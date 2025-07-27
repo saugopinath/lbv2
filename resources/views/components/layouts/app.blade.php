@@ -32,13 +32,14 @@
         <!-- Start Main Content -->
         <div class="main-container flex mx-auto">
             <!-- Start Sidebar -->
-           
+
             <!-- End sidebar -->
 
             <!-- Start Content Area -->
             <div class="main-content flex-1">
                 <!-- Start Topbar -->
-              
+@include('components.layouts.top-navigation')
+
                 <!-- End Topbar -->
 
                 <!-- Start Content -->
@@ -74,10 +75,10 @@
 
     <!-- All javascirpt -->
     <!-- Alpine js -->
-    
+
 
     <!-- Custom js -->
-    
+
 </body>
 
 

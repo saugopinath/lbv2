@@ -25,3 +25,4 @@ Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index
  Route::resources([
         'roles' => App\Http\Controllers\RoleController::class
     ]);
+    
