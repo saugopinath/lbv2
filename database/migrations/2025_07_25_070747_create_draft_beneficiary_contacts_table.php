@@ -30,7 +30,7 @@ return new class extends Migration
             $table->Integer('residency_period');
             $table->Integer('created_by');
             $table->foreign('created_by','user_id_fk')->references('id')->on('public.users');
-            $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals');
+            $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals')->onDelete('cascade');
             $table->foreign('district_id','district_id_fk')->references('id')->on('public.districts');
             $table->foreign('municipality_id','municipality_id_fk')->references('id')->on('public.municipalities');
             $table->foreign('ward_id','ward_id_fk')->references('id')->on('public.wards');

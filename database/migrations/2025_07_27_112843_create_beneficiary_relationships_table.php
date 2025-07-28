@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
  $table->unsignedBigInteger('beneficiary_id');
-                 $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals');
+                 $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals')->onDelete('cascade');
 
             $table->Integer('created_by');
             $table->string('full_name');

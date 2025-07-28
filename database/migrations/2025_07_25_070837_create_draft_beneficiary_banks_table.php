@@ -21,7 +21,7 @@ return new class extends Migration
             $table->char('bank_account_number',20)->unique();
             $table->foreign('ifsc','ifsc_fk')->references('code')->on('public.ifsccodemasters');
             $table->foreign('created_by','user_id_fk')->references('id')->on('public.users');
-            $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals');
+            $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals')->onDelete('cascade');
             $table->timestamps();
             $table->index('application_id','draft_beneficiary_banks_application_id_index');
             $table->index('bank_account_number','draft_beneficiary_banks_bank_account_number_index');

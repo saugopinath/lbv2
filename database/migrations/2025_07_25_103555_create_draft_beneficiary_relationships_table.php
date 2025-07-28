@@ -20,7 +20,7 @@ return new class extends Migration
             $table->smallInteger('relation_type_id');
             $table->foreign('created_by','user_id_fk')->references('id')->on('users');
             $table->foreign('relation_type_id','relation_type_id_fk')->references('id')->on('codemasters');
-             $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals');
+             $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals')->onDelete('cascade');
 
             $table->timestamps();
         });

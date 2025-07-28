@@ -14,7 +14,7 @@ return new class extends Migration
          Schema::create('lb_scheme.beneficiary_contacts', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('beneficiary_id');
-            $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals');
+            $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals')->onDelete('cascade');
             $table->unsignedInteger('application_id');
             $table->smallInteger('district_id');
             $table->smallInteger('rural_urban_id');
