@@ -23,7 +23,7 @@ return new class extends Migration
             $table->boolean('av_status');
             $table->smallInteger('identification_type_id');
             $table->foreign('created_by','user_id_fk')->references('id')->on('users');
-            // $table->foreign('application_id','application_id_fk')->references('application_id')->on('beneficiary_personals');
+
             $table->timestamps();
             $table->index('application_id');
         });

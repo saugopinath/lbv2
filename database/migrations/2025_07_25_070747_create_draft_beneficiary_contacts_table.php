@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('lb_scheme.draft_beneficiary_contacts', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('application_id');
-            $table->foreign('application_id', 'application_id_fk')->references('application_id')->on('lb_scheme.unique_app_ben_ids')->onDelete('cascade');
+
             $table->integer('beneficiary_id');
             $table->smallInteger('district_id');
             $table->smallInteger('rural_urban_id');
@@ -30,7 +30,7 @@ return new class extends Migration
             $table->Integer('residency_period');
             $table->Integer('created_by');
             $table->foreign('created_by','user_id_fk')->references('id')->on('public.users');
-            // $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals');
+            $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals');
             $table->foreign('district_id','district_id_fk')->references('id')->on('public.districts');
             $table->foreign('municipality_id','municipality_id_fk')->references('id')->on('public.municipalities');
             $table->foreign('ward_id','ward_id_fk')->references('id')->on('public.wards');
@@ -41,7 +41,7 @@ return new class extends Migration
             $table->index(['district_id','municipality_id'], 'draft_beneficiary_contacts_district_id_municipality_id_index');
             $table->index(['district_id','municipality_id','ward_id'], 'draft_beneficiary_contacts_district_id_municipality_id_ward_id_index');
             $table->index(['district_id','block_id','panchayat_id'], 'draft_beneficiary_contacts_district_id_block_id_panchayat_id_index');
-            // $table->index('application_id', 'draft_beneficiary_contacts_application_id_index');
+            $table->index('application_id', 'draft_beneficiary_contacts_application_id_index');
         });
     }
 

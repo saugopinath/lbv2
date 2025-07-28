@@ -14,12 +14,14 @@ return new class extends Migration
        Schema::create('lb_scheme.draft_beneficiary_relationships', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('application_id');
-            $table->foreign('application_id', 'application_id_fk')->references('application_id')->on('lb_scheme.unique_app_ben_ids')->onDelete('cascade');
+
             $table->Integer('created_by');
             $table->string('full_name');
             $table->smallInteger('relation_type_id');
             $table->foreign('created_by','user_id_fk')->references('id')->on('users');
             $table->foreign('relation_type_id','relation_type_id_fk')->references('id')->on('codemasters');
+             $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals');
+
             $table->timestamps();
         });
     }

@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('lb_scheme.draft_beneficiary_declarations', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('application_id');
-            $table->foreign('application_id', 'application_id_fk')->references('application_id')->on('lb_scheme.unique_app_ben_ids')->onDelete('cascade');
             $table->integer('beneficiary_id');
             $table->Integer('created_by');
             $table->boolean('is_resident');
@@ -23,9 +22,9 @@ return new class extends Migration
             $table->boolean('av_status');
             $table->smallInteger('identification_type_id');
             $table->foreign('created_by','user_id_fk')->references('id')->on('public.users');
-            // $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals');
+            $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals');
             $table->timestamps();
-            // $table->index('application_id','draft_beneficiary_declarations_application_id_index');
+            $table->index('application_id','draft_beneficiary_declarations_application_id_index');
         });
     }
 

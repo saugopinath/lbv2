@@ -24,7 +24,6 @@ return new class extends Migration
             $table->smallInteger('document_type');
             $table->Integer('created_by');
             $table->foreign('created_by','user_id_fk')->references('id')->on('public.users');
-            // $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.beneficiary_personals');
             $table->index('application_id','beneficiary_enclosures_application_id_index');
         });
     }
