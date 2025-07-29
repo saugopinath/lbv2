@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('lb_scheme.draft_beneficiary_banks', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('application_id');
+            $table->unsignedInteger('application_id')->nullable();
 
-            $table->integer('beneficiary_id');
+
             $table->Integer('created_by');
             $table->char('ifsc',11);
             $table->char('bank_account_number',20)->unique();

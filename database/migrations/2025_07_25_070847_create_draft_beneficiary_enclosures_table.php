@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('lb_scheme.draft_beneficiary_enclosures', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->unsignedInteger('application_id');
+            $table->unsignedInteger('application_id')->nullable();
 
-            $table->integer('beneficiary_id');
+
             $table->text('attched_document');
             $table->string('ip_address');
             $table->string('document_extension');

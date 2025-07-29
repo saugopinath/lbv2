@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('lb_scheme.draft_beneficiary_declarations', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('application_id');
-            $table->integer('beneficiary_id');
+
             $table->Integer('created_by');
             $table->boolean('is_resident');
             $table->boolean('earn_monthly_remuneration');

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedInteger('application_id');
 
-            $table->integer('beneficiary_id');
+
             $table->smallInteger('district_id');
             $table->smallInteger('rural_urban_id');
             $table->smallInteger('block_id');
