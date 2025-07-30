@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lakshmir Bhandar 2.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-cover bg-center bg-no-repeat bg-white"
+  style="background-image: url('https://c.animaapp.com/mdn4r47eB5hzlO/img/testimonial-bg1-1.png')">
+  <div class="min-h-screen flex items-center justify-center px-4">
+    <div class="bg-white/80 rounded-2xl shadow-xl w-full max-w-6xl overflow-hidden flex flex-col lg:flex-row">
+
+      <!-- Left Image Section -->
+      <div class="lg:flex lg:w-1/2 flex-col justify-center items-center p-4 relative rounded-l-2xl">
+        <div class="absolute top-4 left-4 bg-[#003974] p-3 rounded-full">
+          <img src="https://c.animaapp.com/mdn4r47eB5hzlO/img/home.svg" alt="Home" class="w-5 h-5">
+        </div>
+        <!-- <img class="w-64 mb-6" src="https://c.animaapp.com/mdn4r47eB5hzlO/img/biswo-1.png" alt="Logo"> -->
+         <div class="flex justify-center items-center ">
+          <img class="w-48 sm:w-64 mb-4" src="https://c.animaapp.com/mdn4r47eB5hzlO/img/biswo-1.png" alt="Logo">
+         </div>
+       <div class="flex justify-center items-center ">
+        <!-- <div class="w-48 sm:w-64 mb-4 flex items-center justify-center text-center text-2xl sm:text-3xl font-bold text-green-800">
+          পশ্চিমবঙ্গ সরকার
+        </div> -->
+        <div class="text-2xl sm:text-3xl font-bold text-green-800 text-center">
+    পশ্চিমবঙ্গ সরকার
+  </div>
+        </div>
+        <div class="flex justify-center items-center ">
+        <div class="text-2xl sm:text-3xl font-bold text-purple-800 text-center">
+          Government of West Bengal
+        </div>
+        </div>
+     
+      </div> 
+
+      <!-- Form Section -->
+      <div class="w-full lg:w-1/2 p-8 relative bg-white" x-data="{ showPassword: false }">
+        <!-- Home Icon -->
+        <!-- <div class="absolute top-4 left-4 bg-[#003974] p-3 rounded-full">
+            <img src="https://c.animaapp.com/mdn4r47eB5hzlO/img/home.svg" alt="Home" class="w-5 h-5">
+          </div> -->
+
+        <!-- Top Right Logo -->
+        <div class="w-full flex justify-center mb-2">
+          <img src="https://c.animaapp.com/mdn4r47eB5hzlO/img/biswo-2.png" alt="Centered Logo"
+            class="w-24 h-auto sm:block">
+            <!-- <h2 class="text-2xl lg:text-3xl text-center text-[#003974] font-bold">Lakshmir Bhandar Portal</h2> -->
+        </div>
+        <div class="text-center mb-4">
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Lakshmir Bhandar Portal</h1>
+          </div>
+        <form class="w-full space-y-6" action="#" method="POST">
+          
+          <input type="text" name="mobile" placeholder="Registered Mobile No"
+            class="w-full px-4 h-14 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+            required />
+
+          <div x-data="{ showPassword: false }" class="relative w-full">
+            <input :type="showPassword ? 'text' : 'password'"
+              class="w-full px-2 h-14 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+              required placeholder="Enter your password" />
+            <img @click="showPassword = !showPassword" :src="showPassword
+                ? 'https://c.animaapp.com/mdn4r47eB5hzlO/img/eye-off.svg'
+                   : 'https://c.animaapp.com/mdn4r47eB5hzlO/img/eye.svg'" alt="Toggle Password"
+              class="absolute top-1/2 right-3 transform -translate-y-1/2 w-5 h-5 cursor-pointer" />
+          </div>
+          <!-- Captcha -->
+          <div class="flex flex-col sm:flex-row items-center gap-2">
+            <!-- Captcha Input -->
+            <input type="text" name="captcha" placeholder="Captcha"
+              class="w-full sm:w-[40%] h-14 px-4 text-base border border-gray-300 rounded-xl sm:rounded-l-xl sm:rounded-r-none focus:outline-none" />
+
+            <!-- Captcha Image -->
+            <img src="https://c.animaapp.com/mdn4r47eB5hzlO/img/image-1.png" alt="Captcha"
+              class="w-full sm:w-[44%] h-14 object-contain border sm:border-y border-gray-300 rounded-xl sm:rounded-none" />
+
+            <!-- Refresh Button -->
+            <button type="button"
+              class="w-full sm:w-[16%] h-14 bg-[#0f6dfad6] flex items-center justify-center rounded-xl sm:rounded-r-xl sm:rounded-l-none border border-gray-300">
+              <img src="https://c.animaapp.com/mdn4r47eB5hzlO/img/refresh-cw.svg" alt="Refresh" class="w-5 h-5" />
+            </button>
+          </div>
+          <!-- Login Button -->
+          <button type="submit"
+            class="w-full h-14 bg-[#0e3e98f0] text-white text-lg font-semibold rounded-xl shadow-md hover:bg-[#0c3591] flex justify-center items-center gap-3">
+            <img class="w-5 h-5" src="https://c.animaapp.com/mdn4r47eB5hzlO/img/log-in.svg" alt="Login Icon">
+            Login
+          </button>
+        </form>
+        
+
+        <!-- Forget Password -->
+        <div class="text-right mt-4 text-blue-600 italic text-sm hover:underline cursor-pointer">
+          Forget Password
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script>
+  // Tailwind CSS configuration for custom styles
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: '#0e3e98f0',
+          secondary: '#003974',
+        },
+      },
+    },
+  };
+  // Alpine.js initialization
+
+</script>
