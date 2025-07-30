@@ -27,3 +27,5 @@ Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index
         'roles' => App\Http\Controllers\RoleController::class
     ]);
 Route::get('lbform', [LBController::class, 'index'])->middleware(['auth', 'verified'])->name('lbform');
+// use App\Livewire\Pages\Lbform;
+// Route::get('/lbform', Lbform::class)->middleware(['auth', 'verified'])->name('lbform');

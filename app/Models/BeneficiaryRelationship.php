@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Bankmaster extends Model
+class BeneficiaryRelationship extends Model
 {
-    
+    //
 }

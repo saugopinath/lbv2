@@ -77,7 +77,7 @@
     
 
     <!-- Custom js -->
-    
+    @livewireScripts
 </body>
 
 

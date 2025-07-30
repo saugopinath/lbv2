@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Codemaster;
+
 class CodemasterSeeder extends Seeder
 {
     /**
@@ -310,7 +311,7 @@ class CodemasterSeeder extends Seeder
                 "short_name" => "Artisan/Weaver Old Age Pension",
                 "parent_short_code" => "social_pension_cat",
             ),
-         array(
+            array(
                 "name" => "Hinduism",
                 "short_name" => "Hinduism",
                 "parent_short_code" => "religion",
@@ -399,16 +400,19 @@ class CodemasterSeeder extends Seeder
                 "name" => "Father",
                 "short_name" => "relationshipfather",
                 "parent_short_code" => "relationship",
+                "code" => "fname",
             ),
             array(
                 "name" => "Mother",
                 "short_name" => "relationshipmother",
                 "parent_short_code" => "relationship",
+                "code" => "mname",
             ),
             array(
                 "name" => "Spouse",
                 "short_name" => "relationshipspouse",
                 "parent_short_code" => "relationship",
+                "code" => "sname",
             ),
             array(
                 "name" => "NO AADHAR NUMBER",
@@ -442,7 +446,7 @@ class CodemasterSeeder extends Seeder
             ),
             array(
                 "name" => "NO CASTE CERTIFICATE NUMBER",
-                "short_name" => "no_caste_certificate_number",           
+                "short_name" => "no_caste_certificate_number",
                 "parent_short_code" => "incomplete_details",
             ),
             array(
@@ -464,7 +468,7 @@ class CodemasterSeeder extends Seeder
                 "name" => "DUPLICATE BANK ACCOUNT NUMBER",
                 "short_name" => "duplicate_bank_account_number",
                 "parent_short_code" => "incomplete_details",
-            ),   
+            ),
             array(
                 "name" => "STATE OFFICE",
                 "short_name" => "state_office",
@@ -496,7 +500,7 @@ class CodemasterSeeder extends Seeder
                 "parent_short_code" => "office_type",
             ),
             array(
-                
+
                 "name" => "Passport size profile photo",
                 "short_name" => "profile_photo_enc",
                 "parent_short_code" => "ENCDETAILS",
@@ -658,12 +662,23 @@ class CodemasterSeeder extends Seeder
             ),
 
         );
+        // foreach ($codemasterChilds as $codemasterChild_item) {
+        //     Codemaster::create([
+        //         'name'     => strtoupper($codemasterChild_item['name']),
+        //         'short_name'     => $codemasterChild_item['short_name'],
+        //         'parent_id'   => Codemaster::where('short_name', $codemasterChild_item['parent_short_code'])->firstOrFail()->id,
+        //     ]);
+        // }
         foreach ($codemasterChilds as $codemasterChild_item) {
-            Codemaster::create([
-                'name'     => strtoupper($codemasterChild_item['name']),
-                'short_name'     => $codemasterChild_item['short_name'],
-                'parent_id'   => Codemaster::where('short_name', $codemasterChild_item['parent_short_code'])->firstOrFail()->id,
-            ]);
+            $data = [
+                'name'       => strtoupper($codemasterChild_item['name']),
+                'short_name' => $codemasterChild_item['short_name'],
+                'parent_id'  => Codemaster::where('short_name', $codemasterChild_item['parent_short_code'])->firstOrFail()->id,
+            ];
+            if (isset($codemasterChild_item['code'])) {
+                $data['code'] = $codemasterChild_item['code'];
+            }
+            Codemaster::create($data);
         }
     }
 }
