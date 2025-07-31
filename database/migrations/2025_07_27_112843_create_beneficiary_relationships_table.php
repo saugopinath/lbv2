@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('lb_scheme.beneficiary_relationships', function (Blueprint $table) {
             $table->id();
 
- $table->unsignedBigInteger('beneficiary_id');
-                 $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals')->onDelete('cascade');
+          $table->unsignedBigInteger('beneficiary_id');
+        $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals')->onDelete('cascade');
 
             $table->Integer('created_by');
             $table->string('full_name');

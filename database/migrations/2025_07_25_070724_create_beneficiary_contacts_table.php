@@ -14,14 +14,15 @@ return new class extends Migration
          Schema::create('lb_scheme.beneficiary_contacts', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('beneficiary_id');
-            $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals')->onDelete('cascade');
+
             $table->unsignedInteger('application_id');
             $table->smallInteger('district_id');
             $table->smallInteger('rural_urban_id');
             $table->smallInteger('block_id');
             $table->Integer('municipality_id');
             $table->Integer('ward_id');
-            $table->Integer('panchayat_id');
+            // $table->Integer('panchayat_id');
+           $table->Integer('panchayat_id');
             $table->string('police_station',200);
             $table->string('village_town_city',300);
             $table->string('house_premise_no',300);
@@ -30,7 +31,7 @@ return new class extends Migration
             $table->Integer('residency_period');
             $table->Integer('created_by');
             $table->foreign('created_by','user_id_fk')->references('id')->on('users');
-
+             $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals')->onDelete('cascade');
             $table->foreign('district_id','district_id_fk')->references('id')->on('districts');
             $table->foreign('municipality_id','municipality_id_fk')->references('id')->on('municipalities');
             $table->foreign('ward_id','ward_id_fk')->references('id')->on('wards');

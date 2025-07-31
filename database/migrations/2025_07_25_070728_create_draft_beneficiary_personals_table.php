@@ -25,7 +25,9 @@ return new class extends Migration
             $table->string('full_name');
             $table->date('dob');
             $table->string('mobile_no');
-            $table->smallInteger('gender');
+
+            // $table->smallInteger('gender');
+
             $table->smallInteger('caste');
             $table->smallInteger('next_level_role_id');
             $table->string('caste_certificate_no')->nullable();
@@ -38,6 +40,7 @@ return new class extends Migration
             $table->Integer('created_by');
             $table->foreign('application_id', 'application_id_fk')->references('application_id')->on('lb_scheme.unique_app_ben_ids');
             $table->foreign('created_by','user_id_fk')->references('id')->on('public.users');
+
             $table->foreign('district_id','district_id_fk')->references('id')->on('public.districts');
             $table->foreign('block_id','block_id_fk')->references('id')->on('public.blocks');
             $table->foreign('sub_division_id','sub_division_id_fk')->references('id')->on('public.subdivisions');

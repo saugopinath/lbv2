@@ -21,7 +21,7 @@ return new class extends Migration
             $table->boolean('earn_monthly_remuneration');
             $table->boolean('info_genuine_decl');
             $table->boolean('av_status');
-            $table->smallInteger('identification_type_id');
+            // $table->smallInteger('identification_type_id');
             $table->foreign('created_by','user_id_fk')->references('id')->on('users');
 
             $table->timestamps();

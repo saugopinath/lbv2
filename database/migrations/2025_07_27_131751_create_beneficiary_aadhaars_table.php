@@ -14,7 +14,7 @@ return new class extends Migration
        Schema::create('lb_scheme.beneficiary_aadhaars', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('application_id');
-            $table->unsignedBigInteger('beneficiary_id');
+            $table->unsignedBigInteger('beneficiary_id')->nullable();
             $table->Integer('created_by');
             $table->string('encode_key')->nullable();
             $table->text('encoded_aadhar');

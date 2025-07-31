@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('lb_scheme.draft_beneficiary_banks', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('application_id')->nullable();
+            $table->unsignedInteger('application_id');
 
 
             $table->Integer('created_by');
