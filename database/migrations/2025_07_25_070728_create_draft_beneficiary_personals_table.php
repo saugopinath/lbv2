@@ -25,9 +25,6 @@ return new class extends Migration
             $table->string('full_name');
             $table->date('dob');
             $table->string('mobile_no');
-
-            // $table->smallInteger('gender');
-
             $table->smallInteger('caste');
             $table->smallInteger('next_level_role_id');
             $table->string('caste_certificate_no')->nullable();
