@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('codemasters', function (Blueprint $table) {
             $table->tinyIncrements('id')->primary();
+            $table->smallInteger('code')->unique();
             $table->string('name');
             $table->string('short_name');
             $table->smallInteger('parent_id')->nullable();

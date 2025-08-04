@@ -3,6 +3,6 @@
         <x-form.label name="name" label="Government of West Bengal Lakshmir Bhandar Scheme" />
         <livewire:dup-aadhaar-check />
         <livewire:entrytab />
-        <livewire:bank-details :mode="0" />
+        <livewire:enclosure-list />
     </div>
 </x-layouts.app>

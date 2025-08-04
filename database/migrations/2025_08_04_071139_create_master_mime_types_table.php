@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('codemasters', function (Blueprint $table) {
-            $table->string('code', 5)->unique()->nullable();
+        Schema::create('master_mime_types', function (Blueprint $table) {
+            $table->id();
+            $table->string('extension_type')->unique();
+            $table->string('mime_type');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('codemasters', function (Blueprint $table) {
-            $table->dropColumn('code');
-        });
+        Schema::dropIfExists('master_mime_types');
     }
 };

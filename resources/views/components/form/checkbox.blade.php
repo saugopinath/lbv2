@@ -1,4 +1,4 @@
-@props(['disabled' => false, 'name', 'value', 'label' => ''])
+@props(['disabled' => false, 'name', 'value', 'label' => '', 'checked' => false, 'required' => false])
 
 <x-form.field>
 
@@ -7,7 +7,7 @@
                 border-gray-300 focus:border-indigo-300
                 focus:outline-none focus:ring focus:ring-indigo-200 focus:ring-opacity-50
                 p-2" name="{{ $name }}" id="{{ $name }}" type="checkbox" value="{{ $value }}"
-            {{ $disabled ? 'disabled' : '' }} {{ $attributes }}>
+            {{ $disabled ? 'disabled' : '' }}  {{ $checked ? 'checked' : '' }} {{ $required ? 'required' : '' }} {{ $attributes }}>
 
         <label class="font-medium text-xs text-gray-700" for="{{ $name }}">
             {{ empty($label) ? ucwords(str_replace('_',' ',$value)) : $label}}

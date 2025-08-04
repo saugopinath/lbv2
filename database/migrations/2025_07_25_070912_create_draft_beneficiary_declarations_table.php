@@ -20,7 +20,7 @@ return new class extends Migration
             $table->boolean('earn_monthly_remuneration');
             $table->boolean('info_genuine_decl');
             $table->boolean('av_status');
-            $table->smallInteger('identification_type_id');
+            // $table->smallInteger('identification_type_id');//create foregn key later
             $table->foreign('created_by','user_id_fk')->references('id')->on('public.users');
             $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals')->onDelete('cascade');
             $table->timestamps();

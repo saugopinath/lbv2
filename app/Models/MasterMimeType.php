@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BeneficiaryDeclaration extends Model
+class MasterMimeType extends Model
 {
-    protected $guarded = [];
+    
 }

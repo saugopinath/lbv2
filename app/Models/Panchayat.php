@@ -15,10 +15,5 @@ class Panchayat extends Model
     {
         return $this->belongsTo(Block::class);
     }
-
-    public function wards()
-    {
-        return $this->hasMany(Ward::class);
-    }
 }
 

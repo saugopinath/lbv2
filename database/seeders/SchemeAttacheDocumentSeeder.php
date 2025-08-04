@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\SchemeAttachedDocMappings;
 use App\Models\Codemaster;
+
 class SchemeAttacheDocumentSeeder extends Seeder
 {
     /**
@@ -14,44 +15,56 @@ class SchemeAttacheDocumentSeeder extends Seeder
     public function run(): void
     {
         $scheme_attache = array(
-            
-            array(      
-                "scheme_id" => "20",
-                "doc_type_id" => "117",
-                "is_required" => true
+            array(
+                "scheme_id" => 20,
+                "doc_type_id" => 161,
+                "is_required" => true,
+                "max_file_size" => "100KB",
+                "extension_type" => ['jpg', 'jpeg', 'png']
             ),
-            array(      
-                    "scheme_id" => "20",
-                    "doc_type_id" => "2",
-                    "is_required" => true
+            array(
+                "scheme_id" => 20,
+                "doc_type_id" => 162,
+                "is_required" => false,
+                "max_file_size" => "500KB",
+                "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
             ),
-            array(      
-                "scheme_id" => "20",
-                "doc_type_id" => "6",
-                "is_required" => true
+            array(
+                "scheme_id" => 20,
+                "doc_type_id" => 165,
+                "is_required" => true,
+                "max_file_size" => "500KB",
+                "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
             ),
-            array(      
-                "scheme_id" => "20",
-                "doc_type_id" => "10",
-                "is_required" => true
+            array(
+                "scheme_id" => 20,
+                "doc_type_id" => 169,
+                "is_required" => true,
+                "max_file_size" => "500KB",
+                "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
             ),
-            array(      
-                "scheme_id" => "20",
-                "doc_type_id" => "3",
-                "is_required" => false
+            array(
+                "scheme_id" => 20,
+                "doc_type_id" => 1610,
+                "is_required" => false,
+                "max_file_size" => "500KB",
+                "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
             ),
-            array(      
-                "scheme_id" => "20",
-                "doc_type_id" => "11",
-                "is_required" => true
-                )
-            
+            array(
+                "scheme_id" => 20,
+                "doc_type_id" => 1624,
+                "is_required" => true,
+                "max_file_size" => "500KB",
+                "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
+            )
         );
         foreach ($scheme_attache as $item) {
             SchemeAttachedDocMappings::create([
-                'scheme_id'     => $item['scheme_id'],
-                'doc_type_id'     => $item['doc_type_id'],
-                'is_required'     => $item['is_required']
+                'scheme_id'      => $item['scheme_id'],
+                'doc_type_id'    => $item['doc_type_id'],
+                'is_required'    => $item['is_required'],
+                'max_file_size'  => $item['max_file_size'],
+                'extension_type' => implode(',', $item['extension_type'])
             ]);
         }
     }

@@ -11,11 +11,6 @@ class Ward extends Model
 
     protected $guarded = ['id'];
 
-    public function panchayat()
-    {
-        return $this->belongsTo(Panchayat::class);
-    }
-
     public function municipality()
     {
         return $this->belongsTo(Municipality::class);

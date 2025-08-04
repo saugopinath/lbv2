@@ -10,7 +10,7 @@ class Block extends Model
 
     protected $guarded = ['id'];
 
-    public function district()
+     public function district()
     {
         return $this->belongsTo(District::class);
     }

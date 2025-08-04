@@ -4,15 +4,14 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Ifsccodemaster;
-
+use App\Models\DraftBeneficiaryPersonal;
+use App\Models\DraftBeneficiaryBank;
+use Illuminate\Support\Facades\Auth;
 class BankDetails extends Component
 {
     public $mode;
-    public $ifscode;
-    public $bankname;
-    public $bankbranchname;
-
-    public function updatedIfscode() // correct method name for snake_case property
+    public $ifscode, $bankname, $bankbranchname, $bankaccountnumber, $confirmbankaccountnumber;
+    public function updatedIfscode()
     {
         $ifs = Ifsccodemaster::with('bank')
             ->where('code', $this->ifscode)
@@ -29,9 +28,30 @@ class BankDetails extends Component
     }
     public function mount($mode = null)
     {
-        // $ifs = Ifsccodemaster::with('bank')->where('code', 'SBIN0009136')->where('is_active', 1)->first();
-        // dd($ifs);
         $this->mode = $mode;
+    }
+    public function rules()
+    {
+        $rules = [
+            'ifscode' => 'required|string',
+            'bankaccountnumber' => 'required|digits:11|numeric',
+            'confirmbankaccountnumber' => 'required|same:bankaccountnumber',
+        ];
+        return $rules;
+    }
+    public function save()
+    {
+        if ($this->mode === null) {
+            $validated = $this->validate($this->rules());
+            $applicantion = DraftBeneficiaryPersonal::first();
+            DraftBeneficiaryBank::create([
+                'application_id' => $applicantion->application_id,
+                'created_by' => Auth::user()->id,
+                'ifsc' => $validated['ifscode'],
+                'bank_account_number' => $validated['bankaccountnumber'],
+            ]);
+        } else {
+        }
     }
     public function render()
     {

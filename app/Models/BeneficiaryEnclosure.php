@@ -6,5 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class BeneficiaryEnclosure extends Model
 {
-    //
+    protected $table = 'lb_scheme.beneficiary_enclosures';
+    protected $guarded = [];
 }
