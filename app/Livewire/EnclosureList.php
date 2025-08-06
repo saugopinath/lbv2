@@ -10,81 +10,92 @@ use App\Models\BeneficiaryEnclosure;
 use App\Models\SchemeAttachedDocMappings;
 use App\Models\MasterMimeType;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
-use Illuminate\Support\Facades\Response;
 
 class EnclosureList extends Component
 {
     use WithFileUploads;
 
-    public $doc_lists, $documents = [], $existingDocuments = [];
-    public $mode, $id;
+    public $doc_lists;
+    public $documents = [];
+    public $existingDocuments = [];
+    public $mode;
+    public $id;
 
     public function mount($mode = null, $id = null)
     {
         $this->mode = $mode;
         $this->id = $id;
-
         $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->get();
 
         if ($id !== null) {
             $app = DraftBeneficiaryPersonal::with('documents')->where('application_id', $id)->first();
-            foreach ($app->documents as $doc) {
-                $this->existingDocuments[$doc->document_type] = $doc;
+            if ($app) {
+                foreach ($app->documents as $doc) {
+                    $this->existingDocuments[$doc->document_type] = $doc;
+                }
             }
         }
     }
 
-    protected function rules()
+    protected function rules($docId)
     {
-        $rules = [];
+        $doc = $this->doc_lists->where('codemaster.id', $docId)->first();
 
-        foreach ($this->doc_lists as $doc) {
-            $field = $doc->codemaster->id;
-            $maxSize = (int) filter_var($doc->max_file_size, FILTER_SANITIZE_NUMBER_INT);
-            $extensions = array_map('strtolower', array_filter(
-                explode(',', str_replace([';', '|', ' '], ',', $doc->extension_type))
-            ));
-            $mimeTypes = MasterMimeType::whereIn('extension_type', $extensions)->pluck('mime_type')->toArray();
-
-            $required = ($doc->is_required && !isset($this->existingDocuments[$doc->doc_type_id])) ? 'required' : 'nullable';
-            $rules["documents.$field"] = "$required|file|mimes:" . implode(',', $extensions) . "|mimetypes:" . implode(',', $mimeTypes) . "|max:$maxSize";
+        if (!$doc) {
+            return [];
         }
 
-        return $rules;
+        $maxSize = (int) filter_var($doc->max_file_size, FILTER_SANITIZE_NUMBER_INT);
+
+        $extensions = array_map('strtolower', array_filter(
+            explode(',', str_replace([';', '|', ' '], ',', $doc->extension_type))
+        ));
+
+        $mimeTypes = MasterMimeType::whereIn('extension_type', $extensions)->pluck('mime_type')->toArray();
+        $requiredRule = $doc->is_required ? 'required' : 'nullable';
+
+        return [
+            "documents.$docId" => "$requiredRule|file|mimes:" . implode(',', $extensions) . "|mimetypes:" . implode(',', $mimeTypes) . "|max:$maxSize",
+        ];
     }
 
-    public function save()
+    public function saveSingleDocument($docId)
     {
-        $this->validate();
+        $this->validate($this->rules($docId));
 
-        foreach ($this->doc_lists as $doc) {
-            $field = $doc->codemaster->id;
+        $file = data_get($this->documents, $docId);
 
-            if (!empty($this->documents[$field])) {
-                $file = $this->documents[$field];
-                $base64 = base64_encode(file_get_contents($file->getRealPath()));
+        if ($file instanceof TemporaryUploadedFile) {
+            $base64 = base64_encode(file_get_contents($file->getRealPath()));
 
-                BeneficiaryEnclosure::create([
-                    'application_id'        => $this->id,
-                    'attched_document'      => $base64,
-                    'ip_address'            => request()->ip(),
-                    'document_extension'    => strtolower($file->getClientOriginalExtension()),
-                    'document_mime_type'    => $file->getMimeType(),
-                    'document_type'         => $doc->doc_type_id,
-                    'created_by'            => Auth::id(),
-                ]);
+            BeneficiaryEnclosure::create([
+                'application_id'        => $this->id ?? 5,
+                'attched_document'      => $base64,
+                'ip_address'            => request()->ip(),
+                'document_extension'    => strtolower($file->getClientOriginalExtension()),
+                'document_mime_type'    => $file->getMimeType(),
+                'document_type'         => $docId,
+                'created_by'            => Auth::id(),
+            ]);
+
+            // Clear uploaded file
+            $this->documents[$docId] = null;
+
+            // Refresh existing documents
+            $app = DraftBeneficiaryPersonal::with('documents')->where('application_id', $this->id)->first();
+            if ($app) {
+                foreach ($app->documents as $doc) {
+                    $this->existingDocuments[$doc->document_type] = $doc;
+                }
             }
         }
-
-        session()->flash('success', 'Documents uploaded successfully.');
     }
 
     public function downloadDocument($id)
     {
         $document = BeneficiaryEnclosure::findOrFail($id);
-
         $decoded = base64_decode($document->attched_document);
-        $filename = 'document_' . $document->id . '.' . $document->document_extension;
+        $filename = 'document_' . $document->document_type . '.' . $document->document_extension;
 
         return response()->streamDownload(function () use ($decoded) {
             echo $decoded;
