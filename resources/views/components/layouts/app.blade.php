@@ -32,13 +32,14 @@
         <!-- Start Main Content -->
         <div class="main-container flex mx-auto">
             <!-- Start Sidebar -->
+            @include('components.layouts.side-navigation')
 
             <!-- End sidebar -->
 
             <!-- Start Content Area -->
             <div class="main-content flex-1">
                 <!-- Start Topbar -->
-@include('components.layouts.top-navigation')
+                @include('components.layouts.top-navigation')
 
                 <!-- End Topbar -->
 
@@ -53,7 +54,8 @@
                         <p class="font-semibold">
                             &copy;
                             <script>
-                                var year = new Date(); document.write(year.getFullYear());
+                                var year = new Date();
+                                document.write(year.getFullYear());
                             </script>
                             DashHub
                         </p>

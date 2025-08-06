@@ -10,11 +10,14 @@
           <div>
                             <label for="mobile"
                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mobile Number</label>
-                            <input type="text" name="mobile_no" :value="old('mobile_no')" id="mobile"
+                            {{--  <input type="text" name="mobile_no" :value="old('mobile_no')" id="mobile"
                                 class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all duration-200"
-                                placeholder="Please Enter Your  Registered Mobile Number" required autofocus value="{{ old('mobile') }}" maxlength="10">
+                                placeholder="Please Enter Your  Registered Mobile Number" required autofocus value="{{ old('mobile') }}" maxlength="10">  --}}
+
+                                 <x-text-input id="mobile"  class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all duration-200" type="text" name="mobile_no" :value="old('mobile_no')"
+                autofocus autocomplete="off" placeholder="Please Enter Your  Registered Mobile Number" maxlength="10"/>
                         </div>
-                        <!-- Password Input -->
+                        <!-- Password -->
 
   <div>
                             <label for="password"
@@ -23,17 +26,12 @@
                                 <input type="password" name="password" :value="old('password')" id="password"
                                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all duration-200"
                                     placeholder="Please Enter Password" required value="{{ old('password') }}">
-                                <button type="button" onclick="togglePassword()"
-                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
 
-                                </button>
+
                             </div>
-                            @if ($errors->has('password'))
-                                <p class="mt-2 text-sm text-red-600 dark:text-red-500">{{ $errors->first('password') }}
-                                </p>
-                            @endif
+
                         </div>
-     <!-- Captcha Section -->
+     <!-- Captcha -->
                           <div class="space-y-4">
                             <label class="block text-sm font-medium text-gray-900 dark:text-white">Captcha
                                 Verification</label>
@@ -55,7 +53,7 @@
                                     </button>
                                 </div>
                             </div>
-                            {{--  <x-input-error :messages="$errors->get('captcha')" class="mt-2" />  --}}
+
                         </div>
 
                         <!-- Submit Button -->

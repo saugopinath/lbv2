@@ -9,5 +9,10 @@ class DraftBeneficiaryBank extends Model
      protected $guarded = [
         'id',
     ];
-     protected $table = 'lb_scheme.draft_beneficiary_banks';
+    protected $table = 'lb_scheme.draft_beneficiary_banks';
+
+    public function ifscMaster()
+    {
+        return $this->belongsTo(Ifsccodemaster::class, 'ifsc', 'code');
+    }
 }

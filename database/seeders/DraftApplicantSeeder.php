@@ -37,18 +37,18 @@ class DraftApplicantSeeder extends Seeder
 
 
       $entryTypeId = Codemaster::where('code', 41)->value('id');
-      $nextLevelRoleId = Codemaster::where('code', 21)->value('id');
+      $nextLevelRoleId = Codemaster::where('code', 22)->value('id');
     //   $genderId = Codemaster::where('short_name', 'female')->value('id');
       $ifsc = Ifsccodemaster::where('bankmaster_id', 36)->value('code');
       $fatherRelationTypeId = Codemaster::where('code', 131)->value('id');
-$motherRelationTypeId = Codemaster::where('code', 132)->value('id');
+      $motherRelationTypeId = Codemaster::where('code', 132)->value('id');
 
         for ($i = 1; $i <= 5; $i++) {
 
         $casteId = Codemaster::where('parent_id', 1)->inRandomOrder()->value('id');
         $maritalStatusId = Codemaster::where('parent_id', 3)->inRandomOrder()->value('id');
 
-    $aadharNumber = str_pad(rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+         $aadharNumber = str_pad(rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
 
 
 

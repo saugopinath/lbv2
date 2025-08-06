@@ -1,9 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\UserManagementController;
+use App\Livewire\ProcessApplication\DraftApplicationView;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -22,7 +23,11 @@ Route::controller(AuthenticationController::class)->group(function(){
 
 });
 Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
- Route::resources([
+// Route::get('lb-application-list', [App\Http\Controllers\LBFormController::class, 'index'])->middleware(['auth', 'verified'])->name('sumittedlist');
+
+Route::resources([
         'roles' => App\Http\Controllers\RoleController::class
     ]);
-    
+Route::get('lb-application-list', [App\Http\Controllers\LBFormController::class, 'index'])->middleware(['auth', 'verified'])->name('submitted-list');
+Route::get('/draft-application/{id}/edit', [App\Http\Controllers\LBFormController::class, 'edit'])->name('draft-application.edit');
+Route::get('/application/{id}/view', DraftApplicationView::class)->name('draft-application.view');
