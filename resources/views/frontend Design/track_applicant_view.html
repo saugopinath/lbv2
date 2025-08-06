@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Track Applicant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+</head>
+
+<body class="bg-[#def0f4] min-h-screen" x-data="{ showResult: false }">
+
+    <div class="flex-1 flex flex-col">
+        <div class="p-2">
+            <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4">
+                <h1 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Track Application</h1>
+                <form @submit.prevent="showResult = true" class="space-y-4">
+                    <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4"> 
+
+                        <div>
+                            <label for="applicant-id" class="block text-gray-700 dark:text-gray-300 mb-2">Applicant
+                                ID</label>
+                            <input type="text" id="applicant-id" name="applicant_id"
+                                class="border border-gray-300 dark:border-gray-600 rounded-md p-2 w-2xl" />
+                        </div>
+                        <div>
+                            <label for="applicant-id" class="block text-gray-700 dark:text-gray-300 mb-2">Applicant
+                                ID</label>
+                            <input type="text" id="applicant-id" name="applicant_id"
+                                class="border border-gray-300 dark:border-gray-600 rounded-md p-2 w-2xl" />
+                        </div>
+                        <div class="mt-4">
+                            <button type="submit" class="bg-blue-500 text-white rounded-md px-4 py-2">Track
+                                Application</button>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- RESULT DIV (hidden initially) -->
+        <div class="relative bg-white dark:bg-gray-800 shadow-md rounded p-4 overflow-hidden">
+
+            <!-- Watermark in center (in front but faded) -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                <img src="https://c.animaapp.com/mdn4r47eB5hzlO/img/biswo-1.png" alt="Watermark" class="opacity-10" />
+            </div>
+
+            <!-- Content goes on top of watermark -->
+            <div class="relative z-10">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                    Track Your Application
+                </h2>
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                    Application details go here...
+                </h2>
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                    Applicant ID: #123456
+                </h2>
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                    Status: Under Review
+                </h2>
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                    Status: Under Review
+                </h2>
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                    Status: Under Review
+                </h2>
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                    Status: Under Review
+                </h2>
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                    Status: Under Review
+                </h2>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

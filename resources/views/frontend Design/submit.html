@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{ openModal: true }" class="h-full">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Confirm Submit Modal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    <!-- Animation CSS -->
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body class="flex items-center justify-center h-100 bg-gray-100">
+
+    <!-- Modal -->
+    <div x-show="openModal" x-cloak
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 scale-90"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-90"
+        class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 p-4">
+
+        <div class="bg-white w-full max-w-3xl rounded-lg shadow-lg overflow-hidden">
+
+            <!-- Modal Header -->
+            <div class="bg-green-100 px-6 py-4 text-center text-lg font-semibold text-green-800">
+                Confirm Submit
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 space-y-6 text-sm text-gray-700 overflow-y-auto max-h-[80vh]">
+
+                <!-- Header Section -->
+                <div class="grid grid-cols-2">
+                    <div class="text-center">
+                        <img src="https://c.animaapp.com/mdn4r47eB5hzlO/img/biswo-2.png" alt="Logo"
+                            class="w-24 h-24 mx-auto ">
+                    </div>
+                    <div class="text-left p-4 text-gray-800">
+                        <h2 class="text-xl font-bold">Government of West Bengal</h2>
+                        <h3 class="text-md text-gray-600">Lakshmir Bhandar Scheme</h3>
+                    </div>
+                </div>
+
+                <!-- Section: Personal Details -->
+                <div class="border border-gray-300 rounded-md">
+                    <div class="bg-blue-100 px-4 py-2 font-bold text-gray-700">
+                        Personal Details
+                    </div>
+                    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
+                        <div>
+                            <strong>Swasthya Sathi Card No.:</strong> **********
+                        </div>
+                        <div>
+                            <strong>Aadhaar No.:</strong> ****6875
+                        </div>
+                        <div>
+                            <strong>Name:</strong> Soma Roy
+                        </div>
+                        <div>
+                            <strong>DOB:</strong> 12/02/2000
+                        </div>
+                        <div>
+                            <strong>Age:</strong> 25
+                        </div>
+                        <div>
+                            <strong>Gender:</strong> Female
+                        </div>
+                        <div><strong>Caste:</strong> SC</div>
+                        <div><strong>SC/ST Certificate No.:</strong> dhhhh344</div>
+                    </div>
+                </div>
+
+                <!-- Section: Contact Details -->
+                <div class="border border-gray-300 rounded-md">
+                    <div class="bg-blue-100 px-4 py-2 font-bold text-gray-700">
+                        Contact Details
+                    </div>
+                    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
+                        <div><strong>Mobile No.:</strong> 8348691761</div>
+                        <div><strong>Email:</strong> -</div>
+                        <div><strong>Address:</strong> Kolkata</div>
+                        <div><strong>Police Station:</strong> Some PS</div>
+                        <div><strong>District:</strong> Kolkata</div>
+                    </div>
+                </div>
+
+                <!-- Section: Bank Account Details -->
+                <div class="border border-gray-300 rounded-md">
+                    <div class="bg-blue-100 px-4 py-2 font-bold text-gray-700">
+                        Bank Account Details
+                    </div>
+                    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
+                        <div><strong>Bank Name:</strong> SBI</div>
+                        <div><strong>Branch Name:</strong> Kolkata Branch</div>
+                        <div><strong>Account No.:</strong> XXXXXXXXXXXX1234</div>
+                        <div><strong>IFSC Code:</strong> SBIN0001234</div>
+                    </div>
+                </div>
+
+                <!-- Section: Self Declaration -->
+                <div class="border border-gray-300 rounded-md">
+                    <div class="bg-blue-100 px-4 py-2 font-bold text-gray-700">
+                        Self Declaration
+                    </div>
+                    <div class="p-4 text-justify text-gray-600 text-sm">
+                        I hereby declare that all the information provided above is true to the best of my knowledge and
+                        belief. I understand that providing false information may lead to rejection of my application.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex justify-end p-4 border-t border-gray-200 space-x-4">
+                <button @click="openModal = false"
+                    class="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                    Cancel
+                </button>
+                <button
+                    class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-semibold tracking-wide">
+                    Submit
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>
