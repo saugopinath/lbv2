@@ -8,6 +8,7 @@
         "php": "^8.2",
         "laravel/framework": "^11.0",
         "laravel/tinker": "^2.9",
+        "livewire/livewire": "^3.6",
         "mews/captcha": "3.3.3",
         "rappasoft/laravel-livewire-tables": "^3.7",
         "spatie/laravel-permission": "^6.21"

@@ -11,6 +11,8 @@
         "vite": "^5.0"
     },
     "dependencies": {
+        "@alpinejs/collapse": "^3.14.9",
+        "@alpinejs/persist": "^3.14.9",
         "@tailwindcss/vite": "^4.1.11",
         "tailwindcss": "^4.1.11"
     }
