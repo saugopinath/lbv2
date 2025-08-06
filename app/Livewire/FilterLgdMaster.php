@@ -21,16 +21,21 @@ class FilterLgdMaster extends Component
         'gp_ward_dropdown' => 0,
     ];
 
-    public function mount($login_type = null)
+    public function mount($login_type = null, $selectedDistrict = null, $selectedRuralurban = null, $selectedBlockurban = null, $selectedGpWard = null)
     {
         $this->login_type = $login_type;
-
+        $this->selectedDistrict = $selectedDistrict;
+        $this->selectedRuralurban = $selectedRuralurban;
+        $this->selectedBlockurban = $selectedBlockurban;
+        $this->selectedGpWard = $selectedGpWard;
         if ($this->login_type === 'state_office') {
             $this->visible['district_dropdown'] = 1;
             $this->visible['rural_urban_dropdown'] = 1;
             $this->visible['block_dropdown'] = 1;
             $this->visible['gp_ward_dropdown'] = 1;
             $this->districts = District::all();
+            $this->loadSubdivisions();
+            $this->loadGpOrWard();
         }
         if ($this->login_type === 'district_office') {
             $this->visible['rural_urban_dropdown'] = 1;
@@ -104,20 +109,14 @@ class FilterLgdMaster extends Component
         $this->gps = [];
         $this->wards = [];
         $this->loadGpOrWard();
-        $this->dispatch('lgdSelectionChanged', [
-            'district_id' => $this->selectedDistrict,
-            'rural_urban' => $this->selectedRuralurban,
-            'blockurban' => $this->selectedBlockurban,
-            'gp_ward' => null,
-        ]);
     }
     public function updatedSelectedGpWard()
     {
         $this->dispatch('lgdSelectionChanged', [
-            'district_id' => $this->selectedDistrict,
-            'rural_urban' => $this->selectedRuralurban,
-            'blockurban' => $this->selectedBlockurban,
-            'gp_ward' => $this->selectedGpWard,
+            'selectedDistrict' => $this->selectedDistrict,
+            'selectedRuralurban' => $this->selectedRuralurban,
+            'selectedBlockurban' => $this->selectedBlockurban,
+            'selectedGpWard' => $this->selectedGpWard,
         ]);
     }
     public function render()

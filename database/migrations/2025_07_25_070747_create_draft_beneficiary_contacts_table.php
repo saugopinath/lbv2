@@ -26,10 +26,10 @@ return new class extends Migration
             $table->Integer('panchayat_id')->nullable();
             $table->string('police_station',200);
             $table->string('village_town_city',300);
-            $table->string('house_premise_no',300);
+            $table->string('house_premise_no',300)->nullable();
             $table->string('post_office',300);
             $table->char('pincode',8);
-            $table->Integer('residency_period');
+            $table->Integer('residency_period')->nullable();
             $table->Integer('created_by');
             $table->foreign('created_by','user_id_fk')->references('id')->on('public.users');
             $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals')->onDelete('cascade');

@@ -39,13 +39,20 @@ class PersonalDetails extends Component
             'ffname' => 'required|string',
             'mfname' => 'required|string',
             'caste' => 'required',
+            'mar_statu' => 'required',
         ];
-        if ($this->app_type == '30') {
+        if ($this->app_type == Codemaster::getIdByCode(42)) {
             $rules['reg_no'] = 'required|string';
             $rules['ds_date'] = 'required|date';
         }
-        if ($this->caste != '19') {
+        if ($this->caste != Codemaster::getIdByCode(173)) {
             $rules['cas_cer_no'] = 'required|string';
+        }
+        if ($this->mar_statu == Codemaster::getIdByCode(32) || $this->mar_statu == Codemaster::getIdByCode(34)) {
+            $rules['sfname'] = 'required|string';
+        }
+        if (!empty($this->email)) {
+            $rules['email'] = 'email';
         }
         return $rules;
     }
@@ -53,27 +60,32 @@ class PersonalDetails extends Component
     {
         $this->currentDate = Carbon::now()->format('d/m/Y');
         $this->mode = $mode;
-        $app_typee = Codemaster::find(4);
-        $this->app_types = $app_typee->children;
-        $this->mar_status = Codemaster::find(3)->children()->where('id', '!=', 28)->get();
-        $caste = Codemaster::find(1);
-        $this->castes = $caste->children;
+        $this->app_types = Codemaster::where('code', 4)->first()->children()->get();
+        $this->mar_status = Codemaster::where('code', 3)->first()->children()->where('code', '!=', 35)->get();
+        $this->castes = Codemaster::where('code', 17)->first()->children()->get();
         if ($id != null) {
             $this->id = $id;
             $app_det = DraftBeneficiaryPersonal::with('relationships')->where('application_id', $id)->first();
             $this->app_type = $app_det->entry_type;
             $this->app_date = $app_det->created_at->format('d-m-Y');
-            if ($this->app_type == 30) {
+            if ($this->app_type == Codemaster::getIdByCode(42)) {
                 $this->ds_date = Carbon::parse($app_det->ds_date)->format('d-m-Y');
                 $this->reg_no = $app_det->ds_registration_no;
             }
             $this->name = $app_det->full_name;
             $this->mobile = $app_det->mobile_no;
+            $this->email = $app_det->email;
             $this->dob = Carbon::parse($app_det->dob)->format('d-m-Y');
-            $this->ffname = $app_det->relationships->firstWhere('code', 'fname')->full_name;
-            $this->mfname = $app_det->relationships->firstWhere('code', 'mname')->full_name;
+            $this->ffname = $app_det->relationships->firstWhere('relation_type_id', Codemaster::getIdByCode(131))->full_name;
+            $this->mfname = $app_det->relationships->firstWhere('relation_type_id', Codemaster::getIdByCode(132))->full_name;
             $this->mar_statu = $app_det->marital_status;
+            if ($this->mar_statu == Codemaster::getIdByCode(32) || $this->mar_statu == Codemaster::getIdByCode(34)) {
+                $this->sfname = $app_det->relationships->firstWhere('relation_type_id', Codemaster::getIdByCode(133))->full_name;
+            }
             $this->caste = $app_det->caste;
+            if ($this->caste != Codemaster::getIdByCode(173)) {
+                $this->cas_cer_no = $app_det->caste_certificate_no;
+            }
             $this->updatedDob($this->dob);
             $this->age;
         }
@@ -86,66 +98,113 @@ class PersonalDetails extends Component
     {
         $validated = $this->validate($this->rules());
         if ($this->mode === null) {
-            // $hash = Session::get('aadhar_hash');
             $aadhaar_data = Session::get('aadhaar_data');
             $encoded = $aadhaar_data['encoded'];
             $hash = $aadhaar_data['hash'];
             $uniqueApp = UniqueAppBenId::create();
+            $data = [
+                'application_id' => $uniqueApp->application_id,
+                'full_name' => $validated['name'],
+                'dob' => $validated['dob'],
+                'mobile_no' => $validated['mobile'],
+                'entry_type' => $validated['app_type'],
+                'caste' => $validated['caste'],
+                'district_id' => 318,
+                'next_level_role_id' => Codemaster::getIdByCode(21),
+                'marital_status' => $validated['mar_statu'],
+                'is_final_submit' => 0,
+                'is_faulty' => 0,
+                'created_by' => 1,
+            ];
+            if (!empty($validated['email'])) {
+                $data['email'] = $validated['email'];
+            }
+            if ($validated['app_type'] == Codemaster::getIdByCode(42)) {
+                $data['ds_date'] = $validated['ds_date'];
+                $data['ds_registration_no'] = $validated['reg_no'];
+            }
+            if ($validated['caste'] != Codemaster::getIdByCode(173)) {
+                $data['caste_certificate_no'] = $validated['cas_cer_no'];
+            }
+            $draftbenPar = DraftBeneficiaryPersonal::create($data);
+            DraftBeneficiaryRelationship::create([
+                'application_id' => $draftbenPar->application_id,
+                'full_name' => trim($validated['ffname']),
+                'created_by' => 1,
+                'relation_type_id' => Codemaster::getIdByCode(131),
+            ]);
+            DraftBeneficiaryRelationship::create([
+                'application_id' => $draftbenPar->application_id,
+                'full_name' => trim($validated['mfname']),
+                'created_by' => 1,
+                'relation_type_id' => Codemaster::getIdByCode(132),
+            ]);
+            if ($validated['mar_statu'] == Codemaster::getIdByCode(32) || $validated['mar_statu'] == Codemaster::getIdByCode(34)) {
+                DraftBeneficiaryRelationship::create([
+                    'application_id' => $draftbenPar->application_id,
+                    'full_name' => trim($validated['sfname']),
+                    'created_by' => 1,
+                    'relation_type_id' => Codemaster::getIdByCode(133),
+                ]);
+            }
             BeneficiaryAadhaar::create([
                 'application_id' => $uniqueApp->application_id,
                 'aadhar_hash' => $hash,
                 'created_by' => 1,
                 'encoded_aadhar' => $encoded,
             ]);
-            $draftbenPar = DraftBeneficiaryPersonal::create([
-                'application_id' => $uniqueApp->application_id,
-                'full_name' => $validated['name'],
-                'dob' => $validated['dob'],
-                'mobile_no' => $validated['mobile'],
-                'entry_type' => $validated['app_type'],
-                'caste' => $validated['caste'],
-                'ds_date' => $validated['ds_date'],
-                'ds_registration_no' => $validated['reg_no'],
-                'district_id' => 318,
-                'next_level_role_id' => 20,
-                'marital_status' => 24,
-                'is_final_submit' => 0,
-                'is_faulty' => 0,
-                'created_by' => 1,
-            ]);
-            DraftBeneficiaryRelationship::create([
-                'application_id' => $draftbenPar->application_id,
-                'full_name' => trim($validated['ffname']),
-                'created_by' => 1,
-                'relation_type_id' => 79,
-            ]);
-            DraftBeneficiaryRelationship::create([
-                'application_id' => $draftbenPar->application_id,
-                'full_name' => trim($validated['mfname']),
-                'created_by' => 1,
-                'relation_type_id' => 80,
-            ]);
             Session::forget('aadhar_hash');
         } else {
-            DraftBeneficiaryPersonal::where('application_id', $this->id)->update([
+            $data = [
                 'full_name' => $validated['name'],
                 'dob' => $validated['dob'],
                 'mobile_no' => $validated['mobile'],
                 'entry_type' => $validated['app_type'],
                 'caste' => $validated['caste'],
-                'ds_date' => $validated['ds_date'],
-                'ds_registration_no' => $validated['reg_no'],
-            ]);
+                'marital_status' => $validated['mar_statu'],
+            ];
+            if (!empty($validated['email'])) {
+                $data['email'] = $validated['email'];
+            }
+            if ($validated['app_type'] == Codemaster::getIdByCode(42)) {
+                $data['ds_date'] = $validated['ds_date'];
+                $data['ds_registration_no'] = $validated['reg_no'];
+            }
+            if ($validated['caste'] != Codemaster::getIdByCode(173)) {
+                $data['caste_certificate_no'] = $validated['cas_cer_no'];
+            }
+            DraftBeneficiaryPersonal::where('application_id', $this->id)->update($data);
             DraftBeneficiaryRelationship::where('application_id', $this->id)
-                ->where('code', 'fname')
+                ->where('relation_type_id', Codemaster::getIdByCode(131))
                 ->update([
                     'full_name' => trim($validated['ffname']),
                 ]);
             DraftBeneficiaryRelationship::where('application_id', $this->id)
-                ->where('code', 'mname')
+                ->where('relation_type_id', Codemaster::getIdByCode(132))
                 ->update([
                     'full_name' => trim($validated['mfname']),
                 ]);
+            if ($validated['mar_statu'] == Codemaster::getIdByCode(32) || $validated['mar_statu'] == Codemaster::getIdByCode(34)) {
+                $relation = DraftBeneficiaryRelationship::where('application_id', $this->id)
+                    ->where('relation_type_id', Codemaster::getIdByCode(133))
+                    ->first();
+                if ($relation) {
+                    $relation->update([
+                        'full_name' => trim($validated['sfname']),
+                    ]);
+                } else {
+                    DraftBeneficiaryRelationship::create([
+                        'application_id' => $this->id,
+                        'full_name' => trim($validated['sfname']),
+                        'created_by' => 1,
+                        'relation_type_id' => Codemaster::getIdByCode(133),
+                    ]);
+                }
+            } else {
+                DraftBeneficiaryRelationship::where('application_id', $this->id)
+                    ->where('relation_type_id', Codemaster::getIdByCode(133))
+                    ->delete();
+            }
         }
         $this->dispatch('perDet');
     }

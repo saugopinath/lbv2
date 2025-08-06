@@ -17,42 +17,42 @@ class SchemeAttacheDocumentSeeder extends Seeder
         $scheme_attache = array(
             array(
                 "scheme_id" => 20,
-                "doc_type_id" => 161,
+                "doc_type_id" => 100,
                 "is_required" => true,
                 "max_file_size" => "100KB",
                 "extension_type" => ['jpg', 'jpeg', 'png']
             ),
             array(
                 "scheme_id" => 20,
-                "doc_type_id" => 162,
+                "doc_type_id" => 101,
                 "is_required" => false,
                 "max_file_size" => "500KB",
                 "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
             ),
             array(
                 "scheme_id" => 20,
-                "doc_type_id" => 165,
+                "doc_type_id" => 104,
                 "is_required" => true,
                 "max_file_size" => "500KB",
                 "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
             ),
             array(
                 "scheme_id" => 20,
-                "doc_type_id" => 169,
+                "doc_type_id" => 108,
                 "is_required" => true,
                 "max_file_size" => "500KB",
                 "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
             ),
             array(
                 "scheme_id" => 20,
-                "doc_type_id" => 1610,
+                "doc_type_id" => 109,
                 "is_required" => false,
                 "max_file_size" => "500KB",
                 "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
             ),
             array(
                 "scheme_id" => 20,
-                "doc_type_id" => 1624,
+                "doc_type_id" => 123,
                 "is_required" => true,
                 "max_file_size" => "500KB",
                 "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']

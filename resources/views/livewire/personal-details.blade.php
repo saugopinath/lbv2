@@ -9,7 +9,7 @@
         </x-form.select>
         <x-form.date name="app_date" label="Application Date:" required wire:model="app_date" />
         @endif
-        <template x-if="appType == '30'">
+        <template x-if="appType == 30">
             <div>
                 <x-form.input name="reg_no" label="Registration no." required wire:model="reg_no" />
                 <x-form.date name="ds_date" label="Date:" required wire:model="ds_date" />
@@ -30,7 +30,7 @@
             <option value="{{ $mar_statu->id }}">{{ $mar_statu->name }}</option>
             @endforeach
         </x-form.select>
-        <template x-if="MarStatu && MarStatu != '24' && MarStatu != '26'">
+        <template x-if="MarStatu && MarStatu != 24 && MarStatu != 26">
             <div>
                 <x-form.label name="name" label="Spouse Name" />
                 <x-form.input name="sfname" label="Full Name" required wire:model="sfname" />
@@ -42,7 +42,7 @@
             <option value="{{ $caste->id }}">{{ $caste->name }}</option>
             @endforeach
         </x-form.select>
-        <template x-if="caste && caste != '19'">
+        <template x-if="caste && caste != 19">
             <x-form.input name="cas_cer_no" label="SC/ST Certificate No." required wire:model="cas_cer_no" />
         </template>
         <x-button.danger type="submit">

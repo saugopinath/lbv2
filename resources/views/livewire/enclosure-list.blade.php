@@ -1,16 +1,34 @@
 <div>
     <form wire:submit.prevent="save" enctype="multipart/form-data">
         @foreach ($doc_lists as $doc)
+        @php
+        $isRequired = $doc->is_required;
+        $existingDoc = $existingDocuments[$doc->doc_type_id] ?? null;
+        $required = $isRequired; // Always show asterisk if required
+        $enforceRequired = $isRequired && !$existingDoc; // Only enforce required input if no file exists
+        $label = $doc->codemaster->name;
+        @endphp
+
         <x-form.inputfile
-            type="file"
-            name="documents[{{ $doc->codemaster->short_name }}]"
-            label="{{ $doc->codemaster->name }}"
-            wire:model="documents.{{ $doc->codemaster->short_name }}"
-            :required="$doc->is_required" accept="{{ $doc->extension_type }}"
-            maxSize="{{ $doc->max_file_size }}" />
+            name="documents[{{ $doc->codemaster->id }}]"
+            label="{{ $label }}"
+            :required="$required"
+            wire:model="documents.{{ $doc->codemaster->id }}"
+            accept="{{ str_replace([';', '|', ' '], ',', $doc->extension_type) }}"
+            maxSize="{{ $doc->max_file_size }}"
+            :disabled="false" />
+        @if ($existingDoc)
+        <div>
+            <x-button.danger wire:click="downloadDocument({{ $existingDoc->id }})">
+                Download
+            </x-button.danger>
+        </div>
+        @endif
         @endforeach
         @if ($mode != '0')
-        <x-button.danger>Previous</x-button.danger>
+        <x-button.danger type="button">
+            Previous
+        </x-button.danger>
         @endif
         <x-button.danger type="submit">
             {{ $mode == '0' ? 'Save' : 'Save & Next' }}

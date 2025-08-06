@@ -20,4 +20,8 @@ class Codemaster extends Model
     {
         return $this->hasMany(Codemaster::class, 'parent_id');
     }
+    public static function getIdByCode($code)
+    {
+        return self::where('code', $code)->value('id');
+    }
 }

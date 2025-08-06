@@ -1,7 +1,10 @@
 <div>
     <form wire:submit.prevent="save">
         <x-form.input name="state" label="State" wire:model="stateName" required disabled />
-        <livewire:filter-lgd-master :login_type="'state_office'" />
+        <livewire:filter-lgd-master :login_type="'state_office'" :selectedDistrict="$selectedDistrict"
+        :selectedRuralurban="$selectedRuralurban"
+        :selectedBlockurban="$selectedBlockurban"
+        :selectedGpWard="$selectedGpWard" />
         <x-form.input name="police_station" label="Police Station" wire:model="policestation" required />
         <x-form.input name="vill_town_city" label="Village/Town/City" wire:model="villtowncity" required />
         <x-form.input name="house_premise_no" label="House / Premise No." wire:model="housepremiseno" />
