@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-6xl mx-auto p-4 bg-white rounded shadow-md space-y-4">
+    <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
         <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
             <div>
                 <label for="district"

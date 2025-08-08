@@ -1,5 +1,5 @@
 <x-layouts.app>
-  <div class="max-w-6xl mx-auto p-6 bg-white rounded-xl shadow-md space-y-4">
+  <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
     <!-- Top Bar -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div class="flex items-center gap-2 pl-4">
