@@ -1,4 +1,4 @@
-<div
+<div 
     x-data="{ 
         showUploadModal: false, 
         currentDocId: null, 
@@ -20,13 +20,9 @@
             this.currentFileSize = (file.size / 1024).toFixed(2) + ' KB';
             this.currentFileMime = file.type || 'Unknown MIME type';
 
-            if (this.currentFileMime === 'image/jpeg' || this.currentFileMime === 'image/png') {
-        const reader = new FileReader();
-        reader.onload = e => this.currentFilePreview = e.target.result;
-        reader.readAsDataURL(file);
-    } else {
-        this.currentFilePreview = null;  // no preview for other file types
-    }
+            const reader = new FileReader();
+            reader.onload = e => this.currentFilePreview = e.target.result;
+            reader.readAsDataURL(file);
         },
         openModal(docId, docName) {
             this.showUploadModal = true;
@@ -64,33 +60,36 @@
             this.$refs.fileInput.value = null;
         }
     }"
-    class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    class="grid grid-cols-1 md:grid-cols-2 gap-4"
+>
 
     @foreach ($doc_lists as $doc)
-    <div class="backdrop-blur-md bg-white/80 rounded-lg p-4 shadow-sm flex flex-col justify-between">
-        <span class="text-gray-800 font-medium mb-2">
-            {{ $doc->codemaster->name }}
-            @if($doc->is_required)
-            <span class="text-red-500">*</span>
-            @endif
-        </span>
+        <div class="backdrop-blur-md bg-white/80 rounded-lg p-4 shadow-sm flex flex-col justify-between">
+            <span class="text-gray-800 font-medium mb-2">
+                {{ $doc->codemaster->name }}
+                @if($doc->is_required)
+                    <span class="text-red-500">*</span>
+                @endif
+            </span>
 
-        <div class="flex space-x-2">
-            <button
-                @click="openModal({{ $doc->doc_type_id }}, '{{ $doc->codemaster->name }}')"
-                class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">
-                Upload
-            </button>
+            <div class="flex space-x-2">
+                <button
+                    @click="openModal({{ $doc->doc_type_id }}, '{{ $doc->codemaster->name }}')"
+                    class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition"
+                >
+                    Upload
+                </button>
 
-            @if(isset($existingDocuments[$doc->doc_type_id]))
-            <button
-                wire:click="downloadDocument({{ $existingDocuments[$doc->doc_type_id]->id }})"
-                class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition">
-                Download
-            </button>
-            @endif
+                @if(isset($existingDocuments[$doc->doc_type_id]))
+                    <button
+                        wire:click="downloadDocument({{ $existingDocuments[$doc->doc_type_id]->id }})"
+                        class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition"
+                    >
+                        Download
+                    </button>
+                @endif
+            </div>
         </div>
-    </div>
     @endforeach
 
     <!-- Upload Modal -->
@@ -99,7 +98,8 @@
         x-cloak
         x-transition
         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
-        @click.outside="closeModal()">
+        @click.outside="closeModal()"
+    >
         <div class="bg-white rounded shadow p-6 w-full max-w-md" @click.stop>
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-semibold text-gray-800" x-text="'Upload ' + currentDocName"></h2>
@@ -109,7 +109,8 @@
             <div class="flex w-full border border-gray-300 rounded overflow-hidden">
                 <label
                     for="fileInput"
-                    class="bg-blue-600 text-white px-4 py-2 cursor-pointer hover:bg-blue-700 text-sm flex items-center">
+                    class="bg-blue-600 text-white px-4 py-2 cursor-pointer hover:bg-blue-700 text-sm flex items-center"
+                >
                     Choose File
                 </label>
 
@@ -123,11 +124,15 @@
                     class="hidden"
                     x-ref="fileInput"
                     wire:model="singleDocument"
-                    @change="handleFileChange($event)">
+                    @change="handleFileChange($event)"
+                >
             </div>
 
             <!-- File info display -->
-
+            <div class="mt-1 text-sm text-gray-700" x-show="currentFileName">
+                <div><strong>File size:</strong> <span x-text="currentFileSize"></span></div>
+                <div><strong>MIME type:</strong> <span x-text="currentFileMime"></span></div>
+            </div>
 
             <!-- Allowed file types and max size -->
             <div class="mt-2 text-sm text-gray-700">
