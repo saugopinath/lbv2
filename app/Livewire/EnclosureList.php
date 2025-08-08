@@ -19,7 +19,6 @@ class EnclosureList extends Component
     public $currentDocId;
     public $applicationId;
 
-    // Expose current doc rules for display in Blade
     public $currentDocMaxSize = '';
     public $currentDocExtensions = '';
 
@@ -39,7 +38,6 @@ class EnclosureList extends Component
         }
     }
 
-    // Called from Alpine to set current doc info
     public function setCurrentDoc($docTypeId)
     {
         $this->currentDocId = $docTypeId;
