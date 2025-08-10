@@ -5,8 +5,7 @@
                 <x-form.section-heading>
                     Government Of West Bengal Lakshmir Bhandar Scheme
                 </x-form.section-heading>
-                <livewire:dup-aadhaar-check />
-                <livewire:entrytab />
+                <livewire:enclosure-list />
             </div>
         </div>
     </div>

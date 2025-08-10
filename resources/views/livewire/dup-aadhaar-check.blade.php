@@ -1,17 +1,36 @@
 <div
     x-data="{
+        aadhaar: '',
         errorMessage: '',
+        successMessage: '',
+        disableCheckBtn: false,
+
         async validateAndSubmit() {
             this.errorMessage = '';
-            let val = $wire.aadhaar?.replace(/\s+/g, '');
+            this.successMessage = '';
+
+            let val = this.aadhaar.replace(/\s+/g, '');
             if (!/^\d{12}$/.test(val)) {
                 this.errorMessage = 'Please enter a valid 12-digit Aadhaar number.';
                 return;
             }
-            await $wire.checkDuplicate();
+
+            $wire.aadhaar = val; // send clean value to Livewire
+            let result = await $wire.checkDuplicate();
+
+            if (result.status === 'error' || result.status === 'duplicate') {
+                this.errorMessage = result.message;
+                this.disableCheckBtn = false; // allow retry
+            } else if (result.status === 'success') {
+                this.successMessage = result.message;
+                this.disableCheckBtn = true; // disable after success
+            }
         }
     }"
+    x-init="$watch('aadhaar', value => { disableCheckBtn = false; })"
     class="grid gap-6 md:grid-cols-2 mb-6 p-4 border-b border-gray-200 dark:border-gray-700">
+
+    <!-- Aadhaar Input -->
     <div>
         <x-form.input
             id="check_aadhar"
@@ -19,23 +38,29 @@
             label="Aadhar Number"
             placeholder="Enter Aadhar Number"
             required
-            wire:model.defer="aadhaar" />
+            x-model="aadhaar" />
     </div>
+
+    <!-- Button -->
     <div class="flex items-end">
         <x-button.gradient-button
             type="button"
             @click="validateAndSubmit()"
-            wire:loading.attr="disabled">
-            <span wire:loading.remove>Check Availability</span>
-            <span wire:loading>Checking…</span>
+            wire:loading.attr="disabled"
+            wire:target="checkDuplicate"
+            x-bind:disabled="disableCheckBtn">
+            <span wire:loading.remove wire:target="checkDuplicate">Check Availability</span>
+            <span wire:loading wire:target="checkDuplicate">Checking…</span>
         </x-button.gradient-button>
     </div>
+
+    <!-- Error -->
     <template x-if="errorMessage">
         <div class="mt-2 text-red-600 text-sm" x-text="errorMessage"></div>
     </template>
-    @if ($error)
-    <div class="mt-2 text-red-600 text-sm">{{ $error }}</div>
-    @elseif ($valid)
-    <div class="mt-2 text-green-600 text-sm">✅ Aadhaar is valid and not duplicate.</div>
-    @endif
+
+    <!-- Success -->
+    <template x-if="successMessage">
+        <div class="mt-2 text-green-600 text-sm" x-text="successMessage"></div>
+    </template>
 </div>
