@@ -19,7 +19,6 @@
             this.currentFileName = file.name;
             this.currentFileSize = (file.size / 1024).toFixed(2) + ' KB';
             this.currentFileMime = file.type || 'Unknown MIME type';
-
             if (this.currentFileMime === 'image/jpeg' || this.currentFileMime === 'image/png') {
                 const reader = new FileReader();
                 reader.onload = e => this.currentFilePreview = e.target.result;
@@ -37,7 +36,6 @@
             this.currentFileSize = '';
             this.currentFileMime = '';
             this.$refs.fileInput.value = null;
-
             this.$wire.setCurrentDoc(docId);
             this.$wire.set('singleDocument', null);
         },
@@ -65,15 +63,13 @@
         }
     }"
     class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
     @foreach ($doc_lists as $doc)
     <x-document-card
-        :doc="$doc"
-        :existing-documents="$existingDocuments" />
+        :docName="$doc->codemaster->name"
+        :isRequired="$doc->is_required"
+        :docTypeId="$doc->doc_type_id"
+        :existingDoc="$existingDocuments[$doc->doc_type_id] ?? null" />
     @endforeach
-
-
-    {{-- Include UploadModal Component --}}
     <x-upload-modal
         :currentDocExtensions="$currentDocExtensions"
         :currentDocMaxSize="$currentDocMaxSize" />

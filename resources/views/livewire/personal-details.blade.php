@@ -57,7 +57,7 @@
         </div>
         <div class="grid gap-6 md:grid-cols-2 mb-2 pl-4 pr-4">
             <div>
-                <x-form.date
+                <x-form.input
                     id="dob"
                     name="dob"
                     label="Date of Birth"

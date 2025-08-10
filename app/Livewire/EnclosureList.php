@@ -30,6 +30,7 @@ class EnclosureList extends Component
 
         if ($applicationId) {
             $app = DraftBeneficiaryPersonal::with('documents')->where('application_id', $applicationId)->first();
+            // dd($app);
             if ($app) {
                 foreach ($app->documents as $doc) {
                     $this->existingDocuments[$doc->document_type] = $doc;
@@ -96,7 +97,7 @@ class EnclosureList extends Component
             'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
             'document_mime_type' => $this->singleDocument->getMimeType(),
             'document_type' => $this->currentDocId,
-            'created_by' => Auth::id(),
+            'created_by' => 1,
         ]);
 
         $this->singleDocument = null;
