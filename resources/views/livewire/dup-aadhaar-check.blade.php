@@ -3,22 +3,23 @@
         errorMessage: '',
         async validateAndSubmit() {
             this.errorMessage = '';
-            const val = $wire.aadhaar;
+            let val = $wire.aadhaar?.replace(/\s+/g, '');
             if (!/^\d{12}$/.test(val)) {
-                this.errorMessage = 'Please enter a valid 12‑digit Aadhaar number cs.';
+                this.errorMessage = 'Please enter a valid 12-digit Aadhaar number.';
                 return;
             }
             await $wire.checkDuplicate();
         }
     }"
-    class="grid gap-6 md:grid-cols-2 mb-6 p-4 border-b border-gray-200 dark:border-gray-700 ">
+    class="grid gap-6 md:grid-cols-2 mb-6 p-4 border-b border-gray-200 dark:border-gray-700">
     <div>
         <x-form.input
             id="check_aadhar"
             name="aadhar_number"
             label="Aadhar Number"
             placeholder="Enter Aadhar Number"
-            required />
+            required
+            wire:model.defer="aadhaar" />
     </div>
     <div class="flex items-end">
         <x-button.gradient-button
