@@ -5,7 +5,7 @@
                 <x-form.section-heading>
                     Government Of West Bengal Lakshmir Bhandar Scheme
                 </x-form.section-heading>
-                <livewire:self-declaration />
+                <livewire:contact-details />
             </div>
         </div>
     </div>

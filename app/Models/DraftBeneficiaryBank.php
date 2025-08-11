@@ -6,8 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class DraftBeneficiaryBank extends Model
 {
-     protected $guarded = [
+    protected $guarded = [
         'id',
     ];
-     protected $table = 'lb_scheme.draft_beneficiary_banks';
+    protected $table = 'lb_scheme.draft_beneficiary_banks';
+
+    public function ifscCodeMaster()
+    {
+        return $this->belongsTo(IfscCodeMaster::class, 'ifsc', 'code');
+    }
 }

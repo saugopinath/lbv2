@@ -6,8 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ifsccodemaster extends Model
 {
-    public function bank()
+    protected $table = 'public.ifsccodemasters'; 
+    protected $primaryKey = 'code';
+    public $incrementing = false;
+    protected $keyType = 'string';
+
+    public function bankMaster()
     {
-        return $this->belongsTo(BankMaster::class, 'bankmaster_id');
+        return $this->belongsTo(BankMaster::class, 'bankmaster_id', 'id');
     }
 }

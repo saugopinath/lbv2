@@ -26,10 +26,13 @@ class DatabaseSeeder extends Seeder
             DepartmentSeeder::class,
             IfscSeeder::class,
             SchemeSeeder::class,
-            MasterMimeTypeSeeder::class,   
-            SchemeAttacheDocumentSeeder::class,   
-            // RolePermissionSeeder::class,  
-            SuperAdminSeeder::class,   
+            MasterMimeTypeSeeder::class,
+            SchemeAttacheDocumentSeeder::class,
+            // RolePermissionSeeder::class,
+            SuperAdminSeeder::class,
+            DraftApplicantSeeder::class,
+            BeneficiaryApplicantSeeder::class,
+            BenRejectDetailsSeeder::class,
         ]);
     }
 }

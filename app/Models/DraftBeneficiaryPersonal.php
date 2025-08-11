@@ -3,30 +3,34 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\DraftBeneficiaryRelationship;
 
 class DraftBeneficiaryPersonal extends Model
 {
-    protected $guarded = [];
+    protected $guarded = [
+        'application_id',
+    ];
     protected $primaryKey = 'application_id';
     protected $table = 'lb_scheme.draft_beneficiary_personals';
-    public function relationships()
+
+    public $timestamps = false;
+
+    public function father()
     {
-        return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id');
+        return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id', 'application_id');
     }
-    public function documents()
-    {
-        return $this->hasMany(BeneficiaryEnclosure::class, 'application_id');
-    }
+
     public function contact()
     {
-        return $this->hasOne(DraftBeneficiaryContact::class, 'application_id');
+        return $this->hasOne(DraftBeneficiaryContact::class, 'application_id', 'application_id');
     }
+
     public function bank()
     {
-        return $this->hasOne(DraftBeneficiaryBank::class, 'application_id');
+        return $this->hasOne(DraftBeneficiaryBank::class, 'application_id', 'application_id');
     }
-    public function declaration()
+    public function casteName()
     {
-        return $this->hasOne(DraftBeneficiaryDeclaration::class, 'application_id');
+        return $this->belongsTo(CodeMaster::class, 'caste', 'id');
     }
 }

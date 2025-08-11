@@ -16,4 +16,3 @@ class Panchayat extends Model
         return $this->belongsTo(Block::class);
     }
 }
-

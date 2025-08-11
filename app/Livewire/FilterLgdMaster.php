@@ -10,7 +10,6 @@ use App\Models\Municipality;
 class FilterLgdMaster extends Component
 {
     public $districts = [], $blocks = [], $urbanbodys = [], $gps = [], $wards = [];
-
     public $selectedDistrict, $selectedRuralurban, $selectedBlockurban, $selectedGpWard;
     public $login_type;
 
@@ -21,43 +20,38 @@ class FilterLgdMaster extends Component
         'gp_ward_dropdown' => 0,
     ];
 
-    public function mount($login_type = null, $selectedDistrict = null, $selectedRuralurban = null, $selectedBlockurban = null, $selectedGpWard = null)
+    public function mount($login_type = null)
     {
         $this->login_type = $login_type;
-        $this->selectedDistrict = $selectedDistrict;
-        $this->selectedRuralurban = $selectedRuralurban;
-        $this->selectedBlockurban = $selectedBlockurban;
-        $this->selectedGpWard = $selectedGpWard;
+
         if ($this->login_type === 'state_office') {
             $this->visible['district_dropdown'] = 1;
             $this->visible['rural_urban_dropdown'] = 1;
             $this->visible['block_dropdown'] = 1;
             $this->visible['gp_ward_dropdown'] = 1;
             $this->districts = District::all();
-            $this->loadSubdivisions();
-            $this->loadGpOrWard();
         }
         if ($this->login_type === 'district_office') {
             $this->visible['rural_urban_dropdown'] = 1;
             $this->visible['block_dropdown'] = 1;
             $this->visible['gp_ward_dropdown'] = 1;
-            $this->selectedDistrict = 318;
+            $this->selectedDistrict = 305;
         }
         if ($this->login_type === 'subdivision_office') {
             $this->visible['block_dropdown'] = 1;
             $this->visible['gp_ward_dropdown'] = 1;
-            $this->selectedDistrict = 318;
+            $this->selectedDistrict = 305;
             $this->selectedRuralurban = 1;
             $this->loadSubdivisions();
         }
         if ($this->login_type === 'block_office') {
             $this->visible['gp_ward_dropdown'] = 1;
             $this->selectedRuralurban = 2;
-            $this->selectedDistrict = 318;
-            $this->selectedBlockurban = 2974;
+            $this->selectedBlockurban = 2793;
             $this->loadGpOrWard();
         }
     }
+
     public function loadSubdivisions()
     {
         if ($this->selectedDistrict && $this->selectedRuralurban) {
@@ -71,6 +65,7 @@ class FilterLgdMaster extends Component
             }
         }
     }
+
     public function loadGpOrWard()
     {
         if ($this->selectedBlockurban && $this->selectedRuralurban) {
@@ -87,6 +82,7 @@ class FilterLgdMaster extends Component
             }
         }
     }
+
     public function updatedSelectedDistrict()
     {
         $this->selectedRuralurban = null;
@@ -95,6 +91,7 @@ class FilterLgdMaster extends Component
         $this->blocks = [];
         $this->urbanbodys = [];
     }
+
     public function updatedSelectedRuralurban()
     {
         $this->selectedBlockurban = null;
@@ -103,6 +100,7 @@ class FilterLgdMaster extends Component
         $this->urbanbodys = [];
         $this->loadSubdivisions();
     }
+
     public function updatedSelectedBlockurban()
     {
         $this->selectedGpWard = null;
@@ -110,15 +108,31 @@ class FilterLgdMaster extends Component
         $this->wards = [];
         $this->loadGpOrWard();
     }
-    public function updatedSelectedGpWard()
+
+    public function resetFilters()
     {
-        $this->dispatch('lgdSelectionChanged', [
-            'selectedDistrict' => $this->selectedDistrict,
-            'selectedRuralurban' => $this->selectedRuralurban,
-            'selectedBlockurban' => $this->selectedBlockurban,
-            'selectedGpWard' => $this->selectedGpWard,
+        $this->reset([
+            'selectedDistrict',
+            'selectedRuralurban',
+            'selectedBlockurban',
+            'selectedGpWard',
+            'blocks',
+            'urbanbodys',
+            'gps',
+            'wards',
         ]);
     }
+
+    public function applyFilters()
+    {
+        $this->dispatch('filtersApplied', [
+            'district_id' => $this->selectedDistrict,
+            'rural_urban' => $this->selectedRuralurban,
+            'blockurban' => $this->selectedBlockurban,
+            'gp_ward' => $this->selectedGpWard,
+        ]);
+    }
+
     public function render()
     {
         return view('livewire.filter-lgd-master');

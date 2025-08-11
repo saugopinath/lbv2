@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class Bankmaster extends Model
 {
-    
+    protected $table = 'public.bankmasters';
 }
