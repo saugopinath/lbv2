@@ -15,7 +15,7 @@
             </div>
         </div>
         @endif
-        <template x-if="appType == 30">
+        <template x-if="appType == {{ \App\Models\Codemaster::getIdByCode(42) }}">
             <div class="grid gap-6 md:grid-cols-2 mb-2 pl-4 pr-4">
                 <div>
                     <x-form.input
@@ -96,7 +96,7 @@
                     @endforeach
                 </x-form.select>
             </div>
-            <template x-if="MarStatu && MarStatu != 24 && MarStatu != 26">
+            <template x-if="MarStatu && MarStatu != {{ \App\Models\Codemaster::getIdByCode(31) }} && MarStatu != {{ \App\Models\Codemaster::getIdByCode(33) }}">
                 <div>
                     <x-form.input
                         id="sfname"
@@ -115,7 +115,7 @@
                     @endforeach
                 </x-form.select>
             </div>
-            <template x-if="caste && caste != 19">
+            <template x-if="caste && caste != {{ \App\Models\Codemaster::getIdByCode(173) }}">
                 <div>
                     <x-form.input
                         id="cas_cer_no"

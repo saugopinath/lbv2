@@ -31,10 +31,10 @@ class SelfDeclaration extends Component
     public function rules()
     {
         return [
-            'resident' => 'accepted|boolean',
+            'resident' => 'nullable|boolean',
             'no_govt_salary' => 'nullable|boolean',
-            'info_true' => 'accepted|boolean',
-            'aadhaar_consent' => 'accepted|boolean',
+            'info_true' => 'nullable|boolean',
+            'aadhaar_consent' => 'nullable|boolean',
         ];
     }
 

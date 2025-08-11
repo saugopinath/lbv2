@@ -28,7 +28,7 @@
         }
     }"
     x-init="$watch('aadhaar', value => { disableCheckBtn = false; })"
-    class="grid gap-6 md:grid-cols-2 mb-6 p-4 border-b border-gray-200 dark:border-gray-700">
+    class="grid gap-6 md:grid-cols-3 mb-6 p-4 border-b border-gray-200 dark:border-gray-700">
 
     <!-- Aadhaar Input -->
     <div>
@@ -56,11 +56,11 @@
 
     <!-- Error -->
     <template x-if="errorMessage">
-        <div class="mt-2 text-red-600 text-sm" x-text="errorMessage"></div>
+        <div class="mt-8 text-red-600 text-sm" x-text="errorMessage"></div>
     </template>
 
     <!-- Success -->
     <template x-if="successMessage">
-        <div class="mt-2 text-green-600 text-sm" x-text="successMessage"></div>
+        <div class="mt-8 text-green-600 text-sm" x-text="successMessage"></div>
     </template>
 </div>

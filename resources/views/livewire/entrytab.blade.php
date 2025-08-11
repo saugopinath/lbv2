@@ -11,7 +11,7 @@
         @endphp
 
         {{-- Horizontal nav --}}
-        <nav class="flex flex-wrap border-b border-gray-200 text-2xl font-medium text-center mb-6 space-x-4">
+        <nav class="flex flex-wrap border-b border-gray-200 text-xl font-medium text-center mb-6 space-x-2">
             @foreach ($tabs as $key => $tab)
                 @if ($tab['enabled'])
                     <x-entrytab-nav-link 
