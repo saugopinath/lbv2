@@ -13,37 +13,37 @@ class DupAadhaarCheck extends Component
     public $error = null;
     public $valid = false;
     public function checkDuplicate()
-{
-    $this->error = null;
-    $this->valid = false;
-    $this->aadhaar = trim($this->aadhaar);
+    {
+        $this->error = null;
+        $this->valid = false;
+        $this->aadhaar = trim($this->aadhaar);
 
-    // Basic validation
-    if (!ctype_digit($this->aadhaar) || strlen($this->aadhaar) !== 12) {
-        $this->error = "Please enter a valid 12-digit Aadhaar number.";
-        return ['status' => 'error', 'message' => $this->error];
+        // Basic validation
+        if (!ctype_digit($this->aadhaar) || strlen($this->aadhaar) !== 12) {
+            $this->error = "Please enter a valid 12-digit Aadhaar number.";
+            return ['status' => 'error', 'message' => $this->error];
+        }
+
+        $encoded_aadhar = Crypt::encryptString($this->aadhaar);
+        $aadhaar_hash = md5($this->aadhaar);
+
+        // Check duplicate
+        if (BeneficiaryAadhaar::where('aadhar_hash', $aadhaar_hash)->exists()) {
+            $this->error = "Duplicate Aadhaar found!";
+            return ['status' => 'duplicate', 'message' => $this->error];
+        }
+
+        // Aadhaar is valid
+        $this->valid = true;
+        Session::put('aadhaar_data', [
+            'encoded' => $encoded_aadhar,
+            'hash' => $aadhaar_hash,
+        ]);
+
+        $this->dispatch('aadhaarChecked');
+
+        return ['status' => 'success', 'message' => '✅ Aadhaar is valid and not duplicate.'];
     }
-
-    $encoded_aadhar = Crypt::encryptString($this->aadhaar);
-    $aadhaar_hash = md5($this->aadhaar);
-
-    // Check duplicate
-    if (BeneficiaryAadhaar::where('aadhar_hash', $aadhaar_hash)->exists()) {
-        $this->error = "Duplicate Aadhaar found!";
-        return ['status' => 'duplicate', 'message' => $this->error];
-    }
-
-    // Aadhaar is valid
-    $this->valid = true;
-    Session::put('aadhaar_data', [
-        'encoded' => $encoded_aadhar,
-        'hash' => $aadhaar_hash,
-    ]);
-
-    $this->dispatch('aadhaarChecked');
-
-    return ['status' => 'success', 'message' => '✅ Aadhaar is valid and not duplicate.'];
-}
 
 
     public function render()

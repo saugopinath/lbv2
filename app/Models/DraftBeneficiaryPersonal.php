@@ -29,4 +29,8 @@ class DraftBeneficiaryPersonal extends Model
     {
         return $this->hasOne(DraftBeneficiaryDeclaration::class, 'application_id');
     }
+    public function aadhaar()
+    {
+        return $this->hasOne(BeneficiaryAadhaar::class, 'application_id');
+    }
 }
