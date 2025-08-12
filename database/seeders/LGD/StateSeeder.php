@@ -196,7 +196,6 @@ class StateSeeder extends Seeder
         );
         foreach ($lg_states as $state) {
             State::create([
-                'id' => $state['state_code'],
                 'ref_code' => $state['state_code'],
                 'lgd_code'  => $state['state_code'],
                 'name'     => strtoupper($state['state_name_english']),
