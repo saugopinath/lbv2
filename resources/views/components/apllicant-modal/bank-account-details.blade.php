@@ -3,9 +3,9 @@
         Bank Account Details
     </div>
     <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
-        <div><strong>Bank Name:</strong> SBI</div>
-        <div><strong>Branch Name:</strong> Kolkata Branch</div>
-        <div><strong>Account No.:</strong> XXXXXXXXXXXX1234</div>
-        <div><strong>IFSC Code:</strong> SBIN0001234</div>
+        <div><strong>Bank Name:</strong> {{$bankname}}</div>
+        <div><strong>Bank Branch Name:</strong> {{$bankbranchname}}</div>
+        <div><strong>Bank Account No.:</strong> {{$bankaccountnumber}}</div>
+        <div><strong>IFSC Code:</strong> {{$ifscode}}</div>
     </div>
 </div>

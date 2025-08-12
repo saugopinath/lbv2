@@ -3,10 +3,13 @@
         Contact Details
     </div>
     <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
-        <div><strong>Mobile No.:</strong> 8348691761</div>
-        <div><strong>Email:</strong> -</div>
-        <div><strong>Address:</strong> Kolkata</div>
-        <div><strong>Police Station:</strong> Some PS</div>
-        <div><strong>District:</strong> Kolkata</div>
+        <div><strong>District:</strong> {{$distname}}</div>
+        <div><strong>Police Station:</strong> {{$ps}}</div>
+        <div><strong>Block/Municipality/Crop:</strong> {{$blockmunicorp}}</div>
+        <div><strong>GP/Ward No.:</strong> {{$gpward}}</div>
+        <div><strong>Village/Town/City:</strong> {{$villtown}}</div>
+        <div><strong>House/Premise No.:</strong> {{$houseno}}</div>
+        <div><strong>Post Office:</strong> {{$po}}</div>
+        <div><strong>Pin Code:</strong> {{$pin}}</div>
     </div>
 </div>

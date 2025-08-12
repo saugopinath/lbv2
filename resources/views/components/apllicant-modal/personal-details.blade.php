@@ -4,24 +4,61 @@
     </div>
     <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
         <div>
-            <strong>Swasthya Sathi Card No.:</strong> **********
+            <strong>Aadhaar No.:</strong> {{$decryptedAadhaar}}
+        </div>
+    </div>
+    @if($dsregno != null)
+    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
+        <div>
+            <strong>Duare Sarkar Registration No.:</strong> {{ $dsregno }}
         </div>
         <div>
-            <strong>Aadhaar No.:</strong> {{$decrypted}}
+            <strong>Duare Sarkar Date.:</strong> {{ $dsdate }}
+        </div>
+    </div>
+    @endif
+    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
+        <div>
+            <strong>Mobile No.:</strong> {{ $mobile }}
+        </div>
+        @if($email != null)
+        <div>
+            <strong>Email Id:</strong> {{ $email }}
+        </div>
+        @endif
+    </div>
+    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
+        <div>
+            <strong>Name:</strong> {{ $fname }}
+        </div>
+    </div>
+    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
+        <div>
+            <strong>DOB:</strong> {{ $dob }}
         </div>
         <div>
-            <strong>Name:</strong> {{ $applicant->full_name }}
+            <strong>Age (as on {{$currentDate}}):</strong> {{ $age }}
+        </div>
+    </div>
+    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
+        <div>
+            <strong>Father's Name:</strong> {{ $ffname }}
         </div>
         <div>
-            <strong>DOB:</strong> {{ \Carbon\Carbon::parse($applicant->dob)->format('d-m-Y') }}
+            <strong>Mother's Name:</strong> {{ $mfname }}
         </div>
+    </div>
+    @if($email != null)
+    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
         <div>
-            <strong>Age:</strong> {{ \Carbon\Carbon::parse($applicant->dob)->age }}
+            <strong>Spouce Name:</strong> {{ $sfname }}
         </div>
-        <div>
-            <strong>Gender:</strong> Female
-        </div>
-        <div><strong>Caste:</strong> SC</div>
-        <div><strong>SC/ST Certificate No.:</strong> dhhhh344</div>
+    </div>
+    @endif
+    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
+        <div><strong>Caste:</strong> {{ $caste }}</div>
+        @if($cascerno != null)
+        <div><strong>SC/ST Certificate No.:</strong> {{ $cascerno }}</div>
+        @endif
     </div>
 </div>

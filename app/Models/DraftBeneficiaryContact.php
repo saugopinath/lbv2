@@ -34,12 +34,10 @@ class DraftBeneficiaryContact extends Model
     {
         return $this->belongsTo(Block::class, 'block_id', 'id');
     }
-
     public function ward()
     {
         return $this->belongsTo(Ward::class, 'ward_id', 'id');
     }
-
     public function panchayat()
     {
         return $this->belongsTo(Panchayat::class, 'panchayat_id', 'id');
