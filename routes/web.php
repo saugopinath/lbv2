@@ -1,10 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignController;
+use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\UserManagementController;
+use App\Livewire\ProcessApplication\DraftApplicationView;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -28,3 +29,11 @@ Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index
 //     ]);
 Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
 Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
+// Route::get('lb-application-list', [App\Http\Controllers\LBFormController::class, 'index'])->middleware(['auth', 'verified'])->name('sumittedlist');
+
+Route::resources([
+        'roles' => App\Http\Controllers\RoleController::class
+    ]);
+Route::get('lb-application-list', [App\Http\Controllers\LBFormController::class, 'index'])->middleware(['auth', 'verified'])->name('submitted-list');
+Route::get('/draft-application/{id}/edit', [App\Http\Controllers\LBFormController::class, 'edit'])->name('draft-application.edit');
+Route::get('/application/{id}/view', DraftApplicationView::class)->name('draft-application.view');

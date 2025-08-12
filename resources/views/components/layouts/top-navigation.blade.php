@@ -1,7 +1,7 @@
 <div class="h-[60px] bg-white dark:bg-dark dark:border-gray/20 border-b-2 border-lightgray/10 flex items-center justify-between gap-2.5 px-7">
-  
+
     <div class="sm:block hidden flex-auto">
-      
+
     </div>
     <div class="flex items-center gap-5">
         <div x-data="{ fullScreen: false }">
@@ -47,7 +47,7 @@
                 </svg>
             </a>
         </div>
-     
+
         <div class="profile z-10" x-data="dropdown" @click.outside="open = false">
             <button type="button" class="flex items-center gap-2.5" @click="toggle()">
                 <img class="h-[38px] w-[38px] rounded-full" src="" alt="Header Avatar">
@@ -109,10 +109,10 @@
                             <path opacity="0.3" fill-rule="evenodd" clip-rule="evenodd" d="M10.3564 1.6665C9.42824 1.6665 8.58294 2.16709 6.89234 3.16827L6.32055 3.50688C4.62995 4.50806 3.78465 5.00865 3.32055 5.83317C2.85645 6.6577 2.85645 7.65887 2.85645 9.66122V10.3385C2.85645 12.3408 2.85645 13.342 3.32055 14.1665C3.78465 14.991 4.62995 15.4916 6.32055 16.4928L6.89234 16.8314C8.58294 17.8326 9.42824 18.3332 10.3564 18.3332C11.2846 18.3332 12.1299 17.8326 13.8205 16.8314L14.3923 16.4928C16.0829 15.4916 16.9282 14.991 17.3923 14.1665C17.8564 13.342 17.8564 12.3408 17.8564 10.3385V9.66122C17.8564 7.65887 17.8564 6.6577 17.3923 5.83317C16.9282 5.00865 16.0829 4.50806 14.3923 3.50688L13.8205 3.16827C12.1299 2.16709 11.2846 1.6665 10.3564 1.6665Z" fill="currentColor" />
                             <path d="M10.3564 6.875C8.63056 6.875 7.23145 8.27411 7.23145 10C7.23145 11.7259 8.63056 13.125 10.3564 13.125C12.0823 13.125 13.4814 11.7259 13.4814 10C13.4814 8.27411 12.0823 6.875 10.3564 6.875Z" fill="currentColor" />
                         </svg>
-                        
+
                Sign Out
-           
-                        
+
+
                     </a>
                      </form>
                 </li>

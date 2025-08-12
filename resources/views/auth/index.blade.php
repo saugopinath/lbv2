@@ -34,8 +34,8 @@
             <x-publicForm.captcha class="w-full sm:w-[44%] h-14 object-contain border sm:border-y border-gray-300 rounded-xl sm:rounded-none"/>
         </div>
         <x-publicForm.button class="w-full h-14 bg-[#0e3e98f0] text-white text-lg font-semibold rounded-xl shadow-md hover:bg-[#0c3591] flex justify-center items-center gap-3">Send OTP</x-publicForm.button>
-       
-    </form> 
+
+    </form>
     <div class="text-right mt-2 text-blue-600 italic text-sm hover:underline cursor-pointer">
         <a href="{{ route('forget-password') }}">Forgot Password?</a>
     </div>
