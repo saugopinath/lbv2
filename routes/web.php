@@ -28,3 +28,4 @@ Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index
 //     ]);
 Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
 Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
+Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
