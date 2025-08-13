@@ -29,14 +29,22 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <circle opacity="0.3" cx="12" cy="6" r="4" fill="currentColor"></circle>
-                                            <ellipse cx="12" cy="17" rx="7" ry="4" fill="currentColor"></ellipse>
+                <ellipse cx="12" cy="17" rx="7" ry="4" fill="currentColor"></ellipse>
               </svg>
               <span x-show="$store.app.sidebar">Profile</span>
             </button>
             <div x-show="open" @click.outside="open = false"
               class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded shadow-lg z-10">
               <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Profile Details</a>
-              <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Sign Out</a>
+              <button 
+                    type="button"
+                    class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"
+                    @click="$refs.logoutForm.submit();">
+                    Sign Out
+                </button>
+                <form x-ref="logoutForm" method="POST" action="{{ route('logout') }}" class="hidden">
+                    @csrf
+                </form>
             </div>
           </div>
         </div>
