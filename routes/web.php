@@ -25,4 +25,4 @@ Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index
 Route::resources([
     'roles' => App\Http\Controllers\RoleController::class
 ]);
-Route::get('lbform', [LBController::class, 'index'])->name('lbform');
+Route::get('lbform', [LBController::class, 'index'])->middleware(['auth', 'verified'])->name('lbform');

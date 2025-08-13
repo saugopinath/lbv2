@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Livewire;
-
+use Illuminate\Support\Facades\Session;
 use Livewire\Component;
 use App\Models\DraftBeneficiaryPersonal;
 use App\Models\DraftBeneficiaryContact;
@@ -68,9 +68,9 @@ class ContactDetails extends Component
     {
         $validated = $this->validate($this->rules());
         if ($this->mode === null) {
-            $applicantion = DraftBeneficiaryPersonal::first();
+            $application_id = Session::get('apllication_id');
             $data = [
-                'application_id' => $applicantion->application_id,
+                'application_id' => $application_id,
                 'district_id' => $validated['selectedDistrict'],
                 'rural_urban_id' => $validated['selectedRuralurban'],
                 'police_station' => $validated['policestation'],
@@ -107,6 +107,7 @@ class ContactDetails extends Component
             }
             DraftBeneficiaryContact::where('application_id', $this->id)->update($data);
         }
+        $this->dispatch('conDet');
     }
     public function render()
     {

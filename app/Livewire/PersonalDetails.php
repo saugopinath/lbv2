@@ -10,7 +10,7 @@ use App\Models\UniqueAppBenId;
 use App\Models\BeneficiaryAadhaar;
 use App\Models\DraftBeneficiaryPersonal;
 use App\Models\DraftBeneficiaryRelationship;
-
+use Illuminate\Support\Facades\Auth;
 class PersonalDetails extends Component
 {
     public $app_types, $genders, $castes, $mar_status = [];
@@ -114,7 +114,7 @@ class PersonalDetails extends Component
                 'marital_status' => $validated['mar_statu'],
                 'is_final_submit' => 0,
                 'is_faulty' => 0,
-                'created_by' => 1,
+                'created_by' => Auth::id(),
             ];
             if (!empty($validated['email'])) {
                 $data['email'] = $validated['email'];
@@ -130,27 +130,27 @@ class PersonalDetails extends Component
             DraftBeneficiaryRelationship::create([
                 'application_id' => $draftbenPar->application_id,
                 'full_name' => trim($validated['ffname']),
-                'created_by' => 1,
+                'created_by' => Auth::id(),
                 'relation_type_id' => Codemaster::getIdByCode(131),
             ]);
             DraftBeneficiaryRelationship::create([
                 'application_id' => $draftbenPar->application_id,
                 'full_name' => trim($validated['mfname']),
-                'created_by' => 1,
+                'created_by' => Auth::id(),
                 'relation_type_id' => Codemaster::getIdByCode(132),
             ]);
             if ($validated['mar_statu'] == Codemaster::getIdByCode(32) || $validated['mar_statu'] == Codemaster::getIdByCode(34)) {
                 DraftBeneficiaryRelationship::create([
                     'application_id' => $draftbenPar->application_id,
                     'full_name' => trim($validated['sfname']),
-                    'created_by' => 1,
+                    'created_by' => Auth::id(),
                     'relation_type_id' => Codemaster::getIdByCode(133),
                 ]);
             }
             BeneficiaryAadhaar::create([
                 'application_id' => $uniqueApp->application_id,
                 'aadhar_hash' => $hash,
-                'created_by' => 1,
+                'created_by' => Auth::id(),
                 'encoded_aadhar' => $encoded,
             ]);
             Session::forget('aadhar_hash');
@@ -196,7 +196,7 @@ class PersonalDetails extends Component
                     DraftBeneficiaryRelationship::create([
                         'application_id' => $this->id,
                         'full_name' => trim($validated['sfname']),
-                        'created_by' => 1,
+                        'created_by' => Auth::id(),
                         'relation_type_id' => Codemaster::getIdByCode(133),
                     ]);
                 }
@@ -206,6 +206,7 @@ class PersonalDetails extends Component
                     ->delete();
             }
         }
+        Session::put('apllication_id',$draftbenPar->application_id);
         $this->dispatch('perDet');
     }
     public function render()

@@ -19,7 +19,8 @@ class EnclosureList extends Component
     public $applicationId;
     public $currentDocMaxSize = '';
     public $currentDocExtensions = '';
-    public function mount($applicationId = null)
+    public $mode;
+    public function mount($mode = null, $applicationId = null)
     {
         $this->applicationId = $applicationId;
         $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->get();

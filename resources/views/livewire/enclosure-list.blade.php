@@ -1,5 +1,6 @@
-<div
-    x-data="{ 
+<div>
+    <div
+        x-data="{ 
         showUploadModal: false, 
         currentDocId: null, 
         currentDocName: '', 
@@ -62,15 +63,24 @@
             this.$refs.fileInput.value = null;
         }
     }"
-    class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    @foreach ($doc_lists as $doc)
-    <x-document-card
-        :docName="$doc->codemaster->name"
-        :isRequired="$doc->is_required"
-        :docTypeId="$doc->doc_type_id"
-        :existingDoc="$existingDocuments[$doc->doc_type_id] ?? null" />
-    @endforeach
-    <x-upload-modal
-        :currentDocExtensions="$currentDocExtensions"
-        :currentDocMaxSize="$currentDocMaxSize" />
+        class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        @foreach ($doc_lists as $doc)
+        <x-document-card
+            :docName="$doc->codemaster->name"
+            :isRequired="$doc->is_required"
+            :docTypeId="$doc->doc_type_id"
+            :existingDoc="$existingDocuments[$doc->doc_type_id] ?? null" />
+        @endforeach
+        <x-upload-modal
+            :currentDocExtensions="$currentDocExtensions"
+            :currentDocMaxSize="$currentDocMaxSize" />
+    </div>
+    <div class="flex justify-between mt-4 pl-6 pr-6">
+        @if ($mode != '0')
+        <x-button.danger>Previous</x-button.danger>
+        @endif
+        <x-button.primary type="submit">
+            {{ $mode == '0' ? 'Save' : 'Save & Next' }}
+        </x-button.primary>
+    </div>
 </div>

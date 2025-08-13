@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Livewire;
-
+use Illuminate\Support\Facades\Session;
 use Livewire\Component;
 use App\Models\Ifsccodemaster;
 use App\Models\DraftBeneficiaryPersonal;
@@ -54,9 +54,9 @@ class BankDetails extends Component
     {
         $validated = $this->validate($this->rules());
         if ($this->mode === null) {
-            $applicantion = DraftBeneficiaryPersonal::first();
+            $application_id = Session::get('apllication_id');
             DraftBeneficiaryBank::create([
-                'application_id' => $applicantion->application_id,
+                'application_id' => $application_id,
                 'created_by' => Auth::id(),
                 'ifsc' => $validated['ifscode'],
                 'bank_account_number' => $validated['bankaccountnumber'],
@@ -68,6 +68,7 @@ class BankDetails extends Component
             ];
             DraftBeneficiaryBank::where('application_id', $this->id)->update($data);
         }
+        $this->dispatch('bankDet');
     }
     public function render()
     {
