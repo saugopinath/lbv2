@@ -160,11 +160,10 @@ class AuthenticationController  extends Controller
                         ]);
                     if($update_user){
                           $user = User::where('id', $user_id)->where('is_active', 1)->first(); 
+                         // $address=$user->RoleSchemeOfficeMappings->Office;
                           $request->session()->flush();
-                                       Auth::login($user);
-                                        
-                                        
-                                        return redirect('/dashboard');
+                          Auth::login($user);                
+                          return redirect('/dashboard');
                         }
 
     }

@@ -22,7 +22,7 @@ Route::controller(AuthenticationController::class)->group(function(){
     Route::post('/logout', 'logout')->name('logout');
 
 });
-Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard')->middleware('auth');
 //  Route::resources([
 //         'roles' => App\Http\Controllers\RoleController::class
 //     ]);

@@ -36,12 +36,17 @@
 
         <!-- Dashboard Cards -->
         <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4">
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Welcome to the Dashboard</h1>
-            <p class="text-gray-600 dark:text-gray-300">Here is your main content area.</p>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Welcome to the Dashboard </h1>
+            <p class="text-gray-600 dark:text-gray-300">
+                @php
+                $lgd_session = session('lgd_session');
+                foreach($lgd_session as $k=>$v){
+                         echo $k."=".Crypt::decryptString($v)."<br/>";
+                  }
+                
+              @endphp
+            </p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4">
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Welcome to the Dashboard</h1>
-            <p class="text-gray-600 dark:text-gray-300">Here is your main content area.</p>
-        </div>
+        
 </x-layouts.app>

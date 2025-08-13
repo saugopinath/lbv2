@@ -15,8 +15,27 @@ class DatabaseSeeder extends Seeder
     {
          $this->call([
             LGD\StateSeeder::class,
+            LGD\DistrictSeeder::class,
+            LGD\BlockSeeder::class,
+            LGD\PanchayatSeeder::class,
+            LGD\SubdivisionSeeder::class,
+            LGD\MunicipalitiesSeeder::class,
+            LGD\WardSeeder::class,
+            Bank\BankSeeder::class,
+            Bank\IfscSeeder::class,
             DepartmentSeeder::class,
-            SuperAdminSeeder::class,   
+            CodemasterSeeder::class,
+            SchemeSeeder::class,
+            Role\RolePermissionSeeder::class,
+            OfficeMaster\RoleOfficeTypeSeeder::class,
+            OfficeMaster\OfficeMastersTableSeeder::class,
+            Role\SuperAdminSeeder::class,
+            Role\WbHodSeeder::class,
+            Role\PaschimMedinipurApproverSeeder::class,
+            Role\DaspurIIBlockVerifierSeeder::class,
+            Role\DaspurIIBlockOperatorSeeder::class,
+            Role\GhatalSdoOperatorSeeder::class,
+            Role\GhatalSdoVerifierSeeder::class,
         ]);
     }
 }
