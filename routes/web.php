@@ -37,3 +37,4 @@ Route::resources([
 Route::get('lb-application-list', [App\Http\Controllers\LBFormController::class, 'index'])->middleware(['auth', 'verified'])->name('submitted-list');
 Route::get('/draft-application/{id}/edit', [App\Http\Controllers\LBFormController::class, 'edit'])->name('draft-application.edit');
 Route::get('/application/{id}/view', DraftApplicationView::class)->name('draft-application.view');
+Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
