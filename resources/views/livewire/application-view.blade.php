@@ -33,21 +33,23 @@
                                 <div class="bg-gray-50 p-5 rounded-xl hover:bg-gray-100 transition">
                                     <p class="text-sm text-gray-500">Mobile Number</p>
                                     <p class="font-medium text-gray-900">{{ $application->mobile_no ?? '-' }}</p>
-                                </div>                              
+                                </div>
                                 <div class="bg-gray-50 p-5 rounded-xl hover:bg-gray-100 transition">
                                     <p class="text-sm text-gray-500">Age</p>
-                                    <p class="font-medium text-gray-900">{{ $application->dob ? \Carbon\Carbon::parse($application->dob)->age : '-' }}</p>
+                                    <p class="font-medium text-gray-900">
+                                        {{ $application->dob ? \Carbon\Carbon::parse($application->dob)->age : '-' }}
+                                    </p>
                                 </div>
                                 <div class="bg-gray-50 p-5 rounded-xl hover:bg-gray-100 transition">
                                     <p class="text-sm text-gray-500">Father's Name</p>
                                     <p class="font-medium text-gray-900">
-                                        {{ $application->father->where('relation_type_id', 79)->first()?->full_name ?? '-' }}
+                                        {{ $ffname }}
                                     </p>
                                 </div>
                                 <div class="bg-gray-50 p-5 rounded-xl hover:bg-gray-100 transition">
                                     <p class="text-sm text-gray-500">Mother's Name</p>
                                     <p class="font-medium text-gray-900">
-                                        {{ $application->father->where('relation_type_id', 80)->first()?->full_name ?? '-' }}
+                                        {{ $mfname }}
                                     </p>
                                 </div>
                                 <div class="bg-gray-50 p-5 rounded-xl hover:bg-gray-100 transition">
@@ -123,17 +125,41 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="mb-10">
+                            <div class="flex items-center mb-6 border-b border-gray-200 pb-3">
+                                <div class="h-12 w-1.5 bg-purple-600 mr-4 rounded"></div>
+                                <h3 class="text-xl font-semibold text-gray-900">Enclosure List</h3>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                                @foreach ($application->beneficiaryEnclosures as $enclosure)
+                                    <div class="bg-gray-50 p-5 rounded-xl hover:bg-gray-100 transition">
+                                        <p class="text-sm text-gray-500">
+                                            {{ optional($enclosure->documentType)->name ?? 'N/A' }}
 
+                                            <x-button.primary wire:click="viewDocument({{ $enclosure->id }})"
+                                                class="bg-blue-500 text-white whitespace-nowrap cursor-pointer px-3 py-1 rounded">
+                                                View
+                                            </x-button.primary>
+                                        </p>
+                                    </div>
+                                @endforeach
+                                @if ($showModal)
+                                    <div
+                                        class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                                        <div class="bg-white rounded p-4 max-w-4xl max-h-[90vh] overflow-auto relative">
+                                            <button wire:click="closeView"
+                                                class="absolute top-2 right-2 text-gray-700 hover:text-black font-bold text-xl">&times;</button>
 
-
-
+                                            <pre class="whitespace-pre-wrap">{{ $decryptedData }}</pre>
+                                            {{-- Or if this is an image/pdf base64, handle accordingly --}}
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
                     </div>
-
-
                 </div>
             </div>
         </div>
     </div>
-
-
 </div>

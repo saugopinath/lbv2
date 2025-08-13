@@ -1,10 +1,8 @@
 <div x-data="{ show: false }" class="relative inline-block">
     <button
-        {{ $attributes }} {{-- এখানে $attributes মর্জ করলে wire:click কাজ করবে --}}
+        {{ $attributes->merge(['type' => 'button', 'class' => 'w-6 h-6 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 transition cursor-pointer']) }}
         @mouseenter="show = true"
         @mouseleave="show = false"
-        type="button"
-        class="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 transition cursor-pointer"
     >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -50 576 576"
             class="w-4 h-4 text-blue-600" fill="currentColor">
@@ -17,7 +15,8 @@
     </button>
 
     <div x-show="show" x-transition
-        class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded shadow z-10">
-        {{ $slot ?: 'View' }}
+        class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded shadow z-10"
+        style="display: none;">
+        {{ $slot ?? 'View' }}
     </div>
 </div>

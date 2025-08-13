@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use Carbon\Carbon;
+use App\Models\Codemaster;
 use App\Models\BenRejectDetail;
 use App\Models\BeneficiaryPersonal;
 use App\Models\DraftBeneficiaryPersonal;
@@ -28,47 +29,34 @@ class BeneficiariesExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-        if ($this->reportType === "verified") {
+        $roleVerified = Codemaster::getIdByCode(22);
+        $roleApproved = Codemaster::getIdByCode(23);
+        $roleReverted = Codemaster::getIdByCode(21);
+        $relationFather = Codemaster::getIdByCode(131);
+        // dd($roleReverted);
+        if ($this->reportType === "2") {
             $query = DraftBeneficiaryPersonal::query()
-                ->where("next_level_role_id", 22)
-                ->with([
-                    'father' => fn($q) => $q->where('relation_type_id', 79),
-                ])
-                ->whereHas('father', fn($q) => $q->where('relation_type_id', 79));
+                ->where("next_level_role_id", $roleVerified)
+                ->with(['father' => fn($q) => $q->where('relation_type_id', $relationFather)])
+                ->whereHas('father', fn($q) => $q->where('relation_type_id', $relationFather));
         }
-
-        if ($this->reportType === "approved") {
+        if ($this->reportType === "3") {
             $query = BeneficiaryPersonal::query()
-                ->where("next_level_role_id", 23)
-                ->with([
-                    'father' => fn($q) => $q->where('relation_type_id', 79),
-                ])
-                ->whereHas('father', fn($q) => $q->where('relation_type_id', 79));
+                ->where("next_level_role_id", $roleApproved)
+                ->with(['father' => fn($q) => $q->where('relation_type_id', $relationFather)])
+                ->whereHas('father', fn($q) => $q->where('relation_type_id', $relationFather));
         }
-
-        if ($this->reportType === "reverted") {
+        if ($this->reportType === "1" || $this->reportType === "5") {
             $query = DraftBeneficiaryPersonal::query()
-                ->where("next_level_role_id", 21)
-                ->with([
-                    'father' => fn($q) => $q->where('relation_type_id', 79),
-                ])
-                ->whereHas('father', fn($q) => $q->where('relation_type_id', 79));
+                ->where("next_level_role_id", $roleReverted)
+                ->with(['father' => fn($q) => $q->where('relation_type_id', $relationFather)])
+                ->whereHas('father', fn($q) => $q->where('relation_type_id', $relationFather));
         }
-
-        if ($this->reportType === "partial") {
-            $query = DraftBeneficiaryPersonal::query()
-                ->where("next_level_role_id", 21)
-                ->with([
-                    'father' => fn($q) => $q->where('relation_type_id', 79),
-                ])
-                ->whereHas('father', fn($q) => $q->where('relation_type_id', 79));
-        }
-
-        if ($this->reportType === "rejected") {
+        if ($this->reportType === "4") {
             $query = BenRejectDetail::query();
         }
 
-       if ($this->loginType === 'district_office' && $this->districtCode) {
+        if ($this->loginType === 'district_office' && $this->districtCode) {
             $query->where('district_id', $this->districtCode);
         } elseif ($this->loginType === 'subdivision_office' && $this->subdivisionCode) {
             $query->where('municipality_id', $this->subdivisionCode);
@@ -79,7 +67,7 @@ class BeneficiariesExport implements FromCollection, WithHeadings
         $data = $query->get();
 
         return $data->map(function ($item) {
-            if ($this->reportType === 'verified') {
+            if ($this->reportType === '2') {
                 return [
                     'Application ID' => $item->application_id,
                     'Applicant Name' => $item->full_name,
@@ -88,7 +76,7 @@ class BeneficiariesExport implements FromCollection, WithHeadings
                 ];
             }
 
-            if ($this->reportType === 'approved') {
+            if ($this->reportType === '3') {
                 return [
                     'Beneficiary ID' => $item->beneficiary_id,
                     'Application ID' => $item->application_id,
@@ -98,7 +86,7 @@ class BeneficiariesExport implements FromCollection, WithHeadings
                 ];
             }
 
-            if (in_array($this->reportType, ['reverted', 'partial'])) {
+            if (in_array($this->reportType, ['1', '5'])) {
                 return [
                     'Application ID' => $item->application_id,
                     'Applicant Name' => $item->full_name,
@@ -108,7 +96,7 @@ class BeneficiariesExport implements FromCollection, WithHeadings
                 ];
             }
 
-            if ($this->reportType === 'rejected') {
+            if ($this->reportType === '4') {
                 return [
                     'Application ID' => $item->application_id,
                     'Applicant Name' => $item->full_name,
@@ -125,13 +113,13 @@ class BeneficiariesExport implements FromCollection, WithHeadings
 
     public function headings(): array
     {
-        if ($this->reportType === 'verified') {
+        if ($this->reportType === '2') {
             return ['Application ID', 'Applicant Name', 'Father\'s Name', 'Age'];
-        } elseif ($this->reportType === 'approved') {
+        } elseif ($this->reportType === '3') {
             return ['Beneficiary ID', 'Application ID', 'Applicant Name', 'Father\'s Name', 'Age'];
-        } elseif ($this->reportType === 'reverted' || $this->reportType === 'partial') {
+        } elseif ($this->reportType === '1' || $this->reportType === '5') {
             return ['Application ID', 'Applicant Name', 'Father\'s Name', 'Age', 'Mobile No'];
-        } elseif ($this->reportType === 'rejected') {
+        } elseif ($this->reportType === '4') {
             return ['Application ID', 'Applicant Name', 'Father\'s Name', 'Age', 'Mobile No', 'Rejected Reason'];
         } else {
             return [];

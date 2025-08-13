@@ -30,25 +30,25 @@ class DraftApplicantSeeder extends Seeder
     {
 
 
-      $userId = User::where('name','Admin')->value('id');
+        $userId = User::where('name', 'Admin')->value('id');
 
-      $blockId=Panchayat::where('id', 2485)->value('block_id');
-      $districtId = Block::where('id', $blockId)->value('district_id');
+        $blockId = Panchayat::where('id', 2485)->value('block_id');
+        $districtId = Block::where('id', $blockId)->value('district_id');
 
 
-      $entryTypeId = Codemaster::where('code', 41)->value('id');
-      $nextLevelRoleId = Codemaster::where('code', 22)->value('id');
-    //   $genderId = Codemaster::where('short_name', 'female')->value('id');
-      $ifsc = Ifsccodemaster::where('bankmaster_id', 36)->value('code');
-      $fatherRelationTypeId = Codemaster::where('code', 131)->value('id');
-      $motherRelationTypeId = Codemaster::where('code', 132)->value('id');
+        $entryTypeId = Codemaster::where('code', 41)->value('id');
+        $nextLevelRoleId = Codemaster::where('code', 22)->value('id');
+        //   $genderId = Codemaster::where('short_name', 'female')->value('id');
+        $ifsc = Ifsccodemaster::where('bankmaster_id', 36)->value('code');
+        $fatherRelationTypeId = Codemaster::where('code', 131)->value('id');
+        $motherRelationTypeId = Codemaster::where('code', 132)->value('id');
 
         for ($i = 1; $i <= 5; $i++) {
 
-        $casteId = Codemaster::where('parent_id', 1)->inRandomOrder()->value('id');
-        $maritalStatusId = Codemaster::where('parent_id', 3)->inRandomOrder()->value('id');
+            $casteId = Codemaster::where('parent_id', 1)->inRandomOrder()->value('id');
+            $maritalStatusId = Codemaster::where('parent_id', 3)->inRandomOrder()->value('id');
 
-         $aadharNumber = str_pad(rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+            $aadharNumber = str_pad(rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
 
 
 
@@ -87,7 +87,7 @@ class DraftApplicantSeeder extends Seeder
                 'block_id' =>  $blockId,
                 'municipality_id' => null,
                 'ward_id' => null,
-                'panchayat_id' =>'2485',
+                'panchayat_id' => '2485',
                 'police_station' => 'Test PS ' . $i,
                 'village_town_city' => 'Village ' . $i,
                 'house_premise_no' => 'House No ' . $i,
@@ -97,7 +97,7 @@ class DraftApplicantSeeder extends Seeder
                 'created_by' => $userId,
             ]);
 
-             DraftBeneficiaryBank::create([
+            DraftBeneficiaryBank::create([
                 'application_id' => $uniqueAppBenId->application_id,
                 'created_by' => $userId,
                 'ifsc' => $ifsc,
@@ -107,45 +107,42 @@ class DraftApplicantSeeder extends Seeder
 
 
 
-               DraftBeneficiaryDeclaration::create([
+            DraftBeneficiaryDeclaration::create([
                 'application_id' => $uniqueAppBenId->application_id,
                 'created_by' => $userId,
                 'is_resident' => true,
                 'earn_monthly_remuneration' => true,
                 'info_genuine_decl' => true,
                 'av_status' => true,
-
+                
             ]);
             BeneficiaryAadhaar::create([
-            'application_id' => $uniqueAppBenId->application_id,
-            'beneficiary_id' => null,
-            'created_by' => $userId,
-            'encode_key' => null,
-            'encoded_aadhar' => Crypt::encryptString($aadharNumber),
-            'aadhar_hash' => md5($aadharNumber),
+                'application_id' => $uniqueAppBenId->application_id,
+                'beneficiary_id' => null,
+                'created_by' => $userId,
+                'encode_key' => null,
+                'encoded_aadhar' => Crypt::encryptString($aadharNumber),
+                'aadhar_hash' => md5($aadharNumber),
 
-]);
-DraftBeneficiaryRelationship::insert([
-    [
-        'application_id'   => $uniqueAppBenId->application_id,
-        'created_by'       => $userId,
-        'full_name'        => 'Father Name'. $i,
-        'relation_type_id' => $fatherRelationTypeId,
-        'created_at'       => now(),
-        'updated_at'       => now(),
-    ],
-    [
-        'application_id'   => $uniqueAppBenId->application_id,
-        'created_by'       => $userId,
-        'full_name'        => 'Mother Name'. $i,
-        'relation_type_id' => $motherRelationTypeId,
-        'created_at'       => now(),
-        'updated_at'       => now(),
-    ]
-]);
-
-
-
+            ]);
+            DraftBeneficiaryRelationship::insert([
+                [
+                    'application_id'   => $uniqueAppBenId->application_id,
+                    'created_by'       => $userId,
+                    'full_name'        => 'Father Name' . $i,
+                    'relation_type_id' => $fatherRelationTypeId,
+                    'created_at'       => now(),
+                    'updated_at'       => now(),
+                ],
+                [
+                    'application_id'   => $uniqueAppBenId->application_id,
+                    'created_by'       => $userId,
+                    'full_name'        => 'Mother Name' . $i,
+                    'relation_type_id' => $motherRelationTypeId,
+                    'created_at'       => now(),
+                    'updated_at'       => now(),
+                ]
+            ]);
         }
     }
 }

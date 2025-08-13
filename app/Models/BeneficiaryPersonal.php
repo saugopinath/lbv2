@@ -33,4 +33,9 @@ class BeneficiaryPersonal extends Model
     {
         return $this->belongsTo(CodeMaster::class, 'caste', 'id');
     }
+
+     public function enclosers()
+    {
+        return $this->hasMany(BeneficiaryEnclosure::class, 'application_id', 'application_id');
+    }
 }

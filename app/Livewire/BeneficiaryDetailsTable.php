@@ -3,19 +3,23 @@
 namespace App\Livewire;
 
 use Carbon\Carbon;
+use App\Models\Codemaster;
 use App\Models\BenRejectDetail;
 use App\Models\BeneficiaryPersonal;
+use App\Exports\BeneficiariesExport;
+use App\Models\BeneficiaryContact;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Models\DraftBeneficiaryContact;
 use App\Models\DraftBeneficiaryPersonal;
+use App\Helpers\EncryptionArray;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\BeneficiariesExport;
 
 class BeneficiaryDetailsTable extends DataTableComponent
 {
     public ?int $perPage = 5;
-    public string $reportType = '';
+    public string $reportType;
     public string $login_type = '';
     public string $search = '';
 
@@ -26,19 +30,14 @@ class BeneficiaryDetailsTable extends DataTableComponent
     public $loginSubdivisionCode;
     public $loginBlockCode;
 
-    public function filtersApplied($filters)
-    {
-        $this->district_id = $filters['district_id'];
-        $this->rural_urban = $filters['rural_urban'] ?? null;
-        $this->blockurban = $filters['blockurban'];
-        $this->gp_ward = $filters['gp_ward'];
-    }
+    public  $filter_condition = [];
+    public $where_condition = [];
 
     public function mount(string $reportType = '', string $login_type = ''): void
     {
         $this->reportType = $reportType;
         $this->login_type = $login_type;
-
+        // dd($this->reportType );
         // $this->loginType = 'district_office';
         // $this->loginDistrictCode = 305;
 
@@ -48,6 +47,14 @@ class BeneficiaryDetailsTable extends DataTableComponent
         // $this->loginType = 'block_office';
         // $this->loginBlockCode = 2793;
 
+    }
+
+    public function filtersApplied($filters)
+    {
+        $this->district_id = $filters['district_id'];
+        $this->rural_urban = $filters['rural_urban'] ?? null;
+        $this->blockurban = $filters['blockurban'];
+        $this->gp_ward = $filters['gp_ward'];
     }
 
     public function configure(): void
@@ -76,60 +83,43 @@ class BeneficiaryDetailsTable extends DataTableComponent
 
     public function columns(): array
     {
-        if ($this->reportType === 'verified') {
+        if ($this->reportType === '1' || $this->reportType === '2' || $this->reportType === '3' || $this->reportType === '4' || $this->reportType === '5') {
             return [
                 Column::make("Application ID", "application_id")->searchable()->sortable(),
                 Column::make("Applicant Name", "full_name")->searchable(),
-                Column::make("Father's Name")
-                    ->label(fn($row) => optional($row->father->first())->full_name ?? 'N/A'),
                 Column::make("Age", "dob")
                     ->format(fn($value) => $value ? Carbon::parse($value)->age : 'N/A'),
             ];
         }
 
-        if ($this->reportType === 'approved') {
+        if ($this->reportType === '1' || $this->reportType === '2' || $this->reportType === '3' || $this->reportType === '5') {
+            return [
+                Column::make("Father's Name")
+                    ->label(fn($row) => optional($row->father->first())->full_name ?? 'N/A'),
+            ];
+        }
+
+        if ($this->reportType === '3') {
             return [
                 Column::make("Beneficiary ID", "beneficiary_id"),
-                Column::make("Application ID", "application_id")->searchable()->sortable(),
-                Column::make("Applicant Name", "full_name")->searchable(),
-                Column::make("Father's Name")
-                    ->label(fn($row) => optional($row->father->first())->full_name ?? 'N/A'),
-                Column::make("Age", "dob")
-                    ->format(fn($value) => $value ? Carbon::parse($value)->age : 'N/A'),
             ];
         }
 
-        if ($this->reportType === 'reverted') {
+        if ($this->reportType === '5') {
             return [
-                Column::make("Application ID", "application_id")->searchable()->sortable(),
-                Column::make("Applicant Name", "full_name")->searchable(),
-                Column::make("Father's Name")
-                    ->label(fn($row) => optional($row->father->first())->full_name ?? 'N/A'),
-                Column::make("Age", "dob")
-                    ->format(fn($value) => $value ? Carbon::parse($value)->age : 'N/A'),
                 Column::make("Applicant Mobile No.", "mobile_no"),
             ];
         }
 
-        if ($this->reportType === 'partial') {
+        if ($this->reportType === '1') {
             return [
-                Column::make("Application ID", "application_id")->searchable()->sortable(),
-                Column::make("Applicant Name", "full_name")->searchable(),
-                Column::make("Father's Name")
-                    ->label(fn($row) => optional($row->father->first())->full_name ?? 'N/A'),
-                Column::make("Age", "dob")
-                    ->format(fn($value) => $value ? Carbon::parse($value)->age : 'N/A'),
                 Column::make("Applicant Mobile No.", "mobile_no"),
             ];
         }
 
-        if ($this->reportType === 'rejected') {
+        if ($this->reportType === '4') {
             return [
-                Column::make("Application ID", "application_id")->searchable()->sortable(),
-                Column::make("Applicant Name", "full_name")->searchable(),
                 Column::make("Father's Name", "father_full_name"),
-                Column::make("Age", "dob")
-                    ->format(fn($value) => $value ? Carbon::parse($value)->age : 'N/A'),
                 Column::make("Applicant Mobile No.", "mobile_no"),
                 Column::make("Rejected Reason", "rejected_reason"),
             ];
@@ -140,89 +130,78 @@ class BeneficiaryDetailsTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        if ($this->reportType === "verified") {
-            $query = DraftBeneficiaryPersonal::query()
-                ->where("next_level_role_id", 22)
-                ->with(['father' => fn($q) => $q->where('relation_type_id', 79)])
-                ->whereHas('father', fn($q) => $q->where('relation_type_id', 79));
-        }
-        if ($this->reportType === "approved") {
-            $query = BeneficiaryPersonal::query()
-                ->where("next_level_role_id", 23)
-                ->with(['father' => fn($q) => $q->where('relation_type_id', 79)])
-                ->whereHas('father', fn($q) => $q->where('relation_type_id', 79));
-        }
-        if ($this->reportType === "reverted" || $this->reportType === "partial") {
-            $query = DraftBeneficiaryPersonal::query()
-                ->where("next_level_role_id", 21)
-                ->with(['father' => fn($q) => $q->where('relation_type_id', 79)])
-                ->whereHas('father', fn($q) => $q->where('relation_type_id', 79));
-        }
-        if ($this->reportType === "rejected") {
+        $roleVerified = Codemaster::getIdByCode(22);
+        $roleApproved = Codemaster::getIdByCode(23);
+        $roleReverted = Codemaster::getIdByCode(21);
+        $relationFather = Codemaster::getIdByCode(131);
+
+        if ($this->reportType === "2") {
+            $model = DraftBeneficiaryPersonal::with('contact');
+            $next_level_role_id = $roleVerified;
+        } elseif ($this->reportType === "3") {
+            $model = BeneficiaryPersonal::with('contact');
+            $next_level_role_id = $roleApproved;
+        } elseif (in_array($this->reportType, ["1", "5"])) {
+            $model = DraftBeneficiaryPersonal::with('contact');
+            $next_level_role_id = $roleReverted;
+        } elseif ($this->reportType === "4") {
             $query = BenRejectDetail::query();
-        }
 
-        if (!$query) {
-            return DraftBeneficiaryPersonal::query()->whereRaw("1=0");
-        }
+            $query = EncryptionArray::applyLocationFilters(
+                $query,
+                $this->reportType,
+                $this->district_id,
+                $this->rural_urban,
+                $this->blockurban,
+                $this->gp_ward
+            );
+            return $query;
+        } 
+        
+        $query = $model->where('next_level_role_id', $next_level_role_id)
+            ->with(['father' => fn($q) => $q->where('relation_type_id', $relationFather)])
+            ->whereHas('father', fn($q) => $q->where('relation_type_id', $relationFather));
 
+        // $select_lgd = session('lgd_session');
 
-        if ($this->login_type === 'district_office' && $this->loginDistrictCode) {
-            $query->where('district_id', $this->loginDistrictCode);
-        } elseif ($this->login_type === 'subdivision_office' && $this->loginSubdivisionCode) {
-            $query->where('municipality_id', $this->loginSubdivisionCode);
-        } elseif ($this->login_type === 'block_office' && $this->loginBlockCode) {
-            $query->where('block_id', $this->loginBlockCode);
-        }
+        $select_lgd = EncryptionArray::lgdsession();
 
-        if ($this->reportType !== "rejected") {
-            $query->with('contact');
-
-            if ($this->district_id) {
-                $query->whereHas('contact', fn($q) => $q->where('district_id', $this->district_id));
-            }
-            if ($this->blockurban && $this->rural_urban) {
-                $query->whereHas('contact', function ($q) {
-                    if ($this->rural_urban == 2) {
-                        $q->where('block_id', $this->blockurban);
-                    } elseif ($this->rural_urban == 1) {
-                        $q->where('municipality_id', $this->blockurban);
-                    }
-                });
-            }
-            if ($this->gp_ward && $this->rural_urban) {
-                $query->whereHas('contact', function ($q) {
-                    if ($this->rural_urban == 2) {
-                        $q->where('panchayat_id', $this->gp_ward);
-                    } elseif ($this->rural_urban == 1) {
-                        $q->where('ward_id', $this->gp_ward);
-                    }
-                });
-            }
-        } else {
-            if ($this->district_id) {
-                $query->where('district_id', $this->district_id);
-            }
-            if ($this->blockurban && $this->rural_urban) {
-                if ($this->rural_urban == 2) {
-                    $query->where('block_id', $this->blockurban);
-                } elseif ($this->rural_urban == 1) {
-                    $query->where('municipality_id', $this->blockurban);
+        if ($select_lgd) {
+            $select_lgd = array_map(function ($value) {
+                try {
+                    return decrypt($value);
+                } catch (\Exception $e) {
+                    return $value;
                 }
-            }
-            if ($this->gp_ward && $this->rural_urban) {
-                if ($this->rural_urban == 2) {
-                    $query->where('panchayat_id', $this->gp_ward);
-                } elseif ($this->rural_urban == 1) {
-                    $query->where('ward_id', $this->gp_ward);
-                }
-            }
+            }, $select_lgd);
         }
+
+        if (!empty($select_lgd['district_id'])) {
+            $filter_condition['district_id'] = $select_lgd['district_id'];
+        }
+        if (!empty($select_lgd['block_id'])) {
+            $filter_condition['block_id'] = $select_lgd['block_id'];
+        }
+
+        if (!empty($select_lgd['subdivision_id'])) {
+            $query->whereHas('contact', function ($q) use ($select_lgd) {
+                $q->whereHas('municipality', function ($mq) use ($select_lgd) {
+                    $mq->where('subdivision_id', $select_lgd['subdivision_id']);
+                });
+            });
+        }
+
+        $query = EncryptionArray::applyLocationFilters(
+            $query,
+            $this->reportType,
+            $this->district_id,
+            $this->rural_urban,
+            $this->blockurban,
+            $this->gp_ward
+        );
 
         return $query;
     }
-
-
     public function export()
     {
         $reportTypeFormatted = ucfirst($this->reportType);
@@ -240,7 +219,6 @@ class BeneficiaryDetailsTable extends DataTableComponent
             $filename
         );
     }
-
     public function render(): \Illuminate\View\View
     {
         return view('livewire.custom-beneficiary-table', [

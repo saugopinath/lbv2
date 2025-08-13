@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\District;
 use App\Models\Block;
 use App\Models\Municipality;
+use App\Helpers\EncryptionArray;
 
 class FilterLgdMaster extends Component
 {
@@ -24,6 +25,19 @@ class FilterLgdMaster extends Component
     {
         $this->login_type = $login_type;
 
+         $select_lgd = EncryptionArray::lgdsession();
+        //   $select_lgd = session('lgd_session');
+        
+        if ($select_lgd) {
+            $select_lgd = array_map(function ($value) {
+                try {
+                    return decrypt($value);
+                } catch (\Exception $e) {
+                    return $value;
+                }
+            }, $select_lgd);
+        }
+
         if ($this->login_type === 'state_office') {
             $this->visible['district_dropdown'] = 1;
             $this->visible['rural_urban_dropdown'] = 1;
@@ -35,19 +49,19 @@ class FilterLgdMaster extends Component
             $this->visible['rural_urban_dropdown'] = 1;
             $this->visible['block_dropdown'] = 1;
             $this->visible['gp_ward_dropdown'] = 1;
-            $this->selectedDistrict = 305;
+            $this->selectedDistrict = $select_lgd['district_id'];
         }
         if ($this->login_type === 'subdivision_office') {
             $this->visible['block_dropdown'] = 1;
             $this->visible['gp_ward_dropdown'] = 1;
-            $this->selectedDistrict = 305;
+            $this->selectedDistrict = $select_lgd['district_id'];
             $this->selectedRuralurban = 1;
             $this->loadSubdivisions();
         }
         if ($this->login_type === 'block_office') {
             $this->visible['gp_ward_dropdown'] = 1;
             $this->selectedRuralurban = 2;
-            $this->selectedBlockurban = 2793;
+            $this->selectedBlockurban = $select_lgd['block_id'];
             $this->loadGpOrWard();
         }
     }

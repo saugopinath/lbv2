@@ -9,6 +9,7 @@ class Municipality extends Model
 {
     use HasFactory;
 
+    protected $table = 'municipalities';
     protected $guarded = ['id'];
 
     public function district()
@@ -20,5 +21,9 @@ class Municipality extends Model
     {
         return $this->hasMany(Ward::class);
     }
-}
 
+    public function subdivision()
+    {
+        return $this->belongsTo(Subdivision::class, 'subdivision_id', 'ref_code');
+    }
+}

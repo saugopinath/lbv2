@@ -8,7 +8,6 @@
                     <path
                         d="M128 128C128 92.7 156.7 64 192 64L341.5 64C358.5 64 374.8 70.7 386.8 82.7L493.3 189.3C505.3 201.3 512 217.6 512 234.6L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 128zM336 122.5L336 216C336 229.3 346.7 240 360 240L453.5 240L336 122.5zM292 330.7C284.6 319.7 269.7 316.7 258.7 324C247.7 331.3 244.7 346.3 252 357.3L291.2 416L252 474.7C244.6 485.7 247.6 500.6 258.7 508C269.8 515.4 284.6 512.4 292 501.3L320 459.3L348 501.3C355.4 512.3 370.3 515.3 381.3 508C392.3 500.7 395.3 485.7 388 474.7L348.8 416L388 357.3C395.4 346.3 392.4 331.4 381.3 324C370.2 316.6 355.4 319.6 348 330.7L320 372.7L292 330.7z" />
                 </svg>
-
             </x-button.primary>
         </div>
 
@@ -36,20 +35,20 @@
         <table class="min-w-full text-sm text-gray-700 text-center">
             <thead class="bg-teal-200 text-xs uppercase py-3">
                 <tr>
-                    @if ($reportType === 'approved')
+                    @if ($reportType === '3')
                         <th class="py-3">Beneficiary ID</th>
                     @endif
                     <th class="py-3">Application ID</th>
                     <th class="py-3">Applicant Name</th>
                     <th class="py-3">Father's Name</th>
                     <th class="py-3">Age</th>
-                    @if ($reportType === 'reverted' || $reportType === 'partial' || $reportType === 'rejected')
+                    @if ($reportType === '5' || $reportType === '1' || $reportType === '4')
                         <th class="py-3">Applicant Mobile No.</th>
                     @endif
-                    @if ($reportType === 'rejected')
+                    @if ($reportType === '4')
                         <th class="py-3">Rejected Reason</th>
                     @endif
-                    @if ($reportType === 'verified' || $reportType === 'approved')
+                    @if ($reportType === '2' || $reportType === '3')
                         <th class="py-3">ACTIONS</th>
                     @endif
                 </tr>
@@ -57,35 +56,36 @@
             <tbody class="divide-y divide-gray-200 bg-white">
                 @forelse($rows as $row)
                     <tr class="hover:bg-gray-50">
-                        @if ($reportType === 'approved')
+                        @if ($reportType === '3')
                             <td class="py-3">{{ $row->beneficiary_id }}</td>
                         @endif
                         <td class="py-3">{{ $row->application_id ?? '-' }}</td>
                         <td class="py-3 font-medium text-gray-900">{{ $row->full_name }}</td>
-                        @if ($reportType === 'approved' || $reportType === 'reverted' || $reportType === 'partial' || $reportType === 'verified')
-                            <td class="py-3">{{ optional($row->father->first())->full_name ?? 'N/A' }}</td>
+                        @if ($reportType === '3' || $reportType === '5' || $reportType === '1' || $reportType === '2')
+                            <td class="py-3">
+                                {{ optional($row->father->first())->full_name ?? 'N/A' }}
+
+                            </td>
                         @endif
-                        @if ($reportType === 'rejected')
+                        @if ($reportType === '4')
                             <td class="py-3">{{ $row->father_full_name }}</td>
                         @endif
                         <td class="py-3">
                             {{ $row->dob ? \Carbon\Carbon::parse($row->dob)->age : 'N/A' }}
                         </td>
-                        @if ($reportType === 'reverted' || $reportType === 'partial' || $reportType === 'rejected')
+                        @if ($reportType === '4' || $reportType === '1' || $reportType === '4')
                             <td class="py-3">{{ $row->mobile_no }}</td>
                         @endif
-                        @if ($reportType === 'rejected')
+                        @if ($reportType === '4')
                             <td class="py-3">{{ $row->rejected_reason }}</td>
                         @endif
                         <td class="py-3 space-x-4">
-                            @if ($reportType === 'verified')
-                                <x-button.view-button wire:navigate
-                                    href="{{ route('application.view', [$row->application_id, 'reportType' => 'verified']) }}">
+                            @if ($reportType === '2')
+                                <x-button.view-button wire:navigate href="{{ route('application.view', [$row->application_id, 'reportType' => '2']) }}">
                                     View
                                 </x-button.view-button>
-                            @elseif($reportType === 'approved')
-                                <x-button.view-button wire:navigate
-                                    href="{{ route('application.view', [$row->beneficiary_id, 'reportType' => 'approved']) }}">
+                            @elseif($reportType === '3')
+                                <x-button.view-button wire:navigate href="{{ route('application.view', [$row->beneficiary_id, 'reportType' => '3']) }}">
                                     View
                                 </x-button.view-button>
                             @endif
@@ -93,7 +93,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ $reportType === 'approved' ? 6 : ($reportType === 'rejected' ? 6 : 5) }}"
+                        <td colspan="{{ $reportType === '3' ? 6 : ($reportType === '4' ? 6 : 5) }}"
                             class="text-center py-4">No data found.</td>
                     </tr>
                 @endforelse

@@ -34,6 +34,7 @@ Route::resource('cmo-grievances', CMOGrievanceController::class);
 Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])->name('beneficiaries_selection.index');
 Route::get('/report', [BeneficiaryListController::class, 'show'])->name('report.show');
 Route::get('/application/{id}', ApplicationView::class)->name('application.view');
+
 // Route::get('/report/show', ReportPage::class)->name('report.show');
 
 //  Route::resources([

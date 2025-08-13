@@ -32,4 +32,14 @@ class DraftBeneficiaryContact extends Model
     {
         return $this->belongsTo(Ward::class, 'ward_id');
     }
+
+    public function father()
+    {
+        return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id', 'application_id');
+    }
+
+    public function municipality()
+    {
+        return $this->belongsTo(Municipality::class, 'municipality_id', 'id');
+    }
 }
