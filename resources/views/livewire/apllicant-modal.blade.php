@@ -37,6 +37,7 @@
                     <x-apllicant-modal.personal-details :id="$id" />
                     <x-apllicant-modal.contact-details :id="$id" />
                     <x-apllicant-modal.bank-account-details :id="$id" />
+                    <x-apllicant-modal.self-declarations :id="$id" />
                 </div>
 
                 <!-- Footer -->

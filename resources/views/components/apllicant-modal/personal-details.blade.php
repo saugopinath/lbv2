@@ -6,18 +6,14 @@
         <div>
             <strong>Aadhaar No.:</strong> {{$decryptedAadhaar}}
         </div>
-    </div>
-    @if($dsregno != null)
-    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
+        @if($dsregno != null)
         <div>
             <strong>Duare Sarkar Registration No.:</strong> {{ $dsregno }}
         </div>
         <div>
             <strong>Duare Sarkar Date.:</strong> {{ $dsdate }}
         </div>
-    </div>
-    @endif
-    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
+        @endif
         <div>
             <strong>Mobile No.:</strong> {{ $mobile }}
         </div>
@@ -26,36 +22,28 @@
             <strong>Email Id:</strong> {{ $email }}
         </div>
         @endif
-    </div>
-    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
         <div>
             <strong>Name:</strong> {{ $fname }}
         </div>
-    </div>
-    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
         <div>
             <strong>DOB:</strong> {{ $dob }}
         </div>
         <div>
             <strong>Age (as on {{$currentDate}}):</strong> {{ $age }}
         </div>
-    </div>
-    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
         <div>
             <strong>Father's Name:</strong> {{ $ffname }}
         </div>
         <div>
             <strong>Mother's Name:</strong> {{ $mfname }}
         </div>
-    </div>
-    @if($email != null)
-    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
+        @if($email != null)
+
         <div>
             <strong>Spouce Name:</strong> {{ $sfname }}
         </div>
-    </div>
-    @endif
-    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
+
+        @endif
         <div><strong>Caste:</strong> {{ $caste }}</div>
         @if($cascerno != null)
         <div><strong>SC/ST Certificate No.:</strong> {{ $cascerno }}</div>
