@@ -13,6 +13,6 @@ class Ifsccodemaster extends Model
 
     public function bankMaster()
     {
-        return $this->belongsTo(BankMaster::class, 'bankmaster_id', 'id');
-    }
+        return $this->belongsTo(BankMaster::class, 'bankmaster_id', 'id');    }
+    
 }

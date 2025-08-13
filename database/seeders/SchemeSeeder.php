@@ -14,14 +14,13 @@ class SchemeSeeder extends Seeder
     public function run(): void
     {
         $schemes = array(
-            
+           
             array(
                 "id" => "20",
                 "name" => "Lakshmir Bhandar",
                 "short_name" => "LB",
                 "dept_short_name" => "WCD",
             )
-           
             
         );
         foreach ($schemes as $scheme_item) {

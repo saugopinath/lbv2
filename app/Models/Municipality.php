@@ -3,14 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Municipality extends Model
 {
-    use HasFactory;
-
     protected $table = 'municipalities';
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'name',
+        'ref_code',
+        'lgd_code',
+        'district_id',
+        'subdivision_id',
+        'state_id',
+    ];
+
+
+    public function Subdivision(): BelongsTo
+    {
+        return $this->belongsTo(Subdivision::class);
+    }
+
 
     public function district()
     {
@@ -20,10 +32,5 @@ class Municipality extends Model
     public function wards()
     {
         return $this->hasMany(Ward::class);
-    }
-
-    public function subdivision()
-    {
-        return $this->belongsTo(Subdivision::class, 'subdivision_id', 'ref_code');
     }
 }

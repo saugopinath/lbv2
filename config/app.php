@@ -122,5 +122,5 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
-
+ 'password_expire_day' => env('PASSWORD_EXPIRE_DAY', 90),
 ];
