@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
          Schema::create('lb_scheme.beneficiary_personals', function (Blueprint $table) {
-            $table->id('beneficiary_id');
-            $table->unsignedBigInteger('application_id');
+            $table->id();
+            $table->unsignedBigInteger('application_id')->unique();
+            $table->unsignedBigInteger('beneficiary_id')->unique();
             $table->smallInteger('district_id');
             $table->smallInteger('block_id')->nullable();
             $table->mediumInteger('sub_division_id')->nullable();
@@ -24,7 +25,7 @@ return new class extends Migration
             $table->date('dob');
             $table->string('mobile_no');
             $table->string('email')->nullable();
-            $table->smallInteger('gender');
+            // $table->smallInteger('gender');
             $table->smallInteger('caste');
             $table->smallInteger('next_level_role_id');
             $table->string('caste_certificate_no')->nullable();
@@ -35,6 +36,10 @@ return new class extends Migration
             $table->date('ds_date')->nullable();
             $table->string('ds_registration_no')->nullable();
             $table->Integer('created_by');
+
+            $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.unique_app_ben_ids');
+            $table->foreign('application_id', 'application_id_fk')->references('application_id')->on('lb_scheme.unique_app_ben_ids');
+
             $table->foreign('created_by','user_id_fk')->references('id')->on('users');
             $table->foreign('district_id','district_id_fk')->references('id')->on('districts');
             $table->foreign('block_id','block_id_fk')->references('id')->on('blocks');

@@ -26,6 +26,7 @@ return new class extends Migration
             $table->Integer('created_by');
             $table->foreign('created_by','user_id_fk')->references('id')->on('public.users');
              $table->foreign('document_type','document_type_id_fk')->references('id')->on('codemasters');
+               $table->foreign('application_id', 'application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals')->onDelete('cascade');  
             $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals')->onDelete('cascade');
             $table->index('application_id','beneficiary_enclosures_application_id_index');
 
