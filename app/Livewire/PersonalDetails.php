@@ -15,7 +15,7 @@ class PersonalDetails extends Component
 {
     public $app_types, $genders, $castes, $mar_status = [];
     public $mode, $currentDate;
-    public $app_type, $app_date, $reg_no, $ds_date, $id;
+    public $app_type, $app_date, $reg_no, $ds_date, $application_id;
     public $name, $mobile, $email, $dob, $age, $mar_statu;
     public $ffname, $mfname, $sfname;
     public $caste, $cas_cer_no;
@@ -56,16 +56,16 @@ class PersonalDetails extends Component
         }
         return $rules;
     }
-    public function mount($mode = null, $id = null)
+    public function mount($mode = null, $application_id = null)
     {
         $this->currentDate = Carbon::now()->format('d/m/Y');
         $this->mode = $mode;
         $this->app_types = Codemaster::where('code', 4)->first()->children()->get();
         $this->mar_status = Codemaster::where('code', 3)->first()->children()->where('code', '!=', 35)->get();
         $this->castes = Codemaster::where('code', 17)->first()->children()->get();
-        if ($id != null) {
-            $this->id = $id;
-            $app_det = DraftBeneficiaryPersonal::with('relationships')->where('application_id', $id)->first();
+        if ($application_id != null) {
+            $this->application_id = $application_id;
+            $app_det = DraftBeneficiaryPersonal::with('relationships')->where('application_id', $application_id)->first();
             $this->app_type = $app_det->entry_type;
             $this->app_date = $app_det->created_at->format('d-m-Y');
             if ($this->app_type == Codemaster::getIdByCode(42)) {
@@ -92,7 +92,7 @@ class PersonalDetails extends Component
     }
     public function getHideAppTypeSectionProperty()
     {
-        return $this->mode == 0 && empty($this->id);
+        return $this->mode == 0 && empty($this->application_id);
     }
     public function save()
     {
@@ -173,19 +173,19 @@ class PersonalDetails extends Component
             if ($validated['caste'] != Codemaster::getIdByCode(173)) {
                 $data['caste_certificate_no'] = $validated['cas_cer_no'];
             }
-            DraftBeneficiaryPersonal::where('application_id', $this->id)->update($data);
-            DraftBeneficiaryRelationship::where('application_id', $this->id)
+            DraftBeneficiaryPersonal::where('application_id', $this->application_id)->update($data);
+            DraftBeneficiaryRelationship::where('application_id', $this->application_id)
                 ->where('relation_type_id', Codemaster::getIdByCode(131))
                 ->update([
                     'full_name' => trim($validated['ffname']),
                 ]);
-            DraftBeneficiaryRelationship::where('application_id', $this->id)
+            DraftBeneficiaryRelationship::where('application_id', $this->application_id)
                 ->where('relation_type_id', Codemaster::getIdByCode(132))
                 ->update([
                     'full_name' => trim($validated['mfname']),
                 ]);
             if ($validated['mar_statu'] == Codemaster::getIdByCode(32) || $validated['mar_statu'] == Codemaster::getIdByCode(34)) {
-                $relation = DraftBeneficiaryRelationship::where('application_id', $this->id)
+                $relation = DraftBeneficiaryRelationship::where('application_id', $this->application_id)
                     ->where('relation_type_id', Codemaster::getIdByCode(133))
                     ->first();
                 if ($relation) {
@@ -194,19 +194,19 @@ class PersonalDetails extends Component
                     ]);
                 } else {
                     DraftBeneficiaryRelationship::create([
-                        'application_id' => $this->id,
+                        'application_id' => $this->application_id,
                         'full_name' => trim($validated['sfname']),
                         'created_by' => Auth::id(),
                         'relation_type_id' => Codemaster::getIdByCode(133),
                     ]);
                 }
             } else {
-                DraftBeneficiaryRelationship::where('application_id', $this->id)
+                DraftBeneficiaryRelationship::where('application_id', $this->application_id)
                     ->where('relation_type_id', Codemaster::getIdByCode(133))
                     ->delete();
             }
         }
-        Session::put('apllication_id',$draftbenPar->application_id);
+        Session::put('application_id',$draftbenPar->application_id);
         $this->dispatch('perDet');
     }
     public function render()

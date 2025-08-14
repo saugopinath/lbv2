@@ -68,7 +68,7 @@ class ContactDetails extends Component
     {
         $validated = $this->validate($this->rules());
         if ($this->mode === null) {
-            $application_id = Session::get('apllication_id');
+            $application_id = Session::get('application_id');
             $data = [
                 'application_id' => $application_id,
                 'district_id' => $validated['selectedDistrict'],

@@ -54,7 +54,7 @@ class BankDetails extends Component
     {
         $validated = $this->validate($this->rules());
         if ($this->mode === null) {
-            $application_id = Session::get('apllication_id');
+            $application_id = Session::get('application_id');
             DraftBeneficiaryBank::create([
                 'application_id' => $application_id,
                 'created_by' => Auth::id(),

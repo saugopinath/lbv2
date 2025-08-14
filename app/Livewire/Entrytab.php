@@ -6,8 +6,9 @@ use Livewire\Component;
 
 class Entrytab extends Component
 {
-    public $currentTab = 'tab1';
+    public $currentTab;
     public $showTabs = false;
+    public $tab1Enabled = false;
     public $tab2Enabled = false;
     public $tab3Enabled = false;
     public $tab4Enabled = false;
@@ -15,6 +16,8 @@ class Entrytab extends Component
     public function enableTabs()
     {
         $this->showTabs = true;
+        $this->tab1Enabled = true;
+        $this->currentTab = 'tab1';
     }
     public function enableTab2()
     {
