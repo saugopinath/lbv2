@@ -16,16 +16,16 @@ class EnclosureList extends Component
     public $existingDocuments = [];
     public $singleDocument;
     public $currentDocId;
-    public $applicationId;
+    public $application_id;
     public $currentDocMaxSize = '';
     public $currentDocExtensions = '';
     public $mode;
-    public function mount($mode = null, $applicationId = null)
+    public function mount($mode = null, $application_id = null)
     {
-        $this->applicationId = $applicationId;
+        $this->application_id = $application_id;
         $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->get();
-        if ($applicationId) {
-            $app = DraftBeneficiaryPersonal::with('documents')->where('application_id', $applicationId)->first();
+        if ($application_id) {
+            $app = DraftBeneficiaryPersonal::with('documents')->where('application_id', $application_id)->first();
             if ($app) {
                 foreach ($app->documents as $doc) {
                     $this->existingDocuments[$doc->document_type] = $doc;
@@ -56,7 +56,7 @@ class EnclosureList extends Component
     {
         $this->validate();
         $base64 = base64_encode(file_get_contents($this->singleDocument->getRealPath()));
-        $existingDoc = BeneficiaryEnclosure::where('application_id', $this->applicationId)
+        $existingDoc = BeneficiaryEnclosure::where('application_id', $this->application_id)
             ->where('document_type', $this->currentDocId)
             ->first();
         if ($existingDoc) {
@@ -69,7 +69,7 @@ class EnclosureList extends Component
             ]);
         } else {
             BeneficiaryEnclosure::create([
-                'application_id' => $this->applicationId,
+                'application_id' => $this->application_id,
                 'attched_document' => $base64,
                 'ip_address' => request()->ip(),
                 'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
@@ -82,8 +82,8 @@ class EnclosureList extends Component
         $this->currentDocId = null;
         $this->currentDocMaxSize = '';
         $this->currentDocExtensions = '';
-        if ($this->applicationId) {
-            $app = DraftBeneficiaryPersonal::with('documents')->where('application_id', $this->applicationId)->first();
+        if ($this->application_id) {
+            $app = DraftBeneficiaryPersonal::with('documents')->where('application_id', $this->application_id)->first();
             if ($app) {
                 $this->existingDocuments = [];
                 foreach ($app->documents as $doc) {

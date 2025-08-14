@@ -11,6 +11,7 @@ use App\Models\BeneficiaryAadhaar;
 use App\Models\DraftBeneficiaryPersonal;
 use App\Models\DraftBeneficiaryRelationship;
 use Illuminate\Support\Facades\Auth;
+
 class PersonalDetails extends Component
 {
     public $app_types, $genders, $castes, $mar_status = [];
@@ -97,7 +98,7 @@ class PersonalDetails extends Component
     public function save()
     {
         $validated = $this->validate($this->rules());
-        if ($this->mode === null) {
+        if ($this->mode === null && $this->application_id === null) {
             $aadhaar_data = Session::get('aadhaar_data');
             $encoded = $aadhaar_data['encoded'];
             $hash = $aadhaar_data['hash'];
@@ -154,6 +155,7 @@ class PersonalDetails extends Component
                 'encoded_aadhar' => $encoded,
             ]);
             Session::forget('aadhar_hash');
+            $this->dispatch('perDet', application_id: $draftbenPar->application_id);
         } else {
             $data = [
                 'full_name' => $validated['name'],
@@ -205,9 +207,8 @@ class PersonalDetails extends Component
                     ->where('relation_type_id', Codemaster::getIdByCode(133))
                     ->delete();
             }
+            $this->dispatch('perDet', application_id: $this->application_id);
         }
-        Session::put('application_id',$draftbenPar->application_id);
-        $this->dispatch('perDet');
     }
     public function render()
     {
