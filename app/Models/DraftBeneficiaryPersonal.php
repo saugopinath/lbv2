@@ -27,20 +27,34 @@ class DraftBeneficiaryPersonal extends Model
 
     public function bank()
     {
-        return $this->hasOne(DraftBeneficiaryBank::class, 'application_id', 'application_id');
+        return $this->hasOne(DraftBeneficiaryBank::class, 'application_id');
     }
     public function casteName()
     {
         return $this->belongsTo(CodeMaster::class, 'caste', 'id');
     }
 
-    public function enclosers()
+    // public function enclosers()
+    // {
+    //     return $this->hasMany(BeneficiaryEnclosure::class, 'application_id', 'application_id');
+    // }
+
+    // public function beneficiaryEnclosures()
+    // {
+    //     return $this->hasMany(BeneficiaryEnclosure::class, 'application_id', 'application_id');
+    // }
+
+    public function documents()
     {
-        return $this->hasMany(BeneficiaryEnclosure::class, 'application_id', 'application_id');
+        return $this->hasMany(BeneficiaryEnclosure::class, 'application_id');
+    }
+    public function aadhaar()
+    {
+        return $this->hasOne(BeneficiaryAadhaar::class, 'application_id');
     }
 
-    public function beneficiaryEnclosures()
+    public function relationships()
     {
-        return $this->hasMany(BeneficiaryEnclosure::class, 'application_id', 'application_id');
+        return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id');
     }
 }

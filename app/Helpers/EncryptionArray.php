@@ -2,13 +2,13 @@
 
 namespace App\Helpers;
 
+use App\Models\BenRejectDetail;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
 
 class EncryptionArray
 {
-
-    public static function applyLocationFilters(Builder $query,string $reportType,?int $district_id,?int $rural_urban,?int $blockurban,?int $gp_ward): Builder 
+    public static function applyLocationFilters(Builder $query, string $reportType, ?int $district_id, ?int $rural_urban, ?int $blockurban, ?int $gp_ward): Builder
     {
         $blockField = $rural_urban == 2 ? 'block_id' : 'municipality_id';
         $gpWardField = $rural_urban == 2 ? 'panchayat_id' : 'ward_id';
@@ -48,6 +48,39 @@ class EncryptionArray
         ];
         return  $lgd_session;
     }
+    // public static function applyLocationFilter($query, $district_id, $rural_urban, $blockurban, $gp_ward, $reportType)
+    // {
+    //     if ($reportType === 4) {
+    //         if (!empty($district_id)) {
+    //             $query->where('district_id', $district_id);
+    //         }
+    //         if (!empty($rural_urban)) {
+    //             $query->where('rural_urban_id', $rural_urban);
+    //         }
+    //         if (!empty($blockurban)) {
+    //             $query->where('block_id', $blockurban);
+    //         }
+    //         if (!empty($gp_ward)) {
+    //             $query->where('gp_ward_id', $gp_ward);
+    //         }
+    //     }
+    //     else {
+    //         if (!empty($district_id)) {
+    //             $query->whereHas('contact', fn($q) => $q->where('district_id', $district_id));
+    //         }
+    //         if (!empty($rural_urban)) {
+    //             $query->whereHas('contact', fn($q) => $q->where('rural_urban', $rural_urban));
+    //         }
+    //         if (!empty($blockurban)) {
+    //             $query->whereHas('contact', fn($q) => $q->where('block_id', $blockurban));
+    //         }
+    //         if (!empty($gp_ward)) {
+    //             $query->whereHas('contact', fn($q) => $q->where('gp_ward_id', $gp_ward));
+    //         }
+    //     }
+
+    //     return $query;
+    // }
 
     // public static function applyLocationFilters(
     //     Builder $query,

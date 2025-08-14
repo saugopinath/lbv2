@@ -1,12 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthenticationController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\UserManagementController;
-use App\Http\Controllers\CMOGrievanceController;
-use App\Http\Controllers\BeneficiaryListController;
 use App\Livewire\ApplicationView;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LBController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CMOGrievanceController;
+use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\BeneficiaryListController;
 
 
 Route::get('/', function () {
@@ -40,3 +41,5 @@ Route::get('/application/{id}', ApplicationView::class)->name('application.view'
 //  Route::resources([
 //         'roles' => App\Http\Controllers\RoleController::class
 //     ]);
+
+Route::get('lbform', [LBController::class, 'index'])->name('lbform');

@@ -13,7 +13,7 @@ class BeneficiaryEnclosure extends Model
         return $this->belongsTo(DraftBeneficiaryPersonal::class, 'application_id');
     }
 
-    public function documentType()
+    public function documents()
     {
         return $this->belongsTo(Codemaster::class, 'document_type', 'id');
     }
