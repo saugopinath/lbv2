@@ -57,4 +57,5 @@ class DraftBeneficiaryPersonal extends Model
     {
         return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id');
     }
+    
 }

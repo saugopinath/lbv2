@@ -3,29 +3,31 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\Codemaster;
 use App\Models\BeneficiaryPersonal;
-use App\Models\BeneficiaryEnclosure;
-use Illuminate\Support\Facades\Crypt;
 use App\Models\DraftBeneficiaryPersonal;
 
 class ApplicationView extends Component
 {
-    public $ffname;
-    public $mfname;
     public $application;
-    public $decryptedData = null;
-    public $showModal = false;
+    public $reportType;
+    public $label;
+    public $value;
+    public $passId;
 
     public function mount($id)
     {
-        $reportType = request()->query('reportType');
+        $this->reportType = request()->query('reportType');
 
-        if ($reportType === '2') {
-            $this->application = DraftBeneficiaryPersonal::findOrFail($id);
-
-        } elseif ($reportType === '3') {
+        if ($this->reportType === '3') {
             $this->application = BeneficiaryPersonal::findOrFail($id);
+            $this->label = 'Beneficiary Id';
+            $this->value = $this->application->beneficiary_id;
+            $this->passId = $this->application->beneficiary_id;
+        } else {
+            $this->application = DraftBeneficiaryPersonal::findOrFail($id);
+            $this->label = 'Application Id';
+            $this->value = $this->application->application_id;
+            $this->passId = $this->application->application_id;
         }
     }
 

@@ -3,8 +3,9 @@
 namespace App\View\Components\ApllicantModal;
 
 use Closure;
-use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
+use App\Models\BeneficiaryPersonal;
+use Illuminate\Contracts\View\View;
 use App\Models\DraftBeneficiaryPersonal;
 
 class ContactDetails extends Component
@@ -15,20 +16,31 @@ class ContactDetails extends Component
     public $id, $applicantDet, $distname, $ps, $blockmunicorp, $gpward, $villtown, $houseno, $po, $pin;
     public function __construct($id)
     {
-        $applicantDet = DraftBeneficiaryPersonal::with('contact')->where('application_id', $id)->first();
-        $this->distname = $applicantDet->contact->district->name;
-        $this->ps = $applicantDet->contact->police_station;
-        if ($applicantDet->rural_urban_id == 1) {
-            $this->blockmunicorp = $applicantDet->contact->municipality->name;
-            $this->gpward = $applicantDet->contact->ward->name;
+
+         $reportType = request()->query('reportType');
+
+         if ($reportType === '3') {
+            $this->applicantDet = BeneficiaryPersonal::with('contact')
+                ->where('beneficiary_id', $id)
+                ->firstOrFail();
         } else {
-            $this->blockmunicorp = $applicantDet->contact->block->name;
-            $this->gpward = $applicantDet->contact->panchayat->name;
+            $this->applicantDet = DraftBeneficiaryPersonal::with('contact')
+                ->where('application_id', $id)
+                ->firstOrFail();
         }
-        $this->villtown = $applicantDet->contact->village_town_city;
-        $this->houseno = $applicantDet->contact->house_premise_no;
-        $this->po = $applicantDet->contact->post_office;
-        $this->pin = $applicantDet->contact->pincode;
+        $this->distname = $this->applicantDet->contact->district->name;
+        $this->ps = $this->applicantDet->contact->police_station;
+        if ($this->applicantDet->rural_urban_id == 1) {
+            $this->blockmunicorp = $this->applicantDet->contact->municipality->name;
+            $this->gpward = $this->applicantDet->contact->ward->name;
+        } else {
+            $this->blockmunicorp = $this->applicantDet->contact->block->name;
+            $this->gpward = $this->applicantDet->contact->panchayat->name;
+        }
+        $this->villtown = $this->applicantDet->contact->village_town_city;
+        $this->houseno = $this->applicantDet->contact->house_premise_no;
+        $this->po = $this->applicantDet->contact->post_office;
+        $this->pin = $this->applicantDet->contact->pincode;
     }
 
     /**

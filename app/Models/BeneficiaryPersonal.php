@@ -46,7 +46,7 @@ class BeneficiaryPersonal extends Model
 
     public function aadhaar()
     {
-        return $this->hasOne(BeneficiaryAadhaar::class, 'application_id');
+        return $this->hasOne(BeneficiaryAadhaar::class, 'beneficiary_id');
     }
 
     public function relationships()

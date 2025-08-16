@@ -3,10 +3,11 @@
 namespace App\View\Components\ApllicantModal;
 
 use Closure;
-use Illuminate\Contracts\View\View;
-use Illuminate\View\Component;
-use App\Models\DraftBeneficiaryPersonal;
 use App\Models\Ifsccodemaster;
+use Illuminate\View\Component;
+use App\Models\BeneficiaryPersonal;
+use Illuminate\Contracts\View\View;
+use App\Models\DraftBeneficiaryPersonal;
 
 class BankAccountDetails extends Component
 {
@@ -16,11 +17,22 @@ class BankAccountDetails extends Component
     public $id, $applicantDet, $bankname, $bankbranchname, $bankaccountnumber, $ifscode;
     public function __construct($id)
     {
-        $applicantDet = DraftBeneficiaryPersonal::with('bank')->where('application_id', $id)->first();
-        $this->bankname = $applicantDet->bank->ifscbranch->bank->name;
-        $this->ifscode = $applicantDet->bank->ifsc;
-        $this->bankbranchname = $applicantDet->bank->ifscbranch->branch;
-        $this->bankaccountnumber = $applicantDet->bank->bank_account_number;
+
+        $reportType = request()->query('reportType');
+
+         if ($reportType === '3') {
+            $this->applicantDet = BeneficiaryPersonal::with('bank')
+                ->where('beneficiary_id', $id)
+                ->first();
+        } else {
+            $this->applicantDet = DraftBeneficiaryPersonal::with('bank')
+                ->where('application_id', $id)
+                ->first();
+        }
+        $this->bankname = $this->applicantDet->bank->ifscbranch->bank->name;
+        $this->ifscode = $this->applicantDet->bank->ifsc;
+        $this->bankbranchname = $this->applicantDet->bank->ifscbranch->branch;
+        $this->bankaccountnumber = $this->applicantDet->bank->bank_account_number;
     }
 
     /**

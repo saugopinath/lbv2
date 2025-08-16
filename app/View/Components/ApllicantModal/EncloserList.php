@@ -6,27 +6,41 @@ use Closure;
 use Illuminate\View\Component;
 use Illuminate\Contracts\View\View;
 use App\Models\BeneficiaryEnclosure;
-use Illuminate\Support\Facades\Crypt;
 
 class EncloserList extends Component
 {
-    /**
-     * Create a new component instance.
-     */
-    public $id, $applicantDet, $decryptedEncloser;
+    public $id;
+    public $decryptedEncloser;
 
     public function __construct($id)
     {
-        $applicantDet = BeneficiaryEnclosure::with('documents')->where('application_id', $id)->get();
-        dd( $applicantDet);
+        $reportType = request()->query('reportType');
 
+        if ($reportType === '3') {
+            $enclosures = BeneficiaryEnclosure::with('documents')
+                ->where('beneficiary_id', $id)
+                ->get();
+        } else {
+            $enclosures = BeneficiaryEnclosure::with('documents')
+                ->where('application_id', $id)
+                ->get();
+        }
+
+        foreach ($enclosures as $enclosure) {
+            if (!empty($enclosure->attched_document)) {
+                $enclosure->attched_document = 'data:' . $enclosure->document_mime_type . ';base64,' . $enclosure->attched_document;
+            } else {
+                $enclosure->attched_document = null;
+            }
+        }
+
+        $this->decryptedEncloser = $enclosures;
     }
 
-    /**
-     * Get the view / contents that represent the component.
-     */
     public function render(): View|Closure|string
     {
-        return view('components.apllicant-modal.encloser-list');
+        return view('components.apllicant-modal.encloser-list', [
+            'decryptedEncloser' => $this->decryptedEncloser
+        ]);
     }
 }
