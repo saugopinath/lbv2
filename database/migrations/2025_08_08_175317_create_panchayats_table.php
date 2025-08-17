@@ -11,18 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('blocks', function (Blueprint $table) {
-            $table->tinyIncrements('id')->primary();
-            $table->string('ref_code', 50)->index()->nullable();
-            $table->string('lgd_code')->unique();
+        Schema::create('panchayats', function (Blueprint $table) {
+            $table->mediumIncrements('id')->primary();
+            $table->string('lgd_code');
+            $table->string('ref_code')->index();
             $table->string('name');
-            $table->string('local_name')->nullable();
-            $table->foreignId('district_id')->constrained();
+            $table->smallInteger('block_id');
+            $table->foreign('block_id', 'block_id_fk')->references('id')->on('blocks')->onDelete('cascade'); 
             $table->timestamps();
             $table->smallInteger('is_active')->default(1);
-            $table->index(['name', 'district_id']);
             $table->index('lgd_code');
             $table->index('id');
+            $table->index('block_id');
         });
     }
 
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('blocks');
+        Schema::dropIfExists('panchayats');
     }
 };

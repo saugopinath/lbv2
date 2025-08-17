@@ -10,7 +10,8 @@
         "laravel/tinker": "^2.9",
         "mews/captcha": "3.3.3",
         "rappasoft/laravel-livewire-tables": "^3.7",
-        "spatie/laravel-permission": "^6.21"
+        "spatie/laravel-permission": "^6.21",
+        "staudenmeir/belongs-to-through": "^2.16"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16",

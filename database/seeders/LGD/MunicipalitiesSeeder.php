@@ -157,15 +157,13 @@ class MunicipalitiesSeeder extends Seeder
 
         foreach ($wb_municipalities as $municipality) {
             $subdivision_id = Subdivision::where('ref_code', $municipality['subdivision_ref_code'])->firstOrFail()->id;
-            $district_id = District::where('lgd_code', $municipality['district_lgd_code'])->firstOrFail()->id;
             Municipality::create([
                 'id' => $municipality['municipality_lgd_code'],
                 'ref_code' => $municipality['ref_code'],
                 'name' => strtoupper($municipality['name']),
                 'lgd_code' => $municipality['municipality_lgd_code'],
                 'ref_code' => $municipality['ref_code'],
-                'subdivision_id' => $subdivision_id,
-                'district_id' => $district_id,
+                'subdivision_id' => $subdivision_id
             ]);
         }
     }

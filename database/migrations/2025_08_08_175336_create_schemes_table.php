@@ -11,18 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('districts', function (Blueprint $table) {
+        Schema::create('schemes', function (Blueprint $table) {
             $table->tinyIncrements('id')->primary();
-            $table->string('ref_code', 50)->index()->nullable();
-            $table->string('lgd_code')->unique();
             $table->string('name');
             $table->string('short_name');
-            $table->string('local_name')->nullable();
-            $table->foreignId('state_id')->constrained()->index();
+            $table->string('description')->nullable();
+            $table->smallInteger('department_id');
+            $table->foreign('department_id','department_id_fk')->references('id')->on('departments')->onDelete('cascade'); 
             $table->timestamps();
             $table->smallInteger('is_active')->default(1);
-            $table->index('lgd_code');
-            $table->index('id');
+            $table->index(['name', 'short_name']);
+            $table->index('department_id');
         });
     }
 
@@ -31,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('districts');
+        Schema::dropIfExists('schemes');
     }
 };

@@ -17,17 +17,20 @@
     <!-- Top Bar -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div class="flex gap-2">
-        <button class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
+        <button
+          class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
           <i data-lucide="plus" class="w-4 h-4"></i>
           Add
         </button>
-        <button class="flex items-center gap-2 px-2 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition">
-  <i class="fas fa-file-excel text-green-600"></i>
-  Export
-</button>
+        <button
+          class="flex items-center gap-2 px-2 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition">
+          <i class="fas fa-file-excel text-green-600"></i>
+          Export
+        </button>
       </div>
       <div class="flex justify-center">
-        <select class="w-48 px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        <select
+          class="w-48 px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
           <option>Show 10 entries</option>
           <option>Show 25 entries</option>
           <option>Show 50 entries</option>
@@ -64,23 +67,23 @@
             <td class="py-3 space-x-4">
               <!-- View Button -->
               <div x-data="{ show: false }" class="relative inline-block">
-   <button @mouseenter="show = true" @mouseleave="show = false"
-          class="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 transition">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -50 576 576"
-         class="w-4 h-4 text-blue-600" fill="currentColor">
-      <path d="M572.52 241.4C518.29 135.59 410.93 64 288 64S57.68 135.64 3.48 241.41
+                <button @mouseenter="show = true" @mouseleave="show = false"
+                  class="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -50 576 576" class="w-4 h-4 text-blue-600"
+                    fill="currentColor">
+                    <path d="M572.52 241.4C518.29 135.59 410.93 64 288 64S57.68 135.64 3.48 241.41
            a32.35 32.35 0 000 29.19C57.71 376.41 165.07 448 288 448s230.32-71.64
            284.52-177.41a32.35 32.35 0 000-29.19zM288 400a144 144 0 1 1 144-144
            143.93 143.93 0 0 1-144 144zm0-240a95.31 95.31 0 0 0-25.31 3.79
-           a47.85 47.85 0 0 1-66.9 66.9A95.78 95.78 0 1 0 288 160z"/>
-    </svg>
-  </button>
+           a47.85 47.85 0 0 1-66.9 66.9A95.78 95.78 0 1 0 288 160z" />
+                  </svg>
+                </button>
 
-  <div x-show="show" x-transition
-       class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded shadow z-10">
-    View
-  </div>
-</div>
+                <div x-show="show" x-transition
+                  class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded shadow z-10">
+                  View
+                </div>
+              </div>
 
               <!-- Delete Button -->
               <div x-data="{ show: false }" class="relative inline-block">
@@ -105,7 +108,7 @@
               <!-- View Button -->
               <div x-data="{ show: false }" class="relative inline-block">
                 <button @mouseenter="show = true" @mouseleave="show = false"
-                        class="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 transition">
+                  class="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 transition">
                   <i class="fas fa-eye text-blue-600"></i>
 
                 </button>

@@ -799,6 +799,7 @@ class CodemasterSeeder extends Seeder
             Codemaster::create([
                 'name' => strtoupper($codemasterChild_item['name']),
                 'code' => $codemasterChild_item['code'],
+                'parent_short_code' => $codemasterChild_item['parent_short_code'],
                 'short_name'     => $codemasterChild_item['short_name'],
                 'parent_id'   => Codemaster::where('short_name', $codemasterChild_item['parent_short_code'])->firstOrFail()->id,
             ]);

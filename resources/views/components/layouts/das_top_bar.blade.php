@@ -36,7 +36,15 @@
             <div x-show="open" @click.outside="open = false"
               class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded shadow-lg z-10">
               <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Profile Details</a>
-              <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Sign Out</a>
+              <form method="POST" action="{{ route('logout') }}">
+                @csrf
+
+                <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
+                                                this.closest('form').submit();">
+                    {{ __('Sign Out') }}
+                </x-dropdown-link>
+            </form>
+             
             </div>
           </div>
         </div>

@@ -11,17 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('panchayats', function (Blueprint $table) {
+        Schema::create('municipalities', function (Blueprint $table) {
             $table->mediumIncrements('id')->primary();
-            $table->string('lgd_code');
-            $table->string('ref_code')->index();
+            $table->string('lgd_code')->unique();
+            $table->string('ref_code', 50)->index()->nullable();
             $table->string('name');
-            $table->foreignId('block_id')->constrained();
+            $table->string('local_name')->nullable();
+            $table->Integer('subdivision_id');
+            $table->foreign('subdivision_id','subdivision_id_fk')->references('id')->on('subdivisions')->onDelete('cascade'); 
             $table->timestamps();
             $table->smallInteger('is_active')->default(1);
             $table->index('lgd_code');
+            $table->index('subdivision_id');
             $table->index('id');
-            $table->index('block_id');
         });
     }
 
@@ -30,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('panchayats');
+        Schema::dropIfExists('municipalities');
     }
 };

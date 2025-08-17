@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('municipalities', function (Blueprint $table) {
+        Schema::create('wards', function (Blueprint $table) {
             $table->mediumIncrements('id')->primary();
             $table->string('lgd_code')->unique();
-            $table->string('ref_code', 50)->index()->nullable();
+            $table->string('ref_code')->index();
             $table->string('name');
-            $table->string('local_name')->nullable();
-            $table->foreignId('district_id')->constrained();
-            $table->foreignId('subdivision_id')->constrained();
+            $table->Integer('municipality_id');
+            $table->foreign('municipality_id','municipality_id_fk')->references('id')->on('municipalities')->onDelete('cascade'); 
             $table->timestamps();
             $table->smallInteger('is_active')->default(1);
+            $table->smallInteger('ward_number')->nullable();
             $table->index('lgd_code');
             $table->index('id');
-            $table->index('district_id');
+            $table->index('municipality_id');
         });
     }
 
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('municipalities');
+        Schema::dropIfExists('wards');
     }
 };
