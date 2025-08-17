@@ -15,7 +15,25 @@ class BeneficiaryListController extends Controller
 
     public function show(Request $request)
     {
-        $login_type = 'state_office';
+
+        // $login_type = 'state_office';
+        $select_lgd = session('lgd_session');
+        $filter_condition = [];
+
+        if ($select_lgd) {
+            foreach ($select_lgd as $key => $val) {
+                try {
+                    $filter_condition[$key] = Crypt::decryptString($val);
+                } catch (\Exception $e) {
+                    $filter_condition[$key] = $val;
+                }
+            }
+        }
+
+        $login_type = $filter_condition['office_type_id'] ?? null;
+
+
+        // dd($login_type);
         $reportType = $request->input('report_type');
 
         // // dd($reportType);

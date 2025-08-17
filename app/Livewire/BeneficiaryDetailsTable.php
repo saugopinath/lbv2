@@ -5,13 +5,14 @@ namespace App\Livewire;
 use Carbon\Carbon;
 use App\Models\Codemaster;
 use App\Models\BenRejectDetail;
+use App\Helpers\EncryptionArray;
+use App\Models\BeneficiaryContact;
 use App\Models\BeneficiaryPersonal;
 use App\Exports\BeneficiariesExport;
-use App\Models\BeneficiaryContact;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Crypt;
 use App\Models\DraftBeneficiaryContact;
 use App\Models\DraftBeneficiaryPersonal;
-use App\Helpers\EncryptionArray;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
@@ -30,25 +31,11 @@ class BeneficiaryDetailsTable extends DataTableComponent
     public $loginSubdivisionCode;
     public $loginBlockCode;
 
-    public  $filter_condition = [];
-    public $where_condition = [];
-
     public function mount(string $reportType = '', string $login_type = ''): void
     {
         $this->reportType = $reportType;
         $this->login_type = $login_type;
-        // dd($this->reportType );
-        // $this->loginType = 'district_office';
-        // $this->loginDistrictCode = 305;
-
-        // $this->loginType = 'subdivision_office';
-        // $this->loginSubdivisionCode = 250208;
-
-        // $this->loginType = 'block_office';
-        // $this->loginBlockCode = 2793;
-
     }
-
     public function filtersApplied($filters)
     {
         $this->district_id = $filters['district_id'];
@@ -56,7 +43,6 @@ class BeneficiaryDetailsTable extends DataTableComponent
         $this->blockurban = $filters['blockurban'];
         $this->gp_ward = $filters['gp_ward'];
     }
-
     public function configure(): void
     {
         $this->setPrimaryKey($this->reportType === 'approved' ? 'beneficiary_id' : 'application_id')
@@ -127,7 +113,6 @@ class BeneficiaryDetailsTable extends DataTableComponent
 
         return [];
     }
-
     public function builder(): Builder
     {
         $roleVerified = Codemaster::getIdByCode(22);
@@ -156,40 +141,85 @@ class BeneficiaryDetailsTable extends DataTableComponent
                 $this->gp_ward
             );
             return $query;
-        } 
-        
+        }
+
         $query = $model->where('next_level_role_id', $next_level_role_id)
             ->with(['father' => fn($q) => $q->where('relation_type_id', $relationFather)])
             ->whereHas('father', fn($q) => $q->where('relation_type_id', $relationFather));
 
         // $select_lgd = session('lgd_session');
 
-        $select_lgd = EncryptionArray::lgdsession();
+        //         $lgd_session = session('lgd_session');
+        //        dd($lgd_session);
+
+
+
+        // $select_lgd = EncryptionArray::lgdsession();
+
+        // if ($select_lgd) {
+        //     $select_lgd = array_map(function ($value) {
+        //         try {
+        //             return decrypt($value);
+        //         } catch (\Exception $e) {
+        //             return $value;
+        //         }
+        //     }, $select_lgd);
+        // }
+
+
+        // if (!empty($select_lgd['district_id'])) {
+        //     $filter_condition['district_id'] = $select_lgd['district_id'];
+        // }
+        // if (!empty($select_lgd['block_id'])) {
+        //     $filter_condition['block_id'] = $select_lgd['block_id'];
+        // }
+
+        // if (!empty($select_lgd['subdivision_id'])) {
+        //     $query->whereHas('contact', function ($q) use ($select_lgd) {
+        //         $q->whereHas('municipality', function ($mq) use ($select_lgd) {
+        //             $mq->where('subdivision_id', $select_lgd['subdivision_id']);
+        //         });
+        //     });
+        // }
+
+       $select_lgd = session('lgd_session');
+        $filter_condition = [];
 
         if ($select_lgd) {
-            $select_lgd = array_map(function ($value) {
+            foreach ($select_lgd as $key => $val) {
                 try {
-                    return decrypt($value);
+                    $filter_condition[$key] = Crypt::decryptString($val);
                 } catch (\Exception $e) {
-                    return $value;
+                    $filter_condition[$key] = $val;
                 }
-            }, $select_lgd);
+            }
         }
 
-        if (!empty($select_lgd['district_id'])) {
-            $filter_condition['district_id'] = $select_lgd['district_id'];
-        }
-        if (!empty($select_lgd['block_id'])) {
-            $filter_condition['block_id'] = $select_lgd['block_id'];
+
+        if (!empty($filter_condition['district_id'])) {
+            $query->whereHas(
+                'contact',
+                fn($q) =>
+                $q->where('district_id', $filter_condition['district_id'])
+            );
         }
 
-        if (!empty($select_lgd['subdivision_id'])) {
-            $query->whereHas('contact', function ($q) use ($select_lgd) {
-                $q->whereHas('municipality', function ($mq) use ($select_lgd) {
-                    $mq->where('subdivision_id', $select_lgd['subdivision_id']);
-                });
-            });
+        if (!empty($filter_condition['block_id'])) {
+            $query->whereHas(
+                'contact',
+                fn($q) =>
+                $q->where('block_id', $filter_condition['block_id'])
+            );
         }
+
+        if (!empty($filter_condition['subdivision_id'])) {
+            $query->whereHas(
+                'contact.municipality',
+                fn($mq) =>
+                $mq->where('subdivision_id', $filter_condition['subdivision_id'])
+            );
+        }
+
 
         $query = EncryptionArray::applyLocationFilters(
             $query,

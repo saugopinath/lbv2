@@ -8,16 +8,25 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Subdivision extends Model
 {
     protected $fillable = [
-            'name',
-            'ref_code',
-            'lgd_code',
-            'district_id',
-            'state_id',
-        ];
+        'name',
+        'ref_code',
+        'lgd_code',
+        'district_id',
+        'state_id',
+    ];
 
-     public function District(): BelongsTo
+    public function District(): BelongsTo
     {
         return $this->belongsTo(District::class);
-    }  
-    
+    }
+
+    // public function district()
+    // {
+    //     return $this->belongsTo(District::class);
+    // }
+
+    public function municipalities()
+    {
+        return $this->hasMany(Municipality::class);
+    }
 }

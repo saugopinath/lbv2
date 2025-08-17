@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('lgd_code')->nullable();
             $table->string('name');
             $table->string('local_name')->nullable();
-            $table->foreignId('district_id')->constrained();
+            $table->smallInteger('district_id');
+            $table->foreign('district_id','district_id_fk')->references('id')->on('districts')->onDelete('cascade'); 
             $table->timestamps();
             $table->smallInteger('is_active')->default(1);
             $table->index('lgd_code');

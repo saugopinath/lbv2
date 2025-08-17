@@ -27,12 +27,12 @@ Route::controller(AuthenticationController::class)->group(function(){
     Route::post('/logout', 'logout')->name('logout');
 
 });
-Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+// Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('filter', [App\Http\Controllers\FilterController::class, 'index'])->middleware(['auth', 'verified'])->name('filter');
 
-Route::resource('cmo-grievances', CMOGrievanceController::class);
-Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])->name('beneficiaries_selection.index');
+// Route::resource('cmo-grievances', CMOGrievanceController::class);
+Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])->middleware(['auth', 'verified'])->name('beneficiaries_selection.index')->middleware('auth');
 Route::get('/report', [BeneficiaryListController::class, 'show'])->name('report.show');
 Route::get('/application/{id}', ApplicationView::class)->name('application.view');
 

@@ -36,7 +36,7 @@ return new class extends Migration
             $table->boolean('is_faulty');
             $table->date('ds_date')->nullable();
             $table->string('ds_registration_no')->nullable();
-            $table->Integer('created_by');
+            $table->Integer('created_by')->nullable();
             $table->foreign('application_id', 'application_id_fk')->references('application_id')->on('lb_scheme.unique_app_ben_ids');
             $table->foreign('created_by', 'user_id_fk')->references('id')->on('public.users');
 

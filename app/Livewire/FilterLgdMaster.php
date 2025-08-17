@@ -2,11 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Models\Block;
 use Livewire\Component;
 use App\Models\District;
-use App\Models\Block;
 use App\Models\Municipality;
 use App\Helpers\EncryptionArray;
+use Illuminate\Support\Facades\Crypt;
 
 class FilterLgdMaster extends Component
 {
@@ -25,44 +26,58 @@ class FilterLgdMaster extends Component
     {
         $this->login_type = $login_type;
 
-         $select_lgd = EncryptionArray::lgdsession();
-        //   $select_lgd = session('lgd_session');
-        
+        //  $select_lgd = EncryptionArray::lgdsession();
+        // //   $select_lgd = session('lgd_session');
+
+        // if ($select_lgd) {
+        //     $select_lgd = array_map(function ($value) {
+        //         try {
+        //             return decrypt($value);
+        //         } catch (\Exception $e) {
+        //             return $value;
+        //         }
+        //     }, $select_lgd);
+        // }
+
+      $select_lgd = session('lgd_session');
+        $filter_condition = [];
+
         if ($select_lgd) {
-            $select_lgd = array_map(function ($value) {
+            foreach ($select_lgd as $key => $val) {
                 try {
-                    return decrypt($value);
+                    $filter_condition[$key] = Crypt::decryptString($val);
                 } catch (\Exception $e) {
-                    return $value;
+                    $filter_condition[$key] = $val;
                 }
-            }, $select_lgd);
+            }
         }
 
-        if ($this->login_type === 'state_office') {
+
+        if ($this->login_type === '151') {
             $this->visible['district_dropdown'] = 1;
             $this->visible['rural_urban_dropdown'] = 1;
             $this->visible['block_dropdown'] = 1;
             $this->visible['gp_ward_dropdown'] = 1;
             $this->districts = District::all();
         }
-        if ($this->login_type === 'district_office') {
+        if ($this->login_type === '152') {
             $this->visible['rural_urban_dropdown'] = 1;
             $this->visible['block_dropdown'] = 1;
             $this->visible['gp_ward_dropdown'] = 1;
-            $this->selectedDistrict = $select_lgd['district_id'];
+            $this->selectedDistrict = $filter_condition['district_id'];
         }
-        if ($this->login_type === 'subdivision_office') {
-            $this->visible['block_dropdown'] = 1;
-            $this->visible['gp_ward_dropdown'] = 1;
-            $this->selectedDistrict = $select_lgd['district_id'];
-            $this->selectedRuralurban = 1;
-            $this->loadSubdivisions();
-        }
-        if ($this->login_type === 'block_office') {
+        if ($this->login_type === '153') {
             $this->visible['gp_ward_dropdown'] = 1;
             $this->selectedRuralurban = 2;
-            $this->selectedBlockurban = $select_lgd['block_id'];
+            $this->selectedBlockurban = $filter_condition['block_id'];
             $this->loadGpOrWard();
+        }
+         if ($this->login_type === '154') {
+            $this->visible['block_dropdown'] = 1;
+            $this->visible['gp_ward_dropdown'] = 1;
+            $this->selectedDistrict = $filter_condition['district_id'];
+            $this->selectedRuralurban = 1;
+            $this->loadSubdivisions();
         }
     }
 

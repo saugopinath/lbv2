@@ -17,13 +17,13 @@ return new class extends Migration
             $table->string('ref_code', 50)->index()->nullable();
             $table->string('name');
             $table->string('local_name')->nullable();
-            $table->foreignId('district_id')->constrained();
-            $table->foreignId('subdivision_id')->constrained();
+            $table->Integer('subdivision_id');
+            $table->foreign('subdivision_id','subdivision_id_fk')->references('id')->on('subdivisions')->onDelete('cascade'); 
             $table->timestamps();
             $table->smallInteger('is_active')->default(1);
             $table->index('lgd_code');
+            $table->index('subdivision_id');
             $table->index('id');
-            $table->index('district_id');
         });
     }
 
