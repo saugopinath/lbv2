@@ -31,7 +31,7 @@
             </div>
             <div class="flex justify-between mt-4 pl-6 pr-6">
                 @if ($mode != '0')
-                <x-button.danger>Previous</x-button.danger>
+                <x-button.danger wire:click="$dispatch('goPrevious')">Previous</x-button.danger>
                 @endif
                 <x-button.success type="submit">
                     {{ $mode == '0' ? 'Save' : 'Preview and Submit' }}

@@ -13,7 +13,7 @@ class Entrytab extends Component
     public $tab3Enabled = false;
     public $tab4Enabled = false;
     public $tab5Enabled = false;
-    protected $listeners = ['aadhaarChecked' => 'enableTabs', 'perDet' => 'enableTab2', 'conDet' => 'enableTab3', 'bankDet' => 'enableTab4', 'encList' => 'enableTab5'];
+    protected $listeners = ['aadhaarChecked' => 'enableTabs', 'perDet' => 'enableTab2', 'conDet' => 'enableTab3', 'bankDet' => 'enableTab4', 'encList' => 'enableTab5', 'goPrevious' => 'previousTab'];
     public function enableTabs()
     {
         $this->showTabs = true;
@@ -40,6 +40,23 @@ class Entrytab extends Component
     {
         $this->tab5Enabled = true;
         $this->currentTab = 'tab5';
+    }
+    public function previousTab()
+    {
+        switch ($this->currentTab) {
+            case 'tab2':
+                $this->currentTab = 'tab1';
+                break;
+            case 'tab3':
+                $this->currentTab = 'tab2';
+                break;
+            case 'tab4':
+                $this->currentTab = 'tab3';
+                break;
+            case 'tab5':
+                $this->currentTab = 'tab4';
+                break;
+        }
     }
     public function render()
     {
