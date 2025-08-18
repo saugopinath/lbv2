@@ -9,8 +9,6 @@
     'tab5' => ['label' => 'Self Declaration', 'component' => 'self-declaration', 'enabled' => $tab5Enabled, 'icon' => 'M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z'],
     ];
     @endphp
-
-    {{-- Horizontal nav --}}
     <nav class="flex flex-wrap border-b border-gray-200 text-xl font-medium text-center mb-6 space-x-2">
         @foreach ($tabs as $key => $tab)
         @if ($tab['enabled'])
@@ -32,8 +30,6 @@
         @endif
         @endforeach
     </nav>
-
-    {{-- Tab content --}}
     <div class="mt-4">
         @isset($tabs[$currentTab])
         @livewire($tabs[$currentTab]['component'], ['application_id' => $application_id], key($currentTab . '-' . $application_id))

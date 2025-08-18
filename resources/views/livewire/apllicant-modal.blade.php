@@ -34,10 +34,10 @@
                     </div>
 
                     <!-- Laravel Blade Component inside Livewire -->
-                    <x-apllicant-modal.personal-details :id="$id" />
-                    <x-apllicant-modal.contact-details :id="$id" />
-                    <x-apllicant-modal.bank-account-details :id="$id" />
-                    <x-apllicant-modal.self-declarations :id="$id" />
+                    <x-apllicant-modal.personal-details :id="$application_id" />
+                    <x-apllicant-modal.contact-details :id="$application_id" />
+                    <x-apllicant-modal.bank-account-details :id="$application_id" />
+                    <x-apllicant-modal.self-declarations :id="$application_id" />
                 </div>
 
                 <!-- Footer -->

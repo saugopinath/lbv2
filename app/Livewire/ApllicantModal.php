@@ -6,12 +6,12 @@ use Livewire\Component;
 
 class ApllicantModal extends Component
 {
-    public bool $openModal = true;
-    public $id;
-
-    public function mount($id)
+    public bool $openModal = false;
+    public $application_id;
+    protected $listeners = ['selfDec' => 'open'];
+    public function mount($application_id)
     {
-        $this->id = $id;
+        $this->application_id = $application_id;
     }
 
     public function open()

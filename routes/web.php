@@ -29,3 +29,4 @@ Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index
 Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
 Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
 Route::get('lbform', [LBController::class, 'index'])->middleware(['auth', 'verified'])->name('lbform');
+Route::get('draftlist', [LBController::class, 'draftlist'])->middleware(['auth', 'verified'])->name('draftlist');
