@@ -103,6 +103,18 @@ class EnclosureList extends Component
             'Content-Type' => $document->document_mime_type,
         ]);
     }
+    public function save()
+    {
+        foreach ($this->doc_lists as $doc) {
+            $existing = $this->existingDocuments[$doc->doc_type_id] ?? null;
+
+            if ($doc->is_required && empty($existing)) {
+                return;
+            }
+        }
+        $this->dispatch('encList');
+    }
+
     public function render()
     {
         return view('livewire.enclosure-list');

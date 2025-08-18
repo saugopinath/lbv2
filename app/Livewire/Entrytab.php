@@ -12,13 +12,13 @@ class Entrytab extends Component
     public $tab2Enabled = false;
     public $tab3Enabled = false;
     public $tab4Enabled = false;
-    protected $listeners = ['aadhaarChecked' => 'enableTabs', 'perDet' => 'enableTab2', 'conDet' => 'enableTab3', 'bankDet' => 'enableTab4'];
+    public $tab5Enabled = false;
+    protected $listeners = ['aadhaarChecked' => 'enableTabs', 'perDet' => 'enableTab2', 'conDet' => 'enableTab3', 'bankDet' => 'enableTab4', 'encList' => 'enableTab5'];
     public function enableTabs()
     {
         $this->showTabs = true;
         $this->tab1Enabled = true;
         $this->currentTab = 'tab1';
-        
     }
     public function enableTab2($application_id)
     {
@@ -35,6 +35,11 @@ class Entrytab extends Component
     {
         $this->tab4Enabled = true;
         $this->currentTab = 'tab4';
+    }
+    public function enableTab5()
+    {
+        $this->tab5Enabled = true;
+        $this->currentTab = 'tab5';
     }
     public function render()
     {

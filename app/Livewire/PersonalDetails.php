@@ -11,7 +11,7 @@ use App\Models\BeneficiaryAadhaar;
 use App\Models\DraftBeneficiaryPersonal;
 use App\Models\DraftBeneficiaryRelationship;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Crypt;
 class PersonalDetails extends Component
 {
     public $app_types, $genders, $castes, $mar_status = [];
@@ -110,13 +110,18 @@ class PersonalDetails extends Component
                 'mobile_no' => $validated['mobile'],
                 'entry_type' => $validated['app_type'],
                 'caste' => $validated['caste'],
-                'district_id' => 318,
+                'district_id' => Crypt::decryptString(Session::get('lgd_session.district_id')),
                 'next_level_role_id' => Codemaster::getIdByCode(21),
                 'marital_status' => $validated['mar_statu'],
                 'is_final_submit' => 0,
                 'is_faulty' => 0,
                 'created_by' => Auth::id(),
             ];
+            if(Crypt::decryptString(Session::get('lgd_session.office_type_id')) == 153){
+                 $data['block_id'] = Crypt::decryptString(Session::get('lgd_session.block_id'));
+            }else{
+                $data['sub_division_id'] = Crypt::decryptString(Session::get('lgd_session.subdivision_id'));
+            }
             if (!empty($validated['email'])) {
                 $data['email'] = $validated['email'];
             }
