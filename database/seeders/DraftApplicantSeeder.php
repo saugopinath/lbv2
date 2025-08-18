@@ -77,8 +77,7 @@ class DraftApplicantSeeder extends Seeder
                 'is_faulty' => false,
                 'ds_date' => null,
                 'ds_registration_no' => null,
-                // 'created_by' => $userId,
-                'created_by' => null,
+                'created_by' => $userId,
             ]);
 
             DraftBeneficiaryContact::create([
@@ -95,12 +94,12 @@ class DraftApplicantSeeder extends Seeder
                 'post_office' => 'Post Office ' . $i,
                 'pincode' => '7000' . str_pad($i, 4, '0', STR_PAD_LEFT),
                 'residency_period' => rand(1, 10),
-                'created_by' => null,
+                'created_by' => $userId,
             ]);
 
             DraftBeneficiaryBank::create([
                 'application_id' => $uniqueAppBenId->application_id,
-                'created_by' => null,
+                'created_by' => $userId,
                 'ifsc' => $ifsc,
                 'bank_account_number' => '1234000' . str_pad($i, 4, '0', STR_PAD_LEFT),
 
@@ -110,7 +109,7 @@ class DraftApplicantSeeder extends Seeder
 
             DraftBeneficiaryDeclaration::create([
                 'application_id' => $uniqueAppBenId->application_id,
-                'created_by' => null,
+                'created_by' => $userId,
                 'is_resident' => true,
                 'earn_monthly_remuneration' => true,
                 'info_genuine_decl' => true,
@@ -120,7 +119,7 @@ class DraftApplicantSeeder extends Seeder
             BeneficiaryAadhaar::create([
                 'application_id' => $uniqueAppBenId->application_id,
                 'beneficiary_id' => null,
-                'created_by' => null,
+                'created_by' => $userId,
                 'encode_key' => null,
                 'encoded_aadhar' => Crypt::encryptString($aadharNumber),
                 'aadhar_hash' => md5($aadharNumber),
@@ -129,7 +128,7 @@ class DraftApplicantSeeder extends Seeder
             DraftBeneficiaryRelationship::insert([
                 [
                     'application_id'   => $uniqueAppBenId->application_id,
-                    'created_by'       => null,
+                    'created_by'       => $userId,
                     'full_name'        => 'Father Name' . $i,
                     'relation_type_id' => $fatherRelationTypeId,
                     'created_at'       => now(),
@@ -137,7 +136,7 @@ class DraftApplicantSeeder extends Seeder
                 ],
                 [
                     'application_id'   => $uniqueAppBenId->application_id,
-                    'created_by'       => null,
+                    'created_by'       => $userId,
                     'full_name'        => 'Mother Name' . $i,
                     'relation_type_id' => $motherRelationTypeId,
                     'created_at'       => now(),

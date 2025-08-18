@@ -56,11 +56,11 @@ class BeneficiariesExport implements FromCollection, WithHeadings
             $query = BenRejectDetail::query();
         }
 
-        if ($this->loginType === 'district_office' && $this->districtCode) {
+        if ($this->loginType === '152' && $this->districtCode) {
             $query->where('district_id', $this->districtCode);
-        } elseif ($this->loginType === 'subdivision_office' && $this->subdivisionCode) {
+        } elseif ($this->loginType === '154' && $this->subdivisionCode) {
             $query->where('municipality_id', $this->subdivisionCode);
-        } elseif ($this->loginType === 'block_office' && $this->blockCode) {
+        } elseif ($this->loginType === '153' && $this->blockCode) {
             $query->where('block_id', $this->blockCode);
         }
 

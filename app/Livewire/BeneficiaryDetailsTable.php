@@ -2,16 +2,14 @@
 
 namespace App\Livewire;
 
-use Carbon\Carbon;
+use \Carbon\Carbon;
 use App\Models\Codemaster;
 use App\Models\BenRejectDetail;
 use App\Helpers\EncryptionArray;
-use App\Models\BeneficiaryContact;
 use App\Models\BeneficiaryPersonal;
 use App\Exports\BeneficiariesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
-use App\Models\DraftBeneficiaryContact;
 use App\Models\DraftBeneficiaryPersonal;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -25,16 +23,28 @@ class BeneficiaryDetailsTable extends DataTableComponent
     public string $search = '';
 
     public $district_id, $rural_urban, $blockurban, $gp_ward;
-
     protected $listeners = ['filtersApplied'];
-    public $loginDistrictCode;
-    public $loginSubdivisionCode;
-    public $loginBlockCode;
 
+    public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
+    public array $filter_condition = [];
     public function mount(string $reportType = '', string $login_type = ''): void
     {
         $this->reportType = $reportType;
         $this->login_type = $login_type;
+
+        $select_lgd = session('lgd_session');
+
+        if (!empty($select_lgd['district_id'])) {
+            $this->filter_condition['district_id'] = Crypt::decryptString($select_lgd['district_id']);
+        }
+
+        if (!empty($select_lgd['block_id'])) {
+            $this->filter_condition['block_id'] = Crypt::decryptString($select_lgd['block_id']);
+        }
+
+        if (!empty($select_lgd['subdivision_id'])) {
+            $this->filter_condition['subdivision_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+        }
     }
     public function filtersApplied($filters)
     {
@@ -53,71 +63,52 @@ class BeneficiaryDetailsTable extends DataTableComponent
             ->setSearchEnabled()
             ->setSearchLive();
     }
-
     public function updatedSearch($value): void
     {
         $this->setSearch($value);
         $this->resetPage();
     }
-
     public function updatedPerPage($value): void
     {
         $this->perPage = (int)$value;
         $this->setPerPage((int)$value);
         $this->resetPage();
     }
-
     public function columns(): array
     {
-        if ($this->reportType === '1' || $this->reportType === '2' || $this->reportType === '3' || $this->reportType === '4' || $this->reportType === '5') {
-            return [
-                Column::make("Application ID", "application_id")->searchable()->sortable(),
-                Column::make("Applicant Name", "full_name")->searchable(),
-                Column::make("Age", "dob")
-                    ->format(fn($value) => $value ? Carbon::parse($value)->age : 'N/A'),
-            ];
-        }
+        $columns = [
+            Column::make("Application ID", "application_id")->searchable()->sortable(),
+            Column::make("Applicant Name", "full_name")->searchable(),
+            Column::make("Father's Name")
+                ->label(fn($row) => optional($row->father->first())->full_name ?? 'N/A'),
+            Column::make("Age", "dob")
+                ->format(fn($value) => $value ? Carbon::parse($value)->age : 'N/A'),
+        ];
 
-        if ($this->reportType === '1' || $this->reportType === '2' || $this->reportType === '3' || $this->reportType === '5') {
-            return [
-                Column::make("Father's Name")
-                    ->label(fn($row) => optional($row->father->first())->full_name ?? 'N/A'),
-            ];
+        if (in_array($this->reportType, ['1', '5', '4'])) {
+            $columns[] = Column::make("Applicant Mobile No.", "mobile_no");
         }
 
         if ($this->reportType === '3') {
-            return [
-                Column::make("Beneficiary ID", "beneficiary_id"),
-            ];
-        }
-
-        if ($this->reportType === '5') {
-            return [
-                Column::make("Applicant Mobile No.", "mobile_no"),
-            ];
-        }
-
-        if ($this->reportType === '1') {
-            return [
-                Column::make("Applicant Mobile No.", "mobile_no"),
-            ];
+            array_unshift($columns, Column::make("Beneficiary ID", "beneficiary_id"));
         }
 
         if ($this->reportType === '4') {
-            return [
-                Column::make("Father's Name", "father_full_name"),
-                Column::make("Applicant Mobile No.", "mobile_no"),
-                Column::make("Rejected Reason", "rejected_reason"),
-            ];
+            $columns[2] = Column::make("Father's Name", "father_full_name");
+            $columns[] = Column::make("Rejected Reason", "rejected_reason");
         }
 
-        return [];
+        if ($this->reportType === '2') {
+            return $columns;
+        }
+
+        return $columns;
     }
     public function builder(): Builder
     {
-        $roleVerified = Codemaster::getIdByCode(22);
-        $roleApproved = Codemaster::getIdByCode(23);
-        $roleReverted = Codemaster::getIdByCode(21);
+        $roleVerified  = Codemaster::getIdByCode(22);
+        $roleApproved  = Codemaster::getIdByCode(23);
+        $roleReverted  = Codemaster::getIdByCode(21);
         $relationFather = Codemaster::getIdByCode(131);
 
         if ($this->reportType === "2") {
@@ -131,105 +122,52 @@ class BeneficiaryDetailsTable extends DataTableComponent
             $next_level_role_id = $roleReverted;
         } elseif ($this->reportType === "4") {
             $query = BenRejectDetail::query();
-
-            $query = EncryptionArray::applyLocationFilters(
+            return EncryptionArray::applyLocationFilters(
                 $query,
                 $this->reportType,
-                $this->district_id,
-                $this->rural_urban,
-                $this->blockurban,
-                $this->gp_ward
+                $this->district_id ? (int) $this->district_id : null,
+                $this->rural_urban ? (int) $this->rural_urban : null,
+                $this->blockurban ? (int) $this->blockurban : null,
+                $this->gp_ward ? (int) $this->gp_ward : null
             );
-            return $query;
         }
 
         $query = $model->where('next_level_role_id', $next_level_role_id)
             ->with(['father' => fn($q) => $q->where('relation_type_id', $relationFather)])
             ->whereHas('father', fn($q) => $q->where('relation_type_id', $relationFather));
 
-        // $select_lgd = session('lgd_session');
-
-        //         $lgd_session = session('lgd_session');
-        //        dd($lgd_session);
-
-
-
-        // $select_lgd = EncryptionArray::lgdsession();
-
-        // if ($select_lgd) {
-        //     $select_lgd = array_map(function ($value) {
-        //         try {
-        //             return decrypt($value);
-        //         } catch (\Exception $e) {
-        //             return $value;
-        //         }
-        //     }, $select_lgd);
-        // }
-
-
-        // if (!empty($select_lgd['district_id'])) {
-        //     $filter_condition['district_id'] = $select_lgd['district_id'];
-        // }
-        // if (!empty($select_lgd['block_id'])) {
-        //     $filter_condition['block_id'] = $select_lgd['block_id'];
-        // }
-
-        // if (!empty($select_lgd['subdivision_id'])) {
-        //     $query->whereHas('contact', function ($q) use ($select_lgd) {
-        //         $q->whereHas('municipality', function ($mq) use ($select_lgd) {
-        //             $mq->where('subdivision_id', $select_lgd['subdivision_id']);
-        //         });
-        //     });
-        // }
-
-       $select_lgd = session('lgd_session');
-        $filter_condition = [];
-
-        if ($select_lgd) {
-            foreach ($select_lgd as $key => $val) {
-                try {
-                    $filter_condition[$key] = Crypt::decryptString($val);
-                } catch (\Exception $e) {
-                    $filter_condition[$key] = $val;
-                }
-            }
-        }
-
-
-        if (!empty($filter_condition['district_id'])) {
+        if (!empty($this->filter_condition['district_id'])) {
             $query->whereHas(
                 'contact',
                 fn($q) =>
-                $q->where('district_id', $filter_condition['district_id'])
+                $q->where('district_id', $this->filter_condition['district_id'])
             );
         }
 
-        if (!empty($filter_condition['block_id'])) {
+        if (!empty($this->filter_condition['block_id'])) {
             $query->whereHas(
                 'contact',
                 fn($q) =>
-                $q->where('block_id', $filter_condition['block_id'])
+                $q->where('block_id', $this->filter_condition['block_id'])
             );
         }
 
-        if (!empty($filter_condition['subdivision_id'])) {
+        if (!empty($this->filter_condition['subdivision_id'])) {
             $query->whereHas(
                 'contact.municipality',
                 fn($mq) =>
-                $mq->where('subdivision_id', $filter_condition['subdivision_id'])
+                $mq->where('subdivision_id', $this->filter_condition['subdivision_id'])
             );
         }
-
 
         $query = EncryptionArray::applyLocationFilters(
             $query,
             $this->reportType,
-            $this->district_id,
-            $this->rural_urban,
-            $this->blockurban,
-            $this->gp_ward
+            $this->district_id ? (int) $this->district_id : null,
+            $this->rural_urban ? (int) $this->rural_urban : null,
+            $this->blockurban ? (int) $this->blockurban : null,
+            $this->gp_ward ? (int) $this->gp_ward : null
         );
-
         return $query;
     }
     public function export()

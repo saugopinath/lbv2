@@ -2,90 +2,114 @@
 
 namespace App\Helpers;
 
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
 
 class EncryptionArray
 {
 
-    public static function applyLocationFilters(Builder $query,string $reportType,?int $district_id,?int $rural_urban,?int $blockurban,?int $gp_ward): Builder 
+    public static function applyLocationFilters(Builder $query, string $reportType, ?int $district_id, ?int $rural_urban, ?int $blockurban, ?int $gp_ward): Builder
     {
-        $blockField = $rural_urban == 2 ? 'block_id' : 'municipality_id';
-        $gpWardField = $rural_urban == 2 ? 'panchayat_id' : 'ward_id';
-
-        $filters = [
-            ['district_id', $district_id],
-            [$blockField, $blockurban],
-            [$gpWardField, $gp_ward],
-        ];
+        $blockField  = $rural_urban == 2 ? 'block_id'      : 'municipality_id';
+        $gpWardField = $rural_urban == 2 ? 'panchayat_id'  : 'ward_id';
 
         if ($reportType !== "4") {
+
             $query->with('contact');
 
-            foreach ($filters as [$field, $value]) {
-                if ($value) {
-                    $query->whereHas('contact', fn($q) => $q->where($field, $value));
-                }
+            if ($district_id) {
+                $query->whereHas('contact', function ($q) use ($district_id) {
+                    $q->where('district_id', $district_id);
+                });
             }
+
+            if ($blockurban) {
+                $query->whereHas('contact', function ($q) use ($blockField, $blockurban) {
+                    $q->where($blockField, $blockurban);
+                });
+            }
+
+            if ($gp_ward) {
+                $query->whereHas('contact', function ($q) use ($gpWardField, $gp_ward) {
+                    $q->where($gpWardField, $gp_ward);
+                });
+            }
+
         } else {
-            foreach ($filters as [$field, $value]) {
-                if ($value) {
-                    $query->where($field, $value);
-                }
+
+            if ($district_id) {
+                $query->where('district_id', $district_id);
+            }
+
+            if ($blockurban) {
+                $query->where($blockField, $blockurban);
+            }
+
+            if ($gp_ward) {
+                $query->where($gpWardField, $gp_ward);
             }
         }
 
         return $query;
     }
-    public static function lgdsession()
-    {
 
-        $lgd_session = [
-            'state_id' => Crypt::encrypt('19'),
-            // 'district_id' => Crypt::encrypt('305'),
-            // 'subdivision_id' => Crypt::encrypt('33903'),
-            // 'block_id' => Crypt::encrypt('2793'),
-        ];
-        return  $lgd_session;
-    }
-
-    // public static function applyLocationFilters(
-    //     Builder $query,
-    //     string $reportType,
-    //     ?int $district_id,
-    //     ?int $rural_urban,
-    //     ?int $blockurban,
-    //     ?int $gp_ward
-    // ): Builder {
-
+    // public static function applyLocationFilters(Builder $query, string $reportType, ?int $district_id, ?int $rural_urban, ?int $blockurban, ?int $gp_ward): Builder
+    // {
     //     $blockField = $rural_urban == 2 ? 'block_id' : 'municipality_id';
     //     $gpWardField = $rural_urban == 2 ? 'panchayat_id' : 'ward_id';
+
+    //     $filters = [
+    //         ['district_id', $district_id],
+    //         [$blockField, $blockurban],
+    //         [$gpWardField, $gp_ward],
+    //     ];
 
     //     if ($reportType !== "4") {
     //         $query->with('contact');
 
-    //         if ($district_id) {
-    //             $query->whereHas('contact', fn($q) => $q->where('district_id', $district_id));
-    //         }
-
-    //         if ($blockurban && $rural_urban) {
-    //             $query->whereHas('contact', fn($q) => $q->where($blockField, $blockurban));
-    //         }
-
-    //         if ($gp_ward && $rural_urban) {
-    //             $query->whereHas('contact', fn($q) => $q->where($gpWardField, $gp_ward));
+    //         foreach ($filters as [$field, $value]) {
+    //             if ($value) {
+    //                 $query->whereHas('contact', fn($q) => $q->where($field, $value));
+    //             }
     //         }
     //     } else {
-    //         if ($district_id) {
+    //         foreach ($filters as [$field, $value]) {
+    //             if ($value) {
+    //                 $query->where($field, $value);
+    //             }
+    //         }
+    //     }
+
+    //     return $query;
+    // }
+
+    // public static function applyLocationFilter($query, $district_id, $rural_urban, $blockurban, $gp_ward, $reportType)
+    // {
+    //     if ($reportType === 4) {
+    //         if (!empty($district_id)) {
     //             $query->where('district_id', $district_id);
     //         }
-
-    //         if ($blockurban && $rural_urban) {
-    //             $query->where($blockField, $blockurban);
+    //         if (!empty($rural_urban)) {
+    //             $query->where('rural_urban_id', $rural_urban);
     //         }
-
-    //         if ($gp_ward && $rural_urban) {
-    //             $query->where($gpWardField, $gp_ward);
+    //         if (!empty($blockurban)) {
+    //             $query->where('block_id', $blockurban);
+    //         }
+    //         if (!empty($gp_ward)) {
+    //             $query->where('gp_ward_id', $gp_ward);
+    //         }
+    //     }
+    //     else {
+    //         if (!empty($district_id)) {
+    //             $query->whereHas('contact', fn($q) => $q->where('district_id', $district_id));
+    //         }
+    //         if (!empty($rural_urban)) {
+    //             $query->whereHas('contact', fn($q) => $q->where('rural_urban', $rural_urban));
+    //         }
+    //         if (!empty($blockurban)) {
+    //             $query->whereHas('contact', fn($q) => $q->where('block_id', $blockurban));
+    //         }
+    //         if (!empty($gp_ward)) {
+    //             $query->whereHas('contact', fn($q) => $q->where('gp_ward_id', $gp_ward));
     //         }
     //     }
 

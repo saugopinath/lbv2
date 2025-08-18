@@ -6,7 +6,6 @@ use App\Models\Block;
 use Livewire\Component;
 use App\Models\District;
 use App\Models\Municipality;
-use App\Helpers\EncryptionArray;
 use Illuminate\Support\Facades\Crypt;
 
 class FilterLgdMaster extends Component
@@ -14,7 +13,7 @@ class FilterLgdMaster extends Component
     public $districts = [], $blocks = [], $urbanbodys = [], $gps = [], $wards = [];
     public $selectedDistrict, $selectedRuralurban, $selectedBlockurban, $selectedGpWard;
     public $login_type;
-
+    public array $filter_condition = [];
     public $visible = [
         'district_dropdown' => 0,
         'rural_urban_dropdown' => 0,
@@ -26,32 +25,19 @@ class FilterLgdMaster extends Component
     {
         $this->login_type = $login_type;
 
-        //  $select_lgd = EncryptionArray::lgdsession();
-        // //   $select_lgd = session('lgd_session');
+        $select_lgd = session('lgd_session');
 
-        // if ($select_lgd) {
-        //     $select_lgd = array_map(function ($value) {
-        //         try {
-        //             return decrypt($value);
-        //         } catch (\Exception $e) {
-        //             return $value;
-        //         }
-        //     }, $select_lgd);
-        // }
-
-      $select_lgd = session('lgd_session');
-        $filter_condition = [];
-
-        if ($select_lgd) {
-            foreach ($select_lgd as $key => $val) {
-                try {
-                    $filter_condition[$key] = Crypt::decryptString($val);
-                } catch (\Exception $e) {
-                    $filter_condition[$key] = $val;
-                }
-            }
+        if (!empty($select_lgd['district_id'])) {
+            $this->filter_condition['district_id'] = Crypt::decryptString($select_lgd['district_id']);
         }
 
+        if (!empty($select_lgd['block_id'])) {
+            $this->filter_condition['block_id'] = Crypt::decryptString($select_lgd['block_id']);
+        }
+
+        if (!empty($select_lgd['subdivision_id'])) {
+            $this->filter_condition['subdivision_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+        }
 
         if ($this->login_type === '151') {
             $this->visible['district_dropdown'] = 1;
@@ -64,18 +50,18 @@ class FilterLgdMaster extends Component
             $this->visible['rural_urban_dropdown'] = 1;
             $this->visible['block_dropdown'] = 1;
             $this->visible['gp_ward_dropdown'] = 1;
-            $this->selectedDistrict = $filter_condition['district_id'];
+            $this->selectedDistrict = $this->filter_condition['district_id'];
         }
         if ($this->login_type === '153') {
             $this->visible['gp_ward_dropdown'] = 1;
             $this->selectedRuralurban = 2;
-            $this->selectedBlockurban = $filter_condition['block_id'];
+            $this->selectedBlockurban = $select_lgd['block_id'];
             $this->loadGpOrWard();
         }
-         if ($this->login_type === '154') {
+        if ($this->login_type === '154') {
             $this->visible['block_dropdown'] = 1;
             $this->visible['gp_ward_dropdown'] = 1;
-            $this->selectedDistrict = $filter_condition['district_id'];
+            $this->selectedDistrict = $this->filter_condition['district_id'];
             $this->selectedRuralurban = 1;
             $this->loadSubdivisions();
         }

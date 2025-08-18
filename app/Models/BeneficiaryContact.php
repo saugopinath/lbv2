@@ -42,4 +42,5 @@ class BeneficiaryContact extends Model
     {
         return $this->belongsTo(Municipality::class, 'municipality_id', 'id');
     }
+    
 }

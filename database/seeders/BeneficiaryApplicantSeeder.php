@@ -8,11 +8,13 @@ use App\Models\Block;
 use App\Models\District;
 use App\Models\Panchayat;
 use App\Models\Codemaster;
-use App\Models\Municipality;
 use App\Models\Subdivision;
+use Faker\Factory as Faker;
+use App\Models\Municipality;
+use App\Models\Ifsccodemaster;
+use App\Models\BeneficiaryBank;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Faker\Factory as Faker;
 
 class BeneficiaryApplicantSeeder extends Seeder
 {
@@ -37,6 +39,7 @@ class BeneficiaryApplicantSeeder extends Seeder
         $entryTypeId = Codemaster::where('code', 41)->value('id');
         $nextLevelRoleId = Codemaster::where('code', 23)->value('id');
         $fatherRelationTypeId = Codemaster::where('code', 131)->value('id');
+        $ifsc = Ifsccodemaster::where('bankmaster_id', 36)->value('code');
         $motherRelationTypeId = Codemaster::where('code', 132)->value('id');
         $genderIds = Codemaster::where('parent_id', 2)->pluck('id')->toArray();
 
@@ -120,6 +123,18 @@ class BeneficiaryApplicantSeeder extends Seeder
         DB::table('lb_scheme.beneficiary_contacts')->insert($contacts);
 
 
+        foreach ($beneficiaryData as $appId => $beneficiary) {
+
+            BeneficiaryBank::create([
+                'beneficiary_id'      => $beneficiary->beneficiary_id,
+                'application_id'      => $appId,
+                'created_by'          => $userId,
+                'ifsc'                => $ifsc,
+                'bank_account_number' => '1234000' . str_pad($beneficiary->beneficiary_id, 4, '0', STR_PAD_LEFT),
+            ]);
+        }
+
+
         $relationships = [];
         foreach ($beneficiaryData as $appId => $beneficiary) {
             $relationships[] = [
@@ -140,7 +155,7 @@ class BeneficiaryApplicantSeeder extends Seeder
             ];
         }
 
-      
+
         DB::table('lb_scheme.beneficiary_relationships')->insert($relationships);
     }
 }
