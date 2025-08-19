@@ -34,6 +34,10 @@ class BeneficiaryDetailsTable extends DataTableComponent
 
         $select_lgd = session('lgd_session');
 
+        // foreach ($select_lgd as $key => $val) {
+        //     $this->filter_condition[$key] = Crypt::decryptString($val);
+        // }
+
         if (!empty($select_lgd['district_id'])) {
             $this->filter_condition['district_id'] = Crypt::decryptString($select_lgd['district_id']);
         }
@@ -137,25 +141,19 @@ class BeneficiaryDetailsTable extends DataTableComponent
             ->whereHas('father', fn($q) => $q->where('relation_type_id', $relationFather));
 
         if (!empty($this->filter_condition['district_id'])) {
-            $query->whereHas(
-                'contact',
-                fn($q) =>
+            $query->whereHas('contact',fn($q) =>
                 $q->where('district_id', $this->filter_condition['district_id'])
             );
         }
 
         if (!empty($this->filter_condition['block_id'])) {
-            $query->whereHas(
-                'contact',
-                fn($q) =>
+            $query->whereHas('contact',fn($q) =>
                 $q->where('block_id', $this->filter_condition['block_id'])
             );
         }
 
         if (!empty($this->filter_condition['subdivision_id'])) {
-            $query->whereHas(
-                'contact.municipality',
-                fn($mq) =>
+            $query->whereHas('contact.municipality',fn($mq) =>
                 $mq->where('subdivision_id', $this->filter_condition['subdivision_id'])
             );
         }

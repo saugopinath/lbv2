@@ -24,7 +24,7 @@ class BenRejectDetailsSeeder extends Seeder
         $nextLevelRoleId = Codemaster::where('code', 22)->value('id');
         $ifsc = Ifsccodemaster::where('bankmaster_id', 36)->value('code');
 
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 20; $i++) {
             $casteId = Codemaster::where('parent_id', 1)->inRandomOrder()->value('id');
             $maritalStatusId = Codemaster::where('parent_id', 3)->inRandomOrder()->value('id');
 

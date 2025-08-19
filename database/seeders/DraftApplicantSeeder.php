@@ -43,7 +43,7 @@ class DraftApplicantSeeder extends Seeder
         $fatherRelationTypeId = Codemaster::where('code', 131)->value('id');
         $motherRelationTypeId = Codemaster::where('code', 132)->value('id');
 
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 20; $i++) {
 
             $casteId = Codemaster::where('parent_id', 1)->inRandomOrder()->value('id');
             $maritalStatusId = Codemaster::where('parent_id', 3)->inRandomOrder()->value('id');

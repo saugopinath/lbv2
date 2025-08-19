@@ -49,7 +49,7 @@ class BeneficiaryApplicantSeeder extends Seeder
         }
 
         $beneficiaries = [];
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 20; $i++) {
             $isRural = $faker->boolean;
             $districtId = $faker->randomElement($districtIds);
 

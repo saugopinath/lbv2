@@ -27,6 +27,10 @@ class FilterLgdMaster extends Component
 
         $select_lgd = session('lgd_session');
 
+        // foreach ($select_lgd as $key => $val) {
+        //     $this->filter_condition[$key] = Crypt::decryptString($val);
+        // }
+
         if (!empty($select_lgd['district_id'])) {
             $this->filter_condition['district_id'] = Crypt::decryptString($select_lgd['district_id']);
         }
@@ -124,17 +128,50 @@ class FilterLgdMaster extends Component
         $this->loadGpOrWard();
     }
 
+    // public function resetFilters()
+    // {
+    //     $this->reset([
+    //         'selectedDistrict',
+    //         'selectedRuralurban',
+    //         'selectedBlockurban',
+    //         'selectedGpWard',
+    //         'blocks',
+    //         'urbanbodys',
+    //         'gps',
+    //         'wards',
+    //     ]);
+    // }
     public function resetFilters()
     {
-        $this->reset([
-            'selectedDistrict',
-            'selectedRuralurban',
-            'selectedBlockurban',
-            'selectedGpWard',
-            'blocks',
-            'urbanbodys',
-            'gps',
-            'wards',
+        $this->selectedDistrict = null;
+        $this->selectedRuralurban = null;
+        $this->selectedBlockurban = null;
+        $this->selectedGpWard = null;
+        $this->blocks = [];
+        $this->urbanbodys = [];
+        $this->gps = [];
+        $this->wards = [];
+
+        if ($this->login_type === '151') {
+            $this->districts = District::all();
+        } elseif (in_array($this->login_type, ['152', '154'])) {
+            if (!empty($this->filter_condition['district_id'])) {
+                $this->selectedDistrict = $this->filter_condition['district_id'];
+                $this->loadSubdivisions();
+            }
+        } elseif ($this->login_type === '153') {
+            if (!empty($this->filter_condition['block_id'])) {
+                $this->selectedRuralurban = 2;
+                $this->selectedBlockurban = $this->filter_condition['block_id'];
+                $this->loadGpOrWard();
+            }
+        }
+
+        $this->dispatch('filtersApplied', [
+            'district_id' => null,
+            'rural_urban' => null,
+            'blockurban'  => null,
+            'gp_ward'     => null,
         ]);
     }
 

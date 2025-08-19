@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             // SchemeAttacheDocumentSeeder::class,
             // RolePermissionSeeder::class,
             // SuperAdminSeeder::class,
-            DraftApplicantSeeder::class,
+            // DraftApplicantSeeder::class,
             // BeneficiaryApplicantSeeder::class,
             // BenRejectDetailsSeeder::class,
             Bank\BankSeeder::class,
