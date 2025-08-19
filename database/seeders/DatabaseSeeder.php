@@ -21,14 +21,22 @@ class DatabaseSeeder extends Seeder
             LGD\SubdivisionSeeder::class,
             LGD\MunicipalitiesSeeder::class,
             LGD\WardSeeder::class,
-              SuperAdminSeeder::class,
+            Bank\BankSeeder::class,
+            Bank\IfscSeeder::class,
             DepartmentSeeder::class,
-            BankSeeder::class,
-            IfscSeeder::class,
             CodemasterSeeder::class,
+            SchemeSeeder::class,
+            Role\RolePermissionSeeder::class,
+            OfficeMaster\RoleOfficeTypeSeeder::class,
+            OfficeMaster\OfficeMastersTableSeeder::class,
+            Role\SuperAdminSeeder::class,
+            Role\WbHodSeeder::class,
+            Role\PaschimMedinipurApproverSeeder::class,
+            Role\DaspurIIBlockVerifierSeeder::class,
+            Role\DaspurIIBlockOperatorSeeder::class,
+            Role\GhatalSdoOperatorSeeder::class,
+            Role\GhatalSdoVerifierSeeder::class,
             DraftApplicantSeeder::class,
-
-
 
 
         ]);

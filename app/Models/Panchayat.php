@@ -3,22 +3,25 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Panchayat extends Model
 {
-    use HasFactory;
+    protected $fillable = [
+            'name',
+            'ref_code',
+            'lgd_code',
+            'block_id',
+        ];
 
-    protected $guarded = ['id'];
 
-    public function block()
+
+    public function Block(): BelongsTo
     {
-        return $this->belongsTo(Block::class);
-    }
+         return $this->BelongsTo(Block::class);
 
+    }
     public function wards()
     {
         return $this->hasMany(Ward::class);
     }
 }
-

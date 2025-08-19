@@ -530,7 +530,7 @@ class CodemasterSeeder extends Seeder
             ),
             array(
                 "name" => "NO CASTE CERTIFICATE NUMBER",
-                "short_name" => "no_caste_certificate_number",           
+                "short_name" => "no_caste_certificate_number",
                 "parent_short_code" => "incomplete_details",
                  "code" => "147",
             ),
@@ -557,7 +557,7 @@ class CodemasterSeeder extends Seeder
                 "short_name" => "duplicate_bank_account_number",
                 "parent_short_code" => "incomplete_details",
                  "code" => "1411",
-            ),   
+            ),
             array(
                 "name" => "STATE OFFICE",
                 "short_name" => "state_office",
@@ -601,7 +601,7 @@ class CodemasterSeeder extends Seeder
                  "code" => "159",
             ),
             array(
-                
+
                 "name" => "Passport size profile photo",
                 "short_name" => "profile_photo_enc",
                 "parent_short_code" => "ENCDETAILS",
@@ -799,6 +799,7 @@ class CodemasterSeeder extends Seeder
             Codemaster::create([
                 'name' => strtoupper($codemasterChild_item['name']),
                 'code' => $codemasterChild_item['code'],
+                'parent_short_code' => $codemasterChild_item['parent_short_code'],
                 'short_name'     => $codemasterChild_item['short_name'],
                 'parent_id'   => Codemaster::where('short_name', $codemasterChild_item['parent_short_code'])->firstOrFail()->id,
             ]);

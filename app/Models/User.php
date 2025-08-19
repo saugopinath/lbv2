@@ -44,5 +44,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function RoleSchemeOfficeMappings(): HasMany
+    {
+        
+        return $this->hasMany(UserRoleSchemeOfficeMapping::class);
+    }
     
 }

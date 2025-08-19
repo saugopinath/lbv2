@@ -45,7 +45,7 @@ class UserService implements UserInterface
     {
         $current_timestamp = Carbon::now()->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
         $user=User::where('id',$userId)->where('is_active',1)->first();
-      //  dump($user->password_expires_at);dd($current_timestamp);
+       // dump($user->password_expires_at);dd($current_timestamp);
         if((strtotime($user->password_expires_at) > strtotime($current_timestamp))){
             return true;
         }

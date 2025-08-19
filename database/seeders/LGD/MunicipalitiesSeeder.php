@@ -152,20 +152,18 @@ class MunicipalitiesSeeder extends Seeder
             array('municipality_lgd_code'=>'250030','subdivision_ref_code'=>'70401','ref_code'=>'7040003','name'=>'Jamuria','district_lgd_code'=>'704'),
             array('municipality_lgd_code'=>'250031','subdivision_ref_code'=>'70401','ref_code'=>'7040004','name'=>'Kulti','district_lgd_code'=>'704'),
             array('municipality_lgd_code'=>'250033','subdivision_ref_code'=>'70401','ref_code'=>'7040005','name'=>'Raniganj','district_lgd_code'=>'704'),
-           
+
         );
 
         foreach ($wb_municipalities as $municipality) {
             $subdivision_id = Subdivision::where('ref_code', $municipality['subdivision_ref_code'])->firstOrFail()->id;
-            $district_id = District::where('lgd_code', $municipality['district_lgd_code'])->firstOrFail()->id;
             Municipality::create([
                 'id' => $municipality['municipality_lgd_code'],
                 'ref_code' => $municipality['ref_code'],
                 'name' => strtoupper($municipality['name']),
                 'lgd_code' => $municipality['municipality_lgd_code'],
                 'ref_code' => $municipality['ref_code'],
-                'subdivision_id' => $subdivision_id,
-                'district_id' => $district_id,
+                'subdivision_id' => $subdivision_id
             ]);
         }
     }

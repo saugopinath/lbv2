@@ -3,15 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Municipality extends Model
 {
-    use HasFactory;
+    protected $fillable = [
+            'name',
+            'ref_code',
+            'lgd_code',
+            'district_id',
+            'subdivision_id',
+            'state_id',
+        ];
 
-    protected $guarded = ['id'];
 
-    public function district()
+    public function Subdivision(): BelongsTo
+    {
+        return $this->belongsTo(Subdivision::class);
+    }
+
+
+public function district()
     {
         return $this->belongsTo(District::class);
     }
@@ -20,5 +32,5 @@ class Municipality extends Model
     {
         return $this->hasMany(Ward::class);
     }
-}
 
+}
