@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('lgd_code');
             $table->string('ref_code')->index();
             $table->string('name');
-            $table->foreignId('block_id')->constrained();
+            $table->smallInteger('block_id');
+            $table->foreign('block_id', 'block_id_fk')->references('id')->on('blocks')->onDelete('cascade');
             $table->timestamps();
             $table->smallInteger('is_active')->default(1);
             $table->index('lgd_code');

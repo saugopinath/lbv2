@@ -22,7 +22,7 @@ use Illuminate\Http\RedirectResponse;
 class AuthenticationController  extends Controller
 {
     public function __construct(
-        
+
         protected AuthenticationService $authenticationService,
         protected SendSmsService $sendsmsService,
         protected UserService $userService,
@@ -40,8 +40,8 @@ class AuthenticationController  extends Controller
 
     public function loginCheck(LoginRequest $request)
     {
-        $userData = $request->validated(); 
-        
+        $userData = $request->validated();
+
         $valid=1;
         $userObj= $this->userService->findbyMobile($userData['mobile_no']);
         if(is_null($userObj)){
@@ -53,19 +53,19 @@ class AuthenticationController  extends Controller
             $valid=0;
             return back()->withErrors(['password' => [__('messages.passwordnotsend')]]);
         }
-      
+
         $validPassword= $this->userService->validPassword($userObj->id,$userData['password']);
-       
+
         if($validPassword==false){
             $valid=0;
             return back()->withErrors(['password' => [__('messages.invalidPassword')]]);
         }
-       
+
         $isPasswordExpired= $this->userService->isPasswordExpired($userObj->id);
        // dd($isPasswordExpired);
         if($isPasswordExpired==false){
             $valid=0;
-           
+
             return back()->withErrors(['password' => [__('messages.passwordexpire')]]);
         }
         if($valid==1){
@@ -85,20 +85,20 @@ class AuthenticationController  extends Controller
                 DB::rollback();
                 return back()->withErrors('errors', __('messages.dbroolback'));
             }
-           
+
         }
-       
-    } 
+
+    }
     public function forgetPassword(): \Illuminate\View\View
     {
         return view('auth.forgetpassword');
     }
     public function forgetPasswordPost(ForgetpasswordRequest $request): \Illuminate\Http\RedirectResponse
     {
-        $userData = $request->validated(); 
+        $userData = $request->validated();
         $user_obj = $this->userService->findbyMobile($userData['mobile_no']);
         //dd($userData['mobile_no']);
-       
+
         if (empty($user_obj)){
            // dd($user_obj);
            return back()->withErrors(['mobile_no' => [__('messages.mobilenonotregister')]]);
@@ -123,13 +123,13 @@ class AuthenticationController  extends Controller
              DB::rollBack();
              return back()->withErrors(['errors' => [__('messages.dbroolback')]]);
          }
-        }   catch (\Exception $e) {  
-            //dd($e); 
+        }   catch (\Exception $e) {
+            //dd($e);
             return back()->withErrors(['errors' => [__('messages.dbroolback')]]);
-                
+
             }
-        
-    } 
+
+    }
     public function otpVerification(OtpVerificationRequest $request)
     {
         $otpData=$request->validated();
@@ -140,15 +140,15 @@ class AuthenticationController  extends Controller
             'source_type' => $source_type
             ]
              );
-       
-       
+
+
     }
     public function otpValidate(ValidateOtpRequest $request)
     {
-        $otpDate = $request->validated(); 
+        $otpDate = $request->validated();
         $user_id = Crypt::decrypt($request->get('token_id'));
         $source_type = Crypt::decrypt($request->get('source_type'));
-      
+
         if($source_type == 1){
             //dd('ok');
             return redirect('reset-password?token_id='.Crypt::encrypt($user_id).'&source_type='.Crypt::encrypt($source_type));
@@ -159,10 +159,10 @@ class AuthenticationController  extends Controller
                             'flag_sent_otp' => 0
                         ]);
                     if($update_user){
-                          $user = User::where('id', $user_id)->where('is_active', 1)->first(); 
+                          $user = User::where('id', $user_id)->where('is_active', 1)->first();
                          // $address=$user->RoleSchemeOfficeMappings->Office;
                           $request->session()->flush();
-                          Auth::login($user);                
+                          Auth::login($user);
                           return redirect('/dashboard');
                         }
 
@@ -173,7 +173,7 @@ class AuthenticationController  extends Controller
         $user_id = Crypt::decrypt($request->get('token_id'));
         $source_type = Crypt::decrypt($request->get('source_type'));
         $user_obj = $this->userService->find($user_id);
-        
+
         try{
             // dd($user_obj);
          DB::beginTransaction();
@@ -194,10 +194,10 @@ class AuthenticationController  extends Controller
               DB::rollBack();
               return back()->withErrors(['errors' => [__('messages.dbroolback')]]);
           }
-         }   catch (\Exception $e) {  
-            // dd($e); 
+         }   catch (\Exception $e) {
+            // dd($e);
              return back()->withErrors(['errors' => [__('messages.dbroolback')]]);
-                 
+
              }
     }
     public function resetPassword(ResetPasswordRequest $request)
@@ -210,28 +210,28 @@ class AuthenticationController  extends Controller
             'source_type' => $source_type
             ]
              );
-       
-       
+
+
     }
     public function resetPasswordPost(ResetPasswordPostRequest $request)
     {
        // dd('ok');
-        $otpDate = $request->validated(); 
-       
+        $otpDate = $request->validated();
+
         $user_id = Crypt::decrypt($request->get('token_id'));
         $source_type = Crypt::decrypt($request->get('source_type'));
         $user_obj = $this->userService->find($user_id);
-        
-     
-      
-   
+
+
+
+
         if($source_type == 1){
-            
-           
+
+
             $c_time=Carbon::now()->setTimezone('Asia/Kolkata')->format('Y/m/d H:i:s');
             $password_expires_at= Carbon::now()->setTimezone('Asia/Kolkata')->addDays(90)->format('Y/m/d H:i:s');
             DB::beginTransaction();
-           
+
             $inserttrail = array(
                 'old_password' => $user_obj->password,
                 'new_password' => bcrypt($request->user_password),
@@ -244,15 +244,15 @@ class AuthenticationController  extends Controller
             );
             $trailSave = User_audit_trail::create($inserttrail);
             $trail_id = $trailSave->id;
-          
+
             $update_user = User::where('id', $user_obj->id)->update([
-                    'password' => bcrypt($request->user_password), 
-                    'flag_sent_otp' => 0, 
-                    'password_set_time' => $c_time, 
-                    'password_expires_at' => $password_expires_at, 
+                    'password' => bcrypt($request->user_password),
+                    'flag_sent_otp' => 0,
+                    'password_set_time' => $c_time,
+                    'password_expires_at' => $password_expires_at,
                     'updated_at' => $c_time
                 ]);
-                
+
                 if ($update_user && $trail_id) {
                     DB::commit();
                     return redirect('login')->with('success', __('messages.passwordsucessfullyreset'));
@@ -261,7 +261,7 @@ class AuthenticationController  extends Controller
                     return back()->withErrors(['errors' => [__('messages.dbroolback')]]);
                 }
        }
-   
+
     }
      public function logout(Request $request): RedirectResponse
     {

@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('lgd_code')->unique();
             $table->string('ref_code')->index();
             $table->string('name');
-            $table->foreignId('municipality_id')->constrained();
+            $table->Integer('municipality_id');
+            $table->foreign('municipality_id','municipality_id_fk')->references('id')->on('municipalities')->onDelete('cascade');
             $table->timestamps();
             $table->smallInteger('is_active')->default(1);
             $table->smallInteger('ward_number')->nullable();

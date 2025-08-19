@@ -14,12 +14,8 @@ return new class extends Migration
         Schema::create('lb_scheme.draft_beneficiary_contacts', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('application_id');
-
-
             $table->smallInteger('district_id');
-
             $table->smallInteger('rural_urban_id');
-
             $table->smallInteger('block_id')->nullable();
             $table->Integer('municipality_id')->nullable();
             $table->Integer('ward_id')->nullable();

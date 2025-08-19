@@ -16,10 +16,12 @@ return new class extends Migration
             $table->string('name');
             $table->string('short_name');
             $table->string('description')->nullable();
-            $table->foreignId('department_id')->constrained()->index();
+            $table->smallInteger('department_id');
+            $table->foreign('department_id','department_id_fk')->references('id')->on('departments')->onDelete('cascade');
             $table->timestamps();
             $table->smallInteger('is_active')->default(1);
             $table->index(['name', 'short_name']);
+            $table->index('department_id');
         });
     }
 

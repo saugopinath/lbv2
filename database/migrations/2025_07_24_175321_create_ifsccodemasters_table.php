@@ -14,13 +14,16 @@ return new class extends Migration
         Schema::create('ifsccodemasters', function (Blueprint $table) {
             $table->id();
             $table->string('code',11)->unique();
-            $table->foreignId('bankmaster_id')->constrained();
             $table->timestamps();
             $table->string('branch');
-            $table->foreignId('state_id')->constrained();
+            $table->smallInteger('state_id');
+            $table->Integer('bankmaster_id');
+            $table->foreign('state_id','state_id_fk')->references('id')->on('states')->onDelete('cascade');
+            $table->foreign('bankmaster_id','bankmaster_id_fk')->references('id')->on('bankmasters')->onDelete('cascade');
             $table->smallInteger('is_active')->default(1);
             $table->index('code');
             $table->index('bankmaster_id');
+            $table->index('state_id');
             $table->index('id');
         });
     }

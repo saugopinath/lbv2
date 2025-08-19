@@ -18,11 +18,13 @@ return new class extends Migration
             $table->string('name');
             $table->string('short_name');
             $table->string('local_name')->nullable();
-            $table->foreignId('state_id')->constrained()->index();
+            $table->smallInteger('state_id');
+            $table->foreign('state_id', 'state_id_fk')->references('id')->on('states')->onDelete('cascade'); 
             $table->timestamps();
             $table->smallInteger('is_active')->default(1);
             $table->index('lgd_code');
             $table->index('id');
+            $table->index('state_id');
         });
     }
 

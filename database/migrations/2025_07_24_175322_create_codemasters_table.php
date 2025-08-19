@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('codemasters', function (Blueprint $table) {
             $table->tinyIncrements('id')->primary();
-            $table->string('code')->unique();
             $table->string('name');
             $table->string('short_name');
             $table->smallInteger('parent_id')->nullable();
             $table->timestamps();
             $table->smallInteger('is_active')->default(1);
+            $table->smallInteger('code')->nullable()->unique();
+            $table->smallInteger('rank')->nullable();
+            $table->string('parent_short_code')->nullable();
             $table->index('id');
         });
     }
