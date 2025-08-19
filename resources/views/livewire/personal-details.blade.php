@@ -36,7 +36,7 @@
                     name="name"
                     label="Applicant Name"
                     placeholder="Enter Applicant Name"
-                    required wire:model="name" />
+                    required wire:model="name" x-on:input="$el.value = $el.value.replace(/[^A-Za-z\s]/g, '')" />
             </div>
         </div>
         <div class="grid gap-6 md:grid-cols-2 mb-2 pl-4 pr-4">
@@ -44,13 +44,14 @@
                 <x-form.input
                     id="mobile"
                     name="mobile"
-                    label="Phone number"
-                    required wire:model="mobile" placeholder="123-45-678" />
+                    label="Mobile number"
+                    required wire:model="mobile" placeholder="123-45-678" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />
             </div>
             <div>
                 <x-form.input
                     id="email"
                     name="email"
+                    type="email"
                     label="Email address"
                     wire:model="email" placeholder="example@example.com" />
             </div>
@@ -63,12 +64,13 @@
                     label="Date of Birth"
                     required wire:model.lazy="dob" />
             </div>
-            <div>
+            <div class="relative">
                 <x-form.input
                     id="age"
                     name="age"
                     label="Age (as on {{ $currentDate }})"
                     wire:model="age" disabled />
+                <x-loading-spinner wire:target="dob" />
             </div>
         </div>
         <div class="grid gap-6 md:grid-cols-2 mb-2 pl-4 pr-4">
@@ -77,14 +79,14 @@
                     id="ffname"
                     name="ffname"
                     label="Father's Name"
-                    required wire:model="ffname" placeholder="Enter Father's Name" />
+                    required wire:model="ffname" placeholder="Enter Father's Name" x-on:input="$el.value = $el.value.replace(/[^A-Za-z\s]/g, '')" />
             </div>
             <div>
                 <x-form.input
                     id="mfname"
                     name="mfname"
                     label="Mother's Name"
-                    wire:model="mfname" required placeholder="Enter Mother's Name" />
+                    wire:model="mfname" required placeholder="Enter Mother's Name" x-on:input="$el.value = $el.value.replace(/[^A-Za-z\s]/g, '')" />
             </div>
         </div>
         <div class="grid gap-6 md:grid-cols-2 mb-2 pl-4 pr-4">
@@ -102,7 +104,7 @@
                         id="sfname"
                         name="sfname"
                         label="Spouse's Name"
-                        wire:model="sfname" required placeholder="Enter Spouse's Name" />
+                        wire:model="sfname" required placeholder="Enter Spouse's Name" x-on:input="$el.value = $el.value.replace(/[^A-Za-z\s]/g, '')" />
                 </div>
             </template>
         </div>
@@ -121,7 +123,7 @@
                         id="cas_cer_no"
                         name="cas_cer_no"
                         label="Caste Certificate Number"
-                        wire:model="cas_cer_no" placeholder="Enter Caste Certificate Number" required />
+                        wire:model="cas_cer_no" placeholder="Enter Caste Certificate Number" required x-on:input="$el.value = $el.value.replace(/[^A-Za-z0-9\/-]/g, '')" />
                 </div>
             </template>
         </div>
