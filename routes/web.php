@@ -30,3 +30,4 @@ Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tabl
 Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
 Route::get('lbform', [LBController::class, 'index'])->middleware(['auth', 'verified'])->name('lbform');
 Route::get('draftlist', [LBController::class, 'draftlist'])->middleware(['auth', 'verified'])->name('draftlist');
+Route::get('draftedit/{id}', [LBController::class, 'draftedit'])->middleware(['auth', 'verified'])->name('draftedit');

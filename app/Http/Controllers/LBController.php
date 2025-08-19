@@ -16,7 +16,11 @@ class LBController extends Controller
     }
     public function draftlist()
     {
-        $list = DraftBeneficiaryPersonal::all();
-        return view('lbform.draftlist');
+        $lists = DraftBeneficiaryPersonal::paginate(10);
+        return view('lbform.draftlist',compact('lists'));
+    }
+    public function draftedit($id)
+    {
+        return view('lbform.draftedit',compact('id'));
     }
 }

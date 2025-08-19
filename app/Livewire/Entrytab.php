@@ -3,6 +3,11 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use App\Models\DraftBeneficiaryPersonal;
+use App\Models\DraftBeneficiaryContact;
+use App\Models\DraftBeneficiaryBank;
+use App\Models\BeneficiaryEnclosure;
+use App\Models\DraftBeneficiaryDeclaration;
 
 class Entrytab extends Component
 {
@@ -14,6 +19,42 @@ class Entrytab extends Component
     public $tab4Enabled = false;
     public $tab5Enabled = false;
     protected $listeners = ['aadhaarChecked' => 'enableTabs', 'perDet' => 'enableTab2', 'conDet' => 'enableTab3', 'bankDet' => 'enableTab4', 'encList' => 'enableTab5', 'goPrevious' => 'previousTab'];
+    public function mount($application_id = null)
+    {
+        $this->application_id = $application_id;
+        if ($application_id) {
+            $tabsData = [
+                'tab1' => DraftBeneficiaryPersonal::where('application_id', $application_id)->exists(),
+                'tab2' => DraftBeneficiaryContact::where('application_id', $application_id)->exists(),
+                'tab3' => DraftBeneficiaryBank::where('application_id', $application_id)->exists(),
+                'tab4' => BeneficiaryEnclosure::where('application_id', $application_id)->exists(),
+                'tab5' => DraftBeneficiaryDeclaration::where('application_id', $application_id)->exists(),
+            ];
+            $foundNext = false;
+            $lastCompletedTab = null;
+            foreach ($tabsData as $key => $hasData) {
+                if ($hasData) {
+                    $this->{$key . 'Enabled'} = true;
+                    $lastCompletedTab = $key;
+                } elseif (!$foundNext) {
+                    $this->{$key . 'Enabled'} = true;
+                    $this->currentTab = $key;
+                    $foundNext = true;
+                } else {
+                    $this->{$key . 'Enabled'} = false;
+                }
+            }
+            if (!$foundNext && $lastCompletedTab) {
+                $this->currentTab = $lastCompletedTab;
+            }
+            $this->showTabs = true;
+        } 
+        /*else {
+            $this->tab1Enabled = true;
+            $this->currentTab = 'tab1';
+            $this->showTabs = true;
+        }*/
+    }
     public function enableTabs()
     {
         $this->showTabs = true;
