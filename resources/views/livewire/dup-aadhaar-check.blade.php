@@ -10,20 +10,29 @@
             this.successMessage = '';
 
             let val = this.aadhaar.replace(/\s+/g, '');
+            
+            // Check 12-digit format
             if (!/^\d{12}$/.test(val)) {
                 this.errorMessage = 'Please enter a valid 12-digit Aadhaar number.';
                 return;
             }
 
-            $wire.aadhaar = val; // send clean value to Livewire
+            // Verhoeff checksum validation
+            if(!verhoeffValidate(val)) {
+                this.errorMessage = 'Invalid Aadhaar number cs';
+                return;
+            }
+
+            // Send to Livewire
+            $wire.aadhaar = val;
             let result = await $wire.checkDuplicate();
 
-            if (result.status === 'error' || result.status === 'duplicate') {
+            if(result.status === 'error' || result.status === 'duplicate') {
                 this.errorMessage = result.message;
-                this.disableCheckBtn = false; // allow retry
-            } else if (result.status === 'success') {
+                this.disableCheckBtn = false;
+            } else if(result.status === 'success') {
                 this.successMessage = result.message;
-                this.disableCheckBtn = true; // disable after success
+                this.disableCheckBtn = true;
             }
         }
     }"
@@ -35,8 +44,8 @@
         <x-form.input
             id="check_aadhar"
             name="aadhar_number"
-            label="Aadhar Number"
-            placeholder="Enter Aadhar Number"
+            label="Aadhaar Number"
+            placeholder="Enter Aadhaar Number"
             required
             x-model="aadhaar" />
     </div>
@@ -64,3 +73,8 @@
         <div class="mt-8 text-green-600 text-sm" x-text="successMessage"></div>
     </template>
 </div>
+
+<!-- Include Verhoeff JS only on this page -->
+@push('scripts')
+<script src="{{ asset('js/adhar-verhoeff.js') }}"></script>
+@endpush
