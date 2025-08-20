@@ -24,7 +24,7 @@ class PersonalDetails extends Component
     public function updatedDob($value)
     {
         try {
-            $this->age = Carbon::createFromFormat('d-m-Y', $value)->age;
+            $this->age = Carbon::createFromFormat('Y-m-d', $value)->age;
         } catch (\Exception $e) {
             $this->age = null;
         }
@@ -77,7 +77,7 @@ class PersonalDetails extends Component
             $this->name = $app_det->full_name;
             $this->mobile = $app_det->mobile_no;
             $this->email = $app_det->email;
-            $this->dob = Carbon::parse($app_det->dob)->format('d-m-Y');
+            $this->dob = Carbon::parse($app_det->dob)->format('Y-m-d');
             $this->ffname = $app_det->relationships->firstWhere('relation_type_id', Codemaster::getIdByCode(131))->full_name;
             $this->mfname = $app_det->relationships->firstWhere('relation_type_id', Codemaster::getIdByCode(132))->full_name;
             $this->mar_statu = $app_det->marital_status;
@@ -99,6 +99,7 @@ class PersonalDetails extends Component
     public function save()
     {
         $validated = $this->validate($this->rules());
+        dd($validated['dob']);
         if ($this->mode === null && $this->application_id === null) {
             $aadhaar_data = Session::get('aadhaar_data');
             $encoded = $aadhaar_data['encoded'];
