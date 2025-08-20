@@ -62,7 +62,8 @@
                     id="dob"
                     name="dob"
                     label="Date of Birth"
-                    required wire:model.lazy="dob" />
+                    required wire:model.lazy="dob" :min="$minDate"
+                    :max="$maxDate" />
             </div>
             <div class="relative">
                 <x-form.input

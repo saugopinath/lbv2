@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Crypt;
 class PersonalDetails extends Component
 {
     public $app_types, $genders, $castes, $mar_status = [];
-    public $mode, $currentDate;
+    public $mode, $currentDate, $minDate, $maxDate;
     public $app_type, $app_date, $reg_no, $ds_date, $application_id;
     public $name, $mobile, $email, $dob, $age, $mar_statu;
     public $ffname, $mfname, $sfname;
@@ -61,6 +61,8 @@ class PersonalDetails extends Component
     public function mount($mode = null, $application_id = null)
     {
         $this->currentDate = Carbon::now()->format('d/m/Y');
+        $this->minDate = now()->subYears(60)->addDay()->format('Y-m-d');
+        $this->maxDate = now()->subYears(25)->format('Y-m-d');
         $this->mode = $mode;
         $this->app_types = Codemaster::where('code', 4)->first()->children()->get();
         $this->mar_status = Codemaster::where('code', 3)->first()->children()->where('code', '!=', 35)->get();
