@@ -6,21 +6,23 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Session;
 use App\Models\BeneficiaryAadhaar;
 use Illuminate\Support\Facades\Crypt;
+use App\Helpers\AadhaarHelper;
 
 class DupAadhaarCheck extends Component
 {
     public $aadhaar;
     public $error = null;
     public $valid = false;
+
     public function checkDuplicate()
     {
         $this->error = null;
         $this->valid = false;
         $this->aadhaar = trim($this->aadhaar);
 
-        // Basic validation
-        if (!ctype_digit($this->aadhaar) || strlen($this->aadhaar) !== 12) {
-            $this->error = "Please enter a valid 12-digit Aadhaar number.";
+        // Verhoeff validation via helper
+        if (!AadhaarHelper::validate($this->aadhaar)) {
+            $this->error = "Invalid Aadhaar number sc";
             return ['status' => 'error', 'message' => $this->error];
         }
 
@@ -44,7 +46,6 @@ class DupAadhaarCheck extends Component
 
         return ['status' => 'success', 'message' => '✅ Aadhaar is valid and not duplicate.'];
     }
-
 
     public function render()
     {
