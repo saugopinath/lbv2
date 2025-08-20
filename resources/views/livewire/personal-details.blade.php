@@ -128,9 +128,22 @@
             </template>
         </div>
         <div class="flex justify-end mt-4 pr-4">
-            <x-button.primary type="submit">
-                {{ $mode == '0' ? 'Save' : 'Save & Next' }}
+            <x-button.primary type="submit" wire:loading.attr="disabled" wire:target="save" class="flex items-center gap-2">
+                <span wire:loading.remove wire:target="save">
+                    {{ $mode == '0' ? 'Save' : 'Save & Next' }}
+                </span>
+                <span wire:loading wire:target="save" class="flex items-center">
+                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                            stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z">
+                        </path>
+                    </svg>
+                </span>
             </x-button.primary>
         </div>
+
     </form>
 </div>

@@ -4,13 +4,15 @@
             <div>
                 <x-form.input name="ifscode" label="IFS Code" required wire:model.lazy="ifscode" />
             </div>
-            <div>
+            <div class="relative">
                 <x-form.input name="bankname" label="Bank Name" required wire:model.defer="bankname" disabled />
+                <x-loading-spinner wire:target="ifscode" />
             </div>
         </div>
         <div class="grid gap-6 mb-4 md:grid-cols-2 pl-4 pr-4">
-            <div>
+            <div class="relative">
                 <x-form.input name="bank_branch_name" label="Bank Branch Name" required wire:model.defer="bankbranchname" />
+                <x-loading-spinner wire:target="ifscode" />
             </div>
             <div>
                 <x-form.input name="bankaccountnumber" label="Bank Account Number" required wire:model.defer="bankaccountnumber" />
