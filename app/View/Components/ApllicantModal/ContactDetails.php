@@ -13,11 +13,11 @@ class ContactDetails extends Component
     /**
      * Create a new component instance.
      */
-    public $id, $applicantDet, $distname, $ps, $blockmunicorp, $gpward, $villtown, $houseno, $po, $pin;
-    public function __construct($id)
+    public $id, $applicantDet,$reportType, $distname, $ps, $blockmunicorp, $gpward, $villtown, $houseno, $po, $pin;
+    public function __construct($id,$reportType = null)
     {
 
-         $reportType = request()->query('reportType');
+        //  $reportType = request()->query('reportType');
 
          if ($reportType === '3') {
             $this->applicantDet = BeneficiaryPersonal::with('contact')
@@ -28,9 +28,10 @@ class ContactDetails extends Component
                 ->where('application_id', $id)
                 ->firstOrFail();
         }
+
         $this->distname = $this->applicantDet->contact->district->name;
         $this->ps = $this->applicantDet->contact->police_station;
-        if ($this->applicantDet->rural_urban_id == 1) {
+        if ($this->applicantDet->contact->rural_urban_id == 1) {
             $this->blockmunicorp = $this->applicantDet->contact->municipality->name;
             $this->gpward = $this->applicantDet->contact->ward->name;
         } else {

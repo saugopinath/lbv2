@@ -22,3 +22,4 @@ class BeneficiaryListController extends Controller
         return view('beneficiaries.report', compact('reportType', 'login_type'));
     }
 }
+

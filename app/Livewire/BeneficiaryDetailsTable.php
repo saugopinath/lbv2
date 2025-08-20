@@ -140,6 +140,14 @@ class BeneficiaryDetailsTable extends DataTableComponent
             ->with(['father' => fn($q) => $q->where('relation_type_id', $relationFather)])
             ->whereHas('father', fn($q) => $q->where('relation_type_id', $relationFather));
 
+
+        //       if (!empty($select_lgd['district_id'])) {
+        //     $filter_condition['district_id'] = $select_lgd['district_id'];
+        // }
+        // if (!empty($select_lgd['block_id'])) {
+        //     $filter_condition['block_id'] = $select_lgd['block_id'];
+        // }
+
         if (!empty($this->filter_condition['district_id'])) {
             $query->whereHas('contact',fn($q) =>
                 $q->where('district_id', $this->filter_condition['district_id'])

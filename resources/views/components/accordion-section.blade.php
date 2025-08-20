@@ -18,7 +18,8 @@
             <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM232 344C218.7 344 208 333.3 208 320C208 306.7 218.7 296 232 296L408 296C421.3 296 432 306.7 432 320C432 333.3 421.3 344 408 344L232 344z" />
         </svg>
     </button>
-    <div x-show="openSection === '{{ $sectionId }}'" x-transition class="p-4 bg-green-50 shadow border-l-4 border-{{ $color }} space-x-2">
+    <div x-show="openSection === '{{ $sectionId }}'" x-transition.opacity
+     class="transition duration-500 p-4 bg-green-50 shadow border-l-4 border-{{ $color }} space-x-2">
         {{ $slot }}
     </div>
 </div>

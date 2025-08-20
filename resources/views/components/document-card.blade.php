@@ -1,0 +1,80 @@
+{{--  @props(['docName', 'isRequired', 'docTypeId', 'existingDoc'])
+<div class="backdrop-blur-md bg-white/80 rounded-lg p-4 shadow-sm flex flex-col justify-between">
+    <span class="text-gray-800 font-medium mb-2">
+        {{ $docName }}
+        @if ($isRequired)
+        <span class="text-red-500">*</span>
+        @endif
+    </span>
+    <div class="flex space-x-2">
+        <button @click="openModal({{ $docTypeId }}, '{{ $docName }}')"
+            class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">
+            Upload
+        </button>
+        @if ($existingDoc)
+        <button wire:click="downloadDocument({{ $existingDoc->id }})"
+            class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition">
+            Download
+        </button>
+        @endif
+    </div>
+</div>  --}}
+
+@props(['docName', 'isRequired', 'docTypeId', 'existingDoc', 'xIsDuplicate' => 0])
+
+<div x-data="{
+    modalOpen: false,
+    modalSrc: '',
+    modalDocName: '',
+}" class="relative">
+
+    <!-- Single card -->
+    <div class="backdrop-blur-md bg-white/80 rounded-lg p-4 shadow-sm flex flex-col justify-between">
+        <span class="text-gray-800 font-medium mb-2">
+            {{ $docName }}
+            @if ($isRequired)
+                <span class="text-red-500">*</span>
+            @endif
+        </span>
+
+        @if ($xIsDuplicate == 1)
+            @php $mime = $existingDoc->document_mime_type ?? ''; @endphp
+
+            @if ($existingDoc && in_array($mime, ['image/jpg', 'image/jpeg', 'image/png']))
+                <div class="flex space-x-2">
+                    <button
+                        @click="modalSrc='data:{{ $mime }};base64,{{ $existingDoc->attched_document }}'; modalDocName='{{ $docName }}'; modalOpen=true;"
+                        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">View</button>
+                </div>
+            @else ($existingDoc && $mime == 'application/pdf')
+                <div class="flex space-x-2">
+                    <button wire:click="downloadDocument({{ $existingDoc->id }})"
+                        class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition">Download</button>
+                </div>
+            @endif
+        @elseif ($existingDoc)
+            <div class="flex space-x-2">
+                <button @click="openModal({{ $docTypeId }}, '{{ $docName }}')"
+                    class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">Upload</button>
+                <button wire:click="downloadDocument({{ $existingDoc->id }})"
+                    class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition">Download</button>
+            </div>
+        @else
+            <div class="flex space-x-2">
+                <button @click="openModal({{ $docTypeId }}, '{{ $docName }}')"
+                    class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">Upload</button>
+            </div>
+        @endif
+    </div>
+
+    <!-- popup view modal -->
+    <div x-show="modalOpen" x-cloak x-transition class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/30" @click="modalOpen=false"></div>
+        <div class="bg-white p-6 max-w-3xl w-full rounded relative z-10 border shadow">
+            <button @click="modalOpen=false"
+                class="absolute right-2 top-2 text-gray-500 hover:text-red-500 text-xl">&times;</button>
+            <h2 class="text-lg font-semibold mb-3" x-text="modalDocName"></h2>
+            <iframe :src="modalSrc" class="w-full h-[70vh]" frameborder="0"></iframe>
+        </div>
+    </div>
+</div>

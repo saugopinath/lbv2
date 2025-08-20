@@ -22,4 +22,8 @@ class BeneficiaryEnclosure extends Model
     {
         return $this->belongsTo(Codemaster::class, 'document_type', 'id');
     }
+    public function codemaster()
+    {
+        return $this->belongsTo(\App\Models\Codemaster::class, 'document_type', 'id');
+    }
 }

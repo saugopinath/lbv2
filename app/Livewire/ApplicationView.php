@@ -13,10 +13,12 @@ class ApplicationView extends Component
     public $label;
     public $value;
     public $passId;
+    public $is_duplicate;
 
-    public function mount($id)
+    public function mount($id,$is_duplicate = 0)
     {
         $this->reportType = request()->query('reportType');
+        $this->is_duplicate   = $is_duplicate;
 
         if ($this->reportType === '3') {
             $this->application = BeneficiaryPersonal::findOrFail($id);

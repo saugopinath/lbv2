@@ -15,4 +15,9 @@ class BeneficiaryBank extends Model
     {
         return $this->belongsTo(IfscCodeMaster::class, 'ifsc', 'code');
     }
+
+     public function ifscbranch()
+    {
+        return $this->belongsTo(IfscCodeMaster::class, 'ifsc', 'code');
+    }
 }

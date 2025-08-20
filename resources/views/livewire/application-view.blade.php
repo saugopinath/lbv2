@@ -1,4 +1,3 @@
-
 <div class="bg-white dark:bg-gray-800 shadow-md rounded p-8 space-y-4">
     <div class="bg-blue-200 dark:bg-gray-800 shadow-md rounded p-2 space-y-2 text-center border border-blue-300">
         <h2 class="text-lg font-semibold">Application Name: {{ $application->full_name ?? '-' }}</h2>
@@ -8,9 +7,14 @@
     <div x-data="{
         openSection: 'personal-details',
         toggleSection(section) {
-            this.openSection = this.openSection === section ? null : section;
+            if (this.openSection === section) {
+                this.openSection = 'personal-details';
+            } else {
+                this.openSection = section;
+            }
         }
     }" class="space-y-2">
+
         <x-accordion-section title="Personal Details" sectionId="personal-details" color="pink-500">
             <x-apllicant-modal.personal-details :id="$passId" :reportType="$reportType" />
         </x-accordion-section>
@@ -23,8 +27,10 @@
             <x-apllicant-modal.bank-account-details :id="$passId" :reportType="$reportType" />
         </x-accordion-section>
 
-         <x-accordion-section title="Encloser Details" sectionId="encloser-details" color="orange-500">
-            <x-apllicant-modal.encloser-list :id="$passId" :reportType="$reportType" />
+        <x-accordion-section title="Encloser Details" sectionId="encloser-details" color="orange-500">
+            {{--  <x-apllicant-modal.encloser-list :id="$passId" :reportType="$reportType" />  --}}
+            {{--  <x-apllicant-modal.encloser-list :id="$passId" />  --}}
+             <livewire:enclosure-list :application_id="$passId" :is_page="1" />
         </x-accordion-section>
 
     </div>

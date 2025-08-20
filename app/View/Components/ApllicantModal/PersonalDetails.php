@@ -19,15 +19,17 @@ class PersonalDetails extends Component
     public $id, $reportType, $applicantDet, $decryptedAadhaar, $dsregno, $dsdate, $mobile, $email,
         $fname, $dob, $age, $ffname, $mfname, $sfname, $caste, $cascerno, $currentDate;
 
-    public function __construct($id)
+    public function __construct($id,$reportType = null)
     {
-        $reportType = request()->query('reportType');
-
+        // $reportType = request()->query('reportType');
+// dd($reportType);
         $this->currentDate = Carbon::now()->format('d/m/Y');
 
         if ($reportType === '3') {
+            // dd('ok1');
             $applicantDet = BeneficiaryPersonal::with(['aadhaar', 'relationships'])->where('beneficiary_id', $id)->first();
         } else {
+            // dd('ok2');
             $applicantDet = DraftBeneficiaryPersonal::with(['aadhaar', 'relationships'])->where('application_id', $id)->first();
         }
         $this->decryptedAadhaar = Crypt::decryptString($applicantDet->aadhaar->encoded_aadhar);
