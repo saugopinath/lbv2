@@ -30,7 +30,8 @@
         <x-accordion-section title="Encloser Details" sectionId="encloser-details" color="orange-500">
             {{--  <x-apllicant-modal.encloser-list :id="$passId" :reportType="$reportType" />  --}}
             {{--  <x-apllicant-modal.encloser-list :id="$passId" />  --}}
-             <livewire:enclosure-list :application_id="$passId" :is_page="1" />
+             {{--  <livewire:enclosure-list :application_id="$passId" :is_page="1" :doc_type_id_array="[100, 101, 104, 108, 109, 123]" />  --}}
+             <livewire:enclosure-list :application_id="$passId"  />
         </x-accordion-section>
 
     </div>

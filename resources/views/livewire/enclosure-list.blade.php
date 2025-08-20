@@ -61,13 +61,6 @@
             this.currentFileMime = '';
         }
     }" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {{--  @foreach ($doc_lists as $doc)
-        <x-document-card
-            :docName="$doc->codemaster->name"
-            :isRequired="$doc->is_required"
-            :docTypeId="$doc->doc_type_id"
-            :existingDoc="$existingDocuments[$doc->doc_type_id] ?? null" />
-        @endforeach  --}}
         @foreach ($doc_lists as $doc)
             <x-document-card :docName="$doc->codemaster->name" :isRequired="$doc->is_required" :docTypeId="$doc->doc_type_id" :existingDoc="$existingDocuments[$doc->doc_type_id] ?? null"
                 :xIsDuplicate="$is_page == 1 ? 1 : 0" />
@@ -76,7 +69,7 @@
         <x-upload-modal :currentDocExtensions="$currentDocExtensions" :currentDocMaxSize="$currentDocMaxSize" />
     </div>
     <div class="flex justify-between mt-4 pl-6 pr-6">
-        @if ($is_page != 1)
+        @if (!$is_page)
             @if ($mode != '0')
                 <x-button.danger wire:click="$dispatch('goPrevious')">Previous</x-button.danger>
             @endif
@@ -86,7 +79,7 @@
                 return $doc->is_required && empty($existingDocuments[$doc->doc_type_id] ?? null);
             });
         @endphp
-        @if ($is_page != 1)
+        @if (!$is_page)
             @if ($missingRequired->isNotEmpty())
                 <x-button.primary type="button" onclick="alert('upload required')">
                     {{ $mode == '0' ? 'Save' : 'Save & Next' }}

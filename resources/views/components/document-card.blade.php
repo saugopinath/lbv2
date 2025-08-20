@@ -42,27 +42,27 @@
 
             @if ($existingDoc && in_array($mime, ['image/jpg', 'image/jpeg', 'image/png']))
                 <div class="flex space-x-2">
-                    <button
+                    <x-button.primary
                         @click="modalSrc='data:{{ $mime }};base64,{{ $existingDoc->attched_document }}'; modalDocName='{{ $docName }}'; modalOpen=true;"
-                        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">View</button>
+                        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">View</x-button.primary>
                 </div>
             @else ($existingDoc && $mime == 'application/pdf')
                 <div class="flex space-x-2">
-                    <button wire:click="downloadDocument({{ $existingDoc->id }})"
-                        class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition">Download</button>
+                    <x-button.success wire:click="downloadDocument({{ $existingDoc->id }})"
+                        class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition">Download</x-button.success>
                 </div>
             @endif
         @elseif ($existingDoc)
             <div class="flex space-x-2">
-                <button @click="openModal({{ $docTypeId }}, '{{ $docName }}')"
-                    class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">Upload</button>
-                <button wire:click="downloadDocument({{ $existingDoc->id }})"
-                    class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition">Download</button>
+                <x-button.primary @click="openModal({{ $docTypeId }}, '{{ $docName }}')"
+                    class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">Upload</x-button.primary>
+                <x-button.success wire:click="downloadDocument({{ $existingDoc->id }})"
+                    class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition">Download</x-button.success>
             </div>
         @else
             <div class="flex space-x-2">
-                <button @click="openModal({{ $docTypeId }}, '{{ $docName }}')"
-                    class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">Upload</button>
+                <x-button.primary @click="openModal({{ $docTypeId }}, '{{ $docName }}')"
+                    class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">Upload</x-button.primary>
             </div>
         @endif
     </div>
