@@ -92,6 +92,9 @@ class ContactDetails extends Component
                 $data['ward_id'] = $validated['selectedGpWard'];
             }
             DraftBeneficiaryContact::create($data);
+            $this->dispatch('conDet', [
+                'message' => "Contact Details saved successfully for the application id: {$this->application_id}"
+            ]);
         } else {
             $data = [
                 'district_id' => $validated['selectedDistrict'],
@@ -110,8 +113,10 @@ class ContactDetails extends Component
                 $data['ward_id'] = $validated['selectedGpWard'];
             }
             DraftBeneficiaryContact::where('application_id', $this->application_id)->update($data);
+            $this->dispatch('conDet', [
+            'message' => "Contact Details updated successfully for the application id: {$this->application_id}"
+        ]);
         }
-        $this->dispatch('conDet');
     }
     public function render()
     {

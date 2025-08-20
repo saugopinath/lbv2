@@ -34,6 +34,11 @@
         @endforeach
     </nav>
     <div class="mt-4">
+        @if (!empty($tabMessages[$currentTab]))
+        <x-tabalert type="success" :tab="$currentTab">
+            {{ $tabMessages[$currentTab] }}
+        </x-tabalert>
+        @endif
         @if (!empty($tabs[$currentTab]))
         @livewire(
         $tabs[$currentTab]['component'],

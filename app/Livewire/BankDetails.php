@@ -65,14 +65,19 @@ class BankDetails extends Component
                 'ifsc' => $validated['ifscode'],
                 'bank_account_number' => $validated['bankaccountnumber'],
             ]);
+            $this->dispatch('bankDet', [
+                'message' => "Bank Details saved successfully for the application id: {$this->application_id}"
+            ]);
         } else {
             $data = [
                 'ifsc' => $validated['ifscode'],
                 'bank_account_number' => $validated['bankaccountnumber'],
             ];
             DraftBeneficiaryBank::where('application_id', $this->application_id)->update($data);
+            $this->dispatch('bankDet', [
+            'message' => "Bank Details updated successfully for the application id: {$this->application_id}"
+        ]);
         }
-        $this->dispatch('bankDet');
     }
     public function render()
     {

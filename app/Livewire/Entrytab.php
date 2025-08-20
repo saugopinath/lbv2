@@ -18,7 +18,8 @@ class Entrytab extends Component
     public $tab3Enabled = false;
     public $tab4Enabled = false;
     public $tab5Enabled = false;
-    protected $listeners = ['aadhaarChecked' => 'enableTabs', 'perDet' => 'enableTab2', 'conDet' => 'enableTab3', 'bankDet' => 'enableTab4', 'encList' => 'enableTab5', 'goPrevious' => 'previousTab'];
+    public $tabMessages = [];
+    protected $listeners = ['aadhaarChecked' => 'enableTabs', 'perDet' => 'enableTab2', 'conDet' => 'enableTab3', 'bankDet' => 'enableTab4', 'encList' => 'enableTab5', 'goPrevious' => 'previousTab', 'tabMessage' => 'handleTabMessage'];
     public function mount($application_id = null)
     {
         $this->application_id = $application_id;
@@ -48,7 +49,7 @@ class Entrytab extends Component
                 $this->currentTab = $lastCompletedTab;
             }
             $this->showTabs = true;
-        } 
+        }
         /*else {
             $this->tab1Enabled = true;
             $this->currentTab = 'tab1';
@@ -61,26 +62,38 @@ class Entrytab extends Component
         $this->tab1Enabled = true;
         $this->currentTab = 'tab1';
     }
-    public function enableTab2($application_id)
+    public function enableTab2($data)
     {
         $this->tab2Enabled = true;
         $this->currentTab = 'tab2';
-        $this->application_id = $application_id;
+        $this->application_id = $data['application_id'];
+        if (!empty($data['message'])) {
+            $this->tabMessages['tab2'] = $data['message'];
+        }
     }
-    public function enableTab3()
+    public function enableTab3($data)
     {
         $this->tab3Enabled = true;
         $this->currentTab = 'tab3';
+        if (!empty($data['message'])) {
+            $this->tabMessages['tab3'] = $data['message'];
+        }
     }
-    public function enableTab4()
+    public function enableTab4($data)
     {
         $this->tab4Enabled = true;
         $this->currentTab = 'tab4';
+        if (!empty($data['message'])) {
+            $this->tabMessages['tab4'] = $data['message'];
+        }
     }
-    public function enableTab5()
+    public function enableTab5($data)
     {
         $this->tab5Enabled = true;
         $this->currentTab = 'tab5';
+        if (!empty($data['message'])) {
+            $this->tabMessages['tab5'] = $data['message'];
+        }
     }
     public function previousTab()
     {
@@ -97,6 +110,12 @@ class Entrytab extends Component
             case 'tab5':
                 $this->currentTab = 'tab4';
                 break;
+        }
+    }
+    public function clearTabMessage($tab)
+    {
+        if (!empty($this->tabMessages[$tab])) {
+            unset($this->tabMessages[$tab]);
         }
     }
     public function render()

@@ -12,6 +12,7 @@ use App\Models\DraftBeneficiaryPersonal;
 use App\Models\DraftBeneficiaryRelationship;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+
 class PersonalDetails extends Component
 {
     public $app_types, $genders, $castes, $mar_status = [];
@@ -117,9 +118,9 @@ class PersonalDetails extends Component
                 'is_faulty' => 0,
                 'created_by' => Auth::id(),
             ];
-            if(Crypt::decryptString(Session::get('lgd_session.office_type_id')) == 153){
-                 $data['block_id'] = Crypt::decryptString(Session::get('lgd_session.block_id'));
-            }else{
+            if (Crypt::decryptString(Session::get('lgd_session.office_type_id')) == 153) {
+                $data['block_id'] = Crypt::decryptString(Session::get('lgd_session.block_id'));
+            } else {
                 $data['sub_division_id'] = Crypt::decryptString(Session::get('lgd_session.subdivision_id'));
             }
             if (!empty($validated['email'])) {
@@ -160,7 +161,10 @@ class PersonalDetails extends Component
                 'encoded_aadhar' => $encoded,
             ]);
             Session::forget('aadhar_hash');
-            $this->dispatch('perDet', application_id: $draftbenPar->application_id);
+            $this->dispatch('perDet', [
+                'application_id' => $draftbenPar->application_id,
+                'message' => "Personal Details saved successfully and the application id is: {$draftbenPar->application_id}"
+            ]);
         } else {
             $data = [
                 'full_name' => $validated['name'],
@@ -212,7 +216,10 @@ class PersonalDetails extends Component
                     ->where('relation_type_id', Codemaster::getIdByCode(133))
                     ->delete();
             }
-            $this->dispatch('perDet', application_id: $this->application_id);
+            $this->dispatch('perDet', [
+                'application_id' => $this->application_id,
+                'message' => "Personal Details updated successfully for the application id: {$this->application_id}"
+            ]);
         }
     }
     public function render()
