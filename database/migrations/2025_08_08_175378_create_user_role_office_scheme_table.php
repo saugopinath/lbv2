@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_office_mappings');
+        Schema::dropIfExists('user_role_scheme_office_mappings');
     }
 };

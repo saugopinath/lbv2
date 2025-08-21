@@ -1,7 +1,6 @@
 @if ( $message = Session::get('success'))
 
-<div class="rounded p-3 bg-success/10 text-success">
-   
+<div class="rounded-md p-2 bg-green-100 text-green-800 border border-green-200">
         {{ $message}}
     </div>
 @endif
