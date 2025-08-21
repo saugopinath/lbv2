@@ -12,15 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('lb_scheme.beneficiary_approved_lists', function (Blueprint $table) {
-            $table->unsignedInteger('application_id');
+            $table->id();
+            $table->unsignedBigInteger(column: 'sourceable_id')->unique();
+            $table->string('sourceable_type');
             $table->smallInteger('district_id');
             $table->smallInteger('block_id')->nullable();
             $table->mediumInteger('sub_division_id')->nullable();
             $table->integer('municipality_id')->nullable();
             $table->integer('ward_id')->nullable();
             $table->integer('panchayat_id')->nullable();
-            $table->morphs('source');
-            $table->foreign('application_id', 'beneficiary_id_fk')->references('application_id')->on('lb_scheme.beneficiary_personals')->onDelete('cascade');
+            $table->timestamps();
+           
+            
+            // $table->foreign('application_id', 'beneficiary_id_fk')->references('application_id')->on('lb_scheme.beneficiary_personals')->onDelete('cascade');
         });
     }
     /**

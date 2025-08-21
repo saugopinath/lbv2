@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('lb_scheme.faulty_beneficiary_personals', function (Blueprint $table){
-           $table->id();
-            $table->unsignedBigInteger('application_id');
+        //    $table->id();
+            $table->id('application_id');
             $table->unsignedBigInteger('beneficiary_id')->unique();
             $table->smallInteger('district_id');
             $table->smallInteger('block_id')->nullable();

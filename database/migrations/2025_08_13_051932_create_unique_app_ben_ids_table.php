@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('application_id');//pk
             $table->unsignedBigInteger('beneficiary_id')->unique();
             // $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals');
-            // $table->timestamps();
+            $table->timestamps();
         });
     }
 
