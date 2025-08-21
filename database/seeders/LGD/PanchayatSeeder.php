@@ -3369,6 +3369,7 @@ array('ref_code'=>'109815006','lg_code'=>'109815','name'=>'RAJADANGA','block_lgd
         foreach ($wb_Panchayats as $panchayat) {
             $block_id = Block::where('lgd_code', $panchayat['block_lgd_code'])->firstOrFail()->id;
             Panchayat::create([
+                'id' => $panchayat['lg_code'],
                 'ref_code' => $panchayat['ref_code'],
                 'name' => strtoupper($panchayat['name']),
                 'lgd_code' => $panchayat['lg_code'],
