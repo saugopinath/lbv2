@@ -21,6 +21,7 @@ class EnclosureList extends Component
     public $currentDocExtensions = '';
     public $mode, $is_page;
     public $doc_type_id_array = [];
+     public $showErrors = false;
 
     public function mount($mode = null, $application_id = null, $is_page = null, $doc_type_id_array = [])
     {
@@ -52,15 +53,9 @@ class EnclosureList extends Component
                 foreach ($app as $doc) {
                     $this->existingDocuments[$doc->document_type] = $doc;
                 }
-                if ($is_page == 1) {
-                    $uploadedTypes = array_keys($this->existingDocuments);
-                    $this->doc_lists = $this->doc_lists->whereIn('doc_type_id', $uploadedTypes);
-                }
             }
         }
     }
-
-
     public function setCurrentDoc($docTypeId)
     {
         $this->currentDocId = $docTypeId;
@@ -133,6 +128,7 @@ class EnclosureList extends Component
     }
     public function save()
     {
+        $this->showErrors = false;
         foreach ($this->doc_lists as $doc) {
             $existing = $this->existingDocuments[$doc->doc_type_id] ?? null;
 
