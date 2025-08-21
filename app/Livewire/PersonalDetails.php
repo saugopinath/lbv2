@@ -12,9 +12,10 @@ use App\Models\DraftBeneficiaryPersonal;
 use App\Models\DraftBeneficiaryRelationship;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
-
+use App\Traits\WithLiveValidation;
 class PersonalDetails extends Component
 {
+    
     public $app_types, $genders, $castes, $mar_status = [];
     public $mode, $currentDate, $minDate, $maxDate;
     public $app_type, $app_date, $reg_no, $ds_date, $application_id;

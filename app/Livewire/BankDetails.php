@@ -46,12 +46,19 @@ class BankDetails extends Component
     }
     public function rules()
     {
-        $rules = [
-            'ifscode' => 'required|string',
+        return [
+            'ifscode' => 'required|string|max:11',
             'bankaccountnumber' => 'required|numeric',
             'confirmbankaccountnumber' => 'required|same:bankaccountnumber',
         ];
-        return $rules;
+    }
+    public function messages()
+    {
+        return [
+            'ifscode.*' => 'Please enter a valid IFSC code (maximum 11 characters).',
+            'bankaccountnumber.*' => 'Please enter a valid bank account number.',
+            'confirmbankaccountnumber.*' => 'The confirmation account number must match the bank account number.',
+        ];
     }
     public function save()
     {
@@ -75,8 +82,8 @@ class BankDetails extends Component
             ];
             DraftBeneficiaryBank::where('application_id', $this->application_id)->update($data);
             $this->dispatch('bankDet', [
-            'message' => "Bank Details updated successfully for the application id: {$this->application_id}"
-        ]);
+                'message' => "Bank Details updated successfully for the application id: {$this->application_id}"
+            ]);
         }
     }
     public function render()

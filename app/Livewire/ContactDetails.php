@@ -70,9 +70,9 @@ class ContactDetails extends Component
     {
         return [
             'state.*' => 'Please select a state.',
-            'policestation.*' => 'Please enter the police station name.',
-            'villtowncity.*' => 'Please enter the village/town/city name.',
-            'postoffice.*' => 'Please enter the post office name.',
+            'policestation.*' => 'Please enter the police station name and must contain only letters and spaces.',
+            'villtowncity.*' => 'Please enter the village/town/city name and must contain only letters and spaces.',
+            'postoffice.*' => 'Please enter the post office name and must contain only letters and spaces.',
             'pincode.*' => 'Please enter a valid 6-digit pincode.',
             'selectedDistrict.*' => 'Please select a district.',
             'selectedRuralurban.*' => 'Please select Rural/Urban.',
