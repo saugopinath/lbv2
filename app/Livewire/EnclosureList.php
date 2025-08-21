@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Auth;
 use App\Models\DraftBeneficiaryPersonal;
 use App\Models\BeneficiaryEnclosure;
 use App\Models\SchemeAttachedDocMappings;
@@ -50,7 +51,13 @@ class EnclosureList extends Component
 
                 foreach ($app as $doc) {
                     $this->existingDocuments[$doc->document_type] = $doc;
-                }                
+                }
+                if ($is_page == 1) {
+                    $uploadedTypes = array_keys($this->existingDocuments);
+                     $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
+                    ->whereIn('doc_type_id', $uploadedTypes)
+                    ->get();
+                }
             }
         }
     }
