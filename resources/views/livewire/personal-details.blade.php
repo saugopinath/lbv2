@@ -11,7 +11,7 @@
                 </x-form.select>
             </div>
             <div>
-                <x-form.input type="date" name="app_date" id="app_date" label="Application Date:" required wire:model="app_date" />
+                <x-form.input type="date" name="app_date" id="app_date"  label="Application Date:" required wire:model="app_date" :max="$cdate" />
             </div>
         </div>
         @endif
@@ -25,7 +25,7 @@
                         required wire:model="reg_no" />
                 </div>
                 <div>
-                    <x-form.input type="date" name="ds_date" id="ds_date" label="Duare Sakar Date" required wire:model="ds_date" />
+                    <x-form.input type="date" name="ds_date" id="ds_date" label="Duare Sakar Date" required wire:model="ds_date" :max="$cdate" />
                 </div>
             </div>
         </template>
