@@ -53,19 +53,33 @@ class ContactDetails extends Component
     }
     public function rules()
     {
-        $rules = [
+        return [
             'state' => 'required|numeric',
-            'policestation' => 'required|string',
-            'villtowncity' => 'required|string',
-            'postoffice' => 'required|string',
-            'pincode' => 'required|digits:6|numeric',
+            'policestation' => 'required|string|regex:/^[a-zA-Z\s]+$/',
+            'villtowncity' => 'required|string|regex:/^[a-zA-Z\s]+$/',
+            'postoffice' => 'required|string|regex:/^[a-zA-Z\s]+$/',
+            'pincode' => 'required|digits:6',
             'selectedDistrict' => 'required|numeric',
             'selectedRuralurban' => 'required|numeric',
             'selectedBlockurban' => 'required|numeric',
             'selectedGpWard' => 'required|numeric',
             'housepremiseno' => 'nullable|string',
         ];
-        return $rules;
+    }
+    public function messages()
+    {
+        return [
+            'state.*' => 'Please select a state.',
+            'policestation.*' => 'Please enter the police station name.',
+            'villtowncity.*' => 'Please enter the village/town/city name.',
+            'postoffice.*' => 'Please enter the post office name.',
+            'pincode.*' => 'Please enter a valid 6-digit pincode.',
+            'selectedDistrict.*' => 'Please select a district.',
+            'selectedRuralurban.*' => 'Please select Rural/Urban.',
+            'selectedBlockurban.*' => 'Please select a block/urban option.',
+            'selectedGpWard.*' => 'Please select GP/Ward.',
+            'housepremiseno.*' => 'Please enter house/premise number.',
+        ];
     }
     public function save()
     {
@@ -114,8 +128,8 @@ class ContactDetails extends Component
             }
             DraftBeneficiaryContact::where('application_id', $this->application_id)->update($data);
             $this->dispatch('conDet', [
-            'message' => "Contact Details updated successfully for the application id: {$this->application_id}"
-        ]);
+                'message' => "Contact Details updated successfully for the application id: {$this->application_id}"
+            ]);
         }
     }
     public function render()

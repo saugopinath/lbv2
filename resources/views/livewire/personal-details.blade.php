@@ -11,7 +11,7 @@
                 </x-form.select>
             </div>
             <div>
-                <x-form.date name="app_date" id="app_date" label="Application Date:" required wire:model="app_date" />
+                <x-form.input type="date" name="app_date" id="app_date" label="Application Date:" required wire:model="app_date" />
             </div>
         </div>
         @endif
@@ -25,7 +25,7 @@
                         required wire:model="reg_no" />
                 </div>
                 <div>
-                    <x-form.date name="ds_date" id="ds_date" label="Duare Sakar Date" required wire:model="ds_date" />
+                    <x-form.input type="date" name="ds_date" id="ds_date" label="Duare Sakar Date" required wire:model="ds_date" />
                 </div>
             </div>
         </template>
@@ -58,7 +58,7 @@
         </div>
         <div class="grid gap-6 md:grid-cols-2 mb-2 pl-4 pr-4">
             <div>
-                <x-form.date
+                <x-form.input type="date"
                     id="dob"
                     name="dob"
                     label="Date of Birth"

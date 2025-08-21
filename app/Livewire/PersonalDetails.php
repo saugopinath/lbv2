@@ -32,36 +32,77 @@ class PersonalDetails extends Component
     public function rules()
     {
         $rules = [
-            'app_type' => 'required',
-            'app_date' => 'required|date',
-            'name' => 'required|string',
-            'mobile' => 'required|digits:10',
-            'dob' => 'required|date',
-            'age' => 'required|numeric',
-            'ffname' => 'required|string',
-            'mfname' => 'required|string',
-            'caste' => 'required',
-            'mar_statu' => 'required',
+            'app_type'   => 'required',
+            'app_date'   => 'required|date',
+            'name'       => 'required|string|regex:/^[a-zA-Z\s]+$/',
+            'mobile'     => 'required|digits:10',
+            'dob'        => "required|date|after_or_equal:{$this->minDate}|before_or_equal:{$this->maxDate}",
+            'age'        => 'required|integer|between:25,60',
+            'ffname'     => 'required|string|regex:/^[a-zA-Z\s]+$/',
+            'mfname'     => 'required|string|regex:/^[a-zA-Z\s]+$/',
+            'caste'      => 'required',
+            'mar_statu'  => 'required',
         ];
+
+        // Conditional rules
         if ($this->app_type == Codemaster::getIdByCode(42)) {
             $rules['reg_no'] = 'required|string';
             $rules['ds_date'] = 'required|date';
         }
+
         if ($this->caste != Codemaster::getIdByCode(173)) {
             $rules['cas_cer_no'] = 'required|string';
         }
-        if ($this->mar_statu == Codemaster::getIdByCode(32) || $this->mar_statu == Codemaster::getIdByCode(34)) {
-            $rules['sfname'] = 'required|string';
+
+        if (
+            $this->mar_statu == Codemaster::getIdByCode(32) ||
+            $this->mar_statu == Codemaster::getIdByCode(34)
+        ) {
+            $rules['sfname'] = 'required|string|regex:/^[a-zA-Z\s]+$/';
         }
+
         if (!empty($this->email)) {
             $rules['email'] = 'email';
         }
+
         return $rules;
+    }
+    public function messages()
+    {
+        return [
+            'app_type.*'   => 'Please select an application type.',
+
+            'app_date.*'   => 'Please enter a valid application date.',
+
+            'name.*'       => 'Full name is required and must contain only letters and spaces.',
+
+            'mobile.*'     => 'Please enter a valid 10-digit mobile number.',
+
+            'dob.*'        => "Date of birth must be between {$this->minDate} and {$this->maxDate}.",
+
+            'age.*'        => 'Please enter a valid age between 25 and 60 years.',
+
+            'ffname.*'     => 'Father\'s name is required and must contain only letters and spaces.',
+
+            'mfname.*'     => 'Mother\'s name is required and must contain only letters and spaces.',
+
+            'caste.*'      => 'Please select caste.',
+            'mar_statu.*'  => 'Please select marital status.',
+
+            'reg_no.*'     => 'Registration number is required.',
+            'ds_date.*'    => 'DS date is required.',
+
+            'cas_cer_no.*' => 'Caste certificate number is required.',
+
+            'sfname.*'     => 'Spouse name is required and must contain only letters and spaces.',
+
+            'email.*'      => 'Please enter a valid email address.',
+        ];
     }
     public function mount($mode = null, $application_id = null)
     {
         $this->currentDate = Carbon::now()->format('d/m/Y');
-        $this->minDate = now()->subYears(60)->addDay()->format('Y-m-d');
+        $this->minDate = now()->subYears(60)->format('Y-m-d');
         $this->maxDate = now()->subYears(25)->format('Y-m-d');
         $this->mode = $mode;
         $this->app_types = Codemaster::where('code', 4)->first()->children()->get();
@@ -101,7 +142,6 @@ class PersonalDetails extends Component
     public function save()
     {
         $validated = $this->validate($this->rules());
-        dd($validated['dob']);
         if ($this->mode === null && $this->application_id === null) {
             $aadhaar_data = Session::get('aadhaar_data');
             $encoded = $aadhaar_data['encoded'];
