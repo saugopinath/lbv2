@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\EsController;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -28,3 +29,8 @@ Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index
 //     ]);
 Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
 Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
+
+Route::get('/elasticteest', [EsController::class, 'test'])->name('elasticteest');
+Route::get('/elastickpush', [EsController::class, 'push'])->name('elastickpush');
+
+Route::get('/getesdata', [EsController::class, 'getesdata'])->name('getesdata');

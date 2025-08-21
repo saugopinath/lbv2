@@ -19,7 +19,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'password','two_factor_code', 'two_factor_expires_at','flag_sent_otp','password_set_time','password_expires_at','updated_at'
+        'password','two_factor_code', 'two_factor_expires_at','flag_sent_otp','password_set_time','password_expires_at','updated_at','mobile_no'
     ];
 
     /**
