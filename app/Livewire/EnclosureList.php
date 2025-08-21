@@ -29,20 +29,9 @@ class EnclosureList extends Component
         $this->doc_type_id_array = $doc_type_id_array;
 
         if (!empty($this->doc_type_id_array)) {
-            $app = BeneficiaryEnclosure::where('application_id', $application_id)
-                ->whereIn('document_type', $this->doc_type_id_array)
+            $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
+                ->whereIn('doc_type_id', $this->doc_type_id_array)
                 ->get();
-
-            foreach ($app as $doc) {
-                $this->existingDocuments[$doc->document_type] = $doc;
-            }
-
-            if ($is_page == 1) {
-                $uploadedTypes = array_keys($this->existingDocuments);
-                $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-                    ->whereIn('doc_type_id', $uploadedTypes)
-                    ->get();
-            }
         } else {
             $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->get();
 
@@ -54,9 +43,9 @@ class EnclosureList extends Component
                 }
                 if ($is_page == 1) {
                     $uploadedTypes = array_keys($this->existingDocuments);
-                     $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-                    ->whereIn('doc_type_id', $uploadedTypes)
-                    ->get();
+                    $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
+                        ->whereIn('doc_type_id', $uploadedTypes)
+                        ->get();
                 }
             }
         }
