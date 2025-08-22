@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             DepartmentSeeder::class,
             CodemasterSeeder::class,
             SchemeSeeder::class,
+            SchemeAttacheDocumentSeeder::class,
             Role\RolePermissionSeeder::class,
             OfficeMaster\RoleOfficeTypeSeeder::class,
             OfficeMaster\OfficeMastersTableSeeder::class,

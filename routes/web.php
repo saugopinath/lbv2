@@ -6,12 +6,11 @@ use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignController;
 use App\Http\Controllers\UserManagementController;
-use App\Http\Controllers\EsController;
 Route::get('/', function () {
     return view('welcome');
 });
 Route::get('refresh-captcha', [App\Http\Controllers\CaptchaController::class, 'refreshCaptcha'])->name('refresh-captcha');
-Route::controller(AuthenticationController::class)->group(function(){
+Route::controller(AuthenticationController::class)->group(function () {
     Route::get('/login', 'login')->name('login');
     Route::post('/loginPost', 'loginCheck')->name('loginPost');
     Route::post('/resendOtp', 'resendOtp')->name('resendOtp');
@@ -22,7 +21,6 @@ Route::controller(AuthenticationController::class)->group(function(){
     Route::get('/reset-password', 'resetPassword')->middleware(['2fa'])->name('reset-password');
     Route::post('/resetPasswordPost', 'resetPasswordPost')->middleware(['2fa'])->name('resetPasswordPost');
     Route::post('/logout', 'logout')->name('logout');
-
 });
 Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard')->middleware('auth');
 //  Route::resources([
@@ -30,3 +28,6 @@ Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index
 //     ]);
 Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
 Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
+Route::get('lbform', [LBController::class, 'index'])->middleware(['auth', 'verified'])->name('lbform');
+Route::get('draftlist', [LBController::class, 'draftlist'])->middleware(['auth', 'verified'])->name('draftlist');
+Route::get('draftedit/{id}', [LBController::class, 'draftedit'])->middleware(['auth', 'verified'])->name('draftedit');
