@@ -15,6 +15,8 @@ use App\Models\DraftBeneficiaryPersonal;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Rappasoft\LaravelLivewireTables\Views\Actions\Action;
+use Rappasoft\LaravelLivewireTables\Views\Filters\TextFilter;
 
 class BeneficiaryDetailsTable extends DataTableComponent
 {
@@ -56,21 +58,47 @@ class BeneficiaryDetailsTable extends DataTableComponent
         $this->gp_ward = $filters['gp_ward'];
     }
     public function configure(): void
-    {   
-
-        $this->setPrimaryKey('application_id')
+    {
+        $this->setPrimaryKey('sourceable_id')
             ->setPaginationEnabled()
             ->setPerPageAccepted([1, 5])
             ->setPerPage($this->perPage)
             ->setPerPageVisibilityEnabled()
             ->setSearchEnabled()
             ->setSearchLive()
-            ->setBulkActionsEnabled()
-            ->setSelectAllEnabled();
+            ->setBulkActionsEnabled();
+
+        //      $this->setBulkActionsMenuItemAttributes([
+        //     'class' => 'bg-blue-200 text-gray-700 px-3 py-1 rounded hover:bg-blue-300', // default style
+        // ]);
+        //  $this->setBulkActionsEnabled();
+        // $this->setSelectAllDisabled();
+
         //      $this->setTableAttributes([
         // 'class' => 'min-w-full divide-y divide-gray-200 bg-white shadow-md rounded-lg p-4',
         // ]);
-         
+        //      $this->setHideBulkActionsWhenEmptyEnabled();
+        //     $this->setBulkActionsTrCheckboxAttributes([
+        // 'class' => 'hidden', // hide header checkbox if needed
+        //     ]);
+
+        // $this->setQueryStringForFilterEnabled();
+        // $this->setQueryStringForSearchEnabled()
+        //     ->setQueryStringForPerPageEnabled()
+        //     ->setQueryStringForFiltersEnabled();    
+        //         $this->setPerPageDropdownAttributes([
+        //     'class' => 'border rounded px-3 py-1 bg-white text-gray-700 hover:border-gray-500',
+        // ]);
+
+        // // Optional: wrapper for dropdown to control position
+        // $this->setPerPageDropdownWrapperAttributes([
+        //     'class' => 'mb-2 flex justify-end items-center', // e.g., place top-right
+        // ]);
+        $this->setPerPageFieldAttributes([
+            'class' => 'inline-flex justify-center px-4 py-2 text-sm font-medium rounded-md border shadow-sm focus:ring focus:ring-opacity-50
+                    text-gray-700 bg-white border-gray-300 hover:bg-gray-50 focus:border-indigo-300 focus:ring-indigo-200 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600',
+        ]);
+
         $this->setTableWrapperAttributes([
             'class' => 'overflow-x-auto border rounded-lg shadow-sm',
         ]);
@@ -98,13 +126,22 @@ class BeneficiaryDetailsTable extends DataTableComponent
             'class' => 'px-4 py-3 divide-y divide-gray-200 bg-white overflow-y-auto',
         ]);
     }
-    // public function setConfigurableArea():
-    // {
-    //     $this->configurableAreas = $areas;
-
-    //     return $this;
-    // }
-
+    public function bulkActions(): array
+    {
+        return [
+            'bulkapprove' => 'Approve',
+            'exportSelected' => 'Export Selected',
+        ];
+    }
+    public function actions(): array
+    {
+        return [
+            Action::make('Edit Item')
+                ->setIcon("fas fa-edit")
+                ->setIconAttributes(['class' => 'font-4xl text-4xl'])
+                ->setIconRight(),
+        ];
+    }
     public function updatedSearch($value): void
     {
         $this->setSearch($value);
@@ -116,6 +153,32 @@ class BeneficiaryDetailsTable extends DataTableComponent
         $this->setPerPage((int)$value);
         $this->resetPage();
     }
+    public function filters(): array
+    {
+        return [
+            TextFilter::make('Application ID')
+                ->filter(function ($query, $value) {
+                    $query->whereHas('sourceable', function ($q) use ($value) {
+                        $q->where('application_id', 'ILIKE', "%{$value}%");
+                    });
+                }),
+
+            TextFilter::make('Beneficiary ID')
+                ->filter(function ($query, $value) {
+                    $query->whereHas('sourceable', function ($q) use ($value) {
+                        $q->where('beneficiary_id', 'ILIKE', "%{$value}%");
+                    });
+                }),
+
+            TextFilter::make('Applicant Name')
+                ->filter(function ($query, $value) {
+                    $query->whereHas('sourceable', function ($q) use ($value) {
+                        $q->where('full_name', 'ILIKE', "%{$value}%");
+                    });
+                }),
+        ];
+    }
+
     public function columns(): array
     {
         return [
@@ -215,7 +278,7 @@ class BeneficiaryDetailsTable extends DataTableComponent
     //         ),
     //         $filename
     //     );
-    // }?
+    // }
     // public function render(): \Illuminate\View\View
     // {
     //     return view('livewire.custom-beneficiary-table', [
