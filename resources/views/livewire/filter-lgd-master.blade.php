@@ -19,6 +19,15 @@
             </x-form.select>
         @endif
 
+         @if ($visible['subdivision_dropdown'])
+            <x-form.select name="subdivision_id" label="Subdivision" wire:model.live="selectedSubdivision">
+                <option value="">--Select Subdivision--</option>
+                @foreach ($subdivisions as $subdivision)
+                    <option value="{{ $subdivision->id }}">{{ $subdivision->name }}</option>
+                @endforeach
+            </x-form.select>
+        @endif
+
         @if ($visible['block_dropdown'])
             <x-form.select name="blockurban"
                 label="{{ $selectedRuralurban == 2 ? 'Block' : ($selectedRuralurban == 1 ? 'Municipality' : 'Block / Municipality') }}"
@@ -49,147 +58,16 @@
                 @endforeach
             </x-form.select>
         @endif
-         <div class="flex items-center mt-6 gap-3">
-                <x-button.primary wire:click="resetFilters"
-                    class="bg-green-500 text-white whitespace-nowrap cursor-pointer">
-                    Reset
-                </x-button.primary>
-                <x-button.primary wire:click="applyFilters"
-                    class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
-                    Search
-                </x-button.primary>
-            </div>
+
+        <div class="flex items-center mt-6 gap-3">
+            <x-button.primary wire:click="resetFilters"
+                class="bg-green-500 text-white whitespace-nowrap cursor-pointer">
+                Reset
+            </x-button.primary>
+            <x-button.primary wire:click="applyFilters"
+                class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
+                Search
+            </x-button.primary>
+        </div>
     </div>
 </div>
-
-{{--  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    @if ($visible['district_dropdown'])
-        <x-form.select name="district_id" label="District" wire:model.live="selectedDistrict">
-            <option value="">--Select District--</option>
-            @foreach ($districts as $district)
-                <option value="{{ $district->id }}">{{ $district->name }}</option>
-            @endforeach
-        </x-form.select>
-    @endif
-
-    @if ($visible['rural_urban_dropdown'])
-        <x-form.select name="rural_urban" label="Rural / Urban" wire:model.live="selectedRuralurban">
-            <option value="">--Select--</option>
-            @foreach (Config::get('constants.rural_urban') as $key => $val)
-                <option value="{{ $key }}">{{ $val }}</option>
-            @endforeach
-        </x-form.select>
-    @endif
-
-    @if ($visible['block_dropdown'])
-        <x-form.select name="blockurban"
-            label="{{ $selectedRuralurban == 2 ? 'Block' : ($selectedRuralurban == 1 ? 'Municipality' : 'Block / Municipality') }}"
-            wire:model.live="selectedBlockurban">
-            <option value="">--Select--</option>
-            @if ($selectedRuralurban == 2)
-                @foreach ($blocks as $block)
-                    <option value="{{ $block->id }}">{{ $block->name }}</option>
-                @endforeach
-            @elseif ($selectedRuralurban == 1)
-                @foreach ($urbanbodys as $urban)
-                    <option value="{{ $urban->id }}">{{ $urban->name }}</option>
-                @endforeach
-            @endif
-        </x-form.select>
-    @endif
-
-    @if ($visible['gp_ward_dropdown'])
-        <x-form.select name="gpWard"
-            label="{{ $selectedRuralurban == 2 ? 'Gram Panchayat' : ($selectedRuralurban == 1 ? 'Ward No' : 'GP / Ward No') }}"
-            wire:model.live="selectedGpWard">
-            <option value="">--Select--</option>
-            @foreach ($gps as $gp)
-                <option value="{{ $gp->id }}">{{ $gp->name }}</option>
-            @endforeach
-            @foreach ($wards as $ward)
-                <option value="{{ $ward->id }}">{{ $ward->name }}</option>
-            @endforeach
-        </x-form.select>
-    @endif
-
-    <div class="col-span-1 md:col-span-3 flex flex-wrap justify-end gap-1">
-        <x-button.primary wire:click="resetFilters" class="bg-green-500 text-white whitespace-nowrap cursor-pointer">
-            Reset
-        </x-button.primary>
-        <x-button.primary wire:click="applyFilters" class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
-            Search
-        </x-button.primary>
-    </div>
-</div>  --}}
-
-{{--  <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
-    <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
-        <div>
-            @if ($visible['district_dropdown'])
-                <x-form.select name="district_id" label="District" wire:model.live="selectedDistrict">
-                    <option value="">--Select District--</option>
-                    @foreach ($districts as $district)
-                        <option value="{{ $district->id }}">{{ $district->name }}</option>
-                    @endforeach
-                </x-form.select>
-            @endif
-        </div>
-        <div>
-            @if ($visible['rural_urban_dropdown'])
-                <x-form.select name="rural_urban" label="Rural / Urban" wire:model.live="selectedRuralurban">
-                    <option value="">--Select--</option>
-                    @foreach (Config::get('constants.rural_urban') as $key => $val)
-                        <option value="{{ $key }}">{{ $val }}</option>
-                    @endforeach
-                </x-form.select>
-            @endif
-        </div>
-        <div>
-            @if ($visible['block_dropdown'])
-                <x-form.select name="blockurban"
-                    label="{{ $selectedRuralurban == 2 ? 'Block' : ($selectedRuralurban == 1 ? 'Municipality' : 'Block / Municipality') }}"
-                    wire:model.live="selectedBlockurban">
-                    <option value="">--Select--</option>
-                    @if ($selectedRuralurban == 2)
-                        @foreach ($blocks as $block)
-                            <option value="{{ $block->id }}">{{ $block->name }}</option>
-                        @endforeach
-                    @elseif ($selectedRuralurban == 1)
-                        @foreach ($urbanbodys as $urban)
-                            <option value="{{ $urban->id }}">{{ $urban->name }}</option>
-                        @endforeach
-                    @endif
-                </x-form.select>
-            @endif
-        </div>
-        <div>
-            @if ($visible['gp_ward_dropdown'])
-                <x-form.select name="gpWard"
-                    label="{{ $selectedRuralurban == 2 ? 'Gram Panchayat' : ($selectedRuralurban == 1 ? 'Ward No' : 'GP / Ward No') }}"
-                    wire:model.live="selectedGpWard">
-                    <option value="">--Select--</option>
-                    @foreach ($gps as $gp)
-                        <option value="{{ $gp->id }}">{{ $gp->name }}</option>
-                    @endforeach
-                    @foreach ($wards as $ward)
-                        <option value="{{ $ward->id }}">{{ $ward->name }}</option>
-                    @endforeach
-                </x-form.select>
-            @endif
-        </div>
-        <div>
-            <div class="flex items-center mt-6 gap-3">
-                <!-- Search Button -->
-                <x-button.primary wire:click="resetFilters"
-                    class="bg-green-500 text-white whitespace-nowrap cursor-pointer">
-                    Reset
-                </x-button.primary>
-                <x-button.primary wire:click="applyFilters"
-                    class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
-                    Search
-                </x-button.primary>
-            </div>
-
-        </div>
-    </div>
-</div>  --}}

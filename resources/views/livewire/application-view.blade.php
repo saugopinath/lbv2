@@ -36,5 +36,7 @@
              {{--  <livewire:enclosure-list :application_id="$passId"  />  --}}
         </x-accordion-section>
 
+
+        
     </div>
 </div>
