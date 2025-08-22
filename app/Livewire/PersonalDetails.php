@@ -17,7 +17,7 @@ class PersonalDetails extends Component
 {
     
     public $app_types, $genders, $castes, $mar_status = [];
-    public $mode, $currentDate, $minDate, $maxDate, $cdate;
+    public $mode, $currentDate, $minDOB, $maxDOB, $cdate, $pdate;
     public $app_type, $app_date, $reg_no, $ds_date, $application_id;
     public $name, $mobile, $email, $dob, $age, $mar_statu;
     public $ffname, $mfname, $sfname;
@@ -37,7 +37,7 @@ class PersonalDetails extends Component
             'app_date'   => 'required|date',
             'name'       => 'required|string|regex:/^[a-zA-Z\s]+$/',
             'mobile'     => 'required|digits:10',
-            'dob'        => "required|date|after_or_equal:{$this->minDate}|before_or_equal:{$this->maxDate}",
+            'dob'        => "required|date|after_or_equal:{$this->minDOB}|before_or_equal:{$this->maxDOB}",
             'age'        => 'required|integer|between:25,60',
             'ffname'     => 'required|string|regex:/^[a-zA-Z\s]+$/',
             'mfname'     => 'required|string|regex:/^[a-zA-Z\s]+$/',
@@ -79,7 +79,7 @@ class PersonalDetails extends Component
 
             'mobile.*'     => 'Please enter a valid 10-digit mobile number.',
 
-            'dob.*'        => "Date of birth must be between {$this->minDate} and {$this->maxDate}.",
+            'dob.*'        => "Date of birth must be between {$this->minDOB} and {$this->maxDOB}.",
 
             'age.*'        => 'Please enter a valid age between 25 and 60 years.',
 
@@ -103,9 +103,10 @@ class PersonalDetails extends Component
     public function mount($mode = null, $application_id = null)
     {
         $this->currentDate = Carbon::now()->format('d/m/Y');
-        $this->minDate = now()->subYears(60)->format('Y-m-d');
-        $this->maxDate = now()->subYears(25)->format('Y-m-d');
+        $this->minDOB = now()->subYears(60)->format('Y-m-d');
+        $this->maxDOB = now()->subYears(25)->format('Y-m-d');
         $this->cdate = Carbon::now()->format('Y-m-d');
+        $this->pdate = Carbon::now()->subYears(2)->format('Y-m-d');
         $this->mode = $mode;
         $this->app_types = Codemaster::where('code', 4)->first()->children()->get();
         $this->mar_status = Codemaster::where('code', 3)->first()->children()->where('code', '!=', 35)->get();
