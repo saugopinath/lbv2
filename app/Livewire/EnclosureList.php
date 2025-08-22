@@ -20,19 +20,39 @@ class EnclosureList extends Component
     public $currentDocMaxSize = '';
     public $currentDocExtensions = '';
     public $mode, $is_page;
+    public $doc_type_id_array_list = [];
     public $doc_type_id_array = [];
 
-    // public function mount($mode = null, $application_id = null, $is_page = null, $doc_type_id_array = [])
+
+    // public function mount($mode = null, $application_id = null, $is_page = null, $doc_type_id_array_list = [])
     // {
     //     $this->application_id  = $application_id;
     //     $this->is_page         = $is_page;
-    //     $this->doc_type_id_array = $doc_type_id_array;
+    //     $this->doc_type_id_array_list = $doc_type_id_array_list;
 
-    //     if (!empty($this->doc_type_id_array)) {
-    //         $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-    //             ->whereIn('doc_type_id', $this->doc_type_id_array)
+
+    //     if (!empty($this->doc_type_id_array_list)) {
+
+    //         $app = BeneficiaryEnclosure::where('application_id', $application_id)
+    //             ->whereIn('document_type', $this->doc_type_id_array_list)
     //             ->get();
+
+    //         foreach ($app as $doc) {
+    //             $this->existingDocuments[$doc->document_type] = $doc;
+    //         }
+
+    //         if ($is_page == 1) {
+    //             $uploadedTypes = array_keys($this->existingDocuments);
+    //             $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
+    //                 ->whereIn('doc_type_id', $uploadedTypes)
+    //                 ->get();
+    //         } else {
+    //             $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
+    //                 ->whereIn('doc_type_id', $this->doc_type_id_array_list)
+    //                 ->get();
+    //         }
     //     } else {
+
     //         $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->get();
 
     //         if ($application_id) {
@@ -41,47 +61,32 @@ class EnclosureList extends Component
     //             foreach ($app as $doc) {
     //                 $this->existingDocuments[$doc->document_type] = $doc;
     //             }
+
     //             if ($is_page == 1) {
     //                 $uploadedTypes = array_keys($this->existingDocuments);
-    //                 $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-    //                     ->whereIn('doc_type_id', $uploadedTypes)
-    //                     ->get();
+    //                 $this->doc_lists = $this->doc_lists->whereIn('doc_type_id', $uploadedTypes);
     //             }
     //         }
     //     }
     // }
 
 
-    public function mount($mode = null, $application_id = null, $is_page = null, $doc_type_id_array = [])
+
+    public function mount($mode = null, $application_id = null, $is_page = null, $doc_type_id_array_list = [])
     {
         $this->application_id  = $application_id;
         $this->is_page         = $is_page;
-        $this->doc_type_id_array = $doc_type_id_array;
-
-        if (!empty($this->doc_type_id_array)) {
-
-            $app = BeneficiaryEnclosure::where('application_id', $application_id)
-                ->whereIn('document_type', $this->doc_type_id_array)
+        // $this->doc_type_id_array_list = (array) $doc_type_id_array_list;
+        $doc_type_id_array = $this->doc_type_id_array_list;
+        if (!empty($doc_type_id_array)) {
+            $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
+                ->whereIn('doc_type_id', $doc_type_id_array)
                 ->get();
-
-            foreach ($app as $doc) {
-                $this->existingDocuments[$doc->document_type] = $doc;
-            }
-
-            if ($is_page == 1) {
-                $uploadedTypes = array_keys($this->existingDocuments);
-                $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-                    ->whereIn('doc_type_id', $uploadedTypes)
-                    ->get();
-            } else {
-                $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->get();
-            }
         } else {
-
-            $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->get();
-
-            if ($application_id) {
-                $app = BeneficiaryEnclosure::where('application_id', $application_id)->get();
+            if (!empty($this->doc_type_id_array_list)) {
+                $app = BeneficiaryEnclosure::where('application_id', $application_id)
+                    ->whereIn('document_type', $this->doc_type_id_array_list)
+                    ->get();
 
                 foreach ($app as $doc) {
                     $this->existingDocuments[$doc->document_type] = $doc;
@@ -89,12 +94,32 @@ class EnclosureList extends Component
 
                 if ($is_page == 1) {
                     $uploadedTypes = array_keys($this->existingDocuments);
-                    $this->doc_lists = $this->doc_lists->whereIn('doc_type_id', $uploadedTypes);
+                    $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
+                        ->whereIn('doc_type_id', $uploadedTypes)
+                        ->get();
+                } else {
+                    $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
+                        ->whereIn('doc_type_id', $this->doc_type_id_array_list)
+                        ->get();
+                }
+            } else {
+                $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->get();
+
+                if ($application_id) {
+                    $app = BeneficiaryEnclosure::where('application_id', $application_id)->get();
+
+                    foreach ($app as $doc) {
+                        $this->existingDocuments[$doc->document_type] = $doc;
+                    }
+
+                    if ($is_page == 1) {
+                        $uploadedTypes = array_keys($this->existingDocuments);
+                        $this->doc_lists = $this->doc_lists->whereIn('doc_type_id', $uploadedTypes);
+                    }
                 }
             }
         }
     }
-
 
     public function setCurrentDoc($docTypeId)
     {
