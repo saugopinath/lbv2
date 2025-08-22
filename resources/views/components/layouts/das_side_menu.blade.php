@@ -79,7 +79,7 @@
                   </svg><span x-show="sidebar" class="truncate" svg="truncate">Filteration</span></a>
               </li>
               <li>
-                <a href="{{ route('viewpage') }}"
+                <a href=""
                   class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
                   <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
@@ -119,7 +119,7 @@
           <div id="list_menu" x-show="activeMenu === 'Report'" x-collapse x-transition class="pl-4">
             <ul>
               <li>
-                <a href="{{ route('approved-lists') }}"
+                <a href=""
                   class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
                   <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
@@ -132,7 +132,7 @@
                   </svg><span x-show="sidebar" class="truncate" svg="truncate">Approved List(User Address)</span></a>
               </li>
               <li>
-                <a href="{{ route('approved-lists-BA-Wise') }}"
+                <a href=""
                   class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
                   <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">

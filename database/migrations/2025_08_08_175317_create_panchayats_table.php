@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('panchayats', function (Blueprint $table) {
-            $table->bigIncrements('id')->primary();
+            $table->mediumIncrements('id')->primary();
             $table->string('lgd_code');
             $table->string('ref_code')->index();
             $table->string('name');
