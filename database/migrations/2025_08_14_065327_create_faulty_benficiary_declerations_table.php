@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('master_mime_types', function (Blueprint $table) {
+        Schema::create('lb_scheme.faulty_benficiary_declerations', function (Blueprint $table) {
             $table->id();
-            $table->string('extension_type')->unique();
-            $table->string('mime_type');
             $table->timestamps();
         });
     }
@@ -24,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('master_mime_types');
+        Schema::dropIfExists('faulty_benficiary_declerations');
     }
 };

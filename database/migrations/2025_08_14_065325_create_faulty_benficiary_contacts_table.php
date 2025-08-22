@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('lb_scheme.unique_app_ben_ids', function (Blueprint $table) {
-            $table->id('application_id');
-            $table->unsignedBigInteger('beneficiary_id')->nullable();
-            $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals');
+        Schema::create('lb_scheme.faulty_benficiary_contacts', function (Blueprint $table) {
+            $table->id();
             $table->timestamps();
         });
     }
@@ -24,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('lb_scheme.unique_app_ben_ids');
+        Schema::dropIfExists('faulty_benficiary_contacts');
     }
 };
