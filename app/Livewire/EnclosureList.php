@@ -22,171 +22,66 @@ class EnclosureList extends Component
     public $mode, $is_page;
     public $doc_type_id_array_list = [];
     public $doc_type_id_array = [];
-    // public function mount($mode = null, $application_id = null, $is_page = null, $doc_type_id_array_list = [])
-    // {
-    //     $this->application_id = $application_id;
-    //     $this->is_page = $is_page;
-
-    //     $doc_type_id_array = $doc_type_id_array_list;
-
-    //     if (!empty($doc_type_id_array)) {
-    //         // dd('ok1');
-    //         $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-    //             ->whereIn('doc_type_id', $doc_type_id_array)
-    //             ->get();
-    //     } else {
-    //         if (!empty($this->doc_type_id_array_list)) {
-    //             // dd('ok');
-    //             $app = BeneficiaryEnclosure::where('application_id', $application_id)
-    //                 ->whereIn('document_type', $this->doc_type_id_array_list)
-    //                 ->get();
-
-    //             foreach ($app as $doc) {
-    //                 $this->existingDocuments[$doc->document_type] = $doc;
-    //             }
-
-    //             if ($is_page == 1) {
-    //                 $uploadedTypes = array_keys($this->existingDocuments);
-    //                 $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-    //                     ->whereIn('doc_type_id', $uploadedTypes)
-    //                     ->get();
-    //             } else {
-    //                 $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-    //                     ->whereIn('doc_type_id', $this->doc_type_id_array_list)
-    //                     ->get();
-    //             }
-    //         } else {
-    //             // dump('ok');
-    //             $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->get();
-
-    //             if ($application_id) {
-    //                 $app = BeneficiaryEnclosure::where('application_id', $application_id)->get();
-
-    //                 foreach ($app as $doc) {
-    //                     $this->existingDocuments[$doc->document_type] = $doc;
-    //                 }
-
-    //                 if ($is_page == 1) {
-    //                     $uploadedTypes = array_keys($this->existingDocuments);
-    //                     $this->doc_lists = $this->doc_lists->whereIn('doc_type_id', $uploadedTypes);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-
     public function mount($mode = null, $application_id = null, $is_page = null, $doc_type_id_array_list = [], $doc_type_id_array = [])
-{
-    $this->application_id = $application_id;
-    $this->is_page        = $is_page;
+    {
+        $this->application_id = $application_id;
+        $this->is_page        = $is_page;
 
-    // Fix: এখন prop assign হবে
-    $this->doc_type_id_array_list = $doc_type_id_array_list;
-    $this->doc_type_id_array      = $doc_type_id_array;
+        $this->doc_type_id_array_list = $doc_type_id_array_list;
+        $this->doc_type_id_array      = $doc_type_id_array;
 
-    if (!empty($this->doc_type_id_array)) {
-    // case: <livewire:enclosure-list :doc_type_id_array="[100, 101, 104]" />
-    $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-        ->whereIn('doc_type_id', $this->doc_type_id_array)
-        ->get();
-
-    // এখানেই existingDocuments map করতে হবে
-    if ($application_id) {
-        $app = BeneficiaryEnclosure::where('application_id', $application_id)
-            ->whereIn('document_type', $this->doc_type_id_array)
-            ->get();
-
-        foreach ($app as $doc) {
-            $this->existingDocuments[$doc->document_type] = $doc;
-        }
-    }
-} else {
-    if (!empty($this->doc_type_id_array_list)) {
-        // case: <livewire:enclosure-list :doc_type_id_array_list="[100,101]" />
-        $app = BeneficiaryEnclosure::where('application_id', $application_id)
-            ->whereIn('document_type', $this->doc_type_id_array_list)
-            ->get();
-
-        foreach ($app as $doc) {
-            $this->existingDocuments[$doc->document_type] = $doc;
-        }
-
-        if ($is_page == 1) {
-            $uploadedTypes = array_keys($this->existingDocuments);
+        if (!empty($this->doc_type_id_array)) {
             $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-                ->whereIn('doc_type_id', $uploadedTypes)
+                ->whereIn('doc_type_id', $this->doc_type_id_array)
                 ->get();
+
+            if ($application_id) {
+                $app = BeneficiaryEnclosure::where('application_id', $application_id)
+                    ->whereIn('document_type', $this->doc_type_id_array)
+                    ->get();
+
+                foreach ($app as $doc) {
+                    $this->existingDocuments[$doc->document_type] = $doc;
+                }
+            }
         } else {
-            $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-                ->whereIn('doc_type_id', $this->doc_type_id_array_list)
-                ->get();
-        }
-    } else {
-        // case: <livewire:enclosure-list :application_id="$passId" />
-        $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->get();
+            if (!empty($this->doc_type_id_array_list)) {
+                $app = BeneficiaryEnclosure::where('application_id', $application_id)
+                    ->whereIn('document_type', $this->doc_type_id_array_list)
+                    ->get();
 
-        if ($application_id) {
-            $app = BeneficiaryEnclosure::where('application_id', $application_id)->get();
+                foreach ($app as $doc) {
+                    $this->existingDocuments[$doc->document_type] = $doc;
+                }
 
-            foreach ($app as $doc) {
-                $this->existingDocuments[$doc->document_type] = $doc;
-            }
+                if ($is_page == 1) {
+                    $uploadedTypes = array_keys($this->existingDocuments);
+                    $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
+                        ->whereIn('doc_type_id', $uploadedTypes)
+                        ->get();
+                } else {
+                    $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
+                        ->whereIn('doc_type_id', $this->doc_type_id_array_list)
+                        ->get();
+                }
+            } else {
+                $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->get();
 
-            if ($is_page == 1) {
-                $uploadedTypes = array_keys($this->existingDocuments);
-                $this->doc_lists = $this->doc_lists->whereIn('doc_type_id', $uploadedTypes);
+                if ($application_id) {
+                    $app = BeneficiaryEnclosure::where('application_id', $application_id)->get();
+
+                    foreach ($app as $doc) {
+                        $this->existingDocuments[$doc->document_type] = $doc;
+                    }
+
+                    if ($is_page == 1) {
+                        $uploadedTypes = array_keys($this->existingDocuments);
+                        $this->doc_lists = $this->doc_lists->whereIn('doc_type_id', $uploadedTypes);
+                    }
+                }
             }
         }
     }
-}
-
-
-    // if (!empty($this->doc_type_id_array)) {
-    //     // case: <livewire:enclosure-list :doc_type_id_array="[100]" />
-    //     $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-    //         ->whereIn('doc_type_id', $this->doc_type_id_array)
-    //         ->get();
-    // } else {
-    //     if (!empty($this->doc_type_id_array_list)) {
-    //         // case: <livewire:enclosure-list :doc_type_id_array_list="[100,101]" />
-    //         $app = BeneficiaryEnclosure::where('application_id', $application_id)
-    //             ->whereIn('document_type', $this->doc_type_id_array_list)
-    //             ->get();
-
-    //         foreach ($app as $doc) {
-    //             $this->existingDocuments[$doc->document_type] = $doc;
-    //         }
-
-    //         if ($is_page == 1) {
-    //             $uploadedTypes = array_keys($this->existingDocuments);
-    //             $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-    //                 ->whereIn('doc_type_id', $uploadedTypes)
-    //                 ->get();
-    //         } else {
-    //             $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-    //                 ->whereIn('doc_type_id', $this->doc_type_id_array_list)
-    //                 ->get();
-    //         }
-    //     } else {
-    //         // case: <livewire:enclosure-list :application_id="$passId" />
-    //         $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->get();
-
-    //         if ($application_id) {
-    //             $app = BeneficiaryEnclosure::where('application_id', $application_id)->get();
-
-    //             foreach ($app as $doc) {
-    //                 $this->existingDocuments[$doc->document_type] = $doc;
-    //             }
-
-    //             if ($is_page == 1) {
-    //                 $uploadedTypes = array_keys($this->existingDocuments);
-    //                 $this->doc_lists = $this->doc_lists->whereIn('doc_type_id', $uploadedTypes);
-    //             }
-    //         }
-    //     }
-    // }
-}
 
     public function setCurrentDoc($docTypeId)
     {
