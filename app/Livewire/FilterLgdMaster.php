@@ -22,7 +22,6 @@ class FilterLgdMaster extends Component
 
     public function mount()
     {
-
         $select_lgd = session('lgd_session');
 
         $login_type =  Crypt::decryptString($select_lgd['office_type_id']);

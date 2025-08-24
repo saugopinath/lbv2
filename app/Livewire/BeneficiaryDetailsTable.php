@@ -19,7 +19,6 @@ class BeneficiaryDetailsTable extends DataTableComponent
 {
     public ?int $perPage = 5;
     public string $reportType;
-    public string $login_type = '';
     public string $search = '';
 
     public $district_id, $rural_urban, $blockurban, $gp_ward;
@@ -27,16 +26,11 @@ class BeneficiaryDetailsTable extends DataTableComponent
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
     public array $filter_condition = [];
-    public function mount(string $reportType = '', string $login_type = ''): void
+    public function mount(string $reportType = ''): void
     {
         $this->reportType = $reportType;
-        $this->login_type = $login_type;
 
         $select_lgd = session('lgd_session');
-
-        // foreach ($select_lgd as $key => $val) {
-        //     $this->filter_condition[$key] = Crypt::decryptString($val);
-        // }
 
         if (!empty($select_lgd['district_id'])) {
             $this->filter_condition['district_id'] = Crypt::decryptString($select_lgd['district_id']);
@@ -140,28 +134,26 @@ class BeneficiaryDetailsTable extends DataTableComponent
             ->with(['father' => fn($q) => $q->where('relation_type_id', $relationFather)])
             ->whereHas('father', fn($q) => $q->where('relation_type_id', $relationFather));
 
-
-        //       if (!empty($select_lgd['district_id'])) {
-        //     $filter_condition['district_id'] = $select_lgd['district_id'];
-        // }
-        // if (!empty($select_lgd['block_id'])) {
-        //     $filter_condition['block_id'] = $select_lgd['block_id'];
-        // }
-
         if (!empty($this->filter_condition['district_id'])) {
-            $query->whereHas('contact',fn($q) =>
+            $query->whereHas(
+                'contact',
+                fn($q) =>
                 $q->where('district_id', $this->filter_condition['district_id'])
             );
         }
 
         if (!empty($this->filter_condition['block_id'])) {
-            $query->whereHas('contact',fn($q) =>
+            $query->whereHas(
+                'contact',
+                fn($q) =>
                 $q->where('block_id', $this->filter_condition['block_id'])
             );
         }
 
         if (!empty($this->filter_condition['subdivision_id'])) {
-            $query->whereHas('contact.municipality',fn($mq) =>
+            $query->whereHas(
+                'contact.municipality',
+                fn($mq) =>
                 $mq->where('subdivision_id', $this->filter_condition['subdivision_id'])
             );
         }
@@ -181,11 +173,14 @@ class BeneficiaryDetailsTable extends DataTableComponent
         $reportTypeFormatted = ucfirst($this->reportType);
         $timestamp = Carbon::now('Asia/Kolkata')->format('Ymd_Hi');
         $filename = "{$reportTypeFormatted}_Beneficiaries_{$timestamp}.xlsx";
+        $select_lgd = session('lgd_session');
+        $login_type =  Crypt::decryptString($select_lgd['office_type_id']);
+
 
         return Excel::download(
             new BeneficiariesExport(
                 $this->reportType,
-                $this->login_type,
+                $login_type,
                 $this->loginDistrictCode,
                 $this->loginSubdivisionCode,
                 $this->loginBlockCode
