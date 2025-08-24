@@ -35,8 +35,5 @@
              {{--  <livewire:enclosure-list :application_id="$passId" :is_page="1"  />  --}}
              {{--  <livewire:enclosure-list :application_id="$passId"  />  --}}
         </x-accordion-section>
-
-
-        
     </div>
 </div>
