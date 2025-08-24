@@ -3,7 +3,7 @@
         <h2 class="text-xl font-semibold text-gray-700 mb-4">
             Applicant Address
         </h2>
-        <livewire:filter-lgd-master :login_type="$login_type" />
+        <livewire:filter-lgd-master  />
     </div>
     <div class="bg-white shadow-xl rounded-2xl ">
         <h2 class="text-xl font-semibold text-gray-700 mb-4 p-4">
