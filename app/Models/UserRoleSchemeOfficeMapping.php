@@ -24,6 +24,7 @@ class UserRoleSchemeOfficeMapping extends Model
            $mapdataArr=$mapdata->toArray();
            $role_list=[];
            $user_id=$mapdataArr['user_id'];
+        //    $scheme_id=$mapdataArr['scheme_id'];
            $user=User::find($user_id);
            $role_id=$mapdataArr['role_id'];
            $role = Role::find($role_id);

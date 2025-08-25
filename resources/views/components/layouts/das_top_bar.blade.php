@@ -29,7 +29,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <circle opacity="0.3" cx="12" cy="6" r="4" fill="currentColor"></circle>
-                                            <ellipse cx="12" cy="17" rx="7" ry="4" fill="currentColor"></ellipse>
+                <ellipse cx="12" cy="17" rx="7" ry="4" fill="currentColor"></ellipse>
               </svg>
               <span x-show="$store.app.sidebar">Profile</span>
             </button>

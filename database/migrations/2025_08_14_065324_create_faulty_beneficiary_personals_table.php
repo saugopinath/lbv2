@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-         Schema::create('lb_scheme.beneficiary_personals', function (Blueprint $table) {
-            $table->id('beneficiary_id');
-            $table->unsignedInteger('application_id');
+        Schema::create('lb_scheme.faulty_beneficiary_personals', function (Blueprint $table){
+        //    $table->id();
+            $table->id('application_id');
+            $table->unsignedBigInteger('beneficiary_id')->unique();
             $table->smallInteger('district_id');
             $table->smallInteger('block_id')->nullable();
             $table->mediumInteger('sub_division_id')->nullable();
@@ -23,7 +24,8 @@ return new class extends Migration
             $table->string('full_name');
             $table->date('dob');
             $table->string('mobile_no');
-            $table->smallInteger('gender');
+            $table->string('email')->nullable();
+            // $table->smallInteger('gender');
             $table->smallInteger('caste');
             $table->smallInteger('next_level_role_id');
             $table->string('caste_certificate_no')->nullable();
@@ -34,6 +36,9 @@ return new class extends Migration
             $table->date('ds_date')->nullable();
             $table->string('ds_registration_no')->nullable();
             $table->Integer('created_by');
+
+            $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.unique_app_ben_ids');
+
             $table->foreign('created_by','user_id_fk')->references('id')->on('users');
             $table->foreign('district_id','district_id_fk')->references('id')->on('districts');
             $table->foreign('block_id','block_id_fk')->references('id')->on('blocks');
@@ -50,7 +55,7 @@ return new class extends Migration
             $table->index(['district_id','sub_division_id']);
             $table->index(['district_id','municipality_id','ward_id']);
             $table->index(['district_id','block_id','panchayat_id']);
-            $table->index('application_id');
+            $table->index('application_id');      
         });
     }
 
@@ -59,6 +64,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('lb_scheme.beneficiary_personals');
+        Schema::dropIfExists('lb_scheme.faulty_beneficiary_personals');
     }
 };

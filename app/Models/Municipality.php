@@ -7,21 +7,23 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Municipality extends Model
 {
+    protected $table = 'municipalities';
     protected $fillable = [
-            'name',
-            'ref_code',
-            'lgd_code',
-            'district_id',
-            'subdivision_id',
-            'state_id',
-        ];
+        'name',
+        'ref_code',
+        'lgd_code',
+        'district_id',
+        'subdivision_id',
+        'state_id',
+    ];
 
-   
+
     public function Subdivision(): BelongsTo
     {
         return $this->belongsTo(Subdivision::class);
     }
-    
+
+
     public function district()
     {
         return $this->belongsTo(District::class);
@@ -31,6 +33,4 @@ class Municipality extends Model
     {
         return $this->hasMany(Ward::class);
     }
-    
-   
 }

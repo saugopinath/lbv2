@@ -13,6 +13,12 @@ use App\Services\SendSmsService;
 use App\Interfaces\UserInterface;
 use App\Services\UserService;
 
+use App\Interfaces\ElasticsearchInterface;
+use App\Services\ElasticsearchService;
+
+use App\Models\User;
+use App\Observers\UserObserver;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -26,6 +32,9 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(UserInterface::class, UserService::class);
 
+        $this->app->bind(ElasticsearchInterface::class, ElasticsearchService::class);
+
+        
        
     }
 
@@ -34,6 +43,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+         User::observe(UserObserver::class);
     }
 }

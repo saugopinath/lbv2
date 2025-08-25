@@ -3366,9 +3366,18 @@ array('ref_code'=>'109812004','lg_code'=>'109812','name'=>'LATAGURI','block_lgd_
 array('ref_code'=>'109813005','lg_code'=>'109813','name'=>'MOULANI','block_lgd_code'=>'7484'),
 array('ref_code'=>'109815006','lg_code'=>'109815','name'=>'RAJADANGA','block_lgd_code'=>'7484'),
         );
+        $i=1;
         foreach ($wb_Panchayats as $panchayat) {
             $block_id = Block::where('lgd_code', $panchayat['block_lgd_code'])->firstOrFail()->id;
+            if(in_array($panchayat['lg_code'],array(109956,109957,110769,109739,110634,110046,110115,108897,108578,108699,107937,108188))){
+             $id=299521+$i;
+             $i++;
+            }
+            else{
+                $id=$panchayat['lg_code'];
+            }
             Panchayat::create([
+                'id' => $id,
                 'ref_code' => $panchayat['ref_code'],
                 'name' => strtoupper($panchayat['name']),
                 'lgd_code' => $panchayat['lg_code'],

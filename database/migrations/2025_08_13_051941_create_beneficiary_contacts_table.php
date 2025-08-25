@@ -45,7 +45,9 @@ return new class extends Migration
             $table->index(['district_id','municipality_id']);
             $table->index(['district_id','municipality_id','ward_id']);
             $table->index(['district_id','block_id','panchayat_id']);
-            $table->index('application_id');
+            $table->index('application_id', 'beneficiary_contacts_application_id_index');
+            $table->index('beneficiary_id', 'beneficiary_contacts_beneficiary_id_index');
+
         });
     }
 

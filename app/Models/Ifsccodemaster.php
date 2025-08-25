@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ifsccodemaster extends Model
 {
-    public function bank()
+    public function bankmaster()
     {
-        return $this->belongsTo(BankMaster::class, 'bankmaster_id');
+        return $this->belongsTo(Bankmaster::class, 'bankmaster_id');
     }
 }
