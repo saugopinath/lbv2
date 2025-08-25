@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\DesignController;
 use App\Http\Controllers\WorkFlowController;
 use App\Http\Controllers\DashboardController;
@@ -11,7 +12,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::get('refresh-captcha', [App\Http\Controllers\CaptchaController::class, 'refreshCaptcha'])->name('refresh-captcha');
-Route::controller(AuthenticationController::class)->group(function(){
+Route::controller(AuthenticationController::class)->group(function () {
     Route::get('/login', 'login')->name('login');
     Route::post('/loginPost', 'loginCheck')->name('loginPost');
     Route::post('/resendOtp', 'resendOtp')->name('resendOtp');
@@ -26,8 +27,9 @@ Route::controller(AuthenticationController::class)->group(function(){
 });
 Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard')->middleware('auth');
 Route::get('lb-application-list', [WorkFlowController::class, 'index'])->middleware(['auth', 'verified'])->name('submitted-list');
-Route::get('/draft-application/{id}/edit', [App\Http\Controllers\WorkFlowController::class, 'edit'])->name('draft-application.edit');
-Route::get('/application/{id}/view', DraftApplicationView::class)->name('draft-application.view');
+// Route::get('/draft-application/{id}/edit', [App\Http\Controllers\WorkFlowController::class, 'edit'])->name('draft-application.edit');
+// Route::get('/application/{id}/view', DraftApplicationView::class)->name('draft-application.view');
+Route::get('/application/{id}', DraftApplicationView::class)->name('draft-application.view');
 
 
 Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
@@ -35,6 +37,6 @@ Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->na
 Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
 // Route::get('lb-application-list', [App\Http\Controllers\LBFormController::class, 'index'])->middleware(['auth', 'verified'])->name('sumittedlist');
 
-Route::resources([
-        'roles' => App\Http\Controllers\RoleController::class
-    ]);
+// Route::resources([
+//         'roles' => RoleController::class
+//     ]);

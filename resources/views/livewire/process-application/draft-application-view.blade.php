@@ -10,23 +10,41 @@
             this.openSection = this.openSection === section ? null : section;
         }
     }" class="space-y-2">
-        <x-accordion-section title="Personal Details" sectionId="personal-details" color="pink-500">
-            {{--  <x-apllicant-modal.personal-details :id="$passId" :reportType="$reportType" />  --}}
-            <x-apllicant-modal.personal-details />
+        <x-accordion-section title="Personal Detailsss" sectionId="personal-details" color="pink-500">
+            <x-apllicant-modal.personal-details :id="$applicationId" />
+            {{--  <x-apllicant-modal.personal-details :id="$applicationId" :reportType="$reportType" />  --}}
+
         </x-accordion-section>
 
         <x-accordion-section title="Address Details" sectionId="address-details" color="indigo-500">
-            {{--  <x-apllicant-modal.contact-details :id="$passId" :reportType="$reportType" />  --}}
-              <x-apllicant-modal.contact-details />
+            <x-apllicant-modal.contact-details :id="$applicationId" />
+
         </x-accordion-section>
 
         <x-accordion-section title="Bank Details" sectionId="bank-details" color="green-500">
-            {{--  <x-apllicant-modal.bank-account-details :id="$passId" :reportType="$reportType" />  --}}
+            <x-apllicant-modal.bank-account-details :id="$applicationId" />
+
         </x-accordion-section>
 
         <x-accordion-section title="Encloser Details" sectionId="encloser-details" color="orange-500">
             {{--  <x-apllicant-modal.encloser-list :id="$passId" :reportType="$reportType" />  --}}
+
         </x-accordion-section>
 
+        {{--  <x-button.primary> Action </x-button.primary>  --}}
+        <div class="flex space-x-2">
+            <x-button.primary wire:click="openActionModal">
+                Action
+            </x-button.primary>
+
+
+            {{--  <button wire:click="openActionModal" class="px-4 py-2 bg-blue-600 text-white rounded">
+                ACTION
+            </button>  --}}
+            @livewire('process-application.bulk-action-modal')
+
+        </div>
+
+
+
     </div>
-</div>

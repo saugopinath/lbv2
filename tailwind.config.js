@@ -9,11 +9,11 @@ export default {
         "./resources/views/**/*.blade.php",
     ],
 
-    darkMode: "class", // Enable dark mode with the 'dark' class
-    
+    darkMode: "class", 
+
     theme: {
         extend: {
-          
+
             fontFamily: {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
             },

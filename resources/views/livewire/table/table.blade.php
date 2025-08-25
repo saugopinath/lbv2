@@ -29,6 +29,15 @@
                 <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
             </div>
         </div>
+        @if (auth()->user()->hasRole(['Approver', 'Delegated Approver']))
+            <x-button.primary wire:click="openBulkActionModal" :disabled="empty($selectedRows)">
+                Bulk Actions
+            </x-button.primary>
+        @endif
+
+
+
+
     </div>
 
 
@@ -36,12 +45,14 @@
         <table class="min-w-full text-sm text-gray-700 text-center">
             <thead class="bg-violet-800 text-xs uppercase py-3 text-white">
                 <tr>
-
+                    @if (auth()->user()->hasRole(['Approver', 'Delegated Approver']))
+                        <th class="py-3">Check</th>
+                    @endif
                     <th class="py-3">Application ID</th>
                     <th class="py-3">Applicant Name</th>
                     <th class="py-3">Father's Name</th>
                     <th class="py-3">Age</th>
-                    <th class="py-3">GP / Municipality</th>
+                    {{--  <th class="py-3">GP / Municipality</th>  --}}
                     <th class="py-3">Actions</th>
 
 
@@ -50,10 +61,17 @@
             <tbody class="divide-y divide-gray-200 bg-white">
                 @foreach ($rows as $row)
                     <tr>
+                        @if (auth()->user()->hasRole(['Approver', 'Delegated Approver']))
+                            <td class="py-3">
+                                <x-form.checkbox wire:model.live="selectedRows" value="{{ $row->id }}"
+                                    name="selectRow" />
+                            </td>
+                        @endif
+
                         <td class="py-3">{{ $row->application_id }}</td>
                         <td class="py-3">{{ $row->full_name }}</td>
                         <td class="py-3">
-                            {{ $row->ben_relationships->where('relation_type_id', 79)->first()?->full_name ?? '-' }}
+                            {{ $row->relationships->where('relation_type_id', 79)->first()?->full_name ?? '-' }}
                         </td>
                         <td class="py-3">
                             @if ($row->dob)
@@ -62,7 +80,7 @@
                                 -
                             @endif
                         </td>
-                        <td class="py-3">
+                        {{--  <td class="py-3">
                             @if ($row->contacts?->panchayat?->name)
                                 GP: {{ $row->contacts->panchayat->name }}
                             @elseif ($row->contacts?->municipality?->name)
@@ -70,7 +88,7 @@
                             @else
                                 -
                             @endif
-                        </td>
+                        </td>  --}}
                         <td>
                             <x-link-button wire:navigate href="{{ route('draft-application.view', $row->id) }}">
                                 View
@@ -94,4 +112,54 @@
         </div>
         {{--  <div>{{ $rows->links('vendor.livewire.simple') }}</div>  --}}
     </div>
+
+    <!-- modal -->
+    <div>
+
+        @livewire('process-application.bulk-action-modal')
+
+        <!-- Bulk Action Modal -->
+        {{--  <div x-data="{ open: @entangle('bulkActionModal') }">
+            <div x-show="open" x-cloak class="fixed inset-0 flex items-center justify-center bg-black/50" ">
+                <div class="bg-white rounded-lg p-6 w-96">
+                    <h2 class="text-lg font-semibold mb-4">Select Operation</h2>
+
+                    <select wire:model="bulkActionType" class="w-full border rounded p-2 mb-3">
+                        <option value="">Select Operation</option>
+                        <option value="A">Approve</option>
+                        <option value="R">Reject</option>
+                        <option value="T">Revert</option>
+                    </select>
+
+                                  @if (in_array($bulkActionType, ['R', 'T']))
+                <select wire:model="reason" class="w-full border rounded p-2 mb-3">
+                    <option value="">Select Reason</option>
+                    @foreach ($reasons as $id => $name)
+                        <option value="{{ $id }}">{{ $name }}</option>
+                    @endforeach
+                </select>
+
+                <textarea wire:model="remark" placeholder="Enter remark" class="w-full border rounded p-2 mb-3"></textarea>
+                @endif
+
+                <div class="flex justify-end gap-2">
+                    <button @click="open = false" class="px-3 py-1 bg-gray-200 rounded">Cancel</button>
+                    <button wire:click="performBulkAction" class="px-3 py-1 bg-violet-600 text-white rounded">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>  --}}
+    </div>
+
+
+
+
+
+
+
+
+
+
+
 </div>

@@ -13,7 +13,7 @@ class DraftBeneficiaryPersonal extends Model
     protected $primaryKey = 'application_id';
  protected $table = 'lb_scheme.draft_beneficiary_personals';
 
-    public function ben_relationships()
+    public function relationships()
     {
         return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id', 'application_id');
     }
@@ -24,7 +24,7 @@ public function declarations()
     }
 
 
-    public function contacts()
+    public function contact()
     {
         return $this->hasOne(DraftBeneficiaryContact::class, 'application_id', 'application_id');
     }

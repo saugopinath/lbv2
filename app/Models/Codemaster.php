@@ -15,4 +15,8 @@ class Codemaster extends Model
     {
         return $this->belongsTo(Codemaster::class, 'parent_id');
     }
+     public static function getIdByCode($code)
+    {
+        return self::where('code', $code)->value('id');
+    }
 }

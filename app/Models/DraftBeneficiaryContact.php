@@ -13,14 +13,26 @@ class DraftBeneficiaryContact extends Model
 
 
     public function panchayat()
-{
-    return $this->belongsTo(Panchayat::class, 'panchayat_id');
-}
+    {
+        return $this->belongsTo(Panchayat::class, 'panchayat_id');
+    }
 
-public function municipality()
-{
-    return $this->belongsTo(Municipality::class, 'municipality_id');
-}
+    public function municipality()
+    {
+        return $this->belongsTo(Municipality::class, 'municipality_id');
+    }
+    public function district()
+    {
+        return $this->belongsTo(District::class, 'district_id');
+    }
 
+    public function block()
+    {
+        return $this->belongsTo(Block::class, 'block_id');
+    }
+    public function ward()
+    {
+        return $this->belongsTo(Ward::class, 'ward_id');
+    }
 
 }

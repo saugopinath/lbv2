@@ -11,8 +11,17 @@ class DraftBeneficiaryBank extends Model
     ];
     protected $table = 'lb_scheme.draft_beneficiary_banks';
 
-    public function ifscMaster()
+    // public function ifscMaster()
+    // {
+    //     return $this->belongsTo(Ifsccodemaster::class, 'ifsc', 'code');
+    // }
+
+     public function ifscCodeMaster()
     {
-        return $this->belongsTo(Ifsccodemaster::class, 'ifsc', 'code');
+        return $this->belongsTo(IfscCodeMaster::class, 'ifsc', 'code');
+    }
+    public function ifscbranch()
+    {
+        return $this->belongsTo(IfscCodeMaster::class, 'ifsc', 'code');
     }
 }
