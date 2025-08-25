@@ -3,15 +3,10 @@
 namespace App\Livewire;
 
 use App\Models\BeneficiaryApprovedList;
-use \Carbon\Carbon;
-use App\Models\Codemaster;
-use App\Models\BenRejectDetail;
 use App\Helpers\EncryptionArray;
-use App\Models\BeneficiaryPersonal;
 use App\Exports\BeneficiariesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
-use App\Models\DraftBeneficiaryPersonal;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
@@ -20,7 +15,7 @@ use Rappasoft\LaravelLivewireTables\Views\Filters\TextFilter;
 
 class BeneficiaryDetailsTable extends DataTableComponent
 {
-    public ?int $perPage = 1;
+    public ?int $perPage = 5;
     public string $reportType;
     public string $login_type = '';
     public string $search = '';
@@ -61,12 +56,22 @@ class BeneficiaryDetailsTable extends DataTableComponent
     {
         $this->setPrimaryKey('sourceable_id')
             ->setPaginationEnabled()
-            ->setPerPageAccepted([1, 5])
+            ->setPerPageAccepted([5,10])
             ->setPerPage($this->perPage)
             ->setPerPageVisibilityEnabled()
             ->setSearchEnabled()
             ->setSearchLive()
             ->setBulkActionsEnabled();
+
+        $this->setHideBulkActionsWhenEmptyEnabled();
+
+        $this->setConfigurableAreas([
+            'toolbar-left-start' => 'livewire.export_excel_buttons',
+        ]);
+
+        // ->setFilterLayoutSlideDown()
+        // ->setFiltersEnabled();
+        //  $this->setPaginationDropdownVisibilityDisabled();
 
         //      $this->setBulkActionsMenuItemAttributes([
         //     'class' => 'bg-blue-200 text-gray-700 px-3 py-1 rounded hover:bg-blue-300', // default style
@@ -77,7 +82,7 @@ class BeneficiaryDetailsTable extends DataTableComponent
         //      $this->setTableAttributes([
         // 'class' => 'min-w-full divide-y divide-gray-200 bg-white shadow-md rounded-lg p-4',
         // ]);
-        //      $this->setHideBulkActionsWhenEmptyEnabled();
+
         //     $this->setBulkActionsTrCheckboxAttributes([
         // 'class' => 'hidden', // hide header checkbox if needed
         //     ]);
@@ -94,13 +99,13 @@ class BeneficiaryDetailsTable extends DataTableComponent
         // $this->setPerPageDropdownWrapperAttributes([
         //     'class' => 'mb-2 flex justify-end items-center', // e.g., place top-right
         // ]);
-        $this->setPerPageFieldAttributes([
-            'class' => 'inline-flex justify-center px-4 py-2 text-sm font-medium rounded-md border shadow-sm focus:ring focus:ring-opacity-50
-                    text-gray-700 bg-white border-gray-300 hover:bg-gray-50 focus:border-indigo-300 focus:ring-indigo-200 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600',
-        ]);
+        // $this->setPerPageFieldAttributes([
+        //     'class' => 'inline-flex justify-center px-4 py-2 text-sm font-medium rounded-md border shadow-sm focus:ring focus:ring-opacity-50
+        //             text-gray-700 bg-white border-gray-300 hover:bg-gray-50 focus:border-indigo-300 focus:ring-indigo-200 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600',
+        // ]);
 
         $this->setTableWrapperAttributes([
-            'class' => 'overflow-x-auto border rounded-lg shadow-sm',
+            'class' => 'overflow-x-auto overflow-y-auto max-h-[500px] border rounded-lg shadow-sm',
         ]);
 
         $this->setTableAttributes([
@@ -108,17 +113,17 @@ class BeneficiaryDetailsTable extends DataTableComponent
         ]);
 
         $this->setTheadAttributes([
-            'class' => 'bg-violet-800 text-xs uppercase py-3 text-white',
+            'class' => 'bg-violet-800 text-xs uppercase py-3 px-4 text-white',
         ]);
         $this->setThAttributes(function ($column) {
             return [
-                'class' => 'px-4 py-3 text-white/70 bg-violet-800 text-xs',
+                'class' => 'px-4 py-3 text-white bg-violet-800 text-xs',
             ];
         });
 
         $this->setTdAttributes(function ($row) {
             return [
-                'class' => 'px-4 py-2 text-gray-700 text-center',
+                'class' => 'px-4 py-3 text-gray-700 text-center',
             ];
         });
 
@@ -130,16 +135,7 @@ class BeneficiaryDetailsTable extends DataTableComponent
     {
         return [
             'bulkapprove' => 'Approve',
-            'exportSelected' => 'Export Selected',
-        ];
-    }
-    public function actions(): array
-    {
-        return [
-            Action::make('Edit Item')
-                ->setIcon("fas fa-edit")
-                ->setIconAttributes(['class' => 'font-4xl text-4xl'])
-                ->setIconRight(),
+            'exportSelected' => 'Export',
         ];
     }
     public function updatedSearch($value): void
@@ -264,25 +260,12 @@ class BeneficiaryDetailsTable extends DataTableComponent
     }
     // public function export()
     // {
-    //     $reportTypeFormatted = ucfirst($this->reportType);
-    //     $timestamp = Carbon::now('Asia/Kolkata')->format('Ymd_Hi');
-    //     $filename = "{$reportTypeFormatted}_Beneficiaries_{$timestamp}.xlsx";
-
-    //     return Excel::download(
-    //         new BeneficiariesExport(
-    //             $this->reportType,
-    //             $this->login_type,
-    //             $this->loginDistrictCode,
-    //             $this->loginSubdivisionCode,
-    //             $this->loginBlockCode
-    //         ),
-    //         $filename
-    //     );
+    //    return Excel::download(new BeneficiariesExport($this->getFilteredQuery()->get()), 'beneficiaries.xlsx');
     // }
     // public function render(): \Illuminate\View\View
     // {
     //     return view('livewire.custom-beneficiary-table', [
     //         'rows' => $this->getRows(),
     //     ]);
-    // }
-}
+    // 
+    }

@@ -42,20 +42,15 @@
             <x-livewire-tables::includes.actions/>
         @endif
 
-        <!-- @if ($this->hasConfigurableAreaFor('toolbar-left-end')) -->
+        @if ($this->hasConfigurableAreaFor('toolbar-left-end'))
             <div x-cloak x-show="!currentlyReorderingStatus" @class([
                 'mb-3 mb-md-0 input-group' => $isBootstrap,
                 'flex rounded-md shadow-sm' => $isTailwind,
             ])>
                 @include($this->getConfigurableAreaFor('toolbar-left-end'), $this->getParametersForConfigurableArea('toolbar-left-end'))
 
-                 @if ($this->showPaginationDropdown())
-        
-            <x-livewire-tables::tools.toolbar.items.pagination-dropdown />
-        
-    @endif
             </div>
-        <!-- @endif -->
+        @endif
     </div>
 
     <div x-cloak x-show="!currentlyReorderingStatus"
@@ -65,21 +60,18 @@
         ])
     >
         @includeWhen($this->hasConfigurableAreaFor('toolbar-right-start'), $this->getConfigurableAreaFor('toolbar-right-start'), $this->getParametersForConfigurableArea('toolbar-right-start'))
-       
-        @if($this->showActionsInToolbarRight())
-            <x-livewire-tables::includes.actions/>
+      
+        @if ($this->showPaginationDropdown())
+            <x-livewire-tables::tools.toolbar.items.pagination-dropdown />
+        @endif
+        
+
+        @if ($this->columnSelectIsEnabled())
+            <x-livewire-tables::tools.toolbar.items.column-select />
         @endif
 
         @if ($this->showBulkActionsDropdownAlpine() && $this->shouldAlwaysHideBulkActionsDropdownOption != true)
             <x-livewire-tables::tools.toolbar.items.bulk-actions />
-        @endif
-
-        @if ($this->columnSelectIsEnabled)
-            <x-livewire-tables::tools.toolbar.items.column-select />
-        @endif
-
-        @if ($this->showPaginationDropdown())
-            <x-livewire-tables::tools.toolbar.items.pagination-dropdown />
         @endif
 
         @includeWhen($this->hasConfigurableAreaFor('toolbar-right-end'), $this->getConfigurableAreaFor('toolbar-right-end'), $this->getParametersForConfigurableArea('toolbar-right-end'))
