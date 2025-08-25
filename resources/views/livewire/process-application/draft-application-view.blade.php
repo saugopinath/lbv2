@@ -12,7 +12,7 @@
     }" class="space-y-2">
         <x-accordion-section title="Personal Detailsss" sectionId="personal-details" color="pink-500">
             <x-apllicant-modal.personal-details :id="$applicationId" />
-            {{--  <x-apllicant-modal.personal-details :id="$applicationId" :reportType="$reportType" />  --}}
+
 
         </x-accordion-section>
 
@@ -33,14 +33,10 @@
 
         {{--  <x-button.primary> Action </x-button.primary>  --}}
         <div class="flex space-x-2">
-            <x-button.primary wire:click="openActionModal">
+
+            <x-button.primary wire:click="openActionModal" wire-target="openActionModal">
                 Action
             </x-button.primary>
-
-
-            {{--  <button wire:click="openActionModal" class="px-4 py-2 bg-blue-600 text-white rounded">
-                ACTION
-            </button>  --}}
             @livewire('process-application.bulk-action-modal')
 
         </div>

@@ -32,12 +32,13 @@
     <x-slot name="actions">
         <div class="flex justify-end gap-2">
 
-            <button wire:click="$set('bulkActionModal', false)" class="px-3 py-1 bg-gray-200 rounded">
+
+            <x-button.danger wire:click="$set('bulkActionModal', false)">
                 Cancel
-            </button>
-            <button wire:click="performBulkAction" class="px-3 py-1 bg-violet-600 text-white rounded">
+            </x-button.danger>
+            <x-button.primary wire:click="performBulkAction" wire-target="performBulkAction">
                 Confirm
-            </button>
+            </x-button.primary>
         </div>
     </x-slot>
 
