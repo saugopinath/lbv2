@@ -15,13 +15,13 @@ class BankDetails extends Component
     public $ifscode, $bankname, $bankbranchname, $bankaccountnumber, $confirmbankaccountnumber;
     public function updatedIfscode()
     {
-        $ifs = Ifsccodemaster::with('bank')
+        $ifs = Ifsccodemaster::with('bankmaster')
             ->where('code', $this->ifscode)
             ->where('is_active', 1)
             ->first();
 
         if ($ifs) {
-            $this->bankname = $ifs->bank->name;
+            $this->bankname = $ifs->bankmaster->name;
             $this->bankbranchname = $ifs->branch;
         } else {
             $this->bankname = '';
