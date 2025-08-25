@@ -89,14 +89,31 @@
                                 -
                             @endif
                         </td>  --}}
-                        <td>
+                        {{--  <td>
                             <x-link-button wire:navigate href="{{ route('draft-application.view', $row->id) }}">
                                 View
                             </x-link-button>
-
-
-
+                        </td>  --}}
+                        {{--  <td x-data="{ loading: false }">
+                            <a href="{{ route('draft-application.view', $row->id) }}" @click="loading = true"
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md">
+                                <span x-show="!loading">View</span>
+                                <span x-show="loading" class="flex items-center">
+                                    <img src="{{ asset('images/spinner.svg') }}" class="w-5 h-5 animate-spin mr-2">
+                                    Loading...
+                                </span>
+                            </a>
+                        </td>  --}}
+                        <td>
+                            <x-link-button wire:loading.attr="disabled" wire:target="navigate"
+                                href="{{ route('draft-application.view', $row->id) }}">
+                                <span wire:loading.remove wire:target="navigate">View</span>
+                                <span wire:loading wire:target="navigate">
+                                    <x-loader class="h-4 w-4" />
+                                </span>
+                            </x-link-button>
                         </td>
+
 
 
                     </tr>

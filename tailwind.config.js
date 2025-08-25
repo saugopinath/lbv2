@@ -7,13 +7,13 @@ export default {
         "./vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php",
         "./storage/framework/views/*.php",
         "./resources/views/**/*.blade.php",
+        "./vendor/masmerise/livewire-toaster/resources/views/*.blade.php",
     ],
 
-    darkMode: "class", 
+    darkMode: "class",
 
     theme: {
         extend: {
-
             fontFamily: {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
             },

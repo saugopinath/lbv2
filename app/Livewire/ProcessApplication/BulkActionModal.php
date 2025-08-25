@@ -4,6 +4,7 @@ namespace App\Livewire\ProcessApplication;
 use Livewire\Component;
 use App\Models\Codemaster;
 use Livewire\Attributes\On;
+use Masmerise\Toaster\Toaster;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\DraftBeneficiaryPersonal;
@@ -61,10 +62,6 @@ class BulkActionModal extends Component
         }
     }
 
-
-
-
-
     public function performBulkAction()
     {
         $this->validate([
@@ -72,32 +69,50 @@ class BulkActionModal extends Component
             'reason' => in_array($this->bulkActionType, ['R', 'T']) ? 'required' : 'nullable',
             'remark' => 'nullable|string|max:255',
         ]);
-        DB::transaction(function () {
 
+        $successMessage = 'Action performed successfully!';
 
+        DB::transaction(function () use (&$successMessage) {
             $approverRoleId = Codemaster::getIdByCode(23);
+            $operatorRoleId = Codemaster::getIdByCode(20);
 
             if ($this->bulkActionType === 'V') {
-
                 DraftBeneficiaryPersonal::whereIn('id', $this->selectedRows)
                     ->update(['next_level_role_id' => $approverRoleId]);
 
+
+                $successMessage = "The selected application(s) have been successfully verified.";
+
+            } elseif ($this->bulkActionType === 'T') {
+                DraftBeneficiaryPersonal::whereIn('id', $this->selectedRows)
+                    ->update(['next_level_role_id' => $operatorRoleId]);
+
+                $successMessage = "The selected application(s) have been successfully reverted.";
+
+            } elseif ($this->bulkActionType === 'R') {
+
+                $successMessage = "The selected application(s) have been successfully rejected.";
             }
-            // } else ($this->bulkActionType === 'A') {
 
-
-            // }
         });
-
+        Toaster::success($successMessage);
 
         $this->bulkActionModal = false;
-        // $this->reset(['bulkActionType', 'reason', 'remark', 'selectedRows']);
+
+        $this->reset(['bulkActionType', 'reason', 'remark', 'selectedRows', 'bulkActionTypeLabel']);
 
 
-        // $this->dispatch('notify', 'Action performed successfully!');
-        // $this->dispatch('refreshTable'); // Rappasoft tables listen for this event
+        // $this->dispatch('toaster-success', $successMessage);
         $this->dispatch('actionPerformedAndRedirect');
     }
+
+    // ...
+
+
+
+
+
+
     public function render()
     {
         return view('livewire.process-application.bulk-action-modal');
