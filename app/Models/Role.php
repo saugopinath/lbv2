@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Role extends SpatieRole
 {
+    protected $table = 'roles';
+    public $timestamps = false;
+
     use HasFactory, HasUlids;
 
     /**
@@ -38,7 +41,7 @@ class Role extends SpatieRole
      *
      * @var array<string, string>
      */
-   
+
     public function parentRole()
     {
         return $this->belongsTo(self::class, 'parent_role_id');
@@ -52,9 +55,4 @@ class Role extends SpatieRole
     {
         return $this->hasMany(RoleOfficeTypeMapping::class);
     }
-    
-   
-
-
-    
 }

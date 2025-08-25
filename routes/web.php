@@ -10,6 +10,7 @@ use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\BeneficiaryListController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
+use App\Http\Controllers\UserDutyManagementController;
 
 
 Route::get('/', function () {
@@ -52,3 +53,6 @@ Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->na
 Route::get('lbform', [LBController::class, 'index'])->middleware(['auth', 'verified'])->name('lbform');
 Route::get('draftlist', [LBController::class, 'draftlist'])->middleware(['auth', 'verified'])->name('draftlist');
 Route::get('draftedit/{id}', [LBController::class, 'draftedit'])->middleware(['auth', 'verified'])->name('draftedit');
+
+
+Route::get('/userDutymanagement', [UserDutyManagementController::class, 'index'])->middleware(['auth', 'verified'])->name('userDutymanagement.index')->middleware('auth');

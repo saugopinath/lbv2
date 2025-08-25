@@ -20,18 +20,7 @@ class DatabaseSeeder extends Seeder
             LGD\SubdivisionSeeder::class,
             LGD\MunicipalitiesSeeder::class,
             LGD\WardSeeder::class,
-            // BankSeeder::class,
-            // CodemasterSeeder::class,
-            // DepartmentSeeder::class,
-            // IfscSeeder::class,
-            // SchemeSeeder::class,
             MasterMimeTypeSeeder::class,
-            // SchemeAttacheDocumentSeeder::class,
-            // RolePermissionSeeder::class,
-            // SuperAdminSeeder::class,
-            // DraftApplicantSeeder::class,
-            // BeneficiaryApplicantSeeder::class,
-            // BenRejectDetailsSeeder::class,
             Bank\BankSeeder::class,
             Bank\IfscSeeder::class,
             DepartmentSeeder::class,
@@ -48,6 +37,9 @@ class DatabaseSeeder extends Seeder
             Role\DaspurIIBlockOperatorSeeder::class,
             Role\GhatalSdoOperatorSeeder::class,
             Role\GhatalSdoVerifierSeeder::class,
+            // DraftApplicantSeeder::class,
+            // BeneficiaryApplicantSeeder::class,
+            // BenRejectDetailsSeeder::class,
         ]);
     }
 }
