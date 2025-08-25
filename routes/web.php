@@ -1,13 +1,15 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthenticationController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\DesignController;
-use App\Http\Controllers\UserManagementController;
-use App\Http\Controllers\CMOGrievanceController;
-use App\Http\Controllers\BeneficiaryListController;
 use App\Livewire\ApplicationView;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LBController;
+use App\Http\Controllers\DesignController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CMOGrievanceController;
+use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\BeneficiaryListController;
+use App\Http\Controllers\BeneficiaryApprovedListController;
 
 
 Route::get('/', function () {
@@ -47,3 +49,6 @@ Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index
 //     ]);
 Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
 Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
+Route::get('lbform', [LBController::class, 'index'])->middleware(['auth', 'verified'])->name('lbform');
+Route::get('draftlist', [LBController::class, 'draftlist'])->middleware(['auth', 'verified'])->name('draftlist');
+Route::get('draftedit/{id}', [LBController::class, 'draftedit'])->middleware(['auth', 'verified'])->name('draftedit');

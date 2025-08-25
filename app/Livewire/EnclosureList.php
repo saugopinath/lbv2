@@ -82,7 +82,6 @@ class EnclosureList extends Component
             }
         }
     }
-
     public function setCurrentDoc($docTypeId)
     {
         $this->currentDocId = $docTypeId;
@@ -162,7 +161,9 @@ class EnclosureList extends Component
                 return;
             }
         }
-        $this->dispatch('encList');
+        $this->dispatch('encList', [
+            'message' => "Enclosure lists uploaded successfully for the application id: {$this->application_id}"
+        ]);
     }
 
     public function render()

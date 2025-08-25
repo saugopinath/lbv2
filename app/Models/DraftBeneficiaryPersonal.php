@@ -20,15 +20,6 @@ class DraftBeneficiaryPersonal extends Model
         return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id', 'application_id');
     }
 
-    public function contact()
-    {
-        return $this->hasOne(DraftBeneficiaryContact::class, 'application_id', 'application_id');
-    }
-
-    public function bank()
-    {
-        return $this->hasOne(DraftBeneficiaryBank::class, 'application_id', 'application_id');
-    }
     public function casteName()
     {
         return $this->belongsTo(CodeMaster::class, 'caste', 'id');
@@ -44,7 +35,7 @@ class DraftBeneficiaryPersonal extends Model
     //     return $this->hasMany(BeneficiaryEnclosure::class, 'application_id', 'application_id');
     // }
 
-      public function documents()
+    public function documents()
     {
         return $this->hasMany(BeneficiaryEnclosure::class, 'application_id');
     }
@@ -56,5 +47,18 @@ class DraftBeneficiaryPersonal extends Model
     public function relationships()
     {
         return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id');
+    }
+
+    public function contact()
+    {
+        return $this->hasOne(DraftBeneficiaryContact::class, 'application_id');
+    }
+    public function bank()
+    {
+        return $this->hasOne(DraftBeneficiaryBank::class, 'application_id');
+    }
+    public function declaration()
+    {
+        return $this->hasOne(DraftBeneficiaryDeclaration::class, 'application_id');
     }
 }

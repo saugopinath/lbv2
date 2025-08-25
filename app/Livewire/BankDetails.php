@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Illuminate\Support\Facades\Session;
 use Livewire\Component;
 use App\Models\Ifsccodemaster;
 use App\Models\DraftBeneficiaryPersonal;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class BankDetails extends Component
 {
-    public $mode, $id;
+    public $mode, $application_id;
     public $ifscode, $bankname, $bankbranchname, $bankaccountnumber, $confirmbankaccountnumber;
     public function updatedIfscode()
     {
@@ -27,46 +28,62 @@ class BankDetails extends Component
             $this->bankbranchname = '';
         }
     }
-    public function mount($mode = null, $id = null)
+    public function mount($mode = null, $application_id = null)
     {
         $this->mode = $mode;
-        if ($id != null) {
-            $this->id = $id;
-            $app_det = DraftBeneficiaryPersonal::with('bank')->where('application_id', $id)->first();
-            $this->ifscode = $app_det->bank->ifsc;
-            $this->updatedIfscode($this->ifscode);
-            $this->bankname;
-            $this->bankbranchname;
-            $this->bankaccountnumber = trim($app_det->bank->bank_account_number);
-            $this->confirmbankaccountnumber = trim($app_det->bank->bank_account_number);
+        if ($application_id != null) {
+            $this->application_id = $application_id;
+            $app_det = DraftBeneficiaryPersonal::with('bank')->where('application_id', $application_id)->first();
+            if ($app_det->bank) {
+                $this->ifscode = $app_det->bank->ifsc;
+                $this->updatedIfscode($this->ifscode);
+                $this->bankname;
+                $this->bankbranchname;
+                $this->bankaccountnumber = trim($app_det->bank->bank_account_number);
+                $this->confirmbankaccountnumber = trim($app_det->bank->bank_account_number);
+            }
         }
     }
     public function rules()
     {
-        $rules = [
-            'ifscode' => 'required|string',
+        return [
+            'ifscode' => 'required|string|max:11',
             'bankaccountnumber' => 'required|numeric',
             'confirmbankaccountnumber' => 'required|same:bankaccountnumber',
         ];
-        return $rules;
+    }
+    public function messages()
+    {
+        return [
+            'ifscode.*' => 'Please enter a valid IFSC code (maximum 11 characters).',
+            'bankaccountnumber.*' => 'Please enter a valid bank account number.',
+            'confirmbankaccountnumber.*' => 'The confirmation account number must match the bank account number.',
+        ];
     }
     public function save()
     {
         $validated = $this->validate($this->rules());
-        if ($this->mode === null) {
-            $applicantion = DraftBeneficiaryPersonal::first();
+        $app_det = DraftBeneficiaryBank::where('application_id', $this->application_id)->first();
+        if ($this->mode === null && empty($app_det)) {
+            $application_id = $this->application_id;
             DraftBeneficiaryBank::create([
-                'application_id' => $applicantion->application_id,
+                'application_id' => $application_id,
                 'created_by' => Auth::id(),
                 'ifsc' => $validated['ifscode'],
                 'bank_account_number' => $validated['bankaccountnumber'],
+            ]);
+            $this->dispatch('bankDet', [
+                'message' => "Bank Details saved successfully for the application id: {$this->application_id}"
             ]);
         } else {
             $data = [
                 'ifsc' => $validated['ifscode'],
                 'bank_account_number' => $validated['bankaccountnumber'],
             ];
-            DraftBeneficiaryBank::where('application_id', $this->id)->update($data);
+            DraftBeneficiaryBank::where('application_id', $this->application_id)->update($data);
+            $this->dispatch('bankDet', [
+                'message' => "Bank Details updated successfully for the application id: {$this->application_id}"
+            ]);
         }
     }
     public function render()

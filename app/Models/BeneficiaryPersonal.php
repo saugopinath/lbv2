@@ -53,4 +53,9 @@ class BeneficiaryPersonal extends Model
     {
         return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id');
     }
+
+    public function lists()
+    {
+        return $this->morphOne(BeneficiaryApprovedList::class, 'sourceable');
+    }
 }

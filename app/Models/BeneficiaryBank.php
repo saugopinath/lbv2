@@ -20,4 +20,18 @@ class BeneficiaryBank extends Model
     {
         return $this->belongsTo(IfscCodeMaster::class, 'ifsc', 'code');
     }
+
+    // public function beneficiaryPersonal()
+    // {
+    //     return $this->belongsTo(BeneficiaryPersonal::class, 'beneficiary_id', 'beneficiary_id');
+    // }
+
+    // public function beneficiaryFaultyPersonal()
+    // {
+    //     return $this->belongsTo(FaultyBeneficiaryPersonal::class, 'beneficiary_id', 'beneficiary_id');
+    // }
+    public function ifscMaster()
+    {
+        return $this->belongsTo(Ifsccodemaster::class, 'ifsc', 'code');
+    }
 }

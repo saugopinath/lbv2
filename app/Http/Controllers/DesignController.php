@@ -20,4 +20,9 @@ class DesignController extends Controller
         // dd('bhjcv');
         return view('DesignPages.selectionview');
     }
+
+    public function viewPage()
+    {
+        return view('DesignPages.viewpage');
+    }
 }
