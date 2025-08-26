@@ -8,27 +8,27 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('lb_scheme.scheme_validation_parameter_settings', function (Blueprint $table) {
+        Schema::create('scheme_validation_parameter_settings', function (Blueprint $table) {
             $table->id(); 
 
-            $table->unsignedBigInteger('scheme_id');
-            $table->unsignedBigInteger('master_code');
-            $table->unsignedBigInteger('parameter_code');
-
-            $table->boolean('is_active')->default(false);
+            $table->unsignedInteger('scheme_id');
+            $table->unsignedInteger('parameter_code');
+            $table->unsignedInteger('master_code');
+            $table->boolean('is_active')->default(true);
             $table->integer('min_score')->nullable();
             $table->integer('max_score')->nullable();
             $table->date('from_affected_date');
             $table->date('to_affected_date');
-
+            
             $table->unique(['master_code', 'parameter_code'], 'uq_master_parameter');
-            $table->foreign('master_code')->references('id')->on('codemasters')->onDelete('cascade');
-            $table->foreign('parameter_code')->references('id')->on('codemasters')->onDelete('cascade');
+            $table->foreign('scheme_id','scheme_id_fk')->references('id')->on('schemes')->onDelete('cascade');
+            $table->foreign('master_code','master_code_fk')->references('id')->on('codemasters')->onDelete('cascade');
+            $table->foreign('parameter_code','parameter_code_fk')->references('id')->on('codemasters')->onDelete('cascade');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('lb_scheme.scheme_validation_parameter_settings');
+        Schema::dropIfExists('scheme_validation_parameter_settings');
     }
 };
