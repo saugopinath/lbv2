@@ -5,6 +5,7 @@ module.exports = {
         "./resources/**/*.blade.php",
         "./resources/**/*.js",
         "./resources/**/*.vue",
+        "./vendor/masmerise/livewire-toaster/resources/views/*.blade.php",
     ],
     safelist: [
         "bg-pink-500",
@@ -39,7 +40,6 @@ export default {
 
     theme: {
         extend: {
-
             fontFamily: {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
             },

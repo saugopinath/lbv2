@@ -39,7 +39,7 @@ class AddUserForm extends Component
             'displayname' => $this->displayname,
             'email' => $this->email,
             'mobile' => $this->mobile,
-            // 'role' => $this->role,
+            'role' => $this->role,
         ]);
 
         /*

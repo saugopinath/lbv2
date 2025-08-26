@@ -3,21 +3,25 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class OfficeMaster extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'name',
         'address',
         'zip',
-        'office_type',
+        'office_type_id',
         'state_id',
         'district_id',
-        'block_id',
         'subdivision_id',
-        'state_id',
-        'municipality_id',
-        'ward_id'
+        'municipalitiy_id',
+        'ward_id',
+        'block_id',
+        'panchayat_id',
+        'is_active',
     ];
     public function officeType()
     {
