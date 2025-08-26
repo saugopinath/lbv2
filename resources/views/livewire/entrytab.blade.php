@@ -23,6 +23,7 @@
         @endif
         @endforeach
     </nav>
+
     <div class="mt-4">
         @if (!empty($tabMessages[$currentTab]))
         <x-tabalert type="success" :tab="$currentTab">
@@ -32,7 +33,9 @@
         @if (!empty($tabs[$currentTab]))
         @livewire(
         $tabs[$currentTab]['component'],
-        ['application_id' => $application_id],
+        $currentTab === 'tab1' && empty($application_id)
+        ? ['aadhaarData' => $aadhaarData]
+        : ['application_id' => $application_id],
         key('tab-'.$application_id.'-'.$currentTab)
         )
         @endif

@@ -16,18 +16,13 @@ use App\Traits\WithLiveValidation;
 
 class PersonalDetails extends Component
 {
+
     public $app_types, $genders, $castes, $mar_status = [];
     public $mode, $currentDate, $minDOB, $maxDOB, $cdate, $pdate;
     public $app_type, $app_date, $reg_no, $ds_date, $application_id;
     public $name, $mobile, $email, $dob, $age, $mar_statu;
     public $ffname, $mfname, $sfname;
-    public $caste, $cas_cer_no, $hash, $encoded;
-    protected $listeners = ['aadhaarChecked' => 'AadhaarData'];
-    public function AadhaarData($data)
-    {
-        $this->hash = $data['hash'];
-        $this->encoded = $data['encoded'];
-    }
+    public $caste, $cas_cer_no, $encoded, $hash;
     public function updatedDob($value)
     {
         try {
@@ -42,7 +37,7 @@ class PersonalDetails extends Component
             'app_type'   => 'required',
             'app_date'   => 'required|date',
             'name'       => 'required|string|regex:/^[a-zA-Z\s]+$/',
-            'mobile'     => 'required|digits:10',
+            'mobile'     => 'required',
             'dob'        => "required|date|after_or_equal:{$this->minDOB}|before_or_equal:{$this->maxDOB}",
             'age'        => 'required|integer|between:25,60',
             'ffname'     => 'required|string|regex:/^[a-zA-Z\s]+$/',
@@ -50,46 +45,68 @@ class PersonalDetails extends Component
             'caste'      => 'required',
             'mar_statu'  => 'required',
         ];
+
+        // Conditional rules
         if ($this->app_type == Codemaster::getIdByCode(42)) {
             $rules['reg_no'] = 'required|string';
             $rules['ds_date'] = 'required|date';
         }
+
         if ($this->caste != Codemaster::getIdByCode(173)) {
             $rules['cas_cer_no'] = 'required|string';
         }
+
         if (
             $this->mar_statu == Codemaster::getIdByCode(32) ||
             $this->mar_statu == Codemaster::getIdByCode(34)
         ) {
             $rules['sfname'] = 'required|string|regex:/^[a-zA-Z\s]+$/';
         }
+
         if (!empty($this->email)) {
             $rules['email'] = 'email';
         }
+
         return $rules;
     }
     public function messages()
     {
         return [
             'app_type.*'   => 'Please select an application type.',
+
             'app_date.*'   => 'Please enter a valid application date.',
+
             'name.*'       => 'Full name is required and must contain only letters and spaces.',
+
             'mobile.*'     => 'Please enter a valid 10-digit mobile number.',
+
             'dob.*'        => "Date of birth must be between {$this->minDOB} and {$this->maxDOB}.",
+
             'age.*'        => 'Please enter a valid age between 25 and 60 years.',
+
             'ffname.*'     => 'Father\'s name is required and must contain only letters and spaces.',
+
             'mfname.*'     => 'Mother\'s name is required and must contain only letters and spaces.',
+
             'caste.*'      => 'Please select caste.',
             'mar_statu.*'  => 'Please select marital status.',
+
             'reg_no.*'     => 'Registration number is required.',
             'ds_date.*'    => 'DS date is required.',
+
             'cas_cer_no.*' => 'Caste certificate number is required.',
+
             'sfname.*'     => 'Spouse name is required and must contain only letters and spaces.',
+
             'email.*'      => 'Please enter a valid email address.',
         ];
     }
-    public function mount($mode = null, $application_id = null)
+    public function mount($mode = null, $application_id = null, $aadhaarData = null)
     {
+        if ($aadhaarData) {
+            $this->encoded = $aadhaarData['encoded'];
+            $this->hash = $aadhaarData['hash'];
+        }
         $this->currentDate = Carbon::now()->format('d/m/Y');
         $this->minDOB = now()->subYears(60)->format('Y-m-d');
         $this->maxDOB = now()->subYears(25)->format('Y-m-d');
@@ -134,6 +151,7 @@ class PersonalDetails extends Component
     {
         $validated = $this->validate($this->rules());
         if ($this->mode === null && $this->application_id === null) {
+            $aadhaar_data = Session::get('aadhaar_data');
             $uniqueApp = UniqueAppBenId::create();
             $data = [
                 'application_id' => $uniqueApp->application_id,
@@ -191,6 +209,7 @@ class PersonalDetails extends Component
                 'created_by' => Auth::id(),
                 'encoded_aadhar' => $this->encoded,
             ]);
+            Session::forget('aadhar_hash');
             $this->dispatch('perDet', [
                 'application_id' => $draftbenPar->application_id,
                 'message' => "Personal Details saved successfully and the application id is: {$draftbenPar->application_id}"
