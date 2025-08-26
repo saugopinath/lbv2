@@ -62,12 +62,9 @@ class BeneficiaryApprovedListSeeder extends Seeder
     {
         for ($i = 0; $i < 5; $i++) {
             // Create a BeneficiaryPersonal
-            $uniqueAppBenId = UniqueAppBenId::create([
-                'application_id' => rand(1000, 9999),
-                'beneficiary_id' => rand(1000, 9999),
-            ]);
+            
 
-            $office = OfficeMaster::where('district_id', 318)->first();
+            $office = OfficeMaster::where('district_id', 318)->where('block_id', 2979)->first();
             $mapping = UserRoleSchemeOfficeMapping::where('office_id', $office->id)->first();
             $user_id = $mapping->user_id;
             $office = OfficeMaster::find($mapping->office_id);
@@ -83,9 +80,13 @@ class BeneficiaryApprovedListSeeder extends Seeder
             $user_ward_id = $office->ward_id;
             $user_panchayat_id = $office->panchayat_id;
 
+            $uniqueAppBenId = UniqueAppBenId::create([ ]);
+            $beneficiary_id_obj = UniqueAppBenId::where('application_id', $uniqueAppBenId->application_id)->first();
+            // dd($uniqueAppBenId);
+            // dd($beneficiary_id_obj->beneficiary_id);
             $beneficiary = BeneficiaryPersonal::create([
                 'application_id' => $uniqueAppBenId->application_id,
-                'beneficiary_id' => $uniqueAppBenId->beneficiary_id,
+                'beneficiary_id' => $beneficiary_id_obj->beneficiary_id,
                 'district_id' => $dist,
                 'block_id' => $user_block_id,
                 'sub_division_id' => $user_sub_division_id,
@@ -105,14 +106,14 @@ class BeneficiaryApprovedListSeeder extends Seeder
 
             ]);
             // dd($beneficiary);
-            $beneficiary->lists()->create([
-                'district_id' => $beneficiary->district_id,
-                'block_id' => $beneficiary->block_id,
-                'sub_division_id' => $beneficiary->sub_division_id,
-                'municipality_id' => $beneficiary->municipality_id,
-                'ward_id' => $beneficiary->ward_id,
-                'panchayat_id' => $beneficiary->panchayat_id,
-            ]);
+            // $beneficiary->lists()->create([
+            //     'district_id' => $beneficiary->district_id,
+            //     'block_id' => $beneficiary->block_id,
+            //     'sub_division_id' => $beneficiary->sub_division_id,
+            //     'municipality_id' => $beneficiary->municipality_id,
+            //     'ward_id' => $beneficiary->ward_id,
+            //     'panchayat_id' => $beneficiary->panchayat_id,
+            // ]);
 
             $beneficiary_contact = BeneficiaryContact::create([
                 'beneficiary_id' => $beneficiary->beneficiary_id,

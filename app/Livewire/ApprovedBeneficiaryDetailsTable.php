@@ -13,7 +13,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Actions\Action;
 use Rappasoft\LaravelLivewireTables\Views\Filters\TextFilter;
 
-class BeneficiaryDetailsTable extends DataTableComponent
+class ApprovedBeneficiaryDetailsTable extends DataTableComponent
 {
     public ?int $perPage = 5;
     public string $reportType;

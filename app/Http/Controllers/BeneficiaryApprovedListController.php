@@ -91,8 +91,9 @@ class BeneficiaryApprovedListController extends Controller
         }
         $login_type = $filter['office_type_id'];
         // $lists = [];
-        
+        $button_show = 1;
+
         // $header = 'Beneficiary Contact Wise Approved List';
-        return view('UserAddresswiselist.approved_list', compact( 'login_type'));
+        return view('UserAddresswiselist.approved_list', compact( 'login_type', 'button_show'));
     }
 }

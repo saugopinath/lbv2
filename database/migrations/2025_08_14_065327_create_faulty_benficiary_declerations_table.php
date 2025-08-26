@@ -11,9 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('lb_scheme.faulty_benficiary_declerations', function (Blueprint $table) {
+         Schema::create('lb_scheme.faulty_beneficiary_declarations', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('beneficiary_id');
+            $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.faulty_beneficiary_personals')->onDelete('cascade');
+            $table->unsignedInteger('application_id');
+            $table->Integer('created_by');
+            $table->boolean('is_resident');
+            $table->boolean('earn_monthly_remuneration');
+            $table->boolean('info_genuine_decl');
+            $table->boolean('av_status');
+            // $table->smallInteger('identification_type_id');
+            $table->foreign('created_by','user_id_fk')->references('id')->on('users');
+
             $table->timestamps();
+            $table->index('application_id');
         });
     }
 
@@ -22,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('faulty_benficiary_declerations');
+        Schema::dropIfExists('lb_scheme.faulty_beneficiary_declarations');
     }
 };
