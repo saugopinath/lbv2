@@ -48,6 +48,7 @@
                 'flex rounded-md shadow-sm' => $isTailwind,
             ])>
                 @include($this->getConfigurableAreaFor('toolbar-left-end'), $this->getParametersForConfigurableArea('toolbar-left-end'))
+
             </div>
         @endif
     </div>
@@ -59,21 +60,18 @@
         ])
     >
         @includeWhen($this->hasConfigurableAreaFor('toolbar-right-start'), $this->getConfigurableAreaFor('toolbar-right-start'), $this->getParametersForConfigurableArea('toolbar-right-start'))
+      
+        @if ($this->showPaginationDropdown())
+            <x-livewire-tables::tools.toolbar.items.pagination-dropdown />
+        @endif
+        
 
-        @if($this->showActionsInToolbarRight())
-            <x-livewire-tables::includes.actions/>
+        @if ($this->columnSelectIsEnabled())
+            <x-livewire-tables::tools.toolbar.items.column-select />
         @endif
 
         @if ($this->showBulkActionsDropdownAlpine() && $this->shouldAlwaysHideBulkActionsDropdownOption != true)
             <x-livewire-tables::tools.toolbar.items.bulk-actions />
-        @endif
-
-        @if ($this->columnSelectIsEnabled)
-            <x-livewire-tables::tools.toolbar.items.column-select />
-        @endif
-
-        @if ($this->showPaginationDropdown())
-            <x-livewire-tables::tools.toolbar.items.pagination-dropdown />
         @endif
 
         @includeWhen($this->hasConfigurableAreaFor('toolbar-right-end'), $this->getConfigurableAreaFor('toolbar-right-end'), $this->getParametersForConfigurableArea('toolbar-right-end'))

@@ -9,6 +9,7 @@
         "elasticsearch/elasticsearch": "^9.1",
         "laravel/framework": "^11.0",
         "laravel/tinker": "^2.9",
+        "maatwebsite/excel": "^3.1",
         "livewire/livewire": "^3.6",
         "masmerise/livewire-toaster": "^2.8",
         "mews/captcha": "3.3.3",

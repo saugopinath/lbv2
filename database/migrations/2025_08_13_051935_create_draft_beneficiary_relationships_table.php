@@ -13,7 +13,7 @@ return new class extends Migration
     {
        Schema::create('lb_scheme.draft_beneficiary_relationships', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('application_id');
+            $table->unsignedBigInteger('application_id');
 
             $table->Integer('created_by');
             $table->string('full_name');

@@ -39,3 +39,8 @@ Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage')
 Route::get('lbform', [LBController::class, 'index'])->middleware(['auth', 'verified'])->name('lbform');
 Route::get('draftlist', [LBController::class, 'draftlist'])->middleware(['auth', 'verified'])->name('draftlist');
 Route::get('draftedit/{id}', [LBController::class, 'draftedit'])->middleware(['auth', 'verified'])->name('draftedit');
+
+
+Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
+Route::get('/approved-lists', [BeneficiaryApprovedListController::class, 'index'])->name('approved-lists');
+Route::get('/approved-lists-BA-Wise', [BeneficiaryApprovedListController::class, 'beneficiaryContactwiseList'])->name('approved-lists-BA-Wise');
