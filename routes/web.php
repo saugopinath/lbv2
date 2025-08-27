@@ -67,7 +67,7 @@ Route::get('/role-office-master-mappings', [RoleOfficeTypeMappingsController::cl
 Route::get('/role-office-type-mappings/create', Create::class)
     ->name('role-office-type-mappings.create');
 
-Route::get('/officemasters', [OfficeMastersController::class, 'index'])->middleware(['auth', 'verified'])->name('officemasters.index')->middleware('auth'); 
+Route::get('/officemasters', [OfficeMastersController::class, 'index'])->middleware(['auth', 'verified'])->name('officemasters.index')->middleware('auth');
 Route::get('/office-masters/create', OfficeMasterCreate::class)
     ->name('office-masters.create');
 

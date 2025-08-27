@@ -2,67 +2,111 @@
 
 namespace App\Livewire\OfficeMasters;
 
-use App\Models\State;
 use Livewire\Component;
+use App\Models\State;
+use App\Models\District;
+use App\Models\Subdivision;
+use App\Models\Block;
 use App\Models\Codemaster;
 use App\Models\OfficeMaster;
-use Masmerise\Toaster\Toaster;
 
 class Create extends Component
 {
-    public $name, $address, $zip, $selectedMappingLevel, $selectedState;
+    public $name, $address, $zip;
+    public $selectedMappingLevel, $selectedState, $selectedDistrict, $selectedSubdivision, $selectedBlockurban;
 
-    public $mapping_levels = [], $states = [];
+    public $mapping_levels = [];
+    public $states = [];
+    public $districts = [];
+    public $subdivisions = [];
+    public $blocks = [];
 
     public function mount()
     {
+        $this->states = State::orderBy('name', 'asc')->get();
         $officetype = Codemaster::getIdByCode(15);
-        $this->states = State::orderBy('id', 'asc')->get();
-        $this->mapping_levels = Codemaster::where('parent_id', $officetype)->get();
+        $this->mapping_levels = Codemaster::where('parent_id', $officetype)->whereIn('code',[151, 152, 153, 154])->get();
+    }
+
+    public function updatedSelectedMappingLevel($value)
+    {
+        $this->selectedDistrict = null;
+        $this->selectedSubdivision = null;
+        $this->selectedBlockurban = null;
+        $this->districts = [];
+        $this->subdivisions = [];
+        $this->blocks = [];
+
+        if (in_array($value, ['152', '153', '154']) && $this->selectedState) {
+            $this->districts = District::where('state_id', $this->selectedState)->get();
+        }
+    }
+
+    public function updatedSelectedState($stateId)
+    {
+        $this->selectedDistrict = null;
+        $this->selectedSubdivision = null;
+        $this->selectedBlockurban = null;
+        $this->districts = [];
+        $this->subdivisions = [];
+        $this->blocks = [];
+
+        if ($stateId && in_array($this->selectedMappingLevel, ['152', '153', '154'])) {
+            $this->districts = District::where('state_id', $stateId)->get();
+        }
+    }
+
+    public function updatedSelectedDistrict($districtId)
+    {
+        $this->selectedSubdivision = null;
+        $this->selectedBlockurban = null;
+        $this->subdivisions = [];
+        $this->blocks = [];
+
+        if ($this->selectedMappingLevel == '154' && $districtId) {
+            $this->subdivisions = Subdivision::where('district_id', $districtId)->get();
+        }
+
+        if ($this->selectedMappingLevel == '153' && $districtId) {
+            $this->blocks = Block::where('district_id', $districtId)->get();
+        }
     }
 
     public function submit()
     {
-        $this->validate([
-            'name' => 'required|string|max:255',
-            'address' => 'required|string|max:500',
-            'zip' => 'required|numeric|digits:6',
-            'selectedMappingLevel' => 'required|exists:codemasters,code',
-            'selectedState' => 'required|exists:states,id',
-        ]);
+        $rules = [
+            'name' => 'required|string',
+            'address' => 'required|string',
+            'zip' => 'required|digits:6',
+            'selectedMappingLevel' => 'required',
+            'selectedState' => 'required',
+        ];
 
-        dd([
+        if (in_array($this->selectedMappingLevel, ['152', '153', '154'])) {
+            $rules['selectedDistrict'] = 'required';
+        }
+        if ($this->selectedMappingLevel == '154') {
+            $rules['selectedSubdivision'] = 'required';
+        }
+        if ($this->selectedMappingLevel == '153') {
+            $rules['selectedBlockurban'] = 'required';
+        }
+
+        $this->validate($rules);
+
+        OfficeMaster::create([
             'name' => $this->name,
             'address' => $this->address,
             'zip' => $this->zip,
             'office_type_id' => $this->selectedMappingLevel,
             'state_id' => $this->selectedState,
             'district_id' => $this->selectedDistrict ?? null,
-            // 'subdivision_id' => $this->selectedSubdivision ?? null,
-            // 'municipalitiy_id' => $this->selectedBlockurban ?? null,
-            // 'block_id' => $this->selectedBlockurban ?? null,
-            // 'panchayat_id' => $this->selectedGpWard ?? null,
-            // 'ward_id' => $this->selectedGpWard ?? null,
-
+            'subdivision_id' => $this->selectedSubdivision ?? null,
+            'block_id' => $this->selectedBlockurban ?? null,
         ]);
 
-        // OfficeMaster::create([
-        //     'name' => $this->name,
-        //     'address' => $this->address,
-        //     'zip' => $this->zip,
-        //     'office_type_id' => $this->selectedMappingLevel,
-        //     'state_id' => $this->selectedState,
-        //     'district_id' => $this->selectedDistrict ?? null,
-        //     'subdivision_id' => $this->selectedSubdivision ?? null,
-        //     'municipalitiy_id' => $this->selectedBlockurban ?? null,
-        //     'block_id' => $this->selectedBlockurban ?? null,
-        //     'panchayat_id' => $this->selectedGpWard ?? null,
-        //     'ward_id' => $this->selectedGpWard ?? null,
-        // ]);
-
-        // Toaster::success('Office Master created successfully!');
         session()->flash('success', 'Office Master created successfully!');
-        return redirect()->route('role-office-master-mappings.index');
+        return redirect()->route('officemasters.index');
     }
 
     public function render()

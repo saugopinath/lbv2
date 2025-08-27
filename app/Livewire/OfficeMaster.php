@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
-class OfficeMasters extends DataTableComponent
+class OfficeMaster extends DataTableComponent
 {
     public ?int $perPage = 5;
     public string $search = '';
