@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ValidationfailedSettingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
@@ -36,3 +37,6 @@ Route::get('draftedit/{id}', [LBController::class, 'draftedit'])->middleware(['a
 Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
 Route::get('/approved-lists', [BeneficiaryApprovedListController::class, 'index'])->name('approved-lists');
 Route::get('/approved-lists-BA-Wise', [BeneficiaryApprovedListController::class, 'beneficiaryContactwiseList'])->name('approved-lists-BA-Wise');
+
+//validation failed master setting
+Route::get('/validation-failed-settings', [ValidationfailedSettingController::class, 'index'])->name('validation-failed-settings');
