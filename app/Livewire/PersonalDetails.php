@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Livewire;
-
 use Livewire\Component;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Carbon;
@@ -13,10 +11,8 @@ use App\Models\DraftBeneficiaryRelationship;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use App\Traits\WithLiveValidation;
-
 class PersonalDetails extends Component
 {
-
     public $app_types, $genders, $castes, $mar_status = [];
     public $mode, $currentDate, $minDOB, $maxDOB, $cdate, $pdate;
     public $app_type, $app_date, $reg_no, $ds_date, $application_id;
@@ -45,59 +41,41 @@ class PersonalDetails extends Component
             'caste'      => 'required',
             'mar_statu'  => 'required',
         ];
-
-        // Conditional rules
         if ($this->app_type == Codemaster::getIdByCode(42)) {
             $rules['reg_no'] = 'required|string';
             $rules['ds_date'] = 'required|date';
         }
-
         if ($this->caste != Codemaster::getIdByCode(173)) {
             $rules['cas_cer_no'] = 'required|string';
         }
-
         if (
             $this->mar_statu == Codemaster::getIdByCode(32) ||
             $this->mar_statu == Codemaster::getIdByCode(34)
         ) {
             $rules['sfname'] = 'required|string|regex:/^[a-zA-Z\s]+$/';
         }
-
         if (!empty($this->email)) {
             $rules['email'] = 'email';
         }
-
         return $rules;
     }
     public function messages()
     {
         return [
             'app_type.*'   => 'Please select an application type.',
-
             'app_date.*'   => 'Please enter a valid application date.',
-
             'name.*'       => 'Full name is required and must contain only letters and spaces.',
-
             'mobile.*'     => 'Please enter a valid 10-digit mobile number.',
-
             'dob.*'        => "Date of birth must be between {$this->minDOB} and {$this->maxDOB}.",
-
             'age.*'        => 'Please enter a valid age between 25 and 60 years.',
-
             'ffname.*'     => 'Father\'s name is required and must contain only letters and spaces.',
-
             'mfname.*'     => 'Mother\'s name is required and must contain only letters and spaces.',
-
             'caste.*'      => 'Please select caste.',
             'mar_statu.*'  => 'Please select marital status.',
-
             'reg_no.*'     => 'Registration number is required.',
             'ds_date.*'    => 'DS date is required.',
-
             'cas_cer_no.*' => 'Caste certificate number is required.',
-
             'sfname.*'     => 'Spouse name is required and must contain only letters and spaces.',
-
             'email.*'      => 'Please enter a valid email address.',
         ];
     }

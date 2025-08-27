@@ -1,14 +1,11 @@
 <?php
-
 namespace App\Livewire;
-
 use Livewire\Component;
 use App\Models\DraftBeneficiaryPersonal;
 use App\Models\DraftBeneficiaryContact;
 use App\Models\DraftBeneficiaryBank;
 use App\Models\BeneficiaryEnclosure;
 use App\Models\DraftBeneficiaryDeclaration;
-
 class Entrytab extends Component
 {
     public $currentTab, $application_id, $aadhaarData;
@@ -19,7 +16,6 @@ class Entrytab extends Component
     public $tab4Enabled = false;
     public $tab5Enabled = false;
     public $tabMessages = [];
-
     protected $listeners = [
         'aadhaarChecked' => 'enableTabs',
         'perDet' => 'enableTab2',
@@ -29,11 +25,9 @@ class Entrytab extends Component
         'goPrevious' => 'previousTab',
         'tabMessage' => 'handleTabMessage'
     ];
-
     public function mount($application_id = null)
     {
         $this->application_id = $application_id;
-
         if ($application_id) {
             $tabsData = [
                 'tab1' => DraftBeneficiaryPersonal::where('application_id', $application_id)->exists(),
@@ -42,10 +36,8 @@ class Entrytab extends Component
                 'tab4' => BeneficiaryEnclosure::where('application_id', $application_id)->exists(),
                 'tab5' => DraftBeneficiaryDeclaration::where('application_id', $application_id)->exists(),
             ];
-
             $foundNext = false;
             $lastCompletedTab = null;
-
             foreach ($tabsData as $key => $hasData) {
                 if ($hasData) {
                     $this->{$key . 'Enabled'} = true;
@@ -58,16 +50,12 @@ class Entrytab extends Component
                     $this->{$key . 'Enabled'} = false;
                 }
             }
-
             if (!$foundNext && $lastCompletedTab) {
                 $this->currentTab = $lastCompletedTab;
             }
-
             $this->showTabs = true;
         }
     }
-
-    // Enable first tab after Aadhaar verification
     public function enableTabs($data)
     {
         $this->showTabs = true;
@@ -75,31 +63,26 @@ class Entrytab extends Component
         $this->currentTab = 'tab1';
         $this->aadhaarData = $data;
     }
-
     public function enableTab2($data)
     {
         $this->tab1Enabled = true;
         $this->tab2Enabled = true;
         $this->currentTab = 'tab2';
         $this->application_id = $data['application_id'] ?? $this->application_id;
-
         if (!empty($data['message'])) {
             $this->tabMessages['tab2'] = $data['message'];
         }
     }
-
     public function enableTab3($data)
     {
         $this->tab1Enabled = true;
         $this->tab2Enabled = true;
         $this->tab3Enabled = true;
         $this->currentTab = 'tab3';
-
         if (!empty($data['message'])) {
             $this->tabMessages['tab3'] = $data['message'];
         }
     }
-
     public function enableTab4($data)
     {
         $this->tab1Enabled = true;
@@ -107,12 +90,10 @@ class Entrytab extends Component
         $this->tab3Enabled = true;
         $this->tab4Enabled = true;
         $this->currentTab = 'tab4';
-
         if (!empty($data['message'])) {
             $this->tabMessages['tab4'] = $data['message'];
         }
     }
-
     public function enableTab5($data)
     {
         $this->tab1Enabled = true;
@@ -121,32 +102,26 @@ class Entrytab extends Component
         $this->tab4Enabled = true;
         $this->tab5Enabled = true;
         $this->currentTab = 'tab5';
-
         if (!empty($data['message'])) {
             $this->tabMessages['tab5'] = $data['message'];
         }
     }
-
     public function previousTab()
     {
         $tabOrder = ['tab1', 'tab2', 'tab3', 'tab4', 'tab5'];
         $currentIndex = array_search($this->currentTab, $tabOrder);
-
         if ($currentIndex > 0) {
             $this->currentTab = $tabOrder[$currentIndex - 1];
         }
     }
-
     public function clearTabMessage($tab)
     {
         if (!empty($this->tabMessages[$tab])) {
             unset($this->tabMessages[$tab]);
         }
     }
-
     public function render()
     {
-        // প্রতিবার render সময় ট্যাব enabled স্টেট হালনাগাদ হচ্ছে
         $tabs = [
             'tab1' => [
                 'label' => 'Personal Details',
@@ -179,7 +154,6 @@ class Entrytab extends Component
                 'icon' => 'M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z'
             ],
         ];
-
         return view('livewire.entrytab', [
             'tabs' => $tabs
         ]);
