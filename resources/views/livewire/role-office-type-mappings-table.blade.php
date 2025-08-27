@@ -1,4 +1,9 @@
 <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
+    @if (session()->has('message'))
+        <div class="p-2 mb-2 text-sm text-green-700 bg-green-100 rounded">
+            {{ session('message') }}
+        </div>
+    @endif
     <!-- Top Controls: Search, Per Page -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div class="flex justify-end">
@@ -32,11 +37,15 @@
             <tbody class="divide-y divide-gray-200 bg-white overflow-y-auto">
                 @forelse($rows as $row)
                     <tr>
-                       <td>{{ $row['officeType.name'] ?? 'N/A' }}</td>
+                        <td>{{ $row['officeType.name'] ?? 'N/A' }}</td>
                         <td>{{ $row['role.name'] ?? 'N/A' }}</td>
                         <td class="py-3 flex justify-center gap-2">
 
-                            <button wire:click="delete({{ $row->id }})" onclick="return confirm('Are you sure?')"
+                            {{--  <button wire:click="delete({{ $row->id }})" onclick="return confirm('Are you sure?')"
+                                class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                                Delete
+                            </button>  --}}
+                            <button wire:click="delete('{{ $row->id }}')"
                                 class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
                                 Delete
                             </button>
@@ -47,10 +56,6 @@
                         <td colspan="3" class="py-3 text-gray-500">No records found.</td>
                     </tr>
                 @endforelse
-                {{--  @foreach($rows as $row)
-    <pre>{{ json_encode($row->toArray(), JSON_PRETTY_PRINT) }}</pre>
-@endforeach  --}}
-
             </tbody>
         </table>
     </div>

@@ -43,14 +43,30 @@ class RoleOfficeTypeMappings extends DataTableComponent
             Column::make("Role", "role.name")
                 ->sortable()
                 ->searchable(),
+            Column::make('Actions')
+                ->label(function ($row) {
+                    return view('livewire.role-office-type-mappings-table', ['row' => $row]);
+                }),
         ];
     }
     public function builder(): Builder
     {
-        // $abs = RoleOfficeTypeMapping::with('officeType','role')->get(); dd($abs);
-        return RoleOfficeTypeMapping::query()
-            ->with(['officeType', 'role']);
+        return RoleOfficeTypeMapping::with(['officeType', 'role']);
     }
+    public function delete($id): void
+    {
+        $record = RoleOfficeTypeMapping::find($id);
+
+        if ($record) {
+            $record->delete();
+            session()->flash('message', 'Record deleted successfully.');
+            $this->resetPage();
+        } else {
+            session()->flash('error', 'Record not found.');
+        }
+    }
+
+
     public function render(): \Illuminate\View\View
     {
         return view('livewire.role-office-type-mappings-table', [

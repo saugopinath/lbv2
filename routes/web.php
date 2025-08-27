@@ -16,6 +16,7 @@ use App\Http\Controllers\RoleOfficeTypeMappingsController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Livewire\RoleOfficeTypeMappings\Create;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
+use App\Livewire\Users\Create as UsersCreate;
 
 
 Route::get('/', function () {
@@ -72,3 +73,5 @@ Route::get('/office-masters/create', OfficeMasterCreate::class)
     ->name('office-masters.create');
 
 Route::get('/user-managements', [UsersController::class, 'index'])->middleware(['auth', 'verified'])->name('user-managements.index')->middleware('auth');
+Route::get('/users/create', UsersCreate::class)
+    ->name('users.create');
