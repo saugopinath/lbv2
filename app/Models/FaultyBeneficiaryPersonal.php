@@ -11,7 +11,7 @@ class FaultyBeneficiaryPersonal extends Model
     protected $table = 'lb_scheme.faulty_beneficiary_personals';
     public function lists()
     {
-        return $this->morphOne(BeneficiaryApprovedList::class, 'sourceable');
+        return $this->morphOne(BeneficiaryCommonList::class, 'sourceable');
     }
     // public function contact()
     // {

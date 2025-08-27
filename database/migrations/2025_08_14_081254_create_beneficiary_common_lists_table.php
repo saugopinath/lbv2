@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('lb_scheme.beneficiary_approved_lists', function (Blueprint $table) {
+        Schema::create('lb_scheme.beneficiary_common_lists', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger(column: 'sourceable_id')->unique();
             $table->string('sourceable_type');
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('lb_scheme.beneficiary_approved_lists');
+        Schema::dropIfExists('lb_scheme.beneficiary_common_lists');
     }
 };

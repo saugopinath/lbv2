@@ -12,7 +12,7 @@ class BeneficiaryPersonal extends Model
 
     public function lists()
     {
-        return $this->morphOne(BeneficiaryApprovedList::class, 'sourceable');
+        return $this->morphOne(BeneficiaryCommonList::class, 'sourceable');
     }
      public function bank()
     {
