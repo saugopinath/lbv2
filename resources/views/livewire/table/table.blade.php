@@ -94,24 +94,11 @@
                                 View
                             </x-link-button>
                         </td>  --}}
-                        {{--  <td x-data="{ loading: false }">
-                            <a href="{{ route('draft-application.view', $row->id) }}" @click="loading = true"
-                                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md">
-                                <span x-show="!loading">View</span>
-                                <span x-show="loading" class="flex items-center">
-                                    <img src="{{ asset('images/spinner.svg') }}" class="w-5 h-5 animate-spin mr-2">
-                                    Loading...
-                                </span>
-                            </a>
-                        </td>  --}}
+                     
                         <td>
-                            <x-link-button wire:loading.attr="disabled" wire:target="navigate"
+                            <x-link-button wire:target="navigate"
                                 href="{{ route('draft-application.view', $row->id) }}">
-                                <span wire:loading.remove wire:target="navigate">View</span>
-                                <span wire:loading wire:target="navigate">
-                                    <x-loader class="h-4 w-4" />
-                                </span>
-                            </x-link-button>
+                                <span wire:target="navigate">View</span> </x-link-button>
                         </td>
 
 
@@ -134,49 +121,5 @@
     <div>
 
         @livewire('process-application.bulk-action-modal')
-
-        <!-- Bulk Action Modal -->
-        {{--  <div x-data="{ open: @entangle('bulkActionModal') }">
-            <div x-show="open" x-cloak class="fixed inset-0 flex items-center justify-center bg-black/50" ">
-                <div class="bg-white rounded-lg p-6 w-96">
-                    <h2 class="text-lg font-semibold mb-4">Select Operation</h2>
-
-                    <select wire:model="bulkActionType" class="w-full border rounded p-2 mb-3">
-                        <option value="">Select Operation</option>
-                        <option value="A">Approve</option>
-                        <option value="R">Reject</option>
-                        <option value="T">Revert</option>
-                    </select>
-
-                                  @if (in_array($bulkActionType, ['R', 'T']))
-                <select wire:model="reason" class="w-full border rounded p-2 mb-3">
-                    <option value="">Select Reason</option>
-                    @foreach ($reasons as $id => $name)
-                        <option value="{{ $id }}">{{ $name }}</option>
-                    @endforeach
-                </select>
-
-                <textarea wire:model="remark" placeholder="Enter remark" class="w-full border rounded p-2 mb-3"></textarea>
-                @endif
-
-                <div class="flex justify-end gap-2">
-                    <button @click="open = false" class="px-3 py-1 bg-gray-200 rounded">Cancel</button>
-                    <button wire:click="performBulkAction" class="px-3 py-1 bg-violet-600 text-white rounded">
-                        Confirm
-                    </button>
-                </div>
-            </div>
-        </div>  --}}
     </div>
-
-
-
-
-
-
-
-
-
-
-
 </div>

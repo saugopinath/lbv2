@@ -32,7 +32,7 @@ class DraftApplicantSeeder extends Seeder
 
         $userId = User::where('name', 'Admin')->value('id');
 
-        $blockId = Panchayat::where('id', 2497)->value('block_id');
+        $blockId = Panchayat::where('id', 110283)->value('block_id');
         $districtId = Block::where('id', $blockId)->value('district_id');
 
 
@@ -53,7 +53,7 @@ class DraftApplicantSeeder extends Seeder
 
 
             $uniqueAppBenId = UniqueAppBenId::create([
-                'beneficiary_id' => null,
+                'beneficiary_id' => $i,
             ]);
 
             DraftBeneficiaryPersonal::create([
@@ -87,7 +87,7 @@ class DraftApplicantSeeder extends Seeder
                 'block_id' => $blockId,
                 'municipality_id' => null,
                 'ward_id' => null,
-                'panchayat_id' => '2497',
+                'panchayat_id' => '110283',
                 'police_station' => 'Test PS ' . $i,
                 'village_town_city' => 'Village ' . $i,
                 'house_premise_no' => 'House No ' . $i,

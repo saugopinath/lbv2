@@ -131,16 +131,16 @@ class ProcessApplicationTable extends DataTableComponent
                 }),
 
 
-            // Column::make('GP / Municipality')
-            //     ->label(function ($row) {
-            //         if ($row->contacts?->panchayat?->name) {
-            //             return 'GP: ' . $row->contacts->panchayat->name;
-            //         } elseif ($row->contacts?->municipality?->name) {
-            //             return 'Municipality: ' . $row->contacts->municipality->name;
-            //         } else {
-            //             return '-';
-            //         }
-            //     }),
+            Column::make('GP / Municipality')
+                ->label(function ($row) {
+                    if ($row->contacts?->panchayat?->name) {
+                        return 'GP: ' . $row->contacts->panchayat->name;
+                    } elseif ($row->contacts?->municipality?->name) {
+                        return 'Municipality: ' . $row->contacts->municipality->name;
+                    } else {
+                        return '-';
+                    }
+                }),
 
 
 
