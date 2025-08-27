@@ -142,7 +142,7 @@ class Entrytab extends Component
                 'icon' => 'M2 10L12 3l10 7v2H2v-2zm1 3h2v6H3v-6zm4 0h2v6H7v-6zm4 0h2v6h-2v-6zm4 0h2v6h-2v-6zm4 0h2v6h-2v-6zM2 20h20v1H2v-1z'
             ],
             'tab4' => [
-                'label' => 'Enclosure List (Self Attested)',
+                'label' => 'Enclosure List',
                 'component' => 'enclosure-list',
                 'enabled' => $this->tab4Enabled,
                 'icon' => 'm18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13'
