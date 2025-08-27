@@ -2,25 +2,26 @@
 
 namespace App\Livewire\Users;
 
+use Carbon\Carbon;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\State;
 use App\Models\Scheme;
 use Livewire\Component;
+use App\Models\District;
 use App\Models\Codemaster;
 use App\Models\OfficeMaster;
 use App\Models\UserPersonal;
-use App\Models\UserRoleSchemeOfficeMapping;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Config;
-use Carbon\Carbon;
+use App\Models\UserRoleSchemeOfficeMapping;
 
 class Create extends Component
 {
     public $name, $email, $password, $mobile;
-    public $role, $selectscheme, $office, $selectedMappingLevel, $selectedState, $scheme;
+    public $role, $selectscheme, $office, $selectedMappingLevel, $selectedState, $scheme, $selectedDistrict;
 
-    public $roles = [], $schemes = [], $offices = [], $states = [], $mapping_levels = [];
+    public $roles = [], $schemes = [], $offices = [], $states = [], $mapping_levels = [], $districts = [];
 
     protected $rules = [
         'name'     => 'required|string|max:255',
@@ -36,23 +37,38 @@ class Create extends Component
     {
         $this->roles = Role::all();
         $this->schemes = Scheme::all();
-        // $this->offices = OfficeMaster::all();
         $this->states = State::orderBy('name', 'asc')->get();
+
         $officetype = Codemaster::getIdByCode(15);
-        $this->mapping_levels = Codemaster::where('parent_id', $officetype)->whereIn('code', [151, 152, 153, 154])->get();
+        $this->mapping_levels = Codemaster::where('parent_id', $officetype)
+            ->whereIn('code', [151, 152, 153, 154])
+            ->get();
+
+        $this->districts = District::orderBy('name', 'asc')->get();
     }
 
-    public function updatedselectedMappingLevel($value)
+    public function updatedSelectedMappingLevel($value)
     {
-         $this->offices = OfficeMaster::where('office_type_id',$value)->get();
+        $this->office = null;
+        $this->offices = [];
+
+        if ($value) {
+            $this->offices = OfficeMaster::where('office_type_id', $value)->get();
+        }
+
+        if (!in_array($value, [153, 154])) {
+            $this->selectedDistrict = null;
+        }
     }
+
     public function submit()
     {
         $this->validate();
 
         $c_time = Carbon::now()->format('Y-m-d H:i:s');
-
-        $password_expires_at = Carbon::now()->addDays(intval(Config::get('app.password_expire_day')))->format('Y/m/d H:i:s');
+        $password_expires_at = Carbon::now()
+            ->addDays(intval(Config::get('app.password_expire_day')))
+            ->format('Y/m/d H:i:s');
 
         $user = User::create([
             'name' => $this->name,
