@@ -35,10 +35,12 @@
             </div>
 
 
-            {{--  <livewire:filter-lgd-master  />  --}}
+            <livewire:filter-lgd-master  />
 
-            <livewire:filter-lgd-master :selected-district="$selectedDistrict" :selected-subdivision="$selectedSubdivision" :selected-blockurban="$selectedBlockurban" :selected-gp-ward="$selectedGpWard" />
-
+            {{--  <livewire:filter-lgd-master :selectedDistrict="$selectedDistrict"
+            :selectedSubdivision="$selectedSubdivision"
+            :selectedBlockurban="$selectedBlockurban"
+            :selectedGpWard="$selectedGpWard" />  --}}
 
 
             <!-- Buttons -->

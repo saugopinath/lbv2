@@ -14,6 +14,7 @@ class FilterLgdMaster extends Component
     public $districts = [], $blocks = [], $urbanbodys = [], $gps = [], $wards = [], $subdivisions = [];
     public $selectedDistrict, $selectedRuralurban, $selectedBlockurban, $selectedGpWard, $selectedSubdivision;
     public array $filter_condition = [];
+    public $button_show;
     public $visible = [
         'district_dropdown' => 0,
         'rural_urban_dropdown' => 0,
@@ -22,9 +23,11 @@ class FilterLgdMaster extends Component
         'gp_ward_dropdown' => 0,
     ];
 
-    public function mount()
+    public function mount($button_show=null)
     {
         $select_lgd = session('lgd_session');
+        $this->button_show = $button_show;
+
 
         $login_type =  Crypt::decryptString($select_lgd['office_type_id']);
 
@@ -43,14 +46,14 @@ class FilterLgdMaster extends Component
         if ($login_type === '151') {
             $this->visible['district_dropdown'] = 1;
             $this->visible['rural_urban_dropdown'] = 1;
-            $this->visible['subdivision_dropdown'] = 0; // Toggled dynamically for urban
+            $this->visible['subdivision_dropdown'] = 0;
             $this->visible['block_dropdown'] = 1;
             $this->visible['gp_ward_dropdown'] = 1;
             $this->districts = District::all();
         }
         if ($login_type === '152') {
             $this->visible['rural_urban_dropdown'] = 1;
-            $this->visible['subdivision_dropdown'] = 0; // Toggled dynamically for urban
+            $this->visible['subdivision_dropdown'] = 0; 
             $this->visible['block_dropdown'] = 1;
             $this->visible['gp_ward_dropdown'] = 1;
             $this->selectedDistrict = $this->filter_condition['district_id'];

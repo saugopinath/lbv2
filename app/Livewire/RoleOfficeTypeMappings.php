@@ -71,10 +71,10 @@ class RoleOfficeTypeMappings extends DataTableComponent
     //     // Refresh rows
     //     $this->rows = RoleOfficeTypeMapping::with(['role', 'officeType'])->get();
     // }
-    public function render(): \Illuminate\View\View
-    {
-        return view('livewire.role-office-type-mappings-table', [
-            'rows' => $this->getRows(),
-        ]);
-    }
+    // public function render(): \Illuminate\View\View
+    // {
+    //     return view('livewire.role-office-type-mappings-table', [
+    //         'rows' => $this->getRows(),
+    //     ]);
+    // }
 }

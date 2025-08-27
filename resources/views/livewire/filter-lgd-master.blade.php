@@ -58,7 +58,8 @@
                 @endforeach
             </x-form.select>
         @endif
-         <div class="flex items-center mt-6 gap-3">
+        @if ($button_show == 1)
+            <div class="flex items-center mt-6 gap-3">
                 <x-button.primary wire:click="resetFilters"
                     class="bg-green-500 text-white whitespace-nowrap cursor-pointer">
                     Reset
@@ -68,5 +69,6 @@
                     Search
                 </x-button.primary>
             </div>
+        @endif
     </div>
 </div>
