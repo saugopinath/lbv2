@@ -17,7 +17,7 @@ class BankAccountDetails extends Component
     public function __construct($id)
     {
         $applicantDet = DraftBeneficiaryPersonal::with('bank')->where('application_id', $id)->first();
-        $this->bankname = $applicantDet->bank->ifscbranch->bank->name;
+        $this->bankname = $applicantDet->bank->ifscbranch->bankmaster->name;
         $this->ifscode = $applicantDet->bank->ifsc;
         $this->bankbranchname = $applicantDet->bank->ifscbranch->branch;
         $this->bankaccountnumber = $applicantDet->bank->bank_account_number;
