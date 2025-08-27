@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('lb_scheme.draft_beneficiary_banks', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('application_id');
+            $table->unsignedBigInteger('application_id');
 
 
             $table->Integer('created_by');
-            $table->char('ifsc',11);
-            $table->char('bank_account_number',20)->unique();
+            $table->string('ifsc',20);
+            $table->string('bank_account_number',30)->unique();
             $table->foreign('ifsc','ifsc_fk')->references('code')->on('public.ifsccodemasters');
             $table->foreign('created_by','user_id_fk')->references('id')->on('public.users');
             $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals')->onDelete('cascade');

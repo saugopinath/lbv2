@@ -11,15 +11,15 @@ return new class extends Migration
         Schema::create('scheme_validation_parameter_settings', function (Blueprint $table) {
             $table->id(); 
 
-            $table->unsignedInteger('scheme_id');
-            $table->unsignedInteger('parameter_code');
-            $table->unsignedInteger('master_code');
+            $table->smallInteger('scheme_id');
+            $table->smallInteger('parameter_code');
+            $table->smallInteger('master_code');
             $table->boolean('is_active')->default(true);
             $table->integer('min_score')->nullable();
             $table->integer('max_score')->nullable();
             $table->date('from_affected_date');
             $table->date('to_affected_date');
-            
+
             $table->unique(['master_code', 'parameter_code'], 'uq_master_parameter');
             $table->foreign('scheme_id','scheme_id_fk')->references('id')->on('schemes')->onDelete('cascade');
             $table->foreign('master_code','master_code_fk')->references('id')->on('codemasters')->onDelete('cascade');

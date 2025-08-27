@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('beneficiary_id');
             $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.faulty_beneficiary_personals')->onDelete('cascade');
-            $table->unsignedInteger('application_id');
+            $table->unsignedBigInteger('application_id');
             $table->Integer('created_by');
             $table->boolean('is_resident');
             $table->boolean('earn_monthly_remuneration');
