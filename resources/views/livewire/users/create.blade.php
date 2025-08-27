@@ -29,7 +29,7 @@
                         @endforeach
                     </x-form.select>
 
-                    <x-form.select name="role" id="role" label="Role" required wire:model="role">
+                    <x-form.select name="role" id="role" label="Role" required wire:model.live="role">
                         <option value="">Select</option>
                         @foreach ($roles as $role)
                             <option value="{{ $role->id }}">{{ $role->name }}</option>
@@ -44,7 +44,7 @@
                         @endforeach
                     </x-form.select>
 
-                     <x-form.select name="state" label="State" wire:model.live="selectedState" required>
+                    <x-form.select name="state" label="State" wire:model.live="selectedState" required>
                         <option value="">-- Select State --</option>
                         @foreach ($states as $state)
                             <option value="{{ $state->id }}">{{ $state->name }}</option>

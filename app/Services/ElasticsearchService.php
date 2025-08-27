@@ -14,7 +14,7 @@ class ElasticsearchService
 
     /**
      * Test the connection to the Elasticsearch server.
-     * 
+     *
      * @return string
      */
     public function testConnection()
@@ -29,7 +29,7 @@ class ElasticsearchService
 
     /**
      * Create an index in Elasticsearch with the given name and default settings.
-     * 
+     *
      * @param string $indexName
      * @return array
      */
@@ -63,7 +63,7 @@ class ElasticsearchService
 
     /**
      * Populate an index with the given data.
-     * 
+     *
      * @param string $indexName
      * @param array $data
      * @return array
@@ -79,12 +79,12 @@ class ElasticsearchService
         if($this->client->index($params))
            return true;
         else
-             return false;  
+             return false;
     }
 
     /**
      * Verify if a document with the given ID exists in the specified index.
-     * 
+     *
      * @param string $index
      * @param string $id
      * @return array
@@ -99,7 +99,7 @@ class ElasticsearchService
 
     /**
      * Perform a bulk index operation with the given data.
-     * 
+     *
      * @param string $indexName
      * @param array $data
      * @return array
@@ -145,7 +145,7 @@ class ElasticsearchService
 
     /**
      * Get paginated data from the specified index.
-     * 
+     *
      * @param string $indexName
      * @param int $page
      * @param int $pageSize
@@ -182,7 +182,7 @@ class ElasticsearchService
 
     /**
      * Get data from the specified index by document ID.
-     * 
+     *
      * @param string $indexName
      * @param string $id
      * @return array|string
