@@ -6,7 +6,6 @@ namespace Database\Seeders;
 use App\Models\Ifsccodemaster;
 use Illuminate\Database\Seeder;
 use App\Models\BeneficiaryPersonal;
-use App\Models\BeneficiaryApprovedList;
 use App\Models\BeneficiaryBank;
 use App\Models\BeneficiaryContact;
 use App\Models\Block;
