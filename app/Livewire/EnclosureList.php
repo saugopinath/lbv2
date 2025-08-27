@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\DraftBeneficiaryPersonal;
 use App\Models\BeneficiaryEnclosure;
 use App\Models\SchemeAttachedDocMappings;
+use Illuminate\Support\Facades\DB;
 
 class EnclosureList extends Component
 {
@@ -109,24 +110,31 @@ class EnclosureList extends Component
         $existingDoc = BeneficiaryEnclosure::where('application_id', $this->application_id)
             ->where('document_type', $this->currentDocId)
             ->first();
-        if ($existingDoc) {
-            $existingDoc->update([
-                'attched_document' => $base64,
-                'ip_address' => request()->ip(),
-                'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
-                'document_mime_type' => $this->singleDocument->getMimeType(),
-                'created_by' => 1,
-            ]);
-        } else {
-            BeneficiaryEnclosure::create([
-                'application_id' => $this->application_id,
-                'attched_document' => $base64,
-                'ip_address' => request()->ip(),
-                'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
-                'document_mime_type' => $this->singleDocument->getMimeType(),
-                'document_type' => $this->currentDocId,
-                'created_by' => 1,
-            ]);
+        DB::beginTransaction();
+        try {
+            if ($existingDoc) {
+                $existingDoc->update([
+                    'attched_document' => $base64,
+                    'ip_address' => request()->ip(),
+                    'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
+                    'document_mime_type' => $this->singleDocument->getMimeType(),
+                    'created_by' => 1,
+                ]);
+            } else {
+                BeneficiaryEnclosure::create([
+                    'application_id' => $this->application_id,
+                    'attched_document' => $base64,
+                    'ip_address' => request()->ip(),
+                    'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
+                    'document_mime_type' => $this->singleDocument->getMimeType(),
+                    'document_type' => $this->currentDocId,
+                    'created_by' => 1,
+                ]);
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
         $this->singleDocument = null;
         $this->currentDocId = null;
