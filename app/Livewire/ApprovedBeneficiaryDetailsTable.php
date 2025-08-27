@@ -2,9 +2,11 @@
 
 namespace App\Livewire;
 
-use App\Models\BeneficiaryApprovedList;
+use App\Models\BeneficiaryCommonList;
 use App\Helpers\EncryptionArray;
 use App\Exports\BeneficiariesExport;
+use App\Models\BeneficiaryPersonal;
+use App\Models\FaultyBeneficiaryPersonal;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
@@ -220,7 +222,11 @@ class ApprovedBeneficiaryDetailsTable extends DataTableComponent
         //     ->with(['contact' => fn($q) => $q->where('relation_type_id', $relationFather)]);
 
         // return $query;
-        $query = BeneficiaryApprovedList::with('sourceable.contact', 'sourceable.bank');
+        $query = BeneficiaryCommonList::with('sourceable.contact', 'sourceable.bank');
+    //      ->whereIn('sourceable_type', [
+    //     BeneficiaryPersonal::class,
+    //     FaultyBeneficiaryPersonal::class
+    // ]);
 
         if (!empty($this->filter_condition['district_id'])) {
             $query->whereHas(
