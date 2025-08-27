@@ -11,13 +11,6 @@ class RoleOfficeTypeMappings extends DataTableComponent
 {
     public ?int $perPage = 5;
     public string $search = '';
-
-    // public $rows;
-
-    // public function mount()
-    // {
-    //     $this->rows = RoleOfficeTypeMapping::with(['role', 'officeType'])->get();
-    // }
     public function configure(): void
     {
         $this->setPrimaryKey('id')
@@ -28,7 +21,6 @@ class RoleOfficeTypeMappings extends DataTableComponent
             ->setSearchEnabled()
             ->setSearchLive();
     }
-
     public function updatedSearch($value): void
     {
         $this->setSearch($value);
@@ -53,28 +45,16 @@ class RoleOfficeTypeMappings extends DataTableComponent
                 ->searchable(),
         ];
     }
-
     public function builder(): Builder
     {
         // $abs = RoleOfficeTypeMapping::with('officeType','role')->get(); dd($abs);
         return RoleOfficeTypeMapping::query()
             ->with(['officeType', 'role']);
     }
-
-    // public function delete($id)
-    // {
-    //     $mapping = RoleOfficeTypeMapping::findOrFail($id);
-    //     $mapping->delete();
-
-    //     session()->flash('success', 'Record deleted successfully!');
-
-    //     // Refresh rows
-    //     $this->rows = RoleOfficeTypeMapping::with(['role', 'officeType'])->get();
-    // }
-    // public function render(): \Illuminate\View\View
-    // {
-    //     return view('livewire.role-office-type-mappings-table', [
-    //         'rows' => $this->getRows(),
-    //     ]);
-    // }
+    public function render(): \Illuminate\View\View
+    {
+        return view('livewire.role-office-type-mappings-table', [
+            'rows' => $this->getRows(),
+        ]);
+    }
 }

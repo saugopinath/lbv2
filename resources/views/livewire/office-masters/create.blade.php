@@ -66,7 +66,7 @@
                 <x-button.primary type="submit" class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
                     Create
                 </x-button.primary>
-                <a href="{{ route('role-office-master-mappings.index') }}"
+                <a href="{{ route('officemasters.index') }}"
                     class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded shadow-md whitespace-nowrap">
                     Back
                 </a>

@@ -24,23 +24,22 @@
         <table class="min-w-full text-sm text-gray-700 text-center">
             <thead class="bg-violet-800 text-xs uppercase py-3 text-white">
                 <tr>
+                    <th class="py-3">Name</th>
+                    <th class="py-3">Address</th>
+                    <th class="py-3">Zip</th>
                     <th class="py-3">Office Type</th>
-                    <th class="py-3">Role</th>
-                    <th class="py-3">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white overflow-y-auto">
                 @forelse($rows as $row)
                     <tr>
-                        <td class="py-3">{{ $row->officeType?->name }}</td>
-                        <td class="py-3">{{ $row->role?->name }}</td>
-                        <td class="py-3 flex justify-center gap-2">                          
-                            
-                            <button wire:click="delete({{ $row->id }})" onclick="return confirm('Are you sure?')"
-                                class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
-                                Delete
-                            </button>
-                        </td>
+                        {{--  <pre>{{ json_encode($row->toArray(), JSON_PRETTY_PRINT) }}</pre>  --}}
+
+
+                        <td class="py-3">{{ $row->name ?? 'N/A' }}</td>
+                        <td class="py-3">{{ $row->address ?? 'N/A' }}</td>
+                        <td class="py-3">{{ $row->zip ?? 'N/A' }}</td>
+                        <td class="py-3">{{ $row['officeType.name'] ?? 'N/A' }}</td>
                     </tr>
                 @empty
                     <tr>

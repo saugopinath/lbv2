@@ -2,12 +2,12 @@
 
 namespace App\Livewire;
 
-use App\Models\RoleOfficeTypeMapping;
+use App\Models\OfficeMaster;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
-class OfficeMaster extends DataTableComponent
+class OfficeMasters extends DataTableComponent
 {
     public ?int $perPage = 5;
     public string $search = '';
@@ -15,7 +15,7 @@ class OfficeMaster extends DataTableComponent
     public function configure(): void
     {
         $this->setPrimaryKey('id')
-           ->setPaginationEnabled()
+            ->setPaginationEnabled()
             ->setPerPageAccepted([5, 10, 25, 50])
             ->setPerPage($this->perPage)
             ->setPerPageVisibilityEnabled()
@@ -23,7 +23,7 @@ class OfficeMaster extends DataTableComponent
             ->setSearchLive();
     }
 
-     public function updatedSearch($value): void
+    public function updatedSearch($value): void
     {
         $this->setSearch($value);
         $this->resetPage();
@@ -38,11 +38,16 @@ class OfficeMaster extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make("Office Type", "officeType.name")
+            Column::make("Name", "name")
                 ->sortable()
                 ->searchable(),
-
-            Column::make("Role", "role.name")
+            Column::make("Address", "address")
+                ->sortable()
+                ->searchable(),
+            Column::make("Zip", "zip")
+                ->sortable()
+                ->searchable(),
+            Column::make("Office Type", "officeType.name")
                 ->sortable()
                 ->searchable(),
         ];
@@ -50,7 +55,7 @@ class OfficeMaster extends DataTableComponent
 
     public function builder(): Builder
     {
-       return RoleOfficeTypeMapping::with(['officeType', 'role']);
+        return OfficeMaster::with(['officeType']);
     }
 
     public function render(): \Illuminate\View\View

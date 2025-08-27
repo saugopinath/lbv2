@@ -32,8 +32,8 @@
             <tbody class="divide-y divide-gray-200 bg-white overflow-y-auto">
                 @forelse($rows as $row)
                     <tr>
-                        <td>{{ $row->officeType?->name ?? 'N/A' }}</td>
-                        <td>{{ $row->role?->name ?? 'N/A' }}</td>
+                       <td>{{ $row['officeType.name'] ?? 'N/A' }}</td>
+                        <td>{{ $row['role.name'] ?? 'N/A' }}</td>
                         <td class="py-3 flex justify-center gap-2">
 
                             <button wire:click="delete({{ $row->id }})" onclick="return confirm('Are you sure?')"

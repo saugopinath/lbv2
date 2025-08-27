@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class OfficeMaster extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         'name',
         'address',
@@ -23,11 +22,12 @@ class OfficeMaster extends Model
         'panchayat_id',
         'is_active',
     ];
+
     public function officeType()
     {
-        return $this->belongsTo(Codemaster::class, 'office_type', 'code');
+        return $this->belongsTo(Codemaster::class, 'office_type_id', 'code');
     }
-
+   
     public function district()
     {
         return $this->belongsTo(District::class, 'district_id', 'id');
@@ -52,5 +52,4 @@ class OfficeMaster extends Model
     {
         return $this->belongsTo(Ward::class, 'ward_id', 'id');
     }
-
 }
