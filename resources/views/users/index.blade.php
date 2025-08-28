@@ -18,7 +18,7 @@
     </div>
     <div class="bg-white shadow-xl rounded-2xl ">
         <div>
-            {{--  <livewire:office-masters />  --}}
+            <livewire:Users />
         </div>
     </div>
 </x-layouts.app>

@@ -26,9 +26,9 @@ class Create extends Component
 
     public function mount()
     {
-        $officetype = Codemaster::getIdByCode(15);
         $this->roles = Role::all();
-        $this->mapping_levels = Codemaster::where('parent_id', $officetype)->get();
+        $officetype = Codemaster::getIdByCode(15);
+        $this->mapping_levels = Codemaster::where('parent_id', $officetype)->whereIn('code', [151, 152, 153, 154])->get();
     }
 
     public function submit()
@@ -41,7 +41,7 @@ class Create extends Component
         ]);
 
         // Toaster::success('Role Office Type Mapping created successfully!');
-         session()->flash('success', 'Role Office Type Mapping created successfully!');
+        session()->flash('success', 'Role Office Type Mapping created successfully!');
 
         return redirect()->route('role-office-master-mappings.index');
         // $this->dispatch('redirectToIndex');
