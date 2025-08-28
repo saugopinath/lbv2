@@ -6,6 +6,8 @@ use App\Models\RoleOfficeTypeMapping;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class RoleOfficeTypeMappings extends DataTableComponent
 {
@@ -36,6 +38,10 @@ class RoleOfficeTypeMappings extends DataTableComponent
     public function columns(): array
     {
         return [
+            Column::make("ID", "id")
+                ->sortable()
+                ->searchable(),
+
             Column::make("Office Type", "officeType.name")
                 ->sortable()
                 ->searchable(),
@@ -53,20 +59,14 @@ class RoleOfficeTypeMappings extends DataTableComponent
     {
         return RoleOfficeTypeMapping::with(['officeType', 'role']);
     }
-    public function delete($id): void
+    public function deleteUser($userId)
     {
-        $record = RoleOfficeTypeMapping::find($id);
+        DB::transaction(function () use ($userId) {
+            RoleOfficeTypeMapping::where('id', $userId)->delete();
+        });
 
-        if ($record) {
-            $record->delete();
-            session()->flash('message', 'Record deleted successfully.');
-            $this->resetPage();
-        } else {
-            session()->flash('error', 'Record not found.');
-        }
+        Session::flash('success', 'User deleted successfully.');
     }
-
-
     public function render(): \Illuminate\View\View
     {
         return view('livewire.role-office-type-mappings-table', [

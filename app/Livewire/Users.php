@@ -3,9 +3,13 @@
 namespace App\Livewire;
 
 use App\Models\User;
+use App\Models\UserPersonal;
+use App\Models\UserRoleSchemeOfficeMapping;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class Users extends DataTableComponent
 {
@@ -58,7 +62,16 @@ class Users extends DataTableComponent
         return User::query()->where('is_active', '1');
     }
 
+    public function deleteUser($userId)
+    {
+        DB::transaction(function () use ($userId) {
+            UserRoleSchemeOfficeMapping::where('user_id', $userId)->delete();
+            UserPersonal::where('user_id', $userId)->delete();
+            User::where('id', $userId)->delete();
+        });
 
+        Session::flash('success', 'User deleted successfully.');
+    }
     public function render(): \Illuminate\View\View
     {
         return view('livewire.users-table', [

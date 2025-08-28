@@ -1,4 +1,9 @@
 <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
+    @if (session('success'))
+        <div class="bg-green-500 text-white px-4 py-2 rounded shadow mb-2">
+            {{ session('success') }}
+        </div>
+    @endif
     <!-- Top Controls: Search, Per Page -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div class="flex justify-end">
@@ -26,8 +31,9 @@
                 <tr>
                     <th class="py-3">ID</th>
                     <th class="py-3">Name</th>
-                     <th class="py-3">Mobile No</th>
+                    <th class="py-3">Mobile No</th>
                     <th class="py-3">Email</th>
+                    <th class="py-3">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white overflow-y-auto">
@@ -37,6 +43,12 @@
                         <td class="py-3">{{ $row->name ?? 'N/A' }}</td>
                         <td class="py-3">{{ $row->mobile_no ?? 'N/A' }}</td>
                         <td class="py-3">{{ $row->email ?? 'N/A' }}</td>
+                        <td class="py-3">
+                            <x-button.warning wire:click="deleteUser({{ $row->id }})"
+                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
+                                Delete
+                            </x-button.warning>
+                        </td>
                     </tr>
                 @empty
                     <tr>

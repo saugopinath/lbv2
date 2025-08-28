@@ -1,7 +1,7 @@
 <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
-    @if (session()->has('message'))
-        <div class="p-2 mb-2 text-sm text-green-700 bg-green-100 rounded">
-            {{ session('message') }}
+    @if (session('success'))
+        <div class="bg-green-500 text-white px-4 py-2 rounded shadow mb-2">
+            {{ session('success') }}
         </div>
     @endif
     <!-- Top Controls: Search, Per Page -->
@@ -29,6 +29,7 @@
         <table class="min-w-full text-sm text-gray-700 text-center">
             <thead class="bg-violet-800 text-xs uppercase py-3 text-white">
                 <tr>
+                    <th class="py-3">ID</th>
                     <th class="py-3">Office Type</th>
                     <th class="py-3">Role</th>
                     <th class="py-3">Action</th>
@@ -37,18 +38,15 @@
             <tbody class="divide-y divide-gray-200 bg-white overflow-y-auto">
                 @forelse($rows as $row)
                     <tr>
-                        <td>{{ $row['officeType.name'] ?? 'N/A' }}</td>
-                        <td>{{ $row['role.name'] ?? 'N/A' }}</td>
-                        <td class="py-3 flex justify-center gap-2">
-
-                            {{--  <button wire:click="delete({{ $row->id }})" onclick="return confirm('Are you sure?')"
-                                class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                        <td class="py-3">{{ $row->id ?? 'N/A' }}</td>
+                        <td class="py-3">{{ $row['officeType.name'] ?? 'N/A' }}</td>
+                        <td class="py-3">{{ $row['role.name'] ?? 'N/A' }}</td>
+                        <td class="py-3">
+                            <x-button.warning wire:click="deleteUser({{ $row->id }})"
+                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
                                 Delete
-                            </button>  --}}
-                            <button wire:click="delete('{{ $row->id }}')"
-                                class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
-                                Delete
-                            </button>
+                            </x-button.warning>
+                        </td>
                         </td>
                     </tr>
                 @empty

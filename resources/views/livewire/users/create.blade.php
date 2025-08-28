@@ -1,4 +1,9 @@
 <div class="bg-gray-100 p-4 rounded shadow mb-4">
+    @if (session()->has('success'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
     <form wire:submit.prevent="submit">
         <div class="bg-white shadow-md rounded-2xl p-4 flex justify-between items-center">
             <h2 class="text-xl font-semibold text-gray-700">User</h2>
@@ -7,7 +12,7 @@
         <div class="bg-white shadow-md rounded p-4 space-y-8">
             <fieldset class="border border-gray-200 rounded-xl p-4">
                 <div class="grid gap-6 mt-3 md:grid-cols-3">
-                    <x-form.input id="name" name="name" label="Name" wire:model="name"
+                    <x-form.input id="name" name="name" label="Name" required wire:model="name"
                         x-on:input="$el.value = $el.value.replace(/[^A-Za-z\s]/g, '')" />
 
                     <x-form.input id="mobile" name="mobile" label="Mobile Number" required wire:model="mobile"
@@ -36,11 +41,12 @@
                         @endforeach
                     </x-form.select>
 
-                    <x-form.select name="mapping_level" label="Office Type" wire:model.live="selectedMappingLevel"
-                        required>
+                    <x-form.select name="mapping_level" label="Office Type" required
+                        wire:model.live="selectedMappingLevel" required>
                         <option value="">-- Select Office Type --</option>
                         @foreach ($mapping_levels as $mapping_level)
-                            <option value="{{ $mapping_level->code }}">{{ $mapping_level->name }}</option>
+                            <option value="{{ $mapping_level->office_type_id }}">{{ $mapping_level->officeType?->name }}
+                            </option>
                         @endforeach
                     </x-form.select>
 

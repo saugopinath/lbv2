@@ -13,19 +13,20 @@ use App\Models\Codemaster;
 use App\Models\OfficeMaster;
 use App\Models\UserPersonal;
 use Illuminate\Support\Facades\Hash;
+use App\Models\RoleOfficeTypeMapping;
 use Illuminate\Support\Facades\Config;
 use App\Models\UserRoleSchemeOfficeMapping;
 
 class Create extends Component
 {
     public $name, $email, $password, $mobile;
-    public $role, $selectscheme, $office, $selectedMappingLevel, $selectedState, $scheme, $selectedDistrict;
+    public $role, $mapping_level, $selectscheme, $office, $selectedMappingLevel, $selectedState, $scheme, $selectedDistrict, $Role, $role_id;
 
     public $roles = [], $schemes = [], $offices = [], $states = [], $mapping_levels = [], $districts = [];
 
     protected $rules = [
         'name'     => 'required|string|max:255',
-        'mobile'   => 'required|digits:10',
+        'mobile' => 'required|digits:10|unique:users,mobile_no',
         'email'    => 'required|email|unique:users,email',
         'password' => 'required|min:6',
         'role'     => 'required|exists:roles,id',
@@ -39,15 +40,28 @@ class Create extends Component
         $this->schemes = Scheme::all();
         $this->states = State::orderBy('name', 'asc')->get();
         $this->districts = District::orderBy('name', 'asc')->get();
-        $this->updateMappingLevels();
     }
     public function updatedRole($value)
     {
-        $this->selectedMappingLevel = null;
+        $this->mapping_level = null;
+        $this->mapping_levels = [];
         $this->office = null;
         $this->offices = [];
-        $this->selectedDistrict = null;
-        $this->updateMappingLevels();
+        $this->selectedMappingLevel = null;
+
+        if ($value) {
+            $this->mapping_levels = RoleOfficeTypeMapping::with('officeType')
+                ->where('role_id', $value)
+                ->whereHas('officeType', function ($q) {
+                    $q->whereIn('code', [151, 152, 153, 154]);
+                })
+                ->get()
+                ->unique('office_type_id');
+        }
+
+        if (!in_array($value, [153, 154])) {
+            $this->selectedDistrict = null;
+        }
     }
 
     public function updatedSelectedMappingLevel($value)
@@ -61,44 +75,6 @@ class Create extends Component
 
         if (!in_array($value, [153, 154])) {
             $this->selectedDistrict = null;
-        }
-    }
-
-    private function updateMappingLevels()
-    {
-        $officetype = Codemaster::getIdByCode(15);
-        $allMappingLevels = Codemaster::where('parent_id', $officetype)
-            ->whereIn('code', [151, 152, 153, 154])
-            ->get();
-
-        $roleOfficeMapping = [
-            'Super Admin' => [151],
-            'HOD' => [151],
-            'Delegated HOD' => [151],
-            'Approver' => [151, 152],
-            'Delegated Approver' => [151, 152],
-            'Verifier' => [151, 152, 153],
-            'Delegated Verifier' => [151, 152, 153],
-            'Operator' => [151, 152, 153, 154],
-            'Delegated Operator' => [151, 152, 153, 154],
-            'DDO' => [151, 152],
-            'Delegated DDO' => [151, 152],
-            'Mis User State' => [151],
-            'Mis User District' => [152],
-            'Mis User Block' => [153],
-            'Mis User GP' => [153],
-            'Mis User Sub Division' => [154],
-            'Mis User Municipality' => [154],
-            'Mis User Ward' => [154],
-        ];
-
-        $selectedRole = Role::find($this->role);
-        $roleName = $selectedRole ? $selectedRole->name : null;
-
-        if ($roleName && isset($roleOfficeMapping[$roleName])) {
-            $this->mapping_levels = $allMappingLevels->whereIn('code', $roleOfficeMapping[$roleName]);
-        } else {
-            $this->mapping_levels = collect([]);
         }
     }
 

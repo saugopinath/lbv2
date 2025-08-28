@@ -53,7 +53,7 @@ class FilterLgdMaster extends Component
         }
         if ($login_type === '152') {
             $this->visible['rural_urban_dropdown'] = 1;
-            $this->visible['subdivision_dropdown'] = 0; 
+            $this->visible['subdivision_dropdown'] = 0;
             $this->visible['block_dropdown'] = 1;
             $this->visible['gp_ward_dropdown'] = 1;
             $this->selectedDistrict = $this->filter_condition['district_id'];
@@ -65,7 +65,7 @@ class FilterLgdMaster extends Component
             $this->loadGpOrWard();
         }
         if ($login_type === '154') {
-            // $this->visible['subdivision_dropdown'] = 1;
+            $this->visible['subdivision_dropdown'] = 0;
             $this->visible['block_dropdown'] = 1;
             $this->visible['gp_ward_dropdown'] = 1;
             $this->selectedDistrict = $this->filter_condition['district_id'];
