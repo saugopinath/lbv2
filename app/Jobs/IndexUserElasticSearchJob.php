@@ -7,7 +7,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use App\Services\ElasticsearchService;
 use App\Models\User;
 
-class IndexUserElasticSearchJob 
+class IndexUserElasticSearchJob
 {
 
     protected $user;
@@ -15,7 +15,7 @@ class IndexUserElasticSearchJob
      * Create a new job instance.
      */
 
-    
+
     public function __construct(User $user)
     {
         //  dd('inside job');
@@ -25,10 +25,10 @@ class IndexUserElasticSearchJob
     /**
      * Execute the job.
      */
-    public function handle(): void
-    {
-       
-        $elasticsearchService=new ElasticsearchService();
-        $elasticsearchService->populateIndex('users', $this->user->toArray());
-    }
+    // public function handle(): void
+    // {
+
+    //     $elasticsearchService=new ElasticsearchService();
+    //     $elasticsearchService->populateIndex('users', $this->user->toArray());
+    // }
 }
