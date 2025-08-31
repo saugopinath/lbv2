@@ -22,6 +22,7 @@ class EnclosureList extends Component
     public $mode, $is_page;
     public $doc_type_id_array_list = [];
     public $doc_type_id_array = [];
+    public $showErrors = false;
     public function mount($mode = null, $application_id = null, $is_page = null, $doc_type_id_array_list = [], $doc_type_id_array = [])
     {
         $this->application_id = $application_id;
@@ -154,6 +155,7 @@ class EnclosureList extends Component
     }
     public function save()
     {
+        $this->showErrors = false;
         foreach ($this->doc_lists as $doc) {
             $existing = $this->existingDocuments[$doc->doc_type_id] ?? null;
 

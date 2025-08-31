@@ -63,7 +63,7 @@
     }" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         @foreach ($doc_lists as $doc)
             <x-document-card :docName="$doc->codemaster->name" :isRequired="$doc->is_required" :docTypeId="$doc->doc_type_id" :existingDoc="$existingDocuments[$doc->doc_type_id] ?? null"
-                :xIsDuplicate="$is_page == 1 ? 1 : 0" />
+                :xIsDuplicate="$is_page == 1 ? 1 : 0" :showErrors="$showErrors ?? false" />
         @endforeach
 
         <x-upload-modal :currentDocExtensions="$currentDocExtensions" :currentDocMaxSize="$currentDocMaxSize" />
@@ -81,7 +81,7 @@
         @endphp
         @if (!$is_page && empty($doc_type_id_array_list))
             @if ($missingRequired->isNotEmpty())
-                <x-button.primary type="button" onclick="alert('upload required')">
+                 <x-button.primary type="button" wire:click="$set('showErrors', true)">
                     {{ $mode == '0' ? 'Save' : 'Save & Next' }}
                 </x-button.primary>
             @else

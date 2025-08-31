@@ -1,5 +1,4 @@
-
-@props(['docName', 'isRequired', 'docTypeId', 'existingDoc', 'xIsDuplicate' => 0])
+@props(['docName', 'isRequired', 'docTypeId', 'existingDoc', 'xIsDuplicate' => 0, 'showErrors' => false])
 
 <div x-data="{
     modalOpen: false,
@@ -37,7 +36,6 @@
                     </x-button.success>
                 </div>
             @endif
-
         @elseif ($existingDoc)
             @if (in_array($mime, ['image/jpg', 'image/jpeg', 'image/png']))
                 <div class="flex space-x-2">
@@ -77,6 +75,9 @@
                     Upload
                 </x-button.primary>
             </div>
+        @endif
+        @if ($isRequired && empty($existingDoc) && $showErrors)
+            <p class="text-red-500 text-sm mt-2">{{ $docName }} document is required.</p>
         @endif
     </div>
 
