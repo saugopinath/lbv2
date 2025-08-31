@@ -68,7 +68,7 @@ class ProcessApplicationTable extends DataTableComponent
         }
 
         // dump($user);
-        // dd($query->toSql(), $query->getBindings());
+        // dd($query->toSql(), $query->get());
 
 
         return $query;
@@ -108,47 +108,47 @@ class ProcessApplicationTable extends DataTableComponent
                 ->searchable()
                 ->hideIf(true),
 
-            Column::make('Application ID', 'application_id')
-                ->sortable()
-                ->searchable(),
+            //     Column::make('Application ID', 'application_id')
+            //         ->sortable()
+            //         ->searchable(),
 
-            Column::make('Applicant Name', 'full_name')
-                ->sortable()
-                ->searchable(),
+            //     Column::make('Applicant Name', 'full_name')
+            //         ->sortable()
+            //         ->searchable(),
 
-            Column::make('Father\'s Name')
-                ->label(
-                    fn($row) =>
-                    $row->relationships->where('relation_type_id', 79)->first()?->full_name ?? '-'
-                ),
+            //     Column::make('Father\'s Name')
+            //         ->label(
+            //             fn($row) =>
+            //             $row->relationships->where('relation_type_id', 79)->first()?->full_name ?? '-'
+            //         ),
 
-            Column::make('Age')
-                ->label(function ($row) {
-                    if (!$row->dob)
-                        return '-';
-                    $dob = Carbon::parse($row->dob);
-                    return $dob->diff(Carbon::now())->format('%y ');
-                }),
-
-
-            Column::make('GP / Municipality')
-                ->label(function ($row) {
-                    if ($row->contacts?->panchayat?->name) {
-                        return 'GP: ' . $row->contacts->panchayat->name;
-                    } elseif ($row->contacts?->municipality?->name) {
-                        return 'Municipality: ' . $row->contacts->municipality->name;
-                    } else {
-                        return '-';
-                    }
-                }),
+            //     Column::make('Age')
+            //         ->label(function ($row) {
+            //             if (!$row->dob)
+            //                 return '-';
+            //             $dob = Carbon::parse($row->dob);
+            //             return $dob->diff(Carbon::now())->format('%y ');
+            //         }),
 
 
+            //     Column::make('GP / Municipality')
+            //         ->label(function ($row) {
+            //             if ($row->contacts?->panchayat?->name) {
+            //                 return 'GP: ' . $row->contacts->panchayat->name;
+            //             } elseif ($row->contacts?->municipality?->name) {
+            //                 return 'Municipality: ' . $row->contacts->municipality->name;
+            //             } else {
+            //                 return '-';
+            //             }
+            //         }),
 
-            Column::make('Action')
-                ->label(
-                    fn($row) =>
-                    view('components.datatable-action', ['row' => $row])->render()
-                )->html()
+
+
+            //     Column::make('Action')
+            //         ->label(
+            //             fn($row) =>
+            //             view('components.datatable-action', ['row' => $row])->render()
+            //         )->html()
         ];
     }
 

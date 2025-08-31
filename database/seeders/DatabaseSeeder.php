@@ -40,8 +40,8 @@ class DatabaseSeeder extends Seeder
             ValidationFailedCodemasterSeeder::class,
             Role\PurbaMedinipurApproverSeeder::class,
             DraftApplicantSeeder::class,
-            BeneficiaryApprovedListSeeder::class,
-            FaultyBeneficiaryApprovedListSeeder::class,
+            // BeneficiaryApprovedListSeeder::class,
+            // FaultyBeneficiaryApprovedListSeeder::class,
             MasterMimeTypeSeeder::class,
 
 

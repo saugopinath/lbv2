@@ -53,7 +53,7 @@ class DraftApplicantSeeder extends Seeder
 
 
             $uniqueAppBenId = UniqueAppBenId::create([
-                'beneficiary_id' => $i,
+                'beneficiary_id' => 700000000 + $i,
             ]);
 
             DraftBeneficiaryPersonal::create([

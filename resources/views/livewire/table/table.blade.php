@@ -60,15 +60,19 @@
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white">
                 @foreach ($rows as $row)
+                    {{--  @php
+                        dd($row);
+                    @endphp  --}}
                     <tr>
                         @if (auth()->user()->hasRole(['Approver', 'Delegated Approver']))
                             <td class="py-3">
-                                <x-form.checkbox wire:model.live="selectedRows" value="{{ $row->id }}"
+                                <x-form.checkbox wire:model.live="selectedRows" value="{{ $row->application_id }}"
                                     name="selectRow" />
                             </td>
                         @endif
 
                         <td class="py-3">{{ $row->application_id }}</td>
+
                         <td class="py-3">{{ $row->full_name }}</td>
                         <td class="py-3">
                             {{ $row->relationships->where('relation_type_id', 79)->first()?->full_name ?? '-' }}
@@ -94,10 +98,10 @@
                                 View
                             </x-link-button>
                         </td>  --}}
-                     
+
                         <td>
                             <x-link-button wire:target="navigate"
-                                href="{{ route('draft-application.view', $row->id) }}">
+                                href="{{ route('draft-application.view', $row->application_id) }}">
                                 <span wire:target="navigate">View</span> </x-link-button>
                         </td>
 
@@ -105,6 +109,7 @@
 
                     </tr>
                 @endforeach
+
             </tbody>
         </table>
     </div>

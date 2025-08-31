@@ -36,12 +36,32 @@ class DraftBeneficiaryPersonal extends Model
     }
 
 
-    public function subdivision() {
-    return $this->belongsTo(Subdivision::class, 'subdivision_id');
-}
+    public function subdivision()
+    {
+        return $this->belongsTo(Subdivision::class, 'subdivision_id');
+    }
 
-public function block() {
-    return $this->belongsTo(Block::class, 'block_id');
-}
+    public function block()
+    {
+        return $this->belongsTo(Block::class, 'block_id');
+    }
+    public function lists()
+    {
+        return $this->morphOne(BeneficiaryCommonList::class, 'sourceable');
+    }
+    protected static function booted()
+    {
+        static::created(function ($beneficiary) {
+            // When a new DraftBeneficiaryPersonal is created, automatically create a related list
+            $beneficiary->lists()->create([
+                'district_id' => $beneficiary->district_id,
+                'block_id' => $beneficiary->block_id,
+                'sub_division_id' => $beneficiary->sub_division_id,
+                'municipality_id' => $beneficiary->municipality_id,
+                'ward_id' => $beneficiary->ward_id,
+                'panchayat_id' => $beneficiary->panchayat_id,
+            ]);
+        });
+    }
 
 }

@@ -16,14 +16,17 @@ class DraftApplicationView extends Component
         $this->applicationId = $id;
 
         $this->application = DraftBeneficiaryPersonal::with('relationships')->findOrFail($id);
-        // dump($this->application);
-
+        // dd($this->application, $this->application->toSql());
+        // dd($this->application, json_encode($this->application));
+        // $jsondata = json_encode($this->application);
+        // dump($jsondata);
+        // dd(json_decode($jsondata));
     }
 
     public function openActionModal()
     {
 
-        $this->dispatch('openBulkActionModal', selectedIds: [$this->application->id]);
+        $this->dispatch('openBulkActionModal', selectedIds: [$this->application->application_id]);
     }
 
     #[On('actionPerformedAndRedirect')]

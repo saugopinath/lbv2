@@ -2,22 +2,24 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use App\Interfaces\AuthenticationInterface;
-use App\Services\AuthenticationService;
+use App\Models\User;
+use App\Services\UserService;
+use App\Observers\UserObserver;
 
 
-use App\Interfaces\SendSmsInterface;
+use App\Models\BenRejectDetails;
 use App\Services\SendSmsService;
 
 use App\Interfaces\UserInterface;
-use App\Services\UserService;
+use App\Interfaces\SendSmsInterface;
 
-use App\Interfaces\ElasticsearchInterface;
+use App\Observers\BenRejectObserver;
 use App\Services\ElasticsearchService;
 
-use App\Models\User;
-use App\Observers\UserObserver;
+use App\Services\AuthenticationService;
+use Illuminate\Support\ServiceProvider;
+use App\Interfaces\ElasticsearchInterface;
+use App\Interfaces\AuthenticationInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,15 +29,15 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(AuthenticationInterface::class, AuthenticationService::class);
-       
+
         $this->app->bind(SendSmsInterface::class, SendSmsService::class);
 
         $this->app->bind(UserInterface::class, UserService::class);
 
         $this->app->bind(ElasticsearchInterface::class, ElasticsearchService::class);
 
-        
-       
+
+
     }
 
     /**
@@ -43,6 +45,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-         User::observe(UserObserver::class);
+        User::observe(UserObserver::class);
+        BenRejectDetails::observe(BenRejectObserver::class);
     }
 }
