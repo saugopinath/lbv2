@@ -24,4 +24,13 @@ class Codemaster extends Model
     {
         return self::where('code', $code)->value('id');
     }
+     public function menus()
+    {
+        return $this->hasMany(SchemeValidationParameterSetting::class, 'master_code', 'id');
+    }
+
+    public function parameters()
+    {
+        return $this->hasMany(SchemeValidationParameterSetting::class, 'parameter_code', 'id');
+    }
 }

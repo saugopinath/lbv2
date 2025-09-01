@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\ValidationfailedSettingController;
+use App\Http\Controllers\MasterParameterSettingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
@@ -38,5 +38,5 @@ Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage')
 Route::get('/approved-lists', [BeneficiaryApprovedListController::class, 'index'])->name('approved-lists');
 Route::get('/approved-lists-BA-Wise', [BeneficiaryApprovedListController::class, 'beneficiaryContactwiseList'])->name('approved-lists-BA-Wise');
 
-//validation failed master setting
-Route::get('/validation-failed-settings', [ValidationfailedSettingController::class, 'index'])->name('validation-failed-settings');
+//master parameter settings
+Route::get('/master-parameter-settings', [MasterParameterSettingController::class, 'index'])->name('master-parameter-settings');

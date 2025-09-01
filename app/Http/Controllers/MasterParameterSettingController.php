@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
 
-class ValidationfailedSettingController extends Controller
+class MasterParameterSettingController extends Controller
 {
     public function index()
     {
@@ -18,9 +18,9 @@ class ValidationfailedSettingController extends Controller
                 $filter[$k] = Crypt::decryptString($v);
             }
         }
-        $login_type = $filter['office_type_id'];
+        $header='Master Parameter Settings';
 
-        return view('ValidationFailedSetting.index', compact( 'login_type'));
+        return view('MasterParameterSetting.index', compact( 'header'));
     }
 }
 
