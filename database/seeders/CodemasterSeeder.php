@@ -93,6 +93,11 @@ class CodemasterSeeder extends Seeder
                 "short_name" => "ENCDETAILS",
                 "code" => "16",
             ),
+             array(
+                "name" => "OP TYPE",
+                "short_name" => "op_type",
+                "code" => "20",
+            ),
         );
         foreach ($codemasterParents as $codemasterParent_item) {
             Codemaster::create([
@@ -530,7 +535,7 @@ class CodemasterSeeder extends Seeder
             ),
             array(
                 "name" => "NO CASTE CERTIFICATE NUMBER",
-                "short_name" => "no_caste_certificate_number",           
+                "short_name" => "no_caste_certificate_number",
                 "parent_short_code" => "incomplete_details",
                  "code" => "147",
             ),
@@ -557,7 +562,25 @@ class CodemasterSeeder extends Seeder
                 "short_name" => "duplicate_bank_account_number",
                 "parent_short_code" => "incomplete_details",
                  "code" => "1411",
-            ),   
+            ),
+             array(
+                "name" => "Minor Mismatch(40% - 89%)",
+                "short_name" => "minor_mismatch_40_89",
+                "parent_short_code" => "incomplete_details",
+                 "code" => "1412",
+            ),
+             array(
+                "name" => "Minor Mismatch(90% - 100%)",
+                "short_name" => "minor_mismatch_90_100",
+                "parent_short_code" => "incomplete_details",
+                 "code" => "1413",
+            ),
+             array(
+                "name" => "PDS Mismatch",
+                "short_name" => "pds_mismatch",
+                "parent_short_code" => "incomplete_details",
+                 "code" => "1414",
+            ),
             array(
                 "name" => "STATE OFFICE",
                 "short_name" => "state_office",
@@ -601,7 +624,7 @@ class CodemasterSeeder extends Seeder
                  "code" => "159",
             ),
             array(
-                
+
                 "name" => "Passport size profile photo",
                 "short_name" => "profile_photo_enc",
                 "parent_short_code" => "ENCDETAILS",
@@ -793,7 +816,30 @@ class CodemasterSeeder extends Seeder
                 "parent_short_code" => "ENCDETAILS",
                  "code" => "1632",
             ),
-
+             array(
+                "name" => "Application Accepted",
+                "short_name" => "application_accepted",
+                "parent_short_code" => "op_type",
+                 "code" => "243",
+            ),
+              array(
+                "name" => "Application Rejected",
+                "short_name" => "application_rejected",
+                "parent_short_code" => "op_type",
+                 "code" => "244",
+            ),
+              array(
+                "name" => "Application Verify",
+                "short_name" => "application_verify",
+                "parent_short_code" => "op_type",
+                 "code" => "245",
+            ),
+              array(
+                "name" => "Application Approved",
+                "short_name" => "application_approved",
+                "parent_short_code" => "op_type",
+                 "code" => "246",
+            ),
         );
         foreach ($codemasterChilds as $codemasterChild_item) {
             Codemaster::create([

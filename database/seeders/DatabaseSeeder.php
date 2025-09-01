@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
             Role\DaspurIIBlockOperatorSeeder::class,
             Role\GhatalSdoOperatorSeeder::class,
             Role\GhatalSdoVerifierSeeder::class,
+            // IncompletTypeModeSeeder::class,
             // DraftApplicantSeeder::class,
             // BeneficiaryApplicantSeeder::class,
             // BenRejectDetailsSeeder::class,

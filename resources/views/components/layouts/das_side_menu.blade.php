@@ -114,6 +114,22 @@
              </a>
          </div>
 
+          <!-- Menu Item: Incomplete Type -->
+         <div>
+             <a href="{{ route('incomplete.types') }}"
+                 class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
+                 <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
+                     viewBox="0 0 24 24" stroke="currentColor">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                 </svg>
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                     d="M17 20h5v-2a2 2 0 00-2-2h-3m-2-2H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v7m-7 4v5m-7-5h12" />
+                 </svg>
+                 <span x-show="sidebar" class="mr-2 truncate">IncompleteType</span>
+             </a>
+         </div>
+
          {{--  UserDutyManagement  --}}
 
            <div>

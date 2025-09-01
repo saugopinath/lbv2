@@ -17,6 +17,7 @@ use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Livewire\RoleOfficeTypeMappings\Create;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Livewire\Users\Create as UsersCreate;
+use App\Livewire\IncompleteType;
 
 
 Route::get('/', function () {
@@ -75,3 +76,5 @@ Route::get('/office-masters/create', OfficeMasterCreate::class)
 Route::get('/user-managements', [UsersController::class, 'index'])->middleware(['auth', 'verified'])->name('user-managements.index')->middleware('auth');
 Route::get('/users/create', UsersCreate::class)
     ->name('users.create');
+
+Route::get('/incomplete-types', IncompleteType::class)->name('incomplete.types');
