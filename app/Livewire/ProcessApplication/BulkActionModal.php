@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Livewire\ProcessApplication;
+use App\Models\FaultyBeneficiaryPersonal;
 use Livewire\Component;
 use App\Models\Codemaster;
 use Livewire\Attributes\On;
@@ -8,6 +9,7 @@ use Masmerise\Toaster\Toaster;
 use App\Models\BenRejectDetails;
 use App\Models\BeneficiaryAadhaar;
 use Illuminate\Support\Facades\DB;
+use App\Models\BeneficiaryPersonal;
 use App\Models\DraftBeneficiaryBank;
 use Illuminate\Support\Facades\Auth;
 use App\Models\DraftBeneficiaryContact;
@@ -27,6 +29,7 @@ class BulkActionModal extends Component
     public array $reasons = [];
     public array $availableActions = [];
     public int $currentUserId;
+
     public string $bulkActionTypeLabel = 'Select Operation';
 
     #[On('openBulkActionModal')]
@@ -140,11 +143,14 @@ class BulkActionModal extends Component
                         'action_type' => $this->bulkActionType,
                     ]);
 
-                    BenRejectDetails::create([
+
+
+
+                    $reject = new BenRejectDetails([
                         'application_id' => $applicationId,
-                        // 'reject_revert_reason_id' => $this->reason,  // will be picked up in observer
-                        // 'remark' => $this->remark,                   // will be picked up in observer
                     ]);
+                    $reject->update_code = 1;// for draft table
+                    $reject->save();
 
 
 
@@ -165,13 +171,6 @@ class BulkActionModal extends Component
         // $this->dispatch('toaster-success', $successMessage);
         // $this->dispatch('actionPerformedAndRedirect');
     }
-
-
-
-
-
-
-
 
 
 

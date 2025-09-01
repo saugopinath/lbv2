@@ -13,13 +13,14 @@ use App\Services\SendSmsService;
 use App\Interfaces\UserInterface;
 use App\Interfaces\SendSmsInterface;
 
-use App\Observers\BenRejectObserver;
+
 use App\Services\ElasticsearchService;
 
 use App\Services\AuthenticationService;
 use Illuminate\Support\ServiceProvider;
 use App\Interfaces\ElasticsearchInterface;
 use App\Interfaces\AuthenticationInterface;
+use App\Observers\BenRejectDetailsObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,6 +47,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         User::observe(UserObserver::class);
-        BenRejectDetails::observe(BenRejectObserver::class);
+        BenRejectDetails::observe(BenRejectDetailsObserver::class);
     }
 }
