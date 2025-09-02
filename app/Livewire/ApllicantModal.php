@@ -6,25 +6,23 @@ use Livewire\Component;
 
 class ApllicantModal extends Component
 {
-    // public bool $openModal = false;
-    public $application_id, $openModal;
-    // protected $listeners = ['selfDec' => 'open'];
-    public function mount($application_id, $openModal)
+    public $application_id;
+    public bool $openModal = false;
+    protected $listeners = ['openApplicantModal' => 'open'];
+    public function mount($application_id = null)
     {
         $this->application_id = $application_id;
-        $this->openModal = $openModal;
+        $this->openModal = true;
     }
-
     // public function open()
     // {
     //     $this->openModal = true;
     // }
-
     public function close()
     {
-        $this->openModal = false;
+        // $this->openModal = false;
+        $this->dispatch('modalClosed');
     }
-
     public function render()
     {
         return view('livewire.apllicant-modal');

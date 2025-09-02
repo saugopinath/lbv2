@@ -41,4 +41,7 @@
         @endif
     </div>
     @endif
+    @if($showModal)
+    <livewire:apllicant-modal :application_id="$application_id" key="applicant-modal-{{ $application_id ?? 'default' }}" />
+    @endif
 </div>

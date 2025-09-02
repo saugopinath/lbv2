@@ -1,11 +1,14 @@
 <?php
+
 namespace App\Livewire;
+
 use Livewire\Component;
 use App\Models\DraftBeneficiaryPersonal;
 use App\Models\DraftBeneficiaryContact;
 use App\Models\DraftBeneficiaryBank;
 use App\Models\BeneficiaryEnclosure;
 use App\Models\DraftBeneficiaryDeclaration;
+
 class Entrytab extends Component
 {
     public $currentTab, $application_id, $aadhaarData;
@@ -16,6 +19,8 @@ class Entrytab extends Component
     public $tab4Enabled = false;
     public $tab5Enabled = false;
     public $tabMessages = [];
+    // public bool $openModal = false;
+    public bool $showModal = false;
     protected $listeners = [
         'aadhaarChecked' => 'enableTabs',
         'perDet' => 'enableTab2',
@@ -23,7 +28,9 @@ class Entrytab extends Component
         'bankDet' => 'enableTab4',
         'encList' => 'enableTab5',
         'goPrevious' => 'previousTab',
-        'tabMessage' => 'handleTabMessage'
+        'tabMessage' => 'handleTabMessage',
+        'selfDec' => 'openModalForApplicant',
+        'modalClosed' => 'handleModalClosed'
     ];
     public function mount($application_id = null)
     {
@@ -55,6 +62,11 @@ class Entrytab extends Component
             }
             $this->showTabs = true;
         }
+    }
+    public function updatedCurrentTab($value)
+    {
+        // $this->openModal = false;
+        $this->showModal = false;
     }
     public function enableTabs($data)
     {
@@ -105,6 +117,16 @@ class Entrytab extends Component
         if (!empty($data['message'])) {
             $this->tabMessages['tab5'] = $data['message'];
         }
+    }
+    public function openModalForApplicant()
+    {
+        // $this->openModal = true;
+        $this->showModal = true;
+        $this->dispatch('openApplicantModal');
+    }
+    public function handleModalClosed()
+    {
+        $this->showModal = false;
     }
     public function previousTab()
     {
