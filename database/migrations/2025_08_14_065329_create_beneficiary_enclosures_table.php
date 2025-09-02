@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->unsignedBigInteger('beneficiary_id')->nullable();
-            $table->unsignedInteger('application_id');
+            $table->unsignedBigInteger('application_id');
             $table->text('attched_document');
             $table->string('ip_address');
             $table->string('document_extension');

@@ -36,6 +36,7 @@ class DatabaseSeeder extends Seeder
             Role\DaspurIIBlockOperatorSeeder::class,
             Role\GhatalSdoOperatorSeeder::class,
             Role\GhatalSdoVerifierSeeder::class,
+            ValidationFailedCodemasterSeeder::class
         ]);
     }
 }
