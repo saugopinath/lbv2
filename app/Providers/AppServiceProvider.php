@@ -5,12 +5,13 @@ namespace App\Providers;
 use App\Models\User;
 use App\Services\UserService;
 use App\Observers\UserObserver;
-
-
 use App\Models\BenRejectDetails;
-use App\Services\SendSmsService;
 
+
+use App\Services\SendSmsService;
 use App\Interfaces\UserInterface;
+
+use App\Models\BeneficiaryPersonal;
 use App\Interfaces\SendSmsInterface;
 
 
@@ -21,6 +22,7 @@ use Illuminate\Support\ServiceProvider;
 use App\Interfaces\ElasticsearchInterface;
 use App\Interfaces\AuthenticationInterface;
 use App\Observers\BenRejectDetailsObserver;
+use App\Observers\BeneficiaryPersonalObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -48,5 +50,7 @@ class AppServiceProvider extends ServiceProvider
     {
         User::observe(UserObserver::class);
         BenRejectDetails::observe(BenRejectDetailsObserver::class);
+        BeneficiaryPersonal::observe(BeneficiaryPersonalObserver::class);
+
     }
 }

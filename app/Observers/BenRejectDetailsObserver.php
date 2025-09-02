@@ -34,7 +34,7 @@ class BenRejectDetailsObserver
         $applicationId = $benRejectDetails->application_id;
         $currentUserId = auth()->id();
 
-        // Fetch draft data
+      
         switch ($benRejectDetails->update_code) {
 
             case 1: // Draft Beneficiary

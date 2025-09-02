@@ -72,7 +72,7 @@ class BulkActionModal extends Component
                 ->toArray();
         } else {
             $this->reasons = [];
-            $this->reason = '';
+            $this->reason = null;
             $this->remark = '';
         }
     }
@@ -102,15 +102,19 @@ class BulkActionModal extends Component
 
                 $successMessage = "The selected application(s) have been successfully verified.";
 
-            } elseif
-
-            ($this->bulkActionType === 'A') {
+            } elseif ($this->bulkActionType === 'A') {
                 DraftBeneficiaryPersonal::whereIn('application_id', $this->selectedRows)
-                    ->update(['next_level_role_id' => $approverRoleId]);
+                    ->update(['next_level_role_id' => '24']);
+                foreach ($this->selectedRows as $applicationId) {
 
+                    BeneficiaryPersonal::create([
+                        'application_id' => $applicationId,
+                        'created_by' => $currentUserId,
+                    ]);
 
-                $successMessage = "The selected application(s) have been successfully verified.";
+                    $successMessage = "The selected application(s) have been successfully approved.";
 
+                }
             } elseif ($this->bulkActionType === 'T') {
                 foreach ($this->selectedRows as $applicationId) {
 
