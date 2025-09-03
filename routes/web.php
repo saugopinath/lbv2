@@ -18,13 +18,14 @@ use App\Livewire\RoleOfficeTypeMappings\Create;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Livewire\Users\Create as UsersCreate;
 use App\Livewire\IncompleteType;
+use App\Http\Controllers\IncompleteTypeController;
 
 
 Route::get('/', function () {
     return view('welcome');
 });
 Route::get('refresh-captcha', [App\Http\Controllers\CaptchaController::class, 'refreshCaptcha'])->name('refresh-captcha');
-Route::controller(AuthenticationController::class)->group(function(){
+Route::controller(AuthenticationController::class)->group(function () {
     Route::get('/login', 'login')->name('login');
     Route::post('/loginPost', 'loginCheck')->name('loginPost');
     Route::post('/resendOtp', 'resendOtp')->name('resendOtp');
@@ -35,7 +36,6 @@ Route::controller(AuthenticationController::class)->group(function(){
     Route::get('/reset-password', 'resetPassword')->middleware(['2fa'])->name('reset-password');
     Route::post('/resetPasswordPost', 'resetPasswordPost')->middleware(['2fa'])->name('resetPasswordPost');
     Route::post('/logout', 'logout')->name('logout');
-
 });
 // Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -77,4 +77,6 @@ Route::get('/user-managements', [UsersController::class, 'index'])->middleware([
 Route::get('/users/create', UsersCreate::class)
     ->name('users.create');
 
-Route::get('/incomplete-types', IncompleteType::class)->name('incomplete.types');
+// Route::get('/incomplete-types', IncompleteType::class)->name('incomplete.types');
+Route::get('/incomplete-types', [IncompleteTypeController::class, 'index'])->middleware(['auth', 'verified'])->name('incomplete.types')->middleware('auth');
+

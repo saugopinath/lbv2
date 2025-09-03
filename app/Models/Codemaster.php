@@ -25,4 +25,5 @@ class Codemaster extends Model
         return self::where('code', $code)->value('id');
     }
 
+   
 }

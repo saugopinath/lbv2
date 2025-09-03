@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ApplicantIncompletDeatil extends Model
 {
-     protected $table = 'applicant_incomplet_deatils';
+    protected $table = 'applicant_incomplet_deatils';
 
     protected $fillable = [
         'application_id',
@@ -21,5 +21,15 @@ class ApplicantIncompletDeatil extends Model
     public function incompletType()
     {
         return $this->belongsTo(Codemaster::class, 'incomplet_type', 'code');
+    }
+
+    public function getIncompleteTypesNamesAttribute()
+    {
+        return ApplicantIncompletDeatil::where('application_id', $this->application_id)
+            ->with('incompletType')
+            ->get()
+            ->pluck('incompletType.name')
+            ->filter()
+            ->implode(', ');
     }
 }
