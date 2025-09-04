@@ -17,7 +17,7 @@ use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Livewire\RoleOfficeTypeMappings\Create;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Livewire\Users\Create as UsersCreate;
-use App\Livewire\IncompleteType;
+use App\Livewire\IncompletTypePage;
 use App\Http\Controllers\IncompleteTypeController;
 
 
@@ -79,4 +79,6 @@ Route::get('/users/create', UsersCreate::class)
 
 // Route::get('/incomplete-types', IncompleteType::class)->name('incomplete.types');
 Route::get('/incomplete-types', [IncompleteTypeController::class, 'index'])->middleware(['auth', 'verified'])->name('incomplete.types')->middleware('auth');
+Route::get('/incomplet-type/{id}', IncompletTypePage::class)
+    ->name('incomplet-type.view');
 

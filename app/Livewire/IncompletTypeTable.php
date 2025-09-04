@@ -53,6 +53,10 @@ class IncompletTypeTable extends DataTableComponent
 
             Column::make("Incomplete Types")
                 ->label(fn($row) => $row->incomplete_types_names)->sortable()->searchable(),
+            //     Column::make("Actions")
+            // ->label(function ($row) {
+            //     return view('components.table-actions', ['row' => $row]);
+            // }),
         ];
     }
 
@@ -68,12 +72,6 @@ class IncompletTypeTable extends DataTableComponent
         }
 
         return $query;
-    }
-
-
-    public function updateUser()
-    {
-        dd('ok');
     }
 
     public function render(): \Illuminate\View\View
