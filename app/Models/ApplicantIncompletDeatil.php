@@ -30,6 +30,15 @@ class ApplicantIncompletDeatil extends Model
             ->get()
             ->pluck('incompletType.name')
             ->filter()
-            ->implode(', ');
+            ->values()
+            ->map(function ($name, $index) {
+                return ($index + 1) . '. ' . $name;
+            })
+            ->implode('<br>');
+    }
+
+    public function beneficiaryCommonList()
+    {
+        return $this->hasOne(BeneficiaryCommonList::class, 'sourceable_id', 'application_id');
     }
 }

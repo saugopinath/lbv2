@@ -38,7 +38,7 @@
                 @forelse($rows as $row)
                     <tr>
                         <td class="py-3">{{ $row->application_id ?? 'N/A' }}</td>
-                        <td class="py-3">{{ $row->incomplete_types_names ?? 'N/A' }}</td>
+                        <td class="py-3">{!! $row->incomplete_types_names ?? 'N/A' !!}</td>
                         <td class="py-3">
                             <x-button.primary href="{{ route('incomplet-type.view', ['id' => $row->application_id]) }}">
                                 Update

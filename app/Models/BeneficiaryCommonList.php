@@ -13,4 +13,9 @@ class BeneficiaryCommonList extends Model
     {
         return $this->morphTo();
     }
+
+    public function beneficiaryPersonal()
+    {
+        return $this->hasOne(BeneficiaryPersonal::class, 'application_id', 'sourceable_id');
+    }
 }

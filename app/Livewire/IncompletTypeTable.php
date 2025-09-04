@@ -7,6 +7,7 @@ use App\Models\ApplicantIncompletDeatil;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use App\Models\Codemaster;
 
 
 class IncompletTypeTable extends DataTableComponent
@@ -50,28 +51,37 @@ class IncompletTypeTable extends DataTableComponent
     {
         return [
             Column::make("Application ID", "application_id")->sortable()->searchable(),
-
             Column::make("Incomplete Types")
-                ->label(fn($row) => $row->incomplete_types_names)->sortable()->searchable(),
-            //     Column::make("Actions")
-            // ->label(function ($row) {
-            //     return view('components.table-actions', ['row' => $row]);
-            // }),
+                ->label(fn($row) => $row->incomplete_types_names ?? 'N/A')
+                ->html()->sortable()->searchable(),
         ];
     }
 
     public function builder(): Builder
     {
+           $relationFather = Codemaster::getIdByCode(131);
+        // $query = ApplicantIncompletDeatil::query()
+        //     ->select('application_id')
+        //     ->where('next_level_request_id', 1)
+        //     ->groupBy('application_id');
+
         $query = ApplicantIncompletDeatil::query()
-            ->select('application_id')
-            ->where('next_level_request_id', 1)
-            ->groupBy('application_id');
+        ->select('application_id')
+        ->where('next_level_request_id', 1)
+        ->groupBy('application_id')
+        ->with([
+            'beneficiaryCommonList.beneficiaryPersonal' => function ($q) use ($relationFather) {
+                $q->with([
+                    'father' => fn($q) => $q->where('relation_type_id', $relationFather)
+                ])->whereHas('father', fn($q) => $q->where('relation_type_id', $relationFather));
+            }
+        ]);
 
-        if ($this->filterCode) {
-            $query->where('incomplet_type', $this->filterCode);
-        }
+    if ($this->filterCode) {
+        $query->where('incomplet_type', $this->filterCode);
+    }
 
-        return $query;
+    return $query;
     }
 
     public function render(): \Illuminate\View\View
