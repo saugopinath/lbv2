@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Models\User;
 use App\Models\ApplicantIncompletDeatil;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -50,38 +49,62 @@ class IncompletTypeTable extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make("Application ID", "application_id")->sortable()->searchable(),
+            Column::make("Application ID", "application_id")
+                ->sortable()
+                ->searchable(),
+
             Column::make("Incomplete Types")
                 ->label(fn($row) => $row->incomplete_types_names ?? 'N/A')
-                ->html()->sortable()->searchable(),
+                ->html()
+                ->sortable()
+                ->searchable(),
+
+            Column::make("Name")
+                ->label(fn($row) => $row->beneficiaryCommonList?->beneficiaryPersonal?->first()?->full_name ?? 'N/A'),
+
+            Column::make("Father's Name")
+                ->label(
+                    fn($row) =>
+                    $row->beneficiaryCommonList?->beneficiaryPersonal?->first()?->father?->first()?->full_name ?? 'N/A'
+                ),
+
+            Column::make("Address")
+                ->label(function ($row) {
+                    $common = $row->beneficiaryCommonList;
+
+                    if ($common?->block_id && $common?->panchayat) {
+                        return $common->panchayat->name; 
+                    }
+
+                    if ($common?->sub_division_id && $common?->ward) {
+                        return $common->ward->name; 
+                    }
+
+                    return 'N/A';
+                }),
         ];
     }
 
     public function builder(): Builder
     {
-           $relationFather = Codemaster::getIdByCode(131);
-        // $query = ApplicantIncompletDeatil::query()
-        //     ->select('application_id')
-        //     ->where('next_level_request_id', 1)
-        //     ->groupBy('application_id');
-
         $query = ApplicantIncompletDeatil::query()
-        ->select('application_id')
-        ->where('next_level_request_id', 1)
-        ->groupBy('application_id')
-        ->with([
-            'beneficiaryCommonList.beneficiaryPersonal' => function ($q) use ($relationFather) {
-                $q->with([
-                    'father' => fn($q) => $q->where('relation_type_id', $relationFather)
-                ])->whereHas('father', fn($q) => $q->where('relation_type_id', $relationFather));
-            }
-        ]);
+            ->select('application_id')
+            ->whereNull('next_level_request_id')
+            ->groupBy('application_id')
+            ->orderBy('application_id', 'asc')
+            ->with([
+                'beneficiaryCommonList.beneficiaryPersonal.father',
+                'beneficiaryCommonList.block',
+                'beneficiaryCommonList.panchayat',
+                'beneficiaryCommonList.ward',
+            ]);
 
-    if ($this->filterCode) {
-        $query->where('incomplet_type', $this->filterCode);
-    }
 
-    return $query;
+        if ($this->filterCode) {
+            $query->where('incomplet_type', $this->filterCode);
+        }
+
+        return $query;
     }
 
     public function render(): \Illuminate\View\View

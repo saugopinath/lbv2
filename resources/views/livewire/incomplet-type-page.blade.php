@@ -1,6 +1,29 @@
 <div class="p-6 bg-white rounded shadow">
     <h1 class="text-xl font-bold mb-4">Update Incomplete</h1>
 
+    @if ($applicantInfo)
+        <div class="mb-6 p-4 border rounded-lg bg-gray-100 shadow-sm">
+            <div class="flex flex-wrap gap-6 text-sm">
+                <p><strong>Application ID:</strong> {{ $id }}</p>
+                <p><strong>Name:</strong>
+                    {{ $applicantInfo->beneficiaryPersonal->first()->full_name ?? 'N/A' }}
+                </p>
+                <p><strong>Father Name:</strong>
+                    {{ optional($applicantInfo->beneficiaryPersonal->first()?->father?->first())->full_name ?? 'N/A' }}
+                </p>
+                <p><strong>Address:</strong>
+                    @if ($applicantInfo->panchayat)
+                        {{ $applicantInfo->panchayat->name }}
+                    @elseif ($applicantInfo->ward)
+                        {{ $applicantInfo->ward->name }}
+                    @else
+                        N/A
+                    @endif
+                </p>
+            </div>
+        </div>
+    @endif
+
     <form wire:submit.prevent="submit">
         @foreach ($page as $item)
             <div class="p-4 mb-4 border rounded-lg bg-gray-50 shadow-sm">
@@ -15,8 +38,10 @@
                         placeholder="Enter New Aadhaar Number"
                         x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
 
+                          <livewire:enclosure-list :application_id="$id" :doc_type_id_array_list="[108]" />
+
                     {{-- Upload --}}
-                    <label
+                    {{--  <label
                         class="mt-2 inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded cursor-pointer">
                         Upload Aadhaar
                         <input type="file" wire:model="formData.aadhar_doc.{{ $item->id }}" class="hidden">
@@ -24,9 +49,8 @@
 
                     @if (isset($formData['aadhar_doc'][$item->id]))
                         <x-file-preview :file="$formData['aadhar_doc'][$item->id]" />
-                    @endif
+                    @endif  --}}
                 @endif
-
 
                 {{-- DUPLICATE AADHAR NUMBER --}}
                 @if ($item->incompletType->name === 'DUPLICATE AADHAR NUMBER')
@@ -38,7 +62,8 @@
                         placeholder="Enter Correct Aadhaar"
                         x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
 
-                    @if ($item->document_path)
+                        <livewire:enclosure-list :application_id="$id" :doc_type_id_array_list="[108]" />
+                    {{--  @if ($item->document_path)
                         @php $ext = strtolower(pathinfo($item->document_path, PATHINFO_EXTENSION)); @endphp
                         <div class="mt-2">
                             @if (in_array($ext, ['jpg', 'jpeg', 'png']))
@@ -54,16 +79,15 @@
                     @endif
 
                     <label
-                        class="mt-2 inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded cursor-pointer"
-                        Upload New Aadhaar <input type="file"
-                        wire:model="formData.dup_aadhar_doc.{{ $item->id }}" class="hidden">
+                        class="mt-2 inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded cursor-pointer">
+                        Upload New Aadhaar
+                        <input type="file" wire:model="formData.dup_aadhar_doc.{{ $item->id }}" class="hidden">
                     </label>
 
                     @if (isset($formData['dup_aadhar_doc'][$item->id]))
                         <x-file-preview :file="$formData['dup_aadhar_doc'][$item->id]" />
-                    @endif
+                    @endif  --}}
                 @endif
-
 
                 {{-- DUPLICATE BANK ACCOUNT NUMBER --}}
                 @if ($item->incompletType->name === 'DUPLICATE BANK ACCOUNT NUMBER')
@@ -75,7 +99,8 @@
                         wire:model="formData.new_bank_account.{{ $item->id }}" placeholder="Enter New Bank Account"
                         x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,16)" />
 
-                    @if ($item->document_path)
+                        <livewire:enclosure-list :application_id="$id" :doc_type_id_array_list="[112]" />
+                    {{--  @if ($item->document_path)
                         @php $ext = strtolower(pathinfo($item->document_path, PATHINFO_EXTENSION)); @endphp
                         <div class="mt-2">
                             @if (in_array($ext, ['jpg', 'jpeg', 'png']))
@@ -98,7 +123,7 @@
 
                     @if (isset($formData['dup_bank_doc'][$item->id]))
                         <x-file-preview :file="$formData['dup_bank_doc'][$item->id]" />
-                    @endif
+                    @endif  --}}
                 @endif
 
                 {{-- NO MOBILE NUMBER --}}
@@ -126,11 +151,16 @@
                         placeholder="Enter New Account Number"
                         x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,16)" />
 
-                    <label
+                        <livewire:enclosure-list :application_id="$id" :doc_type_id_array_list="[112]" />
+                    {{--  <label
                         class="mt-2 inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded cursor-pointer">
                         Upload Bank
                         <input type="file" wire:model="formData.bank_doc.{{ $item->id }}" class="hidden">
                     </label>
+
+                    @if (isset($formData['bank_doc'][$item->id]))
+                        <x-file-preview :file="$formData['bank_doc'][$item->id]" />
+                    @endif  --}}
                 @endif
 
                 {{-- DUPLICATE MOBILE NUMBER --}}
@@ -158,9 +188,10 @@
 
                 {{-- PDS MISMATCH --}}
                 @if ($item->incompletType->name === 'PDS MISMATCH')
-                    <p class="text-sm text-gray-600">Old PDS: {{ $item->old_value ?? 'N/A' }}</p>
-                    <x-form.input id="pds_{{ $item->id }}" name="pds[{{ $item->id }}]" label="PDS Number"
-                        required wire:model="formData.pds.{{ $item->id }}" placeholder="Enter Correct PDS"
+                    <p class="text-sm text-gray-600">Old Aadhaar Number: {{ $item->old_value ?? 'N/A' }}</p>
+                    <x-form.input id="pds_{{ $item->id }}" name="pds[{{ $item->id }}]" label="Aadhaar Number"
+                        required wire:model="formData.pds.{{ $item->id }}"
+                        placeholder="Enter Correct Aadhaar Number"
                         x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
                 @endif
             </div>
@@ -170,7 +201,6 @@
             <x-button.primary type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
                 {{ $page->count() > 1 ? 'Submit All Updates' : 'Submit' }}
             </x-button.primary>
-
         </div>
     </form>
 </div>

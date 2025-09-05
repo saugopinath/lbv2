@@ -34,6 +34,8 @@ class SchemeAttacheDocumentSeeder extends Seeder
                 "doc_type_id" => 104,
                 "is_required" => true,
                 "max_file_size" => "500KB",
+
+                
                 "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
             ),
             array(

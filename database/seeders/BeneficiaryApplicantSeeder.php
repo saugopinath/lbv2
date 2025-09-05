@@ -58,7 +58,7 @@ class BeneficiaryApplicantSeeder extends Seeder
             $dsDateFormatted = $dsDate ? $dsDate->format('Y-m-d') : null;
 
             $beneficiaries[] = [
-                'application_id' => $faker->unique()->numberBetween(1000, 9999),
+                'beneficiary_id' => $i,
                 'district_id' => $districtId,
                 'block_id' => $isRural ? $faker->randomElement($blockIds) : null,
                 'sub_division_id' => $faker->optional()->randomElement($subdivisionIds),
@@ -68,7 +68,7 @@ class BeneficiaryApplicantSeeder extends Seeder
                 'full_name' => $faker->name,
                 'dob' => $faker->dateTimeBetween('-80 years', '-18 years')->format('Y-m-d'),
                 'mobile_no' => $faker->phoneNumber,
-                'gender' => $faker->randomElement($genderIds),
+                // 'gender' => $faker->randomElement($genderIds),
                 'caste' => $faker->randomElement($casteIds),
                 'next_level_role_id' => $nextLevelRoleId,
                 'caste_certificate_no' => $faker->optional()->numerify('CC######'),
@@ -139,6 +139,7 @@ class BeneficiaryApplicantSeeder extends Seeder
         foreach ($beneficiaryData as $appId => $beneficiary) {
             $relationships[] = [
                 'beneficiary_id' => $beneficiary->beneficiary_id,
+                'application_id'   => $i,
                 'full_name' => $faker->name . ' (Father)',
                 'relation_type_id' => $fatherRelationTypeId,
                 'created_by' => $userId,
@@ -147,6 +148,7 @@ class BeneficiaryApplicantSeeder extends Seeder
             ];
             $relationships[] = [
                 'beneficiary_id' => $beneficiary->beneficiary_id,
+                'application_id'   =>$i,
                 'full_name' => $faker->name . ' (Mother)',
                 'relation_type_id' => $motherRelationTypeId,
                 'created_by' => $userId,

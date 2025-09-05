@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('application_id');
             $table->unsignedBigInteger('beneficiary_id')->nullable();
             $table->unsignedBigInteger('incomplet_type');
-            $table->smallInteger('next_level_request_id');
+            $table->smallInteger('next_level_request_id')->nullable();
             $table->string('new_value')->nullable();
             $table->string('old_value')->nullable();
             $table->unsignedBigInteger('request_id');

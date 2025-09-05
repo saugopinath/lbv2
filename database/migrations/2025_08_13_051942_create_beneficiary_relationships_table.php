@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('lb_scheme.beneficiary_relationships', function (Blueprint $table) {
             $table->id();
-
-          $table->unsignedBigInteger('beneficiary_id');
-        $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals')->onDelete('cascade');
+            $table->unsignedBigInteger('application_id');
+            $table->unsignedBigInteger('beneficiary_id');
+            $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals')->onDelete('cascade');
 
             $table->Integer('created_by');
-            $table->string('full_name'); 
+            $table->string('full_name');
             $table->smallInteger('relation_type_id');
-            $table->foreign('created_by','user_id_fk')->references('id')->on('users');
-            $table->foreign('relation_type_id','relation_type_id_fk')->references('id')->on('codemasters');
+            $table->foreign('created_by', 'user_id_fk')->references('id')->on('users');
+            $table->foreign('relation_type_id', 'relation_type_id_fk')->references('id')->on('codemasters');
             $table->timestamps();
             $table->index('beneficiary_id');
         });

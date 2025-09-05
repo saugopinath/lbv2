@@ -26,7 +26,7 @@ class BeneficiaryCommonListSeeder extends Seeder
         $wardIds        = Ward::pluck('id')->toArray();
         $panchayatIds   = Panchayat::pluck('id')->toArray();
 
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 1200; $i < 1220; $i++) {
 
             $districtId    = $faker->randomElement($districtIds);
             $blockId       = $faker->randomElement($blockIds);

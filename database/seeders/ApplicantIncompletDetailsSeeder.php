@@ -35,12 +35,12 @@ class ApplicantIncompletDetailsSeeder extends Seeder
         }
 
         // Seed 10 records if all required data is available
-        foreach (range(1, 10) as $i) {
+        foreach (range(1200, 1220) as $i) {
             ApplicantIncompletDeatil::create([
                 'application_id'        => $applicationIds[array_rand($applicationIds)],
                 'beneficiary_id'        => null,
                 'incomplet_type'        => $incompleteTypes[array_rand($incompleteTypes)],
-                'next_level_request_id' => 1,
+                'next_level_request_id' => null,
                 'new_value'             => null,
                 'old_value'             => null,
                 'request_id'            => $requestIds[array_rand($requestIds)],
