@@ -18,9 +18,20 @@ class BeneficiaryCommonList extends Model
     // {
     //     return $this->hasOne(BeneficiaryContact::class, 'application_id', 'sourceable_id');
     // }
+
+    public function enclosures()
+    {
+        return $this->hasMany(BeneficiaryTemEnclosure::class, 'application_id', 'sourceable_id');
+    }
+
     public function beneficiaryPersonal()
     {
         return $this->hasOne(BeneficiaryPersonal::class, 'application_id', 'sourceable_id');
+    }
+
+    public function beneficiaryBank()
+    {
+        return $this->hasOne(BeneficiaryBank::class, 'application_id', 'sourceable_id');
     }
 
     public function block()

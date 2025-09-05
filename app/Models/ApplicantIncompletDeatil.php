@@ -18,7 +18,7 @@ class ApplicantIncompletDeatil extends Model
         'request_id',
     ];
 
-     public function commonList()
+    public function commonList()
     {
         return $this->belongsTo(BeneficiaryCommonList::class, 'application_id', 'sourceable_id');
     }
