@@ -23,6 +23,13 @@ class IncompleteType extends Component
         $this->dispatch('filterIncompleteType', code: $this->incompleteList);
     }
 
+     public function resetIncompleteFilters()
+    {
+        $this->incompleteList = '';
+
+        $this->dispatch('filterIncompleteType', code: null);
+    }
+
     public function render()
     {
         return view('livewire.incomplete-type');

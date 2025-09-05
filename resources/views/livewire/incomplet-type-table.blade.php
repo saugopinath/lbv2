@@ -5,6 +5,18 @@
         </div>
     @endif
 
+    <div>
+        @if ($this->activeFilters)
+            <div x-data="{ show: true }" x-show="show" x-transition
+                class="mb-6 p-4 border rounded-lg bg-gray-100 shadow-sm">
+                <div class="flex flex-wrap gap-4 text-sm">
+                    <p class="text-gray-700">{{ $this->activeFilters }}</p>
+                </div>
+            </div>
+        @endif
+    </div>
+    
+
     <!-- Top Controls: Search + Per Page -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div class="flex justify-end">

@@ -14,12 +14,16 @@ class BeneficiaryCommonList extends Model
         return $this->morphTo();
     }
 
+    //  public function contact()
+    // {
+    //     return $this->hasOne(BeneficiaryContact::class, 'application_id', 'sourceable_id');
+    // }
     public function beneficiaryPersonal()
     {
         return $this->hasOne(BeneficiaryPersonal::class, 'application_id', 'sourceable_id');
     }
 
-     public function block()
+    public function block()
     {
         return $this->belongsTo(Block::class, 'block_id');
     }
@@ -32,5 +36,16 @@ class BeneficiaryCommonList extends Model
     public function ward()
     {
         return $this->belongsTo(Ward::class, 'ward_id');
+    }
+
+    public function municipality()
+    {
+        return $this->belongsTo(Municipality::class, 'municipality_id');
+    }
+
+    // Subdivision relationship
+    public function subdivision()
+    {
+        return $this->belongsTo(Subdivision::class, 'sub_division_id');
     }
 }
