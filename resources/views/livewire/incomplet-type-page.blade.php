@@ -35,100 +35,53 @@
                     {{ $item->incompletType->name ?? 'Unknown Type' }}
                 </h2>
 
-                {{-- NO AADHAR NUMBER --}}
                 @if ($item->incompletType->name === 'NO AADHAR NUMBER')
-                    <x-form.input id="no_aadhar_{{ $item->id }}" name="no_aadhar[{{ $item->id }}]"
-                        label="Aadhaar Number" wire:model="formData.aadhar.{{ $item->id }}"
-                        placeholder="Enter New Aadhaar Number"
-                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
-
+                    <x-incomplete.no-aadhar :item="$item" />
                 @endif
 
                 {{-- DUPLICATE AADHAR NUMBER --}}
                 @if ($item->incompletType->name === 'DUPLICATE AADHAR NUMBER')
-                    <p class="text-sm text-gray-600">Old Aadhaar: {{ $item->old_value ?? 'N/A' }}</p>
-
-                    {{-- New Aadhaar --}}
-                    <x-form.input id="dup_aadhar_{{ $item->id }}" name="dup_aadhar[{{ $item->id }}]"
-                        label="New Aadhaar Number" wire:model="formData.new_aadhar.{{ $item->id }}"
-                        placeholder="Enter Correct Aadhaar"
-                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
-
+                    <x-incomplete.dup-aadhar :item="$item" />
                 @endif
 
                 {{-- DUPLICATE BANK ACCOUNT NUMBER --}}
                 @if ($item->incompletType->name === 'DUPLICATE BANK ACCOUNT NUMBER')
-                    <p class="text-sm text-gray-600">Old Account: {{ $item->old_value ?? 'N/A' }}</p>
-                    <p class="text-sm text-gray-600">
-                        IFSC: {{ optional($item->beneficiaryCommonList->beneficiaryBank)->ifsc ?? 'N/A' }}
-                    </p>
-                    {{-- New Account --}}
-                    <x-form.input id="dup_bank_account_{{ $item->id }}"
-                        name="dup_bank_account[{{ $item->id }}]" label="New Bank Account Number"
-                        wire:model="formData.new_bank_account.{{ $item->id }}" placeholder="Enter New Bank Account"
-                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,16)" />
-
+                    <x-incomplete.dup-bank :item="$item" />
                 @endif
 
                 {{-- NO MOBILE NUMBER --}}
                 @if ($item->incompletType->name === 'NO MOBILE NUMBER')
-                    <x-form.input id="no_mobile_{{ $item->id }}" name="no_mobile[{{ $item->id }}]"
-                        label="Mobile Number" wire:model="formData.mobile.{{ $item->id }}"
-                        placeholder="Enter Mobile Number"
-                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />
-                @endif
-
-                {{-- NAME VALIDATION FAILED IN BANK --}}
-                @if ($item->incompletType->name === 'NAME VALIDATION  FAILED IN BANK')
-                    <p class="text-sm text-gray-600">Old Name: {{ $item->old_value ?? 'N/A' }}</p>
-                    <x-form.input id="bank_name_{{ $item->id }}" name="bank_name[{{ $item->id }}]"
-                        label="Correct Name" wire:model="formData.bank_name.{{ $item->id }}"
-                        placeholder="Enter Correct Name"
-                        x-on:input="$el.value = $el.value.replace(/[^A-Za-z\s]/g, '')" />
-                @endif
-
-                {{-- ACCOUNT NUMBER VALIDATION FAILED IN BANK --}}
-                @if ($item->incompletType->name === 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK')
-                    <p class="text-sm text-gray-600">Old Account: {{ $item->old_value ?? 'N/A' }}</p>
-                    <p class="text-sm text-gray-600">
-                        IFSC: {{ optional($item->beneficiaryCommonList->beneficiaryBank)->ifsc ?? 'N/A' }}
-                    </p>
-                    <x-form.input id="bank_account_{{ $item->id }}" name="bank_account[{{ $item->id }}]"
-                        label="Bank Account Number" wire:model="formData.bank_account.{{ $item->id }}"
-                        placeholder="Enter New Account Number"
-                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,16)" />
-
+                    <x-incomplete.no-mobile :item="$item" />
                 @endif
 
                 {{-- DUPLICATE MOBILE NUMBER --}}
                 @if ($item->incompletType->name === 'DUPLICATE MOBILE NUMBER')
-                    <p class="text-sm text-gray-600">Old Mobile: {{ $item->old_value ?? 'N/A' }}</p>
-                    <x-form.input id="dup_mobile_{{ $item->id }}" name="dup_mobile[{{ $item->id }}]"
-                        label="New Mobile Number" wire:model="formData.new_mobile.{{ $item->id }}"
-                        placeholder="Enter New Mobile"
-                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />
+                    <x-incomplete.dup-mobile :item="$item" />
                 @endif
 
-                {{-- MINOR MISMATCH (40% - 89%) --}}
+                {{-- BANK NAME MISMATCH --}}
+                @if ($item->incompletType->name === 'NAME VALIDATION  FAILED IN BANK')
+                    <x-incomplete.bank-name-fail :item="$item" />
+                @endif
+
+                {{-- BANK ACCOUNT FAIL --}}
+                @if ($item->incompletType->name === 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK')
+                    <x-incomplete.bank-account-fail :item="$item" />
+                @endif
+
+                {{-- MISMATCH LOW --}}
                 @if ($item->incompletType->name === 'MINOR MISMATCH(40% - 89%)')
-                    <x-form.textarea id="mismatch_low_{{ $item->id }}" name="mismatch_low[{{ $item->id }}]"
-                        label="Mismatch Details (40%-89%)" placeholder="Enter Corrected Details"
-                        wire:model="formData.mismatch_low.{{ $item->id }}" />
+                    <x-incomplete.mismatch-low :item="$item" />
                 @endif
 
-                {{-- MINOR MISMATCH (90% - 100%) --}}
+                {{-- MISMATCH HIGH --}}
                 @if ($item->incompletType->name === 'MINOR MISMATCH(90% - 100%)')
-                    <x-form.textarea id="mismatch_high_{{ $item->id }}" name="mismatch_high[{{ $item->id }}]"
-                        label="Mismatch Details (90%-100%)" placeholder="Enter Corrected Details"
-                        wire:model="formData.mismatch_high.{{ $item->id }}" />
+                    <x-incomplete.mismatch-high :item="$item" />
                 @endif
 
                 {{-- PDS MISMATCH --}}
                 @if ($item->incompletType->name === 'PDS MISMATCH')
-                    <p class="text-sm text-gray-600">Old Aadhaar Number: {{ $item->old_value ?? 'N/A' }}</p>
-                    <x-form.input id="pds_{{ $item->id }}" name="pds[{{ $item->id }}]" label="Aadhaar Number"
-                        wire:model="formData.pds.{{ $item->id }}" placeholder="Enter Correct Aadhaar Number"
-                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
+                    <x-incomplete.pds-mismatch :item="$item" />
                 @endif
             </div>
         @endforeach

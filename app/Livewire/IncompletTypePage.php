@@ -12,6 +12,25 @@ class IncompletTypePage extends Component
     public $applicantInfo;
     public $formData = [];
 
+    protected $rules = [
+        'formData.aadhar.*'        => 'nullable|digits:12',
+        'formData.new_aadhar.*'    => 'nullable|digits:12',
+        'formData.new_bank_account.*' => 'nullable|digits_between:9,18',
+        'formData.mobile.*'        => 'nullable|digits:10',
+        'formData.new_mobile.*'    => 'nullable|digits:10',
+        'formData.bank_name.*'     => 'nullable|string|max:255',
+        'formData.bank_account.*'  => 'nullable|digits_between:9,18',
+        'formData.mismatch_low.*'  => 'nullable|string|max:255',
+        'formData.mismatch_high.*' => 'nullable|string|max:255',
+        'formData.pds.*'           => 'nullable|string|max:255',
+    ];
+
+    protected $messages = [
+        'formData.aadhar.*.digits' => 'Aadhaar number must be 12 digits.',
+        'formData.mobile.*.digits' => 'Mobile number must be 10 digits.',
+        'formData.new_bank_account.*.digits_between' => 'Bank account must be 9–18 digits.',
+    ];
+
     public function mount($id)
     {
         $this->id = $id;
@@ -20,7 +39,8 @@ class IncompletTypePage extends Component
             ->with([
                 'incompletType',
                 'beneficiaryCommonList.enclosures',
-                'beneficiaryCommonList.beneficiaryBank',
+                'beneficiaryCommonList.aadhaar',
+                'beneficiaryCommonList.bank',
                 'beneficiaryCommonList.beneficiaryPersonal.father',
                 'beneficiaryCommonList.panchayat',
                 'beneficiaryCommonList.ward',
@@ -31,26 +51,25 @@ class IncompletTypePage extends Component
 
     public function submit()
     {
+        $this->validate();
+
         foreach ($this->page as $item) {
             $type = $item->incompletType->name ?? null;
-
-            if (!$type) {
-                continue;
-            }
+            if (!$type) continue;
 
             $newValue = null;
 
             $map = [
-                'NO AADHAR NUMBER' => 'aadhar',
-                'DUPLICATE AADHAR NUMBER' => 'new_aadhar',
-                'DUPLICATE BANK ACCOUNT NUMBER' => 'new_bank_account',
-                'NO MOBILE NUMBER' => 'mobile',
-                'NAME VALIDATION  FAILED IN BANK' => 'bank_name',
+                'NO AADHAR NUMBER'                   => 'aadhar',
+                'DUPLICATE AADHAR NUMBER'            => 'new_aadhar',
+                'DUPLICATE BANK ACCOUNT NUMBER'      => 'new_bank_account',
+                'NO MOBILE NUMBER'                   => 'mobile',
+                'NAME VALIDATION  FAILED IN BANK'    => 'bank_name',
                 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK' => 'bank_account',
-                'DUPLICATE MOBILE NUMBER' => 'new_mobile',
-                'MINOR MISMATCH(40% - 89%)' => 'mismatch_low',
-                'MINOR MISMATCH(90% - 100%)' => 'mismatch_high',
-                'PDS MISMATCH' => 'pds',
+                'DUPLICATE MOBILE NUMBER'            => 'new_mobile',
+                'MINOR MISMATCH(40% - 89%)'          => 'mismatch_low',
+                'MINOR MISMATCH(90% - 100%)'         => 'mismatch_high',
+                'PDS MISMATCH'                       => 'pds',
             ];
 
             if (isset($map[$type]) && isset($this->formData[$map[$type]][$item->id])) {
@@ -58,8 +77,35 @@ class IncompletTypePage extends Component
             }
 
             if ($newValue) {
-                $item->new_value = $newValue;
-                $item->next_level_request_id = 1; 
+                if (in_array($type, ['NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER', 'PDS MISMATCH'])) {
+                    $exists = $item->beneficiaryCommonList
+                        ->aadhaar()
+                        ->where('encoded_aadhar', md5($newValue))
+                        ->exists();
+
+                    if ($exists) {
+                        $this->addError("formData.aadhar.{$item->id}", "This Aadhaar already exists in encoded form!");
+                        continue;
+                    }
+
+                    $item->new_value = md5($newValue);
+                } elseif (in_array($type, ['DUPLICATE BANK ACCOUNT NUMBER', 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK'])) {
+                    $exists = $item->beneficiaryCommonList
+                        ->bank()
+                        ->where('account_number', $newValue)
+                        ->exists();
+
+                    if ($exists) {
+                        $this->addError("formData.bank_account.{$item->id}", "This Bank Account already exists!");
+                        continue;
+                    }
+
+                    $item->new_value = $newValue;
+                } else {
+                    $item->new_value = $newValue;
+                }
+
+                $item->next_level_request_id = 1;
                 $item->save();
             }
         }
