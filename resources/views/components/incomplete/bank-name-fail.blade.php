@@ -8,6 +8,6 @@
     placeholder="Enter Correct Name"
     x-on:input="$el.value = $el.value.replace(/[^A-Za-z\s]/g, '')" />
 
-     @error("formData.aadhar.$item->id")
+     @error("formData.bank_name.$item->id")
         <span class="text-red-600 text-sm">{{ $message }}</span>
     @enderror

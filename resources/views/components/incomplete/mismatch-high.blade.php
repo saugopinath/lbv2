@@ -5,6 +5,6 @@
     placeholder="Enter Corrected Details"
     wire:model="formData.mismatch_high.{{ $item->id }}" />
 
-     @error("formData.aadhar.$item->id")
+     @error("formData.mismatch_high.$item->id")
         <span class="text-red-600 text-sm">{{ $message }}</span>
     @enderror

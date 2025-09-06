@@ -3,7 +3,10 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use App\Models\Codemaster;
+use App\Models\AcceptRejectInfo;
 use App\Models\ApplicantIncompletDeatil;
+use Illuminate\Support\Facades\Crypt;
 
 class IncompletTypePage extends Component
 {
@@ -11,6 +14,7 @@ class IncompletTypePage extends Component
     public $page;
     public $applicantInfo;
     public $formData = [];
+    public $user_id;
 
     protected $rules = [
         'formData.aadhar.*'        => 'nullable|digits:12',
@@ -33,6 +37,10 @@ class IncompletTypePage extends Component
 
     public function mount($id)
     {
+        $select_lgd = session('lgd_session');
+
+        $this->user_id = Crypt::decryptString($select_lgd['role_id']);
+
         $this->id = $id;
 
         $this->page = ApplicantIncompletDeatil::where('application_id', $id)
@@ -52,6 +60,19 @@ class IncompletTypePage extends Component
     public function submit()
     {
         $this->validate();
+
+        $request = AcceptRejectInfo::create([
+            'application_id'         => $this->id,
+            'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
+            'ip_address'             => request()->ip(),
+            'user_id'                => $this->user_id,
+            'browser'                => request()->header('User-Agent'),
+            'model_name'             => 'ApplicantIncompleteDetail',
+            'op_type'                => Codemaster::where('code', 245)->value('id'),
+            'revert_reason_cause_id' => null,
+            'revert_reason_remarks'  => null,
+            'parent_id'              => null,
+        ]);
 
         foreach ($this->page as $item) {
             $type = $item->incompletType->name ?? null;
@@ -92,7 +113,7 @@ class IncompletTypePage extends Component
                 } elseif (in_array($type, ['DUPLICATE BANK ACCOUNT NUMBER', 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK'])) {
                     $exists = $item->beneficiaryCommonList
                         ->bank()
-                        ->where('account_number', $newValue)
+                        ->where('bank_account_number', $newValue)
                         ->exists();
 
                     if ($exists) {
@@ -105,8 +126,11 @@ class IncompletTypePage extends Component
                     $item->new_value = $newValue;
                 }
 
-                $item->next_level_request_id = 1;
-                $item->save();
+                $item->update([
+                    'new_value'             => $item->new_value,
+                    'next_level_request_id' => 1,
+                    'request_id'            => $request->id,
+                ]);
             }
         }
 

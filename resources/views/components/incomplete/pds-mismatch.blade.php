@@ -6,8 +6,8 @@
     label="Aadhaar Number" required
     wire:model="formData.pds.{{ $item->id }}" 
     placeholder="Enter Correct Aadhaar Number"
-    x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
+    x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
 
-     @error("formData.aadhar.$item->id")
+     @error("formData.pds.$item->id")
         <span class="text-red-600 text-sm">{{ $message }}</span>
     @enderror

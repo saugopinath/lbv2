@@ -15,7 +15,7 @@ class ApplicantIncompletDeatil extends Model
         'next_level_request_id',
         'new_value',
         'old_value',
-        'request_id',
+        'request_id'
     ];
 
     public function commonList()

@@ -15,8 +15,7 @@
 
         <div>
             <livewire:incomplet-type-table />
-            {{--  <livewire:edit-incomplete-modal />  --}}
-
         </div>
     </div>
 </x-layouts.app>
+

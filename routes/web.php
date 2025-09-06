@@ -78,7 +78,13 @@ Route::get('/users/create', UsersCreate::class)
     ->name('users.create');
 
 // Route::get('/incomplete-types', IncompleteType::class)->name('incomplete.types');
-Route::get('/incomplete-types', [IncompleteTypeController::class, 'index'])->middleware(['auth', 'verified'])->name('incomplete.types')->middleware('auth');
+// Route::get('/incomplete-types', [IncompleteTypeController::class, 'index'])->middleware(['auth', 'verified'])->name('incomplete.types')->middleware('auth');
+
+Route::get('/incomplete-types/{stage?}', [IncompleteTypeController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('incomplete.types');
+
+
 Route::get('/incomplet-type/{id}', IncompletTypePage::class)
     ->name('incomplet-type.view');
 

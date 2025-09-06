@@ -20,9 +20,15 @@ return new class extends Migration
             $table->string('browser')->nullable();
             $table->string('model_name')->nullable();
             $table->smallInteger('op_type');
+            $table->unsignedBigInteger('revert_reason_cause_id')->nullable();
+            $table->string('revert_reason_remarks')->nullable();
+            $table->unsignedBigInteger('parent_id')->nullable();
             $table->foreign('application_id', 'application_id_fk')->references('sourceable_id')->on('lb_scheme.beneficiary_common_lists');
             $table->foreign('op_type', 'op_type_fk')->references('id')->on('codemasters')->onDelete('cascade');
             $table->foreign('user_id', 'user_id_fk')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('revert_reason_cause_id', 'reject_revert_reason_id_fk')
+                ->references('id')
+                ->on('public.codemasters');
             $table->timestamps();
             $table->index('application_id');
             $table->index('beneficiary_id');

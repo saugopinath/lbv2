@@ -54,16 +54,16 @@
                 @forelse($rows as $row)
                     <tr>
                         <!-- Application ID -->
-                        <td class="py-3 px-2">{{ $row->application_id ?? 'N/A' }}</td>
+                        <td class="py-3 px-2">{{ $row->application_id ?? 'N/A' }}</td>  
 
                         <!-- Applicant Name -->
                         <td class="py-3 px-2">
-                            {{ $row->beneficiaryCommonList?->beneficiaryPersonal?->first()?->full_name ?? 'N/A' }}
+                            {{ $row['beneficiaryCommonList']['beneficiaryPersonal']->full_name ?? 'N/A' }}
                         </td>
 
                         <!-- Father's Name -->
                         <td class="py-3 px-2">
-                            {{ $row->beneficiaryCommonList?->beneficiaryPersonal?->first()?->father?->first()?->full_name ?? 'N/A' }}
+                            {{ $row['beneficiaryCommonList']['beneficiaryPersonal']->father?->first()?->full_name ?? 'N/A' }}
                         </td>
 
                         <!-- Incomplete Type -->

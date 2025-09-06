@@ -14,7 +14,7 @@ class AcceptRejectInfoSeeder extends Seeder
     {
         // Fetch required data
         $applicationIds = BeneficiaryCommonList::pluck('sourceable_id')->toArray();
-        $opTypes = Codemaster::whereIn('code', [243, 244, 245, 246])->pluck('id')->toArray();
+        $opTypes = Codemaster::whereIn('code', [243, 244, 245, 246,247])->pluck('id')->toArray();
         $users = User::pluck('id')->toArray();
 
         // Check if required data is available

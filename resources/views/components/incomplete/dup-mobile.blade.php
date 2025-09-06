@@ -8,6 +8,6 @@
     placeholder="Enter New Mobile"
     x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />
 
-     @error("formData.aadhar.$item->id")
+     @error("formData.new_mobile.$item->id")
         <span class="text-red-600 text-sm">{{ $message }}</span>
     @enderror

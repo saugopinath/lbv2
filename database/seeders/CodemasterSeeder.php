@@ -840,6 +840,12 @@ class CodemasterSeeder extends Seeder
                 "parent_short_code" => "op_type",
                  "code" => "246",
             ),
+             array(
+                "name" => "Application Reverted",
+                "short_name" => "application_reverted",
+                "parent_short_code" => "op_type",
+                 "code" => "247",
+            ),
         );
         foreach ($codemasterChilds as $codemasterChild_item) {
             Codemaster::create([

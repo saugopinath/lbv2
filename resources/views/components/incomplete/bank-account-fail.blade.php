@@ -11,6 +11,6 @@
     placeholder="Enter New Account Number"
     x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,16)" />
 
-     @error("formData.aadhar.$item->id")
+     @error("formData.bank_account.$item->id")
         <span class="text-red-600 text-sm">{{ $message }}</span>
     @enderror

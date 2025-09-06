@@ -16,6 +16,9 @@ class AcceptRejectInfo extends Model
         'browser',
         'model_name',
         'op_type',
+        'revert_reason_cause_id',
+        'revert_reason_remarks',
+        'parent_id'
     ];
 
     public function application()

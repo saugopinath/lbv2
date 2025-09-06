@@ -40,8 +40,6 @@ class DatabaseSeeder extends Seeder
             BeneficiaryCommonListSeeder::class,
              ApplicantIncompletDetailsSeeder::class,
              IncompletTypeModeSeeder::class,
-            AcceptRejectInfoSeeder::class,
-            AcceptRejectInfoSeeder::class,
             ApplicantIncompletDetailsSeeder::class,
             DraftApplicantSeeder::class
         ]);

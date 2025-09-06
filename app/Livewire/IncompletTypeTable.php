@@ -92,12 +92,16 @@ class IncompletTypeTable extends DataTableComponent
                 ->searchable(),
 
             Column::make("Name")
-                ->label(fn($row) => $row->beneficiaryCommonList?->beneficiaryPersonal?->first()?->full_name ?? 'N/A'),
+                ->label(
+                    fn($row) =>
+                    $row->beneficiaryCommonList?->beneficiaryPersonal?->full_name ?? 'N/A'
+                ),
 
             Column::make("Father's Name")
                 ->label(
                     fn($row) =>
-                    $row->beneficiaryCommonList?->beneficiaryPersonal?->first()?->father?->first()?->full_name ?? 'N/A'
+                    $row->beneficiaryCommonList?->beneficiaryPersonal?->father?->first()?->full_name
+                        ?? 'N/A'
                 ),
 
             Column::make("Address")
@@ -123,15 +127,7 @@ class IncompletTypeTable extends DataTableComponent
             ->select('application_id')
             ->whereNull('next_level_request_id')
             ->groupBy('application_id')
-            ->orderBy('application_id', 'asc')
-            ->with([
-                'beneficiaryCommonList.beneficiaryPersonal.father',
-                'beneficiaryCommonList.block',
-                'beneficiaryCommonList.panchayat',
-                'beneficiaryCommonList.ward',
-                'beneficiaryCommonList.subdivision',
-                'beneficiaryCommonList.municipality',
-            ]);
+            ->orderBy('application_id', 'asc');
 
 
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
