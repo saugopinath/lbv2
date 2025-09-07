@@ -6,8 +6,8 @@ use Illuminate\Http\Request;
 
 class IncompleteTypeController extends Controller
 {
-     public function index()
+    public function index($stage = 'verifier')
     {
-        return view('incomplete_types.index');
+        return view('incomplete_types.index', ['stage' => $stage]);
     }
 }

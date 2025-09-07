@@ -15,14 +15,17 @@ class IncompletTypeTable extends DataTableComponent
     public ?int $perPage = 5;
     public string $search = '';
     public ?string $filterCode = null;
+    public string $stage = '';
 
     public $district_id, $rural_urban, $blockurban, $gp_ward, $selectedSubdivision;
     protected $listeners = ['filterIncompleteType' => 'applyFilter', 'filtersApplied'];
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
     public array $filter_condition = [];
-    public function mount(): void
+    public function mount(string $stage = ''): void
     {
+        $this->stage = $stage;
+
         $select_lgd = session('lgd_session');
 
         if (!empty($select_lgd['district_id'])) {
@@ -125,10 +128,16 @@ class IncompletTypeTable extends DataTableComponent
     {
         $query = ApplicantIncompletDeatil::query()
             ->select('application_id')
-            ->whereNull('next_level_request_id')
             ->groupBy('application_id')
             ->orderBy('application_id', 'asc');
 
+        if ($this->stage === 'verifier') {
+            $query->whereNull('next_level_request_id');
+        } elseif ($this->stage === 'approver') {
+            $query->where('next_level_request_id', 1);
+        } elseif ($this->stage === 'revert') {
+            $query->where('next_level_request_id', -50);
+        }
 
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
             $query = EncryptionArray::applyLocationFilter(
@@ -185,6 +194,7 @@ class IncompletTypeTable extends DataTableComponent
     {
         return view('livewire.incomplet-type-table', [
             'rows' => $this->getRows(),
+            'stage' => $this->stage,
         ]);
     }
 }

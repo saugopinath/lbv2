@@ -12,6 +12,7 @@ class IncompletTypePage extends Component
 {
     public $id;
     public $page;
+    public $stage;
     public $applicantInfo;
     public $formData = [];
     public $user_id;
@@ -37,6 +38,8 @@ class IncompletTypePage extends Component
 
     public function mount($id)
     {
+        $this->stage = request()->query('stage');
+
         $select_lgd = session('lgd_session');
 
         $this->user_id = Crypt::decryptString($select_lgd['role_id']);
@@ -109,7 +112,7 @@ class IncompletTypePage extends Component
                         continue;
                     }
 
-                    $item->new_value = md5($newValue);
+                    $item->new_value = Crypt::encryptString($newValue);
                 } elseif (in_array($type, ['DUPLICATE BANK ACCOUNT NUMBER', 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK'])) {
                     $exists = $item->beneficiaryCommonList
                         ->bank()

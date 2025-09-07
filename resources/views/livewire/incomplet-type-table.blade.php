@@ -15,7 +15,7 @@
             </div>
         @endif
     </div>
-    
+
 
     <!-- Top Controls: Search + Per Page -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -54,7 +54,7 @@
                 @forelse($rows as $row)
                     <tr>
                         <!-- Application ID -->
-                        <td class="py-3 px-2">{{ $row->application_id ?? 'N/A' }}</td>  
+                        <td class="py-3 px-2">{{ $row->application_id ?? 'N/A' }}</td>
 
                         <!-- Applicant Name -->
                         <td class="py-3 px-2">
@@ -80,12 +80,27 @@
                                 N/A
                             @endif
                         </td>
-
                         <!-- Action -->
                         <td class="py-3 px-2">
-                            <x-button.primary href="{{ route('incomplet-type.view', ['id' => $row->application_id]) }}">
-                                Update
-                            </x-button.primary>
+                            @if ($stage === 'approver')
+                                {{-- Approve Button --}}
+                                <x-button.primary
+                                    href="{{ route('incomplet-type.view', ['id' => $row->application_id,'stage' => $stage]) }}">
+                                    Approve
+                                </x-button.primary>
+                            @elseif ($stage === 'revert')
+                                {{-- Revert Button --}}
+                                <x-button.danger
+                                    href="{{ route('incomplet-type.view', ['id' => $row->application_id,'stage' => $stage]) }}">
+                                    Update Revert
+                                </x-button.danger>
+                            @else
+                                {{-- Verifier Update Button --}}
+                                <x-button.primary
+                                    href="{{ route('incomplet-type.view', ['id' => $row->application_id,'stage' => $stage]) }}">
+                                    Update
+                                </x-button.primary>
+                            @endif
                         </td>
                     </tr>
                 @empty

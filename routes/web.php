@@ -84,7 +84,5 @@ Route::get('/incomplete-types/{stage?}', [IncompleteTypeController::class, 'inde
     ->middleware(['auth', 'verified'])
     ->name('incomplete.types');
 
-
 Route::get('/incomplet-type/{id}', IncompletTypePage::class)
     ->name('incomplet-type.view');
-
