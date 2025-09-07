@@ -211,12 +211,10 @@ class IncompletTypePage extends Component
 
     public function approve()
     {
-        $this->validate();
 
         $previousId = AcceptRejectInfo::where('application_id', $this->id)
             ->orderByDesc('id')
             ->value('id');
-
 
         $request = AcceptRejectInfo::create([
             'application_id'         => $this->id,
@@ -296,13 +294,9 @@ class IncompletTypePage extends Component
     }
     public function revert()
     {
-        // dd('ok');
-        $this->validate();
-
         $previousId = AcceptRejectInfo::where('application_id', $this->id)
             ->orderByDesc('id')
             ->value('id');
-
 
         $request = AcceptRejectInfo::create([
             'application_id'         => $this->id,
@@ -330,13 +324,9 @@ class IncompletTypePage extends Component
 
     public function revertVerify()
     {
-        // dd('ok');
-        $this->validate();
-
         $previousId = AcceptRejectInfo::where('application_id', $this->id)
             ->orderByDesc('id')
             ->value('id');
-
 
         $request = AcceptRejectInfo::create([
             'application_id'         => $this->id,
