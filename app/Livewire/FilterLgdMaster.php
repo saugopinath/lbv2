@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Crypt;
 class FilterLgdMaster extends Component
 {
     public $districts = [], $blocks = [], $urbanbodys = [], $gps = [], $wards = [], $subdivisions = [];
-    public $selectedDistrict, $selectedRuralurban, $selectedBlockurban, $selectedGpWard, $selectedSubdivision;
+    public $selectedDistrict, $selectedRuralurban, $selectedBlockurban, $selectedGpWard, $selectedSubdivision, $login_type_pass;
     public array $filter_condition = [];
     public $button_show;
     public $visible = [
@@ -23,55 +23,64 @@ class FilterLgdMaster extends Component
         'gp_ward_dropdown' => 0,
     ];
 
-    public function mount($button_show=null)
+    public function mount($button_show = null, $login_type_pass = null)
     {
-        $select_lgd = session('lgd_session');
-        $this->button_show = $button_show;
-
-        $login_type =  Crypt::decryptString($select_lgd['office_type_id']);
-
-        if (!empty($select_lgd['district_id'])) {
-            $this->filter_condition['district_id'] = Crypt::decryptString($select_lgd['district_id']);
-        }
-
-        if (!empty($select_lgd['block_id'])) {
-            $this->filter_condition['block_id'] = Crypt::decryptString($select_lgd['block_id']);
-        }
-
-        if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['subdivision_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
-        }
-
-        if ($login_type === '151') {
+        if ($login_type_pass) {
             $this->visible['district_dropdown'] = 1;
             $this->visible['rural_urban_dropdown'] = 1;
-            $this->visible['subdivision_dropdown'] = 0; // Toggled dynamically for urban
+            $this->visible['subdivision_dropdown'] = 0;
             $this->visible['block_dropdown'] = 1;
             $this->visible['gp_ward_dropdown'] = 1;
             $this->districts = District::all();
-        }
-        if ($login_type === '152') {
-            $this->visible['rural_urban_dropdown'] = 1;
-            $this->visible['subdivision_dropdown'] = 0; // Toggled dynamically for urban
-            $this->visible['block_dropdown'] = 1;
-            $this->visible['gp_ward_dropdown'] = 1;
-            $this->selectedDistrict = $this->filter_condition['district_id'];
-        }
-        if ($login_type === '153') {
-            $this->visible['gp_ward_dropdown'] = 1;
-            $this->selectedRuralurban = 2;
-            $this->selectedBlockurban = $this->filter_condition['block_id'];
-            $this->loadGpOrWard();
-        }
-        if ($login_type === '154') {
-            // $this->visible['subdivision_dropdown'] = 1;
-            $this->visible['block_dropdown'] = 1;
-            $this->visible['gp_ward_dropdown'] = 1;
-            $this->selectedDistrict = $this->filter_condition['district_id'];
-            $this->selectedRuralurban = 1;
-            $this->selectedSubdivision = $this->filter_condition['subdivision_id'];
-            $this->loadDistrictSubdivisions();
-            $this->loadMunicipalities();
+        } else {
+            $select_lgd = session('lgd_session');
+            $this->button_show = $button_show;
+
+            $login_type =  Crypt::decryptString($select_lgd['office_type_id']);
+
+            if (!empty($select_lgd['district_id'])) {
+                $this->filter_condition['district_id'] = Crypt::decryptString($select_lgd['district_id']);
+            }
+
+            if (!empty($select_lgd['block_id'])) {
+                $this->filter_condition['block_id'] = Crypt::decryptString($select_lgd['block_id']);
+            }
+
+            if (!empty($select_lgd['subdivision_id'])) {
+                $this->filter_condition['subdivision_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+            }
+
+            if ($login_type === '151') {
+                $this->visible['district_dropdown'] = 1;
+                $this->visible['rural_urban_dropdown'] = 1;
+                $this->visible['subdivision_dropdown'] = 0; // Toggled dynamically for urban
+                $this->visible['block_dropdown'] = 1;
+                $this->visible['gp_ward_dropdown'] = 1;
+                $this->districts = District::all();
+            }
+            if ($login_type === '152') {
+                $this->visible['rural_urban_dropdown'] = 1;
+                $this->visible['subdivision_dropdown'] = 0; // Toggled dynamically for urban
+                $this->visible['block_dropdown'] = 1;
+                $this->visible['gp_ward_dropdown'] = 1;
+                $this->selectedDistrict = $this->filter_condition['district_id'];
+            }
+            if ($login_type === '153') {
+                $this->visible['gp_ward_dropdown'] = 1;
+                $this->selectedRuralurban = 2;
+                $this->selectedBlockurban = $this->filter_condition['block_id'];
+                $this->loadGpOrWard();
+            }
+            if ($login_type === '154') {
+                // $this->visible['subdivision_dropdown'] = 1;
+                $this->visible['block_dropdown'] = 1;
+                $this->visible['gp_ward_dropdown'] = 1;
+                $this->selectedDistrict = $this->filter_condition['district_id'];
+                $this->selectedRuralurban = 1;
+                $this->selectedSubdivision = $this->filter_condition['subdivision_id'];
+                $this->loadDistrictSubdivisions();
+                $this->loadMunicipalities();
+            }
         }
     }
     public function loadDistrictSubdivisions()
@@ -221,7 +230,16 @@ class FilterLgdMaster extends Component
             'gp_ward' => $this->selectedGpWard,
         ]);
     }
-
+    public function updatedSelectedGpWard()
+    {
+        $this->dispatch('lgdSelectionChanged', [
+            'selectedDistrict' => $this->selectedDistrict,
+            'selectedRuralurban' => $this->selectedRuralurban,
+            'selectedBlockurban' => $this->selectedBlockurban,
+            'selectedGpWard' => $this->selectedGpWard,
+            'selectedSubdivision' => $this->selectedSubdivision,
+        ]);
+    }
     public function render()
     {
         return view('livewire.filter-lgd-master');

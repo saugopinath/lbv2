@@ -10,18 +10,12 @@ use Illuminate\Support\Facades\Crypt;
 class WorkFLowController extends Controller
 {
 
-    public function __construct()
-    {
-
-
-    }
+    public function __construct() {}
 
 
     public function index()
     {
-
-        return view('WorkFLow.SubmittedList');
-
-
+        $button_show = 1;
+        return view('WorkFLow.SubmittedList',compact('button_show'));
     }
 }
