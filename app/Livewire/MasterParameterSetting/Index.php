@@ -13,7 +13,7 @@ class Index extends Component
     public $Schemes = [];
     public $Menus = [];
     public $SubMenus = [];
-    public $Validation_parameters = [];
+    public $Validation_parameters = null;
     public $selectedsetParameter = [];
     public $Parameters = [];
     public $selectedParameter = null;
