@@ -3,14 +3,10 @@
     IFSC: {{ optional($item->beneficiaryCommonList->beneficiaryBank)->ifsc ?? 'N/A' }}
 </p>
 
-<x-form.input 
-    id="dup_bank_account_{{ $item->id }}"
-    name="dup_bank_account[{{ $item->id }}]" 
-    label="New Bank Account Number" required
-    wire:model="formData.new_bank_account.{{ $item->id }}" 
-    placeholder="Enter New Bank Account"
-    x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,16)" />
+<x-form.input id="dup_bank_account_{{ $item->id }}" name="dup_bank_account[{{ $item->id }}]"
+    label="New Bank Account Number" required wire:model="formData.new_bank_account.{{ $item->id }}"
+    placeholder="Enter New Bank Account" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,16)" />
 
-     @error("formData.new_bank_account.$item->id")
-        <span class="text-red-600 text-sm">{{ $message }}</span>
-    @enderror
+@error("formData.new_bank_account.$item->id")
+    <span class="text-red-600 text-sm">{{ $message }}</span>
+@enderror

@@ -64,6 +64,32 @@ class IncompletTypePage extends Component
             ])->get();
 
         $this->applicantInfo = $this->page->first()?->beneficiaryCommonList;
+
+        foreach ($this->page as $item) {
+            $type = $item->incompletType->name ?? null;
+            if (!$type) continue;
+
+            $map = [
+                'NO AADHAR NUMBER'                   => 'aadhar',
+                'DUPLICATE AADHAR NUMBER'            => 'new_aadhar',
+                'DUPLICATE BANK ACCOUNT NUMBER'      => 'new_bank_account',
+                'NO MOBILE NUMBER'                   => 'mobile',
+                'NAME VALIDATION  FAILED IN BANK'    => 'bank_name',
+                'ACCOUNT NUMBER VALIDATION  FAILED IN BANK' => 'bank_account',
+                'DUPLICATE MOBILE NUMBER'            => 'new_mobile',
+                'MINOR MISMATCH(40% - 89%)'          => 'mismatch_low',
+                'MINOR MISMATCH(90% - 100%)'         => 'mismatch_high',
+                'PDS MISMATCH'                       => 'pds',
+            ];
+
+            if (isset($map[$type]) && $item->new_value) {
+                if (in_array($type, ['NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER', 'PDS MISMATCH'])) {
+                    $this->formData[$map[$type]][$item->id] = Crypt::decryptString($item->new_value);
+                } else {
+                    $this->formData[$map[$type]][$item->id] = $item->new_value;
+                }
+            }
+        }
     }
 
     public function submit()
