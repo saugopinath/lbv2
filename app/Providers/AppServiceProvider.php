@@ -23,6 +23,8 @@ use App\Interfaces\ElasticsearchInterface;
 use App\Interfaces\AuthenticationInterface;
 use App\Observers\BenRejectDetailsObserver;
 use App\Observers\BeneficiaryPersonalObserver;
+use App\Models\DraftBeneficiaryPersonal;
+use App\Observers\DraftBeneficiaryPersonalObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,9 +40,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserInterface::class, UserService::class);
 
         $this->app->bind(ElasticsearchInterface::class, ElasticsearchService::class);
-
-
-
     }
 
     /**
@@ -51,6 +50,6 @@ class AppServiceProvider extends ServiceProvider
         User::observe(UserObserver::class);
         BenRejectDetails::observe(BenRejectDetailsObserver::class);
         BeneficiaryPersonal::observe(BeneficiaryPersonalObserver::class);
-
+        DraftBeneficiaryPersonal::observe(DraftBeneficiaryPersonalObserver::class);
     }
 }

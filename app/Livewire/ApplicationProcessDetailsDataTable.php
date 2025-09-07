@@ -27,7 +27,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public string $login_type = '';
     public string $search = '';
 
-    public $district_id, $rural_urban, $blockurban, $gp_ward;
+    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id;
     protected $listeners = ['filtersApplied'];
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
@@ -187,7 +187,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     }
     public function builder(): Builder
     {
-        $query = BeneficiaryCommonList::with('sourceable.relationships');
+        $query = BeneficiaryCommonList::with(['sourceable.relationships']);
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
             $query = EncryptionArray::applyLocationFilters(
                 $query,
@@ -197,15 +197,45 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 $this->gp_ward ? (int) $this->gp_ward : null
             );
         }
+        $user = auth()->user();
+        $next_level_role_id = null;
+
+        if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+            $next_level_role_id = 22;
+        }
+        if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+            $next_level_role_id = 21;
+        }
+        if ($user->hasRole('Operator')) {
+            $next_level_role_id = 20;
+        }
+        if ($next_level_role_id) {
+            $query->whereHasMorph(
+                'sourceable',
+                [DraftBeneficiaryPersonal::class],
+                function ($q) use ($next_level_role_id) {
+                    $q->where('next_level_role_id', $next_level_role_id);
+                }
+            );
+        }
         return $query;
     }
     public function bulkverify()
     {
         $ids = $this->getSelected();
-        $approverRoleId = Codemaster::getIdByCode(22);
+        $approverRoleId = Codemaster::getIdByCode(23);
         foreach ($ids as $id) {
             DraftBeneficiaryPersonal::where('application_id', $id)
                 ->update(['next_level_role_id' => $approverRoleId]);
+        }
+        $this->clearSelected();
+    }
+    public function bulkapprove()
+    {
+        $ids = $this->getSelected();
+        $drafts = DraftBeneficiaryPersonal::whereIn('application_id', $ids)->get();
+        foreach ($drafts as $draft) {
+            $draft->delete();
         }
         $this->clearSelected();
     }
