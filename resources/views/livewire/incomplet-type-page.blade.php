@@ -47,16 +47,19 @@
 
                 @if ($item->incompletType->name === 'NO AADHAR NUMBER')
                     <x-incomplete.no-aadhar :item="$item" />
+                    <livewire:enclosure-list :application_id="$id" :doc_type_id_array_list="[108]" enclosureSource="temp" />
                 @endif
 
                 {{-- DUPLICATE AADHAR NUMBER --}}
                 @if ($item->incompletType->name === 'DUPLICATE AADHAR NUMBER')
                     <x-incomplete.dup-aadhar :item="$item" />
+                    <livewire:enclosure-list :application_id="$id" :doc_type_id_array_list="[108]" enclosureSource="temp" />
                 @endif
 
                 {{-- DUPLICATE BANK ACCOUNT NUMBER --}}
                 @if ($item->incompletType->name === 'DUPLICATE BANK ACCOUNT NUMBER')
                     <x-incomplete.dup-bank :item="$item" />
+                      <livewire:enclosure-list :application_id="$id" :doc_type_id_array_list="[112]" enclosureSource="temp" />
                 @endif
 
                 {{-- NO MOBILE NUMBER --}}
@@ -77,6 +80,7 @@
                 {{-- BANK ACCOUNT FAIL --}}
                 @if ($item->incompletType->name === 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK')
                     <x-incomplete.bank-account-fail :item="$item" />
+                      <livewire:enclosure-list :application_id="$id" :doc_type_id_array_list="[112]" enclosureSource="temp" />
                 @endif
 
                 {{-- MISMATCH LOW --}}
@@ -118,9 +122,9 @@
 
                     {{-- Revert Modal --}}
                     <div x-data="{ open: false }" x-on:open-revert-modal.window="open = true" x-show="open"
-                        class="fixed inset-0 flex items-center justify-center text-gray-500 bg-opacity-50 z-50"
+                        class="fixed inset-0 flex items-center justify-center text-gray-800 bg-opacity-50 z-50"
                         style="display:none">
-                        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+                        <div class="bg-white rounded-lg shadow-lg p-6 w-96 border-gray-800">
                             <h2 class="text-lg font-semibold mb-4">Revert Application</h2>
 
                             {{-- Dropdown from Codemaster --}}
@@ -164,7 +168,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             @elseif ($stage === 'revert')
                 {{-- Revert Verify Button --}}

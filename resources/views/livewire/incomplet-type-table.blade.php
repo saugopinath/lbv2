@@ -47,6 +47,10 @@
                     <th class="py-3 px-2">Father's Name</th>
                     <th class="py-3 px-2">Incomplete Type</th>
                     <th class="py-3 px-2">Address</th>
+                    @if ($stage === 'revert')
+                        <th class="py-3 px-2">Revert Reason</th>
+                        <th class="py-3 px-2">Revert Remarks</th>
+                    @endif
                     <th class="py-3 px-2">Action</th>
                 </tr>
             </thead>
@@ -80,24 +84,36 @@
                                 N/A
                             @endif
                         </td>
+
+                        @if ($stage === 'revert')
+                            <!-- Revert Reason -->
+                            <td class="py-3 px-2">
+                                {{ $row['acceptRejectInfo']['revertReason']->name ?? 'N/A' }}
+                            </td>
+
+                            <!-- Revert Remarks -->
+                            <td class="py-3 px-2">
+                                {{ $row['acceptRejectInfo']->revert_reason_remarks ?? 'N/A' }}
+                            </td>
+                        @endif
                         <!-- Action -->
                         <td class="py-3 px-2">
                             @if ($stage === 'approver')
                                 {{-- Approve Button --}}
                                 <x-button.primary
-                                    href="{{ route('incomplet-type.view', ['id' => $row->application_id,'stage' => $stage]) }}">
+                                    href="{{ route('incomplet-type.view', ['id' => $row->application_id, 'stage' => $stage]) }}">
                                     Approve
                                 </x-button.primary>
                             @elseif ($stage === 'revert')
                                 {{-- Revert Button --}}
                                 <x-button.primary
-                                    href="{{ route('incomplet-type.view', ['id' => $row->application_id,'stage' => $stage]) }}">
+                                    href="{{ route('incomplet-type.view', ['id' => $row->application_id, 'stage' => $stage]) }}">
                                     Update Revert
                                 </x-button.primary>
                             @else
                                 {{-- Verifier Update Button --}}
                                 <x-button.primary
-                                    href="{{ route('incomplet-type.view', ['id' => $row->application_id,'stage' => $stage]) }}">
+                                    href="{{ route('incomplet-type.view', ['id' => $row->application_id, 'stage' => $stage]) }}">
                                     Update
                                 </x-button.primary>
                             @endif

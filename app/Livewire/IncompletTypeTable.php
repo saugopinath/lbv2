@@ -2,11 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Models\Codemaster;
+use App\Helpers\EncryptionArray;
+use Illuminate\Support\Facades\Crypt;
 use App\Models\ApplicantIncompletDeatil;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
-use Illuminate\Support\Facades\Crypt;
-use App\Helpers\EncryptionArray;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
 
@@ -83,7 +84,7 @@ class IncompletTypeTable extends DataTableComponent
 
     public function columns(): array
     {
-        return [
+        $columns = [
             Column::make("Application ID", "application_id")
                 ->sortable()
                 ->searchable(),
@@ -122,6 +123,19 @@ class IncompletTypeTable extends DataTableComponent
                     return 'N/A';
                 }),
         ];
+
+        if ($this->stage === 'revert') {
+            $columns[] = Column::make("Revert Reason")
+                ->label(fn($row) => $row->acceptRejectInfo?->revertReason?->name ?? 'N/A')
+                ->sortable();
+
+
+            $columns[] = Column::make("Revert Remarks")
+                ->label(fn($row) => $row->acceptRejectInfo?->revert_reason_remarks ?? 'N/A')
+                ->sortable();
+        }
+
+        return $columns;
     }
 
     public function builder(): Builder
@@ -136,7 +150,9 @@ class IncompletTypeTable extends DataTableComponent
         } elseif ($this->stage === 'approver') {
             $query->where('next_level_request_id', 1);
         } elseif ($this->stage === 'revert') {
-            $query->where('next_level_request_id', -50);
+            $query->where('next_level_request_id', -50)->with(['acceptRejectInfo' => function ($q) {
+                $q->latest('id');
+            }]);;
         }
 
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {

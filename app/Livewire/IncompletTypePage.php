@@ -166,73 +166,11 @@ class IncompletTypePage extends Component
                     'next_level_request_id' => 1,
                     'request_id'            => $request->id,
                 ]);
-                $this->updateOriginalTable($item);
             }
         }
 
         session()->flash('success', 'Incomplete details updated successfully!');
-        return redirect()->route('incomplete.types', ['id' => $this->id]);
-    }
-
-    protected function updateOriginalTable($item)
-    {
-        $typeId = $item->incomplet_type_id;
-        $newValue = $item->new_value;
-        $beneficiary = $item->beneficiaryCommonList;
-
-        switch ($typeId) {
-            case 141: // NO AADHAR NUMBER
-            case 149: // DUPLICATE AADHAR NUMBER
-            case 1414: // PDS Mismatch
-                $beneficiary->aadhaar()->update([
-                    'encoded_aadhar' => md5($newValue),
-                    'aadhaar_number' => Crypt::encryptString($newValue),
-                ]);
-                break;
-
-            case 142: // NO MOBILE NUMBER
-            case 1410: // DUPLICATE MOBILE NUMBER
-                $beneficiary->beneficiaryPersonal()->update([
-                    'mobile' => $newValue,
-                ]);
-
-                if ($typeId == 142) {
-                    $beneficiary->faultyBeneficiaryPersonal()->update([
-                        'mobile' => $newValue,
-                    ]);
-                }
-                break;
-
-            case 145: // NAME VALIDATION FAILED IN BANK
-                $beneficiary->failedPaymentDetails()->update([
-                    'account_holder_name' => $newValue,
-                ]);
-                break;
-
-            case 146: // ACCOUNT NUMBER VALIDATION FAILED IN BANK
-            case 1411: // DUPLICATE BANK ACCOUNT NUMBER
-                $beneficiary->bank()->update([
-                    'bank_account_number' => $newValue,
-                ]);
-
-                $beneficiary->faultyBeneficiaryBank()->update([
-                    'bank_account_number' => $newValue,
-                ]);
-                $beneficiary->benPaymentDetails()->update([
-                    'bank_account_number' => $newValue,
-                ]);
-                break;
-
-            case 1412: // Minor Mismatch(40% - 89%)
-            case 1413: // Minor Mismatch(90% - 100%)
-                $beneficiary->failedPaymentDetails()->update([
-                    'mismatch_details' => $newValue,
-                ]);
-                break;
-
-            default:
-                break;
-        }
+        return redirect()->route('incomplete.types', ['stage' => 'verifier','id' => $this->id]);
     }
 
     public function approve()
@@ -312,12 +250,87 @@ class IncompletTypePage extends Component
                     'next_level_request_id' => 2,
                     'request_id'            => $request->id,
                 ]);
+                $this->updateOriginalTable($item);
             }
         }
 
         session()->flash('success', 'Approve details updated successfully!');
         return redirect()->route('incomplete.types', ['id' => $this->id]);
     }
+
+    protected function updateOriginalTable($item)
+    {
+        $typeId = $item->incomplet_type_id;
+        $newValue = $item->new_value;
+        $beneficiary = $item->beneficiaryCommonList;
+
+        switch ($typeId) {
+            case 141: // NO AADHAR NUMBER
+            case 149: // DUPLICATE AADHAR NUMBER
+            case 1414: // PDS Mismatch
+                if ($beneficiary->aadhaar) {
+                    $beneficiary->aadhaar()->update([
+                        'encoded_aadhar' => md5($newValue),
+                        'aadhaar_number' => Crypt::encryptString($newValue),
+                    ]);
+                }
+                break;
+
+            case 142: // NO MOBILE NUMBER
+            case 1410: // DUPLICATE MOBILE NUMBER
+                if ($beneficiary->beneficiaryPersonal) {
+                    $beneficiary->beneficiaryPersonal()->update([
+                        'mobile' => $newValue,
+                    ]);
+                }
+                if ($typeId == 142 && $beneficiary->faultyBeneficiaryPersonal) {
+                    $beneficiary->faultyBeneficiaryPersonal()->update([
+                        'mobile' => $newValue,
+                    ]);
+                }
+                break;
+
+            case 145: // NAME VALIDATION FAILED IN BANK
+                if ($beneficiary->failedPaymentDetails) {
+                    $beneficiary->failedPaymentDetails()->update([
+                        'account_holder_name' => $newValue,
+                    ]);
+                }
+                break;
+
+            case 146: // ACCOUNT NUMBER VALIDATION FAILED IN BANK
+            case 1411: // DUPLICATE BANK ACCOUNT NUMBER
+                if ($beneficiary->bank) {
+                    $beneficiary->bank()->update([
+                        'bank_account_number' => $newValue,
+                    ]);
+                }
+                if ($beneficiary->faultyBeneficiaryBank) {
+                    $beneficiary->faultyBeneficiaryBank()->update([
+                        'bank_account_number' => $newValue,
+                    ]);
+                }
+                if ($beneficiary->benPaymentDetails) {
+                    $beneficiary->benPaymentDetails()->update([
+                        'bank_account_number' => $newValue,
+                    ]);
+                }
+                break;
+
+            case 1412: // Minor Mismatch(40% - 89%)
+            case 1413: // Minor Mismatch(90% - 100%)
+                if ($beneficiary->failedPaymentDetails) {
+                    $beneficiary->failedPaymentDetails()->update([
+                        'mismatch_details' => $newValue,
+                    ]);
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
     public function revert()
     {
         $previousId = AcceptRejectInfo::where('application_id', $this->id)
@@ -345,7 +358,7 @@ class IncompletTypePage extends Component
         }
 
         session()->flash('success', 'Application reverted successfully!');
-        return redirect()->route('incomplete.types', ['id' => $this->id]);
+        return redirect()->route('incomplete.types', ['stage' => 'approver','id' => $this->id]);
     }
 
     public function revertVerify()
@@ -428,7 +441,7 @@ class IncompletTypePage extends Component
         }
 
         session()->flash('success', 'Revert details updated successfully!');
-        return redirect()->route('incomplete.types', ['id' => $this->id]);
+        return redirect()->route('incomplete.types', ['stage' => 'revert','id' => $this->id]);
     }
 
     public function render()

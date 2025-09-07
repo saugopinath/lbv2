@@ -45,4 +45,9 @@ class ApplicantIncompletDeatil extends Model
     {
         return $this->hasOne(BeneficiaryCommonList::class, 'sourceable_id', 'application_id');
     }
+
+    public function acceptRejectInfo()
+    {
+        return $this->hasOne(AcceptRejectInfo::class, 'application_id', 'application_id');
+    }
 }
