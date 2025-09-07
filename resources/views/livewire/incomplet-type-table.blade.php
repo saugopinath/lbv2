@@ -90,10 +90,10 @@
                                 </x-button.primary>
                             @elseif ($stage === 'revert')
                                 {{-- Revert Button --}}
-                                <x-button.danger
+                                <x-button.primary
                                     href="{{ route('incomplet-type.view', ['id' => $row->application_id,'stage' => $stage]) }}">
                                     Update Revert
-                                </x-button.danger>
+                                </x-button.primary>
                             @else
                                 {{-- Verifier Update Button --}}
                                 <x-button.primary

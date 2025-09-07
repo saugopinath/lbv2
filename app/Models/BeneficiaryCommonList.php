@@ -7,17 +7,29 @@ use Illuminate\Database\Eloquent\Model;
 class BeneficiaryCommonList extends Model
 {
     protected $guarded = [];
-    // protected $primaryKey = 'beneficiary_id';
     protected $table = 'lb_scheme.beneficiary_common_lists';
     public function sourceable()
     {
         return $this->morphTo();
     }
 
-    //  public function contact()
-    // {
-    //     return $this->hasOne(BeneficiaryContact::class, 'application_id', 'sourceable_id');
-    // }
+    public function faultyBeneficiaryPersonal()
+    {
+        return $this->hasOne(FaultyBeneficiaryPersonal::class, 'beneficiary_id', 'sourceable_id');
+    }  
+    public function faultyBeneficiaryBank()
+    {
+        return $this->hasOne(FaultyBeneficiaryBank::class, 'application_id', 'sourceable_id');
+    }
+    public function failedPaymentDetails()
+    {
+        return $this->hasOne(FailedPaymentDetails::class, 'application_id', 'sourceable_id');
+    }
+    public function benPaymentDetails()
+    {
+        return $this->hasOne(BenPaymentDetails::class, 'application_id', 'id');
+    }
+
 
     public function aadhaar()
     {
@@ -64,7 +76,6 @@ class BeneficiaryCommonList extends Model
         return $this->belongsTo(Municipality::class, 'municipality_id');
     }
 
-    // Subdivision relationship
     public function subdivision()
     {
         return $this->belongsTo(Subdivision::class, 'sub_division_id');
