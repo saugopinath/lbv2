@@ -7,6 +7,7 @@ use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignController;
 use App\Http\Controllers\UserManagementController;
+use App\Livewire\MasterParameterSetting\Index as MasterParameterSettingCreate;
 use App\Http\Controllers\LBController;
 Route::get('/', function () {
     return view('welcome');
@@ -40,3 +41,6 @@ Route::get('/approved-lists-BA-Wise', [BeneficiaryApprovedListController::class,
 
 //master parameter settings
 Route::get('/master-parameter-settings', [MasterParameterSettingController::class, 'index'])->name('master-parameter-settings');
+Route::get('/masterParameterSetting/index', MasterParameterSettingCreate::class)
+    ->name('MasterParameterSetting.index');
+// Route::get('/master-edit', [MasterParameterSettingController::class, 'edit'])->name('master-edit');

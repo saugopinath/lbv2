@@ -10,6 +10,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 class MasterParameterDataTable extends DataTableComponent
 {
     public ?int $perPage = 5;
+    protected $listeners = ['refreshDatatable' => '$refresh'];
 
     public function configure(): void
     {
@@ -58,12 +59,17 @@ class MasterParameterDataTable extends DataTableComponent
                 ->label(fn($row) => $row->menu?->name ?? '-'),
 
             Column::make("Parameters")
-                ->label(fn($row) => implode(', ', $row->parameter_names)),
-            // Column::make("Min Score")
-            //     ->label(fn($row) => $row->min_score ?? '-'),
-            // Column::make("Max Score")
-            //     ->label(fn($row) => $row->max_score ?? '-'),
+                ->label(fn($row) => implode(', ', array: $row->parameter_names)),
+
+            // Column::make("Action")
+            //     ->label(fn($row) => $this->renderEditButton($row))
+            //     ->html(),
+           Column::make("Action")
+            ->label(fn($row) => view('coulmn_button.actions', ['row' => $row])),
+
             
+
+
         ];
     }
 
@@ -74,7 +80,16 @@ class MasterParameterDataTable extends DataTableComponent
             ->groupBy('scheme_id', 'master_code')
             ->with(['scheme', 'menu']);
 
-        // dd($query );
+        // dd($query);
         return $query;
+    }
+    public function renderEditButton($row)
+    {
+        $editUrl = route('MasterParameterSetting.index', [
+            'scheme_id' => $row->scheme_id,
+            'master_code' => $row->master_code,
+        ]);
+
+        return '<a href="' . $editUrl . '" class="text-indigo-600 hover:text-indigo-900">Edit</a>';
     }
 }
