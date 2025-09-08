@@ -3,7 +3,7 @@
 <x-form.input id="dup_aadhar_{{ $item->id }}" name="dup_aadhar[{{ $item->id }}]" label="New Aadhaar Number"
     required wire:model="formData.new_aadhar.{{ $item->id }}" placeholder="Enter Correct Aadhaar"
     x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
-
+ {{--  <livewire:enclosure-list :application_id="$item->id" :doc_type_id_array_list="[108]" enclosureSource="5" />  --}}
 @error("formData.new_aadhar.$item->id")
     <span class="text-red-600 text-sm">{{ $message }}</span>
 @enderror

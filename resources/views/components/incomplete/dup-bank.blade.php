@@ -7,6 +7,8 @@
     label="New Bank Account Number" required wire:model="formData.new_bank_account.{{ $item->id }}"
     placeholder="Enter New Bank Account" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,16)" />
 
+     <livewire:enclosure-list :application_id="$item->id" :doc_type_id_array_list="[112]" enclosureSource="5" />
+
 @error("formData.new_bank_account.$item->id")
     <span class="text-red-600 text-sm">{{ $message }}</span>
 @enderror

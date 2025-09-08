@@ -30,8 +30,10 @@ class EnclosureList extends Component
     public function mount($application_id = null, $is_page = null, $doc_type_id_array_list = [], $doc_type_id_array = [], $enclosureSource = null)
     {
         $this->application_id = $application_id;
+        // dd($this->application_id);
         $this->is_page        = $is_page;
         $this->enclosureSource = $enclosureSource;
+        // dd($this->enclosureSource);
         $this->doc_type_id_array_list = $doc_type_id_array_list;
         $this->doc_type_id_array      = $doc_type_id_array;
 
@@ -51,9 +53,18 @@ class EnclosureList extends Component
             }
         } else {
             if (!empty($this->doc_type_id_array_list)) {
-                $app = BeneficiaryEnclosure::where('application_id', $application_id)
-                    ->whereIn('document_type', $this->doc_type_id_array_list)
-                    ->get();
+
+                if ($this->enclosureSource == 5) {
+                    $app = BeneficiaryTemEnclosure::where('application_id', $application_id)
+                        ->whereIn('document_type', $this->doc_type_id_array_list)
+                        ->get();
+                    // dd($app);
+                } else {
+                    $app = BeneficiaryEnclosure::where('application_id', $application_id)
+                        ->whereIn('document_type', $this->doc_type_id_array_list)
+                        ->get();
+                }
+
 
                 foreach ($app as $doc) {
                     $this->existingDocuments[$doc->document_type] = $doc;
@@ -156,23 +167,24 @@ class EnclosureList extends Component
     }
     protected function enclosureModel()
     {
-        return $this->enclosureSource === 'temp'
+        return $this->enclosureSource === '5'
             ? new BeneficiaryTemEnclosure
             : new BeneficiaryEnclosure;
     }
 
     public function saveSingleDocument()
     {
+        // dd('ok');
         $this->validate();
 
         $base64 = base64_encode(file_get_contents($this->singleDocument->getRealPath()));
 
         $model = $this->enclosureModel();
-
+        // dd($model);
         $existingDoc = $model::where('application_id', $this->application_id)
             ->where('document_type', $this->currentDocId)
             ->first();
-
+        // dd($existingDoc);
         if ($existingDoc) {
             $existingDoc->update([
                 'attched_document' => $base64,
@@ -191,6 +203,7 @@ class EnclosureList extends Component
                 'document_type' => $this->currentDocId,
                 'created_by' => 1,
             ]);
+            // dd($is_upload);
         }
 
         $this->singleDocument = null;
@@ -199,15 +212,25 @@ class EnclosureList extends Component
         $this->currentDocExtensions = '';
         $this->showUploadModal = false;
         if ($this->application_id) {
-            $app = DraftBeneficiaryPersonal::with('documents')->where('application_id', $this->application_id)->first();
-            if ($app) {
+            if ($this->enclosureSource === '5') {
+                $docs = BeneficiaryTemEnclosure::where('application_id', $this->application_id)
+                    ->whereIn('document_type', $this->doc_type_id_array_list)
+                    ->get();
                 $this->existingDocuments = [];
-                foreach ($app->documents as $doc) {
+                foreach ($docs as $doc) {
                     $this->existingDocuments[$doc->document_type] = $doc;
+                }
+            } else {
+                $app = DraftBeneficiaryPersonal::with('documents')->where('application_id', $this->application_id)->first();
+                if ($app) {
+                    $this->existingDocuments = [];
+                    foreach ($app->documents as $doc) {
+                        $this->existingDocuments[$doc->document_type] = $doc;
+                    }
                 }
             }
         }
-         $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.');
+        $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.');
     }
 
     // public function saveSingleDocument()
@@ -266,7 +289,6 @@ class EnclosureList extends Component
     {
         $model = $this->enclosureModel();
         $document = $model::findOrFail($id);
-
         $decoded = base64_decode($document->attched_document);
         $filename = 'document_' . $document->document_type . '.' . $document->document_extension;
 
