@@ -8,6 +8,7 @@ use App\Models\Ifsccodemaster;
 use App\Models\DraftBeneficiaryPersonal;
 use App\Models\DraftBeneficiaryBank;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BankDetails extends Component
 {
@@ -15,13 +16,13 @@ class BankDetails extends Component
     public $ifscode, $bankname, $bankbranchname, $bankaccountnumber, $confirmbankaccountnumber;
     public function updatedIfscode()
     {
-        $ifs = Ifsccodemaster::with('bank')
+        $ifs = Ifsccodemaster::with('bankmaster')
             ->where('code', $this->ifscode)
             ->where('is_active', 1)
             ->first();
 
         if ($ifs) {
-            $this->bankname = $ifs->bank->name;
+            $this->bankname = $ifs->bankmaster->name;
             $this->bankbranchname = $ifs->branch;
         } else {
             $this->bankname = '';
@@ -64,26 +65,33 @@ class BankDetails extends Component
     {
         $validated = $this->validate($this->rules());
         $app_det = DraftBeneficiaryBank::where('application_id', $this->application_id)->first();
-        if ($this->mode === null && empty($app_det)) {
-            $application_id = $this->application_id;
-            DraftBeneficiaryBank::create([
-                'application_id' => $application_id,
-                'created_by' => Auth::id(),
-                'ifsc' => $validated['ifscode'],
-                'bank_account_number' => $validated['bankaccountnumber'],
-            ]);
-            $this->dispatch('bankDet', [
-                'message' => "Bank Details saved successfully for the application id: {$this->application_id}"
-            ]);
-        } else {
-            $data = [
-                'ifsc' => $validated['ifscode'],
-                'bank_account_number' => $validated['bankaccountnumber'],
-            ];
-            DraftBeneficiaryBank::where('application_id', $this->application_id)->update($data);
-            $this->dispatch('bankDet', [
-                'message' => "Bank Details updated successfully for the application id: {$this->application_id}"
-            ]);
+        DB::beginTransaction();
+        try {
+            if ($this->mode === null && empty($app_det)) {
+                $application_id = $this->application_id;
+                DraftBeneficiaryBank::create([
+                    'application_id' => $application_id,
+                    'created_by' => Auth::id(),
+                    'ifsc' => $validated['ifscode'],
+                    'bank_account_number' => $validated['bankaccountnumber'],
+                ]);
+                $this->dispatch('bankDet', [
+                    'message' => "Bank Details saved successfully for the application id: {$this->application_id}"
+                ]);
+            } else {
+                $data = [
+                    'ifsc' => $validated['ifscode'],
+                    'bank_account_number' => $validated['bankaccountnumber'],
+                ];
+                DraftBeneficiaryBank::where('application_id', $this->application_id)->update($data);
+                $this->dispatch('bankDet', [
+                    'message' => "Bank Details updated successfully for the application id: {$this->application_id}"
+                ]);
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
     }
     public function render()

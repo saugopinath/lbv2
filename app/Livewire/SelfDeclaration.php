@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\DraftBeneficiaryDeclaration;
 use App\Models\DraftBeneficiaryPersonal;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SelfDeclaration extends Component
 {
@@ -44,24 +45,31 @@ class SelfDeclaration extends Component
     {
         $validated = $this->validate($this->rules());
         $app_det = DraftBeneficiaryDeclaration::where('application_id', $this->application_id)->first();
-        if ($this->mode === null && empty($app_det)) {
-            $application_id = $this->application_id;
-            DraftBeneficiaryDeclaration::create([
-                'application_id' => $application_id,
-                'is_resident' => $validated['resident'],
-                'earn_monthly_remuneration' => $validated['no_govt_salary'],
-                'info_genuine_decl' => $validated['info_true'],
-                'av_status' => $validated['aadhaar_consent'],
-                'created_by' => Auth::id(),
-            ]);
-        } else {
-            $data = [
-                'is_resident' => $validated['resident'],
-                'earn_monthly_remuneration' => $validated['no_govt_salary'],
-                'info_genuine_decl' => $validated['info_true'],
-                'av_status' => $validated['aadhaar_consent'],
-            ];
-            DraftBeneficiaryDeclaration::where('application_id', $this->application_id)->update($data);
+        DB::beginTransaction();
+        try {
+            if ($this->mode === null && empty($app_det)) {
+                $application_id = $this->application_id;
+                DraftBeneficiaryDeclaration::create([
+                    'application_id' => $application_id,
+                    'is_resident' => $validated['resident'],
+                    'earn_monthly_remuneration' => $validated['no_govt_salary'],
+                    'info_genuine_decl' => $validated['info_true'],
+                    'av_status' => $validated['aadhaar_consent'],
+                    'created_by' => Auth::id(),
+                ]);
+            } else {
+                $data = [
+                    'is_resident' => $validated['resident'],
+                    'earn_monthly_remuneration' => $validated['no_govt_salary'],
+                    'info_genuine_decl' => $validated['info_true'],
+                    'av_status' => $validated['aadhaar_consent'],
+                ];
+                DraftBeneficiaryDeclaration::where('application_id', $this->application_id)->update($data);
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
         $this->dispatch('selfDec');
     }

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\DraftBeneficiaryPersonal;
 use App\Models\BeneficiaryEnclosure;
 use App\Models\SchemeAttachedDocMappings;
+use Illuminate\Support\Facades\DB;
 
 class EnclosureList extends Component
 {
@@ -19,16 +20,66 @@ class EnclosureList extends Component
     public $application_id;
     public $currentDocMaxSize = '';
     public $currentDocExtensions = '';
-    public $mode;
-    public function mount($mode = null, $application_id = null)
+    public $mode, $is_page;
+    public $doc_type_id_array_list = [];
+    public $doc_type_id_array = [];
+    public $showErrors = false;
+    public function mount($mode = null, $application_id = null, $is_page = null, $doc_type_id_array_list = [], $doc_type_id_array = [])
     {
         $this->application_id = $application_id;
-        $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->get();
-        if ($application_id) {
-            $app = DraftBeneficiaryPersonal::with('documents')->where('application_id', $application_id)->first();
-            if ($app) {
-                foreach ($app->documents as $doc) {
+        $this->is_page        = $is_page;
+
+        $this->doc_type_id_array_list = $doc_type_id_array_list;
+        $this->doc_type_id_array      = $doc_type_id_array;
+
+        if (!empty($this->doc_type_id_array)) {
+            $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
+                ->whereIn('doc_type_id', $this->doc_type_id_array)
+                ->get();
+
+            if ($application_id) {
+                $app = BeneficiaryEnclosure::where('application_id', $application_id)
+                    ->whereIn('document_type', $this->doc_type_id_array)
+                    ->get();
+
+                foreach ($app as $doc) {
                     $this->existingDocuments[$doc->document_type] = $doc;
+                }
+            }
+        } else {
+            if (!empty($this->doc_type_id_array_list)) {
+                $app = BeneficiaryEnclosure::where('application_id', $application_id)
+                    ->whereIn('document_type', $this->doc_type_id_array_list)
+                    ->get();
+
+                foreach ($app as $doc) {
+                    $this->existingDocuments[$doc->document_type] = $doc;
+                }
+
+                if ($is_page == 1) {
+                    $uploadedTypes = array_keys($this->existingDocuments);
+                    $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
+                        ->whereIn('doc_type_id', $uploadedTypes)
+                        ->get();
+                } else {
+                    $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
+                        ->whereIn('doc_type_id', $this->doc_type_id_array_list)
+                        ->get();
+                }
+            } else {
+                $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->get();
+
+                if ($application_id) {
+                    $app = BeneficiaryEnclosure::where('application_id', $application_id)->get();
+
+                    foreach ($app as $doc) {
+                        $this->existingDocuments[$doc->document_type] = $doc;
+                    }
+
+                    if ($is_page == 1) {
+                        $uploadedTypes = array_keys($this->existingDocuments);
+                        $this->doc_lists = $this->doc_lists->whereIn('doc_type_id', $uploadedTypes);
+                    }
                 }
             }
         }
@@ -59,24 +110,31 @@ class EnclosureList extends Component
         $existingDoc = BeneficiaryEnclosure::where('application_id', $this->application_id)
             ->where('document_type', $this->currentDocId)
             ->first();
-        if ($existingDoc) {
-            $existingDoc->update([
-                'attched_document' => $base64,
-                'ip_address' => request()->ip(),
-                'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
-                'document_mime_type' => $this->singleDocument->getMimeType(),
-                'created_by' => 1,
-            ]);
-        } else {
-            BeneficiaryEnclosure::create([
-                'application_id' => $this->application_id,
-                'attched_document' => $base64,
-                'ip_address' => request()->ip(),
-                'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
-                'document_mime_type' => $this->singleDocument->getMimeType(),
-                'document_type' => $this->currentDocId,
-                'created_by' => 1,
-            ]);
+        DB::beginTransaction();
+        try {
+            if ($existingDoc) {
+                $existingDoc->update([
+                    'attched_document' => $base64,
+                    'ip_address' => request()->ip(),
+                    'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
+                    'document_mime_type' => $this->singleDocument->getMimeType(),
+                    'created_by' => 1,
+                ]);
+            } else {
+                BeneficiaryEnclosure::create([
+                    'application_id' => $this->application_id,
+                    'attched_document' => $base64,
+                    'ip_address' => request()->ip(),
+                    'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
+                    'document_mime_type' => $this->singleDocument->getMimeType(),
+                    'document_type' => $this->currentDocId,
+                    'created_by' => 1,
+                ]);
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
         $this->singleDocument = null;
         $this->currentDocId = null;
@@ -105,6 +163,7 @@ class EnclosureList extends Component
     }
     public function save()
     {
+        $this->showErrors = false;
         foreach ($this->doc_lists as $doc) {
             $existing = $this->existingDocuments[$doc->doc_type_id] ?? null;
 
