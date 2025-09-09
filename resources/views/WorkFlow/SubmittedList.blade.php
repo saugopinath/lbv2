@@ -10,5 +10,6 @@
 
         <livewire:application-process-details-data-table />
 
+        @include('livewire.bulk-revert')
     </div>
 </x-layouts.app>

@@ -19,6 +19,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use App\Models\DraftBeneficiaryPersonal;
+use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Log;
 
 class ApplicationProcessDetailsDataTable extends DataTableComponent
 {
@@ -27,7 +29,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public string $login_type = '';
     public string $search = '';
 
-    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id;
+    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id, $revertrejectAction;
     protected $listeners = ['filtersApplied'];
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
@@ -238,5 +240,30 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $draft->delete();
         }
         $this->clearSelected();
+    }
+    public function bulkrevert()
+    {
+        $this->handleBulkAction('revert');
+    }
+
+    public function bulkreject()
+    {
+        $this->handleBulkAction('reject');
+    }
+    public function handleBulkAction(string $action)
+    {
+        $this->revertrejectAction = $action;
+        $this->dispatch('open-bulk-revert-modal', action: $action);
+    }
+    #[On('confirm-bulk-revert')]
+    public function confirmBulkRevert()
+    {
+        dd($this->getSelected());
+        try {
+            Log::info('confirmBulkRevert called', ['selected' => $this->getSelected()]);
+        } catch (\Exception $e) {
+            Log::error('Error in confirmBulkRevert', ['message' => $e->getMessage()]);
+            throw $e;
+        }
     }
 }
