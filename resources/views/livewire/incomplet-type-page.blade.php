@@ -58,9 +58,9 @@
                     <h2 class="font-semibold text-lg text-blue-700 mb-2">{{ $item->incompletType->name }}</h2>
 
                     @if ($item->incompletType->name === 'MINOR MISMATCH(40% - 89%)')
-                        <x-incomplete.mismatch-low :item="$item" />
+                        <livewire:incomplete.mismatch-low :item="$item" />
                     @elseif ($item->incompletType->name === 'MINOR MISMATCH(90% - 100%)')
-                        <x-incomplete.mismatch-high :item="$item" />
+                        <livewire:incomplete.mismatch-high :item="$item" />
                     @endif
                 </div>
             @endif
@@ -74,7 +74,7 @@
         @if (!empty($aadhaarIssues))
             <x-incomplete.aadhar-modification :aadhaar-issues="$aadhaarIssues" />
         @endif
-        
+
         @if (!empty($bankIssues))
             <livewire:incomplete.bank-issues :bank-issues="$bankIssues" />
         @endif
