@@ -5,7 +5,7 @@
                 <x-form.input name="state" label="State" wire:model="stateName" required disabled />
             </div>
         </div>
-        <livewire:filter-lgd-master :login_type="'state_office'" :selectedDistrict="$selectedDistrict"
+        <livewire:filter-lgd-master-entry :login_type="'state_office'" :selectedDistrict="$selectedDistrict"
             :selectedRuralurban="$selectedRuralurban"
             :selectedBlockurban="$selectedBlockurban"
             :selectedGpWard="$selectedGpWard" />
