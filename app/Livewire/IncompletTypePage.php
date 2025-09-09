@@ -45,7 +45,6 @@ class IncompletTypePage extends Component
         $select_lgd  = session('lgd_session');
         $this->user_id = Crypt::decryptString($select_lgd['role_id']);
         $this->id = $id;
-// dd($this->id);
         $revertReasons       = Codemaster::getIdByCode(12);
         $this->revertReasons = Codemaster::where('parent_id', $revertReasons)->get();
 
@@ -59,7 +58,6 @@ class IncompletTypePage extends Component
                 'beneficiaryCommonList.panchayat',
                 'beneficiaryCommonList.ward',
             ])->get();
-// dd($this->page);
         $this->applicantInfo = $this->page->first()?->beneficiaryCommonList;
 
         foreach ($this->page as $item) {

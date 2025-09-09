@@ -62,22 +62,22 @@ class EncryptionArray
         $gpWardField = $rural_urban == 2 ? 'panchayat_id' : 'ward_id';
 
         // Load relation for eager loading
-        $query->with('commonList');
+        $query->with('commonList.beneficiaryPersonal.contacts');
 
         if ($district_id) {
-            $query->whereHas('commonList', function ($q) use ($district_id) {
+            $query->whereHas('commonList.beneficiaryPersonal.contacts', function ($q) use ($district_id) {
                 $q->where('district_id', $district_id);
             });
         }
 
         if ($blockurban) {
-            $query->whereHas('commonList', function ($q) use ($blockField, $blockurban) {
+            $query->whereHas('commonList.beneficiaryPersonal.contacts', function ($q) use ($blockField, $blockurban) {
                 $q->where($blockField, $blockurban);
             });
         }
 
         if ($gp_ward) {
-            $query->whereHas('commonList', function ($q) use ($gpWardField, $gp_ward) {
+            $query->whereHas('commonList.beneficiaryPersonal.contacts', function ($q) use ($gpWardField, $gp_ward) {
                 $q->where($gpWardField, $gp_ward);
             });
         }

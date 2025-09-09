@@ -11,10 +11,10 @@ class ApplicantIncompletDetailsSeeder extends Seeder
 {
     public function run(): void
     {
-      
+
         $applicationIds = BeneficiaryCommonList::pluck('sourceable_id')->toArray();
-        $incompleteTypes = IncompletTypeModelMapping::pluck('incomplet_type_code')->toArray();    
-       
+        $incompleteTypes = IncompletTypeModelMapping::pluck('incomplet_type_code')->toArray();
+
         foreach (range(1200, 1220) as $i) {
             ApplicantIncompletDeatil::create([
                 'application_id'        => $applicationIds[array_rand($applicationIds)],

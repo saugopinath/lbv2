@@ -10,11 +10,11 @@
 
         <p class="text-sm text-gray-600">Old Mobile: {{ $mobileIssues[0]->old_value ?? 'N/A' }}</p>
 
-        <x-form.input id="dup_mobile_{{ $mobileIssues[0]->id }}" name="dup_mobile[{{ $mobileIssues[0]->id }}]"
-            label="New Mobile Number" required wire:model="formData.new_mobile.{{ $mobileIssues[0]->id }}"
+        <x-form.input id="dup_mobile_{{ $mobileIssues[0]->application_id }}" name="dup_mobile[{{ $mobileIssues[0]->application_id }}]"
+            label="New Mobile Number" required wire:model="formData.new_mobile.{{ $mobileIssues[0]->application_id }}"
             placeholder="Enter New Mobile" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />
 
-        @error("formData.new_mobile.{$mobileIssues[0]->id}")
+        @error("formData.new_mobile.{$mobileIssues[0]->application_id}")
             <span class="text-red-600 text-sm">{{ $message }}</span>
         @enderror
     </div>

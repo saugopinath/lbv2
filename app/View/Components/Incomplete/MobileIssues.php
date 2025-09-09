@@ -13,6 +13,7 @@ class MobileIssues extends Component
     public function __construct($mobileIssues)
     {
         $this->mobileIssues = $mobileIssues;
+        // dd($this->mobileIssues);
     }
 
     public function render(): View|Closure|string

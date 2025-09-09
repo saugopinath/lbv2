@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('accept_reject_infos', function (Blueprint $table) {
-            $table->smallInteger('change_type')->nullable()->after('op_type');
+        Schema::table('applicant_incomplet_deatils', function (Blueprint $table) {
+            $table->smallInteger('change_type')->nullable()->after('request_id');
         });
     }
 
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('accept_reject_infos', function (Blueprint $table) {
+        Schema::table('applicant_incomplet_deatils', function (Blueprint $table) {
             $table->dropColumn('change_type');
         });
     }

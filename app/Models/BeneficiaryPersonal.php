@@ -24,6 +24,11 @@ class BeneficiaryPersonal extends Model
         return $this->hasOne(BeneficiaryContact::class, 'beneficiary_id', 'beneficiary_id');
     }
 
+     public function contacts()
+    {
+        return $this->hasOne(BeneficiaryContact::class, 'application_id', 'application_id');
+    }
+
     public function bank()
     {
         return $this->hasOne(BeneficiaryBank::class, 'beneficiary_id', 'beneficiary_id');
