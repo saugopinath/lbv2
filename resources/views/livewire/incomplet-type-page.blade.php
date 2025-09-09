@@ -42,6 +42,12 @@
             {{-- Categorize issues --}}
             @if (in_array($item->incompletType->name, ['PDS MISMATCH', 'NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER']))
                 @php $aadhaarIssues[] = $item; @endphp
+            @elseif (in_array($item->incompletType->name, [
+                    'DUPLICATE BANK ACCOUNT NUMBER',
+                    'NAME VALIDATION  FAILED IN BANK',
+                    'ACCOUNT NUMBER VALIDATION  FAILED IN BANK',
+                ]))
+                @php $bankIssues[] = $item; @endphp
             @elseif (in_array($item->incompletType->name, ['NO MOBILE NUMBER', 'DUPLICATE MOBILE NUMBER']))
                 @php $mobileIssues[] = $item; @endphp
             @endif
@@ -58,24 +64,6 @@
                     @endif
                 </div>
             @endif
-            @if (in_array($item->incompletType->name, ['DUPLICATE BANK ACCOUNT NUMBER', 'NAME VALIDATION  FAILED IN BANK','ACCOUNT NUMBER VALIDATION  FAILED IN BANK']))
-                <div class="p-4 mb-4 border rounded-lg bg-gray-50 shadow-sm">
-                    <h2 class="font-semibold text-lg text-blue-700 mb-2">{{ $item->incompletType->name }}</h2>
-
-                    @if ($item->incompletType->name === 'DUPLICATE BANK ACCOUNT NUMBER')
-                        {{--  <x-incomplete.dup-bank :item="$item" />  --}}
-                        <x-incomplete.dup-bank :item="$item" :formData="$formData" />
-                    @endif
-
-                    @if ($item->incompletType->name === 'NAME VALIDATION  FAILED IN BANK')
-                        <x-incomplete.bank-name-fail :item="$item" />
-                    @endif
-
-                    @if ($item->incompletType->name === 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK')
-                        <x-incomplete.bank-account-fail :item="$item" />
-                    @endif
-                </div>
-            @endif
         @endforeach
 
         {{-- Issues Components --}}
@@ -85,6 +73,10 @@
 
         @if (!empty($aadhaarIssues))
             <x-incomplete.aadhar-modification :aadhaar-issues="$aadhaarIssues" />
+        @endif
+        
+        @if (!empty($bankIssues))
+            <livewire:incomplete.bank-issues :bank-issues="$bankIssues" />
         @endif
 
 

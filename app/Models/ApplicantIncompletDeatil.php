@@ -18,6 +18,11 @@ class ApplicantIncompletDeatil extends Model
         'request_id'
     ];
 
+    protected $casts = [
+        'old_value' => 'array',
+        'new_value' => 'array',
+    ];
+
     public function commonList()
     {
         return $this->belongsTo(BeneficiaryCommonList::class, 'application_id', 'sourceable_id');

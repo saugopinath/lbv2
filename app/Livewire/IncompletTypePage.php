@@ -53,11 +53,13 @@ class IncompletTypePage extends Component
                 'incompletType',
                 'beneficiaryCommonList.enclosures',
                 'beneficiaryCommonList.aadhaar',
-                'beneficiaryCommonList.bank',
+                'beneficiaryCommonList.bank.ifscbranch.bankMaster',
                 'beneficiaryCommonList.beneficiaryPersonal.father',
                 'beneficiaryCommonList.panchayat',
                 'beneficiaryCommonList.ward',
             ])->get();
+
+            // dd($this->page);
         $this->applicantInfo = $this->page->first()?->beneficiaryCommonList;
 
         foreach ($this->page as $item) {
