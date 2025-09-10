@@ -10,6 +10,7 @@ class DupAadhaarCheck extends Component
     public $error = null;
     public function checkDuplicate()
     {
+        $this->dispatch('showLoader');
         $this->error = null;
         $this->aadhaar = trim($this->aadhaar);
         if (!ctype_digit($this->aadhaar) || strlen($this->aadhaar) !== 12) {
@@ -19,6 +20,7 @@ class DupAadhaarCheck extends Component
         $encoded_aadhar = Crypt::encryptString($this->aadhaar);
         $aadhaar_hash = md5($this->aadhaar);
         if (BeneficiaryAadhaar::where('aadhar_hash', $aadhaar_hash)->exists()) {
+            $this->dispatch('hideLoader');
             $this->error = "Duplicate Aadhaar found!";
             return ['status' => 'duplicate', 'message' => $this->error];
         }
@@ -26,6 +28,7 @@ class DupAadhaarCheck extends Component
             'encoded' => $encoded_aadhar,
             'hash' => $aadhaar_hash,
         ]);
+        $this->dispatch('hideLoader');
         return ['status' => 'success', 'message' => '✅ Aadhaar is valid and not duplicate.'];
     }
     public function render()
