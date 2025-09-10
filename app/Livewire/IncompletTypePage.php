@@ -20,32 +20,36 @@ class IncompletTypePage extends Component
 
     public $revert_reason_cause_id;
     public $revert_reason_remarks;
-
     protected $rules = [
-        'formData.aadhar_modification.*' => 'nullable|digits:12',
-        'formData.new_bank_account.*'    => 'nullable|digits_between:9,18',
-        'formData.mobile.*'              => 'nullable|digits:10',
-        'formData.new_mobile.*'          => 'nullable|digits:10',
-        'formData.bank_name.*'           => 'nullable|string|max:255',
-        'formData.bank_account.*'        => 'nullable|digits_between:9,18',
-        'formData.mismatch_low.*'        => 'nullable|string|max:255',
-        'formData.mismatch_high.*'       => 'nullable|string|max:255',
-        'formData.pds.*'                 => 'nullable|string|max:255',
+        'formData.aadhar.*'        => 'nullable|digits:12',
+        'formData.new_aadhar.*'    => 'nullable|digits:12',
+        'formData.new_bank_account.*' => 'nullable|digits_between:9,18',
+        'formData.mobile.*'        => 'nullable|digits:10',
+        'formData.new_mobile.*'    => 'nullable|digits:10',
+        'formData.bank_name.*'     => 'nullable|string|max:255',
+        'formData.bank_account.*'  => 'nullable|digits_between:9,18',
+        'formData.mismatch_low.*'  => 'nullable|string|max:255',
+        'formData.mismatch_high.*' => 'nullable|string|max:255',
+        'formData.pds.*'           => 'nullable|string|max:255',
     ];
 
     protected $messages = [
-        'formData.aadhar_modification.*.digits' => 'Aadhaar number must be 12 digits.',
-        'formData.mobile.*.digits'              => 'Mobile number must be 10 digits.',
+        'formData.aadhar.*.digits' => 'Aadhaar number must be 12 digits.',
+        'formData.mobile.*.digits' => 'Mobile number must be 10 digits.',
         'formData.new_bank_account.*.digits_between' => 'Bank account must be 9–18 digits.',
     ];
 
     public function mount($id)
     {
         $this->stage = request()->query('stage');
-        $select_lgd  = session('lgd_session');
+
+        $select_lgd = session('lgd_session');
+
         $this->user_id = Crypt::decryptString($select_lgd['role_id']);
+
         $this->id = $id;
-        $revertReasons       = Codemaster::getIdByCode(12);
+
+        $revertReasons = Codemaster::getIdByCode(12);
         $this->revertReasons = Codemaster::where('parent_id', $revertReasons)->get();
 
         $this->page = ApplicantIncompletDeatil::where('application_id', $id)
@@ -53,24 +57,34 @@ class IncompletTypePage extends Component
                 'incompletType',
                 'beneficiaryCommonList.enclosures',
                 'beneficiaryCommonList.aadhaar',
-                'beneficiaryCommonList.bank.ifscbranch.bankMaster',
+                'beneficiaryCommonList.bank',
                 'beneficiaryCommonList.beneficiaryPersonal.father',
                 'beneficiaryCommonList.panchayat',
                 'beneficiaryCommonList.ward',
             ])->get();
 
-            // dd($this->page);
         $this->applicantInfo = $this->page->first()?->beneficiaryCommonList;
 
         foreach ($this->page as $item) {
             $type = $item->incompletType->name ?? null;
             if (!$type) continue;
 
-            $map = $this->getFieldMap();
+            $map = [
+                'NO AADHAR NUMBER'                   => 'aadhar',
+                'DUPLICATE AADHAR NUMBER'            => 'new_aadhar',
+                'DUPLICATE BANK ACCOUNT NUMBER'      => 'new_bank_account',
+                'NO MOBILE NUMBER'                   => 'mobile',
+                'NAME VALIDATION  FAILED IN BANK'    => 'bank_name',
+                'ACCOUNT NUMBER VALIDATION  FAILED IN BANK' => 'bank_account',
+                'DUPLICATE MOBILE NUMBER'            => 'new_mobile',
+                'MINOR MISMATCH(40% - 89%)'          => 'mismatch_low',
+                'MINOR MISMATCH(90% - 100%)'         => 'mismatch_high',
+                'PDS MISMATCH'                       => 'pds',
+            ];
 
             if (isset($map[$type]) && $item->new_value) {
-                if ($map[$type] === 'aadhar_modification') {
-                    $this->formData['aadhar_modification'][$item->id] = Crypt::decryptString($item->new_value);
+                if (in_array($type, ['NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER', 'PDS MISMATCH'])) {
+                    $this->formData[$map[$type]][$item->id] = Crypt::decryptString($item->new_value);
                 } else {
                     $this->formData[$map[$type]][$item->id] = $item->new_value;
                 }
@@ -78,8 +92,9 @@ class IncompletTypePage extends Component
         }
     }
 
-    public function submit()
+    public function update()
     {
+        // dd('ok');
         $this->validate();
 
         $request = AcceptRejectInfo::create([
@@ -95,14 +110,73 @@ class IncompletTypePage extends Component
             'parent_id'              => null,
         ]);
 
-        $this->processItems($request, 1);
+        foreach ($this->page as $item) {
+            $type = $item->incompletType->name ?? null;
+            if (!$type) continue;
+
+            $newValue = null;
+
+            $map = [
+                'NO AADHAR NUMBER'                   => 'aadhar',
+                'DUPLICATE AADHAR NUMBER'            => 'new_aadhar',
+                'DUPLICATE BANK ACCOUNT NUMBER'      => 'new_bank_account',
+                'NO MOBILE NUMBER'                   => 'mobile',
+                'NAME VALIDATION  FAILED IN BANK'    => 'bank_name',
+                'ACCOUNT NUMBER VALIDATION  FAILED IN BANK' => 'bank_account',
+                'DUPLICATE MOBILE NUMBER'            => 'new_mobile',
+                'MINOR MISMATCH(40% - 89%)'          => 'mismatch_low',
+                'MINOR MISMATCH(90% - 100%)'         => 'mismatch_high',
+                'PDS MISMATCH'                       => 'pds',
+            ];
+
+            if (isset($map[$type]) && isset($this->formData[$map[$type]][$item->id])) {
+                $newValue = $this->formData[$map[$type]][$item->id];
+            }
+
+            if ($newValue) {
+                if (in_array($type, ['NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER', 'PDS MISMATCH'])) {
+                    $exists = $item->beneficiaryCommonList
+                        ->aadhaar()
+                        ->where('encoded_aadhar', md5($newValue))
+                        ->exists();
+
+                    if ($exists) {
+                        $this->addError("formData.aadhar.{$item->id}", "This Aadhaar already exists in encoded form!");
+                        continue;
+                    }
+
+                    $item->new_value = Crypt::encryptString($newValue);
+                } elseif (in_array($type, ['DUPLICATE BANK ACCOUNT NUMBER', 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK'])) {
+                    $exists = $item->beneficiaryCommonList
+                        ->bank()
+                        ->where('bank_account_number', $newValue)
+                        ->exists();
+
+                    if ($exists) {
+                        $this->addError("formData.bank_account.{$item->id}", "This Bank Account already exists!");
+                        continue;
+                    }
+
+                    $item->new_value = $newValue;
+                } else {
+                    $item->new_value = $newValue;
+                }
+
+                $item->update([
+                    'new_value'             => $item->new_value,
+                    'next_level_request_id' => 1,
+                    'request_id'            => $request->id,
+                ]);
+            }
+        }
 
         session()->flash('success', 'Incomplete details updated successfully!');
-        return redirect()->route('incomplete.types', ['stage' => 'verifier', 'id' => $this->id]);
+        return redirect()->route('incomplete.types', ['stage' => 'verifier','id' => $this->id]);
     }
 
     public function approve()
     {
+
         $previousId = AcceptRejectInfo::where('application_id', $this->id)
             ->orderByDesc('id')
             ->value('id');
@@ -120,93 +194,43 @@ class IncompletTypePage extends Component
             'parent_id'              => $previousId,
         ]);
 
-        $this->processItems($request, 2, true);
-
-        session()->flash('success', 'Approve details updated successfully!');
-        return redirect()->route('incomplete.types', ['id' => $this->id]);
-    }
-
-    public function revert()
-    {
-        $previousId = AcceptRejectInfo::where('application_id', $this->id)
-            ->orderByDesc('id')
-            ->value('id');
-
-        $request = AcceptRejectInfo::create([
-            'application_id'         => $this->id,
-            'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
-            'ip_address'             => request()->ip(),
-            'user_id'                => $this->user_id,
-            'browser'                => request()->header('User-Agent'),
-            'model_name'             => 'ApplicantIncompleteDetail',
-            'op_type'                => Codemaster::where('code', 247)->value('id'),
-            'revert_reason_cause_id' => $this->revert_reason_cause_id,
-            'revert_reason_remarks'  => $this->revert_reason_remarks,
-            'parent_id'              => $previousId,
-        ]);
-
-        foreach ($this->page as $item) {
-            $item->update([
-                'next_level_request_id' => -50,
-                'request_id'            => $request->id,
-            ]);
-        }
-
-        session()->flash('success', 'Application reverted successfully!');
-        return redirect()->route('incomplete.types', ['stage' => 'approver', 'id' => $this->id]);
-    }
-
-    public function revertVerify()
-    {
-        $previousId = AcceptRejectInfo::where('application_id', $this->id)
-            ->orderByDesc('id')
-            ->value('id');
-
-        $request = AcceptRejectInfo::create([
-            'application_id'         => $this->id,
-            'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
-            'ip_address'             => request()->ip(),
-            'user_id'                => $this->user_id,
-            'browser'                => request()->header('User-Agent'),
-            'model_name'             => 'ApplicantIncompleteDetail',
-            'op_type'                => Codemaster::where('code', 245)->value('id'),
-            'revert_reason_cause_id' => null,
-            'revert_reason_remarks'  => null,
-            'parent_id'              => $previousId,
-        ]);
-
-        $this->processItems($request, 1);
-
-        session()->flash('success', 'Revert details updated successfully!');
-        return redirect()->route('incomplete.types', ['stage' => 'revert', 'id' => $this->id]);
-    }
-
-    protected function processItems($request, $nextLevel, $approve = false)
-    {
         foreach ($this->page as $item) {
             $type = $item->incompletType->name ?? null;
             if (!$type) continue;
 
-            $map = $this->getFieldMap();
             $newValue = null;
+
+            $map = [
+                'NO AADHAR NUMBER'                   => 'aadhar',
+                'DUPLICATE AADHAR NUMBER'            => 'new_aadhar',
+                'DUPLICATE BANK ACCOUNT NUMBER'      => 'new_bank_account',
+                'NO MOBILE NUMBER'                   => 'mobile',
+                'NAME VALIDATION  FAILED IN BANK'    => 'bank_name',
+                'ACCOUNT NUMBER VALIDATION  FAILED IN BANK' => 'bank_account',
+                'DUPLICATE MOBILE NUMBER'            => 'new_mobile',
+                'MINOR MISMATCH(40% - 89%)'          => 'mismatch_low',
+                'MINOR MISMATCH(90% - 100%)'         => 'mismatch_high',
+                'PDS MISMATCH'                       => 'pds',
+            ];
 
             if (isset($map[$type]) && isset($this->formData[$map[$type]][$item->id])) {
                 $newValue = $this->formData[$map[$type]][$item->id];
             }
 
             if ($newValue) {
-                if ($map[$type] === 'aadhar_modification') {
+                if (in_array($type, ['NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER', 'PDS MISMATCH'])) {
                     $exists = $item->beneficiaryCommonList
                         ->aadhaar()
                         ->where('encoded_aadhar', md5($newValue))
                         ->exists();
 
                     if ($exists) {
-                        $this->addError("formData.aadhar_modification.{$item->id}", "This Aadhaar already exists in encoded form!");
+                        $this->addError("formData.aadhar.{$item->id}", "This Aadhaar already exists in encoded form!");
                         continue;
                     }
+
                     $item->new_value = Crypt::encryptString($newValue);
-                } elseif ($map[$type] === 'new_bank_account' || $map[$type] === 'bank_account') {
+                } elseif (in_array($type, ['DUPLICATE BANK ACCOUNT NUMBER', 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK'])) {
                     $exists = $item->beneficiaryCommonList
                         ->bank()
                         ->where('bank_account_number', $newValue)
@@ -216,6 +240,7 @@ class IncompletTypePage extends Component
                         $this->addError("formData.bank_account.{$item->id}", "This Bank Account already exists!");
                         continue;
                     }
+
                     $item->new_value = $newValue;
                 } else {
                     $item->new_value = $newValue;
@@ -223,31 +248,15 @@ class IncompletTypePage extends Component
 
                 $item->update([
                     'new_value'             => $item->new_value,
-                    'next_level_request_id' => $nextLevel,
+                    'next_level_request_id' => 2,
                     'request_id'            => $request->id,
                 ]);
-
-                if ($approve) {
-                    $this->updateOriginalTable($item);
-                }
+                $this->updateOriginalTable($item);
             }
         }
-    }
 
-    protected function getFieldMap()
-    {
-        return [
-            'NO AADHAR NUMBER'                   => 'aadhar_modification',
-            'DUPLICATE AADHAR NUMBER'            => 'aadhar_modification',
-            'PDS MISMATCH'                       => 'aadhar_modification',
-            'DUPLICATE BANK ACCOUNT NUMBER'      => 'new_bank_account',
-            'NO MOBILE NUMBER'                   => 'mobile',
-            'NAME VALIDATION  FAILED IN BANK'    => 'bank_name',
-            'ACCOUNT NUMBER VALIDATION  FAILED IN BANK' => 'bank_account',
-            'DUPLICATE MOBILE NUMBER'            => 'new_mobile',
-            'MINOR MISMATCH(40% - 89%)'          => 'mismatch_low',
-            'MINOR MISMATCH(90% - 100%)'         => 'mismatch_high',
-        ];
+        session()->flash('success', 'Approve details updated successfully!');
+        return redirect()->route('incomplete.types', ['id' => $this->id]);
     }
 
     protected function updateOriginalTable($item)
@@ -323,10 +332,123 @@ class IncompletTypePage extends Component
         }
     }
 
+    public function revert()
+    {
+        $previousId = AcceptRejectInfo::where('application_id', $this->id)
+            ->orderByDesc('id')
+            ->value('id');
+
+        $request = AcceptRejectInfo::create([
+            'application_id'         => $this->id,
+            'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
+            'ip_address'             => request()->ip(),
+            'user_id'                => $this->user_id,
+            'browser'                => request()->header('User-Agent'),
+            'model_name'             => 'ApplicantIncompleteDetail',
+            'op_type'                => Codemaster::where('code', 247)->value('id'),
+            'revert_reason_cause_id' => $this->revert_reason_cause_id,
+            'revert_reason_remarks'  => $this->revert_reason_remarks,
+            'parent_id'              => $previousId,
+        ]);
+
+        foreach ($this->page as $item) {
+            $item->update([
+                'next_level_request_id' => -50,
+                'request_id'            => $request->id,
+            ]);
+        }
+
+        session()->flash('success', 'Application reverted successfully!');
+        return redirect()->route('incomplete.types', ['stage' => 'approver','id' => $this->id]);
+    }
+
+    public function revertVerify()
+    {
+        $previousId = AcceptRejectInfo::where('application_id', $this->id)
+            ->orderByDesc('id')
+            ->value('id');
+
+        $request = AcceptRejectInfo::create([
+            'application_id'         => $this->id,
+            'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
+            'ip_address'             => request()->ip(),
+            'user_id'                => $this->user_id,
+            'browser'                => request()->header('User-Agent'),
+            'model_name'             => 'ApplicantIncompleteDetail',
+            'op_type'                => Codemaster::where('code', 245)->value('id'),
+            'revert_reason_cause_id' => null,
+            'revert_reason_remarks'  => null,
+            'parent_id'              => $previousId,
+        ]);
+
+        foreach ($this->page as $item) {
+            $type = $item->incompletType->name ?? null;
+            if (!$type) continue;
+
+            $newValue = null;
+
+            $map = [
+                'NO AADHAR NUMBER'                   => 'aadhar',
+                'DUPLICATE AADHAR NUMBER'            => 'new_aadhar',
+                'DUPLICATE BANK ACCOUNT NUMBER'      => 'new_bank_account',
+                'NO MOBILE NUMBER'                   => 'mobile',
+                'NAME VALIDATION  FAILED IN BANK'    => 'bank_name',
+                'ACCOUNT NUMBER VALIDATION  FAILED IN BANK' => 'bank_account',
+                'DUPLICATE MOBILE NUMBER'            => 'new_mobile',
+                'MINOR MISMATCH(40% - 89%)'          => 'mismatch_low',
+                'MINOR MISMATCH(90% - 100%)'         => 'mismatch_high',
+                'PDS MISMATCH'                       => 'pds',
+            ];
+
+            if (isset($map[$type]) && isset($this->formData[$map[$type]][$item->id])) {
+                $newValue = $this->formData[$map[$type]][$item->id];
+            }
+
+            if ($newValue) {
+                if (in_array($type, ['NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER', 'PDS MISMATCH'])) {
+                    $exists = $item->beneficiaryCommonList
+                        ->aadhaar()
+                        ->where('encoded_aadhar', md5($newValue))
+                        ->exists();
+
+                    if ($exists) {
+                        $this->addError("formData.aadhar.{$item->id}", "This Aadhaar already exists in encoded form!");
+                        continue;
+                    }
+
+                    $item->new_value = Crypt::encryptString($newValue);
+                } elseif (in_array($type, ['DUPLICATE BANK ACCOUNT NUMBER', 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK'])) {
+                    $exists = $item->beneficiaryCommonList
+                        ->bank()
+                        ->where('bank_account_number', $newValue)
+                        ->exists();
+
+                    if ($exists) {
+                        $this->addError("formData.bank_account.{$item->id}", "This Bank Account already exists!");
+                        continue;
+                    }
+
+                    $item->new_value = $newValue;
+                } else {
+                    $item->new_value = $newValue;
+                }
+
+                $item->update([
+                    'new_value'             => $item->new_value,
+                    'next_level_request_id' => 1,
+                    'request_id'            => $request->id,
+                ]);
+            }
+        }
+
+        session()->flash('success', 'Revert details updated successfully!');
+        return redirect()->route('incomplete.types', ['stage' => 'revert','id' => $this->id]);
+    }
+
     public function render()
     {
         return view('livewire.incomplet-type-page', [
-            'page'          => $this->page,
+            'page' => $this->page,
             'applicantInfo' => $this->applicantInfo,
         ]);
     }

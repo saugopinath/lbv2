@@ -33,19 +33,17 @@
 
     <form wire:submit.prevent="submit">
         @php
-            // Initialize issue arrays
             $aadhaarIssues = [];
             $mobileIssues = [];
             $bankIssues = [];
+            $minorMismatchIssues = [];
 
-            // Priority order for bank issues
             $bankPriority = [
                 'DUPLICATE BANK ACCOUNT NUMBER',
                 'NAME VALIDATION  FAILED IN BANK',
                 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK',
             ];
 
-            // Loop through all items and categorize them
             foreach ($page as $item) {
                 $typeName = $item->incompletType->name;
 
@@ -55,28 +53,39 @@
                     $mobileIssues[] = $item;
                 } elseif (in_array($typeName, $bankPriority)) {
                     $bankIssues[] = $item;
+                } elseif (in_array($typeName, ['MINOR MISMATCH(40% - 89%)', 'MINOR MISMATCH(90% - 100%)'])) {
+                    $minorMismatchIssues[] = $item;
                 }
             }
 
-            // Sort bank issues according to priority
-            $sortedBankIssues = collect($bankIssues)->sortBy(function ($item) use ($bankPriority) {
-                return array_search($item->incompletType->name, $bankPriority);
-            });
+            $sortedBankIssues = collect($bankIssues)->sortBy(
+                fn($item) => array_search($item->incompletType->name, $bankPriority),
+            );
         @endphp
 
+        {{-- Minor Mismatch Issues --}}
+        @foreach ($minorMismatchIssues as $item)
+            <div class="p-4 mb-4 border rounded-lg bg-gray-50 shadow-sm">
+                <h2 class="font-semibold text-lg text-blue-700 mb-2">{{ $item->incompletType->name }}</h2>
+                @if ($item->incompletType->name === 'MINOR MISMATCH(40% - 89%)')
+                    <livewire:incomplete.mismatch-low :item="$item" :wire:key="'mismatch-low-'.$item->id" />
+                @elseif ($item->incompletType->name === 'MINOR MISMATCH(90% - 100%)')
+                    <livewire:incomplete.mismatch-high :item="$item" :wire:key="'mismatch-high-'.$item->id" />
+                @endif
+            </div>
+        @endforeach
 
-
-        {{-- ---------- Render Aadhaar Issues ---------- --}}
+        {{-- Aadhaar Issues --}}
         @if (!empty($aadhaarIssues))
             <x-incomplete.aadhar-modification :aadhaar-issues="$aadhaarIssues" />
         @endif
 
-        {{-- ---------- Render Mobile Issues ---------- --}}
+        {{-- Mobile Issues --}}
         @if (!empty($mobileIssues))
             <x-incomplete.mobile-issues :mobile-issues="$mobileIssues" />
         @endif
 
-        {{-- ---------- Render Bank Issues ---------- --}}
+        {{-- Bank Issues --}}
         @if (!empty($sortedBankIssues))
             @foreach ($sortedBankIssues as $item)
                 <div class="p-4 mb-4 border rounded-lg bg-gray-50 shadow-sm">
@@ -97,7 +106,7 @@
         {{-- Submit Buttons --}}
         <div class="flex justify-end mt-4 space-x-2">
             @if ($stage === 'verifier')
-                <x-button.primary type="submit">
+                <x-button.primary type="submit"  wire:click="update">
                     Request Send to Approver
                 </x-button.primary>
             @elseif ($stage === 'approver')

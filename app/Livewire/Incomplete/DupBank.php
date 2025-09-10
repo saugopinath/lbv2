@@ -17,6 +17,7 @@ class DupBank extends Component
     public function mount($item)
     {
         $this->old = $item;
+        // dd($this->old->application_id);
         $oldData = $item->old_value ?? [];
 
         $this->ifscode = $oldData['ifsc'] ?? '';
