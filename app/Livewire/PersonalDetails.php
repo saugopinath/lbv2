@@ -135,9 +135,17 @@ class PersonalDetails extends Component
         DB::beginTransaction();
         try {
             if ($this->mode === null && $this->application_id === null) {
-                $uniqueApp = UniqueAppBenId::create();
+                $uniqueApp = UniqueAppBenId::create([]);
+                $beneficiary_id_obj = UniqueAppBenId::where('application_id', $uniqueApp->application_id)->first();
+                BeneficiaryAadhaar::create([
+                    'application_id' => $uniqueApp->application_id,
+                    'aadhar_hash' => $this->hash,
+                    'created_by' => Auth::id(),
+                    'encoded_aadhar' => $this->encoded,
+                ]);
                 $data = [
                     'application_id' => $uniqueApp->application_id,
+                    'beneficiary_id' => $beneficiary_id_obj->beneficiary_id,
                     'full_name' => $validated['name'],
                     'dob' => $validated['dob'],
                     'mobile_no' => $validated['mobile'],
@@ -186,12 +194,6 @@ class PersonalDetails extends Component
                         'relation_type_id' => Codemaster::getIdByCode(133),
                     ]);
                 }
-                BeneficiaryAadhaar::create([
-                    'application_id' => $uniqueApp->application_id,
-                    'aadhar_hash' => $this->hash,
-                    'created_by' => Auth::id(),
-                    'encoded_aadhar' => $this->encoded,
-                ]);
                 $this->dispatch('perDet', [
                     'application_id' => $draftbenPar->application_id,
                     'message' => "Personal Details saved successfully and the application id is: {$draftbenPar->application_id}"
@@ -215,7 +217,9 @@ class PersonalDetails extends Component
                 if ($validated['caste'] != Codemaster::getIdByCode(173)) {
                     $data['caste_certificate_no'] = $validated['cas_cer_no'];
                 }
-                DraftBeneficiaryPersonal::where('application_id', $this->application_id)->update($data);
+                // $draftbenPar = DraftBeneficiaryPersonal::where('application_id', $this->application_id)->update($data);
+                $draftbenPar = DraftBeneficiaryPersonal::where('application_id', $this->application_id)->first();
+                $draftbenPar->update($data);
                 DraftBeneficiaryRelationship::where('application_id', $this->application_id)
                     ->where('relation_type_id', Codemaster::getIdByCode(131))
                     ->update([

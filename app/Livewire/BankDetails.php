@@ -69,7 +69,7 @@ class BankDetails extends Component
         try {
             if ($this->mode === null && empty($app_det)) {
                 $application_id = $this->application_id;
-                DraftBeneficiaryBank::create([
+                $bank = DraftBeneficiaryBank::create([
                     'application_id' => $application_id,
                     'created_by' => Auth::id(),
                     'ifsc' => $validated['ifscode'],
@@ -83,7 +83,9 @@ class BankDetails extends Component
                     'ifsc' => $validated['ifscode'],
                     'bank_account_number' => $validated['bankaccountnumber'],
                 ];
-                DraftBeneficiaryBank::where('application_id', $this->application_id)->update($data);
+                // $bank = DraftBeneficiaryBank::where('application_id', $this->application_id)->update($data);
+                $bank = DraftBeneficiaryBank::where('application_id', $this->application_id)->first();
+                $bank->update($data);
                 $this->dispatch('bankDet', [
                     'message' => "Bank Details updated successfully for the application id: {$this->application_id}"
                 ]);

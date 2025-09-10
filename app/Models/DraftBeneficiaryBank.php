@@ -14,4 +14,27 @@ class DraftBeneficiaryBank extends Model
      {
           return $this->belongsTo(IfscCodeMaster::class, 'ifsc', 'code');
      }
+     public function personal()
+     {
+          return $this->belongsTo(DraftBeneficiaryPersonal::class, 'application_id', 'application_id');
+     }
+     protected static function booted()
+     {
+          static::created(function ($bank) {
+               $personal = $bank->personal;
+               if ($personal && $personal->lists) {
+                    $personal->lists()->update([
+                         'bank_account_number' => $bank->bank_account_number,
+                    ]);
+               }
+          });
+          static::updated(function ($bank) {
+               $personal = $bank->personal;
+               if ($personal && $personal->lists) {
+                    $personal->lists()->update([
+                         'bank_account_number' => $bank->bank_account_number,
+                    ]);
+               }
+          });
+     }
 }

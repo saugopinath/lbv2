@@ -33,4 +33,31 @@ class DraftBeneficiaryPersonal extends Model
     {
         return $this->hasOne(BeneficiaryAadhaar::class, 'application_id');
     }
+    public function lists()
+    {
+        return $this->morphOne(BeneficiaryCommonList::class, 'sourceable');
+    }
+    protected static function booted()
+    {
+        static::created(function ($draftbenPar) {
+            $draftbenPar->lists()->create([
+                'beneficiary_id'     => $draftbenPar->beneficiary_id,
+                'district_id'     => $draftbenPar->district_id,
+                'block_id'        => $draftbenPar->block_id,
+                'sub_division_id' => $draftbenPar->sub_division_id,
+                'municipality_id' => $draftbenPar->municipality_id,
+                'ward_id'         => $draftbenPar->ward_id,
+                'panchayat_id'    => $draftbenPar->panchayat_id,
+                'encoded_aadhar'    => $draftbenPar->aadhaar->encoded_aadhar,
+                'mobile_no' => $draftbenPar->mobile_no,
+            ]);
+        });
+        static::updated(function ($draftbenPar) {
+            if ($draftbenPar->lists) {
+                $draftbenPar->lists->update([
+                    'mobile_no' => $draftbenPar->mobile_no,
+                ]);
+            }
+        });
+    }
 }
