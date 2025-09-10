@@ -33,50 +33,64 @@
 
     <form wire:submit.prevent="submit">
         @php
+            // Initialize issue arrays
             $aadhaarIssues = [];
             $mobileIssues = [];
             $bankIssues = [];
+
+            // Priority order for bank issues
+            $bankPriority = [
+                'DUPLICATE BANK ACCOUNT NUMBER',
+                'NAME VALIDATION  FAILED IN BANK',
+                'ACCOUNT NUMBER VALIDATION  FAILED IN BANK',
+            ];
+
+            // Loop through all items and categorize them
+            foreach ($page as $item) {
+                $typeName = $item->incompletType->name;
+
+                if (in_array($typeName, ['PDS MISMATCH', 'NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER'])) {
+                    $aadhaarIssues[] = $item;
+                } elseif (in_array($typeName, ['NO MOBILE NUMBER', 'DUPLICATE MOBILE NUMBER'])) {
+                    $mobileIssues[] = $item;
+                } elseif (in_array($typeName, $bankPriority)) {
+                    $bankIssues[] = $item;
+                }
+            }
+
+            // Sort bank issues according to priority
+            $sortedBankIssues = collect($bankIssues)->sortBy(function ($item) use ($bankPriority) {
+                return array_search($item->incompletType->name, $bankPriority);
+            });
         @endphp
 
-        @foreach ($page as $item)
-            {{-- Categorize issues --}}
-            @if (in_array($item->incompletType->name, ['PDS MISMATCH', 'NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER']))
-                @php $aadhaarIssues[] = $item; @endphp
-            @elseif (in_array($item->incompletType->name, [
-                    'DUPLICATE BANK ACCOUNT NUMBER',
-                    'NAME VALIDATION  FAILED IN BANK',
-                    'ACCOUNT NUMBER VALIDATION  FAILED IN BANK',
-                ]))
-                @php $bankIssues[] = $item; @endphp
-            @elseif (in_array($item->incompletType->name, ['NO MOBILE NUMBER', 'DUPLICATE MOBILE NUMBER']))
-                @php $mobileIssues[] = $item; @endphp
-            @endif
 
-            {{-- Display mismatch blocks --}}
-            @if (in_array($item->incompletType->name, ['MINOR MISMATCH(40% - 89%)', 'MINOR MISMATCH(90% - 100%)']))
-                <div class="p-4 mb-4 border rounded-lg bg-gray-50 shadow-sm">
-                    <h2 class="font-semibold text-lg text-blue-700 mb-2">{{ $item->incompletType->name }}</h2>
 
-                    @if ($item->incompletType->name === 'MINOR MISMATCH(40% - 89%)')
-                        <livewire:incomplete.mismatch-low :item="$item" />
-                    @elseif ($item->incompletType->name === 'MINOR MISMATCH(90% - 100%)')
-                        <livewire:incomplete.mismatch-high :item="$item" />
-                    @endif
-                </div>
-            @endif
-        @endforeach
-
-        {{-- Issues Components --}}
-        @if (!empty($mobileIssues))
-            <x-incomplete.mobile-issues :mobile-issues="$mobileIssues" />
-        @endif
-
+        {{-- ---------- Render Aadhaar Issues ---------- --}}
         @if (!empty($aadhaarIssues))
             <x-incomplete.aadhar-modification :aadhaar-issues="$aadhaarIssues" />
         @endif
 
-        @if (!empty($bankIssues))
-            <livewire:incomplete.bank-issues :bank-issues="$bankIssues" />
+        {{-- ---------- Render Mobile Issues ---------- --}}
+        @if (!empty($mobileIssues))
+            <x-incomplete.mobile-issues :mobile-issues="$mobileIssues" />
+        @endif
+
+        {{-- ---------- Render Bank Issues ---------- --}}
+        @if (!empty($sortedBankIssues))
+            @foreach ($sortedBankIssues as $item)
+                <div class="p-4 mb-4 border rounded-lg bg-gray-50 shadow-sm">
+                    <h2 class="font-semibold text-lg text-blue-700 mb-2">{{ $item->incompletType->name }}</h2>
+
+                    @if ($item->incompletType->name === 'DUPLICATE BANK ACCOUNT NUMBER')
+                        <livewire:incomplete.dup-bank :item="$item" :wire:key="'dup-'.$item->id" />
+                    @elseif ($item->incompletType->name === 'NAME VALIDATION  FAILED IN BANK')
+                        <livewire:incomplete.bank-name-fail :item="$item" :wire:key="'name-'.$item->id" />
+                    @elseif ($item->incompletType->name === 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK')
+                        <livewire:incomplete.bank-account-fail :item="$item" :wire:key="'account-'.$item->id" />
+                    @endif
+                </div>
+            @endforeach
         @endif
 
 
