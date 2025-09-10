@@ -14,12 +14,15 @@ class DupAadhaarCheck extends Component
         $this->error = null;
         $this->aadhaar = trim($this->aadhaar);
         if (!ctype_digit($this->aadhaar) || strlen($this->aadhaar) !== 12) {
+            $this->dispatch('hideEntryTabs');
+            $this->dispatch('hideLoader');
             $this->error = "Please enter a valid 12-digit Aadhaar number.";
             return ['status' => 'error', 'message' => $this->error];
         }
         $encoded_aadhar = Crypt::encryptString($this->aadhaar);
         $aadhaar_hash = md5($this->aadhaar);
         if (BeneficiaryAadhaar::where('aadhar_hash', $aadhaar_hash)->exists()) {
+            $this->dispatch('hideEntryTabs');
             $this->dispatch('hideLoader');
             $this->error = "Duplicate Aadhaar found!";
             return ['status' => 'duplicate', 'message' => $this->error];
