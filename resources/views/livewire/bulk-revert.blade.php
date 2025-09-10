@@ -20,11 +20,14 @@
             class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
             <h2 class="text-lg font-bold mb-2">Confirm Bulk <span x-text="action.charAt(0).toUpperCase() + action.slice(1)"></span></h2>
             <p class="mb-4">Are you sure you want to <span x-text="action"></span> the selected records?</p>
-            <div class="mb-2">
+            <!-- <div class="mb-2">
                 <x-form.input type="textarea"
                     id="reason"
                     name="reason"
                     label="Reason" required />
+            </div> -->
+            <div>
+                {{$slot}}
             </div>
             <div class="flex space-x-2">
                 <button class="bg-red-500 text-white px-4 py-2 rounded"

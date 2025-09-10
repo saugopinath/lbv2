@@ -10,6 +10,6 @@
 
         <livewire:application-process-details-data-table />
 
-        @include('livewire.bulk-revert')
+        <livewire:revert-reject-modal />
     </div>
 </x-layouts.app>

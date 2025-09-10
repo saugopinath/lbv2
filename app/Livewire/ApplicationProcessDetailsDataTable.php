@@ -250,20 +250,29 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     {
         $this->handleBulkAction('reject');
     }
-    public function handleBulkAction(string $action)
+    public function handleBulkAction($action)
     {
         $this->revertrejectAction = $action;
         $this->dispatch('open-bulk-revert-modal', action: $action);
     }
     #[On('confirm-bulk-revert')]
-    public function confirmBulkRevert()
+    public function confirmBulkRevert($reason)
     {
-        dd($this->getSelected());
-        try {
-            Log::info('confirmBulkRevert called', ['selected' => $this->getSelected()]);
-        } catch (\Exception $e) {
-            Log::error('Error in confirmBulkRevert', ['message' => $e->getMessage()]);
-            throw $e;
+        $ids = $this->getSelected();
+        if ($this->revertrejectAction === 'revert') {
+            // dd($reason, $this->getSelected(), $this->revertrejectAction);
+            $user = auth()->user();
+            if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+                $next_level_role_id = Codemaster::getIdByCode(22);
+            }
+            if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+                $next_level_role_id = Codemaster::getIdByCode(21);
+            }
+            foreach ($ids as $id) {
+                DraftBeneficiaryPersonal::where('application_id', $id)
+                    ->update(['next_level_role_id' => $next_level_role_id]);
+            }
+            $this->clearSelected();
         }
     }
 }
