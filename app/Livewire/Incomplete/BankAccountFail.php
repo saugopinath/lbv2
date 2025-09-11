@@ -47,12 +47,17 @@ class BankAccountFail extends Component
         }
     }
 
+    public function updatedBankAction($value)
+    {
+        $this->dispatch('bank-account-fail-action-changed', id: $this->item->id, action: $value);
+    }
 
     public function setDupAction($value)
     {
         $this->dupAction = $value;
         $this->bank_action = $value;
     }
+   
 
     public function render()
     {

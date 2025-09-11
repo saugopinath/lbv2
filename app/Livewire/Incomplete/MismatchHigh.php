@@ -15,7 +15,6 @@ class MismatchHigh extends Component
     public function mount($item)
     {
         $old = $item->old_value ?? [];
-        // dd($old);
 
         $this->application_id = $old['application_id'] ?? '';
         $this->beneficiary_name = $old['beneficiary_name'] ?? '';

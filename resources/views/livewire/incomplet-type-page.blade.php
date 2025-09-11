@@ -1,4 +1,5 @@
 <div class="p-6 bg-white rounded shadow">
+    {{-- Page Header --}}
     <h1 class="text-xl font-bold mb-4">
         @if ($stage === 'verifier')
             Update Incomplete
@@ -11,6 +12,7 @@
         @endif
     </h1>
 
+    {{-- Applicant Info --}}
     @if ($applicantInfo)
         <div class="mb-6 p-4 border rounded-lg bg-gray-100 shadow-sm">
             <div class="flex flex-wrap gap-6 text-sm">
@@ -33,6 +35,7 @@
 
     <form wire:submit.prevent="submit">
         @php
+            // Categorize issues
             $aadhaarIssues = [];
             $mobileIssues = [];
             $bankIssues = [];
@@ -58,8 +61,9 @@
                 }
             }
 
+            // Sort bank issues by priority
             $sortedBankIssues = collect($bankIssues)->sortBy(
-                fn($item) => array_search($item->incompletType->name, $bankPriority),
+                fn($item) => array_search($item->incompletType->name, $bankPriority)
             );
         @endphp
 
@@ -102,11 +106,11 @@
             @endforeach
         @endif
 
-
         {{-- Submit Buttons --}}
         <div class="flex justify-end mt-4 space-x-2">
             @if ($stage === 'verifier')
-                <x-button.primary type="submit"  wire:click="update">
+                <x-button.primary type="button" class="bg-blue-500 text-white whitespace-nowrap"
+                    wire:click="$dispatch('confirm-submit')">
                     Request Send to Approver
                 </x-button.primary>
             @elseif ($stage === 'approver')
@@ -146,8 +150,7 @@
 
                             <div class="flex justify-end space-x-2">
                                 <x-button.primary x-on:click="open = false">Cancel</x-button.primary>
-                                <x-button.primary wire:click="revert"
-                                    x-on:click="open = false">Submit</x-button.primary>
+                                <x-button.primary wire:click="revert" x-on:click="open = false">Submit</x-button.primary>
                             </div>
                         </div>
                     </div>
@@ -158,3 +161,14 @@
         </div>
     </form>
 </div>
+
+{{-- JS for confirmation --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        Livewire.on('confirm-submit', () => {
+            if (confirm("Are you sure you want to submit this request?")) {
+                Livewire.dispatch('trigger-update');
+            }
+        });
+    });
+</script>

@@ -2,8 +2,6 @@
 
 namespace App\View\Components\Incomplete;
 
-use Closure;
-use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
 class MobileIssues extends Component
@@ -13,10 +11,9 @@ class MobileIssues extends Component
     public function __construct($mobileIssues)
     {
         $this->mobileIssues = $mobileIssues;
-        // dd($this->mobileIssues);
     }
 
-    public function render(): View|Closure|string
+    public function render()
     {
         return view('components.incomplete.mobile-issues');
     }

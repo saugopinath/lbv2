@@ -12,12 +12,11 @@ class DupBank extends Component
     public $ifscode, $bankname, $bankbranchname, $new_bank_account;
     public $bank_action = '';
     public $old;
-
+    public $item;
 
     public function mount($item)
     {
         $this->old = $item;
-        // dd($this->old->application_id);
         $oldData = $item->old_value ?? [];
 
         $this->ifscode = $oldData['ifsc'] ?? '';
@@ -44,12 +43,15 @@ class DupBank extends Component
 
     public function updatedBankAction($value)
     {
-        // dd($value);
         $this->dispatch('dup-bank-action-changed', $value);
+
     }
+
 
     public function render()
     {
         return view('livewire.incomplete.dup-bank');
     }
 }
+
+

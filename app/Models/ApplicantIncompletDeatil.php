@@ -15,7 +15,8 @@ class ApplicantIncompletDeatil extends Model
         'next_level_request_id',
         'new_value',
         'old_value',
-        'request_id'
+        'request_id',
+        'change_type',
     ];
 
     protected $casts = [

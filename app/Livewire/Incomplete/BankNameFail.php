@@ -14,12 +14,13 @@ class BankNameFail extends Component
     public $application_id, $beneficiary_name, $mobile_no, $father_name;
     public $name_as_in_portal, $name_response_for_bank, $name_matching_score;
     public $bank_action = '';
+    public $item;
 
     protected $listeners = [
         'dup-bank-action-changed' => 'setDupAction'
     ];
 
-    public function mount($item, $dupAction = null)
+    public function mount($item)
     {
         $this->old = $item;
 
@@ -39,6 +40,10 @@ class BankNameFail extends Component
         $this->name_matching_score = $oldData['name_matching_score'] ?? '';
     }
 
+    public function updatedBankAction($value)
+    {
+        $this->dispatch('bank-name-fail-action-changed', id: $this->item->id, action: $value);
+    }
     public function setDupAction($value)
     {
         $this->dupAction = $value;
