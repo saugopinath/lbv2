@@ -15,7 +15,16 @@
                 <x-loading-spinner wire:target="ifscode" />
             </div>
             <div>
-                <x-form.input name="bankaccountnumber" label="Bank Account Number" required wire:model.defer="bankaccountnumber" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
+                <x-form.masked-input
+    name="bankaccountnumber"
+    label="Bank Account Number"
+    required
+    wire:model.defer="bankaccountnumber"
+/>
+
+
+
+
             </div>
         </div>
         <div class="grid gap-6 mb-4 md:grid-cols-2 pl-4 pr-4">

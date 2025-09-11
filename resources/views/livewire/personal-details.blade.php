@@ -45,7 +45,7 @@
                     id="mobile"
                     name="mobile"
                     label="Mobile number"
-                    required wire:model="mobile" placeholder="123-45-678" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />
+                    required wire:model="mobile" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />
             </div>
             <div>
                 <x-form.input
@@ -53,7 +53,7 @@
                     name="email"
                     type="email"
                     label="Email address"
-                    wire:model="email" placeholder="example@example.com" />
+                    wire:model="email" />
             </div>
         </div>
         <div class="grid gap-6 md:grid-cols-2 mb-2 pl-4 pr-4">
