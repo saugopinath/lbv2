@@ -12,13 +12,13 @@ class Loader extends Component
 
     public function showLoader()
     {
-        
+        // dump('show');
         $this->show = true;
     }
 
     public function hideLoader()
     {
-        
+        // dump('hide');
         $this->show = false;
     }
 

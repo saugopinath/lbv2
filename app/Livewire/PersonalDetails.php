@@ -132,6 +132,7 @@ class PersonalDetails extends Component
     public function save()
     {
         $validated = $this->validate($this->rules());
+        $this->dispatch('showLoader');
         DB::beginTransaction();
         try {
             if ($this->mode === null && $this->application_id === null) {
@@ -198,6 +199,7 @@ class PersonalDetails extends Component
                     'application_id' => $draftbenPar->application_id,
                     'message' => "Personal Details saved successfully and the application id is: {$draftbenPar->application_id}"
                 ]);
+                $this->dispatch('hideLoader');
             } else {
                 $data = [
                     'full_name' => $validated['name'],
@@ -255,6 +257,7 @@ class PersonalDetails extends Component
                     'application_id' => $this->application_id,
                     'message' => "Personal Details updated successfully for the application id: {$this->application_id}"
                 ]);
+                $this->dispatch('hideLoader');
             }
             DB::commit();
         } catch (\Exception $e) {
