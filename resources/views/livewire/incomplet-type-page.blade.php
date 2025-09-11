@@ -35,16 +35,16 @@
 
     <form wire:submit.prevent="submit">
         @php
-            // Categorize issues
             $aadhaarIssues = [];
             $mobileIssues = [];
             $bankIssues = [];
-            $minorMismatchIssues = [];
 
             $bankPriority = [
                 'DUPLICATE BANK ACCOUNT NUMBER',
                 'NAME VALIDATION  FAILED IN BANK',
                 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK',
+                'MINOR MISMATCH(40% - 89%)',
+                'MINOR MISMATCH(90% - 100%)',
             ];
 
             foreach ($page as $item) {
@@ -56,28 +56,15 @@
                     $mobileIssues[] = $item;
                 } elseif (in_array($typeName, $bankPriority)) {
                     $bankIssues[] = $item;
-                } elseif (in_array($typeName, ['MINOR MISMATCH(40% - 89%)', 'MINOR MISMATCH(90% - 100%)'])) {
-                    $minorMismatchIssues[] = $item;
                 }
             }
 
             // Sort bank issues by priority
             $sortedBankIssues = collect($bankIssues)->sortBy(
-                fn($item) => array_search($item->incompletType->name, $bankPriority)
+                fn($item) => array_search($item->incompletType->name, $bankPriority),
             );
         @endphp
 
-        {{-- Minor Mismatch Issues --}}
-        @foreach ($minorMismatchIssues as $item)
-            <div class="p-4 mb-4 border rounded-lg bg-gray-50 shadow-sm">
-                <h2 class="font-semibold text-lg text-blue-700 mb-2">{{ $item->incompletType->name }}</h2>
-                @if ($item->incompletType->name === 'MINOR MISMATCH(40% - 89%)')
-                    <livewire:incomplete.mismatch-low :item="$item" :wire:key="'mismatch-low-'.$item->id" />
-                @elseif ($item->incompletType->name === 'MINOR MISMATCH(90% - 100%)')
-                    <livewire:incomplete.mismatch-high :item="$item" :wire:key="'mismatch-high-'.$item->id" />
-                @endif
-            </div>
-        @endforeach
 
         {{-- Aadhaar Issues --}}
         @if (!empty($aadhaarIssues))
@@ -101,7 +88,12 @@
                         <livewire:incomplete.bank-name-fail :item="$item" :wire:key="'name-'.$item->id" />
                     @elseif ($item->incompletType->name === 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK')
                         <livewire:incomplete.bank-account-fail :item="$item" :wire:key="'account-'.$item->id" />
+                    @elseif ($item->incompletType->name === 'MINOR MISMATCH(40% - 89%)')
+                        <livewire:incomplete.mismatch-low :item="$item" :wire:key="'mismatch-low-'.$item->id" />
+                    @elseif ($item->incompletType->name === 'MINOR MISMATCH(90% - 100%)')
+                        <livewire:incomplete.mismatch-high :item="$item" :wire:key="'mismatch-high-'.$item->id" />
                     @endif
+
                 </div>
             @endforeach
         @endif
@@ -150,7 +142,8 @@
 
                             <div class="flex justify-end space-x-2">
                                 <x-button.primary x-on:click="open = false">Cancel</x-button.primary>
-                                <x-button.primary wire:click="revert" x-on:click="open = false">Submit</x-button.primary>
+                                <x-button.primary wire:click="revert"
+                                    x-on:click="open = false">Submit</x-button.primary>
                             </div>
                         </div>
                     </div>
@@ -164,7 +157,7 @@
 
 {{-- JS for confirmation --}}
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         Livewire.on('confirm-submit', () => {
             if (confirm("Are you sure you want to submit this request?")) {
                 Livewire.dispatch('trigger-update');

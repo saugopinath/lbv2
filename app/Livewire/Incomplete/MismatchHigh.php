@@ -10,11 +10,17 @@ class MismatchHigh extends Component
     public $application_id, $beneficiary_name, $mobile_no, $father_name;
     public $ifscode, $bankname, $bankbranchname, $new_bank_account;
     public $name_as_in_portal, $name_response_for_bank, $name_matching_score;
-
+    public $old;
+    public $dupAction = null;
+    public $item;
     public $bank_action = '';
+    protected $listeners = [
+        'dup-bank-action-changed' => 'setDupAction'
+    ];
     public function mount($item)
     {
         $old = $item->old_value ?? [];
+        // dd($old);
 
         $this->application_id = $old['application_id'] ?? '';
         $this->beneficiary_name = $old['beneficiary_name'] ?? '';
@@ -45,7 +51,11 @@ class MismatchHigh extends Component
             $this->bankbranchname = '';
         }
     }
-
+    public function setDupAction($value)
+    {
+        $this->dupAction = $value;
+        $this->bank_action = $value;
+    }
     public function render()
     {
         return view('livewire.incomplete.mismatch-high');

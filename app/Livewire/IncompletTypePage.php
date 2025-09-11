@@ -18,9 +18,11 @@ class IncompletTypePage extends Component
     public $formData = [];
     public $revertReasons = [];
     public $user_id;
-    protected $listeners = ['trigger-update' => 'update'];
     public $revert_reason_cause_id;
     public $revert_reason_remarks;
+
+    protected $listeners = ['trigger-update' => 'update', 'update-form-data' => 'updateFormData'];
+
     protected $rules = [
         'formData.aadhar.*'        => 'nullable|digits:12',
         'formData.new_aadhar.*'    => 'nullable|digits:12',
@@ -28,30 +30,33 @@ class IncompletTypePage extends Component
         'formData.mobile.*'        => 'nullable|digits:10',
         'formData.new_mobile.*'    => 'nullable|digits:10',
         'formData.bank_name.*'     => 'nullable|string|max:255',
-        'formData.bank_account.*'  => 'nullable|digits_between:9,18',
+        'formData.ifscode.*'       => 'nullable|string|size:11',
         'formData.mismatch_low.*'  => 'nullable|string|max:255',
         'formData.mismatch_high.*' => 'nullable|string|max:255',
-        'formData.pds.*'           => 'nullable|string|max:255',
+        'formData.pds.*'           => 'nullable|digits:12',
+        'formData.bank_action.*'   => 'nullable|in:1,2',
     ];
 
     protected $messages = [
         'formData.aadhar.*.digits' => 'Aadhaar number must be 12 digits.',
+        'formData.new_aadhar.*.digits' => 'New Aadhaar number must be 12 digits.',
+        'formData.new_bank_account.*.digits_between' => 'Bank account number must be 9–18 digits.',
         'formData.mobile.*.digits' => 'Mobile number must be 10 digits.',
-        'formData.new_bank_account.*.digits_between' => 'Bank account must be 9–18 digits.',
+        'formData.new_mobile.*.digits' => 'New mobile number must be 10 digits.',
+        'formData.ifscode.*.size' => 'IFSC code must be 11 characters.',
+        'formData.pds.*.digits' => 'PDS Aadhaar number must be 12 digits.',
+        'formData.bank_action.*.in' => 'Invalid bank action selected.',
     ];
 
     public function mount($id)
     {
         $this->stage = request()->query('stage');
-
-        $select_lgd = session('lgd_session');
-
-        $this->user_id = Crypt::decryptString($select_lgd['role_id']);
-
         $this->id = $id;
 
-        $revertReasons = Codemaster::getIdByCode(12);
-        $this->revertReasons = Codemaster::where('parent_id', $revertReasons)->get();
+        $select_lgd = session('lgd_session');
+        $this->user_id = Crypt::decryptString($select_lgd['role_id']);
+
+        $this->revertReasons = Codemaster::where('parent_id', Codemaster::getIdByCode(12))->get();
 
         $this->page = ApplicantIncompletDeatil::where('application_id', $id)
             ->with([
@@ -75,27 +80,53 @@ class IncompletTypePage extends Component
                 'DUPLICATE AADHAR NUMBER'            => 'new_aadhar',
                 'DUPLICATE BANK ACCOUNT NUMBER'      => 'new_bank_account',
                 'NO MOBILE NUMBER'                   => 'mobile',
-                'NAME VALIDATION  FAILED IN BANK'    => 'bank_name',
-                'ACCOUNT NUMBER VALIDATION  FAILED IN BANK' => 'bank_account',
+                'NAME VALIDATION FAILED IN BANK'     => 'bank_name',
+                'ACCOUNT NUMBER VALIDATION FAILED IN BANK' => 'bank_account',
                 'DUPLICATE MOBILE NUMBER'            => 'new_mobile',
                 'MINOR MISMATCH(40% - 89%)'          => 'mismatch_low',
                 'MINOR MISMATCH(90% - 100%)'         => 'mismatch_high',
                 'PDS MISMATCH'                       => 'pds',
             ];
 
-            if (isset($map[$type]) && $item->new_value) {
-                if (in_array($type, ['NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER', 'PDS MISMATCH'])) {
-                    $this->formData[$map[$type]][$item->id] = Crypt::decryptString($item->new_value);
+            if (isset($map[$type])) {
+                if ($item->new_value) {
+                    $newValue = json_decode($item->new_value, true);
+                    if (in_array($type, ['NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER', 'PDS MISMATCH'])) {
+                        $this->formData[$map[$type]][$item->id] = $newValue['new_value'] ? Crypt::decryptString($newValue['new_value']) : '';
+                    } elseif (in_array($type, ['DUPLICATE BANK ACCOUNT NUMBER', 'NAME VALIDATION FAILED IN BANK', 'ACCOUNT NUMBER VALIDATION FAILED IN BANK', 'MINOR MISMATCH(40% - 89%)', 'MINOR MISMATCH(90% - 100%)'])) {
+                        $this->formData['new_bank_account'][$item->id] = $newValue['new_value']['account'] ?? $item->old_value['account_number'] ?? '';
+                        $this->formData['ifscode'][$item->id] = $newValue['new_value']['ifscode'] ?? $item->old_value['ifsc'] ?? '';
+                        $this->formData['bank_name'][$item->id] = $newValue['new_value']['bank_name'] ?? $item->old_value['bank_name'] ?? '';
+                        $this->formData['bank_action'][$item->id] = $newValue['bank_action'] ?? '';
+                    } else {
+                        $this->formData[$map[$type]][$item->id] = $newValue['new_value'] ?? '';
+                    }
                 } else {
-                    $this->formData[$map[$type]][$item->id] = $item->new_value;
+                    if (in_array($type, ['DUPLICATE BANK ACCOUNT NUMBER', 'NAME VALIDATION FAILED IN BANK', 'ACCOUNT NUMBER VALIDATION FAILED IN BANK', 'MINOR MISMATCH(40% - 89%)', 'MINOR MISMATCH(90% - 100%)'])) {
+                        $this->formData['new_bank_account'][$item->id] = $item->old_value['account_number'] ?? '';
+                        $this->formData['ifscode'][$item->id] = $item->old_value['ifsc'] ?? '';
+                        $this->formData['bank_name'][$item->id] = $item->old_value['bank_name'] ?? '';
+                        $this->formData['bank_action'][$item->id] = '';
+                    } else {
+                        $this->formData[$map[$type]][$item->id] = $item->old_value ?? '';
+                    }
                 }
             }
         }
     }
 
+    public function updateFormData($data)
+    {
+        $id = $data['id'];
+        $this->formData['ifscode'][$id] = $data['ifscode'];
+        $this->formData['bank_name'][$id] = $data['bank_name'];
+        $this->formData['new_bank_account'][$id] = $data['new_bank_account'];
+        $this->formData['bank_action'][$id] = $data['bank_action'] ?? '';
+    }
+
     public function update()
     {
-
+        // Validate all form data
         $this->validate();
 
         $request = AcceptRejectInfo::create([
@@ -111,121 +142,102 @@ class IncompletTypePage extends Component
             'parent_id'              => null,
         ]);
 
-        $map = [
-            'NO AADHAR NUMBER'                          => 'aadhar',
-            'DUPLICATE AADHAR NUMBER'                   => 'new_aadhar',
-            'DUPLICATE BANK ACCOUNT NUMBER'             => 'new_bank_account',
-            'NO MOBILE NUMBER'                          => 'mobile',
-            'NAME VALIDATION  FAILED IN BANK'           => 'bank_name',
-            'ACCOUNT NUMBER VALIDATION  FAILED IN BANK' => 'bank_account',
-            'DUPLICATE MOBILE NUMBER'                   => 'new_mobile',
-            'MINOR MISMATCH(40% - 89%)'                 => 'mismatch_low',
-            'MINOR MISMATCH(90% - 100%)'                => 'mismatch_high',
-            'PDS MISMATCH'                              => 'pds',
-        ];
+        $bankIssues = collect($this->page)->filter(function ($item) {
+            return in_array($item->incompletType->name, [
+                'DUPLICATE BANK ACCOUNT NUMBER',
+                'NAME VALIDATION FAILED IN BANK',
+                'ACCOUNT NUMBER VALIDATION FAILED IN BANK',
+                'MINOR MISMATCH(40% - 89%)',
+                'MINOR MISMATCH(90% - 100%)',
+            ]);
+        });
 
-        $changedBankComponent = null;
-        $action = '1';
         $sharedBankData = null;
-        $bankIssues = collect($this->page)->filter(fn($item) => in_array($item->incompletType->name, [
-            'DUPLICATE BANK ACCOUNT NUMBER',
-            'NAME VALIDATION  FAILED IN BANK',
-            'ACCOUNT NUMBER VALIDATION  FAILED IN BANK',
-            'MINOR MISMATCH(40% - 89%)',
-            'MINOR MISMATCH(90% - 100%)',
-        ]));
+        $action = '1';
+        $changedBankIssueId = null;
 
         if ($bankIssues->isNotEmpty()) {
-            // foreach ($bankIssues as $item) {
-            //     $componentName = match ($item->incompletType->name) {
-            //         'DUPLICATE BANK ACCOUNT NUMBER' => 'incomplete.dup-bank',
-            //         'NAME VALIDATION FAILED IN BANK' => 'incomplete.bank-name-fail',
-            //         'ACCOUNT NUMBER VALIDATION FAILED IN BANK' => 'incomplete.bank-account-fail',
-            //         'MINOR MISMATCH(40% - 89%)' => 'incomplete.mismatch-low',
-            //         'MINOR MISMATCH(90% - 100%)' => 'incomplete.mismatch-high',
-            //     };
-            //     $componentKey = match ($item->incompletType->name) {
-            //         'DUPLICATE BANK ACCOUNT NUMBER' => 'dup-' . $item->id,
-            //         'NAME VALIDATION FAILED IN BANK' => 'name-' . $item->id,
-            //         'ACCOUNT NUMBER VALIDATION FAILED IN BANK' => 'account-' . $item->id,
-            //         'MINOR MISMATCH(40% - 89%)' => 'mismatch-low-' . $item->id,
-            //         'MINOR MISMATCH(90% - 100%)' => 'mismatch-high-' . $item->id,
-            //     };
-            //     $bankComponent = app('livewire')->getInstance($componentName, $componentKey);
-            //     if ($bankComponent->bank_action === '2') {
-            //         $changedBankComponent = $bankComponent;
-            //         $action = '2';
-            //         break;
-            //     }
-            // }
-
-    foreach ($bankIssues as $item) {
-        $action = $this->formData['bank_action'][$item->id] ?? null;
-
-        if ($action === '2') {
-            $changedBankComponent = $item;
-            $action = '2';
-            break;
-        }
-    }
-
-
-
-            if ($changedBankComponent) {
-                if (empty($changedBankComponent->ifscode) || strlen($changedBankComponent->ifscode) !== 11) {
-                    $changedBankComponent->addError('ifscode', 'IFSC code must be 11 characters.');
-                    return;
+            foreach ($bankIssues as $item) {
+                $componentName = match ($item->incompletType->name) {
+                    'DUPLICATE BANK ACCOUNT NUMBER' => 'incomplete.dup-bank',
+                    'NAME VALIDATION FAILED IN BANK' => 'incomplete.bank-name-fail',
+                    'ACCOUNT NUMBER VALIDATION FAILED IN BANK' => 'incomplete.bank-account-fail',
+                    'MINOR MISMATCH(40% - 89%)' => 'incomplete.mismatch-low',
+                    'MINOR MISMATCH(90% - 100%)' => 'incomplete.mismatch-high',
+                };
+                $componentKey = match ($item->incompletType->name) {
+                    'DUPLICATE BANK ACCOUNT NUMBER' => 'dup-' . $item->id,
+                    'NAME VALIDATION FAILED IN BANK' => 'name-' . $item->id,
+                    'ACCOUNT NUMBER VALIDATION FAILED IN BANK' => 'account-' . $item->id,
+                    'MINOR MISMATCH(40% - 89%)' => 'mismatch-low-' . $item->id,
+                    'MINOR MISMATCH(90% - 100%)' => 'mismatch-high-' . $item->id,
+                };
+                $bankComponent = app('livewire')->getInstance($componentName, $componentKey);
+                if ($bankComponent->bank_action === '2') {
+                    $action = '2';
+                    $changedBankIssueId = $item->id;
+                    break;
                 }
+            }
 
-                if (empty($changedBankComponent->new_bank_account) || strlen($changedBankComponent->new_bank_account) < 9 || strlen($changedBankComponent->new_bank_account) > 18) {
-                    $changedBankComponent->addError('new_bank_account', 'Bank account number must be 9–18 digits.');
-                    return;
-                }
+            // If any issue has "CHANGE", validate and set shared bank data
+            if ($action === '2' && $changedBankIssueId) {
+                $this->validate([
+                    'formData.ifscode.' . $changedBankIssueId => 'required|string|size:11',
+                    'formData.new_bank_account.' . $changedBankIssueId => 'required|digits_between:9,18',
+                ]);
 
-                $ifs = Ifsccodemaster::where('code', $changedBankComponent->ifscode)
+                $ifs = Ifsccodemaster::where('code', $this->formData['ifscode'][$changedBankIssueId])
                     ->where('is_active', 1)
                     ->first();
 
                 if (!$ifs) {
-                    $changedBankComponent->addError('ifscode', 'Invalid IFSC code.');
+                    $this->addError("formData.ifscode.{$changedBankIssueId}", 'Invalid IFSC code.');
                     return;
                 }
 
                 $accountExists = $bankIssues->first()->beneficiaryCommonList
                     ->bank()
-                    ->where('bank_account_number', $changedBankComponent->new_bank_account)
+                    ->where('bank_account_number', $this->formData['new_bank_account'][$changedBankIssueId])
                     ->where('application_id', '!=', $this->id)
                     ->exists();
 
                 if ($accountExists) {
-                    $changedBankComponent->addError('new_bank_account', 'This bank account number already exists.');
+                    $this->addError("formData.new_bank_account.{$changedBankIssueId}", 'This bank account number already exists.');
                     return;
                 }
 
                 $sharedBankData = [
-                    'ifscode' => $changedBankComponent->ifscode,
+                    'ifscode' => $this->formData['ifscode'][$changedBankIssueId],
                     'bank_name' => $ifs->bank->name ?? '',
                     'branch_name' => $ifs->branch ?? '',
-                    'account' => $changedBankComponent->new_bank_account,
+                    'account' => $this->formData['new_bank_account'][$changedBankIssueId],
                 ];
             }
 
+            // Update all bank issues with the same data
             foreach ($bankIssues as $item) {
+                $bankAction = $this->formData['bank_action'][$item->id] ?? '';
                 $jsonData = [
                     'old_value' => $item->old_value ?? null,
                     'new_value' => null,
-                    'bank_action' => $action,
+                    'change_type' => $bankAction ?: '1', // Default to '1' if empty
                 ];
 
-                if ($action === '2') {
+                if ($action === '2' && $bankAction === '2') {
                     $jsonData['new_value'] = $sharedBankData;
                 } else {
-                    $jsonData['new_value'] = $item->old_value ?? null;
+                    $jsonData['new_value'] = [
+                        'ifscode' => $item->old_value['ifsc'] ?? '',
+                        'bank_name' => $item->old_value['bank_name'] ?? '',
+                        'branch_name' => $item->old_value['branch_name'] ?? '',
+                        'account' => $item->old_value['account_number'] ?? '',
+                    ];
                 }
 
                 $item->update([
                     'new_value' => json_encode($jsonData),
-                    'change_type' => $action,
+                    'change_type' => $bankAction ? (int)$bankAction : null,
                     'next_level_request_id' => 1,
                     'request_id' => $request->id,
                 ]);
@@ -247,6 +259,14 @@ class IncompletTypePage extends Component
             $jsonData = [
                 'old_value' => $item->old_value ?? null,
                 'new_value' => null,
+            ];
+
+            $map = [
+                'NO AADHAR NUMBER'                   => 'aadhar',
+                'DUPLICATE AADHAR NUMBER'            => 'new_aadhar',
+                'NO MOBILE NUMBER'                   => 'mobile',
+                'DUPLICATE MOBILE NUMBER'            => 'new_mobile',
+                'PDS MISMATCH'                       => 'pds',
             ];
 
             $newValue = $this->formData[$map[$type]][$item->id] ?? null;

@@ -12,6 +12,12 @@ class MismatchLow extends Component
     public $name_as_in_portal, $name_response_for_bank, $name_matching_score;
 
     public $bank_action = '';
+    public $old;
+    public $dupAction = null;
+    public $item;
+    protected $listeners = [
+        'dup-bank-action-changed' => 'setDupAction'
+    ];
 
     public function mount($item)
     {
@@ -45,7 +51,11 @@ class MismatchLow extends Component
             $this->bankbranchname = '';
         }
     }
-
+    public function setDupAction($value)
+    {
+        $this->dupAction = $value;
+        $this->bank_action = $value;
+    }
     public function render()
     {
         return view('livewire.incomplete.mismatch-low');
