@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('lb_scheme.draft_beneficiary_declarations', function (Blueprint $table) {
+        Schema::create('pension.draft_beneficiary_declarations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('application_id');
 
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->boolean('av_status');
             // $table->smallInteger('identification_type_id');//create foregn key later
             $table->foreign('created_by','user_id_fk')->references('id')->on('public.users');
-            $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals')->onDelete('cascade');
+            $table->foreign('application_id','application_id_fk')->references('application_id')->on('pension.draft_beneficiary_personals')->onDelete('cascade');
             $table->timestamps();
             $table->index('application_id','draft_beneficiary_declarations_application_id_index');
         });

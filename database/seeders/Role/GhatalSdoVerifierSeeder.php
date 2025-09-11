@@ -25,7 +25,7 @@ class GhatalSdoVerifierSeeder extends Seeder
         $role_verifier = Role::findByName('Verifier');
         $role_delegated_verifier = Role::findByName('Delegated Verifier');
         $office = OfficeMaster::where('district_id',318)->where('subdivision_id',34401)->first();
-        $scheme = Scheme::where('short_name','LB')->first();
+        $scheme = Scheme::where('short_name','OAP(WCD)')->first();
     
         $user_verifier = User::create([
             'name' => 'GhatalSDOVerifier',

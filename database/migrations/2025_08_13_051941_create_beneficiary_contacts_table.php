@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-         Schema::create('lb_scheme.beneficiary_contacts', function (Blueprint $table) {
+         Schema::create('pension.beneficiary_contacts', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('beneficiary_id')->unique();;
 
@@ -31,7 +31,7 @@ return new class extends Migration
             $table->Integer('residency_period');
             $table->Integer('created_by');
             $table->foreign('created_by','user_id_fk')->references('id')->on('users');
-             $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals')->onDelete('cascade');
+             $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('pension.beneficiary_personals')->onDelete('cascade');
             $table->foreign('district_id','district_id_fk')->references('id')->on('districts');
             $table->foreign('sub_division_id', 'sub_division_id_fk')->references('id')->on('subdivisions');
             $table->foreign('municipality_id','municipality_id_fk')->references('id')->on('municipalities');

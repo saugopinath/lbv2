@@ -10,7 +10,8 @@
   <meta name="author" content="Webonzer" />
 
   <!-- Site Tiltle -->
-  <title>Lakshmir Bhandar | Government of West Bengal</title>
+    <title>Jai Bangla | Government of West Bengal</title>
+
 
   <!-- Favicon Icon -->
   <link rel="shortcut icon" href="{{asset('images/biswofab.ico')}}">
@@ -61,7 +62,7 @@
           <!-- <h2 class="text-2xl lg:text-3xl text-center text-[#003974] font-bold">Lakshmir Bhandar Portal</h2> -->
         </div>
         <div class="text-center mb-2">
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Lakshmir Bhandar Portal</h1>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Jai Bangla Portal</h1>
         </div>
         {{ $slot }}
       </div>
