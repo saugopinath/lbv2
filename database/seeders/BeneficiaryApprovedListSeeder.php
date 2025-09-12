@@ -27,7 +27,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
                 'application_id' => $i,
                 'beneficiary_id' => $i+1,
             ]);
-            
+
             // Step 2: Office & User setup
             $office = OfficeMaster::where('district_id', 318)->first();
             $mapping = UserRoleSchemeOfficeMapping::where('office_id', $office->id)->first();
@@ -98,7 +98,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
                 'application_id' => $beneficiary->application_id,
                 'created_by' => $user_id,
                 'ifsc' => Ifsccodemaster::where('id', 6712)->value('code'),
-                'bank_account_number' => 'ACC' . str_pad($i, 4, '0', STR_PAD_LEFT),
+                'bank_account_number' => '12345678901123' . str_pad($i, 4, '0', STR_PAD_LEFT),
             ]);
 
             // ✅ Step 7: Relationship Insert

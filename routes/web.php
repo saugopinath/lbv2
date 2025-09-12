@@ -89,5 +89,5 @@ Route::get('/incomplet-type/{id}', IncompletTypePage::class)
     ->name('incomplet-type.view');
 
 
-Route::get('/incomplet-type/{id}', [IncompletPageController::class, 'page'])
-    ->name('incomplet-type.page');
+// Route::get('/incomplet-type/{id}', [IncompletPageController::class, 'page'])
+//     ->name('incomplet-type.page');

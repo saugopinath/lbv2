@@ -2,30 +2,15 @@
 
 namespace App\Livewire\Incomplete;
 
-use App\Models\Ifsccodemaster;
 use Livewire\Component;
+use App\Models\Ifsccodemaster;
+use App\Models\BeneficiaryPersonal;
 
 class DupBank extends Component
 {
-    public $bankIssues = [];
-    public $formData = [];
-    public $ifscode, $bankname, $bankbranchname, $new_bank_account;
-    public $bank_action = '';
-    public $old;
-    public $item;
+     public $ifscode, $bankname, $bankbranchname, $bank_account_number, $old, $dupAction = null, $item, $bank_action = '';
 
-    public function mount($item)
-    {
-        $this->old = $item;
-        $oldData = $item->old_value ?? [];
-
-        $this->ifscode = $oldData['ifsc'] ?? '';
-        $this->bankname = $oldData['bank_name'] ?? '';
-        $this->bankbranchname = $oldData['branch_name'] ?? '';
-        $this->new_bank_account = $oldData['account_number'] ?? '';
-    }
-
-    public function updatedIfscode()
+     public function updatedIfscode()
     {
         $ifs = Ifsccodemaster::with('bank')
             ->where('code', $this->ifscode)
@@ -33,12 +18,40 @@ class DupBank extends Component
             ->first();
 
         if ($ifs) {
-            $this->bankname = $ifs->bank->name;
-            $this->bankbranchname = $ifs->branch;
+            $this->bankname = $ifs->bank->name ?? '';
+            $this->bankbranchname = $ifs->branch ?? '';
         } else {
-            $this->bankname = null;
-            $this->bankbranchname = null;
+            $this->bankname = '';
+            $this->bankbranchname = '';
         }
+    }
+
+     public function mount($item)
+    {
+        $this->item = $item;
+        $old = $item->old_value ?? [];
+
+        $app_det = BeneficiaryPersonal::with('bank')->where('application_id', $item->application_id)->first();
+        if ($app_det->bank) {
+            $this->ifscode = $app_det->bank->ifsc;
+            $this->updatedIfscode($this->ifscode);
+            $this->bankname;
+            $this->bankbranchname;
+        }
+
+        $this->ifscode = $old['ifsc'] ?? '';
+        $this->bank_account_number = $old['bank_account_number'] ?? '';
+    }
+
+    public function updated()
+    {
+        $data = [
+            'ifscode' => $this->ifscode,
+            'bank_account_number' => $this->bank_account_number,
+            'bank_action' => $this->bank_action,
+        ];
+
+        $this->dispatch('trigger-update', $data);
     }
 
     public function updatedBankAction($value)

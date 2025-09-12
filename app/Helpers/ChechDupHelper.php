@@ -13,15 +13,12 @@ class ChechDupHelper
             return true;
         }
 
-        // --------------------
-        // Aadhaar Check
-        // --------------------
         if ($type === 'aadhaar') {
-            $existsInCommonList = BeneficiaryCommonList::where('aadhaar_no', $value)->exists();
+            $existsInCommonList = BeneficiaryCommonList::where('encoded_aadhar', $value)->exists();
 
             $existsInIncomplete = ApplicantIncompletDeatil::whereJsonContains('new_value->aadhaar_no', $value)
                 ->whereHas('incompleteType', function ($q) use ($incompleteType) {
-                    $q->where('name', 'LIKE', "%{$incompleteType}%");
+                    $q->where('table_column', 'LIKE', "%{$incompleteType}%");
                 })
                 ->exists();
 
@@ -32,15 +29,12 @@ class ChechDupHelper
             return true;
         }
 
-        // --------------------
-        // Mobile Check
-        // --------------------
         if ($type === 'mobile') {
             $existsInCommonList = BeneficiaryCommonList::where('mobile_no', $value)->exists();
 
             $existsInIncomplete = ApplicantIncompletDeatil::whereJsonContains('new_value->mobile_no', $value)
                 ->whereHas('incompleteType', function ($q) use ($incompleteType) {
-                    $q->where('name', 'LIKE', "%{$incompleteType}%");
+                    $q->where('table_column', 'LIKE', "%{$incompleteType}%");
                 })
                 ->exists();
 
@@ -51,17 +45,12 @@ class ChechDupHelper
             return true;
         }
 
-        // --------------------
-        // Bank Account Check
-        // --------------------
         if ($type === 'bank') {
-            $existsInCommonList = BeneficiaryCommonList::whereHas('bank', function ($q) use ($value) {
-                $q->where('account_number', $value);
-            })->exists();
+            $existsInCommonList = BeneficiaryCommonList::where('bank_account_number', $value)->exists();
 
             $existsInIncomplete = ApplicantIncompletDeatil::whereJsonContains('new_value->account_number', $value)
                 ->whereHas('incompleteType', function ($q) use ($incompleteType) {
-                    $q->where('name', 'LIKE', "%{$incompleteType}%");
+                    $q->where('table_column', 'LIKE', "%{$incompleteType}%");
                 })
                 ->exists();
 
@@ -72,9 +61,6 @@ class ChechDupHelper
             return true;
         }
 
-        // --------------------
-        // Invalid type
-        // --------------------
         return "Invalid check type!";
     }
 }

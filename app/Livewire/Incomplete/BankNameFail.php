@@ -3,66 +3,64 @@
 namespace App\Livewire\Incomplete;
 
 use Livewire\Component;
+use App\Models\Ifsccodemaster;
+use App\Models\BeneficiaryPersonal;
 
 class BankNameFail extends Component
 {
-    public $old;
-
-    public $dupAction = null;
-
-    public $ifscode, $bankname, $bankbranchname, $new_bank_account;
-    public $application_id, $beneficiary_name, $mobile_no, $father_name;
-    public $name_as_in_portal, $name_response_for_bank, $name_matching_score;
-    public $bank_action = '';
-    public $item;
+    public $ifscode, $bankname, $bankbranchname, $bank_account_number, $old, $dupAction = null, $item, $bank_action = '';
 
     protected $listeners = [
         'dup-bank-action-changed' => 'setDupAction'
     ];
 
-    public function mount($item)
-    {
-        $this->old = $item;
-
-        $oldData = $item->old_value ?? [];
-
-        $this->ifscode = $oldData['ifsc'] ?? '';
-        $this->bankname = $oldData['bank_name'] ?? '';
-        $this->bankbranchname = $oldData['branch_name'] ?? '';
-        $this->new_bank_account = $oldData['account_number'] ?? '';
-
-        $this->application_id = $oldData['application_id'] ?? '';
-        $this->beneficiary_name = $oldData['beneficiary_name'] ?? '';
-        $this->mobile_no = $oldData['mobile_no'] ?? '';
-        $this->father_name = $oldData['father_name'] ?? '';
-        $this->name_as_in_portal = $oldData['name_as_in_portal'] ?? '';
-        $this->name_response_for_bank = $oldData['name_response_for_bank'] ?? '';
-        $this->name_matching_score = $oldData['name_matching_score'] ?? '';
-    }
-
-    public function updatedBankAction($value)
-    {
-        $this->dispatch('bank-name-fail-action-changed', id: $this->item->id, action: $value);
-    }
-    public function setDupAction($value)
-    {
-        $this->dupAction = $value;
-        $this->bank_action = $value;
-    }
     public function updatedIfscode()
     {
-        $ifs = \App\Models\Ifsccodemaster::with('bank')
+        $ifs = Ifsccodemaster::with('bank')
             ->where('code', $this->ifscode)
             ->where('is_active', 1)
             ->first();
 
         if ($ifs) {
-            $this->bankname = $ifs->bank->name;
-            $this->bankbranchname = $ifs->branch;
+            $this->bankname = $ifs->bank->name ?? '';
+            $this->bankbranchname = $ifs->branch ?? '';
         } else {
-            $this->bankname = null;
-            $this->bankbranchname = null;
+            $this->bankname = '';
+            $this->bankbranchname = '';
         }
+    }
+
+    public function mount($item)
+    {
+        $this->item = $item;
+        $old = $item->old_value ?? [];
+
+        $app_det = BeneficiaryPersonal::with('bank')->where('application_id', $item->application_id)->first();
+        if ($app_det->bank) {
+            $this->ifscode = $app_det->bank->ifsc;
+            $this->updatedIfscode($this->ifscode);
+            $this->bankname;
+            $this->bankbranchname;
+        }
+
+        $this->ifscode = $old['ifsc'] ?? '';
+        $this->bank_account_number = $old['bank_account_number'] ?? '';
+    }
+
+    public function updated()
+    {
+        $data = [
+            'ifscode' => $this->ifscode,
+            'bank_account_number' => $this->bank_account_number,
+            'bank_action' => $this->bank_action,
+        ];
+
+        $this->dispatch('trigger-update', $data);
+    }
+    public function setDupAction($value)
+    {
+        $this->dupAction = $value;
+        $this->bank_action = $value;
     }
 
     public function render()

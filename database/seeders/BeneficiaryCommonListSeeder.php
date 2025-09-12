@@ -18,11 +18,11 @@ class BeneficiaryCommonListSeeder extends Seeder
 {
     public function run(): void
     {
-          $faker = Faker::create();
+        $faker = Faker::create();
         $districtIds    = District::pluck('id')->toArray();
         $blockIds       = Block::pluck('id')->toArray();
         $subdivisionIds = Subdivision::pluck('id')->toArray();
-        $municipalityIds= Municipality::pluck('id')->toArray();
+        $municipalityIds = Municipality::pluck('id')->toArray();
         $wardIds        = Ward::pluck('id')->toArray();
         $panchayatIds   = Panchayat::pluck('id')->toArray();
 
@@ -31,7 +31,7 @@ class BeneficiaryCommonListSeeder extends Seeder
             $districtId    = $faker->randomElement($districtIds);
             $blockId       = $faker->randomElement($blockIds);
             $subdivisionId = !empty($subdivisionIds) ? $faker->randomElement($subdivisionIds) : null;
-            $municipalityId= !empty($municipalityIds) ? $faker->randomElement($municipalityIds) : null;
+            $municipalityId = !empty($municipalityIds) ? $faker->randomElement($municipalityIds) : null;
             $wardId        = !empty($wardIds) ? $faker->randomElement($wardIds) : null;
             $panchayatId   = !empty($panchayatIds) ? $faker->randomElement($panchayatIds) : null;
 
@@ -44,10 +44,15 @@ class BeneficiaryCommonListSeeder extends Seeder
                 'municipality_id' => $municipalityId,
                 'ward_id' => $wardId,
                 'panchayat_id' => $panchayatId,
+                'beneficiary_id'      => $i,
+                'mobile_no'           => $faker->numerify('9#########'),
+                'encoded_aadhar'      => base64_encode($faker->numerify('############')),
+                'bank_account_number' => $faker->numerify('###############'),
+                'applicant_status'    => rand(0, 2),
+                'is_reject'           => false,
             ]);
         }
 
         $this->command->info('Successfully seeded 10 records into lb_scheme.beneficiary_common_lists.');
     }
 }
-

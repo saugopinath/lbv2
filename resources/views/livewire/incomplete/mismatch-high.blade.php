@@ -22,8 +22,8 @@
                 <x-form.input name="ifscode" label="IFSC Code" wire:model.defer="ifscode" disabled />
                 <x-form.input name="bankname" label="Bank Name" wire:model.defer="bankname" disabled />
                 <x-form.input name="bankbranchname" label="Branch Name" wire:model.defer="bankbranchname" disabled />
-                <x-form.input name="new_bank_account" label="Existing Bank Account Number"
-                    wire:model.defer="new_bank_account" disabled />
+                <x-form.input name="bank_account_number" label="Existing Bank Account Number"
+                    wire:model.defer="bank_account_number" disabled />
             </div>
         @endif
 
@@ -37,8 +37,8 @@
                 <x-form.input name="bankname" label="Bank Name" wire:model.live="bankname" disabled />
                 <x-form.input name="bankbranchname" label="Branch Name" wire:model.live="bankbranchname" disabled />
 
-                <x-form.input name="new_bank_account" label="New Bank Account Number"
-                    wire:model.live="new_bank_account" />
+                <x-form.input name="bank_account_number" label="New Bank Account Number"
+                    wire:model.live="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" x-on:copy.prevent />
             </div>
         @endif
 

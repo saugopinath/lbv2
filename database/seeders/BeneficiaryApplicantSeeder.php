@@ -130,7 +130,8 @@ class BeneficiaryApplicantSeeder extends Seeder
                 'application_id'      => $appId,
                 'created_by'          => $userId,
                 'ifsc'                => $ifsc,
-                'bank_account_number' => '1234000' . str_pad($beneficiary->beneficiary_id, 4, '0', STR_PAD_LEFT),
+                'bank_account_number' => '123400045687524
+                ' . str_pad($beneficiary->beneficiary_id, 4, '0', STR_PAD_LEFT),
             ]);
         }
 

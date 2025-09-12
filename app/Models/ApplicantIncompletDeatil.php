@@ -19,7 +19,7 @@ class ApplicantIncompletDeatil extends Model
         'change_type',
     ];
 
-    protected $casts = [
+   protected $casts = [
         'old_value' => 'array',
         'new_value' => 'array',
     ];
@@ -31,6 +31,11 @@ class ApplicantIncompletDeatil extends Model
     public function incompletType()
     {
         return $this->belongsTo(Codemaster::class, 'incomplet_type', 'code');
+    }
+
+    public function incompleteType()
+    {
+        return $this->belongsTo(IncompletTypeModelMapping::class, 'incomplet_type', 'incomplet_type_code');
     }
 
     public function getIncompleteTypesNamesAttribute()

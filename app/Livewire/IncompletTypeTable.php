@@ -2,7 +2,12 @@
 
 namespace App\Livewire;
 
-use App\Models\Codemaster;
+use App\Models\Ward;
+use App\Models\Block;
+use App\Models\District;
+use App\Models\Panchayat;
+use App\Models\Subdivision;
+use App\Models\Municipality;
 use App\Helpers\EncryptionArray;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\ApplicantIncompletDeatil;
@@ -148,7 +153,10 @@ class IncompletTypeTable extends DataTableComponent
         if ($this->stage === 'verifier') {
             $query->whereNull('next_level_request_id');
         } elseif ($this->stage === 'approver') {
-            $query->where('next_level_request_id', 1);
+            // $query->where('next_level_request_id', 1);
+            // $query->where('next_level_request_id', 1)
+            //     ->where('is_active', 1);
+                $query->where(['next_level_request_id' => 1, 'is_active' => 1]);
         } elseif ($this->stage === 'revert') {
             $query->where('next_level_request_id', -50)->with(['acceptRejectInfo' => function ($q) {
                 $q->latest('id');
@@ -177,7 +185,7 @@ class IncompletTypeTable extends DataTableComponent
         $filters = [];
 
         if ($this->district_id) {
-            $filters[] = 'District: ' . (\App\Models\District::find($this->district_id)?->name ?? $this->district_id);
+            $filters[] = 'District: ' . (District::find($this->district_id)?->name ?? $this->district_id);
         }
 
         if ($this->rural_urban) {
@@ -186,20 +194,20 @@ class IncompletTypeTable extends DataTableComponent
 
         // Rural
         if ($this->rural_urban == 2 && $this->blockurban) {
-            $filters[] = 'Block: ' . (\App\Models\Block::find($this->blockurban)?->name ?? $this->blockurban);
+            $filters[] = 'Block: ' . (Block::find($this->blockurban)?->name ?? $this->blockurban);
             if ($this->gp_ward) {
-                $filters[] = 'GP: ' . (\App\Models\Panchayat::find($this->gp_ward)?->name ?? $this->gp_ward);
+                $filters[] = 'GP: ' . (Panchayat::find($this->gp_ward)?->name ?? $this->gp_ward);
             }
         }
 
         // Urban
         if ($this->rural_urban == 1 && $this->selectedSubdivision) {
-            $filters[] = 'Subdivision: ' . (\App\Models\Subdivision::find($this->selectedSubdivision)?->name ?? $this->selectedSubdivision);
+            $filters[] = 'Subdivision: ' . (Subdivision::find($this->selectedSubdivision)?->name ?? $this->selectedSubdivision);
             if ($this->blockurban) {
-                $filters[] = 'Municipality: ' . (\App\Models\Municipality::find($this->blockurban)?->name ?? $this->blockurban);
+                $filters[] = 'Municipality: ' . (Municipality::find($this->blockurban)?->name ?? $this->blockurban);
             }
             if ($this->gp_ward) {
-                $filters[] = 'Ward: ' . (\App\Models\Ward::find($this->gp_ward)?->name ?? $this->gp_ward);
+                $filters[] = 'Ward: ' . (Ward::find($this->gp_ward)?->name ?? $this->gp_ward);
             }
         }
 
