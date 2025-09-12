@@ -25,19 +25,10 @@ class MismatchHigh extends Component
     public function mount($item)
     {
         $old = $item->old_value ?? [];
-
-        $this->application_id = $old['application_id'] ?? '';
-        $this->beneficiary_name = $old['beneficiary_name'] ?? '';
-        $this->mobile_no = $old['mobile_no'] ?? '';
-        $this->father_name = $old['father_name'] ?? '';
         $this->ifscode = $old['ifsc'] ?? '';
         $this->bankname = $old['bank_name'] ?? '';
         $this->bankbranchname = $old['branch_name'] ?? '';
         $this->new_bank_account = $old['account_number'] ?? '';
-        $this->name_as_in_portal = $old['name_as_in_portal'] ?? '';
-        $this->name_response_for_bank = $old['name_response_for_bank'] ?? '';
-        $this->name_matching_score = $old['name_matching_score'] ?? '';
-
     }
 
 

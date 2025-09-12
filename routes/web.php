@@ -19,6 +19,7 @@ use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Livewire\Users\Create as UsersCreate;
 use App\Livewire\IncompletTypePage;
 use App\Http\Controllers\IncompleteTypeController;
+use App\Http\Controllers\IncompletPageController;
 
 
 Route::get('/', function () {
@@ -86,3 +87,7 @@ Route::get('/incomplete-types/{stage?}', [IncompleteTypeController::class, 'inde
 
 Route::get('/incomplet-type/{id}', IncompletTypePage::class)
     ->name('incomplet-type.view');
+
+
+Route::get('/incomplet-type/{id}', [IncompletPageController::class, 'page'])
+    ->name('incomplet-type.page');

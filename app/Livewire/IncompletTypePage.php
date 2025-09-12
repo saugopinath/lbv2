@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Helpers\ChechDupHelper;
 use Livewire\Component;
 use App\Models\Codemaster;
 use App\Models\AcceptRejectInfo;
@@ -10,22 +11,7 @@ use App\Models\ApplicantIncompletDeatil;
 
 class IncompletTypePage extends Component
 {
-    public $id;
-    public $page;
-    public $stage;
-    public $applicantInfo;
-    public $formData = [];
-    public $revertReasons = [];
-    public $user_id;
-    public $revert_reason_cause_id;
-    public $revert_reason_remarks;
-
-    // ✅ New properties for issues
-    public $aadhaarIssues = [];
-    public $mobileIssues = [];
-    public $sortedBankIssues = [];
-    public $ifscode, $new_bank_account;
-    public $bank_action;
+    public $id, $page, $stage, $applicantInfo, $formData = [], $revertReasons = [], $user_id, $revert_reason_cause_id, $revert_reason_remarks, $aadhaarIssues = [], $mobileIssues = [], $sortedBankIssues = [], $ifscode, $new_bank_account, $bank_action;
 
     protected $listeners = ['trigger-update' => 'recivedupdateddata'];
 
@@ -52,7 +38,6 @@ class IncompletTypePage extends Component
 
         $this->applicantInfo = $this->page->first()?->beneficiaryCommonList;
 
-        // ✅ Do classification here
         $this->classifyIssues();
     }
     public function recivedupdateddata($data)
@@ -64,7 +49,8 @@ class IncompletTypePage extends Component
 
     public function submit()
     {
-        // dd('ok');
+        $this->checkduplicate();
+
         $request = AcceptRejectInfo::create([
             'application_id'         => $this->id,
             'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
@@ -82,8 +68,6 @@ class IncompletTypePage extends Component
             'new_bank_account' => $this->new_bank_account,
             'application_id' => $this->id,
         ];
-        // $jsonValue1 = json_encode($jsonValue);
-        // dd( $jsonValue1);
 
         $item = $this->page->first();
         if ($item) {
@@ -94,8 +78,38 @@ class IncompletTypePage extends Component
                 'request_id'            => $request->id,
             ]);
         }
-             session()->flash('success', 'Incomplete details updated successfully!');
-        return redirect()->route('incomplete.types', ['stage' => 'verifier','id' => $this->id]);
+        session()->flash('success', 'Incomplete details updated successfully!');
+        return redirect()->route('incomplete.types', ['stage' => 'verifier', 'id' => $this->id]);
+    }
+
+    public function checkduplicate()
+    {
+        $incompleteType = $this->page->first()->incompletType->name ?? null;
+
+        if (!$incompleteType) {
+            return true;
+        }
+
+        if (str_contains($incompleteType, 'AADHAR')) {
+            $type = 'aadhaar';
+            $value = $this->applicantInfo?->aadhaar?->aadhaar_no;
+        } elseif (str_contains($incompleteType, 'MOBILE')) {
+            $type = 'mobile';
+            $value = $this->applicantInfo?->mobile_no;
+        } elseif (str_contains($incompleteType, 'BANK') || str_contains($incompleteType, 'MISMATCH')) {
+            $type = 'bank';
+            $value = $this->new_bank_account;
+        } else {
+            return true;
+        }
+        $result = ChechDupHelper::checkDuplicate($type, $value, $incompleteType);
+
+        if ($result !== true) {
+            session()->flash('error', $result);
+            throw new \Exception($result); 
+        }
+
+        return true;
     }
 
     private function classifyIssues()
@@ -127,7 +141,6 @@ class IncompletTypePage extends Component
         $this->aadhaarIssues = $aadhaarIssues;
         $this->mobileIssues = $mobileIssues;
 
-        // ✅ Sort bank issues
         $this->sortedBankIssues = collect($bankIssues)->sortBy(
             fn($item) => array_search($item->incompletType->name, $bankPriority)
         )->values();
