@@ -47,7 +47,6 @@ class DupBank extends Component
 
     }
 
-
     public function render()
     {
         return view('livewire.incomplete.dup-bank');

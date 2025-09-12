@@ -64,8 +64,6 @@
                 fn($item) => array_search($item->incompletType->name, $bankPriority),
             );
         @endphp
-
-
         {{-- Aadhaar Issues --}}
         @if (!empty($aadhaarIssues))
             <x-incomplete.aadhar-modification :aadhaar-issues="$aadhaarIssues" />

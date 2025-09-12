@@ -4,28 +4,28 @@
         {{-- KEEP SAME preview --}}
         <div x-data="{ action: @entangle('bank_action') }">
             <div x-show="action === '' || action === '1' || action === '2'" class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
-                <x-form.input name="application_id" label="Application Id" value="{{ $application_id }}" disabled />
-                <x-form.input name="beneficiary_name" label="Beneficiary Name" value="{{ $beneficiary_name }}" disabled />
-                <x-form.input name="mobile_no" label="Mobile No" value="{{ $mobile_no }}" disabled />
-                <x-form.input name="father_name" label="Father's Name" value="{{ $father_name }}" disabled />
-                <x-form.input name="ifscode" label="IFSC Code" value="{{ $ifscode }}" disabled />
-                <x-form.input name="bankname" label="Bank Name" value="{{ $bankname }}" disabled />
-                <x-form.input name="bankbranchname" label="Branch Name" value="{{ $bankbranchname }}" disabled />
-                <x-form.input name="new_bank_account" label="Existing Bank Account Number" value="{{ $new_bank_account }}" disabled />
+                <x-form.input name="application_id" label="Application Id" wire:model.defer="application_id" disabled />
+                <x-form.input name="beneficiary_name" label="Beneficiary Name" wire:model.defer="beneficiary_name" disabled />
+                <x-form.input name="mobile_no" label="Mobile No" wire:model.defer="mobile_no" disabled />
+                <x-form.input name="father_name" label="Father's Name" wire:model.defer="father_name" disabled />
+                <x-form.input name="ifscode" label="IFSC Code" wire:model.defer="ifscode" disabled />
+                <x-form.input name="bankname" label="Bank Name" wire:model.defer="bankname" disabled />
+                <x-form.input name="bankbranchname" label="Branch Name" wire:model.defer="bankbranchname" disabled />
+                <x-form.input name="new_bank_account" label="Existing Bank Account Number" wire:model.defer="new_bank_account" disabled />
             </div>
 
             {{-- CHANGE form --}}
             <div x-show="action === '3'" class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
-                <x-form.input name="application_id" label="Application Id" value="{{ $application_id }}" disabled />
-                <x-form.input name="beneficiary_name" label="Beneficiary Name" value="{{ $beneficiary_name }}" disabled />
-                <x-form.input name="mobile_no" label="Mobile No" value="{{ $mobile_no }}" disabled />
-                <x-form.input name="father_name" label="Father's Name" value="{{ $father_name }}" disabled />
+                <x-form.input name="application_id" label="Application Id" wire:model.defer="application_id" disabled />
+                <x-form.input name="beneficiary_name" label="Beneficiary Name" wire:model.defer="beneficiary_name" disabled />
+                <x-form.input name="mobile_no" label="Mobile No" wire:model.defer="mobile_no" disabled />
+                <x-form.input name="father_name" label="Father's Name" wire:model.defer="father_name" disabled />
 
                 <x-form.input name="ifscode" label="IFSC Code" wire:model.lazy="ifscode"
                     x-on:input="if ($el.value.length > 11) $el.value = $el.value.slice(0, 11)" />
 
-                <x-form.input name="bankname" label="Bank Name" value="{{ $bankname }}" disabled />
-                <x-form.input name="bankbranchname" label="Branch Name" value="{{ $bankbranchname }}" disabled />
+                <x-form.input name="bankname" label="Bank Name" wire:model.defer="bankname" disabled />
+                <x-form.input name="bankbranchname" label="Branch Name" wire:model.defer="bankbranchname" disabled />
 
                 <x-form.input name="new_bank_account" label="New Bank Account Number"
                     wire:model.defer="new_bank_account"

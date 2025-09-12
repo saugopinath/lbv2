@@ -13,10 +13,20 @@ class MismatchHigh extends Component
     public $old;
     public $dupAction = null;
     public $item;
+    // public $getdata;
     public $bank_action = '';
     protected $listeners = [
         'dup-bank-action-changed' => 'setDupAction'
     ];
+
+
+public function getdata()
+{
+    // Your logic here (validation, save, API call etc.)
+    dd($this->all());
+
+}
+
     public function mount($item)
     {
         $old = $item->old_value ?? [];
