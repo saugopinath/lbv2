@@ -1,5 +1,5 @@
 <div
-    x-data="{ show: @entangle('show') }"
+    x-data="{ show: @entangle('loaderShow') }"
     x-show="show"
     class="fixed inset-0 bg-opacity-80 flex items-center justify-center z-50"
     style="display: none;"

@@ -15,6 +15,7 @@ class DupAadhaarCheck extends Component
     public function checkDuplicate()
     {
         $this->dispatch('showLoader');
+        // dump('ok');
         $this->error = null;
         $this->aadhaar = trim($this->aadhaar);
 
@@ -38,12 +39,16 @@ class DupAadhaarCheck extends Component
         }
 
         // ✅ ডুপ্লিকেট না থাকলে
+        // dump('ok1');
         $this->dispatch('aadhaarChecked', [
             'encoded' => $encoded_aadhar,
             'hash' => $aadhaar_hash,
         ]);
-
+//         dump('ok2');
+// sleep(5);
+// dump('ok3');
         $this->dispatch('hideLoader');
+        // dump('ok4');
         return ['status' => 'success', 'message' => '✅ Aadhaar is valid and not duplicate.'];
     }
     public function getDuplicates()

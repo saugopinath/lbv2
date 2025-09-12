@@ -6,20 +6,23 @@ use Livewire\Component;
 
 class Loader extends Component
 {
-    public $show = false;
+    public $loaderShow = false;
 
     protected $listeners = ['showLoader', 'hideLoader'];
 
     public function showLoader()
     {
-        // dump('show');
-        $this->show = true;
+        // dump('loaderstart');
+        
+        $this->loaderShow = true;
+        // dump($this->show);
     }
 
     public function hideLoader()
     {
-        // dump('hide');
-        $this->show = false;
+        // dump('insidehide');
+        $this->loaderShow = false;
+        // dump($this->show);
     }
 
     public function render()

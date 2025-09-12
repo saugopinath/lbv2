@@ -16,15 +16,10 @@
             </div>
             <div>
                 <x-form.masked-input
-    name="bankaccountnumber"
-    label="Bank Account Number"
-    required
-    wire:model.defer="bankaccountnumber"
-/>
-
-
-
-
+                    name="bankaccountnumber"
+                    label="Bank Account Number"
+                    required
+                    wire:model.defer="bankaccountnumber" />
             </div>
         </div>
         <div class="grid gap-6 mb-4 md:grid-cols-2 pl-4 pr-4">
