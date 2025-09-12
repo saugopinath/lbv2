@@ -34,36 +34,7 @@
     @endif
 
     <form wire:submit.prevent="submit">
-        @php
-            $aadhaarIssues = [];
-            $mobileIssues = [];
-            $bankIssues = [];
 
-            $bankPriority = [
-                'DUPLICATE BANK ACCOUNT NUMBER',
-                'NAME VALIDATION  FAILED IN BANK',
-                'ACCOUNT NUMBER VALIDATION  FAILED IN BANK',
-                'MINOR MISMATCH(40% - 89%)',
-                'MINOR MISMATCH(90% - 100%)',
-            ];
-
-            foreach ($page as $item) {
-                $typeName = $item->incompletType->name;
-
-                if (in_array($typeName, ['PDS MISMATCH', 'NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER'])) {
-                    $aadhaarIssues[] = $item;
-                } elseif (in_array($typeName, ['NO MOBILE NUMBER', 'DUPLICATE MOBILE NUMBER'])) {
-                    $mobileIssues[] = $item;
-                } elseif (in_array($typeName, $bankPriority)) {
-                    $bankIssues[] = $item;
-                }
-            }
-
-            // Sort bank issues by priority
-            $sortedBankIssues = collect($bankIssues)->sortBy(
-                fn($item) => array_search($item->incompletType->name, $bankPriority),
-            );
-        @endphp
         {{-- Aadhaar Issues --}}
         @if (!empty($aadhaarIssues))
             <x-incomplete.aadhar-modification :aadhaar-issues="$aadhaarIssues" />
@@ -100,13 +71,19 @@
         <div class="flex justify-end mt-4 space-x-2">
             @if ($stage === 'verifier')
                 <x-button.primary type="button" class="bg-blue-500 text-white whitespace-nowrap"
-                    wire:click="$dispatch('confirm-submit')">
+                    x-on:click="if(confirm('Are you sure you want to submit this request?')) { $wire.submit() }">
                     Request Send to Approver
                 </x-button.primary>
             @elseif ($stage === 'approver')
                 <div class="flex justify-center w-full space-x-4">
-                    <x-button.primary type="submit" wire:click="approve">Approve</x-button.primary>
-                    <x-button.danger x-data x-on:click="$dispatch('open-revert-modal')">Revert</x-button.danger>
+                    <x-button.primary type="submit"
+                        x-on:click="if(confirm('Are you sure you want to approve this request?')) { $wire.approve() }">
+                        Approve
+                    </x-button.primary>
+                    <x-button.danger
+                        x-on:click="if(confirm('Are you sure you want to revert this request?')) { $dispatch('open-revert-modal') }">
+                        Revert
+                    </x-button.danger>
 
                     {{-- Revert Modal --}}
                     <div x-data="{ open: false }" x-on:open-revert-modal.window="open = true" x-show="open"
@@ -147,19 +124,11 @@
                     </div>
                 </div>
             @elseif ($stage === 'revert')
-                <x-button.primary wire:click="revertVerify">Revert Verify</x-button.primary>
+                <x-button.primary
+                    x-on:click="if(confirm('Are you sure you want to verify this reverted request?')) { $wire.revertVerify() }">
+                    Revert Verify
+                </x-button.primary>
             @endif
         </div>
     </form>
 </div>
-
-{{-- JS for confirmation --}}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Livewire.on('confirm-submit', () => {
-            if (confirm("Are you sure you want to submit this request?")) {
-                Livewire.dispatch('trigger-update');
-            }
-        });
-    });
-</script>

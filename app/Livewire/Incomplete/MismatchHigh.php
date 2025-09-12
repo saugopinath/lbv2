@@ -20,17 +20,11 @@ class MismatchHigh extends Component
     ];
 
 
-public function getdata()
-{
-    // Your logic here (validation, save, API call etc.)
-    dd($this->all());
 
-}
 
     public function mount($item)
     {
         $old = $item->old_value ?? [];
-        // dd($old);
 
         $this->application_id = $old['application_id'] ?? '';
         $this->beneficiary_name = $old['beneficiary_name'] ?? '';
@@ -43,6 +37,7 @@ public function getdata()
         $this->name_as_in_portal = $old['name_as_in_portal'] ?? '';
         $this->name_response_for_bank = $old['name_response_for_bank'] ?? '';
         $this->name_matching_score = $old['name_matching_score'] ?? '';
+
     }
 
 
@@ -60,6 +55,19 @@ public function getdata()
             $this->bankname = '';
             $this->bankbranchname = '';
         }
+    }
+
+    public function updated()
+    {
+        $data = [
+
+            'ifscode' => $this->ifscode,
+            'new_bank_account' => $this->new_bank_account,
+            'bank_action' => $this->bank_action,
+        ];
+
+        $this->dispatch('trigger-update', $data);
+
     }
     public function setDupAction($value)
     {
