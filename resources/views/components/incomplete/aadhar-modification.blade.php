@@ -9,24 +9,21 @@
             @endforeach
         </ul>
 
-        <x-form.input
-            id="aadhar_modification_{{ $aadhaarIssues[0]->application_id }}"
-            name="aadhar_modification[{{ $aadhaarIssues[0]->application_id }}]"
-            label="Aadhaar Number"
-            required
+        <x-form.input id="aadhar_modification_{{ $aadhaarIssues[0]->application_id }}"
+            name="aadhar_modification[{{ $aadhaarIssues[0]->application_id }}]" label="Aadhaar Number" required
             wire:model="formData.aadhar_modification.{{ $aadhaarIssues[0]->application_id }}"
             placeholder="Enter New Aadhaar Number"
-            x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)"
-        />
+            x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
 
-        <livewire:enclosure-list
-            :application_id="$aadhaarIssues[0]->application_id"
-            :doc_type_id_array_list="[108]"
-            enclosureSource="5"
-        />
+        <livewire:enclosure-list :application_id="$aadhaarIssues[0]->application_id" :doc_type_id_array_list="[108]" enclosureSource="5" />
 
         @error("formData.aadhar_modification.{$aadhaarIssues[0]->application_id}")
             <span class="text-red-600 text-sm">{{ $message }}</span>
         @enderror
-    </div>
+        @if (session()->has('error'))
+            <div class="p-3 mb-3 text-red-700 bg-red-100 rounded">
+                {{ session('error') }}
+            </div>
+        @endif
 
+    </div>

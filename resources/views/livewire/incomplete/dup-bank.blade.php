@@ -35,10 +35,16 @@
                 <x-form.input name="bankbranchname" label="Branch Name" wire:model.live="bankbranchname" disabled />
 
                 <x-form.input name="bank_account_number" label="New Bank Account Number"
-                    wire:model.live="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" x-on:copy.prevent />
+                    wire:model.live="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')"
+                    x-on:copy.prevent />
 
                 <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[112]" enclosureSource="5" />
             </div>
         @endif
     </div>
+    @if (session()->has('error'))
+        <div class="p-3 mb-3 text-red-700 bg-red-100 rounded">
+            {{ session('error') }}
+        </div>
+    @endif
 </div>

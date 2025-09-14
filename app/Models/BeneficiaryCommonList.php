@@ -23,11 +23,11 @@ class BeneficiaryCommonList extends Model
     }
     public function failedPaymentDetails()
     {
-        return $this->hasOne(FailedPaymentDetailNew::class, 'beneficiary_id', 'ben_id');
+        return $this->hasOne(FailedPaymentDetailNew::class, 'ben_id', 'beneficiary_id');
     }
     public function benPaymentDetails()
     {
-        return $this->hasOne(BenPaymentDetailsNew::class, 'beneficiary_id', 'ben_id');
+        return $this->hasOne(BenPaymentDetailsNew::class, 'ben_id', 'beneficiary_id');
     }
 
 

@@ -173,7 +173,6 @@ class IncompletTypePage extends Component
         // dd($this->page);
         foreach ($this->page as $item) {
 
-            $typeName = $item->incompletType->name ?? null;
             $typeId = $item->incomplet_type;
             // dd(  $typeName);
             if (!$typeId) continue;
@@ -215,8 +214,6 @@ class IncompletTypePage extends Component
             $this->updateOriginalTable($item);
         }
 
-
-
         session()->flash('success', 'Approve details updated successfully!');
         return redirect()->route('incomplete.types', ['id' => $this->id]);
     }
@@ -250,6 +247,24 @@ class IncompletTypePage extends Component
                     ]
                 );
 
+                $temp = BeneficiaryTemEnclosure::where('application_id', $this->id)->first();
+                if ($temp) {
+                    $beneficiary->enclosuresUpdated()->updateOrCreate(
+                        ['application_id' => $this->id],
+                        [
+                            'attched_document'   => $temp->attched_document,
+                            'document_type'      => $temp->document_type,
+                            'document_extension' => $temp->document_extension,
+                            'document_mime_type' => $temp->document_mime_type,
+                            'ip_address' => request()->ip(),
+                            'created_by' => 1,
+                            'updated_at'         => now(),
+                        ]
+                    );
+
+                    $temp->delete();
+                }
+
                 BeneficiaryCommonList::where('sourceable_id', $this->id)
                     ->update([
                         'encoded_aadhar' => Crypt::encryptString($newAadhaar),
@@ -269,19 +284,11 @@ class IncompletTypePage extends Component
                     ]
                 );
 
-                $beneficiary->faultyBeneficiaryPersonal()
-                    ->where('application_id', $this->id)
-                    ->delete();
-
-                // if ($typeId == 142) {
-                //     $beneficiary->faultyBeneficiaryPersonal()->updateOrCreate(
-                //         ['application_id' => $this->id], // condition
-                //         [
-                //             'mobile_no'  => $newMobile,
-                //             'created_by' => 1,
-                //         ]
-                //     );
-                // }
+                if ($typeId == 142) {
+                    $beneficiary->faultyBeneficiaryPersonal()
+                        ->where('application_id', $this->id)
+                        ->delete();
+                }
 
                 BeneficiaryCommonList::where('sourceable_id', $this->id)
                     ->update([
@@ -294,6 +301,25 @@ class IncompletTypePage extends Component
                 $beneficiary->failedPaymentDetails()->update([
                     'acc_validated' => 2,
                 ]);
+
+                if ($bank_action == 2 || $bank_action == 3) {
+                    $temp = BeneficiaryTemEnclosure::where('application_id', $this->id)->first();
+
+                    if ($temp) {
+                        $beneficiary->enclosuresUpdated()->updateOrCreate(
+                            ['application_id' => $this->id],
+                            [
+                                'attched_document'   => $temp->attched_document,
+                                'document_type'      => $temp->document_type,
+                                'document_extension' => $temp->document_extension,
+                                'document_mime_type' => $temp->document_mime_type,
+                                'updated_at'         => now(),
+                            ]
+                        );
+
+                        $temp->delete();
+                    }
+                }
 
                 BeneficiaryCommonList::where('sourceable_id', $this->id)
                     ->update([
@@ -332,9 +358,11 @@ class IncompletTypePage extends Component
                     }
                 }
 
-                $beneficiary->faultyBeneficiaryPersonal()
-                    ->where('application_id', $this->id)
-                    ->delete();
+                if ($typeId == 1411) {
+                    $beneficiary->faultyBeneficiaryPersonal()
+                        ->where('application_id', $this->id)
+                        ->delete();
+                }
 
                 $beneficiary->benPaymentDetails()->update([
                     'acc_validated' => 2,
@@ -349,8 +377,10 @@ class IncompletTypePage extends Component
 
             case 1412: // Minor Mismatch(40% - 89%)
             case 1413: // Minor Mismatch(90% - 100%)
-                $beneficiary->failedPaymentDetails()->update([
-                    'acc_validated' => 2,
+                $beneficiary->failedPaymentDetails()->updateOrCreate([
+                    'failed_type' => 0,
+                    'accno' => $newBankAccountNumber,
+                    'ifsc'  => $newifscode,
                 ]);
                 BeneficiaryCommonList::where('sourceable_id', $this->id)
                     ->update([
@@ -366,37 +396,33 @@ class IncompletTypePage extends Component
 
     public function checkduplicate()
     {
-        $incompleteType = $this->page->first()->incompletType->name ?? null;
+        $incompleteType = $this->page->first()->incomplet_type ?? null;
+        // dd($incompleteType);
 
         if (!$incompleteType) {
             return true;
         }
 
         if (
-            str_contains($incompleteType, 'DUPLICATE AADHAR NUMBER')
-            || str_contains($incompleteType, 'NO AADHAR NUMBER')
-            || str_contains($incompleteType, 'PDS MISMATCH')
+            str_contains($incompleteType, '149')
+            || str_contains($incompleteType, '141')
+            || str_contains($incompleteType, '1414')
         ) {
-
             $type = 'aadhaar';
             $value = $this->applicantInfo?->aadhaar?->aadhaar_no;
         } elseif (
-            str_contains($incompleteType, 'NO MOBILE NUMBER')
-            || str_contains($incompleteType, 'DUPLICATE MOBILE NUMBER')
+            str_contains($incompleteType, '142')
+            || str_contains($incompleteType, '1410')
         ) {
-
             $type = 'mobile';
-            // dd($type);
             $value = $this->applicantInfo?->mobile_no;
-            // dd($value);
         } elseif (
-            str_contains($incompleteType, 'DUPLICATE BANK ACCOUNT NUMBER')
-            || str_contains($incompleteType, 'NAME VALIDATION  FAILED IN BANK')
-            || str_contains($incompleteType, 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK')
-            || str_contains($incompleteType, 'MINOR MISMATCH(40% - 89%)')
-            || str_contains($incompleteType, 'MINOR MISMATCH(90% - 100%)')
+            str_contains($incompleteType, '1411')
+            || str_contains($incompleteType, '1412')
+            || str_contains($incompleteType, '1413')
+            || str_contains($incompleteType, '145')
+            || str_contains($incompleteType, '146')
         ) {
-
             $type = 'bank';
             $value = $this->bank_account_number;
         } else {
@@ -407,11 +433,13 @@ class IncompletTypePage extends Component
 
         if ($result !== true) {
             session()->flash('error', $result);
-            throw new \Exception($result);
+
+            return false;
         }
 
         return true;
     }
+
 
 
     private function classifyIssues()

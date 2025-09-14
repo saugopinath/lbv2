@@ -1,6 +1,6 @@
 <div class="mt-4">
     <div class="p-4 mb-4 border rounded-lg bg-gray-50 shadow-sm">
-       <div class="p-4 mb-2 border rounded-lg bg-gray-50 shadow-sm">
+        <div class="p-4 mb-2 border rounded-lg bg-gray-50 shadow-sm">
             <h2>Select Opertion Type</h2>
             <div class="flex gap-6 pl-4 pr-4 mt-2">
                 <label class="flex items-center space-x-2 ">
@@ -38,11 +38,14 @@
                 <x-form.input name="bankbranchname" label="Branch Name" wire:model.live="bankbranchname" disabled />
 
                 <x-form.input name="bank_account_number" label="New Bank Account Number"
-                    wire:model.live="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" x-on:copy.prevent />
+                    wire:model.live="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')"
+                    x-on:copy.prevent />
             </div>
         @endif
     </div>
+    @if (session()->has('error'))
+        <div class="p-3 mb-3 text-red-700 bg-red-100 rounded">
+            {{ session('error') }}
+        </div>
+    @endif
 </div>
-
-
-

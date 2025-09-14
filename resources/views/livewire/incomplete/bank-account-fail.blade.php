@@ -43,5 +43,9 @@
             </div>
         @endif
     </div>
+    @if (session()->has('error'))
+        <div class="p-3 mb-3 text-red-700 bg-red-100 rounded">
+            {{ session('error') }}
+        </div>
+    @endif
 </div>
-
