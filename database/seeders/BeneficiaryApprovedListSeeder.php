@@ -63,6 +63,8 @@ class BeneficiaryApprovedListSeeder extends Seeder
                 'is_final_submit' => true,
                 'is_faulty' => false,
                 'created_by' => $user_id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             // Step 4: Approved List (relation with beneficiary)

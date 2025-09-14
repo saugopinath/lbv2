@@ -61,4 +61,8 @@ class ApplicantIncompletDeatil extends Model
     {
         return $this->hasOne(AcceptRejectInfo::class, 'application_id', 'application_id');
     }
+     public function banks()
+    {
+        return $this->hasOne(BeneficiaryBank::class, 'application_id', 'application_id');
+    }
 }

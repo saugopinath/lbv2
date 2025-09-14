@@ -23,11 +23,11 @@ class BeneficiaryCommonList extends Model
     }
     public function failedPaymentDetails()
     {
-        return $this->hasOne(FailedPaymentDetails::class, 'application_id', 'sourceable_id');
+        return $this->hasOne(FailedPaymentDetailNew::class, 'beneficiary_id', 'ben_id');
     }
     public function benPaymentDetails()
     {
-        return $this->hasOne(BenPaymentDetails::class, 'application_id', 'id');
+        return $this->hasOne(BenPaymentDetailsNew::class, 'beneficiary_id', 'ben_id');
     }
 
 
@@ -44,6 +44,11 @@ class BeneficiaryCommonList extends Model
     public function enclosures()
     {
         return $this->hasMany(BeneficiaryTemEnclosure::class, 'application_id', 'sourceable_id');
+    }
+
+     public function enclosuresUpdated()
+    {
+        return $this->hasMany(BeneficiaryEnclosure::class, 'application_id', 'sourceable_id');
     }
 
     public function beneficiaryPersonal()

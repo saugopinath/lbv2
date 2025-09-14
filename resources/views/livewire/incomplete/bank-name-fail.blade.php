@@ -1,6 +1,5 @@
 <div class="mt-4">
     <div class="p-4 mb-4 border rounded-lg bg-gray-50 shadow-sm">
-<h2 class="font-semibold text-lg text-blue-700 mb-2">{{ $item->incompletType->code }}</h2>
        <div class="p-4 mb-2 border rounded-lg bg-gray-50 shadow-sm">
             <h2>Select Opertion Type</h2>
             <div class="flex gap-6 pl-4 pr-4 mt-2">

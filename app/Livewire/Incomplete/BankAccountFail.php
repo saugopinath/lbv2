@@ -5,6 +5,7 @@ namespace App\Livewire\Incomplete;
 use Livewire\Component;
 use App\Models\Ifsccodemaster;
 use App\Models\BeneficiaryPersonal;
+use App\Models\ApplicantIncompletDeatil;
 
 class BankAccountFail extends Component
 {
@@ -30,21 +31,46 @@ class BankAccountFail extends Component
         }
     }
 
-    public function mount($item)
+    // public function mount($item)
+    // {
+    //     $this->item = $item;
+    //     $old = $item->old_value ?? [];
+
+    //      $app_det = ApplicantIncompletDeatil::with('banks')->where('application_id', $item->application_id)->first();
+    //     if ($app_det->banks) {
+    //         $this->ifscode = $app_det->banks->ifsc;
+    //         $this->updatedIfscode($this->ifscode);
+    //         $this->bankname;
+    //         $this->bankbranchname;
+    //     }
+
+    //     $this->ifscode = $old['ifsc'] ?? '';
+    //     $this->bank_account_number = $old['bank_account_number'] ?? '';
+    // }
+      public function mount($item)
     {
         $this->item = $item;
-        $old = $item->old_value ?? [];
 
-        $app_det = BeneficiaryPersonal::with('bank')->where('application_id', $item->application_id)->first();
-        if ($app_det->bank) {
-            $this->ifscode = $app_det->bank->ifsc;
-            $this->updatedIfscode($this->ifscode);
-            $this->bankname;
-            $this->bankbranchname;
+        $old_value = $item->old_value ?? [];
+        $new_value = $item->new_value ?? [];
+
+        $this->bank_action = (string) ($item->change_type ?? '');
+
+        if (in_array($this->bank_action, ['1', '2', '3'])) {
+            $this->ifscode = $new_value['ifscode'] ?? '';
+            $this->bank_account_number = $new_value['bank_account_number'] ?? '';
+        } else {
+            $this->ifscode = $old_value['ifsc'] ?? '';
+            $this->bank_account_number = $old_value['bank_account_number'] ?? '';
         }
 
-        $this->ifscode = $old['ifsc'] ?? '';
-        $this->bank_account_number = $old['bank_account_number'] ?? '';
+        $app_det = ApplicantIncompletDeatil::with('banks')
+            ->where('application_id', $item->application_id)
+            ->first();
+
+        if ($app_det && $app_det->banks) {
+            $this->updatedIfscode($this->ifscode);
+        }
     }
 
     public function updated()

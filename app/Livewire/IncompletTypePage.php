@@ -2,16 +2,18 @@
 
 namespace App\Livewire;
 
-use App\Helpers\ChechDupHelper;
 use Livewire\Component;
 use App\Models\Codemaster;
+use App\Helpers\ChechDupHelper;
 use App\Models\AcceptRejectInfo;
+use App\Models\BeneficiaryCommonList;
 use Illuminate\Support\Facades\Crypt;
+use App\Models\BeneficiaryTemEnclosure;
 use App\Models\ApplicantIncompletDeatil;
 
 class IncompletTypePage extends Component
 {
-    public $id, $page, $stage, $applicantInfo, $formData = [], $revertReasons = [], $user_id, $revert_reason_cause_id, $revert_reason_remarks, $aadhaarIssues = [], $mobileIssues = [], $sortedBankIssues = [], $ifscode, $new_bank_account, $bank_action;
+    public $id, $page, $stage, $applicantInfo, $formData = [], $revertReasons = [], $user_id, $revert_reason_cause_id, $revert_reason_remarks, $aadhaarIssues = [], $mobileIssues = [], $sortedBankIssues = [], $ifscode, $bank_account_number, $bank_action;
 
     protected $listeners = ['trigger-update' => 'recivedupdateddata'];
 
@@ -39,34 +41,19 @@ class IncompletTypePage extends Component
         $this->applicantInfo = $this->page->first()?->beneficiaryCommonList;
 
         foreach ($this->page as $item) {
+
             if (!empty($item->new_value)) {
-                // 1️⃣ Decode: যদি string হয়, decode করো, যদি array হয়, 그대로 use করো
                 $decoded = is_string($item->new_value) ? json_decode($item->new_value, true) : $item->new_value;
 
-                // 2️⃣ Aadhaar field
                 if (isset($decoded['aadhaar_no'])) {
                     $this->formData['aadhar_modification'][$item->application_id] = $decoded['aadhaar_no'];
                 }
 
-                // 3️⃣ Mobile field
                 if (isset($decoded['mobile_no'])) {
                     $this->formData['new_mobile'][$item->application_id] = $decoded['mobile_no'];
                 }
-
-                // 4️⃣ Bank field
-                if (isset($decoded['account_number'])) {
-                    $this->new_bank_account = $decoded['account_number']; // edit mode prefill
-                }
-                if (isset($decoded['ifscode'])) {
-                    $this->ifscode = $decoded['ifscode']; // edit mode prefill
-                }
-
-                if (isset($item->change_type)) {
-                    $this->bank_action = $item->change_type; // এটা dropdown এ selected দেখাবে
-                }
             }
         }
-
 
         $this->classifyIssues();
     }
@@ -74,10 +61,9 @@ class IncompletTypePage extends Component
     public function recivedupdateddata($data)
     {
         $this->ifscode = $data['ifscode'];
-        $this->new_bank_account = $data['bank_account_number'];
+        $this->bank_account_number = $data['bank_account_number'];
         $this->bank_action = $data['bank_action'];
     }
-
 
 
     public function submit()
@@ -98,25 +84,19 @@ class IncompletTypePage extends Component
             'parent_id'              => null,
         ]);
 
-        // Pre-collect all bank issues to handle is_active logic
-        $bankIssues = $this->page->filter(fn($i) => in_array($i->incompletType->name, [
-            'DUPLICATE BANK ACCOUNT NUMBER',
-            'NAME VALIDATION  FAILED IN BANK',
-            'ACCOUNT NUMBER VALIDATION  FAILED IN BANK',
-            'MINOR MISMATCH(40% - 89%)',
-            'MINOR MISMATCH(90% - 100%)',
-        ]));
+        $bankIssues = $this->page->filter(fn($i) => in_array($i->incomplet_type, ['145', '146', '1411', '1412', '1413']));
 
-        $hasDuplicateBank = $bankIssues->contains(fn($i) => $i->incompletType->name === 'DUPLICATE BANK ACCOUNT NUMBER');
+
+        $hasDuplicateBank = $bankIssues->contains(fn($i) => $i->incomplet_type == '1411');
 
         foreach ($this->page as $item) {
-            $typeName = $item->incompletType->name ?? null;
-            if (!$typeName) continue;
+            $typeCode = $item->incomplet_type ?? null;
+            if (!$typeCode) continue;
 
             $jsonValue = [];
 
             // Aadhaar related
-            if (in_array($typeName, ['PDS MISMATCH', 'NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER'])) {
+            if (in_array($typeCode, ['141', '149', '1414'])) {
                 $jsonValue = [
                     'aadhaar_no'     => $this->formData['aadhar_modification'][$item->application_id] ?? null,
                     'application_id' => $this->id,
@@ -124,7 +104,7 @@ class IncompletTypePage extends Component
             }
 
             // Mobile related
-            elseif (in_array($typeName, ['NO MOBILE NUMBER', 'DUPLICATE MOBILE NUMBER'])) {
+            elseif (in_array($typeCode, ['142', '1410'])) {
                 $jsonValue = [
                     'mobile_no'      => $this->formData['new_mobile'][$item->application_id] ?? null,
                     'application_id' => $this->id,
@@ -132,24 +112,16 @@ class IncompletTypePage extends Component
             }
 
             // Bank related
-            elseif (in_array($typeName, [
-                'DUPLICATE BANK ACCOUNT NUMBER',
-                'NAME VALIDATION  FAILED IN BANK',
-                'ACCOUNT NUMBER VALIDATION  FAILED IN BANK',
-                'MINOR MISMATCH(40% - 89%)',
-                'MINOR MISMATCH(90% - 100%)',
-            ])) {
+            elseif (in_array($typeCode, ['145', '146', '1411', '1412', '1413'])) {
                 $jsonValue = [
                     'ifscode'        => $this->ifscode,
-                    'account_number' => $this->new_bank_account,
-                    'bank_action'    => $this->bank_action,
-                    'application_id' => $this->id,
+                    'bank_account_number' => $this->bank_account_number,
                 ];
 
-                // Determine is_active
-                if ($typeName === 'DUPLICATE BANK ACCOUNT NUMBER') {
+                if ($typeCode == '1411') {
                     $isActive = 1;
                 } else {
+
                     $isActive = $hasDuplicateBank ? 0 : ($this->bank_action == 1 ? 1 : 0);
                 }
 
@@ -161,7 +133,7 @@ class IncompletTypePage extends Component
                     'is_active'             => $isActive,
                 ]);
 
-                continue; // Skip the default update below since we already updated
+                continue;
             }
 
             if (!empty($jsonValue)) {
@@ -193,21 +165,23 @@ class IncompletTypePage extends Component
             'user_id'                => $this->user_id,
             'browser'                => request()->header('User-Agent'),
             'model_name'             => 'ApplicantIncompleteDetail',
-            'op_type'                => Codemaster::where('code', 246)->value('id'),
+            'op_type'                => Codemaster::where('code', operator: 246)->value('id'),
             'revert_reason_cause_id' => null,
             'revert_reason_remarks'  => null,
             'parent_id'              => $previousId,
         ]);
-
+        // dd($this->page);
         foreach ($this->page as $item) {
+
             $typeName = $item->incompletType->name ?? null;
+            $typeId = $item->incomplet_type;
             // dd(  $typeName);
-            if (!$typeName) continue;
+            if (!$typeId) continue;
 
             $jsonValue = [];
 
             // Aadhaar related
-            if (in_array($typeName, ['PDS MISMATCH', 'NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER'])) {
+            if (in_array($typeId, ['141', '149', '1414'])) {
                 $jsonValue = [
                     'aadhaar_no'     => $this->formData['aadhar_modification'][$item->application_id] ?? null,
                     'application_id' => $this->id,
@@ -215,7 +189,7 @@ class IncompletTypePage extends Component
             }
 
             // Mobile related
-            elseif (in_array($typeName, ['NO MOBILE NUMBER', 'DUPLICATE MOBILE NUMBER'])) {
+            elseif (in_array($typeId, ['142', '1410'])) {
                 $jsonValue = [
                     'mobile_no'      => $this->formData['new_mobile'][$item->application_id] ?? null,
                     'application_id' => $this->id,
@@ -223,16 +197,10 @@ class IncompletTypePage extends Component
             }
 
             // Bank related
-            elseif (in_array($typeName, [
-                'DUPLICATE BANK ACCOUNT NUMBER',
-                'NAME VALIDATION  FAILED IN BANK',
-                'ACCOUNT NUMBER VALIDATION  FAILED IN BANK',
-                'MINOR MISMATCH(40% - 89%)',
-                'MINOR MISMATCH(90% - 100%)',
-            ])) {
+            elseif (in_array($typeId, ['145', '146', '1411', '1412', '1413'])) {
                 $jsonValue = [
                     'ifscode'          => $this->ifscode,
-                    'account_number'   => $this->new_bank_account,
+                    'bank_account_number'   => $this->bank_account_number,
                     'bank_action'      => $this->bank_action,
                     'application_id'   => $this->id,
                 ];
@@ -240,14 +208,13 @@ class IncompletTypePage extends Component
 
             if (!empty($jsonValue)) {
                 $item->update([
-                    'new_value'            => $jsonValue,
-                    'change_type'          => $this->bank_action ?? null,
                     'next_level_request_id' => 0,
                     'request_id'           => $request->id,
                 ]);
-                $this->updateOriginalTable($item);
             }
+            $this->updateOriginalTable($item);
         }
+
 
 
         session()->flash('success', 'Approve details updated successfully!');
@@ -256,58 +223,139 @@ class IncompletTypePage extends Component
 
     protected function updateOriginalTable($item)
     {
-        $typeId = $item->incomplet_type_id;
-        $newValue = $item->new_value;
+        $typeId = $item->incomplet_type;
+
+        if (in_array($typeId, ['141', '149', '1414'])) {
+            $newAadhaar = $item->new_value['aadhaar_no'];
+        } elseif (in_array($typeId, ['142', '1410'])) {
+            $newMobile = $item->new_value['mobile_no'];
+        } else {
+            $bank_action = $item->change_type;
+            $newifscode = $item->new_value['ifscode'];
+            $newBankAccountNumber = $item->new_value['bank_account_number'];
+        }
+
         $beneficiary = $item->beneficiaryCommonList;
 
         switch ($typeId) {
             case 141: // NO AADHAR NUMBER
             case 149: // DUPLICATE AADHAR NUMBER
             case 1414: // PDS Mismatch
-                $beneficiary->aadhaar()->update([
-                    'encoded_aadhar' => md5($newValue),
-                    'aadhaar_number' => Crypt::encryptString($newValue),
-                ]);
+                $beneficiary->aadhaar()->updateOrCreate(
+                    ['application_id' => $this->id],
+                    [
+                        'encoded_aadhar' => Crypt::encryptString($newAadhaar),
+                        'aadhar_hash' => md5($newAadhaar),
+                        'created_by'  => 1,
+                    ]
+                );
+
+                BeneficiaryCommonList::where('sourceable_id', $this->id)
+                    ->update([
+                        'encoded_aadhar' => Crypt::encryptString($newAadhaar),
+                    ]);
                 break;
 
             case 142: // NO MOBILE NUMBER
             case 1410: // DUPLICATE MOBILE NUMBER
-                $beneficiary->beneficiaryPersonal()->update([
-                    'mobile' => $newValue,
-                ]);
+                $beneficiary->beneficiaryPersonal()->updateOrCreate(
+                    ['application_id' => $this->id], // condition
+                    [
+                        'mobile_no'   => $newMobile,
+                        'created_by'  => 1,
+                        'is_faulty'   => true,
+                        'created_at'  => now(),
+                        'updated_at'  => now(),
+                    ]
+                );
 
-                if ($typeId == 142) {
-                    $beneficiary->faultyBeneficiaryPersonal()->update([
-                        'mobile' => $newValue,
+                $beneficiary->faultyBeneficiaryPersonal()
+                    ->where('application_id', $this->id)
+                    ->delete();
+
+                // if ($typeId == 142) {
+                //     $beneficiary->faultyBeneficiaryPersonal()->updateOrCreate(
+                //         ['application_id' => $this->id], // condition
+                //         [
+                //             'mobile_no'  => $newMobile,
+                //             'created_by' => 1,
+                //         ]
+                //     );
+                // }
+
+                BeneficiaryCommonList::where('sourceable_id', $this->id)
+                    ->update([
+                        'mobile_no' => $newMobile,
                     ]);
-                }
                 break;
+
 
             case 145: // NAME VALIDATION FAILED IN BANK
                 $beneficiary->failedPaymentDetails()->update([
-                    'acc_validation' => 0,
+                    'acc_validated' => 2,
                 ]);
+
+                BeneficiaryCommonList::where('sourceable_id', $this->id)
+                    ->update([
+                        'bank_account_number' => $newBankAccountNumber,
+                    ]);
+
                 break;
 
             case 146: // ACCOUNT NUMBER VALIDATION FAILED IN BANK
             case 1411: // DUPLICATE BANK ACCOUNT NUMBER
-                $beneficiary->bank()->update([
-                    'bank_account_number' => $newValue,
+                $beneficiary->bank()->updateOrCreate(
+                    ['application_id' => $this->id],
+                    [
+                        'bank_account_number' => $newBankAccountNumber,
+                        'ifsc'               => $newifscode,
+                        'created_by'         => 1,
+                    ]
+                );
+
+                if ($bank_action == 2 || $bank_action == 3) {
+                    $temp = BeneficiaryTemEnclosure::where('application_id', $this->id)->first();
+
+                    if ($temp) {
+                        $beneficiary->enclosuresUpdated()->updateOrCreate(
+                            ['application_id' => $this->id],
+                            [
+                                'attched_document'   => $temp->attched_document,
+                                'document_type'      => $temp->document_type,
+                                'document_extension' => $temp->document_extension,
+                                'document_mime_type' => $temp->document_mime_type,
+                                'updated_at'         => now(),
+                            ]
+                        );
+
+                        $temp->delete();
+                    }
+                }
+
+                $beneficiary->faultyBeneficiaryPersonal()
+                    ->where('application_id', $this->id)
+                    ->delete();
+
+                $beneficiary->benPaymentDetails()->update([
+                    'acc_validated' => 2,
+                    'ben_status'    => 0,
                 ]);
 
-                $beneficiary->faultyBeneficiaryBank()->update([
-                    'bank_account_number' => $newValue,
-                ]);
-                $beneficiary->benPaymentDetails()->update([
-                    'bank_account_number' => $newValue,
-                ]);
+                BeneficiaryCommonList::where('sourceable_id', $this->id)
+                    ->update([
+                        'bank_account_number' => $newBankAccountNumber,
+                    ]);
                 break;
 
             case 1412: // Minor Mismatch(40% - 89%)
             case 1413: // Minor Mismatch(90% - 100%)
                 $beneficiary->failedPaymentDetails()->update([
-                    'mismatch_details' => $newValue,
+                    'acc_validated' => 2,
                 ]);
+                BeneficiaryCommonList::where('sourceable_id', $this->id)
+                    ->update([
+                        'bank_account_number' => $newBankAccountNumber,
+                    ]);
                 break;
 
             default:
@@ -315,76 +363,6 @@ class IncompletTypePage extends Component
         }
     }
 
-    // public function submit()
-    // {
-    //     $this->checkduplicate();
-
-    //     // create accept/reject request entry
-    //     $request = AcceptRejectInfo::create([
-    //         'application_id'         => $this->id,
-    //         'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
-    //         'ip_address'             => request()->ip(),
-    //         'user_id'                => $this->user_id,
-    //         'browser'                => request()->header('User-Agent'),
-    //         'model_name'             => 'ApplicantIncompleteDetail',
-    //         'op_type'                => Codemaster::where('code', 245)->value('id'),
-    //         'revert_reason_cause_id' => null,
-    //         'revert_reason_remarks'  => null,
-    //         'parent_id'              => null,
-    //     ]);
-
-    //     foreach ($this->page as $item) {
-    //         $typeName = $item->incompletType->name ?? null;
-    //         // dd(  $typeName);
-    //         if (!$typeName) continue;
-
-    //         $jsonValue = [];
-
-    //         // Aadhaar related
-    //         if (in_array($typeName, ['PDS MISMATCH', 'NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER'])) {
-    //             $jsonValue = [
-    //                 'aadhaar_no'     => $this->formData['aadhar_modification'][$item->application_id] ?? null,
-    //                 'application_id' => $this->id,
-    //             ];
-    //         }
-
-    //         // Mobile related
-    //         elseif (in_array($typeName, ['NO MOBILE NUMBER', 'DUPLICATE MOBILE NUMBER'])) {
-    //             $jsonValue = [
-    //                 'mobile_no'      => $this->formData['new_mobile'][$item->application_id] ?? null,
-    //                 'application_id' => $this->id,
-    //             ];
-    //         }
-
-    //         // Bank related
-    //         elseif (in_array($typeName, [
-    //             'DUPLICATE BANK ACCOUNT NUMBER',
-    //             'NAME VALIDATION  FAILED IN BANK',
-    //             'ACCOUNT NUMBER VALIDATION  FAILED IN BANK',
-    //             'MINOR MISMATCH(40% - 89%)',
-    //             'MINOR MISMATCH(90% - 100%)',
-    //         ])) {
-    //             $jsonValue = [
-    //                 'ifscode'          => $this->ifscode,
-    //                 'account_number'   => $this->new_bank_account,
-    //                 'bank_action'      => $this->bank_action,
-    //                 'application_id'   => $this->id,
-    //             ];
-    //         }
-
-    //         if (!empty($jsonValue)) {
-    //             $item->update([
-    //                 'new_value'            => $jsonValue,
-    //                 'change_type'          => $this->bank_action ?? null,
-    //                 'next_level_request_id' => 1,
-    //                 'request_id'           => $request->id,
-    //             ]);
-    //         }
-    //     }
-
-    //     session()->flash('success', 'Incomplete details updated successfully!');
-    //     return redirect()->route('incomplete.types', ['stage' => 'verifier', 'id' => $this->id]);
-    // }
 
     public function checkduplicate()
     {
@@ -408,7 +386,9 @@ class IncompletTypePage extends Component
         ) {
 
             $type = 'mobile';
+            // dd($type);
             $value = $this->applicantInfo?->mobile_no;
+            // dd($value);
         } elseif (
             str_contains($incompleteType, 'DUPLICATE BANK ACCOUNT NUMBER')
             || str_contains($incompleteType, 'NAME VALIDATION  FAILED IN BANK')
@@ -418,7 +398,7 @@ class IncompletTypePage extends Component
         ) {
 
             $type = 'bank';
-            $value = $this->new_bank_account;
+            $value = $this->bank_account_number;
         } else {
             return true;
         }
