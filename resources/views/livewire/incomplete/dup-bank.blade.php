@@ -12,7 +12,7 @@
                         value="2" />
                     <span>CHANGE</span>
                 </label>
-            </div>
+            </div>           
         </div>
 
         @if ($bank_action === '' || $bank_action === '1')

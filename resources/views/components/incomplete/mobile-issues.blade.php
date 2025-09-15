@@ -8,7 +8,7 @@
             <li>{{ $issueItem->incompletType->name }}</li>
         @endforeach
     </ul>
-
+<p class="text-sm text-gray-600">Old Mobile: {{ $item->old_value ?? 'N/A' }}</p>
     <x-form.input id="dup_mobile_{{ $mobileIssues[0]->application_id }}"
         name="dup_mobile[{{ $mobileIssues[0]->application_id }}]" label="New Mobile Number" required
         wire:model="formData.new_mobile.{{ $mobileIssues[0]->application_id }}" placeholder="Enter New Mobile"

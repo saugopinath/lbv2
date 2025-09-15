@@ -4,7 +4,6 @@ namespace App\Livewire\Incomplete;
 
 use Livewire\Component;
 use App\Models\Ifsccodemaster;
-use App\Models\BeneficiaryPersonal;
 use App\Models\ApplicantIncompletDeatil;
 
 class DupBank extends Component
