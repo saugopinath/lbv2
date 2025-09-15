@@ -92,8 +92,7 @@ class DraftBeneficiaryPersonalObserver
         //         'sourceable_type' => BeneficiaryPersonal::class,
         //         'sourceable_id'   => $beneficiary->application_id,
         //     ]);
-        AcceptRejectInfo::updateOrCreate(
-            ['application_id' => $draft->application_id],
+        AcceptRejectInfo::Create(
             [
                 'application_id' => $beneficiary->application_id,
                 'beneficiary_id' => $beneficiary->beneficiary_id,
@@ -101,10 +100,12 @@ class DraftBeneficiaryPersonalObserver
                 'user_id'        => Auth::id(),
                 'browser'        => request()->header('User-Agent'),
                 'model_name'     => null,
-                'op_type'        => 138,
+                'op_type'        => Codemaster::getIdByCode(2303),
                 'revert_reason_cause_id' => null,
                 'revert_reason_remarks'  => null,
-                'parent_id'      => null,
+                'parent_id'      => AcceptRejectInfo::where('application_id', $beneficiary->application_id)
+                            ->latest('id')
+                            ->value('id') ?? null,
             ]
         );
     }

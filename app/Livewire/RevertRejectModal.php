@@ -7,31 +7,33 @@ use Livewire\Component;
 class RevertRejectModal extends Component
 {
     public $open = false;
-    public $reason = '';
+    public $remark = '';
     public $action = '';
-
+    public $revertrejectCauses = '';
+    public $cause = '';
     protected $listeners = ['open-bulk-revert-modal' => 'openModal'];
 
-    public function openModal($action)
+    public function openModal($action, $revertrejectCauses)
     {
         $this->open = true;
         $this->action = $action;
+        $this->revertrejectCauses = $revertrejectCauses;
     }
 
     public function close()
     {
         $this->open = false;
-        $this->reason = '';
+        $this->remark = '';
+        $this->cause = '';
     }
 
     public function confirm()
     {
-        $this->validate([
-            'reason' => 'required|string|max:500',
+        $validated = $this->validate([
+            'remark' => 'required|string|max:500',
+            'cause' => 'required',
         ]);
-        $this->dispatch('confirm-bulk-revert', [
-            'reason' => $this->reason,
-        ]);
+        $this->dispatch('confirm-bulk-revert',$validated);
         $this->close();
     }
 

@@ -30,7 +30,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public string $login_type = '';
     public string $search = '';
 
-    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id, $revertrejectAction;
+    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id, $revertrejectAction, $revertrejectCauses;
     protected $listeners = ['filtersApplied'];
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
@@ -223,21 +223,10 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         }
         return $query;
     }
-    // public function bulkverify()
-    // {
-    //     $ids = $this->getSelected();
-    //     $approverRoleId = Codemaster::getIdByCode(23);
-    //     foreach ($ids as $id) {
-    //         DraftBeneficiaryPersonal::where('application_id', $id)
-    //             ->update(['next_level_role_id' => $approverRoleId]);
-    //     }
-    //     $this->clearSelected();
-    // }
-
+    
     public function bulkverify()
     {
         $ids = $this->getSelected();
-        // dd($ids);
         $approverRoleId = Codemaster::getIdByCode(23);
         $select_lgd = session('lgd_session');
         $user_id = Crypt::decryptString($select_lgd['role_id']);
@@ -245,9 +234,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             DraftBeneficiaryPersonal::where('application_id', $id)
                 ->update(['next_level_role_id' => $approverRoleId]);
             $beneficiary = DraftBeneficiaryPersonal::where('application_id', $id)->first();
-            // dd($beneficiary);
-            AcceptRejectInfo::updateOrCreate(
-                ['application_id' => $beneficiary->application_id],
+            AcceptRejectInfo::Create(
                 [
                     'application_id' => $beneficiary->application_id,
                     'beneficiary_id' => $beneficiary->application_id,
@@ -255,10 +242,12 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     'user_id'        => $user_id,
                     'browser'        => request()->header('User-Agent'),
                     'model_name'     => null,
-                    'op_type'        => 138,
+                    'op_type'        => Codemaster::getIdByCode(2302),
                     'revert_reason_cause_id' => null,
                     'revert_reason_remarks'  => null,
-                    'parent_id'      => null,
+                    'parent_id'      => AcceptRejectInfo::where('application_id', $id)
+                        ->latest('id')
+                        ->value('id') ?? null,
                 ]
             );
         }
@@ -287,15 +276,17 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     }
     public function handleBulkAction($action)
     {
+        $this->revertrejectCauses = Codemaster::where('code', 12)->first()->children()->get();
         $this->revertrejectAction = $action;
-        $this->dispatch('open-bulk-revert-modal', action: $action);
+        $this->dispatch('open-bulk-revert-modal', action: $action, revertrejectCauses: $this->revertrejectCauses);
     }
     #[On('confirm-bulk-revert')]
-    public function confirmBulkRevert($reason)
+    public function confirmBulkRevert($validated)
     {
         $ids = $this->getSelected();
+        $select_lgd = session('lgd_session');
+        $user_id = Crypt::decryptString($select_lgd['role_id']);
         if ($this->revertrejectAction === 'revert') {
-            // dd($reason, $this->getSelected(), $this->revertrejectAction);
             $user = auth()->user();
             if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
                 $next_level_role_id = Codemaster::getIdByCode(22);
@@ -306,6 +297,23 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             foreach ($ids as $id) {
                 DraftBeneficiaryPersonal::where('application_id', $id)
                     ->update(['next_level_role_id' => $next_level_role_id]);
+                $beneficiary = DraftBeneficiaryPersonal::where('application_id', $id)->first();
+                AcceptRejectInfo::Create(
+                    [
+                        'application_id' => $beneficiary->application_id,
+                        'beneficiary_id' => $beneficiary->application_id,
+                        'ip_address'     => request()->ip(),
+                        'user_id'        => $user_id,
+                        'browser'        => request()->header('User-Agent'),
+                        'model_name'     => null,
+                        'op_type'        => Codemaster::getIdByCode(2304),
+                        'revert_reason_cause_id' => $validated['cause'],
+                        'revert_reason_remarks'  => $validated['remark'],
+                        'parent_id'      => AcceptRejectInfo::where('application_id', $id)
+                            ->latest('id')
+                            ->value('id') ?? null,
+                    ]
+                );
             }
             $this->clearSelected();
         }
