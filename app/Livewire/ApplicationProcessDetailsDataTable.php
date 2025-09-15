@@ -19,6 +19,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use App\Models\DraftBeneficiaryPersonal;
+use App\Models\AcceptRejectInfo;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Log;
 
@@ -222,16 +223,50 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         }
         return $query;
     }
+    // public function bulkverify()
+    // {
+    //     $ids = $this->getSelected();
+    //     $approverRoleId = Codemaster::getIdByCode(23);
+    //     foreach ($ids as $id) {
+    //         DraftBeneficiaryPersonal::where('application_id', $id)
+    //             ->update(['next_level_role_id' => $approverRoleId]);
+    //     }
+    //     $this->clearSelected();
+    // }
+
     public function bulkverify()
     {
         $ids = $this->getSelected();
+        // dd($ids);
         $approverRoleId = Codemaster::getIdByCode(23);
+        $select_lgd = session('lgd_session');
+        $user_id = Crypt::decryptString($select_lgd['role_id']);
         foreach ($ids as $id) {
             DraftBeneficiaryPersonal::where('application_id', $id)
                 ->update(['next_level_role_id' => $approverRoleId]);
+            $beneficiary = DraftBeneficiaryPersonal::where('application_id', $id)->first();
+            // dd($beneficiary);
+            AcceptRejectInfo::updateOrCreate(
+                ['application_id' => $beneficiary->application_id],
+                [
+                    'application_id' => $beneficiary->application_id,
+                    'beneficiary_id' => $beneficiary->application_id,
+                    'ip_address'     => request()->ip(),
+                    'user_id'        => $user_id,
+                    'browser'        => request()->header('User-Agent'),
+                    'model_name'     => null,
+                    'op_type'        => 138,
+                    'revert_reason_cause_id' => null,
+                    'revert_reason_remarks'  => null,
+                    'parent_id'      => null,
+                ]
+            );
         }
+
         $this->clearSelected();
     }
+
+
     public function bulkapprove()
     {
         $ids = $this->getSelected();

@@ -6,9 +6,13 @@ use App\Models\DraftBeneficiaryPersonal;
 use App\Models\BeneficiaryPersonal;
 use App\Models\BeneficiaryCommonList;
 use App\Models\BeneficiaryBank;
+use App\Models\AcceptRejectInfo;
 use App\Models\BeneficiaryContact;
 use App\Models\BeneficiaryRelationship;
+use App\Models\Codemaster;
 use App\Models\BeneficiaryDeclaration;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Auth;
 class DraftBeneficiaryPersonalObserver
 {
     /**
@@ -52,47 +56,56 @@ class DraftBeneficiaryPersonalObserver
     }
     public function deleting(DraftBeneficiaryPersonal $draft)
     {
-        $data = $draft->toArray();
-        unset($data['id']);
         $beneficiary = BeneficiaryPersonal::updateOrCreate(
             ['application_id' => $draft->application_id],
-            $data
+            collect($draft)->except(['id', 'created_at', 'updated_at'])->toArray()
         );
         if ($draft->contact) {
-            $contactData = $draft->contact->toArray();
             BeneficiaryContact::updateOrCreate(
                 ['application_id' => $beneficiary->application_id],
-                $contactData
+                collect($draft->contact)->except(['created_at', 'updated_at'])->toArray()
             );
         }
         if ($draft->relationships) {
-            $relationshipData = $draft->relationships->toArray();
-            foreach ($relationshipData as $rel) {
+            foreach ($draft->relationships as $rel) {
                 BeneficiaryRelationship::updateOrCreate(
                     ['application_id' => $beneficiary->application_id],
-                    $rel
+                    collect($rel)->except(['created_at', 'updated_at'])->toArray()
                 );
             }
         }
         if ($draft->bank) {
-            $bankData = $draft->bank->toArray();
             BeneficiaryBank::updateOrCreate(
                 ['application_id' => $beneficiary->application_id],
-                $bankData
+                collect($draft->bank)->except(['created_at', 'updated_at'])->toArray()
             );
         }
         if ($draft->declaration) {
-            $declarationData = $draft->declaration->toArray();
             BeneficiaryDeclaration::updateOrCreate(
                 ['application_id' => $beneficiary->application_id],
-                $declarationData
+                collect($draft->declaration)->except(['created_at', 'updated_at'])->toArray()
             );
         }
-        BeneficiaryCommonList::where('sourceable_type', DraftBeneficiaryPersonal::class)
-            ->where('sourceable_id', $draft->application_id)
-            ->update([
-                'sourceable_type' => BeneficiaryPersonal::class,
-                'sourceable_id'   => $beneficiary->application_id,
-            ]);
+        // BeneficiaryCommonList::where('sourceable_type', DraftBeneficiaryPersonal::class)
+        //     ->where('sourceable_id', $draft->application_id)
+        //     ->update([
+        //         'sourceable_type' => BeneficiaryPersonal::class,
+        //         'sourceable_id'   => $beneficiary->application_id,
+        //     ]);
+        AcceptRejectInfo::updateOrCreate(
+            ['application_id' => $draft->application_id],
+            [
+                'application_id' => $beneficiary->application_id,
+                'beneficiary_id' => $beneficiary->beneficiary_id,
+                'ip_address'     => request()->ip(),
+                'user_id'        => Auth::id(),
+                'browser'        => request()->header('User-Agent'),
+                'model_name'     => null,
+                'op_type'        => 138,
+                'revert_reason_cause_id' => null,
+                'revert_reason_remarks'  => null,
+                'parent_id'      => null,
+            ]
+        );
     }
 }

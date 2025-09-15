@@ -39,4 +39,12 @@ class BeneficiaryPersonal extends Model
     //     });
     // }
 
+    protected static function booted()
+    {
+        static::created(function ($beneficiary) {
+            if ($beneficiary) {
+                $beneficiary->lists()->update([]);
+            }
+        });
+    }
 }
