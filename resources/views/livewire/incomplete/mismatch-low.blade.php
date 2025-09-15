@@ -87,7 +87,7 @@
                 <x-form.input name="bankbranchname" label="Branch Name" wire:model="bankbranchname" disabled />
 
                 <x-form.input name="bank_account_number" label="New Bank Account Number"
-                    wire:model="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')"
+                    wire:model.live="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')"
                     x-on:copy.prevent />
             </div>
         @endif

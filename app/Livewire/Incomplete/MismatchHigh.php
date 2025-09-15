@@ -64,7 +64,6 @@ class MismatchHigh extends Component
             'bank_account_number' => $this->bank_account_number,
             'bank_action' => $this->bank_action,
         ];
-
         $this->dispatch('trigger-update', $data);
     }
     public function setDupAction($value)
