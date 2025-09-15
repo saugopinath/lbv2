@@ -153,14 +153,11 @@ class IncompletTypeTable extends DataTableComponent
         if ($this->stage === 'verifier') {
             $query->whereNull('next_level_request_id');
         } elseif ($this->stage === 'approver') {
-            // $query->where('next_level_request_id', 1);
-            // $query->where('next_level_request_id', 1)
-            //     ->where('is_active', 1);
-                $query->where(['next_level_request_id' => 1, 'is_active' => 1]);
+            $query->where('next_level_request_id', 1);
         } elseif ($this->stage === 'revert') {
             $query->where('next_level_request_id', -50)->with(['acceptRejectInfo' => function ($q) {
                 $q->latest('id');
-            }]);;
+            }]);
         }
 
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {

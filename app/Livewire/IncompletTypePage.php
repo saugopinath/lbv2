@@ -65,7 +65,6 @@ class IncompletTypePage extends Component
         $this->bank_action = $data['bank_action'];
     }
 
-
     public function submit()
     {
         $this->checkduplicate();
@@ -84,10 +83,9 @@ class IncompletTypePage extends Component
             'parent_id'              => null,
         ]);
 
+        // check if 1411 exists in bank issues
         $bankIssues = $this->page->filter(fn($i) => in_array($i->incomplet_type, ['145', '146', '1411', '1412', '1413']));
-
-
-        $hasDuplicateBank = $bankIssues->contains(fn($i) => $i->incomplet_type == '1411');
+        $dupbankacc = $bankIssues->contains(fn($i) => $i->incomplet_type == '1411');
 
         foreach ($this->page as $item) {
             $typeCode = $item->incomplet_type ?? null;
@@ -114,19 +112,25 @@ class IncompletTypePage extends Component
             // Bank related
             elseif (in_array($typeCode, ['145', '146', '1411', '1412', '1413'])) {
                 $jsonValue = [
-                    'ifscode'        => $this->ifscode,
+                    'ifscode'             => $this->ifscode,
                     'bank_account_number' => $this->bank_account_number,
                 ];
 
                 if ($typeCode == '1411') {
                     $isActive = 1;
+                    $updateValue = $jsonValue;
                 } else {
-
-                    $isActive = $hasDuplicateBank ? 0 : ($this->bank_action == 1 ? 1 : 0);
+                    if ($dupbankacc) {
+                        $isActive = 0;
+                        $updateValue = $item->old_value ?? $jsonValue;
+                    } else {
+                        $isActive = ($this->bank_action == 1 ? 1 : 0);
+                        $updateValue = $jsonValue;
+                    }
                 }
 
                 $item->update([
-                    'new_value'             => $jsonValue,
+                    'new_value'             => $updateValue,
                     'change_type'           => $this->bank_action ?? null,
                     'next_level_request_id' => 1,
                     'request_id'            => $request->id,
@@ -136,6 +140,7 @@ class IncompletTypePage extends Component
                 continue;
             }
 
+            // Update Aadhaar/Mobile if exists
             if (!empty($jsonValue)) {
                 $item->update([
                     'new_value'             => $jsonValue,
@@ -146,9 +151,96 @@ class IncompletTypePage extends Component
             }
         }
 
+
         session()->flash('success', 'Incomplete details updated successfully!');
         return redirect()->route('incomplete.types', ['stage' => 'verifier', 'id' => $this->id]);
     }
+
+
+    // public function submit()
+    // {
+    //     $this->checkduplicate();
+
+    //     // create accept/reject request entry
+    //     $request = AcceptRejectInfo::create([
+    //         'application_id'         => $this->id,
+    //         'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
+    //         'ip_address'             => request()->ip(),
+    //         'user_id'                => $this->user_id,
+    //         'browser'                => request()->header('User-Agent'),
+    //         'model_name'             => 'ApplicantIncompleteDetail',
+    //         'op_type'                => Codemaster::where('code', 245)->value('id'),
+    //         'revert_reason_cause_id' => null,
+    //         'revert_reason_remarks'  => null,
+    //         'parent_id'              => null,
+    //     ]);
+
+    //     $bankIssues = $this->page->filter(fn($i) => in_array($i->incomplet_type, ['145', '146', '1411', '1412', '1413']));
+
+
+    //     $hasDuplicateBank = $bankIssues->contains(fn($i) => $i->incomplet_type == '1411');
+
+    //     foreach ($this->page as $item) {
+    //         $typeCode = $item->incomplet_type ?? null;
+    //         if (!$typeCode) continue;
+
+    //         $jsonValue = [];
+
+    //         // Aadhaar related
+    //         if (in_array($typeCode, ['141', '149', '1414'])) {
+    //             $jsonValue = [
+    //                 'aadhaar_no'     => $this->formData['aadhar_modification'][$item->application_id] ?? null,
+    //                 'application_id' => $this->id,
+    //             ];
+    //         }
+
+    //         // Mobile related
+    //         elseif (in_array($typeCode, ['142', '1410'])) {
+    //             $jsonValue = [
+    //                 'mobile_no'      => $this->formData['new_mobile'][$item->application_id] ?? null,
+    //                 'application_id' => $this->id,
+    //             ];
+    //         }
+
+    //         // Bank related
+    //         elseif (in_array($typeCode, ['145', '146', '1411', '1412', '1413'])) {
+    //             $jsonValue = [
+    //                 'ifscode'        => $this->ifscode,
+    //                 'bank_account_number' => $this->bank_account_number,
+    //             ];
+
+    //             if ($typeCode == '1411') {
+    //                 $isActive = 1;
+    //             } else {
+
+    //                 $isActive = $hasDuplicateBank ? 0 : ($this->bank_action == 1 ? 1 : 0);
+    //             }
+
+    //             $item->update([
+    //                 'new_value'             => $jsonValue,
+    //                 'change_type'           => $this->bank_action ?? null,
+    //                 'next_level_request_id' => 1,
+    //                 'request_id'            => $request->id,
+    //                 'is_active'             => $isActive,
+    //             ]);
+
+    //             continue;
+    //         }
+
+    //         if (!empty($jsonValue)) {
+    //             $item->update([
+    //                 'new_value'             => $jsonValue,
+    //                 'change_type'           => $this->bank_action ?? null,
+    //                 'next_level_request_id' => 1,
+    //                 'request_id'            => $request->id,
+    //             ]);
+    //         }
+    //     }
+
+    //     session()->flash('success', 'Incomplete details updated successfully!');
+    //     return redirect()->route('incomplete.types', ['stage' => 'verifier', 'id' => $this->id]);
+    // }
+
 
 
     public function approve()
@@ -207,7 +299,7 @@ class IncompletTypePage extends Component
 
             if (!empty($jsonValue)) {
                 $item->update([
-                    'next_level_request_id' => 0,
+                    'next_level_request_id' => 2,
                     'request_id'           => $request->id,
                 ]);
             }
@@ -299,7 +391,10 @@ class IncompletTypePage extends Component
 
             case 145: // NAME VALIDATION FAILED IN BANK
                 $beneficiary->failedPaymentDetails()->update([
-                    'acc_validated' => 2,
+                    'edited_status' => 2,
+                    'failed_type' => 3,
+                    'accno' => $newBankAccountNumber,
+                    'ifsc'  => $newifscode,
                 ]);
 
                 if ($bank_action == 2 || $bank_action == 3) {
@@ -356,6 +451,16 @@ class IncompletTypePage extends Component
 
                         $temp->delete();
                     }
+                    $beneficiary->benPaymentDetails()->update([
+                        'acc_validated' => 0,
+                        'last_accno' => $newBankAccountNumber,
+                        'last_ifsc' => $newifscode,
+
+                    ]);
+                } else {
+                    $beneficiary->benPaymentDetails()->update([
+                        'acc_validated' => 2,
+                    ]);
                 }
 
                 if ($typeId == 1411) {
@@ -363,11 +468,6 @@ class IncompletTypePage extends Component
                         ->where('application_id', $this->id)
                         ->delete();
                 }
-
-                $beneficiary->benPaymentDetails()->update([
-                    'acc_validated' => 2,
-                    'ben_status'    => 0,
-                ]);
 
                 BeneficiaryCommonList::where('sourceable_id', $this->id)
                     ->update([
@@ -378,9 +478,11 @@ class IncompletTypePage extends Component
             case 1412: // Minor Mismatch(40% - 89%)
             case 1413: // Minor Mismatch(90% - 100%)
                 $beneficiary->failedPaymentDetails()->updateOrCreate([
-                    'failed_type' => 0,
+                    'edited_status' => 2,
+                    'failed_type' => 3,
                     'accno' => $newBankAccountNumber,
                     'ifsc'  => $newifscode,
+                    'updated_at'         => now(),
                 ]);
                 BeneficiaryCommonList::where('sourceable_id', $this->id)
                     ->update([
@@ -392,7 +494,102 @@ class IncompletTypePage extends Component
                 break;
         }
     }
+    public function revert()
+    {
+        $previousId = AcceptRejectInfo::where('application_id', $this->id)
+            ->orderByDesc('id')
+            ->value('id');
 
+        $request = AcceptRejectInfo::create([
+            'application_id'         => $this->id,
+            'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
+            'ip_address'             => request()->ip(),
+            'user_id'                => $this->user_id,
+            'browser'                => request()->header('User-Agent'),
+            'model_name'             => 'ApplicantIncompleteDetail',
+            'op_type'                => Codemaster::where('code', 247)->value('id'),
+            'revert_reason_cause_id' => $this->revert_reason_cause_id,
+            'revert_reason_remarks'  => $this->revert_reason_remarks,
+            'parent_id'              => $previousId,
+        ]);
+
+        foreach ($this->page as $item) {
+            $item->update([
+                'next_level_request_id' => -50,
+                'request_id'            => $request->id,
+            ]);
+        }
+
+        session()->flash('success', 'Application reverted successfully!');
+        return redirect()->route('incomplete.types', ['stage' => 'approver', 'id' => $this->id]);
+    }
+
+    public function revertVerify()
+    {
+        $previousId = AcceptRejectInfo::where('application_id', $this->id)
+            ->orderByDesc('id')
+            ->value('id');
+
+        $request = AcceptRejectInfo::create([
+            'application_id'         => $this->id,
+            'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
+            'ip_address'             => request()->ip(),
+            'user_id'                => $this->user_id,
+            'browser'                => request()->header('User-Agent'),
+            'model_name'             => 'ApplicantIncompleteDetail',
+            'op_type'                => Codemaster::where('code', 245)->value('id'),
+            'revert_reason_cause_id' => null,
+            'revert_reason_remarks'  => null,
+            'parent_id'              => $previousId,
+        ]);
+
+        foreach ($this->page as $item) {
+
+            $typeId = $item->incomplet_type;
+            // dd(  $typeName);
+            if (!$typeId) continue;
+
+            $jsonValue = [];
+
+            // Aadhaar related
+            if (in_array($typeId, ['141', '149', '1414'])) {
+                $jsonValue = [
+                    'aadhaar_no'     => $this->formData['aadhar_modification'][$item->application_id] ?? null,
+                    'application_id' => $this->id,
+                ];
+            }
+
+            // Mobile related
+            elseif (in_array($typeId, ['142', '1410'])) {
+                $jsonValue = [
+                    'mobile_no'      => $this->formData['new_mobile'][$item->application_id] ?? null,
+                    'application_id' => $this->id,
+                ];
+            }
+
+            // Bank related
+            elseif (in_array($typeId, ['145', '146', '1411', '1412', '1413'])) {
+                $jsonValue = [
+                    'ifscode'          => $this->ifscode,
+                    'bank_account_number'   => $this->bank_account_number,
+                    'bank_action'      => $this->bank_action,
+                    'application_id'   => $this->id,
+                ];
+            }
+
+            if (!empty($jsonValue)) {
+                $item->update([
+                    'new_value'             => $jsonValue,
+                    'change_type'           => $this->bank_action ?? null,
+                    'next_level_request_id' => 1,
+                    'request_id'            => $request->id,
+                ]);
+            }
+        }
+
+        session()->flash('success', 'Revert details updated successfully!');
+        return redirect()->route('incomplete.types', ['stage' => 'revert', 'id' => $this->id]);
+    }
 
     public function checkduplicate()
     {
@@ -439,8 +636,6 @@ class IncompletTypePage extends Component
 
         return true;
     }
-
-
 
     private function classifyIssues()
     {

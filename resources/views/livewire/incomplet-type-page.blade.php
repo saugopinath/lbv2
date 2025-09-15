@@ -51,15 +51,15 @@
                 <div class="p-4 mb-4 border rounded-lg bg-gray-50 shadow-sm">
                     <h2 class="font-semibold text-lg text-blue-700 mb-2">{{ $item->incompletType->name }}</h2>
 
-                    @if ($item->incompletType->name === 'DUPLICATE BANK ACCOUNT NUMBER')
+                    @if ($item->incomplet_type == '1411')
                         <livewire:incomplete.dup-bank :item="$item" :wire:key="'dup-'.$item->id" />
-                    @elseif ($item->incompletType->name === 'NAME VALIDATION  FAILED IN BANK')
+                    @elseif ($item->incomplet_type == '145')
                         <livewire:incomplete.bank-name-fail :item="$item" :wire:key="'name-'.$item->id" />
-                    @elseif ($item->incompletType->name === 'ACCOUNT NUMBER VALIDATION  FAILED IN BANK')
+                    @elseif ($item->incomplet_type == '146')
                         <livewire:incomplete.bank-account-fail :item="$item" :wire:key="'account-'.$item->id" />
-                    @elseif ($item->incompletType->name === 'MINOR MISMATCH(40% - 89%)')
+                    @elseif ($item->incomplet_type == '1412')
                         <livewire:incomplete.mismatch-low :item="$item" :wire:key="'mismatch-low-'.$item->id" />
-                    @elseif ($item->incompletType->name === 'MINOR MISMATCH(90% - 100%)')
+                    @elseif ($item->incomplet_type == '1413')
                         <livewire:incomplete.mismatch-high :item="$item" :wire:key="'mismatch-high-'.$item->id" />
                     @endif
 
@@ -87,7 +87,7 @@
 
                     {{-- Revert Modal --}}
                     <div x-data="{ open: false }" x-on:open-revert-modal.window="open = true" x-show="open"
-                        class="fixed inset-0 flex items-center justify-center text-gray-800 bg-opacity-50 z-50"
+                        class="fixed inset-0 flex items-center justify-center text-gray-800 bg-black/60 z-50"
                         style="display:none">
                         <div class="bg-white rounded-lg shadow-lg p-6 w-96 border-gray-800">
                             <h2 class="text-lg font-semibold mb-4">Revert Application</h2>

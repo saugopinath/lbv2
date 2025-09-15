@@ -96,7 +96,7 @@ class CodemasterSeeder extends Seeder
              array(
                 "name" => "OP TYPE",
                 "short_name" => "op_type",
-                "code" => "20",
+                "code" => "210",
             ),
         );
         foreach ($codemasterParents as $codemasterParent_item) {
@@ -820,31 +820,31 @@ class CodemasterSeeder extends Seeder
                 "name" => "Application Accepted",
                 "short_name" => "application_accepted",
                 "parent_short_code" => "op_type",
-                 "code" => "243",
+                 "code" => "2101",
             ),
               array(
                 "name" => "Application Rejected",
                 "short_name" => "application_rejected",
                 "parent_short_code" => "op_type",
-                 "code" => "244",
+                 "code" => "2102",
             ),
               array(
                 "name" => "Application Verify",
                 "short_name" => "application_verify",
                 "parent_short_code" => "op_type",
-                 "code" => "245",
+                 "code" => "2103",
             ),
               array(
                 "name" => "Application Approved",
                 "short_name" => "application_approved",
                 "parent_short_code" => "op_type",
-                 "code" => "246",
+                 "code" => "2104",
             ),
              array(
                 "name" => "Application Reverted",
                 "short_name" => "application_reverted",
                 "parent_short_code" => "op_type",
-                 "code" => "247",
+                 "code" => "2105",
             ),
         );
         foreach ($codemasterChilds as $codemasterChild_item) {

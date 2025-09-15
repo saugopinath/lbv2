@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class ApplicantIncompletDeatil extends Model
 {
     protected $table = 'applicant_incomplet_deatils';
-
     protected $fillable = [
         'application_id',
         'beneficiary_id',
@@ -16,12 +15,13 @@ class ApplicantIncompletDeatil extends Model
         'new_value',
         'old_value',
         'request_id',
+        'is_active',
         'change_type',
     ];
 
-   protected $casts = [
-        'old_value' => 'array',
+    protected $casts = [
         'new_value' => 'array',
+        'old_value' => 'array',
     ];
 
     public function commonList()
@@ -41,6 +41,7 @@ class ApplicantIncompletDeatil extends Model
     public function getIncompleteTypesNamesAttribute()
     {
         return ApplicantIncompletDeatil::where('application_id', $this->application_id)
+        ->where('is_active', 1)
             ->with('incompletType')
             ->get()
             ->pluck('incompletType.name')
@@ -61,7 +62,7 @@ class ApplicantIncompletDeatil extends Model
     {
         return $this->hasOne(AcceptRejectInfo::class, 'application_id', 'application_id');
     }
-     public function banks()
+    public function banks()
     {
         return $this->hasOne(BeneficiaryBank::class, 'application_id', 'application_id');
     }

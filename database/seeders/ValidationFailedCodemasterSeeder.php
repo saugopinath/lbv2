@@ -27,7 +27,7 @@ class ValidationFailedCodemasterSeeder extends Seeder
             [
                 "name" => "ALLOWED VALIDATION PARAMETERS",
                 "short_name" => "allowed_validation_parameters",
-                "code" => "30",
+                "code" => "20",
             ],
         ];
 

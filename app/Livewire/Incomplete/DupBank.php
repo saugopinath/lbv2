@@ -9,9 +9,9 @@ use App\Models\ApplicantIncompletDeatil;
 
 class DupBank extends Component
 {
-     public $ifscode, $bankname, $bankbranchname, $bank_account_number, $old, $dupAction = null, $item, $bank_action = '';
+    public $ifscode, $bankname, $bankbranchname, $bank_account_number, $old, $dupAction = null, $item, $bank_action = '';
 
-     public function updatedIfscode()
+    public function updatedIfscode()
     {
         $ifs = Ifsccodemaster::with('bank')
             ->where('code', $this->ifscode)
@@ -27,23 +27,7 @@ class DupBank extends Component
         }
     }
 
-    //  public function mount($item)
-    // {
-    //     $this->item = $item;
-    //     $old = $item->old_value ?? [];
-
-    //     $app_det = BeneficiaryPersonal::with('bank')->where('application_id', $item->application_id)->first();
-    //     if ($app_det->bank) {
-    //         $this->ifscode = $app_det->bank->ifsc;
-    //         $this->updatedIfscode($this->ifscode);
-    //         $this->bankname;
-    //         $this->bankbranchname;
-    //     }
-
-    //     $this->ifscode = $old['ifsc'] ?? '';
-    //     $this->bank_account_number = $old['bank_account_number'] ?? '';
-    // }
-     public function mount($item)
+    public function mount($item)
     {
         $this->item = $item;
 
@@ -83,7 +67,6 @@ class DupBank extends Component
     public function updatedBankAction($value)
     {
         $this->dispatch('dup-bank-action-changed', $value);
-
     }
 
     public function render()
@@ -91,5 +74,3 @@ class DupBank extends Component
         return view('livewire.incomplete.dup-bank');
     }
 }
-
-
