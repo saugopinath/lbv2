@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\MasterParameterSettingController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\UserPermissionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
@@ -9,6 +11,7 @@ use App\Http\Controllers\DesignController;
 use App\Http\Controllers\UserManagementController;
 use App\Livewire\MasterParameterSetting\Index as MasterParameterSettingCreate;
 use App\Http\Controllers\LBController;
+use App\Livewire\UserPermission\AssignPermissionsPage;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -44,3 +47,9 @@ Route::get('/master-parameter-settings', [MasterParameterSettingController::clas
 Route::get('/masterParameterSetting/index', MasterParameterSettingCreate::class)
     ->name('MasterParameterSetting.index');
 // Route::get('/master-edit', [MasterParameterSettingController::class, 'edit'])->name('master-edit');
+Route::get('/permission', [PermissionController::class, 'index'])->name('permission');
+Route::get('/user-permission', [UserPermissionController::class, 'index'])->name('user-permission');
+
+
+Route::get('/assign-users-permissions', AssignPermissionsPage::class)
+    ->name('assign-users-permissions');

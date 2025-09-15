@@ -52,6 +52,10 @@ class Role extends SpatieRole
     {
         return $this->hasMany(RoleOfficeTypeMapping::class);
     }
+     public function mappings(): HasMany
+    {
+        return $this->hasMany(UserRoleSchemeOfficeMapping::class, 'role_id');
+    }
     
    
 

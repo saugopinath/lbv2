@@ -25,7 +25,7 @@ class BeneficiaryPersonal extends Model
      protected static function booted()
     {
         static::created(function ($beneficiary) {
-            // When a new BeneficiaryPersonal is created, automatically create a related list
+         
             $beneficiary->lists()->create([
                 'district_id'     => $beneficiary->district_id,
                 'block_id'        => $beneficiary->block_id,

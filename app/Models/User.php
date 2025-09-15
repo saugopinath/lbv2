@@ -8,6 +8,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Permission\Models\Permission;
+
+
 
 class User extends Authenticatable
 {
@@ -51,5 +55,29 @@ class User extends Authenticatable
         
         return $this->hasMany(UserRoleSchemeOfficeMapping::class);
     }
-    
+    public function mappedRoles(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Role::class,
+            'user_role_scheme_office_mappings',
+            'user_id',
+            'role_id'
+        )
+        ->wherePivot('is_active', 1)
+        ->where('roles.id', '!=', 10);
+    }
+
+    /**
+     * Direct permissions assigned to the user (not via roles)
+     */
+    public function mappedPermissions(): BelongsToMany
+    {
+        return $this->morphToMany(
+            Permission::class,
+            'model',
+            'model_has_permissions',
+            'model_id',
+            'permission_id'
+        );
+    }
 }
