@@ -82,12 +82,25 @@
                 <x-form.input name="ifscode" label="IFSC Code" wire:model.lazy="ifscode"
                     x-on:input="if ($el.value.length > 11) $el.value = $el.value.slice(0, 11)" />
 
-                <x-form.input name="bankname" label="Bank Name" wire:model="bankname" disabled />
-                <x-form.input name="bankbranchname" label="Branch Name" wire:model="bankbranchname" disabled />
+                <div class="relative">
+                    <x-form.input name="bankname" label="Bank Name" wire:model="bankname" disabled />
+                    <x-loading-spinner wire:target="ifscode" />
+                </div>
 
-                <x-form.input name="bank_account_number" label="New Bank Account Number"
+                <div class="relative">
+                    <x-form.input name="bankbranchname" label="Branch Name" wire:model="bankbranchname" disabled />
+                    <x-loading-spinner wire:target="ifscode" />
+                </div>
+
+                {{--  <x-form.input name="bank_account_number" label="New Bank Account Number"
                     wire:model.live="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')"
-                    x-on:copy.prevent />
+                    x-on:copy.prevent />  --}}
+                      <x-form.masked-input name="confirmbankaccountnumber" label="New Bank Account Number" required
+                    wire:model.live="confirmbankaccountnumber" />
+
+                <x-form.input name="bank_account_number" label="Confirm Bank Account Number" required
+                    wire:model.live="bank_account_number"
+                    x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
             </div>
         @endif
     </div>

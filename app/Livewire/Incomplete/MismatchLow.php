@@ -9,7 +9,7 @@ use App\Models\ApplicantIncompletDeatil;
 
 class MismatchLow extends Component
 {
-    public $ifscode, $bankname, $bankbranchname, $bank_account_number, $old, $dupAction = null, $item, $bank_action = '';
+    public $ifscode, $bankname, $bankbranchname, $bank_account_number, $old, $dupAction = null, $item, $bank_action = '', $confirmbankaccountnumber;
     protected $listeners = [
         'dup-bank-action-changed' => 'setDupAction'
     ];
@@ -29,22 +29,7 @@ class MismatchLow extends Component
             $this->bankbranchname = '';
         }
     }
-    // public function mount($item)
-    // {
-    //     $this->item = $item;
-    //     $old = $item->old_value ?? [];
-
-    //     $app_det = ApplicantIncompletDeatil::with('banks')->where('application_id', $item->application_id)->first();
-    //     if ($app_det->banks) {
-    //         $this->ifscode = $app_det->banks->ifsc;
-    //         $this->updatedIfscode($this->ifscode);
-    //         $this->bankname;
-    //         $this->bankbranchname;
-    //     }
-
-    //     $this->ifscode = $old['ifsc'] ?? '';
-    //     $this->bank_account_number = $old['bank_account_number'] ?? '';
-    // }
+   
       public function mount($item)
     {
         $this->item = $item;
@@ -57,9 +42,11 @@ class MismatchLow extends Component
         if (in_array($this->bank_action, ['1', '2', '3'])) {
             $this->ifscode = $new_value['ifscode'] ?? '';
             $this->bank_account_number = $new_value['bank_account_number'] ?? '';
+            $this->confirmbankaccountnumber = $new_value['confirmbankaccountnumber'] ?? '';
         } else {
             $this->ifscode = $old_value['ifsc'] ?? '';
             $this->bank_account_number = $old_value['bank_account_number'] ?? '';
+            $this->confirmbankaccountnumber = $old_value['confirmbankaccountnumber'] ?? '';
         }
 
         $app_det = ApplicantIncompletDeatil::with('banks')
@@ -77,6 +64,7 @@ class MismatchLow extends Component
             'ifscode' => $this->ifscode,
             'bank_account_number' => $this->bank_account_number,
             'bank_action' => $this->bank_action,
+            'confirmbankaccountnumber' => $this->confirmbankaccountnumber,
         ];
 
         $this->dispatch('trigger-update', $data);

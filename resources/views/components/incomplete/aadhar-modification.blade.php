@@ -19,11 +19,6 @@
 
         @error("formData.aadhar_modification.{$aadhaarIssues[0]->application_id}")
             <span class="text-red-600 text-sm">{{ $message }}</span>
-        @enderror
-        @if (session()->has('error'))
-            <div class="p-3 mb-3 text-red-700 bg-red-100 rounded">
-                {{ session('error') }}
-            </div>
-        @endif
+        @enderror      
 
     </div>

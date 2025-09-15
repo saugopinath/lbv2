@@ -64,6 +64,9 @@
                     <span>CHANGE</span>
                 </label>
             </div>
+            @error('bank_action')
+                <span class="text-red-600 text-sm">{{ $message }}</span>
+            @enderror
         </div>
 
         {{-- KEEP SAME / VIEW --}}
@@ -82,13 +85,34 @@
             <div class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
                 <x-form.input name="ifscode" label="IFSC Code" wire:model.lazy="ifscode"
                     x-on:input="if ($el.value.length > 11) $el.value = $el.value.slice(0, 11)" />
+                @error('ifscode')
+                    <span class="text-sm text-red-600">{{ $message }}</span>
+                @enderror
+                <div class="relative">
+                    <x-form.input name="bankname" label="Bank Name" wire:model="bankname" disabled />
+                    <x-loading-spinner wire:target="ifscode" />
+                </div>
 
-                <x-form.input name="bankname" label="Bank Name" wire:model="bankname" disabled />
-                <x-form.input name="bankbranchname" label="Branch Name" wire:model="bankbranchname" disabled />
+                <div class="relative">
+                    <x-form.input name="bankbranchname" label="Branch Name" wire:model="bankbranchname" disabled />
+                    <x-loading-spinner wire:target="ifscode" />
+                </div>
 
-                <x-form.input name="bank_account_number" label="New Bank Account Number"
+                {{--  <x-form.input name="bank_account_number" label="New Bank Account Number"
                     wire:model.live="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')"
-                    x-on:copy.prevent />
+                    x-on:copy.prevent />  --}}
+                <x-form.masked-input name="confirmbankaccountnumber" label="New Bank Account Number" required
+                    wire:model.live="confirmbankaccountnumber" />
+                @error('confirmbankaccountnumber')
+                    <span class="text-sm text-red-600">{{ $message }}</span>
+                @enderror
+
+                <x-form.input name="bank_account_number" label="Confirm Bank Account Number" required
+                    wire:model.live="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
+                @error('bank_account_number')
+                    <span class="text-red-600 text-sm">{{ $message }}</span>
+                @enderror
+
             </div>
         @endif
     </div>

@@ -13,14 +13,30 @@ use App\Models\ApplicantIncompletDeatil;
 
 class IncompletTypePage extends Component
 {
-    public $id, $page, $stage, $applicantInfo, $formData = [], $revertReasons = [], $user_id, $revert_reason_cause_id, $revert_reason_remarks, $aadhaarIssues = [], $mobileIssues = [], $sortedBankIssues = [], $ifscode, $bank_account_number, $bank_action;
+    public $id, $page, $stage, $applicantInfo, $formData = [], $revertReasons = [], $user_id, $revert_reason_cause_id, $revert_reason_remarks, $aadhaarIssues = [], $mobileIssues = [], $sortedBankIssues = [], $ifscode, $bank_account_number, $bank_action, $confirmbankaccountnumber;
+
 
     protected $rules = [
         'bank_action' => 'required',
+        'ifscode' => 'required_if:bank_action,3|size:11',
+        'bank_account_number' => 'required_if:bank_action,3|digits_between:9,18',
+        'confirmbankaccountnumber' => 'required_if:bank_action,3|same:bank_account_number',
+        'formData.new_mobile.*' => 'nullable|digits:10',
+        'formData.aadhar_modification.*' => 'nullable|digits:12',
     ];
+
     protected $messages = [
         'bank_action.required' => 'Please select an operation type (KEEP SAME / CHANGE).',
+        'ifscode.required_if' => 'IFSC code is required when changing bank details.',
+        'ifscode.size' => 'IFSC code must be exactly 11 characters.',
+        'bank_account_number.required_if' => 'Bank account number is required when changing bank details.',
+        'bank_account_number.digits_between' => 'Bank account number must be 9 to 18 digits.',
+        'confirmbankaccountnumber.required_if' => 'Please confirm your new bank account number.',
+        'confirmbankaccountnumber.same' => 'Confirm account number must match with new account number.',
+        'formData.new_mobile.*.digits' => 'Mobile number must be exactly 10 digits.',
+        'formData.aadhar_modification.*.digits' => 'Aadhaar number must be exactly 12 digits.',
     ];
+
 
     protected $listeners = ['trigger-update' => 'recivedupdateddata'];
 
@@ -71,14 +87,14 @@ class IncompletTypePage extends Component
         $this->ifscode = $data['ifscode'];
         $this->bank_account_number = $data['bank_account_number'];
         $this->bank_action = $data['bank_action'];
+        $this->confirmbankaccountnumber = $data['confirmbankaccountnumber'];
     }
 
     public function submit()
     {
-        // $this->validate();
+        $this->validate();
         $this->checkduplicate();
 
-        // create accept/reject request entry
         $request = AcceptRejectInfo::create([
             'application_id'         => $this->id,
             'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
@@ -92,7 +108,6 @@ class IncompletTypePage extends Component
             'parent_id'              => null,
         ]);
 
-        // সব incomplete issues একবারে নিয়ে আসি
         $allIssues = $this->page;
         $bankIssues = $allIssues->filter(fn($i) => in_array($i->incomplet_type, ['145', '146', '1411', '1412', '1413']));
         $dupbankacc = $bankIssues->contains(fn($i) => $i->incomplet_type == '1411');
@@ -124,22 +139,19 @@ class IncompletTypePage extends Component
                 $jsonValue = [
                     'ifscode'             => $this->ifscode,
                     'bank_account_number' => $this->bank_account_number,
+                    'confirmbankaccountnumber' => $this->confirmbankaccountnumber,
                 ];
 
                 $relatedIssues = $allIssues->whereIn('incomplet_type', ['145', '146', '1411', '1412', '1413']);
 
                 if ($relatedIssues->count() === 1) {
-                    // শুধু single issue আছে
                     $isActive = 1;
                     $updateValue = $jsonValue;
                 } else {
-                    // একাধিক issue আছে
                     if ($typeCode == '1411') {
-                        // 1411 থাকলে active করব
                         $isActive = 1;
                         $updateValue = $jsonValue;
                     } else {
-                        // অন্য bank issue থাকলে
                         if ($dupbankacc) {
                             $isActive = 0;
                             $updateValue = $item->old_value ?? $jsonValue;
@@ -161,7 +173,6 @@ class IncompletTypePage extends Component
                 continue;
             }
 
-            // Update Aadhaar/Mobile if exists
             if (!empty($jsonValue)) {
                 $item->update([
                     'new_value'             => $jsonValue,
@@ -175,97 +186,6 @@ class IncompletTypePage extends Component
         session()->flash('success', 'Incomplete details updated successfully!');
         return redirect()->route('incomplete.types', ['stage' => 'verifier', 'id' => $this->id]);
     }
-
-    // public function submit()
-    // {
-    //     // $this->validate();
-    //     $this->checkduplicate();
-
-    //     // create accept/reject request entry
-    //     $request = AcceptRejectInfo::create([
-    //         'application_id'         => $this->id,
-    //         'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
-    //         'ip_address'             => request()->ip(),
-    //         'user_id'                => $this->user_id,
-    //         'browser'                => request()->header('User-Agent'),
-    //         'model_name'             => 'ApplicantIncompleteDetail',
-    //         'op_type'                => Codemaster::where('code', 245)->value('id'),
-    //         'revert_reason_cause_id' => null,
-    //         'revert_reason_remarks'  => null,
-    //         'parent_id'              => null,
-    //     ]);
-
-    //     // check if 1411 exists in bank issues
-    //     $bankIssues = $this->page->filter(fn($i) => in_array($i->incomplet_type, ['145', '146', '1411', '1412', '1413']));
-    //     $dupbankacc = $bankIssues->contains(fn($i) => $i->incomplet_type == '1411');
-
-    //     foreach ($this->page as $item) {
-    //         $typeCode = $item->incomplet_type ?? null;
-    //         if (!$typeCode) continue;
-
-    //         $jsonValue = [];
-
-    //         // Aadhaar related
-    //         if (in_array($typeCode, ['141', '149', '1414'])) {
-    //             $jsonValue = [
-    //                 'aadhaar_no'     => $this->formData['aadhar_modification'][$item->application_id] ?? null,
-    //                 'application_id' => $this->id,
-    //             ];
-    //         }
-
-    //         // Mobile related
-    //         elseif (in_array($typeCode, ['142', '1410'])) {
-    //             $jsonValue = [
-    //                 'mobile_no'      => $this->formData['new_mobile'][$item->application_id] ?? null,
-    //                 'application_id' => $this->id,
-    //             ];
-    //         }
-
-    //         // Bank related
-    //         elseif (in_array($typeCode, ['145', '146', '1411', '1412', '1413'])) {
-    //             $jsonValue = [
-    //                 'ifscode'             => $this->ifscode,
-    //                 'bank_account_number' => $this->bank_account_number,
-    //             ];
-
-    //             if ($typeCode == '1411') {
-    //                 $isActive = 1;
-    //                 $updateValue = $jsonValue;
-    //             } else {
-    //                 if ($dupbankacc) {
-    //                     $isActive = 0;
-    //                     $updateValue = $item->old_value ?? $jsonValue;
-    //                 } else {
-    //                     $isActive = ($this->bank_action == 1 ? 1 : 0);
-    //                     $updateValue = $jsonValue;
-    //                 }
-    //             }
-
-    //             $item->update([
-    //                 'new_value'             => $updateValue,
-    //                 'change_type'           => $this->bank_action ?? null,
-    //                 'next_level_request_id' => 1,
-    //                 'request_id'            => $request->id,
-    //                 'is_active'             => $isActive,
-    //             ]);
-
-    //             continue;
-    //         }
-
-    //         // Update Aadhaar/Mobile if exists
-    //         if (!empty($jsonValue)) {
-    //             $item->update([
-    //                 'new_value'             => $jsonValue,
-    //                 'change_type'           => $this->bank_action ?? null,
-    //                 'next_level_request_id' => 1,
-    //                 'request_id'            => $request->id,
-    //             ]);
-    //         }
-    //     }
-
-    //     session()->flash('success', 'Incomplete details updated successfully!');
-    //     return redirect()->route('incomplete.types', ['stage' => 'verifier', 'id' => $this->id]);
-    // }
 
     public function approve()
     {
@@ -318,6 +238,7 @@ class IncompletTypePage extends Component
                 $jsonValue = [
                     'ifscode'          => $this->ifscode,
                     'bank_account_number'   => $this->bank_account_number,
+                    'confirmbankaccountnumber' => $this->confirmbankaccountnumber,
                     'bank_action'      => $this->bank_action,
                     'application_id'   => $this->id,
                 ];
@@ -598,6 +519,7 @@ class IncompletTypePage extends Component
                 $jsonValue = [
                     'ifscode'          => $this->ifscode,
                     'bank_account_number'   => $this->bank_account_number,
+                    'confirmbankaccountnumber' => $this->confirmbankaccountnumber,
                     'bank_action'      => $this->bank_action,
                     'application_id'   => $this->id,
                 ];
