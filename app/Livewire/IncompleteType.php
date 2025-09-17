@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Models\ApplicantIncompletDeatil;
 use App\Models\Codemaster;
 use Livewire\Component;
 
@@ -10,24 +9,36 @@ class IncompleteType extends Component
 {
     public $results = [];
     public $incompleteList = '';
+    public $button_show = 1;
 
-    public function mount()
+    protected $listeners = [
+        'resetChildFilters' => 'resetIncompleteFilters'
+    ];
+
+    public function mount($button_show = null)
     {
+        $this->button_show = $button_show ?? 1;
+
         $officetype = Codemaster::getIdByCode(14);
         $this->results = Codemaster::where('parent_id', $officetype)
-            ->whereIn('code', [141, 142, 143, 144, 145, 146, 147, 148, 149, 1410, 1411, 1412, 1413, 1414])->get();
+            ->whereIn('code', [141,142,145,146,149,1410,1411,1412,1413,1414])
+            ->get();
+    }
+
+    public function updatedIncompleteList()
+    {
+        $this->dispatch('filterIncompleteType', $this->incompleteList);
     }
 
     public function search()
     {
-        $this->dispatch('filterIncompleteType', code: $this->incompleteList);
+        $this->dispatch('filterIncompleteType', $this->incompleteList);
     }
 
-     public function resetIncompleteFilters()
+    public function resetIncompleteFilters()
     {
         $this->incompleteList = '';
-
-        $this->dispatch('filterIncompleteType', code: null);
+        $this->dispatch('filterIncompleteType', null);
     }
 
     public function render()

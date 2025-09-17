@@ -19,7 +19,7 @@
             </div>
         </div>
 
-       
+
         @if ($bank_action === '' || $bank_action === '1' || $bank_action === '2')
             <div class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
                 <x-form.input name="ifscode" label="IFSC Code" wire:model.defer="ifscode" disabled />
@@ -109,6 +109,7 @@
 
                 <x-form.input name="bank_account_number" label="Confirm Bank Account Number" required
                     wire:model.live="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
+                    
                 @error('bank_account_number')
                     <span class="text-red-600 text-sm">{{ $message }}</span>
                 @enderror

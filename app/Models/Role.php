@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Permission\Models\Role as SpatieRole;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Role extends SpatieRole
+class Role extends SpatieRole implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $table = 'roles';
     public $timestamps = false;
 

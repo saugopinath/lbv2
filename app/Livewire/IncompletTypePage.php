@@ -92,7 +92,7 @@ class IncompletTypePage extends Component
 
     public function submit()
     {
-        $this->validate();
+        // $this->validate();
         $this->checkduplicate();
 
         $request = AcceptRejectInfo::create([
@@ -183,7 +183,7 @@ class IncompletTypePage extends Component
             }
         }
 
-        session()->flash('success', 'Incomplete details updated successfully!');
+        session()->flash('success', 'Request Send to approver for Approval!');
         return redirect()->route('incomplete.types', ['stage' => 'verifier', 'id' => $this->id]);
     }
 
@@ -194,7 +194,7 @@ class IncompletTypePage extends Component
             ->where('op_type', $opType)
             ->orderByDesc('id')
             ->value('id');
-        dd($previousId);
+        // dd($previousId);
 
         $request = AcceptRejectInfo::create([
             'application_id'         => $this->id,
@@ -246,6 +246,8 @@ class IncompletTypePage extends Component
 
             if (!empty($jsonValue)) {
                 $item->update([
+                    'new_value'             => $jsonValue,
+                    'change_type'           => $this->bank_action,
                     'next_level_request_id' => 2,
                     'request_id'           => $request->id,
                 ]);

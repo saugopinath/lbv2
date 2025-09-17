@@ -78,17 +78,18 @@
                 <div class="flex justify-center w-full space-x-4">
                     <x-button.primary type="submit"
                         x-on:click="if(confirm('Are you sure you want to approve this request?')) { $wire.approve() }">
-                        Approve
+                        View
                     </x-button.primary>
-                    <x-button.danger
-                        x-on:click="if(confirm('Are you sure you want to revert this request?')) { $dispatch('open-revert-modal') }">
+                    <!-- Revert Button -->
+                    <x-button.danger x-on:click="$dispatch('open-revert-modal')">
                         Revert
                     </x-button.danger>
 
-                    {{-- Revert Modal --}}
+                    <!-- Revert Modal -->
                     <div x-data="{ open: false }" x-on:open-revert-modal.window="open = true" x-show="open"
                         class="fixed inset-0 flex items-center justify-center text-gray-800 bg-black/60 z-50"
                         style="display:none">
+
                         <div class="bg-white rounded-lg shadow-lg p-6 w-96 border-gray-800">
                             <h2 class="text-lg font-semibold mb-4">Revert Application</h2>
 
@@ -115,13 +116,19 @@
                                 @enderror
                             </div>
 
+                            {{-- Buttons --}}
                             <div class="flex justify-end space-x-2">
                                 <x-button.primary x-on:click="open = false">Cancel</x-button.primary>
-                                <x-button.primary wire:click="revert"
-                                    x-on:click="open = false">Submit</x-button.primary>
+
+                                <!-- এখানে confirm হবে -->
+                                <x-button.primary
+                                    x-on:click="if(confirm('Are you sure you want to revert this request?')) { $wire.revert(); open = false }">
+                                    Submit
+                                </x-button.primary>
                             </div>
                         </div>
                     </div>
+
                 </div>
             @elseif ($stage === 'revert')
                 <x-button.primary

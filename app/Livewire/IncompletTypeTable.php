@@ -8,6 +8,7 @@ use App\Models\District;
 use App\Models\Panchayat;
 use App\Models\Subdivision;
 use App\Models\Municipality;
+use App\Models\Codemaster;
 use App\Helpers\EncryptionArray;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\ApplicantIncompletDeatil;
@@ -20,11 +21,11 @@ class IncompletTypeTable extends DataTableComponent
 {
     public ?int $perPage = 5;
     public string $search = '';
-    public ?string $filterCode = null;
     public string $stage = '';
-
+    public ?string $filterCode = null;
     public $district_id, $rural_urban, $blockurban, $gp_ward, $selectedSubdivision;
-    protected $listeners = ['filterIncompleteType' => 'applyFilter', 'filtersApplied'];
+
+    protected $listeners = ['doSearch' => 'doSearch'];
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
     public array $filter_condition = [];
@@ -47,20 +48,15 @@ class IncompletTypeTable extends DataTableComponent
         }
     }
 
-    public function applyFilter($code)
-    {
-        $this->filterCode = $code;
-        $this->resetPage();
-    }
-
-    public function filtersApplied($filters)
+    public function doSearch(array $filters)
     {
         $this->district_id = $filters['district_id'] ?? null;
         $this->rural_urban = $filters['rural_urban'] ?? null;
+        $this->selectedSubdivision = $filters['subdivision_id'] ?? null;
         $this->blockurban = $filters['blockurban'] ?? null;
         $this->gp_ward = $filters['gp_ward'] ?? null;
-        $this->selectedSubdivision = $filters['subdivision_id'] ?? null;
-
+        $this->filterCode = $filters['incomplete_type'] ?? null;
+        // dd($this->filterCode);
         $this->resetPage();
     }
 
@@ -144,73 +140,165 @@ class IncompletTypeTable extends DataTableComponent
     }
 
     public function builder(): Builder
-    {
-        $query = ApplicantIncompletDeatil::query()
-            ->select('application_id')
-            ->groupBy('application_id')
-            ->orderBy('application_id', 'asc');
+{
+    $query = ApplicantIncompletDeatil::query()
+        ->select('application_id')
+        ->groupBy('application_id')
+        ->orderBy('application_id', 'asc');
 
-        if ($this->stage === 'verifier') {
-            $query->whereNull('next_level_request_id');
-        } elseif ($this->stage === 'approver') {
-            $query->where('next_level_request_id', 1);
-        } elseif ($this->stage === 'revert') {
-            $query->where('next_level_request_id', -50)->with(['acceptRejectInfo' => function ($q) {
-                $q->latest('id');
-            }]);
+    $user = auth()->user();
+
+    $next_level_request_id = null;
+
+    // 👉 প্রথমে route / livewire থেকে আসা $this->stage ব্যবহার করো
+    $stage = $this->stage ?? null;
+
+    // যদি radio দিয়ে বা route থেকে না আসে, fallback হবে role অনুযায়ী
+    if (!$stage) {
+        if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+            $stage = 'verifier';
+            $next_level_request_id = null;
+        } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+            $stage = 'approver';
+            $next_level_request_id = 1;
         }
-
-        if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
-            $query = EncryptionArray::applyLocationFilter(
-                $query,
-                $this->district_id ? (int) $this->district_id : null,
-                $this->rural_urban ? (int) $this->rural_urban : null,
-                $this->blockurban ? (int) $this->blockurban : null,
-                $this->gp_ward ? (int) $this->gp_ward : null
-            );
-        }
-
-        if ($this->filterCode) {
-            $query->where('incomplet_type', $this->filterCode);
-        }
-
-        return $query;
     }
 
+    switch ($stage) {
+        case 'verifier':
+            $query->whereNull('next_level_request_id');
+            break;
+
+        case 'approver':
+            $query->where('next_level_request_id', 1);
+            break;
+
+        case 'revert': // ✅ এখানে কাজ করবে
+            $query->where('next_level_request_id', -50)
+                ->with(['acceptRejectInfo' => function ($q) {
+                    $q->latest('id');
+                }]);
+            break;
+    }
+
+    // Location filter apply
+    if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->filterCode) {
+        $query = EncryptionArray::applyLocationFilter(
+            $query,
+            $this->district_id ? (int) $this->district_id : null,
+            $this->rural_urban ? (int) $this->rural_urban : null,
+            $this->blockurban ? (int) $this->blockurban : null,
+            $this->gp_ward ? (int) $this->gp_ward : null,
+            $this->filterCode ? (int) $this->filterCode : null,
+        );
+    }
+
+    return $query;
+}
+
+
+    // public function builder(): Builder
+    // {
+    //     $query = ApplicantIncompletDeatil::query()
+    //         ->select('application_id')
+    //         ->groupBy('application_id')
+    //         ->orderBy('application_id', 'asc');
+
+    //     $user = auth()->user();
+
+    //     $next_level_request_id = null;
+    //     $stage = null;
+
+    //     if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+    //         $stage = 'verifier';
+    //         $next_level_request_id = null;
+    //     } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+    //         $stage = 'approver';
+    //         $next_level_request_id = 1;
+    //     }
+
+    //     switch ($stage) {
+    //         case 'verifier':
+    //             $query->whereNull('next_level_request_id');
+    //             break;
+
+    //         case 'approver':
+    //             $query->where('next_level_request_id', 1);
+    //             break;
+
+    //         case 'revert':
+    //             $query->where('next_level_request_id', -50)
+    //                 ->with(['acceptRejectInfo' => function ($q) {
+    //                     $q->latest('id');
+    //                 }]);
+    //             break;
+    //     }
+
+
+    //     if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->filterCode) {
+    //         $query = EncryptionArray::applyLocationFilter(
+    //             $query,
+    //             $this->district_id ? (int) $this->district_id : null,
+    //             $this->rural_urban ? (int) $this->rural_urban : null,
+    //             $this->blockurban ? (int) $this->blockurban : null,
+    //             $this->gp_ward ? (int) $this->gp_ward : null,
+    //             $this->filterCode ? (int) $this->filterCode : null,
+    //         );
+    //     }
+
+    //     return $query;
+    // }
     public function getActiveFiltersProperty()
     {
         $filters = [];
 
-        if ($this->district_id) {
-            $filters[] = 'District: ' . (District::find($this->district_id)?->name ?? $this->district_id);
+        // GP / Ward
+        if ($this->gp_ward) {
+            if ($this->rural_urban == 1) {
+                $ward = Ward::find($this->gp_ward)?->name;
+                if ($ward) $filters[] = 'Ward: ' . $ward;
+            } else {
+                $gp = Panchayat::find($this->gp_ward)?->name;
+                if ($gp) $filters[] = 'GP: ' . $gp;
+            }
         }
 
+        // Block / Municipality
+        if ($this->blockurban) {
+            if ($this->rural_urban == 2) {
+                $block = Block::find($this->blockurban)?->name;
+                if ($block) $filters[] = 'Block: ' . $block;
+            } else {
+                $municipality = Municipality::find($this->blockurban)?->name;
+                if ($municipality) $filters[] = 'Municipality: ' . $municipality;
+            }
+        }
+
+        // Subdivision
+        if ($this->selectedSubdivision) {
+            $sub = Subdivision::find($this->selectedSubdivision)?->name;
+            if ($sub) $filters[] = 'Subdivision: ' . $sub;
+        }
+
+        // District
+        if ($this->district_id) {
+            $district = District::find($this->district_id)?->name;
+            if ($district) $filters[] = 'District: ' . $district;
+        }
+
+        // Rural / Urban
         if ($this->rural_urban) {
             $filters[] = 'Rural/Urban: ' . ($this->rural_urban == 2 ? 'Rural' : 'Urban');
         }
 
-        // Rural
-        if ($this->rural_urban == 2 && $this->blockurban) {
-            $filters[] = 'Block: ' . (Block::find($this->blockurban)?->name ?? $this->blockurban);
-            if ($this->gp_ward) {
-                $filters[] = 'GP: ' . (Panchayat::find($this->gp_ward)?->name ?? $this->gp_ward);
-            }
-        }
-
-        // Urban
-        if ($this->rural_urban == 1 && $this->selectedSubdivision) {
-            $filters[] = 'Subdivision: ' . (Subdivision::find($this->selectedSubdivision)?->name ?? $this->selectedSubdivision);
-            if ($this->blockurban) {
-                $filters[] = 'Municipality: ' . (Municipality::find($this->blockurban)?->name ?? $this->blockurban);
-            }
-            if ($this->gp_ward) {
-                $filters[] = 'Ward: ' . (Ward::find($this->gp_ward)?->name ?? $this->gp_ward);
-            }
+        // Incomplete Type
+        if ($this->filterCode) {
+            $codemaster = Codemaster::where('code', $this->filterCode)->first()?->name;
+            if ($codemaster) $filters[] = 'Incomplete Type: ' . $codemaster;
         }
 
         return implode(', ', $filters);
     }
-
     public function render(): \Illuminate\View\View
     {
         return view('livewire.incomplet-type-table', [

@@ -5,8 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Log;
-class UserRoleSchemeOfficeMapping extends Model
+use OwenIt\Auditing\Contracts\Auditable;
+class UserRoleSchemeOfficeMapping extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $fillable = [
             'user_id',
             'office_id',
@@ -15,12 +17,12 @@ class UserRoleSchemeOfficeMapping extends Model
         ];
      protected static function booted(): void
     {
-       
+
         /**
          * Call After Post Create
          */
         static::created(function (UserRoleSchemeOfficeMapping $mapdata) {
-             
+
            $mapdataArr=$mapdata->toArray();
            $role_list=[];
            $user_id=$mapdataArr['user_id'];
@@ -29,7 +31,7 @@ class UserRoleSchemeOfficeMapping extends Model
            $role_id=$mapdataArr['role_id'];
            $role = Role::find($role_id);
            $user->assignRole($role);
-          
+
         });
 
 
@@ -50,6 +52,6 @@ class UserRoleSchemeOfficeMapping extends Model
     {
         return $this->belongsTo(Role::class);
     }
-    
-   
+
+
 }

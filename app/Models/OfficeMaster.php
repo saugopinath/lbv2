@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class OfficeMaster extends Model
+class OfficeMaster extends Model implements Auditable
 {
     use HasFactory;
+    use \OwenIt\Auditing\Auditable;
     protected $fillable = [
         'name',
         'address',
@@ -27,7 +29,7 @@ class OfficeMaster extends Model
     {
         return $this->belongsTo(Codemaster::class, 'office_type_id', 'code');
     }
-   
+
     public function district()
     {
         return $this->belongsTo(District::class, 'district_id', 'id');
