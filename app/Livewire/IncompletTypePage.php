@@ -154,7 +154,8 @@ class IncompletTypePage extends Component
                     } else {
                         if ($dupbankacc) {
                             $isActive = 0;
-                            $updateValue = $item->old_value ?? $jsonValue;
+                            // $updateValue = $item->old_value ?? $jsonValue;
+                            $updateValue = null;
                         } else {
                             $isActive = ($this->bank_action == 1 ? 1 : 0);
                             $updateValue = $jsonValue;

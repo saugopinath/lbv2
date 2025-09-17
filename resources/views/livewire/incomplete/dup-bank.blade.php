@@ -25,33 +25,6 @@
             </div>
         @endif
 
-        {{--  @if ($bank_action === '2')
-            <div class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
-
-                <x-form.input name="ifscode" label="IFSC Code" wire:model.lazy="ifscode"
-                    x-on:input="if ($el.value.length > 11) $el.value = $el.value.slice(0, 11)" />
-
-                <div class="relative">
-                    <x-form.input name="bankname" label="Bank Name" wire:model="bankname" disabled />
-                    <x-loading-spinner wire:target="ifscode" />
-                </div>
-
-                <div class="relative">
-                    <x-form.input name="bankbranchname" label="Branch Name" wire:model="bankbranchname" disabled />
-                    <x-loading-spinner wire:target="ifscode" />
-                </div>
-
-                <x-form.masked-input name="bank_account_number" label="New Bank Account Number" required
-                    wire:model.live="bank_account_number" />
-
-                <x-form.input name="confirmbankaccountnumber" label="Confirm Bank Account Number" required
-                    wire:model.live="confirmbankaccountnumber"
-                    x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
-
-
-                <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[112]" enclosureSource="5" />
-            </div>
-        @endif  --}}
         @if ($bank_action === '2')
             <div x-data="{
                 bank: @entangle('bank_account_number').live,
@@ -112,8 +85,21 @@
                     </p>
                 </div>
 
-                {{-- Enclosure List --}}
-                <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[112]" enclosureSource="5" />
+               
+                <div class="flex gap-6">
+                    {{-- Previous Approved Document --}}
+                    <div class="w-1/2">
+                        <h3 class="font-semibold mb-2">Previous Approved Document</h3>
+                       {{--  <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[112]" :is_page="1" />  --}}
+                    </div>
+
+                    {{-- Newly Temp Document --}}
+                    <div class="w-1/2">
+                        <h3 class="font-semibold mb-2">Newly Temp Document</h3>
+                        <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[112]" enclosureSource="5" />
+                    </div>
+                </div>
+
             </div>
         @endif
 

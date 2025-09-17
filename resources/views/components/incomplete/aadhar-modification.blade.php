@@ -15,10 +15,24 @@
             placeholder="Enter New Aadhaar Number"
             x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
 
-        <livewire:enclosure-list :application_id="$aadhaarIssues[0]->application_id" :doc_type_id_array_list="[108]" enclosureSource="5" />
+        <div class="flex gap-6">
+            {{-- Previous Approved Document --}}
+            <div class="w-1/2">
+                <h3 class="font-semibold mb-2">Previous Approved Document</h3>
+                <livewire:enclosure-list :application_id="$aadhaarIssues[0]->application_id" :doc_type_id_array_list="[108]" :is_page="1" :key="'previous-' . $aadhaarIssues[0]->application_id" />
+            </div>
+
+            {{-- Newly Temp Document --}}
+            <div class="w-1/2">
+                <h3 class="font-semibold mb-2">Newly Temp Document</h3>
+                <livewire:enclosure-list :application_id="$aadhaarIssues[0]->application_id" :doc_type_id_array_list="[108]" enclosureSource="5" :key="'new-' . $aadhaarIssues[0]->application_id" />
+            </div>
+        </div>
+
+
 
         @error("formData.aadhar_modification.{$aadhaarIssues[0]->application_id}")
             <span class="text-red-600 text-sm">{{ $message }}</span>
-        @enderror      
+        @enderror
 
     </div>
