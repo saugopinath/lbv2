@@ -11,6 +11,7 @@
     x-on:input="
         $el.value = $el.value.replace(/[^A-Za-z\s]/g, '');
         error = '';
+        $wire.set('score', null);
     "
     x-on:keydown="
         if ($event.key === 'Backspace' || $event.key === 'Delete') {
@@ -18,9 +19,6 @@
         }
     "
     required />
-
-
-
             </div>
             <div class="flex items-center space-x-3 mt-6">
                 <x-button.gradient-button
