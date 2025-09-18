@@ -2,19 +2,25 @@
     <form wire:submit.prevent="save" x-data="{ passbookName: @entangle('passbook_name'), error: '' }">
         <div class="grid gap-6 md:grid-cols-2 mb-2 pl-4 pr-4">
             <div>
-                <x-form.input
-                    id="passbook_name"
-                    name="passbook_name"
-                    label="Name as in Bank Passbook"
-                    placeholder="Enter Name as in Bank Passbook"
-                    x-model="passbookName"
-                    x-on:input="
-                    $el.value = $el.value.replace(/[^A-Za-z\s]/g, '');
-                    error = '';
-                    if ($el.value.trim() === '') {
-                        $wire.set('score', null);
-                    }
-                " required />
+<x-form.input
+    id="passbook_name"
+    name="passbook_name"
+    label="Name as in Bank Passbook"
+    placeholder="Enter Name as in Bank Passbook"
+    x-model="passbookName"
+    x-on:input="
+        $el.value = $el.value.replace(/[^A-Za-z\s]/g, '');
+        error = '';
+    "
+    x-on:keydown="
+        if ($event.key === 'Backspace' || $event.key === 'Delete') {
+            $wire.set('score', null);
+        }
+    "
+    required />
+
+
+
             </div>
             <div class="flex items-center space-x-3 mt-6">
                 <x-button.gradient-button
@@ -94,7 +100,7 @@
             @if ($mode != '0')
             <x-button.danger wire:click="$dispatch('goPrevious')">Previous</x-button.danger>
             @endif
-            <x-button.primary type="submit">
+            <x-button.primary :disabled="$score === null" type="submit">
                 {{ $mode == '0' ? 'Save' : 'Save & Next' }}
             </x-button.primary>
         </div>

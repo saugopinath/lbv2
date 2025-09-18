@@ -11,7 +11,7 @@
                 </x-form.select>
             </div>
             <div>
-                <x-form.input type="date" name="app_date" id="app_date"  label="Application Date:" required wire:model="app_date" :max="$cdate" :min="$pdate" />
+                <x-form.input type="date" name="app_date" id="app_date" label="Application Date:" required wire:model="app_date" :max="$cdate" :min="$pdate" />
             </div>
         </div>
         @endif
@@ -45,7 +45,11 @@
                     id="mobile"
                     name="mobile"
                     label="Mobile number"
-                    required wire:model="mobile" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />
+                    required wire:model.defer="mobile"
+                    x-on:input="
+        $el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10);
+        $wire.set('mobile', $el.value);
+    " />
             </div>
             <div>
                 <x-form.input

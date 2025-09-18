@@ -47,7 +47,6 @@ class BankDetails extends Component
     }
     public function mount($mode = null, $application_id = null)
     {
-        // dd($application_id);
         $this->mode = $mode;
         if ($application_id != null) {
             $this->application_id = $application_id;

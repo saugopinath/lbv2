@@ -37,7 +37,7 @@ class PersonalDetails extends Component
             'app_type'   => 'required',
             'app_date'   => 'required|date',
             'name'       => 'required|string|regex:/^[a-zA-Z\s]+$/',
-            'mobile'     => 'required',
+            'mobile'     => 'required|digits:10',
             'dob'        => "required|date|after_or_equal:{$this->minDOB}|before_or_equal:{$this->maxDOB}",
             'age'        => 'required|integer|between:25,60',
             'ffname'     => 'required|string|regex:/^[a-zA-Z\s]+$/',
