@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
-class BeneficiaryAadhaar extends Model
+use OwenIt\Auditing\Contracts\Auditable;
+class BeneficiaryAadhaar extends Model implements Auditable
 {
+  use \OwenIt\Auditing\Auditable;
   protected $guarded = [];
   protected $table = 'lb_scheme.beneficiary_aadhaars';
 }

@@ -48,7 +48,7 @@
             label="Aadhar Number"
             placeholder="Enter Aadhar Number"
             required
-            x-model="aadhaar" />
+            x-model="aadhaar" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
     </div>
 
     <!-- Buttons Row -->

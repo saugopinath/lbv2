@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
-class DraftBeneficiaryContact extends Model
+use OwenIt\Auditing\Contracts\Auditable;
+class DraftBeneficiaryContact extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $fillable = [
         'application_id',
         'district_id',
@@ -21,6 +22,7 @@ class DraftBeneficiaryContact extends Model
         'ward_id',
         'created_by',
     ];
+    protected $primaryKey = 'application_id';
     protected $table = 'lb_scheme.draft_beneficiary_contacts';
     public function district()
     {

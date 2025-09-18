@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
-class DraftBeneficiaryBank extends Model
+use OwenIt\Auditing\Contracts\Auditable;
+class DraftBeneficiaryBank extends Model implements Auditable
 {
+     use \OwenIt\Auditing\Auditable;
      protected $guarded = [
           'id',
      ];
      protected $table = 'lb_scheme.draft_beneficiary_banks';
+     protected $primaryKey = 'application_id';
      public function ifscbranch()
      {
           return $this->belongsTo(IfscCodeMaster::class, 'ifsc', 'code');
