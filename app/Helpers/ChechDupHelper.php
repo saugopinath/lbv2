@@ -23,7 +23,7 @@ class ChechDupHelper
                 ->exists();
 
             if ($existsInCommonList || $existsInIncomplete) {
-                return "Duplicate found for {$incompleteType} (Aadhaar: {$value})";
+                return "Duplicate found for Aadhaar: {$value}";
             }
 
             return true;
@@ -39,7 +39,7 @@ class ChechDupHelper
                 ->exists();
 
             if ($existsInCommonList || $existsInIncomplete) {
-                return "Duplicate found for {$incompleteType} (Mobile: {$value})";
+                return "Duplicate found for Mobile: {$value}";
             }
 
             return true;
@@ -55,7 +55,7 @@ class ChechDupHelper
                 ->exists();
 
             if ($existsInCommonList || $existsInIncomplete) {
-                return "Duplicate found for {$incompleteType} (Account: {$value})";
+                return "Duplicate found for Account: {$value}";
             }
 
             return true;

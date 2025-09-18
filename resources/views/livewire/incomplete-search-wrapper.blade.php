@@ -7,6 +7,7 @@
 
         <div class="flex items-center gap-6">
             {{-- Is Revert Radio --}}
+           @if($stage == 'verifier' || $stage == 'revert')
             <div class="flex items-center gap-4">
                 <span class="text-gray-700 font-medium">Is Revert :</span>
                 <div class="flex items-center gap-4">
@@ -20,6 +21,7 @@
                     </label>
                 </div>
             </div>
+            @endif
 
             {{-- Search / Reset --}}
             <div class="flex gap-3">

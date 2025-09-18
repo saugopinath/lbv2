@@ -17,10 +17,10 @@
 
         <div class="flex gap-6">
             {{-- Previous Approved Document --}}
-            <div class="w-1/2">
+            {{--  <div class="w-1/2">
                 <h3 class="font-semibold mb-2">Previous Approved Document</h3>
                 <livewire:enclosure-list :application_id="$aadhaarIssues[0]->application_id" :doc_type_id_array_list="[108]" :is_page="1" :key="'previous-' . $aadhaarIssues[0]->application_id" />
-            </div>
+            </div>  --}}
 
             {{-- Newly Temp Document --}}
             <div class="w-1/2">
@@ -29,7 +29,9 @@
             </div>
         </div>
 
-
+        @error('duplicate_check')
+            <span class="text-red-600 text-sm">{{ $message }}</span>
+        @enderror
 
         @error("formData.aadhar_modification.{$aadhaarIssues[0]->application_id}")
             <span class="text-red-600 text-sm">{{ $message }}</span>

@@ -12,6 +12,24 @@
         @endif
     </h1>
 
+    {{--  <div x-data="{
+        openSection: 'personal-details',
+        toggleSection(section) {
+            if (this.openSection === section) {
+                this.openSection = 'personal-details';
+            } else {
+                this.openSection = section;
+            }
+        }
+    }" class="space-y-2">
+
+        <x-accordion-section title="Personal Details" sectionId="personal-details" color="pink-500">
+            <x-apllicant-modal.personal-details :id="$id" :reportType="3" />
+        </x-accordion-section>
+
+
+    </div>  --}}
+
     {{-- Applicant Info --}}
     @if ($applicantInfo)
         <div class="mb-6 p-4 border rounded-lg bg-gray-100 shadow-sm">
@@ -32,6 +50,7 @@
             </div>
         </div>
     @endif
+
 
     <form wire:submit.prevent="submit">
 
@@ -78,7 +97,7 @@
                 <div class="flex justify-center w-full space-x-4">
                     <x-button.primary type="submit"
                         x-on:click="if(confirm('Are you sure you want to approve this request?')) { $wire.approve() }">
-                        View
+                        Approve
                     </x-button.primary>
                     <!-- Revert Button -->
                     <x-button.danger x-on:click="$dispatch('open-revert-modal')">
@@ -133,7 +152,7 @@
             @elseif ($stage === 'revert')
                 <x-button.primary
                     x-on:click="if(confirm('Are you sure you want to verify this reverted request?')) { $wire.revertVerify() }">
-                    Revert Verify
+                    Revert Request Send to Approver
                 </x-button.primary>
             @endif
         </div>

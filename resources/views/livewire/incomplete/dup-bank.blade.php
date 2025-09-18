@@ -85,12 +85,12 @@
                     </p>
                 </div>
 
-               
+
                 <div class="flex gap-6">
                     {{-- Previous Approved Document --}}
                     <div class="w-1/2">
                         <h3 class="font-semibold mb-2">Previous Approved Document</h3>
-                       {{--  <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[112]" :is_page="1" />  --}}
+                        {{--  <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[112]" :is_page="1" />  --}}
                     </div>
 
                     {{-- Newly Temp Document --}}
@@ -110,4 +110,7 @@
             {{ session('error') }}
         </div>
     @endif
+    @error('duplicate_check')
+        <span class="text-red-600 text-sm">{{ $message }}</span>
+    @enderror
 </div>

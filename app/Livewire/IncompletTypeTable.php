@@ -150,10 +150,8 @@ class IncompletTypeTable extends DataTableComponent
 
     $next_level_request_id = null;
 
-    // 👉 প্রথমে route / livewire থেকে আসা $this->stage ব্যবহার করো
     $stage = $this->stage ?? null;
 
-    // যদি radio দিয়ে বা route থেকে না আসে, fallback হবে role অনুযায়ী
     if (!$stage) {
         if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
             $stage = 'verifier';
@@ -173,7 +171,7 @@ class IncompletTypeTable extends DataTableComponent
             $query->where('next_level_request_id', 1);
             break;
 
-        case 'revert': // ✅ এখানে কাজ করবে
+        case 'revert':
             $query->where('next_level_request_id', -50)
                 ->with(['acceptRejectInfo' => function ($q) {
                     $q->latest('id');

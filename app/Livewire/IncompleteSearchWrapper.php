@@ -47,7 +47,6 @@ class IncompleteSearchWrapper extends Component
 
     public function updatedRevert($value)
     {
-        // dd($value);
         if ($value === 'yes') {
             $this->stage = 'revert';
         } else {

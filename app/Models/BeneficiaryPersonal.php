@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class BeneficiaryPersonal extends Model
+class BeneficiaryPersonal extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $table = 'lb_scheme.beneficiary_personals';
-    protected $primaryKey = 'beneficiary_id';
+    protected $primaryKey = 'application_id';
 
-    protected $guarded = ['beneficiary_id'];
+    protected $guarded = [];
 
     public $timestamps = false;
 
@@ -51,7 +53,7 @@ class BeneficiaryPersonal extends Model
 
     public function aadhaar()
     {
-        return $this->hasOne(BeneficiaryAadhaar::class, 'beneficiary_id');
+        return $this->hasOne(BeneficiaryAadhaar::class, 'application_id');
     }
 
     public function relationships()

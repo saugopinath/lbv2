@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class ApplicantIncompletDeatil extends Model
+class ApplicantIncompletDeatil extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $table = 'applicant_incomplet_deatils';
     protected $fillable = [
         'application_id',
@@ -41,7 +43,7 @@ class ApplicantIncompletDeatil extends Model
     public function getIncompleteTypesNamesAttribute()
     {
         return ApplicantIncompletDeatil::where('application_id', $this->application_id)
-        ->where('is_active', 1)
+            ->whereIn('is_active', [0, 1])
             ->with('incompletType')
             ->get()
             ->pluck('incompletType.name')

@@ -25,13 +25,14 @@ class PersonalDetails extends Component
         // dd($reportType);
         $this->currentDate = Carbon::now()->format('d/m/Y');
 
-        if ($reportType === '3') {
+        if ($reportType == '3') {
             // dd('ok1');
-            $applicantDet = BeneficiaryPersonal::with(['aadhaar', 'relationships'])->where('beneficiary_id', $id)->first();
+            $applicantDet = BeneficiaryPersonal::with(['aadhaar', 'relationships'])->where('application_id', $id)->first();
         } else {
             // dd('ok2');
             $applicantDet = DraftBeneficiaryPersonal::with(['aadhaar', 'relationships'])->where('application_id', $id)->first();
         }
+        // dd($applicantDet);
         $this->decryptedAadhaar = Crypt::decryptString($applicantDet->aadhaar->encoded_aadhar);
         $this->dsregno = $applicantDet->ds_registration_no;
         $this->dsdate = Carbon::parse($applicantDet->ds_date)->format('d-m-Y');
