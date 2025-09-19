@@ -45,4 +45,13 @@ class BenRejectDetails extends Model
     {
         return $this->morphOne(BeneficiaryCommonList::class, 'sourceable');
     }
+    
+    protected static function booted()
+    {
+        static::created(function ($benRejectDetails) {
+            if ($benRejectDetails) {
+                $benRejectDetails->lists()->update([]);
+            }
+        });
+    }
 }

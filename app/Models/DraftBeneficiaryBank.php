@@ -9,6 +9,7 @@ class DraftBeneficiaryBank extends Model
      protected $guarded = [
         'id',
     ];
+    protected $primaryKey = 'application_id';
     protected $table = 'lb_scheme.draft_beneficiary_banks';
 
     // public function ifscMaster()

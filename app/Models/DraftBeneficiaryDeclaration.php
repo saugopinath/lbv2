@@ -9,5 +9,6 @@ class DraftBeneficiaryDeclaration extends Model
     protected $guarded = [
         'id',
     ];
+    protected $primaryKey = 'application_id';
      protected $table = 'lb_scheme.draft_beneficiary_declarations';
 }

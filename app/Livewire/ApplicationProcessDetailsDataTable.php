@@ -20,8 +20,14 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use App\Models\DraftBeneficiaryPersonal;
 use App\Models\AcceptRejectInfo;
+use App\Models\BeneficiaryAadhaar;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Log;
+use App\Models\BenRejectDetails;
+use App\Models\DraftBeneficiaryBank;
+use App\Models\DraftBeneficiaryContact;
+use App\Models\DraftBeneficiaryDeclaration;
+use App\Models\DraftBeneficiaryRelationship;
 
 class ApplicationProcessDetailsDataTable extends DataTableComponent
 {
@@ -204,18 +210,17 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $next_level_role_id = null;
 
         if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
-            $next_level_role_id = 22;
+            $next_level_role_id = Codemaster::getIdByCode(23);
         }
         if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
-            $next_level_role_id = 21;
+            $next_level_role_id = Codemaster::getIdByCode(22);
         }
         if ($user->hasRole('Operator')) {
-            $next_level_role_id = 20;
+            $next_level_role_id = Codemaster::getIdByCode(21);
         }
         if ($next_level_role_id) {
-            $query->whereHasMorph(
+            $query->whereHas(
                 'sourceable',
-                [DraftBeneficiaryPersonal::class],
                 function ($q) use ($next_level_role_id) {
                     $q->where('next_level_role_id', $next_level_role_id);
                 }
@@ -223,7 +228,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         }
         return $query;
     }
-    
+
     public function bulkverify()
     {
         $ids = $this->getSelected();
@@ -259,10 +264,35 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public function bulkapprove()
     {
         $ids = $this->getSelected();
-        $drafts = DraftBeneficiaryPersonal::whereIn('application_id', $ids)->get();
-        foreach ($drafts as $draft) {
-            $draft->delete();
+        // $drafts = DraftBeneficiaryPersonal::whereIn('application_id', $ids)->get();
+        // foreach ($drafts as $draft) {
+        //     $draft->delete();
+        // }
+
+        foreach ($ids as $id) {
+            $draft = DraftBeneficiaryPersonal::where('application_id', $id)->first();
+            if ($draft) {
+                $draft->delete();
+            }
+            $select_lgd = session('lgd_session');
+            AcceptRejectInfo::Create(
+                [
+                    'application_id' => $draft->application_id,
+                    'beneficiary_id' => $draft->application_id,
+                    'ip_address'     => request()->ip(),
+                    'user_id'        => Crypt::decryptString($select_lgd['role_id']),
+                    'browser'        => request()->header('User-Agent'),
+                    'model_name'     => null,
+                    'op_type'        => Codemaster::getIdByCode(2303),
+                    'revert_reason_cause_id' => null,
+                    'revert_reason_remarks'  => null,
+                    'parent_id'      => AcceptRejectInfo::where('application_id', $draft->application_id)
+                        ->latest('id')
+                        ->value('id') ?? null,
+                ]
+            );
         }
+
         $this->clearSelected();
     }
     public function bulkrevert()
@@ -307,6 +337,38 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                         'browser'        => request()->header('User-Agent'),
                         'model_name'     => null,
                         'op_type'        => Codemaster::getIdByCode(2304),
+                        'revert_reason_cause_id' => $validated['cause'],
+                        'revert_reason_remarks'  => $validated['remark'],
+                        'parent_id'      => AcceptRejectInfo::where('application_id', $id)
+                            ->latest('id')
+                            ->value('id') ?? null,
+                    ]
+                );
+            }
+            $this->clearSelected();
+        } elseif ($this->revertrejectAction === 'reject') {
+            $ids = $this->getSelected();
+            foreach ($ids as $id) {
+                $benrej = new BenRejectDetails;
+                $benrej->application_id     = $id;
+                $benrej->created_by     = $user_id;
+                $benrej->district_id     = Crypt::decryptString($select_lgd['district_id']);
+                $benrej->personal_details     = DraftBeneficiaryPersonal::where('application_id', $id)->get()->toArray();
+                $benrej->contact_details      = DraftBeneficiaryContact::where('application_id', $id)->get()->toArray();
+                $benrej->bank_details         = DraftBeneficiaryBank::where('application_id', $id)->get()->toArray();
+                $benrej->declaration_details  = DraftBeneficiaryDeclaration::where('application_id', $id)->get()->toArray();
+                $benrej->relationship_details = DraftBeneficiaryRelationship::where('application_id', $id)->get()->toArray();
+                $benrej->aadhar_details       = BeneficiaryAadhaar::where('application_id', $id)->get()->toArray();
+                $benRejectDetails = $benrej->save();
+                AcceptRejectInfo::Create(
+                    [
+                        'application_id' => $id,
+                        'beneficiary_id' => $id,
+                        'ip_address'     => request()->ip(),
+                        'user_id'        => $user_id,
+                        'browser'        => request()->header('User-Agent'),
+                        'model_name'     => null,
+                        'op_type'        => Codemaster::getIdByCode(2305),
                         'revert_reason_cause_id' => $validated['cause'],
                         'revert_reason_remarks'  => $validated['remark'],
                         'parent_id'      => AcceptRejectInfo::where('application_id', $id)

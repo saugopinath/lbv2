@@ -22,7 +22,10 @@ class BeneficiaryPersonal extends Model
     {
         return $this->hasOne(BeneficiaryContact::class, 'application_id');
     }
-
+    public function relationships()
+    {
+        return $this->hasMany(BeneficiaryRelationship::class, 'application_id');
+    }
 
     // protected static function booted()
     // {

@@ -21,6 +21,7 @@ class DraftBeneficiaryContact extends Model
         'ward_id',
         'created_by',
     ];
+    protected $primaryKey = 'application_id';
     protected $table = 'lb_scheme.draft_beneficiary_contacts';
     public function district()
     {
