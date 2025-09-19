@@ -45,7 +45,7 @@
             id="dup_mobile_{{ $mobileIssues[0]->application_id }}"
             name="dup_mobile[{{ $mobileIssues[0]->application_id }}]"
             label="New Mobile Number"
-            wire:model.defer="formData.new_mobile.{{ $mobileIssues[0]->application_id }}"
+            wire:model.live="formData.new_mobile.{{ $mobileIssues[0]->application_id }}"
             placeholder="Enter New Mobile"
             required
             x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)"

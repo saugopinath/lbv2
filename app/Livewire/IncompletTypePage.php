@@ -17,16 +17,16 @@ class IncompletTypePage extends Component
 
 
     protected $rules = [
-        'bank_action' => 'required',
+        // 'bank_action' => 'required',
         // 'ifscode' => 'required_if:bank_action,3|size:11',
         // 'bank_account_number' => 'required_if:bank_action,3|digits_between:9,18',
         // 'confirmbankaccountnumber' => 'required_if:bank_action,3|same:bank_account_number',
-        // 'formData.new_mobile' => 'nullable|digits:10',
-        // 'formData.aadhar_modification' => 'digits:12',
+        // 'formData.new_mobile.*' => 'nullable|digits:10',
+        // 'formData.aadhar_modification.*' => 'digits:12',
     ];
 
     protected $messages = [
-        'bank_action' => 'Please select an operation type (KEEP SAME / CHANGE).',
+        // 'bank_action' => 'Please select an operation type (KEEP SAME / CHANGE).',
         // 'ifscode.required_if' => 'IFSC code is required when changing bank details.',
         // 'ifscode.size' => 'IFSC code must be exactly 11 characters.',
         // 'bank_account_number.required_if' => 'Bank account number is required when changing bank details.',
@@ -92,11 +92,13 @@ class IncompletTypePage extends Component
 
     public function submit()
     {
-        $this->validate();
+        // dd($this->validate());
+
+
         if (!$this->checkduplicate()) {
             return;
         }
-        dd('ok');
+        // dd('ok');
         $request = AcceptRejectInfo::create([
             'application_id'         => $this->id,
             'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
@@ -115,6 +117,7 @@ class IncompletTypePage extends Component
         $dupbankacc = $bankIssues->contains(fn($i) => $i->incomplet_type == '1411');
 
         foreach ($allIssues as $item) {
+            //    dd($this->formData['aadhar_modification'][$item->application_id]);
             $typeCode = $item->incomplet_type ?? null;
             if (!$typeCode) continue;
 

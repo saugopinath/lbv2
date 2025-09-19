@@ -11,7 +11,7 @@
         <p class="text-sm text-gray-600">Old Aadhaar: {{ $item->old_value ?? 'N/A' }}</p>
         <x-form.input id="aadhar_modification_{{ $aadhaarIssues[0]->application_id }}"
             name="aadhar_modification[{{ $aadhaarIssues[0]->application_id }}]" label="Aadhaar Number" required
-            wire:model="formData.aadhar_modification.{{ $aadhaarIssues[0]->application_id }}"
+            wire:model.live="formData.aadhar_modification.{{ $aadhaarIssues[0]->application_id }}"
             placeholder="Enter New Aadhaar Number"
             x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
 
