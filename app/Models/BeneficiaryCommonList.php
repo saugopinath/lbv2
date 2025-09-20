@@ -16,7 +16,7 @@ class BeneficiaryCommonList extends Model
     public function faultyBeneficiaryPersonal()
     {
         return $this->hasOne(FaultyBeneficiaryPersonal::class, 'beneficiary_id', 'sourceable_id');
-    }  
+    }
     public function faultyBeneficiaryBank()
     {
         return $this->hasOne(FaultyBeneficiaryBank::class, 'application_id', 'sourceable_id');
@@ -29,8 +29,6 @@ class BeneficiaryCommonList extends Model
     {
         return $this->hasOne(BenPaymentDetailsNew::class, 'ben_id', 'beneficiary_id');
     }
-
-
     public function aadhaar()
     {
         return $this->hasOne(BeneficiaryAadhaar::class, 'application_id', 'sourceable_id');

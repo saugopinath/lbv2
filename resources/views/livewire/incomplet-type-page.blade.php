@@ -12,24 +12,6 @@
         @endif
     </h1>
 
-    {{--  <div x-data="{
-        openSection: 'personal-details',
-        toggleSection(section) {
-            if (this.openSection === section) {
-                this.openSection = 'personal-details';
-            } else {
-                this.openSection = section;
-            }
-        }
-    }" class="space-y-2">
-
-        <x-accordion-section title="Personal Details" sectionId="personal-details" color="pink-500">
-            <x-apllicant-modal.personal-details :id="$id" :reportType="3" />
-        </x-accordion-section>
-
-
-    </div>  --}}
-
     {{-- Applicant Info --}}
     @if ($applicantInfo)
         <div class="mb-6 p-4 border rounded-lg bg-gray-100 shadow-sm">
@@ -51,10 +33,11 @@
         </div>
     @endif
 
+    {{--  <form method="POST" action="{{ route('incomplete-full-deatils-update', ['id' => $id]) }}">  --}}
+        <form method="POST" action="{{ route('incomplete-full-deatils-update', ['id' => encrypt($id)]) }}">
+    @csrf
+        @csrf
 
-    <form wire:submit.prevent="submit">
-
-        {{-- Aadhaar Issues --}}
         @if (!empty($aadhaarIssues))
             <x-incomplete.aadhar-modification :aadhaar-issues="$aadhaarIssues" />
         @endif
@@ -86,11 +69,10 @@
             @endforeach
         @endif
 
-        {{-- Submit Buttons --}}
         <div class="flex justify-end mt-4 space-x-2">
             @if ($stage === 'verifier')
-                <x-button.primary type="button" class="bg-blue-500 text-white whitespace-nowrap"
-                    x-on:click="if(confirm('Are you sure you want to submit this request?')) { $wire.submit() }">
+                <x-button.primary type="submit" class="bg-blue-500 text-white whitespace-nowrap"
+                    x-on:click="if(confirm('Are you sure you want to submit this request?'))">
                     Request Send to Approver
                 </x-button.primary>
             @elseif ($stage === 'approver')
@@ -139,7 +121,6 @@
                             <div class="flex justify-end space-x-2">
                                 <x-button.primary x-on:click="open = false">Cancel</x-button.primary>
 
-                                <!-- এখানে confirm হবে -->
                                 <x-button.primary
                                     x-on:click="if(confirm('Are you sure you want to revert this request?')) { $wire.revert(); open = false }">
                                     Submit

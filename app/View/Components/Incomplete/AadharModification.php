@@ -11,6 +11,7 @@ class AadharModification extends Component
     public function __construct($aadhaarIssues = [])
     {
         $this->aadhaarIssues = $aadhaarIssues;
+        // dd($this->aadhaarIssues);
     }
 
     public function render()

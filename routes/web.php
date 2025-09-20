@@ -89,5 +89,16 @@ Route::get('/incomplet-type/{id}', IncompletTypePage::class)
     ->name('incomplet-type.view');
 
 
+// Route::post('incomplete-full-deatils-update', [IncompleteTypeController::class, 'fullUpdate'])
+//     ->middleware(['auth', 'verified'])
+//     ->name('incomplete-full-deatils-update');
+
+
+
+    Route::post('/incomplete/update/{id}', [IncompleteTypeController::class, 'fullUpdate'])
+    ->name('incomplete-full-deatils-update');
+
+
+
 // Route::get('/incomplet-type/{id}', [IncompletPageController::class, 'page'])
 //     ->name('incomplet-type.page');

@@ -11,7 +11,7 @@ use App\Models\UserRoleSchemeOfficeMapping;
 
 class DashboardController  extends Controller
 {
-    public function __construct() 
+    public function __construct()
     {
 
     }
@@ -25,7 +25,7 @@ class DashboardController  extends Controller
 
         $lgd_session=array();
         if(!is_null($roleSchemeOfficeMappings)){
-         
+
         Session::put('lgd_session', $lgd_session);
         if(!is_null($roleSchemeOfficeMappings->scheme_id)){
           $lgd_session['scheme_id']=Crypt::encryptString($roleSchemeOfficeMappings->scheme_id);
@@ -62,12 +62,12 @@ class DashboardController  extends Controller
         $lgd_session['scheme_id']=Crypt::encryptString($scheme_id->id);
         $lgd_session['office_type_id']=Crypt::encryptString(151);
         $lgd_session['state_id']=Crypt::encryptString(1);
-     
+
       }
         Session::put('lgd_session', $lgd_session);
         // dd($lgd_session);
         return view('admin.index');
     }
 
-   
+
 }

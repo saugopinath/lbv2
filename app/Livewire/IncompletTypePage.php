@@ -98,7 +98,7 @@ class IncompletTypePage extends Component
         if (!$this->checkduplicate()) {
             return;
         }
-        // dd('ok');
+        dd('ok');
         $request = AcceptRejectInfo::create([
             'application_id'         => $this->id,
             'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
@@ -195,6 +195,7 @@ class IncompletTypePage extends Component
 
     public function approve()
     {
+        dd('approver');
         $opType = Codemaster::where('code', 245)->value('id');
         $previousId = AcceptRejectInfo::where('application_id', $this->id)
             ->where('op_type', $opType)

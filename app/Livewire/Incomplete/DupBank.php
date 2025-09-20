@@ -32,7 +32,7 @@ class DupBank extends Component
 
         $old_value = $item->old_value ?? [];
         $new_value = $item->new_value ?? [];
-
+$this->bank_action = old('bank_action', $this->bank_action); 
         $this->bank_action = (string) ($item->change_type ?? '');
 
         // if (in_array($this->bank_action, ['1', '2', '3'])) {
