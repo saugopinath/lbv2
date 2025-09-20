@@ -56,10 +56,6 @@
                 {{-- IFSC Code --}}
                 <x-form.input name="ifscode" label="IFSC Code" wire:model.lazy="ifscode"
                     x-on:input="if ($el.value.length > 11) $el.value = $el.value.slice(0, 11)" />
-                {{--  @if ($errors->has('ifscode'))
-                    <span class="text-red-800 text-sm">
-                        <li>{{ $errors->first('ifscode') }}</li>
-                @endif  --}}
 
                 {{-- Bank Name --}}
                 <div class="relative">
@@ -76,19 +72,13 @@
                 {{-- New Bank Account Number --}}
                 <x-form.masked-input name="bank_account_number" label="New Bank Account Number" required
                     wire:model.live="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
-                {{--  @if ($errors->has('bank_account_number'))
-                    <span class="text-red-800 text-sm">
-                        <li>{{ $errors->first('bank_account_number') }}</li>
-                @endif  --}}
+                <input type="hidden" name="bank_account_number" :value="$wire.bank_account_number">
                 {{-- Confirm Bank Account Number --}}
                 <div class="col-span-1">
                     <x-form.input name="confirmbankaccountnumber" label="Confirm Bank Account Number" required
                         wire:model.live="confirmbankaccountnumber"
                         x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
-                    {{--  @if ($errors->has('confirmbankaccountnumber'))
-                        <span class="text-red-800 text-sm">
-                            <li>{{ $errors->first('confirmbankaccountnumber') }}</li>
-                    @endif  --}}
+
                     {{-- Error Message --}}
                     <p x-show="showError" x-transition.opacity class="text-red-500 text-sm mt-1">
                         ❌ Bank account numbers do not match
@@ -112,10 +102,6 @@
             </div>
         @endif
     </div>
-
-
-
-
 
     @error('duplicate_check')
         <span class="text-red-600 text-sm">{{ $message }}</span>

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\AcceptRejectInfo;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\ApplicantIncompletDeatil;
+use App\Helpers\ChechDupHelper;
 use Illuminate\Support\Facades\Validator;
 
 class IncompleteTypeController extends Controller
@@ -28,7 +29,7 @@ class IncompleteTypeController extends Controller
         // Input Data
         $aadharData     = $request->aadhar_modification;
         $mobileData     = $request->dup_mobile;
-        $bankActionData = (int) $request->bank_action; // cast to integer
+        $bankActionData = (int) $request->bank_action;
         $bankAccData    = $request->bank_account_number;
         $confirmAccData = $request->confirmbankaccountnumber;
         $ifscodeData    = $request->ifscode;
@@ -39,6 +40,12 @@ class IncompleteTypeController extends Controller
 
         if ($allIssues->isEmpty()) {
             return redirect()->back()->with('error', 'Application not found!');
+        }
+
+        // Perform duplicate check
+        $duplicateCheck = $this->checkduplicate($request, $id);
+        if ($duplicateCheck !== true) {
+            return redirect()->back()->withErrors(['duplicate_check' => $duplicateCheck])->withInput();
         }
 
         // Rules and messages
@@ -68,15 +75,14 @@ class IncompleteTypeController extends Controller
                 $messages['bank_action.in'] = 'Please select radio button for Keep Same or Change.';
 
                 if (in_array($bankActionData, [2, 3])) {
-                    // $rules['bank_account_number'] = 'required|digits_between:9,18';
-                    // $rules['confirmbankaccountnumber'] = 'required|same:bank_account_number';
-                    // $rules['confirmbankaccountnumber'] = 'required|digits_between:9,18';
+                    $rules['bank_account_number'] = 'required|digits_between:9,18';
+                    $rules['confirmbankaccountnumber'] = 'required|same:bank_account_number';
                     $rules['ifscode'] = 'required|regex:/^[A-Z]{4}0[A-Z0-9]{6}$/i';
 
-                    // $messages['bank_account_number.required'] = 'Bank Account Number is required.';
-                    // $messages['bank_account_number.digits_between'] = 'Bank Account Number must be between 9 to 18 digits.';
-                    // $messages['confirmbankaccountnumber.required'] = 'Confirm Bank Account Number is required.';
-                    // $messages['confirmbankaccountnumber.same'] = 'Bank Account Number and Confirm Bank Account Number must match.';
+                    $messages['bank_account_number.required'] = 'Bank Account Number is required.';
+                    $messages['bank_account_number.digits_between'] = 'Bank Account Number must be between 9 to 18 digits.';
+                    $messages['confirmbankaccountnumber.required'] = 'Confirm Bank Account Number is required.';
+                    $messages['confirmbankaccountnumber.same'] = 'Bank Account Number and Confirm Bank Account Number not match.';
                     $messages['ifscode.required'] = 'IFSC Code is required.';
                     $messages['ifscode.regex'] = 'IFSC Code format is invalid.';
                 }
@@ -100,7 +106,7 @@ class IncompleteTypeController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
-dd('ok');
+        // dd('ok');
         $select_lgd = session('lgd_session');
         $user_id    = Crypt::decryptString($select_lgd['role_id']);
 
@@ -206,6 +212,47 @@ dd('ok');
         return redirect()->route('incomplete.types', ['stage' => 'verifier', 'id' => $realId]);
     }
 
+
+    /**
+     * Check for duplicates in aadhaar, mobile, or bank account.
+     */
+    public function checkduplicate(Request $request, $id)
+    {
+        $realId = Crypt::decrypt($id);
+
+        $aadharData     = $request->aadhar_modification;
+        $mobileData     = $request->dup_mobile;
+        $confirmAccData = $request->confirmbankaccountnumber;
+
+        $allIssues = ApplicantIncompletDeatil::where('application_id', $realId)->get();
+
+        if ($allIssues->isEmpty()) {
+            return true; // No issues found, no need for duplicate check
+        }
+
+        foreach ($allIssues as $item) {
+            $typeCode = $item->incomplet_type ?? null;
+
+            if (in_array($typeCode, ['141', '149', '1414']) && $aadharData) {
+                $result = ChechDupHelper::checkDuplicate('aadhaar', $aadharData, $item->beneficiaryCommonList);
+                if ($result !== true) {
+                    return $result; // Return error message
+                }
+            } elseif (in_array($typeCode, ['142', '1410']) && $mobileData) {
+                $result = ChechDupHelper::checkDuplicate('mobile', $mobileData, $item->beneficiaryCommonList);
+                if ($result !== true) {
+                    return $result; // Return error message
+                }
+            } elseif (in_array($typeCode, ['145', '146', '1411', '1412', '1413']) && $confirmAccData) {
+                $result = ChechDupHelper::checkDuplicate('bank', $confirmAccData, $item->beneficiaryCommonList);
+                if ($result !== true) {
+                    return $result; // Return error message
+                }
+            }
+        }
+
+        return true; // No duplicates found
+    }
 
 
     /**

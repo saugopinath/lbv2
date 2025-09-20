@@ -55,7 +55,7 @@ class ChechDupHelper
                 ->exists();
 
             if ($existsInCommonList || $existsInIncomplete) {
-                return "Duplicate found for Account: {$value}";
+                return "Duplicate found for Bank Account: {$value}";
             }
 
             return true;

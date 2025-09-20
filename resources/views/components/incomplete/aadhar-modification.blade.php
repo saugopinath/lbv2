@@ -13,8 +13,12 @@
 
         <x-form.input id="aadhar_modification_{{ $aadhaarIssues[0]->application_id }}" name="aadhar_modification"
             label="Aadhaar Number" required placeholder="Enter New Aadhaar Number" value="{{ old('aadhar_modification') }}"
+            wire:model="formData.aadhar_modification.{{ $aadhaarIssues[0]->application_id }}"
             x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
-
+        @if ($errors->has('aadhaar'))
+            <span class="text-red-800 text-sm">
+                <li>{{ $errors->first('aadhaar') }}</li>
+        @endif
 
         <div class="flex gap-6">
             <div class="w-1/2">
@@ -26,10 +30,4 @@
         @error('duplicate_check')
             <span class="text-red-600 text-sm">{{ $message }}</span>
         @enderror
-
-        @if ($errors->has('aadhaar'))
-            <span class="text-red-800 text-sm">
-                <li>{{ $errors->first('aadhaar') }}</li>
-        @endif
-
     </div>
