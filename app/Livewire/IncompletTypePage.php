@@ -260,6 +260,8 @@ class IncompletTypePage extends Component
                                 'document_type'      => $temp->document_type,
                                 'document_extension' => $temp->document_extension,
                                 'document_mime_type' => $temp->document_mime_type,
+                                'ip_address'         => request()->ip(),
+                                'created_by'         => 1,
                                 'updated_at'         => now(),
                             ]
                         );
@@ -296,6 +298,8 @@ class IncompletTypePage extends Component
                                 'document_type'      => $temp->document_type,
                                 'document_extension' => $temp->document_extension,
                                 'document_mime_type' => $temp->document_mime_type,
+                                'ip_address'         => request()->ip(),
+                                'created_by'         => 1,
                                 'updated_at'         => now(),
                             ]
                         );

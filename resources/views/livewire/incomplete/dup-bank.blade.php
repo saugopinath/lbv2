@@ -54,7 +54,7 @@
             }" x-effect="checkMatch()" class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
 
                 {{-- IFSC Code --}}
-                <x-form.input name="ifscode" label="IFSC Code" wire:model.lazy="ifscode"
+                <x-form.input name="ifscode" label="IFSC Code" wire:model.live="ifscode"
                     x-on:input="if ($el.value.length > 11) $el.value = $el.value.slice(0, 11)" />
 
                 {{-- Bank Name --}}
@@ -71,12 +71,12 @@
 
                 {{-- New Bank Account Number --}}
                 <x-form.masked-input name="bank_account_number" label="New Bank Account Number" required
-                    wire:model.live="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
+                    wire:model="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
                 <input type="hidden" name="bank_account_number" :value="$wire.bank_account_number">
                 {{-- Confirm Bank Account Number --}}
                 <div class="col-span-1">
                     <x-form.input name="confirmbankaccountnumber" label="Confirm Bank Account Number" required
-                        wire:model.live="confirmbankaccountnumber"
+                        wire:model="confirmbankaccountnumber"
                         x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
 
                     {{-- Error Message --}}

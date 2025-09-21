@@ -44,14 +44,24 @@ class MismatchLow extends Component
             $this->bank_action = (string) ($item->change_type ?? '');
         }
 
-        if (in_array($this->bank_action, ['1', '2', '3'])) {
-            $this->ifscode = $new_value['ifscode'] ?? '';
-            $this->bank_account_number = $new_value['bank_account_number'] ?? '';
-            $this->confirmbankaccountnumber = $new_value['confirmbankaccountnumber'] ?? '';
+        // if (in_array($this->bank_action, ['1', '2', '3'])) {
+        //     $this->ifscode = $new_value['ifscode'] ?? '';
+        //     $this->bank_account_number = $new_value['bank_account_number'] ?? '';
+        //     $this->confirmbankaccountnumber = $new_value['confirmbankaccountnumber'] ?? '';
+        // } else {
+        //     $this->ifscode = $old_value['ifsc'] ?? '';
+        //     $this->bank_account_number = $old_value['bank_account_number'] ?? '';
+        //     $this->confirmbankaccountnumber = $old_value['confirmbankaccountnumber'] ?? '';
+        // }
+
+         if (in_array($this->bank_action, ['1', '2', '3'])) {
+            $this->ifscode = old('ifscode', $new_value['ifscode'] ?? '');
+            $this->bank_account_number = old('bank_account_number', $new_value['bank_account_number'] ?? '');
+            $this->confirmbankaccountnumber = old('confirmbankaccountnumber', $new_value['confirmbankaccountnumber'] ?? '');
         } else {
-            $this->ifscode = $old_value['ifsc'] ?? '';
-            $this->bank_account_number = $old_value['bank_account_number'] ?? '';
-            $this->confirmbankaccountnumber = $old_value['confirmbankaccountnumber'] ?? '';
+            $this->ifscode = old('ifscode', $old_value['ifsc'] ?? '');
+            $this->bank_account_number = old('bank_account_number', $old_value['bank_account_number'] ?? '');
+            $this->confirmbankaccountnumber = old('confirmbankaccountnumber', $old_value['confirmbankaccountnumber'] ?? '');
         }
 
         $app_det = ApplicantIncompletDeatil::with('banks')
