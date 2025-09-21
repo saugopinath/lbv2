@@ -147,7 +147,6 @@ class IncompleteTypeController extends Controller
             if (in_array($typeCode, ['141', '149', '1414'])) {
                 $jsonValue = [
                     'aadhaar_no'     => $aadharData,
-                    'application_id' => $realId,
                 ];
             }
 
@@ -155,7 +154,6 @@ class IncompleteTypeController extends Controller
             elseif (in_array($typeCode, ['142', '1410'])) {
                 $jsonValue = [
                     'mobile_no'      => $mobileData,
-                    'application_id' => $realId,
                 ];
             }
 

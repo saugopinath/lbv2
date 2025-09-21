@@ -15,10 +15,7 @@
             label="Aadhaar Number" required placeholder="Enter New Aadhaar Number" value="{{ old('aadhar_modification') }}"
             wire:model="formData.aadhar_modification.{{ $aadhaarIssues[0]->application_id }}"
             x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
-        @if ($errors->has('aadhaar'))
-            <span class="text-red-800 text-sm">
-                <li>{{ $errors->first('aadhaar') }}</li>
-        @endif
+
 
         <div class="flex gap-6">
             <div class="w-1/2">
@@ -26,6 +23,11 @@
                 <livewire:enclosure-list :application_id="$aadhaarIssues[0]->application_id" :doc_type_id_array_list="[108]" enclosureSource="5" :key="'new-' . $aadhaarIssues[0]->application_id" />
             </div>
         </div>
+
+        @if ($errors->has('aadhaar'))
+            <span class="text-red-800 text-sm">
+                <li>{{ $errors->first('aadhaar') }}</li>
+        @endif
 
         @error('duplicate_check')
             <span class="text-red-600 text-sm">{{ $message }}</span>

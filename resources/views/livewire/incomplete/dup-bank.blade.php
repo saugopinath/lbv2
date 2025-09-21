@@ -4,13 +4,13 @@
             <h2>Select Opertion Type</h2>
             <div class="flex gap-6 pl-4 pr-4 mt-2">
                 <label class="flex items-center space-x-2">
-                    <input type="radio" class="form-radio text-blue-600" name="bank_action" wire:model.live="bank_action"
+                    <input type="radio" class="form-radio text-blue-600" name="bank_action" wire:model.lazy="bank_action"
                         value="1" />
                     <span>KEEP SAME</span>
                 </label>
                 <label class="flex items-center space-x-2">
                     <input type="radio" class="form-radio text-blue-600" name="bank_action"
-                        wire:model.live="bank_action" value="2" />
+                        wire:model.lazy="bank_action" value="2" {{ old('bank_action', $bank_action) == '2' ? 'checked' : '' }} />
                     <span>CHANGE</span>
                 </label>
             </div>

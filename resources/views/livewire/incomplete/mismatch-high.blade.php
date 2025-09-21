@@ -8,15 +8,15 @@
                 <div class="flex gap-6 pl-4 pr-4 mt-2">
                     <label class="flex items-center space-x-2 ">
                         <input type="radio" class="form-radio text-blue-600" name="bank_action"
-                            wire:model.live="bank_action" value="4"
+                            wire:model.lazy="bank_action" value="4"
                             @if ($dupAction === '2') disabled @endif />
                         <span>KEEP SAME</span>
                     </label>
 
                     <label class="flex items-center space-x-2">
                         <input type="radio" class="form-radio text-blue-600" name="bank_action"
-                            wire:model.live="bank_action" value="3"
-                            @if ($dupAction === '1' || $dupAction === '2') disabled @endif />
+                            wire:model.lazy="bank_action" value="3"
+                            @if ($dupAction === '1' || $dupAction === '2') disabled @endif {{ old('bank_action', $bank_action) == '3' ? 'checked' : '' }} />
                         <span>CHANGE</span>
                     </label>
                 </div>

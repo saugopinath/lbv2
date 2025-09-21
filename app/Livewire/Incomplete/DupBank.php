@@ -32,8 +32,13 @@ class DupBank extends Component
 
         $old_value = $item->old_value ?? [];
         $new_value = $item->new_value ?? [];
-$this->bank_action = old('bank_action', $this->bank_action); 
-        $this->bank_action = (string) ($item->change_type ?? '');
+
+        // $this->bank_action = (string) ($item->change_type ?? '');
+        if (old('bank_action') !== null) {
+            $this->bank_action = (string) old('bank_action');
+        } else {
+            $this->bank_action = (string) ($item->change_type ?? '');
+        }
 
         // if (in_array($this->bank_action, ['1', '2', '3'])) {
         //     $this->ifscode = $new_value['ifscode'] ?? '';
@@ -42,7 +47,7 @@ $this->bank_action = old('bank_action', $this->bank_action);
         //     $this->ifscode = $old_value['ifsc'] ?? '';
         //     $this->bank_account_number = $old_value['bank_account_number'] ?? '';
         // }
-         if (in_array($this->bank_action, ['1', '2', '3'])) {
+        if (in_array($this->bank_action, ['1', '2', '3'])) {
             $this->ifscode = $new_value['ifscode'] ?? '';
             $this->bank_account_number = $new_value['bank_account_number'] ?? '';
             $this->confirmbankaccountnumber = $new_value['confirmbankaccountnumber'] ?? '';
@@ -68,7 +73,7 @@ $this->bank_action = old('bank_action', $this->bank_action);
         //     'bank_account_number' => $this->bank_account_number,
         //     'bank_action' => $this->bank_action,
         // ];
-         $data = [
+        $data = [
             'ifscode' => $this->ifscode,
             'bank_account_number' => $this->bank_account_number,
             'bank_action' => $this->bank_action,
