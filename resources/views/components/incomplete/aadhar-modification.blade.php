@@ -12,13 +12,19 @@
         </p>
         <div>
 
-            <x-form.input id="aadhar_modification_{{ $aadhaarIssues[0]->application_id }}" name="aadhar_modification"
+            {{--  <x-form.input id="aadhar_modification_{{ $aadhaarIssues[0]->application_id }}" name="aadhar_modification"
                 label="Aadhaar Number" required placeholder="Enter New Aadhaar Number"
                 wire:model="formData.aadhar_modification.{{ $aadhaarIssues[0]->application_id }}"
+                x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />  --}}
+
+            <x-form.input id="aadhar_modification_{{ $aadhaarIssues[0]->application_id }}" name="aadhar_modification"
+                label="Aadhaar Number" required placeholder="Enter New Aadhaar Number"
+                value="{{ old('aadhar_modification', $issueItem->new_value['aadhaar_no'] ?? '') }}"
                 x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
 
+
             @if ($errors->has('aadhaar'))
-                <span class="text-red-800 text-sm">
+                <span class="text-red-600 text-sm">
                     <li>{{ $errors->first('aadhaar') }}</li>
             @endif
         </div>
@@ -31,7 +37,7 @@
 
                 {{-- Error --}}
                 @error('document_upload')
-                    <span class="text-red-600 text-sm">{{ $message }}</span>>
+                    <span class="text-red-600 text-sm">{{ $message }}</span>
                 @enderror
             </div>
         </div>

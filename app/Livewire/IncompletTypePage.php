@@ -148,7 +148,8 @@ class IncompletTypePage extends Component
         }
 
         session()->flash('success', 'Approve details updated successfully!');
-        return redirect()->route('incomplete.types', ['id' => $this->id]);
+        // return redirect()->route('incomplete.types', ['id' => $this->id]);
+        return redirect()->route('incomplete.types', ['stage' => 'approver', 'id' => $this->id]);
     }
 
     protected function updateOriginalTable($item)
@@ -171,13 +172,6 @@ class IncompletTypePage extends Component
 
         $beneficiary = $item->beneficiaryCommonList;
 
-        $exists = BeneficiaryBank::where('bank_account_number', $newBankAccountNumber)
-            ->where('application_id', '!=', $this->id)
-            ->exists();
-
-        if ($exists) {
-            throw new \Exception("Duplicate bank account number found!");
-        }
 
         switch ($typeId) {
             case 141: // NO AADHAR NUMBER

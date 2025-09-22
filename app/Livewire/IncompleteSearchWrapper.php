@@ -41,22 +41,10 @@ class IncompleteSearchWrapper extends Component
 
     public function search()
     {
-        // emit aggregated filters to table
+        $this->dispatch('showLoader');
+
         $this->dispatch('doSearch', $this->filters);
     }
-
-    // public function search()
-    // {
-    //     // dd('ok');
-    //     // $this->dispatch('showLoader');
-
-    //     // আপনার search filter logic
-    //     $this->dispatch('doSearch', $this->filters);
-
-
-
-    //     $this->dispatch('hideLoader'); // Loader বন্ধ
-    // }
 
     public function updatedRevert($value)
     {

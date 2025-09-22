@@ -15,13 +15,19 @@
 
     {{-- New Mobile Input --}}
     <div class="mt-2">
+        {{--  <x-form.input id="dup_mobile_{{ $mobileIssues[0]->application_id }}" name="dup_mobile" label="New Mobile Number"
+            placeholder="Enter New Mobile" required
+               value="{{ old('dup_mobile', $issueItem->new_value['aadhaar_no'] ?? '') }}"
+            x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />  --}}
+
+
         <x-form.input id="dup_mobile_{{ $mobileIssues[0]->application_id }}" name="dup_mobile" label="New Mobile Number"
             placeholder="Enter New Mobile" required
-            wire:model="formData.new_mobile.{{ $mobileIssues[0]->application_id }}"
+            value="{{ old('dup_mobile', $issueItem->new_value['mobile_no'] ?? '') }}"
             x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />
 
         @if ($errors->has('mobile'))
-            <span class="text-red-800 text-sm">
+            <span class="text-red-600 text-sm">
                 <li>{{ $errors->first('mobile') }}</li>
         @endif
 

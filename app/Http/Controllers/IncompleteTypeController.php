@@ -128,7 +128,7 @@ class IncompleteTypeController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
-        dd('ok');
+        // dd('ok');
         $select_lgd = session('lgd_session');
         $user_id    = Crypt::decryptString($select_lgd['role_id']);
 
