@@ -33,4 +33,5 @@ class Codemaster extends Model
     {
         return $this->hasMany(SchemeValidationParameterSetting::class, 'parameter_code', 'id');
     }
+
 }

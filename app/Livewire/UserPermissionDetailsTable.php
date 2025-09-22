@@ -15,7 +15,8 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class UserPermissionDetailsTable extends DataTableComponent
-{   public ?int $perPage = 5;
+{
+    public ?int $perPage = 5;
     public $role, $selectedMappingLevel, $selectedState, $selectedDistrict, $office;
 
     protected $listeners = ['refreshUserTable' => '$refresh',  'userFilter' => 'userFilter'];
@@ -34,7 +35,7 @@ class UserPermissionDetailsTable extends DataTableComponent
     public function configure(): void
     {
         $this->setPrimaryKey('id');
-        $this->setPerPageAccepted([5,10]);
+        $this->setPerPageAccepted([5, 10]);
         $this->setPerPage($this->perPage);
         $this->setBulkActionsEnabled();
         $this->setHideBulkActionsWhenEmptyEnabled();
@@ -75,23 +76,23 @@ class UserPermissionDetailsTable extends DataTableComponent
         ];
     }
     public function builder(): Builder
-{
-    $query = User::query()
-        ->whereHas('RoleSchemeOfficeMappings', function ($q) {
-            $q->where('is_active', 1);
+    {
+        $query = User::query()
+            ->whereHas('RoleSchemeOfficeMappings', function ($q) {
+                $q->where('is_active', 1);
 
-            if (!empty($this->role)) {
-                $q->where('role_id', $this->role);
-            }
+                if (!empty($this->role)) {
+                    $q->where('role_id', $this->role);
+                }
 
-            if (!empty($this->office)) {
-                $q->where('office_id', $this->office);
-            }
-        })
-        ->with(['mappedRoles', 'mappedPermissions']);
+                if (!empty($this->office)) {
+                    $q->where('office_id', $this->office);
+                }
+            })
+            ->with(['mappedRoles', 'mappedPermissions']);
 
-    return $query;
-}
+        return $query;
+    }
 
     public function columns(): array
     {

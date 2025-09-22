@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CasteModificationController;
 use App\Http\Controllers\MasterParameterSettingController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UserPermissionController;
@@ -53,3 +54,10 @@ Route::get('/user-permission', [UserPermissionController::class, 'index'])->name
 
 Route::get('/assign-users-permissions', AssignPermissionsPage::class)
     ->name('assign-users-permissions');
+
+Route::get('/Caste-modification-info', [CasteModificationController::class, 'index'])->name('Caste-modification-info');
+Route::post('/caste-modification/edit', [CasteModificationController::class, 'editview'])->name('caste-modification.edit');
+Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
+     ->name('beneficiary.updateCaste');
+
+     Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])->name('caste-modification-list');

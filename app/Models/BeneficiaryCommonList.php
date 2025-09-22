@@ -13,4 +13,5 @@ class BeneficiaryCommonList extends Model
     {
         return $this->morphTo();
     }
+    
 }

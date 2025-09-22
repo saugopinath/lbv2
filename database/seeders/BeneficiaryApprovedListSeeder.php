@@ -3,11 +3,14 @@
 
 namespace Database\Seeders;
 
+use App\Models\BeneficiaryAadhaar;
 use App\Models\Ifsccodemaster;
 use Illuminate\Database\Seeder;
 use App\Models\BeneficiaryPersonal;
 use App\Models\BeneficiaryBank;
 use App\Models\BeneficiaryContact;
+use App\Models\BeneficiaryEnclosure;
+use App\Models\BeneficiaryRelationship;
 use App\Models\Block;
 use App\Models\Codemaster;
 use App\Models\District;
@@ -15,6 +18,7 @@ use App\Models\OfficeMaster;
 use App\Models\Panchayat;
 use App\Models\UniqueAppBenId;
 use App\Models\UserRoleSchemeOfficeMapping;
+use Illuminate\Support\Facades\Crypt;
 
 class BeneficiaryApprovedListSeeder extends Seeder
 {
@@ -61,10 +65,10 @@ class BeneficiaryApprovedListSeeder extends Seeder
     {
         for ($i = 0; $i < 5; $i++) {
             // Create a BeneficiaryPersonal
-            
+
 
             $office = OfficeMaster::where('district_id', 318)->where('block_id', 2979)->first();
-            $mapping = UserRoleSchemeOfficeMapping::where('office_id', $office->id)->first();
+            $mapping = UserRoleSchemeOfficeMapping::where('office_id', $office->id)->where('role_id', 8)->first();
             $user_id = $mapping->user_id;
             $office = OfficeMaster::find($mapping->office_id);
             $dist = $office->district_id;
@@ -78,11 +82,24 @@ class BeneficiaryApprovedListSeeder extends Seeder
             $user_municipality_id = $office->municipality_id;
             $user_ward_id = $office->ward_id;
             $user_panchayat_id = $office->panchayat_id;
+            $aadhar_number = rand(100000000000, 999999999999);
+            $encoded_aadhar = $encoded_aadhar = Crypt::encryptString((string) $aadhar_number);
 
-            $uniqueAppBenId = UniqueAppBenId::create([ ]);
+            $uniqueAppBenId = UniqueAppBenId::create([]);
             $beneficiary_id_obj = UniqueAppBenId::where('application_id', $uniqueAppBenId->application_id)->first();
+            $fatherRelationTypeId = Codemaster::where('code', 131)->value('id');
+            $motherRelationTypeId = Codemaster::where('code', 132)->value('id');
             // dd($uniqueAppBenId);
             // dd($beneficiary_id_obj->beneficiary_id);
+            $beneficiary_aadhar = BeneficiaryAadhaar::create([
+                'application_id'   => $uniqueAppBenId->application_id,
+                'beneficiary_id'   => $uniqueAppBenId->beneficiary_id,
+                'created_by'       => $user_id,
+                'encode_key' => null,
+                'encoded_aadhar'   => $encoded_aadhar,
+                'aadhar_hash'      => hash('sha256', (string) $aadhar_number),
+            ]);
+            // dd($beneficiary_aadhar);
             $beneficiary = BeneficiaryPersonal::create([
                 'application_id' => $uniqueAppBenId->application_id,
                 'beneficiary_id' => $beneficiary_id_obj->beneficiary_id,
@@ -103,6 +120,24 @@ class BeneficiaryApprovedListSeeder extends Seeder
                 'is_faulty' => false,
                 'created_by' => $user_id,
 
+            ]);
+            $beneficiaryrelationship = BeneficiaryRelationship::insert([
+                [
+                    'application_id' => $uniqueAppBenId->application_id,
+                    'beneficiary_id' => $beneficiary_id_obj->beneficiary_id,
+                    'created_by' => $user_id,
+                    'full_name' => 'Father Name' . $i,
+                    'relation_type_id' => $fatherRelationTypeId,
+                   
+                ],
+                [
+                    'application_id' => $uniqueAppBenId->application_id,
+                    'beneficiary_id' => $beneficiary_id_obj->beneficiary_id,
+                    'created_by' => $user_id,
+                    'full_name' => 'Mother Name' . $i,
+                    'relation_type_id' => $motherRelationTypeId,
+                   
+                ]
             ]);
             // dd($beneficiary);
             // $beneficiary->lists()->create([
@@ -137,8 +172,29 @@ class BeneficiaryApprovedListSeeder extends Seeder
                 'application_id' => $beneficiary->application_id,
                 'created_by' => $user_id,
                 'ifsc' => Ifsccodemaster::where('id', 6712)->value('code'),
-                'bank_account_number' => 'ACC' . str_pad($i, 4, '0', STR_PAD_LEFT),
+                'bank_account_number' => 'ACC' . str_pad($i, 4, '0', STR_PAD_LEFT) .($i + 1),
             ]);
+            $docs = [
+                ['name' => 'aadhar_card_enc', 'type' => 104],
+                ['name' => 'caste_certificate_enc',   'type' => 101],
+                ['name' => 'bank_pass_book_enc',    'type' => 108],
+            ];
+
+            foreach ($docs as $doc) {
+                $filePath = 'D:\lbv2\public\images\background-cover.jpg';
+                $fileContent = file_get_contents($filePath);
+                $base64File = base64_encode($fileContent);
+                BeneficiaryEnclosure::create([
+                    'beneficiary_id'     => $beneficiary->beneficiary_id,
+                    'application_id'     => $beneficiary->application_id,
+                    'attched_document'   => $base64File,
+                    'ip_address'         => '127.0.0.1',
+                    'document_extension' => 'png',
+                    'document_mime_type' => 'image/png',
+                    'document_type'      => $doc['type'],
+                    'created_by'         => $user_id,
+                ]);
+            }
         }
     }
 }
