@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('lb_scheme.draft_beneficiary_personals', function (Blueprint $table) {
-            $table->unsignedBigInteger('beneficiary_id')->unique();
+        Schema::table('permissions', function (Blueprint $table) {
+              $table->unsignedBigInteger('parent_id')->nullable()->after('id');
+
         });
     }
 
@@ -21,8 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('lb_scheme.draft_beneficiary_personals', function (Blueprint $table) {
-            $table->dropColumn('beneficiary_id');
+        Schema::table('permissions', function (Blueprint $table) {
+            $table->dropColumn('parent_id');
         });
     }
 };
