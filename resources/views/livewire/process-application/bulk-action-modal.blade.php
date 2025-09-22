@@ -1,29 +1,27 @@
 <x-modal wire:model="bulkActionModal">
 
 
-    <x-slot name="title">
-        Select Operation
-    </x-slot>
+
 
 
     <x-slot name="body">
         <div class="space-y-4">
-            <select wire:model.live="bulkActionType" class="w-full border rounded p-2">
+            <x-form.select wire:model.live="bulkActionType" class="w-full border rounded p-2" label="Select Operation" name="bulkActionType" required>
                 <option value="">Select Operation</option>
                 @foreach ($availableActions as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
-            </select>
+            </x-form.select>
 
             @if (in_array($bulkActionType, ['R', 'T']))
-                <select wire:model="reason" class="w-full border rounded p-2">
+                <x-form.select wire:model="reason" class="w-full border rounded p-2" label="Reason" name="reason" required>
                     <option value="">Select Reason</option>
                     @foreach ($reasons as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
                     @endforeach
-                </select>
+                </x-form.select>
 
-                <textarea wire:model="remark" placeholder="Enter remark" class="w-full border rounded p-2"></textarea>
+                <x-form.input type="textarea" wire:model="remark" placeholder="Enter remark" name="remark" label="Remark" class="w-full border rounded p-2" required></x-form.input>
             @endif
         </div>
     </x-slot>
