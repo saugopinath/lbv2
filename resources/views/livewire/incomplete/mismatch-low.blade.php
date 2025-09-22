@@ -16,7 +16,8 @@
                     <label class="flex items-center space-x-2">
                         <input type="radio" class="form-radio text-blue-600" name="bank_action"
                             wire:model.lazy="bank_action" value="3"
-                            @if ($dupAction === '1' || $dupAction === '2') disabled @endif {{ old('bank_action', $bank_action) == '3' ? 'checked' : '' }}/>
+                            @if ($dupAction === '1' || $dupAction === '2') disabled @endif
+                            {{ old('bank_action', $bank_action) == '3' ? 'checked' : '' }} x-on:change="Livewire.dispatch('showLoader')" />
                         <span>CHANGE</span>
                     </label>
                 </div>
@@ -103,9 +104,9 @@
                 </div>
 
                 {{-- New Bank Account Number --}}
-                <x-form.masked-input name="bank_account_number" label="New Bank Account Number" required
+                <x-form.input type="password" name="bank_account_number" label="New Bank Account Number" required
                     wire:model="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
-                <input type="hidden" name="bank_account_number" :value="$wire.bank_account_number">
+                {{--  <input type="hidden" name="bank_account_number" :value="$wire.bank_account_number">  --}}
                 {{-- Confirm Bank Account Number --}}
                 <div class="col-span-1">
                     <x-form.input name="confirmbankaccountnumber" label="Confirm Bank Account Number" required
@@ -123,20 +124,20 @@
                     </p>
                 </div>
 
-
                 <div class="flex gap-6">
-                    {{-- Newly Temp Document --}}
                     <div class="w-1/2">
                         <h3 class="font-semibold mb-2">Newly Temp Document</h3>
+
                         <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[112]" enclosureSource="5" />
+
+                        {{-- Error --}}
+                        @error('document_upload')
+                            <span class="text-red-600 text-sm">{{ $message }}</span>
+                        @enderror
                     </div>
                 </div>
 
             </div>
         @endif
     </div>
-
-    @error('duplicate_check')
-        <span class="text-red-600 text-sm">{{ $message }}</span>
-    @enderror
 </div>

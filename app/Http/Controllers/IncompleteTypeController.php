@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Codemaster;
 use Illuminate\Http\Request;
+use App\Helpers\ChechDupHelper;
 use App\Models\AcceptRejectInfo;
 use Illuminate\Support\Facades\Crypt;
+use App\Models\BeneficiaryTemEnclosure;
 use App\Models\ApplicantIncompletDeatil;
-use App\Helpers\ChechDupHelper;
 use Illuminate\Support\Facades\Validator;
 
 class IncompleteTypeController extends Controller
@@ -60,6 +61,16 @@ class IncompleteTypeController extends Controller
                 $rules['aadhaar'] = 'required|digits:12';
                 $messages['aadhaar.required'] = 'Aadhaar number is required.';
                 $messages['aadhaar.digits']   = 'Aadhaar number must be exactly 12 digits.';
+
+                // Document check
+                $uploadedDocsCount = BeneficiaryTemEnclosure::where('application_id', $realId)
+                    ->whereIn('document_type', [108])
+                    ->count();
+                // dd($uploadedDocsCount);
+                if ($uploadedDocsCount < 1) {
+                    $rules['document_upload'] = 'required';
+                    $messages['document_upload.required'] = 'Please upload the required document.';
+                }
             }
 
             // Mobile check
@@ -72,7 +83,7 @@ class IncompleteTypeController extends Controller
             if (in_array($typeCode, ['145', '146', '1411', '1412', '1413'])) {
                 $rules['bank_action'] = 'required|in:1,2,3,4';
                 $messages['bank_action.required'] = 'Invalid bank action selected.';
-                $messages['bank_action.in'] = 'Please select radio button for Keep Same or Change.';
+                $messages['bank_action.in'] = 'Operation Type is required.';
 
                 if (in_array($bankActionData, [2, 3])) {
                     $rules['bank_account_number'] = 'required|digits_between:9,18';
@@ -85,6 +96,16 @@ class IncompleteTypeController extends Controller
                     $messages['confirmbankaccountnumber.same'] = 'Bank Account Number and Confirm Bank Account Number not match.';
                     $messages['ifscode.required'] = 'IFSC Code is required.';
                     $messages['ifscode.regex'] = 'IFSC Code format is invalid.';
+
+                    // Document check
+                    $uploadedDocsCount = BeneficiaryTemEnclosure::where('application_id', $realId)
+                        ->whereIn('document_type', [112])
+                        ->count();
+                    // dd($uploadedDocsCount);
+                    if ($uploadedDocsCount < 1) {
+                        $rules['document_upload'] = 'required';
+                        $messages['document_upload.required'] = 'Please upload the required document.';
+                    }
                 }
             }
         }
@@ -98,6 +119,7 @@ class IncompleteTypeController extends Controller
                 'bank_account_number' => $bankAccData,
                 'confirmbankaccountnumber' => $confirmAccData,
                 'ifscode' => $ifscodeData,
+                'document_upload' => null,
             ],
             $rules,
             $messages
@@ -106,7 +128,7 @@ class IncompleteTypeController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
-        // dd('ok');
+        dd('ok');
         $select_lgd = session('lgd_session');
         $user_id    = Crypt::decryptString($select_lgd['role_id']);
 

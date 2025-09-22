@@ -16,7 +16,7 @@
     {{-- New Mobile Input --}}
     <div class="mt-2">
         <x-form.input id="dup_mobile_{{ $mobileIssues[0]->application_id }}" name="dup_mobile" label="New Mobile Number"
-            placeholder="Enter New Mobile" required value="{{ old('dup_mobile') }}"
+            placeholder="Enter New Mobile" required
             wire:model="formData.new_mobile.{{ $mobileIssues[0]->application_id }}"
             x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />
 

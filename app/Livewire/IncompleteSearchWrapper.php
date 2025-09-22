@@ -45,6 +45,19 @@ class IncompleteSearchWrapper extends Component
         $this->dispatch('doSearch', $this->filters);
     }
 
+    // public function search()
+    // {
+    //     // dd('ok');
+    //     // $this->dispatch('showLoader');
+
+    //     // আপনার search filter logic
+    //     $this->dispatch('doSearch', $this->filters);
+
+
+
+    //     $this->dispatch('hideLoader'); // Loader বন্ধ
+    // }
+
     public function updatedRevert($value)
     {
         if ($value === 'yes') {

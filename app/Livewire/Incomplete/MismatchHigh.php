@@ -38,7 +38,7 @@ class MismatchHigh extends Component
         $new_value = $item->new_value ?? [];
 
         // $this->bank_action = (string) ($item->change_type ?? '');
-         if (old('bank_action') !== null) {
+        if (old('bank_action') !== null) {
             $this->bank_action = (string) old('bank_action');
         } else {
             $this->bank_action = (string) ($item->change_type ?? '');
@@ -61,7 +61,7 @@ class MismatchHigh extends Component
         //     $this->confirmbankaccountnumber = $old_value['confirmbankaccountnumber'] ?? '';
         // }
 
-         if (in_array($this->bank_action, ['1', '2', '3'])) {
+        if (in_array($this->bank_action, ['1', '2', '3'])) {
             $this->ifscode = old('ifscode', $new_value['ifscode'] ?? '');
             $this->bank_account_number = old('bank_account_number', $new_value['bank_account_number'] ?? '');
             $this->confirmbankaccountnumber = old('confirmbankaccountnumber', $new_value['confirmbankaccountnumber'] ?? '');
@@ -88,7 +88,7 @@ class MismatchHigh extends Component
         //     'bank_account_number' => $this->bank_account_number,
         //     'bank_action' => $this->bank_action,
         // ];
-         $data = [
+        $data = [
             'ifscode' => $this->ifscode,
             'bank_account_number' => $this->bank_account_number,
             'bank_action' => $this->bank_action,
@@ -101,6 +101,15 @@ class MismatchHigh extends Component
         $this->dupAction = $value;
         $this->bank_action = $value;
     }
+
+    public function updatedBankAction($value)
+    {
+        // dd($value);
+        if ($value == 3) {
+            $this->dispatch('hideLoader');
+        }
+    }
+
     public function render()
     {
         return view('livewire.incomplete.mismatch-high');

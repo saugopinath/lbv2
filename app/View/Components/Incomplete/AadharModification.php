@@ -7,6 +7,7 @@ use Illuminate\View\Component;
 class AadharModification extends Component
 {
     public $aadhaarIssues;
+    public $formData = [];
 
     public function __construct($aadhaarIssues = [])
     {

@@ -47,7 +47,7 @@ class BankNameFail extends Component
     //     $this->ifscode = $old['ifsc'] ?? '';
     //     $this->bank_account_number = $old['bank_account_number'] ?? '';
     // }
-      public function mount($item)
+    public function mount($item)
     {
         $this->item = $item;
 
@@ -55,7 +55,7 @@ class BankNameFail extends Component
         $new_value = $item->new_value ?? [];
 
         // $this->bank_action = (string) ($item->change_type ?? '');
-         if (old('bank_action') !== null) {
+        if (old('bank_action') !== null) {
             $this->bank_action = (string) old('bank_action');
         } else {
             $this->bank_action = (string) ($item->change_type ?? '');
@@ -78,7 +78,7 @@ class BankNameFail extends Component
         //     $this->confirmbankaccountnumber = $old_value['confirmbankaccountnumber'] ?? '';
         // }
 
-         if (in_array($this->bank_action, ['1', '2', '3'])) {
+        if (in_array($this->bank_action, ['1', '2', '3'])) {
             $this->ifscode = old('ifscode', $new_value['ifscode'] ?? '');
             $this->bank_account_number = old('bank_account_number', $new_value['bank_account_number'] ?? '');
             $this->confirmbankaccountnumber = old('confirmbankaccountnumber', $new_value['confirmbankaccountnumber'] ?? '');
@@ -87,7 +87,7 @@ class BankNameFail extends Component
             $this->bank_account_number = old('bank_account_number', $old_value['bank_account_number'] ?? '');
             $this->confirmbankaccountnumber = old('confirmbankaccountnumber', $old_value['confirmbankaccountnumber'] ?? '');
         }
-        
+
         $app_det = ApplicantIncompletDeatil::with('banks')
             ->where('application_id', $item->application_id)
             ->first();
@@ -104,7 +104,7 @@ class BankNameFail extends Component
         //     'bank_account_number' => $this->bank_account_number,
         //     'bank_action' => $this->bank_action,
         // ];
-         $data = [
+        $data = [
             'ifscode' => $this->ifscode,
             'bank_account_number' => $this->bank_account_number,
             'bank_action' => $this->bank_action,
@@ -112,6 +112,13 @@ class BankNameFail extends Component
         ];
 
         $this->dispatch('trigger-update', $data);
+    }
+    public function updatedBankAction($value)
+    {
+        // dd($value);
+        if ($value == 3) {
+            $this->dispatch('hideLoader');
+        }
     }
     public function setDupAction($value)
     {

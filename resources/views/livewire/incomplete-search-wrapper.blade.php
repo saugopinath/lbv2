@@ -26,6 +26,7 @@
             {{-- Search / Reset --}}
             <div class="flex gap-3">
                 <x-button.primary wire:click="search"
+                {{--  x-on:click="Livewire.dispatch('showLoader')"  --}}
                     class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">Search</x-button.primary>
                 <x-button.primary wire:click="resetAll"
                     class="bg-green-500 text-white whitespace-nowrap cursor-pointer">Reset</x-button.primary>

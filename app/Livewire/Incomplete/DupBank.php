@@ -96,6 +96,9 @@ class DupBank extends Component
 
     public function updatedBankAction($value)
     {
+        if ($value == 2) {
+             $this->dispatch('hideLoader');
+        }
         $this->dispatch('dup-bank-action-changed', $value);
     }
 

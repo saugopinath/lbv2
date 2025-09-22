@@ -140,59 +140,59 @@ class IncompletTypeTable extends DataTableComponent
     }
 
     public function builder(): Builder
-{
-    $query = ApplicantIncompletDeatil::query()
-        ->select('application_id')
-        ->groupBy('application_id')
-        ->orderBy('application_id', 'asc');
+    {
+        $query = ApplicantIncompletDeatil::query()
+            ->select('application_id')
+            ->groupBy('application_id')
+            ->orderBy('application_id', 'asc');
 
-    $user = auth()->user();
+        $user = auth()->user();
 
-    $next_level_request_id = null;
+        $next_level_request_id = null;
 
-    $stage = $this->stage ?? null;
+        $stage = $this->stage ?? null;
 
-    if (!$stage) {
-        if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
-            $stage = 'verifier';
-            $next_level_request_id = null;
-        } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
-            $stage = 'approver';
-            $next_level_request_id = 1;
+        if (!$stage) {
+            if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+                $stage = 'verifier';
+                $next_level_request_id = null;
+            } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+                $stage = 'approver';
+                $next_level_request_id = 1;
+            }
         }
+
+        switch ($stage) {
+            case 'verifier':
+                $query->whereNull('next_level_request_id');
+                break;
+
+            case 'approver':
+                $query->where('next_level_request_id', 1);
+                break;
+
+            case 'revert':
+                $query->where('next_level_request_id', -50)
+                    ->with(['acceptRejectInfo' => function ($q) {
+                        $q->latest('id');
+                    }]);
+                break;
+        }
+
+        // Location filter apply
+        if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->filterCode) {
+            $query = EncryptionArray::applyLocationFilter(
+                $query,
+                $this->district_id ? (int) $this->district_id : null,
+                $this->rural_urban ? (int) $this->rural_urban : null,
+                $this->blockurban ? (int) $this->blockurban : null,
+                $this->gp_ward ? (int) $this->gp_ward : null,
+                $this->filterCode ? (int) $this->filterCode : null,
+            );
+        }
+
+        return $query;
     }
-
-    switch ($stage) {
-        case 'verifier':
-            $query->whereNull('next_level_request_id');
-            break;
-
-        case 'approver':
-            $query->where('next_level_request_id', 1);
-            break;
-
-        case 'revert':
-            $query->where('next_level_request_id', -50)
-                ->with(['acceptRejectInfo' => function ($q) {
-                    $q->latest('id');
-                }]);
-            break;
-    }
-
-    // Location filter apply
-    if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->filterCode) {
-        $query = EncryptionArray::applyLocationFilter(
-            $query,
-            $this->district_id ? (int) $this->district_id : null,
-            $this->rural_urban ? (int) $this->rural_urban : null,
-            $this->blockurban ? (int) $this->blockurban : null,
-            $this->gp_ward ? (int) $this->gp_ward : null,
-            $this->filterCode ? (int) $this->filterCode : null,
-        );
-    }
-
-    return $query;
-}
 
 
     // public function builder(): Builder
@@ -297,10 +297,23 @@ class IncompletTypeTable extends DataTableComponent
 
         return implode(', ', $filters);
     }
+    // public function render(): \Illuminate\View\View
+    // {
+    //     return view('livewire.incomplet-type-table', [
+    //         'rows' => $this->getRows(),
+    //         'stage' => $this->stage,
+    //     ]);
+    // }
     public function render(): \Illuminate\View\View
     {
+        // Data fetch
+        $rows = $this->getRows();
+
+        // Loader hide trigger
+        // $this->dispatch('hideLoader');
+
         return view('livewire.incomplet-type-table', [
-            'rows' => $this->getRows(),
+            'rows' => $rows,
             'stage' => $this->stage,
         ]);
     }

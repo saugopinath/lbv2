@@ -93,11 +93,6 @@ class CodemasterSeeder extends Seeder
                 "short_name" => "ENCDETAILS",
                 "code" => "16",
             ),
-             array(
-                "name" => "OP TYPE",
-                "short_name" => "op_type",
-                "code" => "210",
-            ),
         );
         foreach ($codemasterParents as $codemasterParent_item) {
             Codemaster::create([
@@ -815,36 +810,6 @@ class CodemasterSeeder extends Seeder
                 "short_name" => "life_certificate_enc",
                 "parent_short_code" => "ENCDETAILS",
                  "code" => "1632",
-            ),
-             array(
-                "name" => "Application Accepted",
-                "short_name" => "application_accepted",
-                "parent_short_code" => "op_type",
-                 "code" => "2101",
-            ),
-              array(
-                "name" => "Application Rejected",
-                "short_name" => "application_rejected",
-                "parent_short_code" => "op_type",
-                 "code" => "2102",
-            ),
-              array(
-                "name" => "Application Verify",
-                "short_name" => "application_verify",
-                "parent_short_code" => "op_type",
-                 "code" => "2103",
-            ),
-              array(
-                "name" => "Application Approved",
-                "short_name" => "application_approved",
-                "parent_short_code" => "op_type",
-                 "code" => "2104",
-            ),
-             array(
-                "name" => "Application Reverted",
-                "short_name" => "application_reverted",
-                "parent_short_code" => "op_type",
-                 "code" => "2105",
             ),
         );
         foreach ($codemasterChilds as $codemasterChild_item) {

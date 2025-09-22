@@ -14,7 +14,7 @@ class MismatchLow extends Component
         'dup-bank-action-changed' => 'setDupAction'
     ];
 
-     public function updatedIfscode()
+    public function updatedIfscode()
     {
         $ifs = Ifsccodemaster::with('bank')
             ->where('code', $this->ifscode)
@@ -30,7 +30,7 @@ class MismatchLow extends Component
         }
     }
 
-      public function mount($item)
+    public function mount($item)
     {
         $this->item = $item;
 
@@ -38,7 +38,7 @@ class MismatchLow extends Component
         $new_value = $item->new_value ?? [];
 
         // $this->bank_action = (string) ($item->change_type ?? '');
-         if (old('bank_action') !== null) {
+        if (old('bank_action') !== null) {
             $this->bank_action = (string) old('bank_action');
         } else {
             $this->bank_action = (string) ($item->change_type ?? '');
@@ -54,7 +54,7 @@ class MismatchLow extends Component
         //     $this->confirmbankaccountnumber = $old_value['confirmbankaccountnumber'] ?? '';
         // }
 
-         if (in_array($this->bank_action, ['1', '2', '3'])) {
+        if (in_array($this->bank_action, ['1', '2', '3'])) {
             $this->ifscode = old('ifscode', $new_value['ifscode'] ?? '');
             $this->bank_account_number = old('bank_account_number', $new_value['bank_account_number'] ?? '');
             $this->confirmbankaccountnumber = old('confirmbankaccountnumber', $new_value['confirmbankaccountnumber'] ?? '');
@@ -83,6 +83,13 @@ class MismatchLow extends Component
         ];
 
         $this->dispatch('trigger-update', $data);
+    }
+    public function updatedBankAction($value)
+    {
+        // dd($value);
+        if ($value == 3) {
+            $this->dispatch('hideLoader');
+        }
     }
     public function setDupAction($value)
     {

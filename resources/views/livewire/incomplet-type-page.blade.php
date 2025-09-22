@@ -32,10 +32,26 @@
             </div>
         </div>
     @endif
+    {{--  @error('duplicate_check')
+        <div class="mt-2 p-3 border border-red-400 bg-red-100 text-red-700 rounded-md shadow-sm">
+            {{ $message }}
+        </div>
+    @enderror  --}}
+    @if ($errors->has('duplicate_check'))
+        <div class="mt-2 mb-0 p-3 border border-red-400 bg-red-100 text-red-700 rounded-md shadow-sm">
+            <ul class="list-disc list-inside text-sm">
+                @foreach ($errors->get('duplicate_check') as $message)
+                    <li>{{ $message }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+
 
     {{--  <form method="POST" action="{{ route('incomplete-full-deatils-update', ['id' => $id]) }}">  --}}
-        <form method="POST" action="{{ route('incomplete-full-deatils-update', ['id' => encrypt($id)]) }}">
-    @csrf
+    <form method="POST" action="{{ route('incomplete-full-deatils-update', ['id' => encrypt($id)]) }}">
+        @csrf
         @csrf
 
         @if (!empty($aadhaarIssues))
