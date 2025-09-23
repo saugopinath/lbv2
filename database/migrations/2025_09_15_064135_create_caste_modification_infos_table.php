@@ -40,15 +40,11 @@ return new class extends Migration
             $table->index('beneficiary_id');
         });
     }
-
-
-
-
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('caste_modification_infos');
+        Schema::dropIfExists('lb_scheme.caste_modification_infos');
     }
 };

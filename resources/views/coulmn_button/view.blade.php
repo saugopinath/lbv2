@@ -1,5 +1,6 @@
 @props([
     'wireClick' => null,
+    'link' => null,
     'tooltip' => null,
     'icon' => null,
 ])
@@ -12,15 +13,25 @@
 @endphp
 
 <div x-data="{ show: false }" class="relative inline-block">
-    <button 
-        @if($wireClick) wire:click="{{ $wireClick }}" @endif
-        @mouseenter="show = true" 
-        @mouseleave="show = false"
-        class="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-md 
-               hover:bg-gray-300 transition"
-    >
-        {!! $icon ?? $defaultIcon !!}
-    </button>
+    @if($link)
+        <a href="{{ $link }}" 
+           @mouseenter="show = true" 
+           @mouseleave="show = false"
+           class="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 transition"
+           title="{{ $tooltip }}">
+            {!! $icon ?? $defaultIcon !!}
+        </a>
+    @else
+        <button 
+            @if($wireClick) wire:click="{{ $wireClick }}" @endif
+            @mouseenter="show = true" 
+            @mouseleave="show = false"
+            class="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-md 
+                   hover:bg-gray-300 transition"
+        >
+            {!! $icon ?? $defaultIcon !!}
+        </button>
+    @endif
 
     @if($tooltip)
         <div 

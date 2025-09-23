@@ -118,7 +118,7 @@ class CasteModificationController extends Controller
         return redirect()->route('Caste-modification-info')->with('success', 'Caste details updated successfully!');
     }
 
-     public function list()
+    public function list()
     {
         // $user = auth()->user();
         // $user->hasRole('Operator');
@@ -126,6 +126,19 @@ class CasteModificationController extends Controller
         // if ($user->hasRole('Operator')) {}
         $header = 'Caste Modification Information List';
         return view('CasteModificationView.caste_modification_list', compact('header'));
+    }
+    public function view(Request $request) {
+        // dd($request->all());
+        $applicant_id = $request->application_id;
+    $application_id = Crypt::decrypt($applicant_id);
+    // dd($application_id);
+     $application = CasteModificationInfo::with([
+        'beneficiaryCommonList.sourceable',
+    ])->where('application_id', $application_id)->firstOrFail();
+dd($application);
+    $header = 'Application Details';
+        return view('CasteModificationView.beneficiary_details', compact('header','application_id'));
+
     }
 
 }
