@@ -3,18 +3,18 @@
 namespace App\Livewire\CasteModification;
 
 use App\Models\BeneficiaryCommonList;
-use Illuminate\Support\Facades\Auth;
+use App\Models\CasteModificationInfo;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Component;
 
 class SearchBeneficiary extends Component
 {
-    public $searchType = ''; // default
+    public $searchType = '';
     public $searchValue = '';
     public $results = null;
+    public $items = [];
     public $currentLabel = 'Select Search Type';
     public $filter_condition = [];
-    public $items = [];
 
     public $searchOptions = [
         1 => 'Application ID',
@@ -22,6 +22,7 @@ class SearchBeneficiary extends Component
         3 => 'Aadhar Number',
         4 => 'Mobile No',
     ];
+
     protected $searchTypeMap = [
         1 => 'sourceable_id',
         2 => 'beneficiary_id',
@@ -29,10 +30,10 @@ class SearchBeneficiary extends Component
         4 => 'mobile_no',
     ];
 
-
     public function mount(): void
     {
         $select_lgd = session('lgd_session');
+
         if (!empty($select_lgd['district_id'])) {
             $this->filter_condition['district_id'] = Crypt::decryptString($select_lgd['district_id']);
         }
@@ -42,8 +43,6 @@ class SearchBeneficiary extends Component
         if (!empty($select_lgd['subdivision_id'])) {
             $this->filter_condition['subdivision_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
-
-        //    dd($this->filter_condition);
     }
 
     public function updatedSearchType($value)
@@ -55,57 +54,80 @@ class SearchBeneficiary extends Component
         }
 
         $this->currentLabel = $this->searchOptions[$value];
-        // only reset when user first chooses a type
         $this->reset('searchValue');
     }
+
     protected function rules()
     {
         return [
             'searchType'  => 'required|in:1,2,3,4',
-
+            'searchValue' => ['required', function ($attribute, $value, $fail) {
+                switch ($this->searchType) {
+                    case 1: // Application ID
+                    case 2: // Beneficiary ID
+                        if (!is_numeric($value)) {
+                            $fail('This field must be numeric.');
+                        }
+                        break;
+                    case 3: // Aadhar Number
+                        if (!preg_match('/^\d{12}$/', $value)) {
+                            $fail('Aadhar number must be exactly 12 digits.');
+                        }
+                        break;
+                    case 4: // Mobile No
+                        if (!preg_match('/^\d{10}$/', $value)) {
+                            $fail('Mobile number must be exactly 10 digits.');
+                        }
+                        break;
+                    default:
+                        $fail('Invalid search type selected.');
+                }
+            }]
         ];
     }
 
     protected $messages = [
-        'searchType.required'  => 'Please select a search type.',
+        'searchType.required' => 'Please select a search type.',
+        'searchType.in'       => 'Invalid search type selected.',
         'searchValue.required' => 'Please enter a value to search.',
-        'searchValue.numeric'  => 'This field must be a number.',
-        'searchValue.digits'   => 'Aadhar must be exactly 12 digits.',
     ];
-    // public function updatedSearchValue($value)
-    // {
-    //     dd($value);
-    //     $this->searchValue = $value;
-    //     dd($this->searchValue);
-    // }
+
     public function search()
     {
         $this->validate();
-        $user = Auth::user();
         $column = $this->searchTypeMap[$this->searchType];
-        $query = BeneficiaryCommonList::query()->with('sourceable');
-
-        $query->where($column, $this->searchValue);
-
-        if (!empty($this->filter_condition)) {
-            $query->where($this->filter_condition);
+        $existingRecord = CasteModificationInfo::where('application_id', $this->searchValue)->first();
+        if ($existingRecord) {
+            if ($existingRecord->next_level_requested_id == 148) {
+                $message = "Request already Verified by the Verifier.";
+            } elseif ($existingRecord->next_level_requested_id == 149) {
+                $message = "Request already Approved By the Approver.";
+            } elseif ($existingRecord->next_level_requested_id == 150) {
+                $message = "Request is reverted.";
+            } else {
+                $message = "Caste modification already requested.";
+            }
+            session()->flash('warning', $message);
+            $this->items = [];
+            return;
+        } else {
+            $query = BeneficiaryCommonList::query()->with('sourceable');
+            $query->where($column, $this->searchValue);
+            if (!empty($this->filter_condition)) {
+                $query->where($this->filter_condition);
+            }
+            $this->results = $query->get();
+            $this->items = $this->results->map(function ($item) {
+                return [
+                    'application_id' => $item->sourceable->application_id,
+                    'beneficiary_id' => $item->sourceable->beneficiary_id,
+                    'mobile_no'      => $item->sourceable->mobile_no,
+                    'applicant_name' => $item->sourceable->full_name,
+                    'Caste_name'     => $item->sourceable->castes->name ?? '-',
+                ];
+            });
         }
-
-        $this->results = $query->get();
-        // dd($this->results);
-        $this->items = $this->results->map(function ($item) {
-            return [
-                'application_id' => $item->sourceable->application_id,
-                'beneficiary_id' => $item->sourceable->beneficiary_id,
-                // 'aadhar_number' => $item->sourceable->aadhar->bank_account_number,
-                'mobile_no' => $item->sourceable->mobile_no,
-                'applicant_name' => $item->sourceable->full_name,
-                'Caste_name' => $item->sourceable->castes->name,
-            ];
-        });
-        // dd($this->items);
     }
-
     public function render()
     {
         return view('livewire.caste-modification.search-beneficiary', [

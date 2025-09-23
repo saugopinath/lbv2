@@ -68,10 +68,23 @@ class CasteModificationController extends Controller
         $userId = Auth::id();
 
         $request->validate([
-            'application_id' => 'required',
-            'caste'         => 'required',
-        ]);
-        $application_id = $request->application_id;
+        'application_id' => 'required|string',
+        'caste' => 'required|integer|exists:codemasters,id',
+        'cast_no' => [
+            'nullable',
+            'string',
+            'required_if:caste,17,18',
+        ],
+    ], [
+        // application_id
+        'application_id.required' => 'Invalid application.',
+        // caste
+        'caste.required' => 'Please select a caste.',
+        // cast_no
+        'cast_no.required_if' => 'Caste certificate number is required .',
+       
+    ]);
+       $application_id = Crypt::decryptString($request->application_id);
         // dd($application_id);
         $beneficiary = BeneficiaryCommonList::where('sourceable_id', $application_id)->with('sourceable')->firstOrFail();
         // dd($beneficiary);
