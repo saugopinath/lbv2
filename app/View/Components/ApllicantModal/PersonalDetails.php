@@ -26,7 +26,7 @@ class PersonalDetails extends Component
         $this->currentDate = Carbon::now()->format('d/m/Y');
 
         if ($reportType == '3') {
-            // dd('ok1');
+            // dd($id);
             $applicantDet = BeneficiaryPersonal::with(['aadhaar', 'relationships'])->where('application_id', $id)->first();
         } else {
             // dd('ok2');

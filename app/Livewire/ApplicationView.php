@@ -22,7 +22,7 @@ class ApplicationView extends Component
 
         if ($this->reportType === '3') {
             $this->application = BeneficiaryPersonal::findOrFail($id);
-            $this->label = 'Beneficiary Id';
+            $this->label = 'Application Id';
             $this->value = $this->application->beneficiary_id;
             $this->passId = $this->application->beneficiary_id;
         } else {

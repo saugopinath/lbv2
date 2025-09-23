@@ -228,7 +228,7 @@ class IncompleteTypeController extends Controller
             }
         }
 
-        session()->flash('success', 'Request sent to Approver for approval!');
+        session()->flash('success', "Request sent to Approver for approval for the Application ID: {$realId}");
         return redirect()->route('incomplete.types', ['stage' => 'verifier', 'id' => $realId]);
     }
 

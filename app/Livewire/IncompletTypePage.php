@@ -20,15 +20,18 @@ class IncompletTypePage extends Component
 
     public function mount($id)
     {
-        $this->stage = request()->query('stage');
-        $this->id = $id;
-
+        // $this->stage = request()->query('stage');
+        // $this->id = $id;
+        $this->id = decrypt($id);
+        // dd($this->id);
+        $this->stage = decrypt(request()->query('stage'));
+// dd($this->stage );
         $select_lgd = session('lgd_session');
         $this->user_id = Crypt::decryptString($select_lgd['role_id']);
 
         $this->revertReasons = Codemaster::where('parent_id', Codemaster::getIdByCode(12))->get();
 
-        $this->page = ApplicantIncompletDeatil::where('application_id', $id)
+        $this->page = ApplicantIncompletDeatil::where('application_id', $this->id)
             ->with([
                 'incompletType',
                 'beneficiaryCommonList.enclosures',
@@ -147,7 +150,7 @@ class IncompletTypePage extends Component
             $this->updateOriginalTable($item);
         }
 
-        session()->flash('success', 'Approve details updated successfully!');
+        session()->flash('success', "Approve details updated successfully for the Application ID: {$this->id}");
         // return redirect()->route('incomplete.types', ['id' => $this->id]);
         return redirect()->route('incomplete.types', ['stage' => 'approver', 'id' => $this->id]);
     }
@@ -372,7 +375,8 @@ class IncompletTypePage extends Component
             ]);
         }
 
-        session()->flash('success', 'Application reverted successfully!');
+        // session()->flash('success', 'Application reverted successfully!');
+        session()->flash('success', "Application reverted successfully for the Application ID: {$this->id}");
         return redirect()->route('incomplete.types', ['stage' => 'approver', 'id' => $this->id]);
     }
 
@@ -471,7 +475,8 @@ class IncompletTypePage extends Component
             }
         }
 
-        session()->flash('success', 'Revert details updated Request Send to approver for Approval!');
+        // session()->flash('success', 'Revert details updated Request Send to approver for Approval!');
+        session()->flash('success', "Revert details updated Request Send to approver for Approval for the Application ID: {$this->id}");
         return redirect()->route('incomplete.types', ['stage' => 'revert', 'id' => $this->id]);
     }
 

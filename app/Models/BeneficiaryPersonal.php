@@ -58,7 +58,7 @@ class BeneficiaryPersonal extends Model implements Auditable
 
     public function relationships()
     {
-        return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id');
+        return $this->hasMany(BeneficiaryRelationship::class, 'application_id');
     }
 
     public function lists()
