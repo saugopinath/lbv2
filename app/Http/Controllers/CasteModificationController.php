@@ -127,18 +127,32 @@ class CasteModificationController extends Controller
         $header = 'Caste Modification Information List';
         return view('CasteModificationView.caste_modification_list', compact('header'));
     }
-    public function view(Request $request) {
-        // dd($request->all());
+    public function viewAppDetails(Request $request)
+    {
         $applicant_id = $request->application_id;
-    $application_id = Crypt::decrypt($applicant_id);
-    // dd($application_id);
-     $application = CasteModificationInfo::with([
-        'beneficiaryCommonList.sourceable',
-    ])->where('application_id', $application_id)->firstOrFail();
-dd($application);
-    $header = 'Application Details';
-        return view('CasteModificationView.beneficiary_details', compact('header','application_id'));
+        $application_id = Crypt::decrypt($applicant_id);
 
+        $application = CasteModificationInfo::where('application_id', $application_id)->firstOrFail();
+        $oldData = $application->old_data;
+        $newData = $application->new_data;
+
+        $oldCasteName = Codemaster::find($oldData['caste'])->name ?? 'N/A';
+        $newCasteName = Codemaster::find($newData['caste'])->name ?? 'N/A';
+        $oldCasteNumber = $oldData['caste_certificate_no'] ?? 'N/A';
+        $newCasteNumber = $newData['caste_certificate_no'] ?? 'N/A';
+        // dump($oldCasteName);
+        // dd($newCasteName);
+
+        $header = 'Application Details';
+
+        return view('CasteModificationView.beneficiary_details', compact(
+            'header',
+            'application_id',
+            'application',
+            'oldCasteName',
+            'newCasteName',
+            'oldCasteNumber',
+            'newCasteNumber'
+        ));
     }
-
 }
