@@ -9,6 +9,7 @@ use App\Models\Codemaster;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 
 class CasteModificationController extends Controller
 {
@@ -68,24 +69,25 @@ class CasteModificationController extends Controller
         $userId = Auth::id();
 
         $request->validate([
-        'application_id' => 'required|string',
-        'caste' => 'required|integer|exists:codemasters,id',
-        'cast_no' => [
-            'nullable',
-            'string',
-            'required_if:caste,17,18',
-        ],
-    ], [
-        // application_id
-        'application_id.required' => 'Invalid application.',
-        // caste
-        'caste.required' => 'Please select a caste.',
-        // cast_no
-        'cast_no.required_if' => 'Caste certificate number is required .',
-       
-    ]);
-       $application_id = Crypt::decryptString($request->application_id);
+            'application_id' => 'required|string',
+            'caste' => 'required|integer|exists:codemasters,id',
+            'cast_no' => [
+                'nullable',
+                'string',
+                'required_if:caste,17,18',
+            ],
+        ], [
+            // application_id
+            'application_id.required' => 'Invalid application.',
+            // caste
+            'caste.required' => 'Please select a caste.',
+            // cast_no
+            'cast_no.required_if' => 'Caste certificate number is required .',
+
+        ]);
+        $application_id = Crypt::decryptString($request->application_id);
         // dd($application_id);
+
         $beneficiary = BeneficiaryCommonList::where('sourceable_id', $application_id)->with('sourceable')->firstOrFail();
         // dd($beneficiary);
         if (!$beneficiary) {
@@ -102,35 +104,46 @@ class CasteModificationController extends Controller
         ];
         // dump($oldData);
         // dd($newData);
-        $logdetails = AcceptRejectInfo::create([
-            'application_id'         => $beneficiary->sourceable_id,
-            'beneficiary_id'         => $beneficiary->beneficiary_id,
-            'ip_address'             => request()->ip(),
-            'user_id'                => $userId,
-            'browser'                => request()->header('User-Agent'),
-            'model_name'             => CasteModificationInfo::class,
-            'op_type'                => Codemaster::getIdByCode(2106),
-            'revert_reason_cause_id' => null,
-            'revert_reason_remarks'  => null,
-            'parent_id'              => null,
-        ]);
+        DB::beginTransaction();
+        try {
+            $logdetails = AcceptRejectInfo::create([
+                'application_id'         => $beneficiary->sourceable_id,
+                'beneficiary_id'         => $beneficiary->beneficiary_id,
+                'ip_address'             => request()->ip(),
+                'user_id'                => $userId,
+                'browser'                => request()->header('User-Agent'),
+                'model_name'             => CasteModificationInfo::class,
+                'op_type'                => Codemaster::getIdByCode(2106),
+                'revert_reason_cause_id' => null,
+                'revert_reason_remarks'  => null,
+                'parent_id'              => null,
+            ]);
 
-        $modified_caste = CasteModificationInfo::create([
-            'application_id' => $beneficiary->sourceable_id,
-            'beneficiary_id' => $beneficiary->beneficiary_id,
-            'old_data' => $oldData,
-            'new_data' => $newData,
-            'caste_request_type' => $request->caste,
-            'next_level_requested_id' => Codemaster::getIdByCode(2201),
-            'request_id' => $logdetails->id,
-            'created_by' => $userId,
-            'updated_by' => $userId,
-        ]);
-        // dd($modified_caste);
-
-        return redirect()->route('Caste-modification-info')->with('success', 'Caste details updated successfully!');
+            $modified_caste = CasteModificationInfo::create([
+                'application_id' => $beneficiary->sourceable_id,
+                'beneficiary_id' => $beneficiary->beneficiary_id,
+                'old_data' => $oldData,
+                'new_data' => $newData,
+                'caste_request_type' => $request->caste,
+                'next_level_requested_id' => Codemaster::getIdByCode(2201),
+                'request_id' => $logdetails->id,
+                'created_by' => $userId,
+                'updated_by' => $userId,
+            ]);
+            // dd($modified_caste);
+            if ($logdetails && $modified_caste) {
+                DB::commit();
+                return redirect()->route('Caste-modification-info')
+                    ->with('success', 'Caste updated Request Process Successfully!');
+            } else {
+                DB::rollBack();
+                return back()->with('error', 'Failed to save caste modification.');
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Something went wrong: ' . $e->getMessage());
+        }
     }
-
     public function list()
     {
         // $user = auth()->user();
