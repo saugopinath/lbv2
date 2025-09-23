@@ -13,9 +13,10 @@ class BankAccountDetails extends Component
     /**
      * Create a new component instance.
      */
-    public $id, $applicantDet, $bankname, $bankbranchname, $bankaccountnumber, $ifscode;
-    public function __construct($id)
+    public $id, $applicantDet, $bankname, $bankbranchname, $bankaccountnumber, $ifscode, $mode;
+    public function __construct($id, $mode = null)
     {
+        $this->mode = $mode;
         $applicantDet = DraftBeneficiaryPersonal::with('bank')->where('application_id', $id)->first();
         $this->bankname = $applicantDet->bank->ifscbranch->bankmaster->name;
         $this->ifscode = $applicantDet->bank->ifsc;
@@ -28,6 +29,10 @@ class BankAccountDetails extends Component
      */
     public function render(): View|Closure|string
     {
+
+        if ($this->mode === 'page') {
+            return view('components.apllicant-modal.bank-account-details-page');
+        }
         return view('components.apllicant-modal.bank-account-details');
     }
 }

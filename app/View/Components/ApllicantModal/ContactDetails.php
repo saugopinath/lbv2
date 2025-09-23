@@ -12,9 +12,10 @@ class ContactDetails extends Component
     /**
      * Create a new component instance.
      */
-    public $id, $applicantDet, $distname, $ps, $blockmunicorp, $gpward, $villtown, $houseno, $po, $pin;
-    public function __construct($id)
+    public $id, $applicantDet, $distname, $ps, $blockmunicorp, $gpward, $villtown, $houseno, $po, $pin, $mode;
+    public function __construct($id, $mode = null)
     {
+        $this->mode = $mode;
         $applicantDet = DraftBeneficiaryPersonal::with('contact')->where('application_id', $id)->first();
         $this->distname = $applicantDet->contact->district->name;
         $this->ps = $applicantDet->contact->police_station;
@@ -36,6 +37,9 @@ class ContactDetails extends Component
      */
     public function render(): View|Closure|string
     {
+        if ($this->mode === 'page') {
+            return view('components.apllicant-modal.contact-details-page');
+        }
         return view('components.apllicant-modal.contact-details');
     }
 }

@@ -16,10 +16,11 @@ class PersonalDetails extends Component
      * Create a new component instance.
      */
     public $id, $applicantDet, $decryptedAadhaar, $dsregno, $dsdate, $mobile, $email,
-        $fname, $dob, $age, $ffname, $mfname, $sfname, $caste, $cascerno, $currentDate;
+        $fname, $dob, $age, $ffname, $mfname, $sfname, $caste, $cascerno, $currentDate, $mode;
 
-    public function __construct($id)
+    public function __construct($id, $mode = null)
     {
+        $this->mode = $mode;
         $this->currentDate = Carbon::now()->format('d/m/Y');
         $applicantDet = DraftBeneficiaryPersonal::with(['aadhaar', 'relationships'])->where('application_id', $id)->first();
         $this->decryptedAadhaar = Crypt::decryptString($applicantDet->aadhaar->encoded_aadhar);
@@ -44,6 +45,9 @@ class PersonalDetails extends Component
      */
     public function render(): View|Closure|string
     {
+        if ($this->mode === 'page') {
+            return view('components.apllicant-modal.personal-details-page');
+        }
         return view('components.apllicant-modal.personal-details');
     }
 }
