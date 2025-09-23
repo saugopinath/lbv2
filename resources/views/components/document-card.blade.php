@@ -1,4 +1,3 @@
-
 @props(['docName', 'isRequired', 'docTypeId', 'existingDoc', 'xIsDuplicate' => 0, 'showErrors' => false])
 
 <div x-data="{
@@ -25,47 +24,46 @@
                 <div class="flex space-x-2">
                     <x-button.primary
                         @click="modalSrc='data:{{ $mime }};base64,{{ $existingDoc->attched_document }}'; modalDocName='{{ $docName }}'; modalOpen=true;"
-                        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">
+                        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition cursor-pointer">
                         View
                     </x-button.primary>
                 </div>
             @elseif ($existingDoc && $mime == 'application/pdf')
                 <div class="flex space-x-2">
                     <x-button.success wire:click="downloadDocument({{ $existingDoc->id }})"
-                        class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition">
+                        class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition cursor-pointer">
                         Download
                     </x-button.success>
                 </div>
             @endif
-
         @elseif ($existingDoc)
             @if (in_array($mime, ['image/jpg', 'image/jpeg', 'image/png']))
                 <div class="flex space-x-2">
                     <x-button.primary @click="openModal({{ $docTypeId }}, '{{ $docName }}')"
-                        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">
+                        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition cursor-pointer">
                         Upload
                     </x-button.primary>
                     <x-button.primary
                         @click="modalSrc='data:{{ $mime }};base64,{{ $existingDoc->attched_document }}'; modalDocName='{{ $docName }}'; modalOpen=true;"
-                        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">
+                        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition cursor-pointer">
                         View
                     </x-button.primary>
                 </div>
             @elseif ($mime == 'application/pdf')
                 <div class="flex space-x-2">
                     <x-button.primary @click="openModal({{ $docTypeId }}, '{{ $docName }}')"
-                        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">
+                        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition cursor-pointer">
                         Upload
                     </x-button.primary>
                     <x-button.success wire:click="downloadDocument({{ $existingDoc->id }})"
-                        class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition">
+                        class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition cursor-pointer">
                         Download
                     </x-button.success>
                 </div>
             @else
                 <div class="flex space-x-2">
                     <x-button.primary @click="openModal({{ $docTypeId }}, '{{ $docName }}')"
-                        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">
+                        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition cursor-pointer">
                         Upload
                     </x-button.primary>
                 </div>
@@ -73,15 +71,14 @@
         @else
             <div class="flex space-x-2">
                 <x-button.primary @click="openModal({{ $docTypeId }}, '{{ $docName }}')"
-                    class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">
+                    class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition cursor-pointer">
                     Upload
                 </x-button.primary>
             </div>
         @endif
-         @if ($isRequired && empty($existingDoc) && $showErrors)
+        @if ($isRequired && empty($existingDoc) && $showErrors)
             <p class="text-red-500 text-sm mt-2">{{ $docName }} document is required.</p>
         @endif
-
     </div>
 
     <!-- popup view modal -->
