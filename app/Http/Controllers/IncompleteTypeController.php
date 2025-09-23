@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Models\BeneficiaryTemEnclosure;
 use App\Models\ApplicantIncompletDeatil;
 use Illuminate\Support\Facades\Validator;
+use App\Helpers\AadhaarHelper;
 
 class IncompleteTypeController extends Controller
 {
@@ -127,6 +128,13 @@ class IncompleteTypeController extends Controller
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        // Extra Aadhaar validation (without closure)
+        if (in_array($typeCode, ['141', '149', '1414']) && !\App\Helpers\AadhaarHelper::validate($aadharData)) {
+            return redirect()->back()
+                ->withErrors(['aadhaar' => 'Invalid Aadhaar number.'])
+                ->withInput();
         }
         // dd('ok');
         $select_lgd = session('lgd_session');
