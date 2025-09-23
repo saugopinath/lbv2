@@ -113,7 +113,7 @@ class IncompleteTypeController extends Controller
                     }
                 }
             }
-            
+
             // Validator run
             $validator = Validator::make(
                 [
@@ -228,7 +228,7 @@ class IncompleteTypeController extends Controller
                 if (!empty($jsonValue)) {
                     $item->update([
                         'new_value'             => $jsonValue,
-                        'change_type'           => $bankActionData ?? null,
+                        'change_type'           => null,
                         'next_level_request_id' => 1,
                         'request_id'            => $acceptReject->id,
                     ]);

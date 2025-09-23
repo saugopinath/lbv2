@@ -52,18 +52,19 @@
     </p>
 
     <div class="mt-2">
-        {{--  @if (request()->get('stage') === 'verifier')  --}}
-         @if (request()->has('stage') && decrypt(request()->get('stage')) === 'verifier')
+        @if (request()->has('stage') && in_array(decrypt(request()->get('stage')), ['verifier', 'revert']))
             <x-form.input id="dup_mobile_{{ $mobileIssues[0]->application_id }}" name="dup_mobile"
                 label="New Mobile Number" placeholder="Enter New Mobile" required
-                value="{{ old('dup_mobile', $issueItem->new_value['mobile_no'] ?? '') }}"
+                wire:model.defer="formData.dup_mobile.{{ $mobileIssues[0]->application_id }}"
+                {{--  value="{{ old('dup_mobile', $issueItem->new_value['mobile_no'] ?? '') }}"  --}}
                 x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />
-        {{--  @elseif (request()->get('stage') === 'approver')  --}}
-         @elseif (request()->has('stage') && decrypt(request()->get('stage')) === 'approver')
+
+        @elseif (request()->has('stage') && decrypt(request()->get('stage')) === 'approver')
             <p class="text-sm text-gray-700">
                 <strong>New Mobile:</strong> {{ $issueItem->new_value['mobile_no'] ?? 'Not Provided' }}
             </p>
         @endif
+
         @if ($errors->has('mobile'))
             <span class="text-red-600 text-sm">
                 <li>{{ $errors->first('mobile') }}</li>

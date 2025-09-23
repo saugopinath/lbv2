@@ -64,12 +64,13 @@
         </p>
 
         <div>
-            @if (request()->has('stage') && decrypt(request()->get('stage')) === 'verifier')
+            @if (request()->has('stage') && in_array(decrypt(request()->get('stage')), ['verifier', 'revert']))
                 <x-form.input id="aadhar_modification_{{ $aadhaarIssues[0]->application_id }}" name="aadhar_modification"
                     label="Aadhaar Number" required placeholder="Enter New Aadhaar Number"
-                    value="{{ old('aadhar_modification', $issueItem->new_value['aadhaar_no'] ?? '') }}"
+                    wire:model.defer="formData.aadhar_modification.{{ $aadhaarIssues[0]->application_id }}"
+                    {{--  value="{{ old('aadhar_modification', $issueItem->new_value['aadhaar_no'] ?? '') }}"  --}}
                     x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
-                {{--  @elseif (request()->get('stage') === 'approver')  --}}
+
             @elseif (request()->has('stage') && decrypt(request()->get('stage')) === 'approver')
                 <p class="mt-2 text-gray-700">
                     <strong>New Aadhaar:</strong> {{ $issueItem->new_value['aadhaar_no'] ?? 'N/A' }}
