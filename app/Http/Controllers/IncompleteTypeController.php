@@ -241,7 +241,7 @@ class IncompleteTypeController extends Controller
             return redirect()->route('incomplete.types', ['stage' => 'verifier', 'id' => $realId]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Full Update Failed: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            // Log::error("Full Update Failed: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
 
             return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
         }

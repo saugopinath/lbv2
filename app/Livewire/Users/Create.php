@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\RoleOfficeTypeMapping;
 use Illuminate\Support\Facades\Config;
 use App\Models\UserRoleSchemeOfficeMapping;
+use Illuminate\Support\Facades\DB;
 
 class Create extends Component
 {
@@ -38,7 +39,8 @@ class Create extends Component
     {
         $this->roles = Role::all();
         $this->schemes = Scheme::all();
-        $this->states = State::orderBy('name', 'asc')->get();
+        // $this->states = State::orderBy('name', 'asc')->get();
+        $this->states = State::where('is_active', 1)->where('lgd_code',  19)->get();
         $this->districts = District::orderBy('name', 'asc')->get();
     }
     public function updatedRole($value)
@@ -87,36 +89,46 @@ class Create extends Component
             ->addDays(intval(Config::get('app.password_expire_day')))
             ->format('Y/m/d H:i:s');
 
-        $user = User::create([
-            'name' => $this->name,
-            'mobile_no' => $this->mobile,
-            'email' => $this->email,
-            'password' => Hash::make($this->password),
-            'password_set_time' => $c_time,
-            'password_expires_at' => $password_expires_at,
-        ]);
+        try {
+            DB::beginTransaction();
 
-        UserPersonal::create([
-            'user_id' => $user->id,
-            'name' => $user->name,
-        ]);
+            $user = User::create([
+                'name' => $this->name,
+                'mobile_no' => $this->mobile,
+                'email' => $this->email,
+                'password' => Hash::make($this->password),
+                'password_set_time' => $c_time,
+                'password_expires_at' => $password_expires_at,
+            ]);
 
-        $role = Role::find($this->role);
+            UserPersonal::create([
+                'user_id' => $user->id,
+                'name' => $user->name,
+            ]);
 
-        if ($role) {
-            $user->assignRole($role);
+            $role = Role::find($this->role);
+
+            if ($role) {
+                $user->assignRole($role);
+            }
+
+            UserRoleSchemeOfficeMapping::create([
+                'user_id' => $user->id,
+                'scheme_id' => $this->selectscheme,
+                'role_id' => $this->role,
+                'office_id' => $this->office,
+            ]);
+            
+            DB::commit();
+
+            session()->flash('success', 'User created successfully!');
+            return redirect()->route('user-managements.index');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
         }
-
-        UserRoleSchemeOfficeMapping::create([
-            'user_id' => $user->id,
-            'scheme_id' => $this->selectscheme,
-            'role_id' => $this->role,
-            'office_id' => $this->office,
-        ]);
-
-        session()->flash('success', 'User created successfully!');
-
-        return redirect()->route('user-managements.index');
     }
 
     public function render()

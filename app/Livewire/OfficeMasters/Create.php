@@ -9,6 +9,7 @@ use App\Models\Subdivision;
 use App\Models\Block;
 use App\Models\Codemaster;
 use App\Models\OfficeMaster;
+use Illuminate\Support\Facades\DB;
 
 class Create extends Component
 {
@@ -25,7 +26,7 @@ class Create extends Component
     {
         $this->states = State::orderBy('name', 'asc')->get();
         $officetype = Codemaster::getIdByCode(15);
-        $this->mapping_levels = Codemaster::where('parent_id', $officetype)->whereIn('code',[151, 152, 153, 154])->get();
+        $this->mapping_levels = Codemaster::where('parent_id', $officetype)->whereIn('code', [151, 152, 153, 154])->get();
     }
 
     public function updatedSelectedMappingLevel($value)
@@ -94,19 +95,28 @@ class Create extends Component
 
         $this->validate($rules);
 
-        OfficeMaster::create([
-            'name' => $this->name,
-            'address' => $this->address,
-            'zip' => $this->zip,
-            'office_type_id' => $this->selectedMappingLevel,
-            'state_id' => $this->selectedState,
-            'district_id' => $this->selectedDistrict ?? null,
-            'subdivision_id' => $this->selectedSubdivision ?? null,
-            'block_id' => $this->selectedBlockurban ?? null,
-        ]);
+        try {
+            DB::beginTransaction();
 
-        session()->flash('success', 'Office Master created successfully!');
-        return redirect()->route('officemasters.index');
+            OfficeMaster::create([
+                'name' => $this->name,
+                'address' => $this->address,
+                'zip' => $this->zip,
+                'office_type_id' => $this->selectedMappingLevel,
+                'state_id' => $this->selectedState,
+                'district_id' => $this->selectedDistrict ?? null,
+                'subdivision_id' => $this->selectedSubdivision ?? null,
+                'block_id' => $this->selectedBlockurban ?? null,
+            ]);
+            DB::commit();
+
+            session()->flash('success', 'Office Master created successfully!');
+            return redirect()->route('officemasters.index');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
+        }
     }
 
     public function render()

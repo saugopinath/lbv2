@@ -6,7 +6,7 @@ use Livewire\Component;
 use App\Models\Role;
 use App\Models\Codemaster;
 use App\Models\RoleOfficeTypeMapping;
-use Masmerise\Toaster\Toaster;
+use Illuminate\Support\Facades\DB;
 
 class Create extends Component
 {
@@ -34,17 +34,23 @@ class Create extends Component
     public function submit()
     {
         $this->validate();
+        try {
+            DB::beginTransaction();
 
-        RoleOfficeTypeMapping::create([
-            'role_id' => $this->role,
-            'office_type_id' => $this->selectedMappingLevel,
-        ]);
+            RoleOfficeTypeMapping::create([
+                'role_id' => $this->role,
+                'office_type_id' => $this->selectedMappingLevel,
+            ]);
 
-        // Toaster::success('Role Office Type Mapping created successfully!');
-        session()->flash('success', 'Role Office Type Mapping created successfully!');
+            DB::commit();
 
-        return redirect()->route('role-office-master-mappings.index');
-        // $this->dispatch('redirectToIndex');
+            session()->flash('success', 'Role Office Type Mapping created successfully!');
+            return redirect()->route('role-office-master-mappings.index');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
+        }
     }
 
     public function render()

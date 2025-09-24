@@ -70,9 +70,5 @@
                 <li>{{ $errors->first('mobile') }}</li>
             </span>
         @endif
-
-        @error('duplicate_check')
-            <span class="text-red-600 text-sm">{{ $message }}</span>
-        @enderror
     </div>
 </div>

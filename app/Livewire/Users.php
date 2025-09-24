@@ -15,6 +15,8 @@ class Users extends DataTableComponent
 {
     public ?int $perPage = 5;
     public string $search = '';
+    protected $listeners = ['userFilter' => 'userFilter'];
+    public $role, $selectedMappingLevel, $selectedState, $selectedDistrict, $office;
 
     public function configure(): void
     {
@@ -25,6 +27,16 @@ class Users extends DataTableComponent
             ->setPerPageVisibilityEnabled()
             ->setSearchEnabled()
             ->setSearchLive();
+    }
+    public function userFilter($filters)
+    {
+        $this->role = $filters['role'] ?? null;
+        $this->selectedMappingLevel = $filters['mapping_level'] ?? null;
+        $this->selectedState = $filters['state'] ?? null;
+        $this->selectedDistrict = $filters['district'] ?? null;
+        $this->office = $filters['office'] ?? null;
+
+        // Add any derived logic here if needed
     }
 
     public function updatedSearch($value): void
@@ -59,7 +71,21 @@ class Users extends DataTableComponent
 
     public function builder(): Builder
     {
-        return User::query()->where('is_active', '1');
+        $query = User::query()
+            ->whereHas('RoleSchemeOfficeMappings', function ($q) {
+                $q->where('is_active', 1);
+
+                if (!empty($this->role)) {
+                    $q->where('role_id', $this->role);
+                }
+
+                if (!empty($this->office)) {
+                    $q->where('office_id', $this->office);
+                }
+            })
+            ->orderBy('id', 'asc');
+
+        return $query;
     }
 
     public function deleteUser($userId)

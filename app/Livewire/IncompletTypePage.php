@@ -75,13 +75,13 @@ class IncompletTypePage extends Component
 
     public function approve()
     {
-        // try {
-            $opType = Codemaster::where('code', 245)->value('id');
-            $previousId = AcceptRejectInfo::where('application_id', $this->id)
-                ->where('op_type', $opType)
-                ->orderByDesc('id')
-                ->value('id');
-          // DB::beginTransaction();
+        $opType = Codemaster::where('code', 245)->value('id');
+        $previousId = AcceptRejectInfo::where('application_id', $this->id)
+            ->where('op_type', $opType)
+            ->orderByDesc('id')
+            ->value('id');
+        try {
+            DB::beginTransaction();
             $request = AcceptRejectInfo::create([
                 'application_id'         => $this->id,
                 'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
@@ -146,15 +146,15 @@ class IncompletTypePage extends Component
                 $this->updateOriginalTable($item);
             }
 
-            // DB::commit();
+            DB::commit();
 
             session()->flash('success', "Approve details updated successfully for the Application ID: {$this->id}");
             return redirect()->route('incomplete.types', ['stage' => 'approver', 'id' => $this->id]);
-        // } catch (\Exception $e) {
-        //     DB::rollBack();
-        //     Log::error("Approve Failed: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-        //     return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
-        // }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Approve Failed: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
+        }
     }
 
     protected function updateOriginalTable($item)
@@ -425,7 +425,7 @@ class IncompletTypePage extends Component
                 if (!$typeCode) continue;
 
                 $jsonValue = [];
-// dd($this->formData['aadhar_modification'][$item->application_id]);
+                // dd($this->formData['aadhar_modification'][$item->application_id]);
                 // Aadhaar related
                 if (in_array($typeCode, ['141', '149', '1414'])) {
 

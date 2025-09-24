@@ -1,5 +1,4 @@
 <x-layouts.app>
-   
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-2xl p-4">
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold text-gray-700">
@@ -12,6 +11,7 @@
             </a>
         </div>
     </div>
+    <livewire:user-permission-filter.filter-user-permission />
     <div class="bg-white shadow-xl rounded-2xl ">
         <div>
             <livewire:Users />
