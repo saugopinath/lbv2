@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('lb_scheme.faulty_beneficiary_banks', function (Blueprint $table) {
-            //
+            $table->string('bankpassbook_name')->nullable();
+            $table->smallInteger('app_gen_score')->nullable();
         });
     }
 
@@ -22,7 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('lb_scheme.faulty_beneficiary_banks', function (Blueprint $table) {
-            //
+            $table->dropColumn('bankpassbook_name');
+            $table->dropColumn('app_gen_score');
         });
     }
 };
