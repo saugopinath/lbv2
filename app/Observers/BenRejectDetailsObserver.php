@@ -19,8 +19,10 @@ class BenRejectDetailsObserver
      */
     public function created(BenRejectDetails $benRejectDetails): void
     {
-        DraftBeneficiaryPersonal::where('application_id', $benRejectDetails->application_id)->delete();
-        BeneficiaryAadhaar::where('application_id', $benRejectDetails->application_id)->delete();
+        // $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($benRejectDetails->application_id);
+        // $DraftBeneficiaryPersonal->delete();
+        // $BeneficiaryAadhaar = BeneficiaryAadhaar::find($benRejectDetails->application_id);
+        // $BeneficiaryAadhaar->delete();
     }
     public function updated(BenRejectDetails $benRejectDetails): void
     {

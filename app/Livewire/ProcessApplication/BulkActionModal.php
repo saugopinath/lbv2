@@ -86,7 +86,7 @@ class BulkActionModal extends Component
         $validated = $this->validate([
             'bulkActionType' => 'required|in:V,A,R,T',
             'reason' => in_array($this->bulkActionType, ['R', 'T']) ? 'required' : 'nullable',
-            'remark' => in_array($this->bulkActionType, ['R', 'T']) ? 'required|string|max:255' :'nullable',
+            'remark' => in_array($this->bulkActionType, ['R', 'T']) ? 'required|string|max:255' : 'nullable',
         ]);
 
         $successMessage = 'Action performed successfully!';
@@ -101,49 +101,43 @@ class BulkActionModal extends Component
         $ids = $this->selectedRows;
         if ($this->bulkActionType === 'V') {
             foreach ($ids as $id) {
-                DraftBeneficiaryPersonal::where('application_id', $id)
-                    ->update(['next_level_role_id' => $approverRoleId]);
-                $beneficiary = DraftBeneficiaryPersonal::where('application_id', $id)->first();
-                AcceptRejectInfo::Create(
-                    [
-                        'application_id' => $beneficiary->application_id,
-                        'beneficiary_id' => $beneficiary->application_id,
-                        'ip_address'     => request()->ip(),
-                        'user_id'        => Auth::id(),
-                        'browser'        => request()->header('User-Agent'),
-                        'model_name'     => null,
-                        'op_type'        => Codemaster::getIdByCode(2302),
-                        'revert_reason_cause_id' => null,
-                        'revert_reason_remarks'  => null,
-                        'parent_id'      => AcceptRejectInfo::where('application_id', $id)
-                            ->latest('id')
-                            ->value('id') ?? null,
-                    ]
-                );
+                $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
+                $DraftBeneficiaryPersonal->next_level_role_id = $approverRoleId;
+                $DraftBeneficiaryPersonal->save();
+                $AcceptRejectInfo = new AcceptRejectInfo;
+                $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+                $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                $AcceptRejectInfo->ip_address = request()->ip();
+                $AcceptRejectInfo->user_id = Auth::id();
+                $AcceptRejectInfo->browser = request()->header('User-Agent');
+                $AcceptRejectInfo->model_name = null;
+                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2302);
+                $AcceptRejectInfo->revert_reason_cause_id = null;
+                $AcceptRejectInfo->revert_reason_remarks = null;
+                $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                    ->latest('id')
+                    ->value('id') ?? null;
+                $AcceptRejectInfo->save();
             }
         } elseif ($this->bulkActionType === 'A') {
             foreach ($ids as $id) {
-                $draft = DraftBeneficiaryPersonal::where('application_id', $id)->first();
-                if ($draft) {
-                    $draft->delete();
-                }
-                $select_lgd = session('lgd_session');
-                AcceptRejectInfo::Create(
-                    [
-                        'application_id' => $draft->application_id,
-                        'beneficiary_id' => $draft->application_id,
-                        'ip_address'     => request()->ip(),
-                        'user_id'        => Crypt::decryptString($select_lgd['role_id']),
-                        'browser'        => request()->header('User-Agent'),
-                        'model_name'     => null,
-                        'op_type'        => Codemaster::getIdByCode(2303),
-                        'revert_reason_cause_id' => null,
-                        'revert_reason_remarks'  => null,
-                        'parent_id'      => AcceptRejectInfo::where('application_id', $draft->application_id)
-                            ->latest('id')
-                            ->value('id') ?? null,
-                    ]
-                );
+                $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
+                $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(2303);
+                $DraftBeneficiaryPersonal->save();
+                $AcceptRejectInfo = new AcceptRejectInfo;
+                $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+                $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                $AcceptRejectInfo->ip_address = request()->ip();
+                $AcceptRejectInfo->user_id = Auth::id();
+                $AcceptRejectInfo->browser = request()->header('User-Agent');
+                $AcceptRejectInfo->model_name = null;
+                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2303);
+                $AcceptRejectInfo->revert_reason_cause_id = null;
+                $AcceptRejectInfo->revert_reason_remarks = null;
+                $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                    ->latest('id')
+                    ->value('id') ?? null;
+                $AcceptRejectInfo->save();
             }
         } elseif ($this->bulkActionType === 'T') {
 
@@ -155,55 +149,43 @@ class BulkActionModal extends Component
                 $next_level_role_id = Codemaster::getIdByCode(21);
             }
             foreach ($ids as $id) {
-                DraftBeneficiaryPersonal::where('application_id', $id)
-                    ->update(['next_level_role_id' => $next_level_role_id]);
-                $beneficiary = DraftBeneficiaryPersonal::where('application_id', $id)->first();
-                AcceptRejectInfo::Create(
-                    [
-                        'application_id' => $beneficiary->application_id,
-                        'beneficiary_id' => $beneficiary->application_id,
-                        'ip_address'     => request()->ip(),
-                        'user_id'        => $user_id,
-                        'browser'        => request()->header('User-Agent'),
-                        'model_name'     => null,
-                        'op_type'        => Codemaster::getIdByCode(2304),
-                        'revert_reason_cause_id' => $validated['reason'],
-                        'revert_reason_remarks'  => $validated['remark'],
-                        'parent_id'      => AcceptRejectInfo::where('application_id', $id)
-                            ->latest('id')
-                            ->value('id') ?? null,
-                    ]
-                );
+                $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
+                $DraftBeneficiaryPersonal->next_level_role_id = $next_level_role_id;
+                $DraftBeneficiaryPersonal->save();
+                $AcceptRejectInfo = new AcceptRejectInfo;
+                $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+                $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                $AcceptRejectInfo->ip_address = request()->ip();
+                $AcceptRejectInfo->user_id = Auth::id();
+                $AcceptRejectInfo->browser = request()->header('User-Agent');
+                $AcceptRejectInfo->model_name = null;
+                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2304);
+                $AcceptRejectInfo->revert_reason_cause_id =  $validated['reason'];
+                $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
+                $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                    ->latest('id')
+                    ->value('id') ?? null;
+                $AcceptRejectInfo->save();
             }
         } elseif ($this->bulkActionType === 'R') {
             foreach ($ids as $id) {
-                $benrej = new BenRejectDetails;
-                $benrej->application_id     = $id;
-                $benrej->created_by     = $user_id;
-                $benrej->district_id     = Crypt::decryptString($select_lgd['district_id']);
-                $benrej->personal_details     = DraftBeneficiaryPersonal::where('application_id', $id)->get()->toArray();
-                $benrej->contact_details      = DraftBeneficiaryContact::where('application_id', $id)->get()->toArray();
-                $benrej->bank_details         = DraftBeneficiaryBank::where('application_id', $id)->get()->toArray();
-                $benrej->declaration_details  = DraftBeneficiaryDeclaration::where('application_id', $id)->get()->toArray();
-                $benrej->relationship_details = DraftBeneficiaryRelationship::where('application_id', $id)->get()->toArray();
-                $benrej->aadhar_details       = BeneficiaryAadhaar::where('application_id', $id)->get()->toArray();
-                $benRejectDetails = $benrej->save();
-                AcceptRejectInfo::Create(
-                    [
-                        'application_id' => $id,
-                        'beneficiary_id' => $id,
-                        'ip_address'     => request()->ip(),
-                        'user_id'        => $user_id,
-                        'browser'        => request()->header('User-Agent'),
-                        'model_name'     => null,
-                        'op_type'        => Codemaster::getIdByCode(2305),
-                        'revert_reason_cause_id' => $validated['reason'],
-                        'revert_reason_remarks'  => $validated['remark'],
-                        'parent_id'      => AcceptRejectInfo::where('application_id', $id)
-                            ->latest('id')
-                            ->value('id') ?? null,
-                    ]
-                );
+                $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
+                $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(2305);
+                $DraftBeneficiaryPersonal->save();
+                $AcceptRejectInfo = new AcceptRejectInfo;
+                $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+                $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                $AcceptRejectInfo->ip_address = request()->ip();
+                $AcceptRejectInfo->user_id = Auth::id();
+                $AcceptRejectInfo->browser = request()->header('User-Agent');
+                $AcceptRejectInfo->model_name = null;
+                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2305);
+                $AcceptRejectInfo->revert_reason_cause_id = null;
+                $AcceptRejectInfo->revert_reason_remarks = null;
+                $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                    ->latest('id')
+                    ->value('id') ?? null;
+                $AcceptRejectInfo->save();
             }
         }
         // });
@@ -213,7 +195,7 @@ class BulkActionModal extends Component
 
         $this->reset(['bulkActionType', 'reason', 'remark', 'selectedRows', 'bulkActionTypeLabel']);
 
-        return redirect()->route('submitted-list');
+        return redirect()->route('lb-application-list');
         // $this->dispatch('toaster-success', $successMessage);
         // $this->dispatch('actionPerformedAndRedirect');
     }
