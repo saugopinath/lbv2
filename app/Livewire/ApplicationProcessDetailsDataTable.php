@@ -359,7 +359,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 $benrej->declaration_details  = DraftBeneficiaryDeclaration::where('application_id', $id)->get()->toArray();
                 $benrej->relationship_details = DraftBeneficiaryRelationship::where('application_id', $id)->get()->toArray();
                 $benrej->aadhar_details       = BeneficiaryAadhaar::where('application_id', $id)->get()->toArray();
-                $benRejectDetails = $benrej->save();
+                $benrej->save();
                 AcceptRejectInfo::Create(
                     [
                         'application_id' => $id,
