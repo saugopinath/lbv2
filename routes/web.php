@@ -38,5 +38,5 @@ Route::get('draftedit/{id}', [LBController::class, 'draftedit'])->middleware(['a
 Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
 Route::get('/approved-lists', [BeneficiaryApprovedListController::class, 'index'])->name('approved-lists');
 Route::get('/approved-lists-BA-Wise', [BeneficiaryApprovedListController::class, 'beneficiaryContactwiseList'])->name('approved-lists-BA-Wise');
-Route::get('lb-application-list', [WorkFlowController::class, 'index'])->middleware(['auth', 'verified'])->name('submitted-list');
+Route::get('lb-application-list', [WorkFlowController::class, 'index'])->middleware(['auth', 'verified'])->name('lb-application-list');
 Route::get('/application/{id}', DraftApplicationView::class)->name('draft-application.view');
