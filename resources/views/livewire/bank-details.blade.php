@@ -2,23 +2,23 @@
     <form wire:submit.prevent="save" x-data="{ passbookName: @entangle('passbook_name'), error: '' }">
         <div class="grid gap-6 md:grid-cols-2 mb-2 pl-4 pr-4">
             <div>
-<x-form.input
-    id="passbook_name"
-    name="passbook_name"
-    label="Name as in Bank Passbook"
-    placeholder="Enter Name as in Bank Passbook"
-    x-model="passbookName"
-    x-on:input="
+                <x-form.input
+                    id="passbook_name"
+                    name="passbook_name"
+                    label="Name as in Bank Passbook"
+                    placeholder="Enter Name as in Bank Passbook"
+                    x-model="passbookName"
+                    x-on:input="
         $el.value = $el.value.replace(/[^A-Za-z\s]/g, '');
         error = '';
         $wire.set('score', null);
     "
-    x-on:keydown="
+                    x-on:keydown="
         if ($event.key === 'Backspace' || $event.key === 'Delete') {
             $wire.set('score', null);
         }
     "
-    required />
+                    required />
             </div>
             <div class="flex items-center space-x-3 mt-6">
                 <x-button.gradient-button
@@ -77,7 +77,8 @@
                 <x-loading-spinner wire:target="ifscode" />
             </div>
             <div>
-                <x-form.masked-input
+                <x-form.input
+                    type="password"
                     name="bankaccountnumber"
                     label="Bank Account Number"
                     required
