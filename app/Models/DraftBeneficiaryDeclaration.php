@@ -7,6 +7,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 class DraftBeneficiaryDeclaration extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
+    protected $primaryKey = 'application_id';
     protected $guarded = [
         'id',
     ];

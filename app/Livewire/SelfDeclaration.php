@@ -7,6 +7,8 @@ use App\Models\DraftBeneficiaryDeclaration;
 use App\Models\DraftBeneficiaryPersonal;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\AcceptRejectInfo;
+use App\Models\Codemaster;
 
 class SelfDeclaration extends Component
 {
@@ -49,22 +51,42 @@ class SelfDeclaration extends Component
         try {
             if ($this->mode === null && empty($app_det)) {
                 $application_id = $this->application_id;
-                DraftBeneficiaryDeclaration::create([
-                    'application_id' => $application_id,
-                    'is_resident' => $validated['resident'],
-                    'earn_monthly_remuneration' => $validated['no_govt_salary'],
-                    'info_genuine_decl' => $validated['info_true'],
-                    'av_status' => $validated['aadhaar_consent'],
-                    'created_by' => Auth::id(),
-                ]);
+                $DraftBeneficiaryDeclaration = new DraftBeneficiaryDeclaration;
+                $DraftBeneficiaryDeclaration->application_id = $application_id;
+                $DraftBeneficiaryDeclaration->is_resident = $validated['resident'];
+                $DraftBeneficiaryDeclaration->earn_monthly_remuneration = $validated['no_govt_salary'];
+                $DraftBeneficiaryDeclaration->info_genuine_decl = $validated['info_true'];
+                $DraftBeneficiaryDeclaration->av_status = $validated['aadhaar_consent'];
+                $DraftBeneficiaryDeclaration->created_by = Auth::id();
+                $DraftBeneficiaryDeclaration->save();
+                
+                $draftbenPar = DraftBeneficiaryPersonal::find($application_id);
+                $draftbenPar->next_level_role_id = Codemaster::getIdByCode(22);
+                $draftbenPar->is_final_submit = 1;
+                $draftbenPar->save();
+
+                $AcceptRejectInfo = new AcceptRejectInfo;
+                $AcceptRejectInfo->application_id = $application_id;
+                $AcceptRejectInfo->beneficiary_id = $draftbenPar->beneficiary_id;
+                $AcceptRejectInfo->ip_address = request()->ip();
+                $AcceptRejectInfo->user_id = Auth::id();
+                $AcceptRejectInfo->browser = request()->header('User-Agent');
+                $AcceptRejectInfo->model_name = null;
+                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2301);
+                $AcceptRejectInfo->revert_reason_cause_id = null;
+                $AcceptRejectInfo->revert_reason_remarks = null;
+                $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $application_id)
+                    ->latest('id')
+                    ->value('id') ?? null;
+                $AcceptRejectInfo->save();
             } else {
-                $data = [
-                    'is_resident' => $validated['resident'],
-                    'earn_monthly_remuneration' => $validated['no_govt_salary'],
-                    'info_genuine_decl' => $validated['info_true'],
-                    'av_status' => $validated['aadhaar_consent'],
-                ];
-                DraftBeneficiaryDeclaration::where('application_id', $this->application_id)->update($data);
+                $DraftBeneficiaryDeclaration = DraftBeneficiaryDeclaration::find($this->application_id);
+                $DraftBeneficiaryDeclaration->is_resident = $validated['resident'];
+                $DraftBeneficiaryDeclaration->earn_monthly_remuneration = $validated['no_govt_salary'];
+                $DraftBeneficiaryDeclaration->info_genuine_decl = $validated['info_true'];
+                $DraftBeneficiaryDeclaration->av_status = $validated['aadhaar_consent'];
+                $DraftBeneficiaryDeclaration->created_by = Auth::id();
+                $DraftBeneficiaryDeclaration->save();
             }
             DB::commit();
         } catch (\Exception $e) {
