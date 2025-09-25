@@ -19,7 +19,7 @@ class ContactDetails extends Component
         $applicantDet = DraftBeneficiaryPersonal::with('contact')->where('application_id', $id)->first();
         $this->distname = $applicantDet->contact->district->name;
         $this->ps = $applicantDet->contact->police_station;
-        if ($applicantDet->rural_urban_id == 1) {
+        if ($applicantDet->contact->rural_urban_id == 1) {
             $this->blockmunicorp = $applicantDet->contact->municipality->name;
             $this->gpward = $applicantDet->contact->ward->name;
         } else {

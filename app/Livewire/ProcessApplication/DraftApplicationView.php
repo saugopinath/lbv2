@@ -4,7 +4,7 @@ namespace App\Livewire\ProcessApplication;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Models\DraftBeneficiaryPersonal;
-
+use Illuminate\Support\Facades\Crypt;
 class DraftApplicationView extends Component
 {
     public $applicationId;
@@ -13,9 +13,9 @@ class DraftApplicationView extends Component
     public function mount($id)
     {
         // dump($id);
-        $this->applicationId = $id;
+        $this->applicationId = Crypt::decryptString($id);
 
-        $this->application = DraftBeneficiaryPersonal::with('relationships')->findOrFail($id);
+        $this->application = DraftBeneficiaryPersonal::with('relationships')->findOrFail($this->applicationId);
         // dd($this->application, $this->application->toSql());
         // dd($this->application, json_encode($this->application));
         // $jsondata = json_encode($this->application);
