@@ -26,7 +26,7 @@
             } else if (result.status === 'duplicate') {
                 this.errorMessage = result.message;
                 this.disableCheckBtn = false;
-                this.showFindDuplicate = true; // ✅ বাটন দেখানো হবে
+                this.showFindDuplicate = true;
             } else if (result.status === 'success') {
                 this.successMessage = result.message;
                 this.disableCheckBtn = true;
@@ -48,7 +48,8 @@
             label="Aadhar Number"
             placeholder="Enter Aadhar Number"
             required
-            x-model="aadhaar" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
+            x-model="aadhaar" x-on:input="aadhaar = $el.value.replace(/[^0-9]/g, '').slice(0,12);
+        $el.value = aadhaar;" />
     </div>
 
     <!-- Buttons Row -->
@@ -63,8 +64,6 @@
             <span wire:loading.remove wire:target="checkDuplicate">Check Availability</span>
             <span wire:loading wire:target="checkDuplicate">Checking…</span>
         </x-button.gradient-button>
-
-        <!-- ✅ Duplicate হলে একই রো-তে Find Duplicate Button -->
         <template x-if="showFindDuplicate">
             <x-button.gradient-button
                 type="button"

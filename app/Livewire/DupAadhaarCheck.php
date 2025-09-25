@@ -18,8 +18,6 @@ class DupAadhaarCheck extends Component
         // dump('ok');
         $this->error = null;
         $this->aadhaar = trim($this->aadhaar);
-
-        // ✅ ১২-সংখ্যার ডিজিট কিনা চেক
         if (!ctype_digit($this->aadhaar) || strlen($this->aadhaar) !== 12) {
             $this->dispatch('hideEntryTabs');
             $this->dispatch('hideLoader');
@@ -29,16 +27,12 @@ class DupAadhaarCheck extends Component
 
         $encoded_aadhar = Crypt::encryptString($this->aadhaar);
         $aadhaar_hash = md5($this->aadhaar);
-
-        // ✅ ডুপ্লিকেট আছে কিনা ডাটাবেজে চেক
         if (BeneficiaryAadhaar::where('aadhar_hash', $aadhaar_hash)->exists()) {
             $this->dispatch('hideEntryTabs');
             $this->dispatch('hideLoader');
             $this->error = "Duplicate Aadhaar found!";
             return ['status' => 'duplicate', 'message' => $this->error];
         }
-
-        // ✅ ডুপ্লিকেট না থাকলে
         // dump('ok1');
         $this->dispatch('aadhaarChecked', [
             'encoded' => $encoded_aadhar,
