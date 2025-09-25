@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class BenRejectDetails extends Model
+class BenRejectDetails extends Model implements Auditable
 {
     // protected $guarded = [
     //     'id',
     // ];
-
+    use \OwenIt\Auditing\Auditable;
     protected $fillable = [
         'application_id',
         'beneficiary_id',
@@ -45,7 +46,7 @@ class BenRejectDetails extends Model
     {
         return $this->morphOne(BeneficiaryCommonList::class, 'sourceable');
     }
-    
+
     protected static function booted()
     {
         static::created(function ($benRejectDetails) {

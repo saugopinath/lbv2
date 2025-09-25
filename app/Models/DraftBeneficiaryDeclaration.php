@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
-class DraftBeneficiaryDeclaration extends Model
+use OwenIt\Auditing\Contracts\Auditable;
+class DraftBeneficiaryDeclaration extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $guarded = [
         'id',
     ];

@@ -30,6 +30,7 @@ use App\Models\DraftBeneficiaryDeclaration;
 use App\Models\DraftBeneficiaryRelationship;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+
 class ApplicationProcessDetailsDataTable extends DataTableComponent
 {
     public ?int $perPage = 5;
@@ -237,23 +238,30 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $select_lgd = session('lgd_session');
         $user_id = Crypt::decryptString($select_lgd['role_id']);
         foreach ($ids as $id) {
-            $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-            $DraftBeneficiaryPersonal->next_level_role_id = $approverRoleId;
-            $DraftBeneficiaryPersonal->save();
-            $AcceptRejectInfo = new AcceptRejectInfo;
-            $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-            $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
-            $AcceptRejectInfo->ip_address = request()->ip();
-            $AcceptRejectInfo->user_id = Auth::id();
-            $AcceptRejectInfo->browser = request()->header('User-Agent');
-            $AcceptRejectInfo->model_name = null;
-            $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2302);
-            $AcceptRejectInfo->revert_reason_cause_id = null;
-            $AcceptRejectInfo->revert_reason_remarks = null;
-            $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                ->latest('id')
-                ->value('id') ?? null;
-            $AcceptRejectInfo->save();
+            DB::beginTransaction();
+            try {
+                $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
+                $DraftBeneficiaryPersonal->next_level_role_id = $approverRoleId;
+                $DraftBeneficiaryPersonal->save();
+                $AcceptRejectInfo = new AcceptRejectInfo;
+                $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+                $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                $AcceptRejectInfo->ip_address = request()->ip();
+                $AcceptRejectInfo->user_id = Auth::id();
+                $AcceptRejectInfo->browser = request()->header('User-Agent');
+                $AcceptRejectInfo->model_name = null;
+                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2302);
+                $AcceptRejectInfo->revert_reason_cause_id = null;
+                $AcceptRejectInfo->revert_reason_remarks = null;
+                $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                    ->latest('id')
+                    ->value('id') ?? null;
+                $AcceptRejectInfo->save();
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
         }
 
         $this->clearSelected();
@@ -328,45 +336,59 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 $next_level_role_id = Codemaster::getIdByCode(21);
             }
             foreach ($ids as $id) {
-                $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                $DraftBeneficiaryPersonal->next_level_role_id = $next_level_role_id;
-                $DraftBeneficiaryPersonal->save();
-                $AcceptRejectInfo = new AcceptRejectInfo;
-                $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
-                $AcceptRejectInfo->ip_address = request()->ip();
-                $AcceptRejectInfo->user_id = Auth::id();
-                $AcceptRejectInfo->browser = request()->header('User-Agent');
-                $AcceptRejectInfo->model_name = null;
-                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2304);
-                $AcceptRejectInfo->revert_reason_cause_id =  $validated['reason'];
-                $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
-                $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                    ->latest('id')
-                    ->value('id') ?? null;
-                $AcceptRejectInfo->save();
+                DB::beginTransaction();
+                try {
+                    $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
+                    $DraftBeneficiaryPersonal->next_level_role_id = $next_level_role_id;
+                    $DraftBeneficiaryPersonal->save();
+                    $AcceptRejectInfo = new AcceptRejectInfo;
+                    $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+                    $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                    $AcceptRejectInfo->ip_address = request()->ip();
+                    $AcceptRejectInfo->user_id = Auth::id();
+                    $AcceptRejectInfo->browser = request()->header('User-Agent');
+                    $AcceptRejectInfo->model_name = null;
+                    $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2304);
+                    $AcceptRejectInfo->revert_reason_cause_id =  $validated['reason'];
+                    $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
+                    $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                        ->latest('id')
+                        ->value('id') ?? null;
+                    $AcceptRejectInfo->save();
+                    DB::commit();
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    throw $e;
+                }
             }
             $this->clearSelected();
         } elseif ($this->revertrejectAction === 'reject') {
             $ids = $this->getSelected();
             foreach ($ids as $id) {
-                $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(2305);
-                $DraftBeneficiaryPersonal->save();
-                $AcceptRejectInfo = new AcceptRejectInfo;
-                $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
-                $AcceptRejectInfo->ip_address = request()->ip();
-                $AcceptRejectInfo->user_id = Auth::id();
-                $AcceptRejectInfo->browser = request()->header('User-Agent');
-                $AcceptRejectInfo->model_name = null;
-                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2305);
-                $AcceptRejectInfo->revert_reason_cause_id = null;
-                $AcceptRejectInfo->revert_reason_remarks = null;
-                $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                    ->latest('id')
-                    ->value('id') ?? null;
-                $AcceptRejectInfo->save();
+                DB::beginTransaction();
+                try {
+                    $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
+                    $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(2305);
+                    $DraftBeneficiaryPersonal->save();
+                    $AcceptRejectInfo = new AcceptRejectInfo;
+                    $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+                    $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                    $AcceptRejectInfo->ip_address = request()->ip();
+                    $AcceptRejectInfo->user_id = Auth::id();
+                    $AcceptRejectInfo->browser = request()->header('User-Agent');
+                    $AcceptRejectInfo->model_name = null;
+                    $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2305);
+                    $AcceptRejectInfo->revert_reason_cause_id = null;
+                    $AcceptRejectInfo->revert_reason_remarks = null;
+                    $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                        ->latest('id')
+                        ->value('id') ?? null;
+                    $AcceptRejectInfo->save();
+                    DB::commit();
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    throw $e;
+                }
             }
             $this->clearSelected();
         }
