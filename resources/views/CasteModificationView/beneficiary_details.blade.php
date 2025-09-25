@@ -6,8 +6,8 @@
                 {{ $header }}
             </h1>
             <span class="px-4 py-1.5 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 shadow-sm">
-    Application Id {{ $application_id }}
-</span>
+                Application Id {{ $application_id }}
+            </span>
 
         </div>
     </div>
@@ -31,18 +31,17 @@
     <!-- Modification Details -->
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-4 mb-4">
 
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex justify-between items-center mb-4 p-2">
             <h2 class="text-lg font-semibold text-indigo-700 dark:text-indigo-300 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5 mr-2 text-indigo-500"
-                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    class="h-5 w-5 mr-1 ml-1 text-indigo-500"
+                    fill="none" viewBox="-2 -2 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12h6m2 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Modification Details
             </h2>
         </div>
-
         <!-- Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Old Data Card -->
@@ -89,5 +88,9 @@
                 </ul>
             </div>
         </div>
+        <div class="rounded-xl p-4 mt-4">
+            <livewire:caste-modification.caste-modification-action :applicationId="$application_id" />
+        </div>
+
     </div>
 </x-layouts.app>

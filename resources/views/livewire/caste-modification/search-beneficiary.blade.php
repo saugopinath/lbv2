@@ -26,10 +26,8 @@
                 required />
         </div>
     </div>
-    <button wire:click="search" class="bg-blue-500 text-white px-4 py-2 rounded">Search</button>
-    @if (session()->has('warning'))
-    <p class="mt-4 text-red-500 font-medium">{{ session('warning') }}</p>
-    @endif
+    <x-button.loading-button action="search" text="Search"></x-button.loading-button>
+
     @if ($items)
     <div class="mt-6">
         @if(count($items) > 0)
@@ -57,9 +55,8 @@
                             <form action="{{ route('caste-modification.edit') }}" method="GET">
                                 <input type="hidden" name="application_id" value="{{ Crypt::encryptString($row['application_id']) }}">
                                 <input type="hidden" name="beneficiary_id" value="{{ Crypt::encryptString($row['beneficiary_id']) }}">
-                                <button type="submit" class="text-indigo-500 hover:text-indigo-800 font-medium">
-                                    Caste Change
-                                </button>
+                                <x-button.loading-button type="submit" text="change">                                  
+                                </x-button.loading-button>
                             </form>
 
                         </td>
@@ -69,7 +66,7 @@
             </table>
         </div>
         @else
-        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mt-4">
+        <div class="bg-red-50 border border-red-200 text-yellow-700 px-4 py-3 rounded mt-4">
             No beneficiary found.
         </div>
         @endif

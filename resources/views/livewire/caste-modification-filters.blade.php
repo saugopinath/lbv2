@@ -4,9 +4,12 @@
         <x-form.select id="status" name="status" label="Application Status" wire:model="applicantStatus">
             <option value="">-- Select Status --</option>
             @foreach($statusOptions as $key => $label)
-                <option value="{{ $key }}">{{ $label }}</option>
+            <option value="{{ $key }}">{{ $label }}</option>
             @endforeach
         </x-form.select>
+           @error('applicantStatus')
+        <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
+    @enderror
     </div>
 
     {{-- Caste Filter --}}
@@ -14,7 +17,7 @@
         <x-form.select id="caste" name="caste" label="New Requested Caste" wire:model="casteId">
             <option value="">-- Select Caste --</option>
             @foreach($casteOptions as $key => $label)
-                <option value="{{ $key }}">{{ $label }}</option>
+            <option value="{{ $key }}">{{ $label }}</option>
             @endforeach
         </x-form.select>
     </div>

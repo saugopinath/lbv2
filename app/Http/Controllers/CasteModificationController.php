@@ -7,6 +7,7 @@ use App\Models\BeneficiaryCommonList;
 use App\Models\CasteModificationInfo;
 use App\Models\Codemaster;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -40,22 +41,33 @@ class CasteModificationController extends Controller
         $caste_field_visible = 0;
         // $casteid=Codemaster::getIdByCode($this->casteCodeMaster);
         // dd($casteParentid);
+        // dd($application_id);
         $doctype = $this->doctype;
-
         $BenDetails = BeneficiaryCommonList::where('sourceable_id', $application_id)->with('sourceable')->firstOrFail();
         // dd($BenDetails);
         $allCastes = Codemaster::where('code', $this->casteCodeMaster)
             ->first()
             ->children()
             ->pluck('name', 'id');
-
+        // dd($allCastes);
         $currentCasteId = $BenDetails->sourceable->caste;
         // dd($currentCasteId);
-
         $castes = $allCastes->filter(fn($name, $id) => $id != $currentCasteId);
         // dd($castes);
-
-        return view('CasteModificationView.beneficiary_cast_edit', compact('application_id', 'header', 'castes', 'doctype'));
+        $checkapplication = CasteModificationInfo::where('application_id', $application_id)->first();
+// dd($checkapplication);
+        $isReverted = false;
+        $oldData = [];
+        if ($checkapplication) {
+            $isReverted = $checkapplication->next_level_requested_id == Codemaster::getIdByCode(2204);
+            if ($isReverted) {
+                $oldData = $checkapplication->new_data;
+            }
+        }
+        // dd($castes);
+        // dump($isReverted);
+        // dd( $oldData);
+        return view('CasteModificationView.beneficiary_cast_edit', compact('application_id', 'header', 'castes', 'doctype', 'isReverted', 'oldData'));
     }
 
     public function updateCaste(Request $request)
@@ -104,40 +116,126 @@ class CasteModificationController extends Controller
         ];
         // dump($oldData);
         // dd($newData);
+        // DB::beginTransaction();
+        // try {
+
+        //     $logdetails = new AcceptRejectInfo;
+        //     $logdetails->application_id         = $beneficiary->sourceable_id;
+        //     $logdetails->beneficiary_id         = $beneficiary->beneficiary_id;
+        //     $logdetails->ip_address             = request()->ip();
+        //     $logdetails->user_id                = $userId;
+        //     $logdetails->browser                = request()->header('User-Agent');
+        //     $logdetails->model_name             = request()->path();
+        //     $logdetails->op_type                = Codemaster::getIdByCode(2106);
+        //     $logdetails->revert_reason_cause_id = null;
+        //     $logdetails->revert_reason_remarks  = null;
+        //     $logdetails->parent_id              = null;
+        //     // dd($logdetails);
+        //     $logdetailsSaved = $logdetails->save();
+
+
+        //     $modified_caste = new CasteModificationInfo;
+        //     $modified_caste->application_id          = $beneficiary->sourceable_id;
+        //     $modified_caste->beneficiary_id          = $beneficiary->beneficiary_id;
+        //     $modified_caste->old_data                = $oldData;
+        //     $modified_caste->new_data                = $newData;
+        //     $modified_caste->caste_request_type      = $request->caste;
+        //     $modified_caste->next_level_requested_id = Codemaster::getIdByCode(2201);
+        //     $modified_caste->request_id              = $logdetails->id;
+        //     $modified_caste->created_by              = $userId;
+        //     $modified_caste->updated_by              = $userId;
+        //     $modifiedCasteSaved = $modified_caste->save();
+
+
+        //     if ($logdetailsSaved && $modifiedCasteSaved) {
+        //         DB::commit();
+        //         return redirect()->route('Caste-modification-info')
+        //             ->with('success', 'Caste updated Request Process Successfully!');
+        //     } else {
+        //         DB::rollBack();
+        //         return back()->with('error', 'Failed to save caste modification.');
+        //     }
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     return back()->with('error', 'Something went wrong: ' . $e->getMessage());
+        // }
+        $previousId = AcceptRejectInfo::where('application_id', $application_id)
+            ->orderByDesc('id')
+            ->value('id');
+        $existingModification = CasteModificationInfo::where('application_id', $beneficiary->sourceable_id)
+            ->where('next_level_requested_id', Codemaster::getIdByCode(2204)) // Rejected state
+            ->first();
+
         DB::beginTransaction();
         try {
-            $logdetails = AcceptRejectInfo::create([
-                'application_id'         => $beneficiary->sourceable_id,
-                'beneficiary_id'         => $beneficiary->beneficiary_id,
-                'ip_address'             => request()->ip(),
-                'user_id'                => $userId,
-                'browser'                => request()->header('User-Agent'),
-                'model_name'             => CasteModificationInfo::class,
-                'op_type'                => Codemaster::getIdByCode(2106),
-                'revert_reason_cause_id' => null,
-                'revert_reason_remarks'  => null,
-                'parent_id'              => null,
-            ]);
+            if ($existingModification) {
+                $acceptReject = new AcceptRejectInfo();
+                $acceptReject->application_id         = $application_id;
+                $acceptReject->beneficiary_id         = $existingModification->beneficiary_id;
+                $acceptReject->ip_address             = request()->ip();
+                $acceptReject->user_id                = Auth::id();
+                $acceptReject->browser                = request()->header('User-Agent');
+                $acceptReject->model_name             = request()->path();
+                $acceptReject->op_type                = Codemaster::getIdByCode(2106);
+                $acceptReject->revert_reason_cause_id = null;
+                $acceptReject->revert_reason_remarks  = null;
+                $acceptReject->parent_id              = $previousId;
+                $acceptSaved = $acceptReject->save();
 
-            $modified_caste = CasteModificationInfo::create([
-                'application_id' => $beneficiary->sourceable_id,
-                'beneficiary_id' => $beneficiary->beneficiary_id,
-                'old_data' => $oldData,
-                'new_data' => $newData,
-                'caste_request_type' => $request->caste,
-                'next_level_requested_id' => Codemaster::getIdByCode(2201),
-                'request_id' => $logdetails->id,
-                'created_by' => $userId,
-                'updated_by' => $userId,
-            ]);
-            // dd($modified_caste);
-            if ($logdetails && $modified_caste) {
-                DB::commit();
-                return redirect()->route('Caste-modification-info')
-                    ->with('success', 'Caste updated Request Process Successfully!');
+                // Update request_id with new log
+                $existingModification->new_data = $newData;
+                $existingModification->caste_request_type = $request->caste;
+                $existingModification->next_level_requested_id = Codemaster::getIdByCode(2201); // forward again
+                $existingModification->updated_by = $userId;
+                $existingModification->request_id = $acceptReject->id;
+                $updatedModification = $existingModification->save();
+
+                if ($acceptSaved && $updatedModification) {
+                    DB::commit();
+                    return redirect()->route('Caste-modification-info')
+                        ->with('success', 'Caste re-apply request send successfully!');
+                } else {
+                    DB::rollBack();
+                    return back()->with('error', 'Something went wrong: ');
+                }
             } else {
-                DB::rollBack();
-                return back()->with('error', 'Failed to save caste modification.');
+                // --- Fresh new request ---
+                $logdetails = new AcceptRejectInfo;
+                $logdetails->application_id         = $beneficiary->sourceable_id;
+                $logdetails->beneficiary_id         = $beneficiary->beneficiary_id;
+                $logdetails->ip_address             = request()->ip();
+                $logdetails->user_id                = $userId;
+                $logdetails->browser                = request()->header('User-Agent');
+                $logdetails->model_name             = request()->path();
+                $logdetails->op_type                = Codemaster::getIdByCode(2106);
+                $logdetails->revert_reason_cause_id = null;
+                $logdetails->revert_reason_remarks  = null;
+                $logdetails->parent_id              = null;
+                // dd($logdetails);
+                $logdetailsSaved = $logdetails->save();
+
+
+                $modified_caste = new CasteModificationInfo;
+                $modified_caste->application_id          = $beneficiary->sourceable_id;
+                $modified_caste->beneficiary_id          = $beneficiary->beneficiary_id;
+                $modified_caste->old_data                = $oldData;
+                $modified_caste->new_data                = $newData;
+                $modified_caste->caste_request_type      = $request->caste;
+                $modified_caste->next_level_requested_id = Codemaster::getIdByCode(2201);
+                $modified_caste->request_id              = $logdetails->id;
+                $modified_caste->created_by              = $userId;
+                $modified_caste->updated_by              = $userId;
+                $modifiedCasteSaved = $modified_caste->save();
+
+
+                if ($logdetailsSaved && $modifiedCasteSaved) {
+                    DB::commit();
+                    return redirect()->route('Caste-modification-info')
+                        ->with('success', 'Caste updated Request processed Successfully!');
+                } else {
+                    DB::rollBack();
+                    return back()->with('error', 'Failed to save caste modification.');
+                }
             }
         } catch (\Exception $e) {
             DB::rollBack();

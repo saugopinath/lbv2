@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Helpers\CheckAuthHelper;
 use Livewire\Component;
 use App\Models\CodeMaster;
 use Illuminate\Support\Facades\Crypt;
@@ -13,6 +14,9 @@ class CasteModificationFilters extends Component
     public array $statusOptions = [];
     public $casteOptions;
 
+    protected $rules = [
+        'applicantStatus' => 'required|string',
+    ];
     public function mount(): void
     {
         $this->casteOptions = CodeMaster::where('code', 17)->first()
@@ -21,47 +25,55 @@ class CasteModificationFilters extends Component
 
         $roleId = session('lgd_session') ? Crypt::decryptString(session('lgd_session.role_id')) : null;
 
-        if (in_array($roleId, [6,7])) { // Verifier
+        if (CheckAuthHelper::isVerifier()) {
+            $this->statusOptions = [
+                'PL'  => 'Pending List',
+                'APL' => 'Approval Pending List',
+                'AL'  => 'Approved List',
+                'RL'  => 'Reverted List',
+            ];
+        } elseif (CheckAuthHelper::isOperator()) {
+            $this->statusOptions = [
+                'VPL' => 'Verification Pending List',
+                'APL' => 'Approval Pending List',
+                'AL'  => 'Approved List',
+                'RL'  => 'Reverted List',
+            ];
+        } elseif (CheckAuthHelper::isApprover()) {
             $this->statusOptions = [
                 'PL' => 'Pending List',
-                'APL' => 'Approval Pending',
-                'AL' => 'Approved',
-                'RL' => 'Reverted',
-            ];
-        } elseif (in_array($roleId, [8, 9])) { // Operator
-            $this->statusOptions = [
-                'VPL' => 'Verification Pending',
-                'APL' => 'Approval Pending',
-                'AL' => 'Approved',
-                'RL' => 'Reverted',
-            ];
-        } elseif(in_array($roleId, [4, 5])) { // Approver
-            $this->statusOptions = [
-                'PL' => 'Pending List',
-                'AL' => 'Approved',
-                'RL' => 'Reverted',
+                'AL' => 'Approved List',
+                'RL' => 'Reverted List',
             ];
         }
     }
 
     public function applyFilters()
     {
-        // Emit filters for parent Blade to re-mount table
-        $this->dispatch('filtersApplied', [
-            'status' => $this->applicantStatus,
-            'caste'  => $this->casteId,
-        ]);
-        // dd($this->applicantStatus);
+        try {
+
+            $this->validate();
+            $this->dispatch('filtersApplied', [
+                'status' => $this->applicantStatus,
+                'caste'  => $this->casteId,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->resettable();
+            throw $e;
+        }
     }
+
 
     public function resetFilters()
     {
+        $this->resetValidation();
         $this->applicantStatus = '';
         $this->casteId = '';
-        $this->dispatch('filtersApplied', [
-            'status' => '',
-            'caste'  => '',
-        ]);
+        $this->dispatch('resetFilters');
+    }
+    public function resettable()
+    {
+        $this->dispatch('resettable');
     }
 
     public function render()

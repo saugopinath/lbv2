@@ -41,7 +41,8 @@
                 <div class="flex-1 p-2 overflow-auto">
                     <!-- Main Content -->
                     <main class="p-2 space-y-2">
-                       <x-flash-message position="top-right" width="w-80" />
+                        <x-flash-message position="top-right" width="w-80" />
+                
                         {{ $slot }}
                     </main>
                 </div>

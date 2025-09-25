@@ -186,7 +186,7 @@
                </svg><span x-show="sidebar" class="truncate" svg="truncate">Change Caste</span></a>
            </li>
            <li>
-             <a href="caste-modification-list"
+             <a href="{{ route('caste-modification-list') }}"
                class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
                <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                  viewBox="0 0 24 24" stroke="currentColor">

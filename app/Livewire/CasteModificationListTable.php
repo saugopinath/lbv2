@@ -14,7 +14,8 @@ class CasteModificationListTable extends DataTableComponent
     protected $listeners = [
         'refreshDatatable' => '$refresh',
         'filtersApplied'   => 'setFilters',
-        'resetFilters'     => 'resetFilters'
+        'resetFilters'     => 'resetFilters',
+        'resettable'  => 'resettable',
     ];
     public int $rowNumberOffset = 0;
     // public int $roleId = 0;
@@ -121,26 +122,32 @@ class CasteModificationListTable extends DataTableComponent
         // dd('bhbhbjhb');
         $this->applicantStatus = $filters['status'] ?? '';
         $this->casteId         = $filters['caste'] ?? '';
-
         $this->action_visible = ($this->applicantStatus == 'PL') ? 1 : 0;
-        $this->showTable = true;
+        if (!empty($this->applicantStatus)) {
+            $this->showTable = true;
+        } else {
+            $this->showTable = false;
+        }
         // dump($this->applicantStatus);
         // dump($this->casteId);
-
         // dd($this->action_visible);
-        // $this->resetPage();
+        $this->resetPage();
     }
-    // public function resetFilters(): void
-    // {
-    //     $this->applicantStatus   = '';
-    //     $this->casteId           = '';
-    //     $this->nextLevelRequestId = 0;
 
-    //     // ✅ hide Actions column when filters are reset
-    //     $this->action_visible = 0;
+    public function resetFilters(): void
+    {
+        $this->applicantStatus   = '';
+        $this->casteId           = '';
+        $this->nextLevelRequestId = 0;
+        $this->showTable = false;
+        $this->resetPage();
+    }
+    public function resettable(): void
+    {
+        $this->showTable = false;
+        $this->resetPage();
+    }
 
-    //     $this->resetPage();
-    // }
 
     public function builder(): Builder
     {
@@ -178,21 +185,11 @@ class CasteModificationListTable extends DataTableComponent
                 $this->nextLevelRequestId = Codemaster::getIdByCode(2203);
             } elseif ($this->applicantStatus == 'RL') {
                 $this->nextLevelRequestId = Codemaster::getIdByCode(2204);
+            } else {
+                $this->nextLevelRequestId = 0;
             }
-
-            $query->where('next_level_requested_id', $this->nextLevelRequestId);
-        } else {
-            if (in_array($this->roleId, [4, 5])) {
-                $this->nextLevelRequestId = Codemaster::getIdByCode(2202);
-            } elseif (in_array($this->roleId, [6, 7])) {
-                $this->nextLevelRequestId = Codemaster::getIdByCode(2201);
-            } elseif (in_array($this->roleId, [8, 9])) {
-                $this->nextLevelRequestId = Codemaster::getIdByCode(2201);
-            }
-
             $query->where('next_level_requested_id', $this->nextLevelRequestId);
         }
-
         return $query;
     }
     public function columns(): array
@@ -205,17 +202,42 @@ class CasteModificationListTable extends DataTableComponent
             Column::make("Father's Name")
                 ->label(fn($row) => $row->beneficiaryCommonList?->sourceable?->relationships
                     ->where('relation_type_id', 79)->first()?->full_name ?? 'N/A'),
+            //     Column::make("Actions")
+            //         ->label(fn($row) => view('coulmn_button.view', [
+            //             'link' => route('view-beneficiary-details', [
+            //                 'application_id' => Crypt::encrypt($row->application_id)
+            //             ]),
+            //             'tooltip' => 'view Application',
+            //         ])->render())
+            //         ->html()
+            //         ->hideIf(
+            //             !auth()->user()?->hasAnyRole(['Verifier', 'Approver'])
+            //         ),
             Column::make("Actions")
-                ->label(fn($row) => view('coulmn_button.view', [
-                    'link' => route('view-beneficiary-details', [
-                        'application_id' => Crypt::encrypt($row->application_id)
-                    ]),
-                    'tooltip' => 'Verify Application',
-                ])->render())
-                ->html()
-                ->hideIf(
-                    !auth()->user()?->hasAnyRole(['Verifier', 'Approver'])
-                ),
+                ->label(function ($row) {
+                    if (auth()->user()?->hasAnyRole(['Verifier', 'Approver'])) {
+                        return view('coulmn_button.view', [
+                            'link' => route('view-beneficiary-details', [
+                                'application_id' => Crypt::encrypt($row->application_id)
+                            ]),
+                            'tooltip' => 'View Application',
+                        ])->render();
+                    }
+
+                    if (auth()->user()?->hasRole('Operator')) {
+                        return view('coulmn_button.view', [
+                            'link' => route('caste-modification.edit', [
+                                'application_id' => Crypt::encryptstring($row->application_id),
+                                'beneficiary_id'=> Crypt::encryptstring($row->beneficiary_id)
+                            ]),
+                            'tooltip' => 'Edit Application',
+                        ])->render();
+                    }
+
+                    return ''; 
+                })
+                ->html(),
+
         ];
     }
 

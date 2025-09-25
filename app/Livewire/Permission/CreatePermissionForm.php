@@ -83,6 +83,7 @@ class CreatePermissionForm extends Component
 
         $this->reset(['name', 'is_parent', 'parent_id', 'has_score', 'min_score', 'max_score']);
         $this->dispatch('close-modal');
+        // $this->dispatch('notify', 'Permission created successfully!', 'success');
         $this->dispatch('notify', message: 'Permission created successfully!');
         $this->dispatch('refreshDatatable');
     }

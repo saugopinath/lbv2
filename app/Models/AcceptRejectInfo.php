@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class AcceptRejectInfo extends Model
+class AcceptRejectInfo extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable; 
+    
     protected $table = 'accept_reject_infos';
 
     protected $fillable = [

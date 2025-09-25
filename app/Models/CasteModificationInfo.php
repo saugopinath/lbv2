@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class CasteModificationInfo extends Model
+class CasteModificationInfo extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable; 
+    
     protected $table = 'lb_scheme.caste_modification_infos';
     protected $guarded = ['id'];
     protected $casts = [
