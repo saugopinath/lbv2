@@ -238,7 +238,6 @@ protected function messages()
         return;
     }
 
-   
         $this->validate();
 
         $base64 = base64_encode(file_get_contents($this->singleDocument->getRealPath()));
