@@ -17,7 +17,8 @@
                         <input type="radio" class="form-radio text-blue-600" name="bank_action"
                             wire:model.lazy="bank_action" value="3"
                             @if ($dupAction === '1' || $dupAction === '2') disabled @endif
-                            {{ old('bank_action', $bank_action) == '3' ? 'checked' : '' }} x-on:change="Livewire.dispatch('showLoader')" />
+                            {{ old('bank_action', $bank_action) == '3' ? 'checked' : '' }}
+                            x-on:change="Livewire.dispatch('showLoader')" />
                         <span>CHANGE</span>
                     </label>
                 </div>
@@ -124,10 +125,13 @@
                     </p>
                 </div>
 
-                <div class="flex gap-6">
-                    <div class="w-1/2">
+                <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
+                    {{--  <div class="w-1/3">
+                        <h3 class="font-semibold mb-2">Previous Approved Document</h3>
+                        <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[112]" :is_page="1" />
+                    </div>  --}}
+                    <div class="w-1/3">
                         <h3 class="font-semibold mb-2">Newly Temp Document</h3>
-
                         <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[112]" enclosureSource="5" />
 
                         {{-- Error --}}

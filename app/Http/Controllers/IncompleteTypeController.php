@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Helpers\AadhaarHelper;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 
 class IncompleteTypeController extends Controller
 {
@@ -28,6 +29,7 @@ class IncompleteTypeController extends Controller
 
     public function fullUpdate(Request $request, $id)
     {
+        // dd($request->dup_mobile);
         // Decrypt ID
         $realId = Crypt::decrypt($id);
 
@@ -152,7 +154,7 @@ class IncompleteTypeController extends Controller
                 'ip_address'             => $request->ip(),
                 'user_id'                => $user_id,
                 'browser'                => $request->header('User-Agent'),
-                'model_name'             => 'ApplicantIncompleteDetail',
+                'model_name' => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
                 'op_type'                => Codemaster::where('code', 245)->value('id'),
                 'revert_reason_cause_id' => null,
                 'revert_reason_remarks'  => null,

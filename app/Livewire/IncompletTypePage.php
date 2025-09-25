@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\BeneficiaryTemEnclosure;
 use App\Models\ApplicantIncompletDeatil;
+use Illuminate\Support\Facades\Route;
 
 class IncompletTypePage extends Component
 {
@@ -88,7 +89,7 @@ class IncompletTypePage extends Component
                 'ip_address'             => request()->ip(),
                 'user_id'                => $this->user_id,
                 'browser'                => request()->header('User-Agent'),
-                'model_name'             => 'ApplicantIncompleteDetail',
+                'model_name'             => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
                 'op_type'                => Codemaster::where('code', 246)->value('id'),
                 'revert_reason_cause_id' => null,
                 'revert_reason_remarks'  => null,
@@ -362,7 +363,7 @@ class IncompletTypePage extends Component
                 'ip_address'             => request()->ip(),
                 'user_id'                => $this->user_id,
                 'browser'                => request()->header('User-Agent'),
-                'model_name'             => 'ApplicantIncompleteDetail',
+                'model_name'             => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
                 'op_type'                => Codemaster::where('code', 247)->value('id'),
                 'revert_reason_cause_id' => $this->revert_reason_cause_id,
                 'revert_reason_remarks'  => $this->revert_reason_remarks,
@@ -409,7 +410,7 @@ class IncompletTypePage extends Component
                 'ip_address'             => request()->ip(),
                 'user_id'                => $this->user_id,
                 'browser'                => request()->header('User-Agent'),
-                'model_name'             => 'ApplicantIncompleteDetail',
+                'model_name'             => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
                 'op_type'                => Codemaster::where('code', 245)->value('id'),
                 'revert_reason_cause_id' => null,
                 'revert_reason_remarks'  => null,

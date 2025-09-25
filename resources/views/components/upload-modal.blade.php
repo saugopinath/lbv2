@@ -31,6 +31,7 @@
         @error('singleDocument')
             <div class="mt-2 text-sm text-red-600">{{ $message }}</div>
         @enderror
+        <div x-show="errorMessage" x-text="errorMessage" class="mt-2 text-sm text-red-600"></div>
 
         <!-- Image Preview -->
         <template x-if="currentFilePreview">

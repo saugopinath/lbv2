@@ -8,17 +8,17 @@
             currentFilePreview: null,
             currentFileName: '',
             currentFileMime: '',
-    
+
             handleFileChange(event) {
                 const file = event.target.files[0];
                 if (!file) {
                     this.resetFileData();
                     return;
                 }
-    
+
                 this.currentFileName = file.name;
                 this.currentFileMime = file.type || 'Unknown MIME type';
-    
+
                 if (this.currentFileMime.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = e => this.currentFilePreview = e.target.result;
@@ -27,7 +27,7 @@
                     this.currentFilePreview = null;
                 }
             },
-    
+
             openModal(docId, docName) {
                 this.currentDocName = docName || '';
                 this.resetFileData();
@@ -37,7 +37,7 @@
                 this.currentDocId = docId;
                 this.$wire.call('setCurrentDoc', docId);
                 this.showUploadModal = true;
-    
+
                 {{--  this.showUploadModal = true;  --}}
                 {{--  this.currentDocId = docId;  --}}
                 {{--  this.currentDocName = docName;  --}}
@@ -46,8 +46,30 @@
                 {{--  this.$wire.setCurrentDoc(docId);  --}}
                 {{--  this.$wire.set('singleDocument', null);  --}}
             },
-    
+
             async uploadFile() {
+                    if (!this.$refs.fileInput.files.length) {
+                        this.errorMessage = 'Please select a file to upload.';
+                        return;
+                    }
+
+                    this.errorMessage = ''; // reset error if file selected
+
+                    try {
+                        // Livewire Method Call
+                        await this.$wire.saveSingleDocument();
+
+                        // Reset data after upload success
+                        this.resetFileData();
+                        if (this.$refs.fileInput) this.$refs.fileInput.value = null;
+                    } catch (e) {
+                        // Focus back on file input if error occurs
+                        if (this.$refs.fileInput) this.$refs.fileInput.focus();
+                        this.errorMessage = 'Something went wrong while uploading.';
+                    }
+                },
+
+                {{--  async uploadFile() {
                     if (!this.$refs.fileInput.files.length) {
                         alert('Please select a file to upload.');
                         return;
@@ -59,9 +81,9 @@
                     } catch (e) {
                         if (this.$refs.fileInput) this.$refs.fileInput.focus();
                     }
-                },
-    
-                {{--  uploadFile() {
+                },  --}}
+
+        {{--  uploadFile() {
                     if (!this.$refs.fileInput.files.length) {
                         alert('Please select a file to upload.');
                         return;
@@ -71,7 +93,7 @@
                             this.closeModal();
                         });
                 },  --}}
-    
+
         closeModal() {
                 this.showUploadModal = false;
                 this.resetFileData();
@@ -79,7 +101,7 @@
                 this.$wire.set('singleDocument', null);
                 this.$wire.call('resetSingleDocumentErrors');
             },
-    
+
             {{--  closeModal() {
                     this.showUploadModal = false;
                     this.resetFileData();
@@ -87,13 +109,14 @@
                     this.$wire.set('currentDocId', null);
                     this.$refs.fileInput.value = null;
                 },  --}}
-    
+
         resetFileData() {
             this.currentFilePreview = null;
             this.currentFileName = '';
             this.currentFileMime = '';
+             this.errorMessage = '';
         }
-    
+
         {{--  resetFileData() {
             this.currentFilePreview = null;
             this.currentFileName = '';

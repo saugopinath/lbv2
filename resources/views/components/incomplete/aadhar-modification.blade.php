@@ -9,17 +9,20 @@
             @endforeach
         </ul>
 
-        <p class="text-sm text-gray-600">
-            <strong>Old Aadhaar:</strong> {{ $issueItem->old_value['aadhaar_no'] ?? 'N/A' }}
+
+
+        <p class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
+            Old Aadhaar: {{ $issueItem->old_value['aadhaar_no'] ?? 'N/A' }}
         </p>
 
         <div>
             @if (request()->has('stage') && in_array(decrypt(request()->get('stage')), ['verifier', 'revert']))
-                <x-form.input id="aadhar_modification_{{ $aadhaarIssues[0]->application_id }}" name="aadhar_modification"
-                    label="Aadhaar Number" required placeholder="Enter New Aadhaar Number"
-                    wire:model.defer="formData.aadhar_modification.{{ $aadhaarIssues[0]->application_id }}"
-                    value="{{ old('aadhar_modification', $issueItem->new_value['aadhaar_no'] ?? '') }}"
-                    x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
+                <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
+                    <x-form.input id="aadhar_modification_{{ $aadhaarIssues[0]->application_id }}"
+                        name="aadhar_modification" label="Aadhaar Number" required placeholder="Enter New Aadhaar Number"
+                        wire:model.defer="formData.aadhar_modification.{{ $aadhaarIssues[0]->application_id }}"
+                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
+                </div>
 
             @elseif (request()->has('stage') && decrypt(request()->get('stage')) === 'approver')
                 <p class="mt-2 text-gray-700">
@@ -35,8 +38,13 @@
             @endif
         </div>
 
-        <div class="flex gap-6 mt-4">
-            <div class="w-1/2">
+        <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
+            {{-- Previous Approved Document --}}
+             {{--  <div class="w-1/3">
+                <h3 class="font-semibold mb-2">Previous Approved Document</h3>
+                <livewire:enclosure-list :application_id="$aadhaarIssues[0]->application_id" :doc_type_id_array_list="[108]" :is_page="1" :key="'previous-' . $aadhaarIssues[0]->application_id" />
+            </div>  --}}
+            <div class="w-1/3">
                 <h3 class="font-semibold mb-2">Newly Temp Document</h3>
                 <livewire:enclosure-list :application_id="$aadhaarIssues[0]->application_id" :doc_type_id_array_list="[108]" enclosureSource="5" :key="'new-' . $aadhaarIssues[0]->application_id" />
 
