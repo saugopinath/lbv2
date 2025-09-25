@@ -132,34 +132,89 @@ class EnclosureList extends Component
     //         'singleDocument' => "$requiredRule|file|mimes:$mimesRule|max:$maxSizeKB",
     //     ];
     // }
-    protected function rules()
-    {
-        if (!$this->currentDocId) {
-            return [
-                'singleDocument' => 'nullable|file',
-            ];
-        }
-
-        $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
-
-        if (!$doc) {
-            return [
-                'singleDocument' => 'nullable|file',
-            ];
-        }
-
-        preg_match('/(\d+)/', $doc->max_file_size, $matches);
-        $maxSizeKB = isset($matches[1]) ? (int) $matches[1] : 1024;
-
-        $extensionsArray = array_map('trim', explode(',', strtolower($doc->extension_type)));
-        $mimesRule = implode(',', $extensionsArray);
-
-        $requiredRule = $doc->is_required ? 'required' : 'nullable';
-
-        return [
-            'singleDocument' => "$requiredRule|file|mimes:$mimesRule|max:$maxSizeKB",
-        ];
+protected function rules()
+{
+    if (!$this->currentDocId) {
+        return ['singleDocument' => 'nullable|file'];
     }
+
+    $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
+    if (!$doc) {
+        return ['singleDocument' => 'nullable|file'];
+    }
+
+    preg_match('/(\d+)/', $doc->max_file_size, $matches);
+    $maxSizeKB = isset($matches[1]) ? (int) $matches[1] : 1024;
+
+    $extensionsArray = array_map('trim', explode(',', strtolower($doc->extension_type)));
+    $mimesRule = implode(',', $extensionsArray);
+
+    $requiredRule = $doc->is_required ? 'required' : 'nullable';
+
+    // Set properties early
+    $this->currentDocMaxSize = $maxSizeKB . ' KB';
+    $this->currentDocExtensions = strtoupper($mimesRule);
+
+    return [
+        'singleDocument' => "$requiredRule|file|mimes:$mimesRule|max:$maxSizeKB",
+    ];
+}
+
+protected function messages()
+{
+    $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
+    $docName = $doc?->codemaster?->name ?? 'Document';
+    $extensions = $this->currentDocExtensions ?: 'JPG, PNG, PDF';
+    $maxSize    = $this->currentDocMaxSize ?: '1024 KB';
+
+    return [
+        'singleDocument.required' => "{$docName} is required.",
+        'singleDocument.mimes'    => "{$docName} must be of type: {$extensions}.",
+        'singleDocument.max'      => "{$docName} must not be greater than {$maxSize}.",
+    ];
+}
+
+    // protected function messages()
+    // {
+    //     $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
+
+    //     $docName = $doc?->codemaster?->name ?? 'Document';
+    //     // dd( $docName);
+    //     return [
+    //         'singleDocument.required' => "{$docName} is required.",
+    //         'singleDocument.mimes'    => "{$docName} must be of type: {$this->currentDocExtensions}.",
+    //         'singleDocument.max'      => "{$docName} must not be greater than {$this->currentDocMaxSize}.",
+    //     ];
+    // }
+
+    // protected function rules()
+    // {
+    //     if (!$this->currentDocId) {
+    //         return [
+    //             'singleDocument' => 'nullable|file',
+    //         ];
+    //     }
+
+    //     $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
+
+    //     if (!$doc) {
+    //         return [
+    //             'singleDocument' => 'nullable|file',
+    //         ];
+    //     }
+
+    //     preg_match('/(\d+)/', $doc->max_file_size, $matches);
+    //     $maxSizeKB = isset($matches[1]) ? (int) $matches[1] : 1024;
+
+    //     $extensionsArray = array_map('trim', explode(',', strtolower($doc->extension_type)));
+    //     $mimesRule = implode(',', $extensionsArray);
+
+    //     $requiredRule = $doc->is_required ? 'required' : 'nullable';
+
+    //     return [
+    //         'singleDocument' => "$requiredRule|file|mimes:$mimesRule|max:$maxSizeKB",
+    //     ];
+    // }
 
     public function resetSingleDocumentErrors()
     {
@@ -175,6 +230,15 @@ class EnclosureList extends Component
     public function saveSingleDocument()
     {
         // dd('ok');
+
+        if (!$this->singleDocument) {
+        $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
+        $docName = $doc?->codemaster?->name ?? 'Document';
+        $this->addError('singleDocument', "{$docName} is required.");
+        return;
+    }
+
+   
         $this->validate();
 
         $base64 = base64_encode(file_get_contents($this->singleDocument->getRealPath()));

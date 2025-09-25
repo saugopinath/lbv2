@@ -96,8 +96,12 @@
 
         closeModal() {
                 this.showUploadModal = false;
+                this.errorMessage = '';
+                this.currentFileName = '';
+                this.currentFilePreview = '';
                 this.resetFileData();
                 if (this.$refs.fileInput) this.$refs.fileInput.value = null;
+                {{--  this.$wire.setErrorBag({});  --}}
                 this.$wire.set('singleDocument', null);
                 this.$wire.call('resetSingleDocumentErrors');
             },
@@ -114,7 +118,7 @@
             this.currentFilePreview = null;
             this.currentFileName = '';
             this.currentFileMime = '';
-             this.errorMessage = '';
+            this.errorMessage = '';
         }
 
         {{--  resetFileData() {
