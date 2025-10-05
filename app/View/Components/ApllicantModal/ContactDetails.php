@@ -13,13 +13,12 @@ class ContactDetails extends Component
     /**
      * Create a new component instance.
      */
-    public $id, $applicantDet,$reportType, $distname, $ps, $blockmunicorp, $gpward, $villtown, $houseno, $po, $pin;
-    public function __construct($id,$reportType = null)
+    public $id, $applicantDet, $distname, $ps, $blockmunicorp, $gpward, $villtown, $houseno, $po, $pin, $mode;
+    public function __construct($id, $reportType = null, $mode = null)
     {
-
-        //  $reportType = request()->query('reportType');
-
-         if ($reportType === '3') {
+        $reportType = request()->query('reportType');
+        $this->mode = $mode;
+        if ($reportType === '3') {
             $this->applicantDet = BeneficiaryPersonal::with('contact')
                 ->where('beneficiary_id', $id)
                 ->firstOrFail();
@@ -49,6 +48,9 @@ class ContactDetails extends Component
      */
     public function render(): View|Closure|string
     {
+        if ($this->mode === 'page') {
+            return view('components.apllicant-modal.contact-details-page');
+        }
         return view('components.apllicant-modal.contact-details');
     }
 }

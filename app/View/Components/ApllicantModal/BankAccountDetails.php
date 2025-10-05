@@ -14,13 +14,12 @@ class BankAccountDetails extends Component
     /**
      * Create a new component instance.
      */
-    public $id,$reportType, $applicantDet, $bankname, $bankbranchname, $bankaccountnumber, $ifscode;
-    public function __construct($id,$reportType = null)
+    public $id, $applicantDet, $bankname, $bankbranchname, $bankaccountnumber, $ifscode, $mode;
+    public function __construct($id, $reportType = null, $mode = null)
     {
-
-        // $reportType = request()->query('reportType');
-
-         if ($reportType === '3') {
+        $reportType = request()->query('reportType');
+        $this->mode = $mode;
+        if ($reportType === '3') {
             $this->applicantDet = BeneficiaryPersonal::with('bank')
                 ->where('beneficiary_id', $id)
                 ->first();
@@ -41,6 +40,10 @@ class BankAccountDetails extends Component
      */
     public function render(): View|Closure|string
     {
+
+        if ($this->mode === 'page') {
+            return view('components.apllicant-modal.bank-account-details-page');
+        }
         return view('components.apllicant-modal.bank-account-details');
     }
 }

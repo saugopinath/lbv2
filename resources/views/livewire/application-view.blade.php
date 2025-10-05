@@ -16,15 +16,15 @@
     }" class="space-y-2">
 
         <x-accordion-section title="Personal Details" sectionId="personal-details" color="pink-500">
-            <x-apllicant-modal.personal-details :id="$passId" :reportType="$reportType" />
+            <x-apllicant-modal.personal-details :id="$passId" :reportType="$reportType" mode="page" />
         </x-accordion-section>
 
         <x-accordion-section title="Address Details" sectionId="address-details" color="indigo-500">
-            <x-apllicant-modal.contact-details :id="$passId" :reportType="$reportType" />
+            <x-apllicant-modal.contact-details :id="$passId" :reportType="$reportType" mode="page" />
         </x-accordion-section>
 
         <x-accordion-section title="Bank Details" sectionId="bank-details" color="green-500">
-            <x-apllicant-modal.bank-account-details :id="$passId" :reportType="$reportType" />
+            <x-apllicant-modal.bank-account-details :id="$passId" :reportType="$reportType" mode="page" />
         </x-accordion-section>
 
         <x-accordion-section title="Encloser Details" sectionId="encloser-details" color="orange-500">
