@@ -80,10 +80,10 @@
                               <td class="py-3">{{ $row->rejected_reason }}</td>
                           @endif
                           <td class="py-3 space-x-4">
-                              @if ($reportType != '4')
+                              @if ($reportType != '4')                                 
                                   <x-icon.view
                                       href="{{ route('application.view', [
-                                          'id' => $reportType == '3' ? $row->beneficiary_id : $row->application_id,
+                                          'id' => $reportType == '3' ? encrypt($row->beneficiary_id) : encrypt($row->application_id),
                                           'reportType' => $reportType,
                                       ]) }}">
                                       View

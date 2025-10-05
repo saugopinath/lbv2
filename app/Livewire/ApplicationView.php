@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\BeneficiaryPersonal;
+use Illuminate\Support\Facades\Crypt;
 use App\Models\DraftBeneficiaryPersonal;
 
 class ApplicationView extends Component
@@ -17,16 +18,17 @@ class ApplicationView extends Component
 
     public function mount($id,$is_duplicate = 0)
     {
+        $realId = Crypt::decrypt($id);
         $this->reportType = request()->query('reportType');
         $this->is_duplicate   = $is_duplicate;
 
         if ($this->reportType === '3') {
-            $this->application = BeneficiaryPersonal::findOrFail($id);
+            $this->application = BeneficiaryPersonal::findOrFail($realId);
             $this->label = 'Beneficiary Id';
             $this->value = $this->application->beneficiary_id;
             $this->passId = $this->application->beneficiary_id;
         } else {
-            $this->application = DraftBeneficiaryPersonal::findOrFail($id);
+            $this->application = DraftBeneficiaryPersonal::findOrFail($realId);
             $this->label = 'Application Id';
             $this->value = $this->application->application_id;
             $this->passId = $this->application->application_id;

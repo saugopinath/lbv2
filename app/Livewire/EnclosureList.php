@@ -170,8 +170,6 @@ class EnclosureList extends Component
 
     public function saveSingleDocument()
     {
-        // dd('ok');
-
         if (!$this->singleDocument) {
             $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
             $docName = $doc?->codemaster?->name ?? 'Document';
@@ -212,6 +210,7 @@ class EnclosureList extends Component
 
         $this->singleDocument = null;
         $this->currentDocId = null;
+        $savedDocId = $this->currentDocId;
         $this->currentDocMaxSize = '';
         $this->currentDocExtensions = '';
         $this->showUploadModal = false;
@@ -234,7 +233,9 @@ class EnclosureList extends Component
                 }
             }
         }
+
         $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.');
+        $this->dispatch('$refresh');
     }
 
     public function downloadDocument($id)

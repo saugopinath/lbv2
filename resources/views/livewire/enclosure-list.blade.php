@@ -71,6 +71,7 @@
                     if (this.$refs.fileInput) this.$refs.fileInput.value = null;
                     this.$wire.set('singleDocument', null);
                     this.$wire.call('resetSingleDocumentErrors');
+                    this.$wire.dispatch('$refresh');
                 },
     
                 resetFileData() {
