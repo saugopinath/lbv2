@@ -210,7 +210,6 @@ class EnclosureList extends Component
 
         $this->singleDocument = null;
         $this->currentDocId = null;
-        $savedDocId = $this->currentDocId;
         $this->currentDocMaxSize = '';
         $this->currentDocExtensions = '';
         $this->showUploadModal = false;
