@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
-class BeneficiaryDetailsTable extends DataTableComponent
+class BeneficiaryTable extends DataTableComponent
 {
     public ?int $perPage = 5;
     public string $reportType;

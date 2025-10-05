@@ -10,7 +10,7 @@
              Beneficiary Report
         </h2>
         <div>
-            <livewire:beneficiary-details-table :reportType="$reportType" />
+            <livewire:beneficiary-table :reportType="$reportType" />
         </div>
     </div>
 </x-layouts.app>
