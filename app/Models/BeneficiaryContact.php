@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class BeneficiaryContact extends Model
+class BeneficiaryContact extends Model implements Auditable
 {
     protected $guarded = [
         'id',
     ];
+    use \OwenIt\Auditing\Auditable;
+    // protected $primaryKey = 'application_id';
     protected $table = 'lb_scheme.beneficiary_contacts';
 
     public $timestamps = false;

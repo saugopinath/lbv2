@@ -3,12 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
-class DraftBeneficiaryContact extends Model
+use OwenIt\Auditing\Contracts\Auditable;
+class DraftBeneficiaryContact extends Model implements Auditable
 {
-    protected $guarded = [
-        'id',
+    use \OwenIt\Auditing\Auditable;
+    protected $fillable = [
+        'application_id',
+        'district_id',
+        'rural_urban_id',
+        'police_station',
+        'village_town_city',
+        'post_office',
+        'pincode',
+        'house_premise_no',
+        'block_id',
+        'panchayat_id',
+        'municipality_id',
+        'ward_id',
+        'created_by',
     ];
+    protected $primaryKey = 'application_id';
     protected $table = 'lb_scheme.draft_beneficiary_contacts';
 
     public $timestamps = false;

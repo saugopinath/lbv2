@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('lb_scheme.beneficiary_declarations', function (Blueprint $table) {
             $table->id();
+
             $table->unsignedBigInteger('beneficiary_id');
             $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals')->onDelete('cascade');
-            $table->unsignedInteger('application_id');
+            $table->unsignedBigInteger('application_id');
             $table->Integer('created_by');
             $table->boolean('is_resident');
             $table->boolean('earn_monthly_remuneration');

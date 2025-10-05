@@ -6,7 +6,6 @@ use Livewire\Component;
 use App\Models\District;
 use App\Models\Block;
 use App\Models\Municipality;
-use Illuminate\Support\Facades\Crypt;
 
 class FilterLgdMasterEntry extends Component
 {
@@ -24,7 +23,7 @@ class FilterLgdMasterEntry extends Component
 
     public function mount($login_type = null, $selectedDistrict = null, $selectedRuralurban = null, $selectedBlockurban = null, $selectedGpWard = null)
     {
-        $this->login_type = 'state_office';
+        $this->login_type = $login_type;
         $this->selectedDistrict = $selectedDistrict;
         $this->selectedRuralurban = $selectedRuralurban;
         $this->selectedBlockurban = $selectedBlockurban;
@@ -36,6 +35,26 @@ class FilterLgdMasterEntry extends Component
             $this->visible['gp_ward_dropdown'] = 1;
             $this->districts = District::all();
             $this->loadSubdivisions();
+            $this->loadGpOrWard();
+        }
+        if ($this->login_type === 'district_office') {
+            $this->visible['rural_urban_dropdown'] = 1;
+            $this->visible['block_dropdown'] = 1;
+            $this->visible['gp_ward_dropdown'] = 1;
+            $this->selectedDistrict = 318;
+        }
+        if ($this->login_type === 'subdivision_office') {
+            $this->visible['block_dropdown'] = 1;
+            $this->visible['gp_ward_dropdown'] = 1;
+            $this->selectedDistrict = 318;
+            $this->selectedRuralurban = 1;
+            $this->loadSubdivisions();
+        }
+        if ($this->login_type === 'block_office') {
+            $this->visible['gp_ward_dropdown'] = 1;
+            $this->selectedRuralurban = 2;
+            $this->selectedDistrict = 318;
+            $this->selectedBlockurban = 2974;
             $this->loadGpOrWard();
         }
     }

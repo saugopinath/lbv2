@@ -51,6 +51,34 @@ class EncryptionArray
         return $query;
     }
 
+     public static function applyLocationFilte(Builder $query, ?int $district_id, ?int $rural_urban, ?int $blockurban, ?int $gp_ward): Builder
+    {
+        $blockField  = $rural_urban == 2 ? 'block_id'      : 'municipality_id';
+        $gpWardField = $rural_urban == 2 ? 'panchayat_id'  : 'ward_id';
+
+            $query->with('sourceable.contact');
+
+            if ($district_id) {
+                $query->whereHas('sourceable.contact', function ($q) use ($district_id) {
+                    $q->where('district_id', $district_id);
+                });
+            }
+
+            if ($blockurban) {
+                $query->whereHas('sourceable.contact', function ($q) use ($blockField, $blockurban) {
+                    $q->where($blockField, $blockurban);
+                });
+            }
+
+            if ($gp_ward) {
+                $query->whereHas('sourceable.contact', function ($q) use ($gpWardField, $gp_ward) {
+                    $q->where($gpWardField, $gp_ward);
+                });
+            }
+
+        return $query;
+    }
+
     // public static function applyLocationFilter(
     //     Builder $query,
     //     ?int $district_id,

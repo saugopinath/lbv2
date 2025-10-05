@@ -14,7 +14,7 @@
         wire:key="{{ $tableName }}-twrap"
         {{ $attributes->merge($customAttributes['wrapper'])
             ->class([
-                'shadow overflow-y-auto border-b border-gray-200 dark:border-gray-700 sm:rounded-lg' => $customAttributes['wrapper']['default'] ?? true
+                'overflow-x-auto overflow-y-auto max-h-[500px] border rounded-lg shadow-sm' => $customAttributes['wrapper']['default'] ?? true
             ])
             ->except(['default','default-styling','default-colors']) }}
     >

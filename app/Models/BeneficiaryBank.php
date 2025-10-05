@@ -8,9 +8,10 @@ use OwenIt\Auditing\Contracts\Auditable;
 class BeneficiaryBank extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
-    protected $guarded = [
+     protected $guarded = [
         'id',
     ];
+    // protected $primaryKey = 'beneficiary_id';
     protected $table = 'lb_scheme.beneficiary_banks';
 
     public function ifscCodeMaster()

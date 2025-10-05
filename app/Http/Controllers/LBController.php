@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DraftBeneficiaryPersonal;
+
 use Illuminate\Http\Request;
 
 class LBController extends Controller
@@ -16,8 +16,8 @@ class LBController extends Controller
     }
     public function draftlist()
     {
-        $lists = DraftBeneficiaryPersonal::paginate(10);
-        return view('lbform.draftlist',compact('lists'));
+        $button_show = 1;
+        return view('lbform.draftlist',compact('button_show'));
     }
     public function draftedit($id)
     {

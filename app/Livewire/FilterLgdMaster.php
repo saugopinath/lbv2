@@ -31,7 +31,6 @@ class FilterLgdMaster extends Component
         $select_lgd = session('lgd_session');
         $this->button_show = $button_show;
 
-
         $login_type =  Crypt::decryptString($select_lgd['office_type_id']);
 
         if (!empty($select_lgd['district_id'])) {

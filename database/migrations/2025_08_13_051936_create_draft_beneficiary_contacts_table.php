@@ -13,14 +13,11 @@ return new class extends Migration
     {
         Schema::create('lb_scheme.draft_beneficiary_contacts', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('application_id');
-
-
+            $table->unsignedBigInteger('application_id');
             $table->smallInteger('district_id');
-
             $table->smallInteger('rural_urban_id');
-
             $table->smallInteger('block_id')->nullable();
+            $table->mediumInteger('sub_division_id')->nullable();
             $table->Integer('municipality_id')->nullable();
             $table->Integer('ward_id')->nullable();
             $table->Integer('panchayat_id')->nullable();
@@ -28,12 +25,13 @@ return new class extends Migration
             $table->string('village_town_city',300);
             $table->string('house_premise_no',300)->nullable();
             $table->string('post_office',300);
-            $table->char('pincode',8);
+            $table->string('pincode',6);
             $table->Integer('residency_period')->nullable();
             $table->Integer('created_by');
             $table->foreign('created_by','user_id_fk')->references('id')->on('public.users');
             $table->foreign('application_id','application_id_fk')->references('application_id')->on('lb_scheme.draft_beneficiary_personals')->onDelete('cascade');
             $table->foreign('district_id','district_id_fk')->references('id')->on('public.districts');
+            $table->foreign('sub_division_id', 'sub_division_id_fk')->references('id')->on('public.subdivisions');
             $table->foreign('municipality_id','municipality_id_fk')->references('id')->on('public.municipalities');
             $table->foreign('ward_id','ward_id_fk')->references('id')->on('public.wards');
             $table->foreign('block_id','block_id_fk')->references('id')->on('public.blocks');
@@ -41,6 +39,7 @@ return new class extends Migration
             $table->timestamps();
             $table->index(['district_id','block_id'], 'draft_beneficiary_contacts_district_id_block_id_index');
             $table->index(['district_id','municipality_id'], 'draft_beneficiary_contacts_district_id_municipality_id_index');
+             $table->index(['district_id', 'sub_division_id'], 'draft_beneficiary_contacts_district_id_sub_division_id_index');
             $table->index(['district_id','municipality_id','ward_id'], 'draft_beneficiary_contacts_district_id_municipality_id_ward_id_index');
             $table->index(['district_id','block_id','panchayat_id'], 'draft_beneficiary_contacts_district_id_block_id_panchayat_id_index');
             $table->index('application_id', 'draft_beneficiary_contacts_application_id_index');

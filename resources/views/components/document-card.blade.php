@@ -82,10 +82,14 @@
                 </x-button.primary>
             </div>
         @endif
+<<<<<<< HEAD
         {{--  @if ($isRequired && empty($existingDoc) && $showErrors)
             <p class="text-red-500 text-sm mt-2">{{ $docName }} document is required.</p>
         @endif  --}}
         @if ($isRequired && empty($existingDoc) && !$singleDocument && $showErrors)
+=======
+        @if ($isRequired && empty($existingDoc) && $showErrors)
+>>>>>>> bca24133e2247f41e7344d63099822462ceff6fd
             <p class="text-red-500 text-sm mt-2">{{ $docName }} document is required.</p>
         @endif
         <template x-if="successMessage">

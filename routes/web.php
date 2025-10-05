@@ -22,6 +22,8 @@ use App\Http\Controllers\IncompleteTypeController;
 use App\Http\Controllers\IncompletPageController;
 
 
+use App\Http\Controllers\WorkFlowController;
+use App\Livewire\ProcessApplication\DraftApplicationView;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -102,3 +104,8 @@ Route::get('/incomplet-type/{id}', IncompletTypePage::class)
 
 // Route::get('/incomplet-type/{id}', [IncompletPageController::class, 'page'])
 //     ->name('incomplet-type.page');
+Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
+Route::get('/approved-lists', [BeneficiaryApprovedListController::class, 'index'])->name('approved-lists');
+Route::get('/approved-lists-BA-Wise', [BeneficiaryApprovedListController::class, 'beneficiaryContactwiseList'])->name('approved-lists-BA-Wise');
+Route::get('lb-application-list', [WorkFlowController::class, 'index'])->middleware(['auth', 'verified'])->name('lb-application-list');
+Route::get('/application/{id}', DraftApplicationView::class)->name('draft-application.view');

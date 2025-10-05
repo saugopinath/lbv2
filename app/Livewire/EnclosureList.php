@@ -98,7 +98,6 @@ class EnclosureList extends Component
             }
         }
     }
-
     public function setCurrentDoc($docTypeId)
     {
         $this->currentDocId = $docTypeId;

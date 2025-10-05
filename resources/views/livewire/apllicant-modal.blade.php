@@ -1,5 +1,4 @@
 <div>
-    @if($openModal)
         <div 
             x-data="{ openModal: @entangle('openModal') }" 
             x-show="openModal" 
@@ -53,5 +52,4 @@
                 </div>
             </div>
         </div>
-    @endif
 </div>

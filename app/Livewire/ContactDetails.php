@@ -8,6 +8,7 @@ use App\Models\DraftBeneficiaryPersonal;
 use App\Models\DraftBeneficiaryContact;
 use Illuminate\Support\Facades\Auth;
 use App\Models\State;
+use Illuminate\Support\Facades\DB;
 
 class ContactDetails extends Component
 {
@@ -84,52 +85,61 @@ class ContactDetails extends Component
     public function save()
     {
         $validated = $this->validate($this->rules());
-        $app_det = DraftBeneficiaryContact::where('application_id', $this->application_id)->first();
-        if ($this->mode === null && empty($app_det)) {
-            $application_id = $this->application_id;
-            $data = [
-                'application_id' => $application_id,
-                'district_id' => $validated['selectedDistrict'],
-                'rural_urban_id' => $validated['selectedRuralurban'],
-                'police_station' => $validated['policestation'],
-                'village_town_city' => $validated['villtowncity'],
-                'post_office' => $validated['postoffice'],
-                'pincode' => $validated['pincode'],
-                'created_by' => Auth::id(),
-            ];
-            $data['house_premise_no'] = $validated['housepremiseno'] ?? null;
-            if ($validated['selectedRuralurban'] == 2) {
-                $data['block_id'] = $validated['selectedBlockurban'];
-                $data['panchayat_id'] = $validated['selectedGpWard'];
+        $DraftBeneficiaryContact = DraftBeneficiaryContact::find($this->application_id);
+        DB::beginTransaction();
+        try {
+            if ($this->mode === null && empty($DraftBeneficiaryContact)) {
+                $application_id = $this->application_id;
+                $DraftBeneficiaryContact = new DraftBeneficiaryContact;
+                $DraftBeneficiaryContact->application_id = $application_id;
+                $DraftBeneficiaryContact->district_id = $validated['selectedDistrict'];
+                $DraftBeneficiaryContact->rural_urban_id = $validated['selectedRuralurban'];
+                $DraftBeneficiaryContact->police_station = $validated['policestation'];
+                $DraftBeneficiaryContact->village_town_city = $validated['villtowncity'];
+                $DraftBeneficiaryContact->post_office = $validated['postoffice'];
+                $DraftBeneficiaryContact->pincode = $validated['pincode'];
+                $DraftBeneficiaryContact->created_by = Auth::id();
+                $DraftBeneficiaryContact->house_premise_no = $validated['housepremiseno'] ?? null;
+                if ($validated['selectedRuralurban'] == 2) {
+                    $DraftBeneficiaryContact->block_id = $validated['selectedBlockurban'];
+                    $DraftBeneficiaryContact->panchayat_id = $validated['selectedGpWard'];
+                } else {
+                    $DraftBeneficiaryContact->municipality_id = $validated['selectedBlockurban'];
+                    $DraftBeneficiaryContact->ward_id = $validated['selectedGpWard'];
+                }
+                $DraftBeneficiaryContact->save();
+                $this->dispatch('conDet', [
+                    'message' => "Contact Details saved successfully for the application id: {$this->application_id}"
+                ]);
             } else {
-                $data['municipality_id'] = $validated['selectedBlockurban'];
-                $data['ward_id'] = $validated['selectedGpWard'];
+                $DraftBeneficiaryContact->district_id = $validated['selectedDistrict'];
+                $DraftBeneficiaryContact->rural_urban_id = $validated['selectedRuralurban'];
+                $DraftBeneficiaryContact->police_station = $validated['policestation'];
+                $DraftBeneficiaryContact->village_town_city = $validated['villtowncity'];
+                $DraftBeneficiaryContact->post_office = $validated['postoffice'];
+                $DraftBeneficiaryContact->pincode = $validated['pincode'];
+                $DraftBeneficiaryContact->created_by = Auth::id();
+                $DraftBeneficiaryContact->house_premise_no = $validated['housepremiseno'] ?? null;
+                if ($validated['selectedRuralurban'] == 2) {
+                    $DraftBeneficiaryContact->block_id = $validated['selectedBlockurban'];
+                    $DraftBeneficiaryContact->panchayat_id = $validated['selectedGpWard'];
+                    $DraftBeneficiaryContact->municipality_id = null;
+                    $DraftBeneficiaryContact->ward_id = null;
+                } else {
+                    $DraftBeneficiaryContact->municipality_id = $validated['selectedBlockurban'];
+                    $DraftBeneficiaryContact->ward_id = $validated['selectedGpWard'];
+                    $DraftBeneficiaryContact->block_id = null;
+                    $DraftBeneficiaryContact->panchayat_id = null;
+                }
+                $DraftBeneficiaryContact->save();
+                $this->dispatch('conDet', [
+                    'message' => "Contact Details updated successfully for the application id: {$this->application_id}"
+                ]);
             }
-            DraftBeneficiaryContact::create($data);
-            $this->dispatch('conDet', [
-                'message' => "Contact Details saved successfully for the application id: {$this->application_id}"
-            ]);
-        } else {
-            $data = [
-                'district_id' => $validated['selectedDistrict'],
-                'rural_urban_id' => $validated['selectedRuralurban'],
-                'police_station' => $validated['policestation'],
-                'village_town_city' => $validated['villtowncity'],
-                'post_office' => $validated['postoffice'],
-                'pincode' => $validated['pincode'],
-            ];
-            $data['house_premise_no'] = $validated['housepremiseno'] ?? null;
-            if ($validated['selectedRuralurban'] == 2) {
-                $data['block_id'] = $validated['selectedBlockurban'];
-                $data['panchayat_id'] = $validated['selectedGpWard'];
-            } else {
-                $data['municipality_id'] = $validated['selectedBlockurban'];
-                $data['ward_id'] = $validated['selectedGpWard'];
-            }
-            DraftBeneficiaryContact::where('application_id', $this->application_id)->update($data);
-            $this->dispatch('conDet', [
-                'message' => "Contact Details updated successfully for the application id: {$this->application_id}"
-            ]);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
     }
     public function render()

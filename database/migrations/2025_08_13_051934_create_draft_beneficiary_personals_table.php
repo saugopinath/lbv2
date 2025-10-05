@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('lb_scheme.draft_beneficiary_personals', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('application_id')->unique();
-
+            $table->unsignedBigInteger('beneficiary_id')->unique();
             $table->smallInteger('district_id');
             $table->smallInteger('block_id')->nullable();
             $table->mediumInteger('sub_division_id')->nullable();
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->Integer('panchayat_id')->nullable();
             $table->string('full_name');
             $table->date('dob');
-            $table->string('mobile_no');
+            $table->string('mobile_no', 10);
             $table->string('email')->nullable();
             // $table->smallInteger('gender');
             $table->smallInteger('caste');

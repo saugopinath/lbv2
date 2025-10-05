@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
-class BeneficiaryEnclosure extends Model
+use OwenIt\Auditing\Contracts\Auditable;
+class BeneficiaryEnclosure extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $table = 'lb_scheme.beneficiary_enclosures';
     protected $guarded = [];
     public function personal()
@@ -24,6 +25,6 @@ class BeneficiaryEnclosure extends Model
     }
     public function codemaster()
     {
-        return $this->belongsTo(\App\Models\Codemaster::class, 'document_type', 'id');
+        return $this->belongsTo(Codemaster::class, 'document_type', 'id');
     }
 }
