@@ -40,13 +40,7 @@
             </div>
         </template>
 
-        <!-- Buttons -->
-        {{--  <div class="flex justify-end space-x-2 mt-4">
-            <button @click="closeModal()"
-                class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 cursor-pointer">Cancel</button>
-            <button @click="uploadFile()"
-                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 cursor-pointer">Upload</button>
-        </div>  --}}
+        <!-- Buttons -->       
 
         <div class="flex justify-end space-x-2 mt-4">
             <x-button.primary @click="closeModal()"

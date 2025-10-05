@@ -98,13 +98,7 @@ class EnclosureList extends Component
             }
         }
     }
-    // public function setCurrentDoc($docTypeId)
-    // {
-    //     $this->currentDocId = $docTypeId;
-    //     $doc = $this->doc_lists->firstWhere('doc_type_id', $docTypeId);
-    //     $this->currentDocMaxSize = $doc->max_file_size;
-    //     $this->currentDocExtensions = $doc->extension_type;
-    // }
+
     public function setCurrentDoc($docTypeId)
     {
         $this->currentDocId = $docTypeId;
@@ -120,101 +114,48 @@ class EnclosureList extends Component
 
         $this->resetErrorBag('singleDocument');
     }
-    // protected function rules()
-    // {
-    //     $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
-    //     preg_match('/(\d+)/', $doc->max_file_size, $matches);
-    //     $maxSizeKB = isset($matches[1]) ? (int) $matches[1] : 1024;
-    //     $extensionsArray = array_map('trim', explode(',', strtolower($doc->extension_type)));
-    //     $mimesRule = implode(',', $extensionsArray);
-    //     $requiredRule = $doc->is_required ? 'required' : 'nullable';
-    //     return [
-    //         'singleDocument' => "$requiredRule|file|mimes:$mimesRule|max:$maxSizeKB",
-    //     ];
-    // }
-protected function rules()
-{
-    if (!$this->currentDocId) {
-        return ['singleDocument' => 'nullable|file'];
+
+    protected function rules()
+    {
+        if (!$this->currentDocId) {
+            return ['singleDocument' => 'nullable|file'];
+        }
+
+        $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
+        if (!$doc) {
+            return ['singleDocument' => 'nullable|file'];
+        }
+
+        preg_match('/(\d+)/', $doc->max_file_size, $matches);
+        $maxSizeKB = isset($matches[1]) ? (int) $matches[1] : 1024;
+
+        $extensionsArray = array_map('trim', explode(',', strtolower($doc->extension_type)));
+        $mimesRule = implode(',', $extensionsArray);
+
+        $requiredRule = $doc->is_required ? 'required' : 'nullable';
+
+        // Set properties early
+        $this->currentDocMaxSize = $maxSizeKB . ' KB';
+        $this->currentDocExtensions = strtoupper($mimesRule);
+
+        return [
+            'singleDocument' => "$requiredRule|file|mimes:$mimesRule|max:$maxSizeKB",
+        ];
     }
 
-    $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
-    if (!$doc) {
-        return ['singleDocument' => 'nullable|file'];
+    protected function messages()
+    {
+        $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
+        $docName = $doc?->codemaster?->name ?? 'Document';
+        $extensions = $this->currentDocExtensions ?: 'JPG, PNG, PDF';
+        $maxSize    = $this->currentDocMaxSize ?: '1024 KB';
+
+        return [
+            'singleDocument.required' => "{$docName} is required.",
+            'singleDocument.mimes'    => "{$docName} must be of type: {$extensions}.",
+            'singleDocument.max'      => "{$docName} must not be greater than {$maxSize}.",
+        ];
     }
-
-    preg_match('/(\d+)/', $doc->max_file_size, $matches);
-    $maxSizeKB = isset($matches[1]) ? (int) $matches[1] : 1024;
-
-    $extensionsArray = array_map('trim', explode(',', strtolower($doc->extension_type)));
-    $mimesRule = implode(',', $extensionsArray);
-
-    $requiredRule = $doc->is_required ? 'required' : 'nullable';
-
-    // Set properties early
-    $this->currentDocMaxSize = $maxSizeKB . ' KB';
-    $this->currentDocExtensions = strtoupper($mimesRule);
-
-    return [
-        'singleDocument' => "$requiredRule|file|mimes:$mimesRule|max:$maxSizeKB",
-    ];
-}
-
-protected function messages()
-{
-    $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
-    $docName = $doc?->codemaster?->name ?? 'Document';
-    $extensions = $this->currentDocExtensions ?: 'JPG, PNG, PDF';
-    $maxSize    = $this->currentDocMaxSize ?: '1024 KB';
-
-    return [
-        'singleDocument.required' => "{$docName} is required.",
-        'singleDocument.mimes'    => "{$docName} must be of type: {$extensions}.",
-        'singleDocument.max'      => "{$docName} must not be greater than {$maxSize}.",
-    ];
-}
-
-    // protected function messages()
-    // {
-    //     $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
-
-    //     $docName = $doc?->codemaster?->name ?? 'Document';
-    //     // dd( $docName);
-    //     return [
-    //         'singleDocument.required' => "{$docName} is required.",
-    //         'singleDocument.mimes'    => "{$docName} must be of type: {$this->currentDocExtensions}.",
-    //         'singleDocument.max'      => "{$docName} must not be greater than {$this->currentDocMaxSize}.",
-    //     ];
-    // }
-
-    // protected function rules()
-    // {
-    //     if (!$this->currentDocId) {
-    //         return [
-    //             'singleDocument' => 'nullable|file',
-    //         ];
-    //     }
-
-    //     $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
-
-    //     if (!$doc) {
-    //         return [
-    //             'singleDocument' => 'nullable|file',
-    //         ];
-    //     }
-
-    //     preg_match('/(\d+)/', $doc->max_file_size, $matches);
-    //     $maxSizeKB = isset($matches[1]) ? (int) $matches[1] : 1024;
-
-    //     $extensionsArray = array_map('trim', explode(',', strtolower($doc->extension_type)));
-    //     $mimesRule = implode(',', $extensionsArray);
-
-    //     $requiredRule = $doc->is_required ? 'required' : 'nullable';
-
-    //     return [
-    //         'singleDocument' => "$requiredRule|file|mimes:$mimesRule|max:$maxSizeKB",
-    //     ];
-    // }
 
     public function resetSingleDocumentErrors()
     {
@@ -232,11 +173,11 @@ protected function messages()
         // dd('ok');
 
         if (!$this->singleDocument) {
-        $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
-        $docName = $doc?->codemaster?->name ?? 'Document';
-        $this->addError('singleDocument', "{$docName} is required.");
-        return;
-    }
+            $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
+            $docName = $doc?->codemaster?->name ?? 'Document';
+            $this->addError('singleDocument', "{$docName} is required.");
+            return;
+        }
 
         $this->validate();
 
@@ -295,58 +236,6 @@ protected function messages()
         }
         $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.');
     }
-
-    // public function saveSingleDocument()
-    // {
-    //     $this->validate();
-    //     $base64 = base64_encode(file_get_contents($this->singleDocument->getRealPath()));
-    //     $existingDoc = BeneficiaryEnclosure::where('application_id', $this->application_id)
-    //         ->where('document_type', $this->currentDocId)
-    //         ->first();
-    //     if ($existingDoc) {
-    //         $existingDoc->update([
-    //             'attched_document' => $base64,
-    //             'ip_address' => request()->ip(),
-    //             'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
-    //             'document_mime_type' => $this->singleDocument->getMimeType(),
-    //             'created_by' => 1,
-    //         ]);
-    //     } else {
-    //         BeneficiaryEnclosure::create([
-    //             'application_id' => $this->application_id,
-    //             'attched_document' => $base64,
-    //             'ip_address' => request()->ip(),
-    //             'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
-    //             'document_mime_type' => $this->singleDocument->getMimeType(),
-    //             'document_type' => $this->currentDocId,
-    //             'created_by' => 1,
-    //         ]);
-    //     }
-    //     $this->singleDocument = null;
-    //     $this->currentDocId = null;
-    //     $this->currentDocMaxSize = '';
-    //     $this->currentDocExtensions = '';
-    //     if ($this->application_id) {
-    //         $app = DraftBeneficiaryPersonal::with('documents')->where('application_id', $this->application_id)->first();
-    //         if ($app) {
-    //             $this->existingDocuments = [];
-    //             foreach ($app->documents as $doc) {
-    //                 $this->existingDocuments[$doc->document_type] = $doc;
-    //             }
-    //         }
-    //     }
-    // }
-    // public function downloadDocument($id)
-    // {
-    //     $document = BeneficiaryEnclosure::findOrFail($id);
-    //     $decoded = base64_decode($document->attched_document);
-    //     $filename = 'document_' . $document->document_type . '.' . $document->document_extension;
-    //     return response()->streamDownload(function () use ($decoded) {
-    //         echo $decoded;
-    //     }, $filename, [
-    //         'Content-Type' => $document->document_mime_type,
-    //     ]);
-    // }
 
     public function downloadDocument($id)
     {

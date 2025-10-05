@@ -8,17 +8,17 @@
             currentFilePreview: null,
             currentFileName: '',
             currentFileMime: '',
-
+    
             handleFileChange(event) {
                 const file = event.target.files[0];
                 if (!file) {
                     this.resetFileData();
                     return;
                 }
-
+    
                 this.currentFileName = file.name;
                 this.currentFileMime = file.type || 'Unknown MIME type';
-
+    
                 if (this.currentFileMime.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = e => this.currentFilePreview = e.target.result;
@@ -27,7 +27,7 @@
                     this.currentFilePreview = null;
                 }
             },
-
+    
             openModal(docId, docName) {
                 this.currentDocName = docName || '';
                 this.resetFileData();
@@ -37,28 +37,21 @@
                 this.currentDocId = docId;
                 this.$wire.call('setCurrentDoc', docId);
                 this.showUploadModal = true;
-
-                {{--  this.showUploadModal = true;  --}}
-                {{--  this.currentDocId = docId;  --}}
-                {{--  this.currentDocName = docName;  --}}
-                {{--  this.resetFileData();  --}}
-                {{--  this.$refs.fileInput.value = null;  --}}
-                {{--  this.$wire.setCurrentDoc(docId);  --}}
-                {{--  this.$wire.set('singleDocument', null);  --}}
+    
             },
-
+    
             async uploadFile() {
                     if (!this.$refs.fileInput.files.length) {
                         this.errorMessage = 'Please select a file to upload.';
                         return;
                     }
-
+    
                     this.errorMessage = ''; // reset error if file selected
-
+    
                     try {
                         // Livewire Method Call
                         await this.$wire.saveSingleDocument();
-
+    
                         // Reset data after upload success
                         this.resetFileData();
                         if (this.$refs.fileInput) this.$refs.fileInput.value = null;
@@ -68,64 +61,25 @@
                         this.errorMessage = 'Something went wrong while uploading.';
                     }
                 },
-
-                {{--  async uploadFile() {
-                    if (!this.$refs.fileInput.files.length) {
-                        alert('Please select a file to upload.');
-                        return;
-                    }
-                    try {
-                        await this.$wire.saveSingleDocument();
-                        this.resetFileData();
-                        if (this.$refs.fileInput) this.$refs.fileInput.value = null;
-                    } catch (e) {
-                        if (this.$refs.fileInput) this.$refs.fileInput.focus();
-                    }
-                },  --}}
-
-        {{--  uploadFile() {
-                    if (!this.$refs.fileInput.files.length) {
-                        alert('Please select a file to upload.');
-                        return;
-                    }
-                    this.$wire.saveSingleDocument()
-                        .then(() => {
-                            this.closeModal();
-                        });
-                },  --}}
-
-        closeModal() {
-                this.showUploadModal = false;
-                this.errorMessage = '';
-                this.currentFileName = '';
-                this.currentFilePreview = '';
-                this.resetFileData();
-                if (this.$refs.fileInput) this.$refs.fileInput.value = null;
-                {{--  this.$wire.setErrorBag({});  --}}
-                this.$wire.set('singleDocument', null);
-                this.$wire.call('resetSingleDocumentErrors');
-            },
-
-            {{--  closeModal() {
+    
+                closeModal() {
                     this.showUploadModal = false;
+                    this.errorMessage = '';
+                    this.currentFileName = '';
+                    this.currentFilePreview = '';
                     this.resetFileData();
+                    if (this.$refs.fileInput) this.$refs.fileInput.value = null;
                     this.$wire.set('singleDocument', null);
-                    this.$wire.set('currentDocId', null);
-                    this.$refs.fileInput.value = null;
-                },  --}}
-
-        resetFileData() {
-            this.currentFilePreview = null;
-            this.currentFileName = '';
-            this.currentFileMime = '';
-            this.errorMessage = '';
-        }
-
-        {{--  resetFileData() {
-            this.currentFilePreview = null;
-            this.currentFileName = '';
-            this.currentFileMime = '';
-        }  --}}
+                    this.$wire.call('resetSingleDocumentErrors');
+                },
+    
+                resetFileData() {
+                    this.currentFilePreview = null;
+                    this.currentFileName = '';
+                    this.currentFileMime = '';
+                    this.errorMessage = '';
+                }
+    
     }" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         @foreach ($doc_lists as $doc)
             <x-document-card :docName="$doc->codemaster->name" :isRequired="$doc->is_required" :docTypeId="$doc->doc_type_id" :existingDoc="$existingDocuments[$doc->doc_type_id] ?? null" :xIsDuplicate="$is_page == 1 ? 1 : 0"
