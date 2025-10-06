@@ -74,15 +74,104 @@ class IncompletTypePage extends Component
         $this->confirmbankaccountnumber = $data['confirmbankaccountnumber'];
     }
 
+    //     public function approve()
+    //     {
+    //         $opType = Codemaster::where('code', 2103)->value('id');
+    //         $previousId = AcceptRejectInfo::where('application_id', $this->id)
+    //             ->where('op_type', $opType)
+    //             ->orderByDesc('id')
+    //             ->value('id');
+    //         // try {
+    //             // DB::beginTransaction();
+    //             $request = AcceptRejectInfo::create([
+    //                 'application_id'         => $this->id,
+    //                 'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
+    //                 'ip_address'             => request()->ip(),
+    //                 'user_id'                => $this->user_id,
+    //                 'browser'                => request()->header('User-Agent'),
+    //                 'model_name'             => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
+    //                 'op_type'                => Codemaster::where('code', 2104)->value('id'),
+    //                 'revert_reason_cause_id' => null,
+    //                 'revert_reason_remarks'  => null,
+    //                 'parent_id'              => $previousId,
+    //             ]);
+
+    //             foreach ($this->page as $item) {
+    //                 $typeId = $item->incomplet_type;
+    //                 if (!$typeId) continue;
+
+    //                 $jsonValue = [];
+    // // dd($this->formData['aadhar_modification'][$item->application_id],$this->formData['dup_mobile'][$item->application_id]);
+    //                 // Aadhaar related
+    //                 if (in_array($typeId, ['141', '149', '1414'])) {
+    //                     $jsonValue = [
+    //                         'aadhaar_no'     => $this->formData['aadhar_modification'][$item->application_id] ?? null,
+    //                         'application_id' => $this->id,
+    //                     ];
+    //                 }
+    //                 // Mobile related
+    //                 elseif (in_array($typeId, ['142', '1410'])) {
+    //                     $jsonValue = [
+    //                         'mobile_no'      => $this->formData['dup_mobile'][$item->application_id] ?? null,
+    //                         'application_id' => $this->id,
+    //                     ];
+    //                 }
+    //                 // Bank related
+    //                 elseif (in_array($typeId, ['145', '146', '1411', '1412', '1413'])) {
+    //                     $jsonValue = [
+    //                         'ifscode'               => $this->ifscode,
+    //                         'bank_account_number'   => $this->bank_account_number,
+    //                         'confirmbankaccountnumber' => $this->confirmbankaccountnumber,
+    //                         'bank_action'           => $this->bank_action,
+    //                         'application_id'        => $this->id,
+    //                     ];
+    //                 }
+
+    //                 if ($item->is_active == 1) {
+    //                     // dd('ok');
+    //                     if (!empty($jsonValue)) {
+    //                         $item->update([
+    //                             'next_level_request_id' => 2,
+    //                             'request_id'            => $request->id,
+    //                             'is_active'             => -1,
+    //                         ]);
+    //                     }
+    //                 } elseif ($item->is_active == 0) {
+    //                     if (!empty($jsonValue)) {
+    //                         $item->update([
+    //                             'next_level_request_id' => 2,
+    //                             'request_id'            => $request->id,
+    //                         ]);
+    //                     }
+    //                 }
+
+    //                 $this->updateOriginalTable($item);
+    //             }
+
+    //             // DB::commit();
+
+    //             session()->flash('success', "Approve details updated successfully for the Application ID: {$this->id}");
+    //             return redirect()->route('incomplete.types', ['stage' => 'approver', 'id' => $this->id]);
+    //         // } catch (\Exception $e) {
+    //         //     DB::rollBack();
+    //         //     Log::error("Approve Failed: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+    //         //     return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
+    //         // }
+    //     }
+
+
     public function approve()
     {
-        $opType = Codemaster::where('code', 245)->value('id');
-        $previousId = AcceptRejectInfo::where('application_id', $this->id)
-            ->where('op_type', $opType)
-            ->orderByDesc('id')
-            ->value('id');
         try {
             DB::beginTransaction();
+
+            $opType = Codemaster::where('code', 2103)->value('id');
+            $previousId = AcceptRejectInfo::where('application_id', $this->id)
+                ->where('op_type', $opType)
+                ->orderByDesc('id')
+                ->value('id');
+
+            // Create new approve request
             $request = AcceptRejectInfo::create([
                 'application_id'         => $this->id,
                 'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
@@ -90,7 +179,7 @@ class IncompletTypePage extends Component
                 'user_id'                => $this->user_id,
                 'browser'                => request()->header('User-Agent'),
                 'model_name'             => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
-                'op_type'                => Codemaster::where('code', 246)->value('id'),
+                'op_type'                => Codemaster::where('code', 2104)->value('id'),
                 'revert_reason_cause_id' => null,
                 'revert_reason_remarks'  => null,
                 'parent_id'              => $previousId,
@@ -119,24 +208,23 @@ class IncompletTypePage extends Component
                 // Bank related
                 elseif (in_array($typeId, ['145', '146', '1411', '1412', '1413'])) {
                     $jsonValue = [
-                        'ifscode'               => $this->ifscode,
-                        'bank_account_number'   => $this->bank_account_number,
+                        'ifscode'                 => $this->ifscode,
+                        'bank_account_number'     => $this->bank_account_number,
                         'confirmbankaccountnumber' => $this->confirmbankaccountnumber,
-                        'bank_action'           => $this->bank_action,
-                        'application_id'        => $this->id,
+                        'bank_action'             => $this->bank_action,
+                        'application_id'          => $this->id,
                     ];
                 }
 
-                if ($item->is_active == 1) {
-                    if (!empty($jsonValue)) {
+                // Update incomplete item
+                if (!empty($jsonValue)) {
+                    if ($item->is_active == 1) {
                         $item->update([
                             'next_level_request_id' => 2,
                             'request_id'            => $request->id,
                             'is_active'             => -1,
                         ]);
-                    }
-                } elseif ($item->is_active == 0) {
-                    if (!empty($jsonValue)) {
+                    } elseif ($item->is_active == 0) {
                         $item->update([
                             'next_level_request_id' => 2,
                             'request_id'            => $request->id,
@@ -144,22 +232,32 @@ class IncompletTypePage extends Component
                     }
                 }
 
+                // Update main/original table
                 $this->updateOriginalTable($item);
             }
 
             DB::commit();
 
-            session()->flash('success', "Approve details updated successfully for the Application ID: {$this->id}");
+            session()->flash('success', "Approve details updated successfully for Application ID: {$this->id}");
             return redirect()->route('incomplete.types', ['stage' => 'approver', 'id' => $this->id]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Approve Failed: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
+            Log::error("Approve Failed: " . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'application_id' => $this->id,
+                'user_id' => $this->user_id,
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Something went wrong while approving: ' . $e->getMessage())
+                ->withInput();
         }
     }
 
+
     protected function updateOriginalTable($item)
     {
+        // dd('ok');
         if ($item->is_active != -1) {
             return;
         }
@@ -353,7 +451,13 @@ class IncompletTypePage extends Component
         DB::beginTransaction();
 
         try {
+            // $previousId = AcceptRejectInfo::where('application_id', $this->id)
+            //     ->orderByDesc('id')
+            //     ->value('id');
+
+            $opType = Codemaster::where('code', 2104)->value('id');
             $previousId = AcceptRejectInfo::where('application_id', $this->id)
+                ->where('op_type', $opType)
                 ->orderByDesc('id')
                 ->value('id');
 
@@ -364,7 +468,7 @@ class IncompletTypePage extends Component
                 'user_id'                => $this->user_id,
                 'browser'                => request()->header('User-Agent'),
                 'model_name'             => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
-                'op_type'                => Codemaster::where('code', 247)->value('id'),
+                'op_type'                => Codemaster::where('code', 2105)->value('id'),
                 'revert_reason_cause_id' => $this->revert_reason_cause_id,
                 'revert_reason_remarks'  => $this->revert_reason_remarks,
                 'parent_id'              => $previousId,
@@ -411,7 +515,7 @@ class IncompletTypePage extends Component
                 'user_id'                => $this->user_id,
                 'browser'                => request()->header('User-Agent'),
                 'model_name'             => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
-                'op_type'                => Codemaster::where('code', 245)->value('id'),
+                'op_type'                => Codemaster::where('code', 2103)->value('id'),
                 'revert_reason_cause_id' => null,
                 'revert_reason_remarks'  => null,
                 'parent_id'              => $previousId,

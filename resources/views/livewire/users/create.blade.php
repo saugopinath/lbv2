@@ -15,9 +15,11 @@
                     <x-form.input id="name" name="name" label="Name" required wire:model="name"
                         x-on:input="$el.value = $el.value.replace(/[^A-Za-z\s]/g, '')" />
 
-                    <x-form.input id="mobile" name="mobile" label="Mobile Number" required wire:model="mobile"
-                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />
-
+                    <x-form.input id="mobile" name="mobile" label="Mobile number" required wire:model.defer="mobile"
+                        x-on:input="
+        $el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10);
+        $wire.set('mobile', $el.value);
+    " />
                     <x-form.input id="email" name="email" type="email" label="Email address" required
                         wire:model="email" />
                     <x-form.input id="password" name="password" type="password" label="Password" required

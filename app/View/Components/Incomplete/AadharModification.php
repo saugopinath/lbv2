@@ -12,11 +12,28 @@ class AadharModification extends Component
     public function __construct($aadhaarIssues = [])
     {
         $this->aadhaarIssues = $aadhaarIssues;
-        // dd($this->aadhaarIssues);
+
+         
     }
 
     public function render()
     {
-        return view('components.incomplete.aadhar-modification');
+        $user = auth()->user();
+
+        $stage = $this->stage ?? null;
+       
+
+        if (!$stage) {
+            if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+                $stage = 'verifier';
+
+            } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+                $stage = 'approver';
+            }
+
+        }
+        //  dd($stage);
+     return view('components.incomplete.aadhar-modification', compact('stage'));
+
     }
 }

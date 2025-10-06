@@ -147,17 +147,13 @@ class IncompletTypeTable extends DataTableComponent
 
         $user = auth()->user();
 
-        $next_level_request_id = null;
-
         $stage = $this->stage ?? null;
 
         if (!$stage) {
             if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
                 $stage = 'verifier';
-                $next_level_request_id = null;
             } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
                 $stage = 'approver';
-                $next_level_request_id = 1;
             }
         }
 

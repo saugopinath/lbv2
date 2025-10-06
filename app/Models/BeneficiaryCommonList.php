@@ -30,7 +30,7 @@ class BeneficiaryCommonList extends Model implements Auditable
     }
     public function benPaymentDetails()
     {
-        return $this->hasOne(BenPaymentDetailsNew::class, 'ben_id', 'beneficiary_id');
+        return $this->hasOne(BenPaymentDetails::class, 'ben_id', 'beneficiary_id');
     }
     public function aadhaar()
     {

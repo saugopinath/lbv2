@@ -133,7 +133,7 @@
                     <div class="w-1/3">
                         <h3 class="font-semibold mb-2">Newly Temp Document</h3>
 
-                        <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[112]" enclosureSource="5" />
+                        <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[111]" enclosureSource="5" />
 
                         {{-- Error --}}
                         @error('document_upload')

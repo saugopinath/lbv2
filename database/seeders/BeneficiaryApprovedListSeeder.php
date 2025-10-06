@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Ifsccodemaster;
 use App\Models\BeneficiaryPersonal;
+use App\Models\BeneficiaryApprovedList;
 use App\Models\BeneficiaryBank;
 use App\Models\BeneficiaryContact;
 use App\Models\BeneficiaryRelationship;
@@ -20,11 +21,15 @@ class BeneficiaryApprovedListSeeder extends Seeder
 {
     public function run(): void
     {
-        for ($i = 0; $i < 20; $i++) {
-            // Create a BeneficiaryPersonal
-            
+        for ($i = 1200; $i <= 1220; $i++) {
+            // Step 1: Unique Application/Beneficiary ID
+            $uniqueAppBenId = UniqueAppBenId::create([
+                'application_id' => $i,
+                'beneficiary_id' => $i+1,
+            ]);
 
-            $office = OfficeMaster::where('district_id', 318)->where('block_id', 2979)->first();
+            // Step 2: Office & User setup
+            $office = OfficeMaster::where('district_id', 318)->first();
             $mapping = UserRoleSchemeOfficeMapping::where('office_id', $office->id)->first();
             $user_id = $mapping->user_id;
             $dist = $office->district_id;
@@ -38,13 +43,10 @@ class BeneficiaryApprovedListSeeder extends Seeder
             $block_id = Block::where('district_id', $dist)->first()->id;
             $panchayat_id = Panchayat::where('block_id', $block_id)->first()->id;
 
-            $uniqueAppBenId = UniqueAppBenId::create([ ]);
-            $beneficiary_id_obj = UniqueAppBenId::where('application_id', $uniqueAppBenId->application_id)->first();
-            // dd($uniqueAppBenId);
-            // dd($beneficiary_id_obj->beneficiary_id);
+            // Step 3: Beneficiary Personal
             $beneficiary = BeneficiaryPersonal::create([
                 'application_id' => $uniqueAppBenId->application_id,
-                'beneficiary_id' => $beneficiary_id_obj->beneficiary_id,
+                'beneficiary_id' => $uniqueAppBenId->beneficiary_id,
                 'district_id' => $dist,
                 'block_id' => $office->block_id,
                 'sub_division_id' => $office->sub_division_id,
@@ -64,15 +66,17 @@ class BeneficiaryApprovedListSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            // dd($beneficiary);
-            // $beneficiary->lists()->create([
-            //     'district_id' => $beneficiary->district_id,
-            //     'block_id' => $beneficiary->block_id,
-            //     'sub_division_id' => $beneficiary->sub_division_id,
-            //     'municipality_id' => $beneficiary->municipality_id,
-            //     'ward_id' => $beneficiary->ward_id,
-            //     'panchayat_id' => $beneficiary->panchayat_id,
-            // ]);
+
+            // Step 4: Approved List (relation with beneficiary)
+            $beneficiary->lists()->create([
+                'beneficiary_id' => $beneficiary->beneficiary_id,
+                'district_id' => $beneficiary->district_id,
+                'block_id' => $beneficiary->block_id,
+                'sub_division_id' => $beneficiary->sub_division_id,
+                'municipality_id' => $beneficiary->municipality_id,
+                'ward_id' => $beneficiary->ward_id,
+                'panchayat_id' => $beneficiary->panchayat_id,
+            ]);
 
             // Step 5: Contact Info
             BeneficiaryContact::create([
@@ -86,7 +90,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
                 'village_town_city' => 'Village ' . $i,
                 'house_premise_no' => 'House No ' . $i,
                 'post_office' => 'Post Office ' . $i,
-                'pincode' => '7000' . str_pad($i, 4, '0', STR_PAD_LEFT),
+                'pincode' => '700000',
                 'residency_period' => rand(1, 10),
                 'created_by' => $user_id,
             ]);

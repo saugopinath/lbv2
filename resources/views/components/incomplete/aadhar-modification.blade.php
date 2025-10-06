@@ -16,15 +16,15 @@
         </p>
 
         <div>
-            @if (request()->has('stage') && in_array(decrypt(request()->get('stage')), ['verifier', 'revert']))
+            {{--  @dump($stage);  --}}
+            @if (!empty($stage) && in_array($stage, ['verifier', 'revert']))
                 <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
                     <x-form.input id="aadhar_modification_{{ $aadhaarIssues[0]->application_id }}"
                         name="aadhar_modification" label="Aadhaar Number" required placeholder="Enter New Aadhaar Number"
                         wire:model.defer="formData.aadhar_modification.{{ $aadhaarIssues[0]->application_id }}"
                         x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
                 </div>
-
-            @elseif (request()->has('stage') && decrypt(request()->get('stage')) === 'approver')
+            @elseif (!empty($stage) && $stage === 'approver')
                 <p class="mt-2 text-gray-700">
                     <strong>New Aadhaar:</strong> {{ $issueItem->new_value['aadhaar_no'] ?? 'N/A' }}
                 </p>
@@ -40,13 +40,13 @@
 
         <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
             {{-- Previous Approved Document --}}
-             {{--  <div class="w-1/3">
+            {{--  <div class="w-1/3">
                 <h3 class="font-semibold mb-2">Previous Approved Document</h3>
                 <livewire:enclosure-list :application_id="$aadhaarIssues[0]->application_id" :doc_type_id_array_list="[108]" :is_page="1" :key="'previous-' . $aadhaarIssues[0]->application_id" />
             </div>  --}}
             <div class="w-1/3">
                 <h3 class="font-semibold mb-2">Newly Temp Document</h3>
-                <livewire:enclosure-list :application_id="$aadhaarIssues[0]->application_id" :doc_type_id_array_list="[108]" enclosureSource="5" :key="'new-' . $aadhaarIssues[0]->application_id" />
+                <livewire:enclosure-list :application_id="$aadhaarIssues[0]->application_id" :doc_type_id_array_list="[107]" enclosureSource="5" :key="'new-' . $aadhaarIssues[0]->application_id" />
 
                 {{-- Document error --}}
                 @error('document_upload')

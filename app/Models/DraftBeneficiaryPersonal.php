@@ -11,13 +11,13 @@ class DraftBeneficiaryPersonal extends Model implements Auditable
     protected $guarded = [
         'application_id',
     ];
-    
+
     use \OwenIt\Auditing\Auditable;
 
     protected $primaryKey = 'application_id';
     protected $table = 'lb_scheme.draft_beneficiary_personals';
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function father()
     {

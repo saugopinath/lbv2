@@ -15,7 +15,9 @@
     </p>
 
     <div class="mt-2">
-        @if (request()->has('stage') && in_array(decrypt(request()->get('stage')), ['verifier', 'revert']))
+        @if (!empty($stage) && in_array($stage, ['verifier', 'revert']))
+            
+        {{--  @dump('ok2');  --}}
             <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
                 <x-form.input id="dup_mobile_{{ $mobileIssues[0]->application_id }}" name="dup_mobile"
                 label="New Mobile Number" placeholder="Enter New Mobile" required
@@ -23,7 +25,7 @@
                 x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />
             </div>
 
-        @elseif (request()->has('stage') && decrypt(request()->get('stage')) === 'approver')
+        @elseif (!empty($stage) && $stage === 'approver')
             <p class="text-sm text-gray-700">
                 <strong>New Mobile:</strong> {{ $issueItem->new_value['mobile_no'] ?? 'Not Provided' }}
             </p>

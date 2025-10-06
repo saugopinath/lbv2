@@ -37,7 +37,7 @@ class BeneficiaryCommonListSeeder extends Seeder
 
             BeneficiaryCommonList::create([
                 'sourceable_id' => $i,
-                'sourceable_type' => 'App\\Models\\Beneficiary',
+                'sourceable_type' => 'App\Models\BeneficiaryPersonal',
                 'district_id' => $districtId,
                 'block_id' => $blockId,
                 'sub_division_id' => $subdivisionId,

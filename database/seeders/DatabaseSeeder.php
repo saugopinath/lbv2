@@ -41,7 +41,7 @@ class DatabaseSeeder extends Seeder
              ApplicantIncompletDetailsSeeder::class,
              IncompletTypeModeSeeder::class,
             ApplicantIncompletDetailsSeeder::class,
-            DraftApplicantSeeder::class,
+            // DraftApplicantSeeder::class,
             ValidationFailedCodemasterSeeder::class
         ]);
     }

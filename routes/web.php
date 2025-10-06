@@ -20,10 +20,11 @@ use App\Livewire\Users\Create as UsersCreate;
 use App\Livewire\IncompletTypePage;
 use App\Http\Controllers\IncompleteTypeController;
 use App\Http\Controllers\IncompletPageController;
-
-
 use App\Http\Controllers\WorkFlowController;
 use App\Livewire\ProcessApplication\DraftApplicationView;
+
+
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -47,7 +48,7 @@ Route::get('filter', [App\Http\Controllers\FilterController::class, 'index'])->m
 Route::resource('cmo-grievances', CMOGrievanceController::class);
 Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])->middleware(['auth', 'verified'])->name('beneficiaries_selection.index')->middleware('auth');
 Route::get('/report', [BeneficiaryListController::class, 'show'])->name('report.show');
-Route::get('/application/{id}', ApplicationView::class)->name('application.view');
+Route::get('/custom_application/{id}', ApplicationView::class)->name('custom_application.view');
 
 // Route::get('/report/show', ReportPage::class)->name('report.show');
 

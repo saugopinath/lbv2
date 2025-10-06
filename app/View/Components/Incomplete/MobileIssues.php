@@ -15,6 +15,20 @@ class MobileIssues extends Component
 
     public function render()
     {
-        return view('components.incomplete.mobile-issues');
+          $user = auth()->user();
+
+        $stage = $this->stage ?? null;
+       
+
+        if (!$stage) {
+            if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+                $stage = 'verifier';
+
+            } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+                $stage = 'approver';
+            }
+
+        }
+        return view('components.incomplete.mobile-issues',compact('stage'));
     }
 }
