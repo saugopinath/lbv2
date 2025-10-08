@@ -19,9 +19,11 @@ class PersonalDetails extends Component
     public $id, $applicantDet, $decryptedAadhaar, $dsregno, $dsdate, $mobile, $email,
         $fname, $dob, $age, $ffname, $mfname, $sfname, $caste, $cascerno, $currentDate, $mode;
 
-     public function __construct($id, $reportType = null, $mode = null)
+    public function __construct($id, $reportType = null, $mode = null)
     {
-        $reportType = request()->query('reportType');
+        if (request()->query('reportType')) {
+            $reportType = request()->query('reportType');
+        }
         // dd($reportType);
         $this->mode = $mode;
         $this->currentDate = Carbon::now()->format('d/m/Y');

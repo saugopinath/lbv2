@@ -16,8 +16,17 @@
 
                 <x-form.textarea id="address" name="address" label="Address" required wire:model="address" />
 
-                <x-form.input name="zip" label="Pin Code" wire:model="zip" required
-                    x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,6)" />
+               
+
+                    <x-form.input
+                    name="zip"
+                    label="Pin Code"
+                    wire:model="zip"
+                    required
+                    x-on:input="
+        $el.value = $el.value.replace(/[^0-9]/g, '').slice(0,6);
+        $wire.set('zip', $el.value);
+    " />
 
                 <!-- Office Type -->
                 <x-form.select name="mapping_level" label="Office Type" wire:model.live="selectedMappingLevel" required>

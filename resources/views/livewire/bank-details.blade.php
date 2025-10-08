@@ -99,9 +99,9 @@
             @if ($mode != '0')
             <x-button.danger wire:click="$dispatch('goPrevious')">Previous</x-button.danger>
             @endif
-            <x-button.primary :disabled="$score === null" type="submit">
+            <x-button.primary-with-disable :disabled="$score === null" type="submit">
                 {{ $mode == '0' ? 'Save' : 'Save & Next' }}
-            </x-button.primary>
+            </x-button.primary-with-disable>
         </div>
     </form>
 </div>

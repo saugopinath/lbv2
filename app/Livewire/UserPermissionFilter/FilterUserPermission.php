@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire\UserPermissionFilter;
 
 use App\Models\District;
@@ -11,7 +12,7 @@ use Livewire\Component;
 
 class FilterUserPermission extends Component
 {
-    public $role, $mapping_level, $selectscheme, $office, $selectedMappingLevel, $selectedState, $scheme, $selectedDistrict, $Role, $role_id;
+    public $role, $mapping_level, $selectscheme, $office, $selectedMappingLevel, $selectedState, $scheme, $selectedDistrict, $Role, $role_id, $ml;
 
     public $roles = [], $schemes = [], $offices = [], $states = [], $mapping_levels = [], $districts = [];
 
@@ -31,9 +32,10 @@ class FilterUserPermission extends Component
         $this->selectedMappingLevel = null;
         $this->selectedDistrict = null;
         $this->selectedState = null;
-        
+
 
         if ($value) {
+
             $this->mapping_levels = RoleOfficeTypeMapping::with('officeType')
                 ->where('role_id', $value)
                 ->whereHas('officeType', function ($q) {
@@ -52,7 +54,7 @@ class FilterUserPermission extends Component
     {
         $this->office = null;
         $this->offices = [];
-
+        $this->ml = $value;
         if ($value) {
             $this->offices = OfficeMaster::where('office_type_id', $value)->get();
         }
@@ -70,7 +72,12 @@ class FilterUserPermission extends Component
             $this->districts = District::where('state_id', $value)->orderBy('name', 'asc')->get();
         }
     }
- 
+    public function updatedSelectedDistrict($value)
+    {
+        if ($value) {
+            $this->offices = OfficeMaster::where('office_type_id', $this->ml)->where('district_id', $value)->get();
+        }
+    }
 
     public function applyFilters()
     {

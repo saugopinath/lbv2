@@ -17,45 +17,45 @@ class SchemeAttacheDocumentSeeder extends Seeder
         $scheme_attache = array(
             array(
                 "scheme_id" => 20,
-                "doc_type_id" => 100,
+                "doc_type_id" => Codemaster::getIdByCode(169),
                 "is_required" => true,
                 "max_file_size" => "100KB",
+                "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
+            ),
+            array(
+                "scheme_id" => 20,
+                "doc_type_id" => Codemaster::getIdByCode(165),
+                "is_required" => true,
+                "max_file_size" => "500KB",
+                "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
+            ),
+            array(
+                "scheme_id" => 20,
+                "doc_type_id" => Codemaster::getIdByCode(161),
+                "is_required" => true,
+                "max_file_size" => "500KB",
+
+
                 "extension_type" => ['jpg', 'jpeg', 'png']
             ),
             array(
                 "scheme_id" => 20,
-                "doc_type_id" => 101,
+                "doc_type_id" => Codemaster::getIdByCode(1624),
+                "is_required" => true,
+                "max_file_size" => "500KB",
+                "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
+            ),
+            array(
+                "scheme_id" => 20,
+                "doc_type_id" => Codemaster::getIdByCode(1610),
                 "is_required" => false,
                 "max_file_size" => "500KB",
                 "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
             ),
             array(
                 "scheme_id" => 20,
-                "doc_type_id" => 104,
-                "is_required" => true,
-                "max_file_size" => "500KB",
-
-                
-                "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
-            ),
-            array(
-                "scheme_id" => 20,
-                "doc_type_id" => 108,
-                "is_required" => true,
-                "max_file_size" => "500KB",
-                "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
-            ),
-            array(
-                "scheme_id" => 20,
-                "doc_type_id" => 109,
+                "doc_type_id" => Codemaster::getIdByCode(162),
                 "is_required" => false,
-                "max_file_size" => "500KB",
-                "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
-            ),
-            array(
-                "scheme_id" => 20,
-                "doc_type_id" => 123,
-                "is_required" => true,
                 "max_file_size" => "500KB",
                 "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
             )

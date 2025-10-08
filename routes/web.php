@@ -22,6 +22,12 @@ use App\Http\Controllers\IncompleteTypeController;
 use App\Http\Controllers\IncompletPageController;
 use App\Http\Controllers\WorkFlowController;
 use App\Livewire\ProcessApplication\DraftApplicationView;
+use App\Http\Controllers\CasteModificationController;
+use App\Http\Controllers\MasterParameterSettingController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\UserPermissionController;
+use App\Livewire\MasterParameterSetting\Index as MasterParameterSettingCreate;
+use App\Livewire\UserPermission\AssignPermissionsPage;
 
 
 
@@ -110,3 +116,18 @@ Route::get('/approved-lists', [BeneficiaryApprovedListController::class, 'index'
 Route::get('/approved-lists-BA-Wise', [BeneficiaryApprovedListController::class, 'beneficiaryContactwiseList'])->name('approved-lists-BA-Wise');
 Route::get('lb-application-list', [WorkFlowController::class, 'index'])->middleware(['auth', 'verified'])->name('lb-application-list');
 Route::get('/application/{id}', DraftApplicationView::class)->name('draft-application.view');
+
+Route::get('/permission', [PermissionController::class, 'index'])->name('permission');
+Route::get('/user-permission', [UserPermissionController::class, 'index'])->name('user-permission');
+
+
+Route::get('/assign-users-permissions', AssignPermissionsPage::class)
+    ->name('assign-users-permissions');
+
+Route::get('/Caste-modification-info', [CasteModificationController::class, 'index'])->name('Caste-modification-info');
+Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])->name('caste-modification.edit');
+Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
+     ->name('beneficiary.updateCaste');
+Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])->name('caste-modification-list');
+
+Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])->name('view-beneficiary-details');

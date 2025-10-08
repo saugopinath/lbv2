@@ -72,7 +72,7 @@ class Users extends DataTableComponent
     public function builder(): Builder
     {
         $query = User::query()
-            ->whereHas('RoleSchemeOfficeMappings', function ($q) {
+            ->whereHas('RoleSchemeOfficeMappings.office', function ($q) {
                 $q->where('is_active', 1);
 
                 if (!empty($this->role)) {
@@ -82,7 +82,14 @@ class Users extends DataTableComponent
                 if (!empty($this->office)) {
                     $q->where('office_id', $this->office);
                 }
+                 if (!empty($this->selectedDistrict)) {
+                    $q->where('district_id', $this->selectedDistrict);
+                }
+                if (!empty($this->selectedMappingLevel)) {
+                    $q->where('office_type_id', $this->selectedMappingLevel);
+                }
             })
+            ->with(['mappedRoles', 'mappedPermissions'])
             ->orderBy('id', 'asc');
 
         return $query;

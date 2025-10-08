@@ -39,7 +39,7 @@
             {{-- District (only for specific mapping levels) --}}
             @if (in_array($selectedMappingLevel, [153, 154]))
                 <div class="relative">
-                    <x-form.select name="district" label="District" wire:model="selectedDistrict" required>
+                    <x-form.select name="district" label="District" wire:model.live="selectedDistrict" required>
                         <option value="">Select District</option>
                         @foreach ($districts as $district)
                             <option value="{{ $district->id }}">{{ $district->name }}</option>
@@ -67,7 +67,7 @@
         <button
             wire:click="applyFilters"
             type="button"
-            class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded transition duration-200 cursor-pointer"
+            class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded transition duration-200"
         >
             🔍 Search
         </button>
@@ -75,7 +75,7 @@
         <button
             wire:click="resetFilters"
             type="button"
-            class="px-4 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-semibold rounded transition duration-200 cursor-pointer"
+            class="px-4 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-semibold rounded transition duration-200"
         >
             ♻️ Reset
         </button>

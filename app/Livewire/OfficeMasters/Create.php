@@ -24,7 +24,7 @@ class Create extends Component
 
     public function mount()
     {
-        $this->states = State::orderBy('name', 'asc')->get();
+        $this->states = State::where('is_active', 1)->where('lgd_code',  19)->get();
         $officetype = Codemaster::getIdByCode(15);
         $this->mapping_levels = Codemaster::where('parent_id', $officetype)->whereIn('code', [151, 152, 153, 154])->get();
     }
@@ -112,7 +112,6 @@ class Create extends Component
 
             session()->flash('success', 'Office Master created successfully!');
             return redirect()->route('officemasters.index');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
