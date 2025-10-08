@@ -26,12 +26,12 @@
     <x-button.loading-button action="search" text="Search"></x-button.loading-button>
 
     @if (session()->has('warning'))
-        <div class="mb-4 p-3 rounded-lg bg-yellow-100 text-yellow-800 shadow-sm">
+        <div class="mb-4 p-3 mt-3 rounded-lg bg-yellow-300 text-yellow-800 shadow-sm">
             {{ session('warning') }}
         </div>
     @endif
 
-    @if (!empty($items))
+    @if(count($items) > 0)
         <div class="mt-6">
             @if (count($items) > 0)
                 <div class="overflow-x-auto bg-white shadow-md rounded-lg">
