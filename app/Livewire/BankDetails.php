@@ -85,9 +85,13 @@ class BankDetails extends Component
     }
     public function save()
     {
-        $validated = $this->validate($this->rules());
+        try {
+            $validated = $this->validate($this->rules());
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('hideLoader');
+            throw $e;
+        }
         $DraftBeneficiaryBank = DraftBeneficiaryBank::find($this->application_id);
-        $this->dispatch('showLoader');
         DB::beginTransaction();
         try {
             if ($this->mode === null && empty($DraftBeneficiaryBank)) {
@@ -103,7 +107,6 @@ class BankDetails extends Component
                 $this->dispatch('bankDet', [
                     'message' => "Bank Details saved successfully for the application id: {$this->application_id}"
                 ]);
-                 $this->dispatch('hideLoader');
             } else {
                 $DraftBeneficiaryBank->created_by = Auth::id();
                 $DraftBeneficiaryBank->ifsc = $validated['ifscode'];
@@ -114,13 +117,14 @@ class BankDetails extends Component
                 $this->dispatch('bankDet', [
                     'message' => "Bank Details updated successfully for the application id: {$this->application_id}"
                 ]);
-                 $this->dispatch('hideLoader');
             }
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+            $this->dispatch('hideLoader');
             throw $e;
         }
+        $this->dispatch('hideLoader');
     }
     public function render()
     {

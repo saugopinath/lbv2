@@ -45,9 +45,13 @@ class SelfDeclaration extends Component
 
     public function save()
     {
-        $validated = $this->validate($this->rules());
+        try {
+            $validated = $this->validate($this->rules());
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('hideLoader');
+            throw $e;
+        }
         $app_det = DraftBeneficiaryDeclaration::where('application_id', $this->application_id)->first();
-        $this->dispatch('showLoader');
         DB::beginTransaction();
         try {
             if ($this->mode === null && empty($app_det)) {
@@ -80,7 +84,6 @@ class SelfDeclaration extends Component
                     ->latest('id')
                     ->value('id') ?? null;
                 $AcceptRejectInfo->save();
-                 $this->dispatch('hideLoader');
             } else {
                 $DraftBeneficiaryDeclaration = DraftBeneficiaryDeclaration::find($this->application_id);
                 $DraftBeneficiaryDeclaration->is_resident = $validated['resident'];
@@ -89,14 +92,15 @@ class SelfDeclaration extends Component
                 $DraftBeneficiaryDeclaration->av_status = $validated['aadhaar_consent'];
                 $DraftBeneficiaryDeclaration->created_by = Auth::id();
                 $DraftBeneficiaryDeclaration->save();
-                 $this->dispatch('hideLoader');
             }
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+            $this->dispatch('hideLoader');
             throw $e;
         }
         $this->dispatch('selfDec');
+        $this->dispatch('hideLoader');
     }
 
     public function render()

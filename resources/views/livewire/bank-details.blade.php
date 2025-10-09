@@ -3,7 +3,7 @@
             Livewire.dispatch('showLoader');
             $wire.save();
         "
-        x-data="{ passbookName: @entangle('passbook_name'), error: '' }">
+        x-data="{ passbookName: @entangle('passbook_name'), ifscode: @entangle('ifscode'), error: '' }">
         <div class="grid gap-6 md:grid-cols-2 mb-2 pl-4 pr-4">
             <div>
                 <x-form.input id="passbook_name" name="passbook_name" label="Name as in Bank Passbook"
@@ -41,16 +41,25 @@
                     <span class="text-red-500 text-sm" x-text="error"></span>
                 </template>
                 @if ($score !== null)
-                    <span wire:model="score" class="font-semibold text-sm {{ $scoreColor }} ">
-                        Matching Score: {{ $score }}%
-                    </span>
+                <span wire:model="score" class="font-semibold text-sm {{ $scoreColor }} ">
+                    Matching Score: {{ $score }}%
+                </span>
                 @endif
             </div>
         </div>
         <div class="grid gap-6 mb-4 md:grid-cols-2 pl-4 pr-4">
             <div>
-                <x-form.input name="ifscode" label="IFS Code" required wire:model.lazy="ifscode"
-                    x-on:input="if ($el.value.length > 11) $el.value = $el.value.slice(0, 11)" />
+                <x-form.input
+                    name="ifscode"
+                    label="IFS Code"
+                    required
+                    x-model="ifscode"
+                    maxlength="11"
+                    wire:model.lazy="ifscode"
+                    x-on:input="
+            ifscode = $el.value.toUpperCase().slice(0, 11);
+            $el.value = ifscode;
+        " />
             </div>
             <div class="relative">
                 <x-form.input name="bankname" label="Bank Name" required wire:model.defer="bankname" disabled />
@@ -77,7 +86,7 @@
         </div>
         <div class="flex justify-between mt-4 pl-6 pr-6">
             @if ($mode != '0')
-                <x-button.danger wire:click="$dispatch('goPrevious')">Previous</x-button.danger>
+            <x-button.danger wire:click="$dispatch('goPrevious')">Previous</x-button.danger>
             @endif
             <x-button.primary-with-disable :disabled="$score === null" type="submit">
                 {{ $mode == '0' ? 'Save' : 'Save & Next' }}
