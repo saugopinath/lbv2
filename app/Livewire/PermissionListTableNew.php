@@ -74,7 +74,7 @@ class PermissionListTableNew extends DataTableComponent
 
     public function delete($id)
     {
-        
+
         $permission = Permission::find($id);
         // dd($permission);
         if ($permission) {

@@ -78,6 +78,7 @@ class CasteModificationFilters extends Component
 
     public function render()
     {
+        $this->dispatch('hideLoader');
         return view('livewire.caste-modification-filters');
     }
 }

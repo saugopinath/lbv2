@@ -23,7 +23,14 @@
         </div>
     </div>
 
-    <x-button.loading-button action="search" text="Search"></x-button.loading-button>
+    <x-button.loading-button action="search" text="Search"
+        x-on:click="
+        Livewire.dispatch('showLoader');
+        $wire.search().then(() => {
+            Livewire.dispatch('hideLoader');
+        });
+    " />
+
 
     @if (session()->has('warning'))
         <div class="mb-4 p-3 mt-3 rounded-lg bg-yellow-300 text-yellow-800 shadow-sm">
@@ -31,7 +38,7 @@
         </div>
     @endif
 
-    @if(count($items) > 0)
+    @if (count($items) > 0)
         <div class="mt-6">
             @if (count($items) > 0)
                 <div class="overflow-x-auto bg-white shadow-md rounded-lg">
@@ -49,16 +56,27 @@
                         <tbody class="divide-y divide-gray-100">
                             @foreach ($items as $row)
                                 <tr class="hover:bg-gray-50 transition duration-150">
-                                    <td class="px-4 py-2 text-center text-sm text-gray-700">{{ $row['application_id'] }}</td>
-                                    <td class="px-4 py-2 text-center text-sm text-gray-700">{{ $row['beneficiary_id'] }}</td>
-                                    <td class="px-4 py-2 text-center text-sm text-gray-700">{{ $row['applicant_name'] }}</td>
+                                    <td class="px-4 py-2 text-center text-sm text-gray-700">{{ $row['application_id'] }}
+                                    </td>
+                                    <td class="px-4 py-2 text-center text-sm text-gray-700">{{ $row['beneficiary_id'] }}
+                                    </td>
+                                    <td class="px-4 py-2 text-center text-sm text-gray-700">{{ $row['applicant_name'] }}
+                                    </td>
                                     <td class="px-4 py-2 text-center text-sm text-gray-700">{{ $row['mobile_no'] }}</td>
-                                    <td class="px-4 py-2 text-center text-sm text-gray-700">{{ $row['Caste_name'] }}</td>
+                                    <td class="px-4 py-2 text-center text-sm text-gray-700">{{ $row['Caste_name'] }}
+                                    </td>
                                     <td class="px-4 py-2 text-center">
                                         <form action="{{ route('caste-modification.edit') }}" method="GET">
-                                            <input type="hidden" name="application_id" value="{{ Crypt::encryptString($row['application_id']) }}">
-                                            <input type="hidden" name="beneficiary_id" value="{{ Crypt::encryptString($row['beneficiary_id']) }}">
-                                            <x-button.loading-button type="submit" text="Change" />
+                                            <input type="hidden" name="application_id"
+                                                value="{{ Crypt::encryptString($row['application_id']) }}">
+                                            <input type="hidden" name="beneficiary_id"
+                                                value="{{ Crypt::encryptString($row['beneficiary_id']) }}">
+                                         <x-button.loading-button
+        type="submit"
+        text="Change"
+        x-data
+        x-on:click.prevent="Livewire.dispatch('showLoader'); $el.form.submit();"
+    />
                                         </form>
                                     </td>
                                 </tr>
@@ -74,4 +92,3 @@
         </div>
     @endif
 </div>
-

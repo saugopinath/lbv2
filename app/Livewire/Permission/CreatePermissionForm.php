@@ -57,7 +57,7 @@ class CreatePermissionForm extends Component
     }
     public function save()
     {
-
+        $this->dispatch('showLoader');
         $this->validate();
 
         if ($this->is_parent == '0') {
@@ -67,7 +67,7 @@ class CreatePermissionForm extends Component
         //             'name'       => $this->name,
         //             'is_parent'  => $this->is_parent,
         //             'parent_id'  => $this->parent_id,
-        //         ]);  
+        //         ]);
         $permission = Permission::create([
             'name'       => $this->name,
             'guard_name' => 'web',
@@ -83,6 +83,7 @@ class CreatePermissionForm extends Component
 
         $this->reset(['name', 'is_parent', 'parent_id', 'has_score', 'min_score', 'max_score']);
         $this->dispatch('close-modal');
+        $this->dispatch('hideLoader');
         // $this->dispatch('notify', 'Permission created successfully!', 'success');
         $this->dispatch('notify', message: 'Permission created successfully!');
         $this->dispatch('refreshDatatable');

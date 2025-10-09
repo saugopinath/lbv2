@@ -1,13 +1,13 @@
 @props([
-    'action' => null,   
+    'action' => null,
     'text' => 'Submit',
     'color' => 'indigo',
     'type' => 'button', ])
 
 <button
-    @if($action) 
-        wire:click="{{ $action }}" 
-        wire:loading.attr="disabled" 
+    @if($action)
+        wire:click="{{ $action }}"
+        wire:loading.attr="disabled"
     @else
         x-data="{ loading: false }"
         x-on:click="if($el.type === 'submit'){ loading = true; $el.form.submit(); }"

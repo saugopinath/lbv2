@@ -1,6 +1,6 @@
 <div class="bg-white shadow rounded-lg p-4 border border-gray-200">
     <fieldset class="space-y-4">
-        <legend class="text-sm font-semibold text-gray-600 mb-2">🔎 Filter Users</legend>
+        <legend class="text-sm font-semibold text-gray-600 mb-2">Filter Users</legend>
 
         <div class="grid gap-4 md:grid-cols-2">
             {{-- Role --}}
@@ -64,20 +64,23 @@
 
     {{-- Buttons --}}
     <div class="flex justify-end items-center gap-3 mt-4">
-        <button
-            wire:click="applyFilters"
+        <x-button.primary
+             x-on:click="
+        Livewire.dispatch('showLoader');
+        $wire.applyFilters();
+    "
             type="button"
-            class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded transition duration-200"
+            class="bg-blue-500 text-white whitespace-nowrap cursor-pointer"
         >
-            🔍 Search
-        </button>
+            Search
+        </x-button.primary >
 
-        <button
+        <x-button.primary
             wire:click="resetFilters"
             type="button"
-            class="px-4 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-semibold rounded transition duration-200"
+            class="bg-green-500 text-white whitespace-nowrap cursor-pointer"
         >
-            ♻️ Reset
-        </button>
+            Reset
+        </x-button.primary >
     </div>
 </div>

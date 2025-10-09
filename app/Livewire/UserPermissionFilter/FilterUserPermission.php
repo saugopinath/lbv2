@@ -105,6 +105,7 @@ class FilterUserPermission extends Component
 
     public function render()
     {
+        $this->dispatch('hideLoader');
         return view('livewire.user-permission-filter.filter-user-permission');
     }
 }

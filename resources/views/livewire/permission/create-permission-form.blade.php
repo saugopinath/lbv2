@@ -55,7 +55,7 @@
                         <option value="0">No</option>
                     </x-form.select>
                 </div>
-                
+
                 <!-- Select Parent -->
                 @elseif($is_parent == 1)
                 <div>
@@ -69,7 +69,7 @@
                 </div>
                 @endif
                 <!-- Has Score? -->
-                
+
 
                 @if($has_score == 1)
                 <div class="mt-3">
@@ -91,10 +91,14 @@
 
 
                 <div class="flex justify-end space-x-2 mt-4">
-                    <x-button.primary type="submit"
-                        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 cursor-pointer">
-                        Save
-                    </x-button.primary>
+                    <x-button.primary
+    type="submit"
+    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 cursor-pointer"
+    x-on:click="Livewire.dispatch('showLoader')"
+>
+    Save
+</x-button.primary>
+
                     <x-button.primary
                         wire:click="cancel"
                         class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer">
