@@ -41,7 +41,7 @@ class IncompleteSearchWrapper extends Component
 
     public function search()
     {
-        $this->dispatch('showLoader');
+        // $this->dispatch('showLoader');
 
         $this->dispatch('doSearch', $this->filters);
     }

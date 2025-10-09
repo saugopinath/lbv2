@@ -190,6 +190,7 @@ class BeneficiaryTable extends DataTableComponent
     }
     public function render(): \Illuminate\View\View
     {
+        $this->dispatch('hideLoader');
         return view('livewire.custom-beneficiary-table', [
             'rows' => $this->getRows(),
             'reportType' => $this->reportType,

@@ -64,7 +64,11 @@
                     class="bg-green-500 text-white whitespace-nowrap cursor-pointer">
                     Reset
                 </x-button.primary>
-                <x-button.primary wire:click="applyFilters"
+                <x-button.primary
+                    x-on:click="
+        Livewire.dispatch('showLoader');
+        $wire.applyFilters();
+    "
                     class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
                     Search
                 </x-button.primary>

@@ -22,11 +22,11 @@ class FilterLgdMaster extends Component
         'block_dropdown' => 0,
         'gp_ward_dropdown' => 0,
     ];
-      protected $listeners = [
+    protected $listeners = [
         'resetChildFilters' => 'resetFilters',
     ];
 
-    public function mount($button_show=null)
+    public function mount($button_show = null)
     {
         $select_lgd = session('lgd_session');
         $this->button_show = $button_show;
@@ -248,15 +248,15 @@ class FilterLgdMaster extends Component
         ]);
     }
 
-      public function updatedSelectedGpWard()
+    public function updatedSelectedGpWard()
     {
-        // $this->dispatch('filtersApplied', [
-        //     'district_id' => $this->selectedDistrict,
-        //     'rural_urban' => $this->selectedRuralurban,
-        //     'subdivision_id' => $this->selectedSubdivision,
-        //     'blockurban' => $this->selectedBlockurban,
-        //     'gp_ward' => $this->selectedGpWard,
-        // ]);
+        $this->dispatch('filtersApplied', [
+            'district_id' => $this->selectedDistrict,
+            'rural_urban' => $this->selectedRuralurban,
+            'subdivision_id' => $this->selectedSubdivision,
+            'blockurban' => $this->selectedBlockurban,
+            'gp_ward' => $this->selectedGpWard,
+        ]);
     }
 
     public function applyFilters()
