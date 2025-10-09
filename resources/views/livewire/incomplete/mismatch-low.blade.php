@@ -69,6 +69,7 @@
             <div x-data="{
                 bank: @entangle('bank_account_number').live,
                 confirm: @entangle('confirmbankaccountnumber').live,
+                ifscode: @entangle('ifscode'),
                 showSuccess: false,
                 showError: false,
                 checkMatch() {
@@ -89,9 +90,15 @@
             }" x-effect="checkMatch()" class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
 
                 {{-- IFSC Code --}}
-                <x-form.input name="ifscode" label="IFSC Code" wire:model.live="ifscode"
-                    x-on:input="if ($el.value.length > 11) $el.value = $el.value.slice(0, 11)" />
+                {{--  <x-form.input name="ifscode" label="IFSC Code" wire:model.live="ifscode"
+                    x-on:input="if ($el.value.length > 11) $el.value = $el.value.slice(0, 11)" />  --}}
 
+                <x-form.input name="ifscode" label="IFS Code" required x-model="ifscode" maxlength="11"
+                    wire:model.live="ifscode"
+                    x-on:input="
+            ifscode = $el.value.toUpperCase().slice(0, 11);
+            $el.value = ifscode;
+        " />
                 {{-- Bank Name --}}
                 <div class="relative">
                     <x-form.input name="bankname" label="Bank Name" wire:model="bankname" disabled />
