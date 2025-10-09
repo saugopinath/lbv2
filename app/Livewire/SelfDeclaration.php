@@ -47,6 +47,7 @@ class SelfDeclaration extends Component
     {
         $validated = $this->validate($this->rules());
         $app_det = DraftBeneficiaryDeclaration::where('application_id', $this->application_id)->first();
+        $this->dispatch('showLoader');
         DB::beginTransaction();
         try {
             if ($this->mode === null && empty($app_det)) {
@@ -59,7 +60,7 @@ class SelfDeclaration extends Component
                 $DraftBeneficiaryDeclaration->av_status = $validated['aadhaar_consent'];
                 $DraftBeneficiaryDeclaration->created_by = Auth::id();
                 $DraftBeneficiaryDeclaration->save();
-                
+
                 $draftbenPar = DraftBeneficiaryPersonal::find($application_id);
                 $draftbenPar->next_level_role_id = Codemaster::getIdByCode(22);
                 $draftbenPar->is_final_submit = 1;
@@ -72,13 +73,14 @@ class SelfDeclaration extends Component
                 $AcceptRejectInfo->user_id = Auth::id();
                 $AcceptRejectInfo->browser = request()->header('User-Agent');
                 $AcceptRejectInfo->model_name = null;
-                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2301);
+                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(22);
                 $AcceptRejectInfo->revert_reason_cause_id = null;
                 $AcceptRejectInfo->revert_reason_remarks = null;
                 $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $application_id)
                     ->latest('id')
                     ->value('id') ?? null;
                 $AcceptRejectInfo->save();
+                 $this->dispatch('hideLoader');
             } else {
                 $DraftBeneficiaryDeclaration = DraftBeneficiaryDeclaration::find($this->application_id);
                 $DraftBeneficiaryDeclaration->is_resident = $validated['resident'];
@@ -87,6 +89,7 @@ class SelfDeclaration extends Component
                 $DraftBeneficiaryDeclaration->av_status = $validated['aadhaar_consent'];
                 $DraftBeneficiaryDeclaration->created_by = Auth::id();
                 $DraftBeneficiaryDeclaration->save();
+                 $this->dispatch('hideLoader');
             }
             DB::commit();
         } catch (\Exception $e) {

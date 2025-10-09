@@ -86,6 +86,7 @@ class ContactDetails extends Component
     {
         $validated = $this->validate($this->rules());
         $DraftBeneficiaryContact = DraftBeneficiaryContact::find($this->application_id);
+         $this->dispatch('showLoader');
         DB::beginTransaction();
         try {
             if ($this->mode === null && empty($DraftBeneficiaryContact)) {
@@ -111,6 +112,7 @@ class ContactDetails extends Component
                 $this->dispatch('conDet', [
                     'message' => "Contact Details saved successfully for the application id: {$this->application_id}"
                 ]);
+                $this->dispatch('hideLoader');
             } else {
                 $DraftBeneficiaryContact->district_id = $validated['selectedDistrict'];
                 $DraftBeneficiaryContact->rural_urban_id = $validated['selectedRuralurban'];
@@ -135,6 +137,7 @@ class ContactDetails extends Component
                 $this->dispatch('conDet', [
                     'message' => "Contact Details updated successfully for the application id: {$this->application_id}"
                 ]);
+                $this->dispatch('hideLoader');
             }
             DB::commit();
         } catch (\Exception $e) {

@@ -1,5 +1,8 @@
 <div x-data="{ appType: '{{ $app_type }}',caste: '{{ $caste }}',MarStatu: '{{ $mar_statu }}'}">
-    <form wire:submit.prevent="save">
+    <form  x-on:submit.prevent="
+            Livewire.dispatch('showLoader');
+            $wire.save();
+        ">
         @if($this->hideAppTypeSection)
         <div class="grid gap-6 md:grid-cols-2 mb-2 pl-4 pr-4">
             <div>

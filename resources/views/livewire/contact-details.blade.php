@@ -1,5 +1,8 @@
 <div>
-    <form wire:submit.prevent="save">
+    <form x-on:submit.prevent="
+            Livewire.dispatch('showLoader');
+            $wire.save();
+        ">
         <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
             <div>
                 <x-form.input name="state" label="State" wire:model="stateName" required disabled />

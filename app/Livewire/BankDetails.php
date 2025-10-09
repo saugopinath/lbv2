@@ -87,6 +87,7 @@ class BankDetails extends Component
     {
         $validated = $this->validate($this->rules());
         $DraftBeneficiaryBank = DraftBeneficiaryBank::find($this->application_id);
+        $this->dispatch('showLoader');
         DB::beginTransaction();
         try {
             if ($this->mode === null && empty($DraftBeneficiaryBank)) {
@@ -102,6 +103,7 @@ class BankDetails extends Component
                 $this->dispatch('bankDet', [
                     'message' => "Bank Details saved successfully for the application id: {$this->application_id}"
                 ]);
+                 $this->dispatch('hideLoader');
             } else {
                 $DraftBeneficiaryBank->created_by = Auth::id();
                 $DraftBeneficiaryBank->ifsc = $validated['ifscode'];
@@ -112,6 +114,7 @@ class BankDetails extends Component
                 $this->dispatch('bankDet', [
                     'message' => "Bank Details updated successfully for the application id: {$this->application_id}"
                 ]);
+                 $this->dispatch('hideLoader');
             }
             DB::commit();
         } catch (\Exception $e) {
