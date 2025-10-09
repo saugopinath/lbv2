@@ -63,7 +63,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
 
     public function run(): void
     {
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 15; $i++) {
             // Create a BeneficiaryPersonal
 
 
@@ -172,7 +172,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
                 'application_id' => $beneficiary->application_id,
                 'created_by' => $user_id,
                 'ifsc' => Ifsccodemaster::where('id', 6712)->value('code'),
-                'bank_account_number' => 'BALCC' . str_pad($i, 4, '0', STR_PAD_LEFT) .($i + 1),
+                'bank_account_number' => 'BACC' . str_pad($i, 4, '0', STR_PAD_LEFT) .($i + 1),
             ]);
             $docs = [
                 ['name' => 'aadhar_card_enc', 'type' => 104],
