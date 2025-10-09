@@ -250,14 +250,29 @@ class FilterLgdMaster extends Component
 
     public function updatedSelectedGpWard()
     {
-        $this->dispatch('filtersApplied', [
-            'district_id' => $this->selectedDistrict,
-            'rural_urban' => $this->selectedRuralurban,
-            'subdivision_id' => $this->selectedSubdivision,
-            'blockurban' => $this->selectedBlockurban,
-            'gp_ward' => $this->selectedGpWard,
-        ]);
+        $user = auth()->user();
+
+        $stage = $this->stage ?? null;
+
+        if (!$stage) {
+            if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+                $stage = 'verifier';
+            } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+                $stage = 'approver';
+            }
+        }
+
+        if ($stage == 'verifier' || $stage == 'approver') {
+            $this->dispatch('filtersApplied', [
+                'district_id'    => $this->selectedDistrict,
+                'rural_urban'    => $this->selectedRuralurban,
+                'subdivision_id' => $this->selectedSubdivision,
+                'blockurban'     => $this->selectedBlockurban,
+                'gp_ward'        => $this->selectedGpWard,
+            ]);
+        }
     }
+
 
     public function applyFilters()
     {
