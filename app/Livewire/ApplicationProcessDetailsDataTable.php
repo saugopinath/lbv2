@@ -249,7 +249,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 $AcceptRejectInfo->user_id = Auth::id();
                 $AcceptRejectInfo->browser = request()->header('User-Agent');
                 $AcceptRejectInfo->model_name = null;
-                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2302);
+                $AcceptRejectInfo->op_type = $approverRoleId;
                 $AcceptRejectInfo->revert_reason_cause_id = null;
                 $AcceptRejectInfo->revert_reason_remarks = null;
                 $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
@@ -280,7 +280,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             DB::beginTransaction();
             try {
                 $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(2303);
+                $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(0);
                 $DraftBeneficiaryPersonal->save();
                 $AcceptRejectInfo = new AcceptRejectInfo;
                 $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
@@ -289,7 +289,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 $AcceptRejectInfo->user_id = Auth::id();
                 $AcceptRejectInfo->browser = request()->header('User-Agent');
                 $AcceptRejectInfo->model_name = null;
-                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2303);
+                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(0);
                 $AcceptRejectInfo->revert_reason_cause_id = null;
                 $AcceptRejectInfo->revert_reason_remarks = null;
                 $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
@@ -347,7 +347,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     $AcceptRejectInfo->user_id = Auth::id();
                     $AcceptRejectInfo->browser = request()->header('User-Agent');
                     $AcceptRejectInfo->model_name = null;
-                    $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2304);
+                    $AcceptRejectInfo->op_type = $next_level_role_id;
                     $AcceptRejectInfo->revert_reason_cause_id =  $validated['reason'];
                     $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
                     $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
@@ -367,7 +367,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 DB::beginTransaction();
                 try {
                     $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                    $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(2305);
+                    $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(-1);
                     $DraftBeneficiaryPersonal->save();
                     $AcceptRejectInfo = new AcceptRejectInfo;
                     $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
@@ -376,7 +376,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     $AcceptRejectInfo->user_id = Auth::id();
                     $AcceptRejectInfo->browser = request()->header('User-Agent');
                     $AcceptRejectInfo->model_name = null;
-                    $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2305);
+                    $AcceptRejectInfo->op_type = Codemaster::getIdByCode(-1);
                     $AcceptRejectInfo->revert_reason_cause_id = null;
                     $AcceptRejectInfo->revert_reason_remarks = null;
                     $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)

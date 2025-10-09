@@ -37,7 +37,7 @@ class DraftBeneficiaryPersonalObserver
     {
         if ($draftBeneficiaryPersonal->wasChanged('next_level_role_id')) {
             $newRole = $draftBeneficiaryPersonal->next_level_role_id;
-            if ($newRole == 144) {
+            if ($newRole == Codemaster::getIdByCode(0)) {
                 // dd($draftBeneficiaryPersonal);
                 // $beneficiary = BeneficiaryPersonal::updateOrCreate(
                 //     ['application_id' => $draftBeneficiaryPersonal->application_id],
@@ -81,7 +81,7 @@ class DraftBeneficiaryPersonalObserver
                 }
                 $beneficiaryPersonal = DraftBeneficiaryPersonal::find($draftBeneficiaryPersonal->application_id);
                 $beneficiaryPersonal->delete();
-            } elseif ($newRole == 146) {
+            } elseif ($newRole == Codemaster::getIdByCode(-1)) {
                 $select_lgd = session('lgd_session');
                 $benrej = new BenRejectDetails;
                 $benrej->application_id     = $draftBeneficiaryPersonal->application_id;
