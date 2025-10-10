@@ -62,7 +62,7 @@ class DraftBeneficiaryPersonalObserver
                             'relation_type_id' => $rel['relation_type_id']
                         ],
                         collect($rel)
-                            ->except(['created_at', 'updated_at'])
+                            ->except(['created_at', 'updated_at','id'])
                             ->merge(['beneficiary_id' => $beneficiary->beneficiary_id])
                             ->toArray()
                     );
