@@ -121,6 +121,10 @@ class BulkActionModal extends Component
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     DB::commit();
+                    $this->dispatch('toastr', [
+                        'type' => 'success',
+                        'message' => 'Application verified successfully!'
+                    ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
@@ -148,6 +152,10 @@ class BulkActionModal extends Component
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     DB::commit();
+                     $this->dispatch('toastr', [
+                    'type' => 'success',
+                    'message' => 'Application approved successfully!'
+                ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
@@ -183,6 +191,10 @@ class BulkActionModal extends Component
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     DB::commit();
+                     $this->dispatch('toastr', [
+                    'type' => 'warning',
+                    'message' => 'Application reverted successfully!'
+                ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
@@ -210,6 +222,10 @@ class BulkActionModal extends Component
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     DB::commit();
+                     $this->dispatch('toastr', [
+                    'type' => 'error',
+                    'message' => 'Application rejected successfully!'
+                ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;

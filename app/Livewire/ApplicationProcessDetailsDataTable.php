@@ -227,9 +227,8 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 }
             );
         }
-         $this->dispatch('hideLoader');
+        $this->dispatch('hideLoader');
         return $query;
-
     }
 
     public function bulkverify()
@@ -259,6 +258,10 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     ->value('id') ?? null;
                 $AcceptRejectInfo->save();
                 DB::commit();
+                $this->dispatch('toastr', [
+                    'type' => 'success',
+                    'message' => 'All applications verified successfully!'
+                ]);
             } catch (\Exception $e) {
                 DB::rollBack();
                 throw $e;
@@ -299,6 +302,10 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     ->value('id') ?? null;
                 $AcceptRejectInfo->save();
                 DB::commit();
+                $this->dispatch('toastr', [
+                    'type' => 'success',
+                    'message' => 'All applications approved successfully!'
+                ]);
             } catch (\Exception $e) {
                 DB::rollBack();
                 throw $e;
@@ -357,6 +364,10 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     DB::commit();
+                    $this->dispatch('toastr', [
+                        'type' => 'warning',
+                        'message' => 'All applications reverted successfully!'
+                    ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
@@ -386,6 +397,10 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     DB::commit();
+                    $this->dispatch('toastr', [
+                        'type' => 'error',
+                        'message' => 'All applications rejected successfully!'
+                    ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
