@@ -1,9 +1,5 @@
 <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
-    @if (session('success'))
-        <div class="bg-green-500 text-white px-4 py-2 rounded shadow mb-2">
-            {{ session('success') }}
-        </div>
-    @endif
+   
     <!-- Top Controls: Search, Per Page -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div class="flex justify-end">
