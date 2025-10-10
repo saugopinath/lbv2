@@ -111,6 +111,7 @@ class IncompletTypeTable extends DataTableComponent
             Column::make("Address")
                 ->label(function ($row) {
                     $common = $row->beneficiaryCommonList->sourceable;
+                    // dd($common);
 
                     if ($common?->block_id && $common?->panchayat) {
                         return $common->panchayat->name;
@@ -143,7 +144,12 @@ class IncompletTypeTable extends DataTableComponent
         $query = ApplicantIncompletDeatil::query()
             ->select('application_id')
             ->groupBy('application_id')
-            ->orderBy('application_id', 'asc');
+            ->orderBy('application_id', 'asc')
+            ->whereHas('beneficiaryCommonList', function ($q) {
+                foreach ($this->filter_condition as $col => $val) {
+                    $q->where($col, $val);
+                }
+            });
 
         $user = auth()->user();
 
@@ -176,7 +182,7 @@ class IncompletTypeTable extends DataTableComponent
 
         // Location filter apply
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->filterCode) {
-            $query = EncryptionArray::applyLocationFilter(
+            $query = EncryptionArray::applyIncompletLocationFilter(
                 $query,
                 $this->district_id ? (int) $this->district_id : null,
                 $this->rural_urban ? (int) $this->rural_urban : null,

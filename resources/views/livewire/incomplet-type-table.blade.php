@@ -68,13 +68,16 @@
                         <td class="py-3 px-2">
                             {{ $row->beneficiaryCommonList?->sourceable?->father?->first()?->full_name ?? 'N/A' }}
                         </td>
-                        
+
                         <!-- Incomplete Type -->
                         <td class="py-3 px-2">{!! $row->incomplete_types_names ?? 'N/A' !!}</td>
 
                         <!-- Address -->
                         <td class="py-3 px-2">
-                            @php $common = $row->beneficiaryCommonList->sourceable; @endphp
+                            @php
+                                $common = $row->beneficiaryCommonList?->sourceable?->contacts;
+                            @endphp
+
                             @if ($common?->block_id && $common?->panchayat)
                                 {{ $common->panchayat->name }}
                             @elseif ($common?->sub_division_id && $common?->ward)
