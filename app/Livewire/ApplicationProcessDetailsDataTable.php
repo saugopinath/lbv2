@@ -197,9 +197,9 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     }
     public function builder(): Builder
     {
-        $query = BeneficiaryCommonList::with(['sourceable.relationships']);
+        $query = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact');
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
-            $query = EncryptionArray::applyLocationFilte(
+            $query = EncryptionArray::applyLocationFilters(
                 $query,
                 $this->district_id ? (int) $this->district_id : null,
                 $this->rural_urban ? (int) $this->rural_urban : null,
@@ -227,7 +227,9 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 }
             );
         }
+         $this->dispatch('hideLoader');
         return $query;
+
     }
 
     public function bulkverify()

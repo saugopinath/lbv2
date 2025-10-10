@@ -26,7 +26,7 @@ class ApplicantIncompletDetailsSeeder extends Seeder
             return;
         }
 
-        foreach (range(1200, 1220) as $i) {
+        foreach (range(150000001, 150000015) as $i) {
             ApplicantIncompletDeatil::create([
                 'application_id'        => $applicationIds[array_rand($applicationIds)],
                 'beneficiary_id'        => null,

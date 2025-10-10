@@ -120,7 +120,7 @@ class BeneficiaryTable extends DataTableComponent
             $next_level_role_id = $roleReverted;
         } elseif ($this->reportType === "4") {
             $query = BenRejectDetail::query();
-            return EncryptionArray::applyLocationFilters(
+            return EncryptionArray::applyLocationFilter(
                 $query,
                 $this->reportType,
                 $this->district_id ? (int) $this->district_id : null,
@@ -158,7 +158,7 @@ class BeneficiaryTable extends DataTableComponent
             );
         }
 
-        $query = EncryptionArray::applyLocationFilters(
+        $query = EncryptionArray::applyLocationFilter(
             $query,
             $this->reportType,
             $this->district_id ? (int) $this->district_id : null,

@@ -37,12 +37,13 @@ class IncompletTypePage extends Component
         $this->page = ApplicantIncompletDeatil::where('application_id', $this->id)
             ->with([
                 'incompletType',
-                'beneficiaryCommonList.enclosures',
-                'beneficiaryCommonList.aadhaar',
-                'beneficiaryCommonList.bank',
-                'beneficiaryCommonList.beneficiaryPersonal.father',
-                'beneficiaryCommonList.panchayat',
-                'beneficiaryCommonList.ward',
+                // 'beneficiaryCommonList.enclosures',
+                // 'beneficiaryCommonList.aadhaar',
+                // 'beneficiaryCommonList.bank',
+                // 'beneficiaryCommonList.sourceable.bank',
+                // 'beneficiaryCommonList.sourceable.father',
+                // 'beneficiaryCommonList.panchayat',
+                // 'beneficiaryCommonList.ward',
             ])->get();
 
         $this->applicantInfo = $this->page->first()?->beneficiaryCommonList;

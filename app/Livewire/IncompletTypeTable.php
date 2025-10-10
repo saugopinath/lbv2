@@ -98,19 +98,19 @@ class IncompletTypeTable extends DataTableComponent
             Column::make("Name")
                 ->label(
                     fn($row) =>
-                    $row->beneficiaryCommonList?->beneficiaryPersonal?->full_name ?? 'N/A'
+                    $row->beneficiaryCommonList?->sourceable?->full_name ?? 'N/A'
                 ),
 
             Column::make("Father's Name")
                 ->label(
                     fn($row) =>
-                    $row->beneficiaryCommonList?->beneficiaryPersonal?->father?->first()?->full_name
+                    $row->beneficiaryCommonList?->sourceable?->father?->first()?->full_name
                         ?? 'N/A'
                 ),
 
             Column::make("Address")
                 ->label(function ($row) {
-                    $common = $row->beneficiaryCommonList;
+                    $common = $row->beneficiaryCommonList->sourceable;
 
                     if ($common?->block_id && $common?->panchayat) {
                         return $common->panchayat->name;
@@ -240,7 +240,7 @@ class IncompletTypeTable extends DataTableComponent
 
         return implode(', ', $filters);
     }
-    
+
     public function render(): \Illuminate\View\View
     {
         $rows = $this->getRows();

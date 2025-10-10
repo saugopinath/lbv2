@@ -62,20 +62,19 @@
 
                         <!-- Applicant Name -->
                         <td class="py-3 px-2">
-                            {{ $row['beneficiaryCommonList']['beneficiaryPersonal']->full_name ?? 'N/A' }}
+                            {{ $row['beneficiaryCommonList']['sourceable']->full_name ?? 'N/A' }}
                         </td>
 
-                        <!-- Father's Name -->
                         <td class="py-3 px-2">
-                            {{ $row['beneficiaryCommonList']['beneficiaryPersonal']->father?->first()?->full_name ?? 'N/A' }}
+                            {{ $row->beneficiaryCommonList?->sourceable?->father?->first()?->full_name ?? 'N/A' }}
                         </td>
-
+                        
                         <!-- Incomplete Type -->
                         <td class="py-3 px-2">{!! $row->incomplete_types_names ?? 'N/A' !!}</td>
 
                         <!-- Address -->
                         <td class="py-3 px-2">
-                            @php $common = $row->beneficiaryCommonList; @endphp
+                            @php $common = $row->beneficiaryCommonList->sourceable; @endphp
                             @if ($common?->block_id && $common?->panchayat)
                                 {{ $common->panchayat->name }}
                             @elseif ($common?->sub_division_id && $common?->ward)
@@ -98,7 +97,7 @@
                         @endif
                         <!-- Action -->
                         <td class="py-3 px-2">
-                             @if ($stage === 'approver')
+                            @if ($stage === 'approver')
                                 {{-- Approve Button --}}
                                 <x-button.primary
                                     href="{{ route('incomplet-type.view', ['id' => encrypt($row->application_id), 'stage' => encrypt($stage)]) }}">
