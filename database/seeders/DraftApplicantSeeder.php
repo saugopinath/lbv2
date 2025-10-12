@@ -60,9 +60,7 @@ class DraftApplicantSeeder extends Seeder
             $panchayatId   = !empty($panchayatIds) ? $faker->randomElement($panchayatIds) : null;
 
             // Unique Application ID generate
-            $uniqueAppBenId = UniqueAppBenId::create([
-                'beneficiary_id' => $i,
-            ]);
+           $uniqueAppBenId = UniqueAppBenId::create([]);
 
             // Personal
             DraftBeneficiaryPersonal::create([
@@ -101,7 +99,7 @@ class DraftApplicantSeeder extends Seeder
                 'village_town_city' => 'Village ' . $i,
                 'house_premise_no'  => 'House No ' . $i,
                 'post_office'       => 'Post Office ' . $i,
-                'pincode'           => '7000' . str_pad($i, 4, '0', STR_PAD_LEFT),
+                'pincode'           => '700157',
                 'residency_period'  => rand(1, 10),
                 'created_by'        => $userId,
             ]);

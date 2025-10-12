@@ -10,6 +10,7 @@ use App\Models\District;
 use App\Models\Panchayat;
 use App\Models\Codemaster;
 use App\Models\Subdivision;
+use App\Models\UniqueAppBenId;
 use Faker\Factory as Faker;
 use App\Models\Municipality;
 use Illuminate\Support\Str;
@@ -28,6 +29,7 @@ class BeneficiaryCommonListSeeder extends Seeder
 
         for ($i = 150000000; $i < 150000015; $i++) {
 
+            $uniqueAppBenId = UniqueAppBenId::create([]);
             $districtId    = $faker->randomElement($districtIds);
             $blockId       = $faker->randomElement($blockIds);
             $subdivisionId = !empty($subdivisionIds) ? $faker->randomElement($subdivisionIds) : null;
@@ -36,7 +38,7 @@ class BeneficiaryCommonListSeeder extends Seeder
             $panchayatId   = !empty($panchayatIds) ? $faker->randomElement($panchayatIds) : null;
 
             BeneficiaryCommonList::create([
-                'sourceable_id' => $i,
+                'sourceable_id' => $uniqueAppBenId->application_id,
                 'sourceable_type' => 'App\Models\BeneficiaryPersonal',
                 'district_id' => $districtId,
                 'block_id' => $blockId,
@@ -44,7 +46,7 @@ class BeneficiaryCommonListSeeder extends Seeder
                 'municipality_id' => $municipalityId,
                 'ward_id' => $wardId,
                 'panchayat_id' => $panchayatId,
-                'beneficiary_id'      => $i,
+                'beneficiary_id'      => $uniqueAppBenId->application_id,
                 'mobile_no'           => $faker->numerify('9#########'),
                 'encoded_aadhar'      => base64_encode($faker->numerify('############')),
                 'bank_account_number' => $faker->numerify('###############'),
