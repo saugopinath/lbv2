@@ -30,7 +30,7 @@ class PersonalDetails extends Component
 
         if ($reportType == '3') {
             // dd($id);
-            $applicantDet = BeneficiaryPersonal::with(['aadhaar', 'relationships'])->where('application_id', $id)->first();
+            $applicantDet = BeneficiaryPersonal::with(['aadhaar', 'relationships'])->where('beneficiary_id', $id)->first();
         } else {
             // dd('ok2');
             $applicantDet = DraftBeneficiaryPersonal::with(['aadhaar', 'relationships'])->where('application_id', $id)->first();

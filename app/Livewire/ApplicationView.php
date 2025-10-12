@@ -25,12 +25,14 @@ class ApplicationView extends Component
         $this->is_duplicate   = $is_duplicate;
 
         if ($this->reportType === '3') {
-            $this->application = BeneficiaryPersonal::findOrFail($realId);
+            // $this->application = BeneficiaryPersonal::findOrFail($realId);
+             $this->application = BeneficiaryPersonal::where('beneficiary_id', $realId)->first();
             $this->label = 'Beneficiary Id';
             $this->value = $this->application->beneficiary_id;
             $this->passId = $this->application->beneficiary_id;
         } else {
-            $this->application = DraftBeneficiaryPersonal::findOrFail($realId);
+            // $this->application = DraftBeneficiaryPersonal::findOrFail($realId);
+            $this->application = DraftBeneficiaryPersonal::where('application_id', $realId)->first();
             $this->label = 'Application Id';
             $this->value = $this->application->application_id;
             $this->passId = $this->application->application_id;

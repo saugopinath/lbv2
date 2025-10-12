@@ -60,10 +60,6 @@
         @endif
         @if ($button_show == 1)
             <div class="flex items-center mt-6 gap-3">
-                <x-button.primary wire:click="resetFilters"
-                    class="bg-green-500 text-white whitespace-nowrap cursor-pointer">
-                    Reset
-                </x-button.primary>
                 <x-button.primary
                     x-on:click="
         Livewire.dispatch('showLoader');
@@ -71,6 +67,10 @@
     "
                     class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
                     Search
+                </x-button.primary>
+                 <x-button.primary wire:click="resetFilters"
+                    class="bg-green-500 text-white whitespace-nowrap cursor-pointer">
+                    Reset
                 </x-button.primary>
             </div>
         @endif
