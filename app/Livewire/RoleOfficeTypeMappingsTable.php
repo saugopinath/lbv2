@@ -9,7 +9,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
-class RoleOfficeTypeMappings extends DataTableComponent
+class RoleOfficeTypeMappingsTable extends DataTableComponent
 {
     public ?int $perPage = 5;
     public string $search = '';

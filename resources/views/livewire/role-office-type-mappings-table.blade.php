@@ -1,5 +1,5 @@
 <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
-   
+
     <!-- Top Controls: Search, Per Page -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div class="flex justify-end">

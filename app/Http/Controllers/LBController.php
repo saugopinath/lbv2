@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Crypt;
 
 use Illuminate\Http\Request;
 
@@ -21,6 +21,7 @@ class LBController extends Controller
     }
     public function draftedit($id)
     {
+        $id= Crypt::decryptString($id);
         return view('lbform.draftedit',compact('id'));
     }
 }

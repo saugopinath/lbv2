@@ -37,7 +37,7 @@
         {{-- <x-button.primary> Action </x-button.primary>  --}}
         <div class="flex space-x-2">
 
-            <x-button.primary wire:click="openActionModal" wire-target="openActionModal">
+            <x-button.primary wire:click="openActionModal" wire-target="openActionModal"  x-on:click="Livewire.dispatch('showLoader')">
                 Action
             </x-button.primary>
             @livewire('process-application.bulk-action-modal')

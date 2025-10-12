@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\BeneficiaryCommonList;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Auth;
 use App\Models\BeneficiaryTemEnclosure;
 use App\Models\ApplicantIncompletDeatil;
 use Illuminate\Support\Facades\Route;
@@ -201,7 +202,7 @@ class IncompletTypePage extends Component
                     [
                         'encoded_aadhar' => Crypt::encryptString($newAadhaar),
                         'aadhar_hash'    => md5($newAadhaar),
-                        'created_by'     => 1,
+                        'created_by'     => Auth::id(),
                     ]
                 );
 
@@ -215,7 +216,7 @@ class IncompletTypePage extends Component
                             'document_extension' => $temp->document_extension,
                             'document_mime_type' => $temp->document_mime_type,
                             'ip_address'         => request()->ip(),
-                            'created_by'         => 1,
+                            'created_by'         => Auth::id(),
                             'updated_at'         => now(),
                         ]
                     );
@@ -235,7 +236,7 @@ class IncompletTypePage extends Component
                     ['application_id' => $this->id],
                     [
                         'mobile_no'  => $newMobile,
-                        'created_by' => 1,
+                        'created_by' => Auth::id(),
                         'is_faulty'  => true,
                         'created_at' => now(),
                         'updated_at' => now(),
@@ -274,7 +275,7 @@ class IncompletTypePage extends Component
                                 'document_extension' => $temp->document_extension,
                                 'document_mime_type' => $temp->document_mime_type,
                                 'ip_address'         => request()->ip(),
-                                'created_by'         => 1,
+                                'created_by'         => Auth::id(),
                                 'updated_at'         => now(),
                             ]
                         );
@@ -296,7 +297,7 @@ class IncompletTypePage extends Component
                     [
                         'bank_account_number' => $newBankAccountNumber,
                         'ifsc'               => $newifscode,
-                        'created_by'         => 1,
+                        'created_by'         => Auth::id(),
                     ]
                 );
 
@@ -312,7 +313,7 @@ class IncompletTypePage extends Component
                                 'document_extension' => $temp->document_extension,
                                 'document_mime_type' => $temp->document_mime_type,
                                 'ip_address'         => request()->ip(),
-                                'created_by'         => 1,
+                                'created_by'         => Auth::id(),
                                 'updated_at'         => now(),
                             ]
                         );

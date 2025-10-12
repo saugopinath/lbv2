@@ -2,19 +2,22 @@
 
 namespace App\Livewire;
 
-use App\Models\BeneficiaryCommonList;
+use App\Models\Codemaster;
 use App\Helpers\EncryptionArray;
-use App\Exports\BeneficiariesExport;
 use App\Models\BeneficiaryPersonal;
-use App\Models\FaultyBeneficiaryPersonal;
+use App\Exports\BeneficiariesExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\BeneficiaryCommonList;
 use Illuminate\Support\Facades\Crypt;
+use App\Models\DraftBeneficiaryPersonal;
+use Illuminate\Support\HtmlString;
+use App\Models\FaultyBeneficiaryPersonal;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Actions\Action;
 use Rappasoft\LaravelLivewireTables\Views\Filters\TextFilter;
-use App\Models\DraftBeneficiaryPersonal;
+
 class DraftBeneficiaryDetailsTable extends DataTableComponent
 {
     public ?int $perPage = 5;
@@ -58,7 +61,7 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
     {
         $this->setPrimaryKey('application_id')
             ->setPaginationEnabled()
-            ->setPerPageAccepted([5,10])
+            ->setPerPageAccepted([5, 10])
             ->setPerPage($this->perPage)
             ->setPerPageVisibilityEnabled()
             ->setSearchEnabled()
@@ -92,7 +95,7 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
         // $this->setQueryStringForFilterEnabled();
         // $this->setQueryStringForSearchEnabled()
         //     ->setQueryStringForPerPageEnabled()
-        //     ->setQueryStringForFiltersEnabled();    
+        //     ->setQueryStringForFiltersEnabled();
         //         $this->setPerPageDropdownAttributes([
         //     'class' => 'border rounded px-3 py-1 bg-white text-gray-700 hover:border-gray-500',
         // ]);
@@ -183,15 +186,15 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
             Column::make("Application ID", "application_id")
                 ->label(fn($row) => $row->application_id ?? 'N/A')
                 ->sortable(),
-                // ->searchable(function ($query, $searchTerm) {
-                //     $query->whereHas('sourceable', function ($q) use ($searchTerm) {
-                //         $q->where('application_id', 'ILIKE', "%{$searchTerm}%");
-                //     });
-                // }),
+            // ->searchable(function ($query, $searchTerm) {
+            //     $query->whereHas('sourceable', function ($q) use ($searchTerm) {
+            //         $q->where('application_id', 'ILIKE', "%{$searchTerm}%");
+            //     });
+            // }),
 
             // ->label(fn($row) => $row->sourceable->application_id ?? 'N/A'),
 
-            
+
 
             Column::make("Applicant Name", "full_name")
                 ->label(fn($row) => $row->full_name ?? 'N/A'),
@@ -199,20 +202,14 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
             Column::make("Mobile No", "mobile_no")
                 ->label(fn($row) => $row->mobile_no ?? 'N/A'),
 
-            Column::make("Bank AC No", "bank_account_number")
-                ->label(fn($row) => $row->bank->bank_account_number ?? 'N/A'),
 
-            Column::make("IFSC", "ifsc")
-                ->label(fn($row) => $row->bank->ifsc ?? 'N/A'),
-
-            Column::make("Branch", "branch")
-                ->label(fn($row) => $row->bank->ifscMaster->branch ?? 'N/A'),
-
-            Column::make("Bank Name", "bank_name")
-                ->label(fn($row) => $row->bank->ifscMaster->bankmaster->name ?? 'N/A'),
-
-            Column::make("Type")
-                ->label(fn($row) => class_basename($row->sourceable_type)),
+                 Column::make("Actions")
+                ->label(function ($row) {
+                    $url = route('draftedit', Crypt::encryptString($row->application_id));
+                    return new HtmlString(
+                        '<button type="button" onclick="window.open(\'' . $url . '\', \'_blank\')" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">Edit</button>'
+                    );
+                }),
         ];
     }
     public function builder(): Builder
@@ -221,11 +218,15 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
         //     ->with(['contact' => fn($q) => $q->where('relation_type_id', $relationFather)]);
 
         // return $query;
-        $query = DraftBeneficiaryPersonal::with('contact', 'bank');
-    //      ->whereIn('sourceable_type', [
-    //     BeneficiaryPersonal::class,
-    //     FaultyBeneficiaryPersonal::class
-    // ]);
+
+         $next_level_role_id = Codemaster::getIdByCode(21);
+        $query = DraftBeneficiaryPersonal::with('contact', 'bank')
+            ->where('next_level_role_id',$next_level_role_id);
+        // dd($query);
+        //      ->whereIn('sourceable_type', [
+        //     BeneficiaryPersonal::class,
+        //     FaultyBeneficiaryPersonal::class
+        // ]);
         // if (!empty($this->filter_condition['district_id'])) {
         //     $query->whereHas(
         //         'contact',
@@ -250,7 +251,7 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
         //     );
         // }
         // // $result = $query->get();
-        // // dd($result); 
+        // // dd($result);
         // if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
         //     $query = EncryptionArray::applyLocationFilters(
         //         $query,
@@ -271,5 +272,5 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
     //     return view('livewire.custom-beneficiary-table', [
     //         'rows' => $this->getRows(),
     //     ]);
-    // 
-    }
+    //
+}
