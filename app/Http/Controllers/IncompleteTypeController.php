@@ -52,7 +52,7 @@ class IncompleteTypeController extends Controller
             if ($duplicateCheck !== true) {
                 return back()->withErrors(['duplicate_check' => $duplicateCheck])->withInput();
             }
-
+// dd('ok');
             // ✅ Step 2: Validation rules setup
             $rules = [];
             $messages = [];
@@ -250,7 +250,7 @@ class IncompleteTypeController extends Controller
         $aadharData     = $request->aadhar_modification;
         $mobileData     = $request->dup_mobile;
         $confirmAccData = $request->confirmbankaccountnumber;
-
+// dd( $aadharData );
         $allIssues = ApplicantIncompletDeatil::where('application_id', $realId)->get();
 
         if ($allIssues->isEmpty()) {
@@ -258,9 +258,11 @@ class IncompleteTypeController extends Controller
         }
 
         foreach ($allIssues as $item) {
+            // dd($item);
             $typeCode = $item->incomplet_type ?? null;
 
             if (in_array($typeCode, ['141', '149', '1414']) && $aadharData) {
+                // dd($item->beneficiaryCommonList);
                 $result = ChechDupHelper::checkDuplicate('aadhaar', $aadharData, $item->beneficiaryCommonList);
                 if ($result !== true) {
                     return $result; // Return error message

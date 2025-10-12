@@ -14,6 +14,7 @@ class ChechDupHelper
         }
 
         if ($type === 'aadhaar') {
+            // dd($value);
             $existsInCommonList = BeneficiaryCommonList::where('encoded_aadhar', $value)->exists();
 
             $existsInIncomplete = ApplicantIncompletDeatil::whereJsonContains('new_value->aadhaar_no', $value)

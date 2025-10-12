@@ -32,11 +32,7 @@
             </div>
         </div>
     @endif
-    {{--  @error('duplicate_check')
-        <div class="mt-2 p-3 border border-red-400 bg-red-100 text-red-700 rounded-md shadow-sm">
-            {{ $message }}
-        </div>
-    @enderror  --}}
+  
     @if ($errors->has('duplicate_check'))
         <div class="mt-2 mb-0 p-3 border border-red-400 bg-red-100 text-red-700 rounded-md shadow-sm">
             <ul class="list-disc list-inside text-sm">
@@ -46,10 +42,12 @@
             </ul>
         </div>
     @endif
+    @if (session('error'))
+        <div class="mb-4 p-3 rounded bg-red-100 border border-red-400 text-red-700">
+            <strong>Error:</strong> {{ session('error') }}
+        </div>
+    @endif
 
-
-
-    {{--  <form method="POST" action="{{ route('incomplete-full-deatils-update', ['id' => $id]) }}">  --}}
     <form method="POST" action="{{ route('incomplete-full-deatils-update', ['id' => encrypt($id)]) }}">
         @csrf
         @csrf
