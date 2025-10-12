@@ -159,23 +159,23 @@ class EncryptionArray
         $gpWardField = $rural_urban == 2 ? 'panchayat_id' : 'ward_id';
 
         // Base eager load
-        $query->with('commonList.beneficiaryPersonal.contacts');
+        $query->with('commonList.sourceable.contacts');
 
         // ✅ Priority wise filter (deepest → highest)
         if ($gp_ward) {
-            $query->whereHas('commonList.beneficiaryPersonal.contacts', function ($q) use ($gpWardField, $gp_ward) {
+            $query->whereHas('commonList.sourceable.contacts', function ($q) use ($gpWardField, $gp_ward) {
                 $q->where($gpWardField, $gp_ward);
             });
         } elseif ($blockurban) {
-            $query->whereHas('commonList.beneficiaryPersonal.contacts', function ($q) use ($blockField, $blockurban) {
+            $query->whereHas('commonList.sourceable.contacts', function ($q) use ($blockField, $blockurban) {
                 $q->where($blockField, $blockurban);
             });
         } elseif ($district_id) {
-            $query->whereHas('commonList.beneficiaryPersonal.contacts', function ($q) use ($district_id) {
+            $query->whereHas('commonList.sourceable.contacts', function ($q) use ($district_id) {
                 $q->where('district_id', $district_id);
             });
         } elseif ($filterCode) {
-            $query->whereHas('commonList.beneficiaryPersonal.contacts', function ($q) use ($filterCode) {
+            $query->whereHas('commonList.sourceable.contacts', function ($q) use ($filterCode) {
                 $q->where('incomplet_type', $filterCode);
             });
             //  $query->where('incomplet_type', $filterCode);

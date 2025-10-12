@@ -54,10 +54,10 @@ class BeneficiaryCommonList extends Model implements Auditable
         return $this->hasMany(BeneficiaryEnclosure::class, 'application_id', 'sourceable_id');
     }
 
-    public function beneficiaryPersonal()
-    {
-        return $this->hasOne(BeneficiaryPersonal::class, 'application_id', 'sourceable_id');
-    }
+    // public function beneficiaryPersonal()
+    // {
+    //     return $this->hasOne(BeneficiaryPersonal::class, 'application_id', 'sourceable_id');
+    // }
 
     public function beneficiaryBank()
     {
