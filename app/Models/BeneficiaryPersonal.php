@@ -38,10 +38,10 @@ class BeneficiaryPersonal extends Model implements Auditable
         return $this->hasOne(BeneficiaryRelationship::class, 'application_id', 'application_id');
     }
 
-    public function contact()
-    {
-        return $this->hasOne(BeneficiaryContact::class, 'application_id', 'application_id');
-    }
+    // public function contact()
+    // {
+    //     return $this->hasOne(BeneficiaryContact::class, 'application_id', 'application_id');
+    // }
 
     public function bank()
     {

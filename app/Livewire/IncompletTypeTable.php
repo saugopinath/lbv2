@@ -149,12 +149,13 @@ class IncompletTypeTable extends DataTableComponent
             ->select('application_id')
             ->groupBy('application_id')
             ->orderBy('application_id', 'asc')
+            ->with('commonList.sourceable.contacts.panchayat', 'commonList.sourceable.contacts.ward')
             ->whereHas('beneficiaryCommonList', function ($q) {
                 foreach ($this->filter_condition as $col => $val) {
                     $q->where($col, $val);
                 }
             });
-
+// dd($query->get());
         $user = auth()->user();
 
         $stage = $this->stage ?? null;

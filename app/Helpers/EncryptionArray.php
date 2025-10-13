@@ -198,7 +198,8 @@ class EncryptionArray
                     }
                 });
             });
-        } elseif ($blockurban) {
+        }
+        if ($blockurban) {
             $query->whereHas('commonList', function ($q) use ($blockField, $blockurban) {
                 $q->whereHasMorph('sourceable', '*', function ($q, $type) use ($blockField, $blockurban) {
                     if (method_exists($q->getModel(), 'contacts')) {
@@ -208,7 +209,8 @@ class EncryptionArray
                     }
                 });
             });
-        } elseif ($district_id) {
+        }
+         if ($district_id) {
             $query->whereHas('commonList', function ($q) use ($district_id) {
                 $q->whereHasMorph('sourceable', '*', function ($q, $type) use ($district_id) {
                     if (method_exists($q->getModel(), 'contacts')) {
@@ -218,7 +220,8 @@ class EncryptionArray
                     }
                 });
             });
-        } elseif ($filterCode) {
+        }
+        if ($filterCode) {
             $query->whereHas('commonList', function ($q) use ($filterCode) {
                 $q->whereHasMorph('sourceable', '*', function ($q, $type) use ($filterCode) {
                     if (method_exists($q->getModel(), 'contacts')) {

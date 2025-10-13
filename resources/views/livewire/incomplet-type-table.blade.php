@@ -1,5 +1,5 @@
 <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
-  
+
     <div>
         @if ($this->activeFilters)
             <div x-data="{ show: true }" x-show="show" x-transition
