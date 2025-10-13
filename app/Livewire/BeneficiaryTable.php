@@ -51,10 +51,13 @@ class BeneficiaryTable extends DataTableComponent
     }
     public function filtersApplied($filters)
     {
+        // dd($filters['gp_ward']);
         $this->district_id = $filters['district_id'];
+        // dd($this->district_id );
         $this->rural_urban = $filters['rural_urban'] ?? null;
         $this->blockurban = $filters['blockurban'];
         $this->gp_ward = $filters['gp_ward'];
+        // dd($this->gp_ward );
     }
     public function configure(): void
     {
@@ -170,22 +173,26 @@ class BeneficiaryTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $roleVerified  = Codemaster::getIdByCode(22);
+        $roleVerified  = Codemaster::getIdByCode(23);
         $roleApproved  = Codemaster::getIdByCode(0);
         $roleReverted  = Codemaster::getIdByCode(21);
 
+        $next_level_role_id = null;
+        $sourceableClass = null;
 
+        // 🔹 Decide which model type to use based on reportType
         if ($this->reportType === "2") {
-            // $model = DraftBeneficiaryPersonal::with('contact');
+            $sourceableClass = DraftBeneficiaryPersonal::class;
             $next_level_role_id = $roleVerified;
         } elseif ($this->reportType === "3") {
-            // $model = BeneficiaryPersonal::with('contact');
+            $sourceableClass = BeneficiaryPersonal::class;
             $next_level_role_id = $roleApproved;
         } elseif (in_array($this->reportType, ["1", "5"])) {
-            // $model = DraftBeneficiaryPersonal::with('contact');
+            $sourceableClass = DraftBeneficiaryPersonal::class;
             $next_level_role_id = $roleReverted;
         } elseif ($this->reportType === "4") {
             $query = BenRejectDetail::query();
+
             return EncryptionArray::applyLocationFilter(
                 $query,
                 $this->reportType,
@@ -196,66 +203,84 @@ class BeneficiaryTable extends DataTableComponent
             );
         }
 
-        $query = BeneficiaryCommonList::with('sourceable.contact', 'sourceable.bank', 'sourceable.relationships')
-            ->whereHas(
+        $query = BeneficiaryCommonList::with('sourceable.contact', 'sourceable.relationships')
+            ->whereHasMorph(
                 'sourceable',
+                $sourceableClass,
                 function ($q) use ($next_level_role_id) {
                     $q->where('next_level_role_id', $next_level_role_id);
                 }
             );
-        // dd($query->get());
 
         if (!empty($this->filter_condition['district_id'])) {
-            $query->whereHas(
-                'sourceable.contact',
-                fn($q) =>
-                $q->where('district_id', $this->filter_condition['district_id'])
+            $districtId = $this->filter_condition['district_id'];
+
+            $query->whereHasMorph(
+                'sourceable',
+                $sourceableClass,
+                function ($q) use ($districtId) {
+                    $q->whereHas('contact', function ($contactQuery) use ($districtId) {
+                        $contactQuery->where('district_id', $districtId);
+                    });
+                }
             );
         }
 
         if (!empty($this->filter_condition['block_id'])) {
-            $query->whereHas(
-                'sourceable.contact',
-                fn($q) =>
-                $q->where('block_id', $this->filter_condition['block_id'])
+            $blockId = $this->filter_condition['block_id'];
+
+            $query->whereHasMorph(
+                'sourceable',
+                $sourceableClass,
+                function ($q) use ($blockId) {
+                    $q->whereHas('contact', function ($contactQuery) use ($blockId) {
+                        $contactQuery->where('block_id', $blockId);
+                    });
+                }
             );
         }
 
         if (!empty($this->filter_condition['subdivision_id'])) {
-            $query->whereHas(
-                'sourceable.contact.municipality',
-                fn($mq) =>
-                $mq->where('subdivision_id', $this->filter_condition['subdivision_id'])
+            $subdivisionId = $this->filter_condition['subdivision_id'];
+
+            $query->whereHasMorph(
+                'sourceable',
+                $sourceableClass,
+                function ($q) use ($subdivisionId) {
+                    $q->whereHas('contact.municipality', function ($municipalityQuery) use ($subdivisionId) {
+                        $municipalityQuery->where('subdivision_id', $subdivisionId);
+                    });
+                }
             );
         }
 
-        $query = EncryptionArray::applyLocationFilter(
-            $query,
-            $this->reportType,
-            $this->district_id ? (int) $this->district_id : null,
-            $this->rural_urban ? (int) $this->rural_urban : null,
-            $this->blockurban ? (int) $this->blockurban : null,
-            $this->gp_ward ? (int) $this->gp_ward : null
-        );
-        // dump(
-        //     vsprintf(
-        //         str_replace('?', '%s', $query->toSql()),
-        //         collect($query->getBindings())->map(
-        //             fn($binding) =>
-        //             is_numeric($binding) ? $binding : "'{$binding}'"
-        //         )->toArray()
-        //     )
+        // dd($this->gp_ward);
+        // $query = EncryptionArray::applyLocationFilter(
+        //     $query,
+        //     $this->reportType,
+        //     $this->district_id ? (int) $this->district_id : null,
+        //     $this->rural_urban ? (int) $this->rural_urban : null,
+        //     $this->blockurban ? (int) $this->blockurban : null,
+        //     $this->gp_ward ? (int) $this->gp_ward : null
         // );
-        // dd($query->get());
 
+
+         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
+            // dd($this->gp_ward);
+            $query = EncryptionArray::applyLocationFilter(
+                $query,
+                $this->reportType,
+                $this->district_id ? (int) $this->district_id : null,
+                $this->rural_urban ? (int) $this->rural_urban : null,
+                $this->blockurban ? (int) $this->blockurban : null,
+                $this->gp_ward ? (int) $this->gp_ward : null
+            );
+        }
+
+        $this->dispatch('hideLoader');
         return $query;
-
-        //    dd(vsprintf(
-        // str_replace('?', '%s', $query->toSql()),
-        // collect($query->getBindings())->map(fn($binding) => is_numeric($binding) ? $binding : "'{$binding}'")->toArray()
-        // ));
-
     }
+
 
     public function filters(): array
     {

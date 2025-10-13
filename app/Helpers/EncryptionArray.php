@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\Codemaster;
 use Illuminate\Database\Eloquent\Builder;
 
 class EncryptionArray
@@ -9,29 +10,56 @@ class EncryptionArray
 
     public static function applyLocationFilter(Builder $query, string $reportType, ?int $district_id, ?int $rural_urban, ?int $blockurban, ?int $gp_ward): Builder
     {
+        // dump($rural_urban);
+        // dump($blockurban);
+        // dd($gp_ward);
         $blockField  = $rural_urban == 2 ? 'block_id'      : 'municipality_id';
         $gpWardField = $rural_urban == 2 ? 'panchayat_id'  : 'ward_id';
-
+        // $query->with('sourceable.contact');
+        // dd($reportType,$district_id,$rural_urban,$blockurban,$gp_ward,$blockField, $gpWardField);
         if ($reportType !== "4") {
 
-            $query->with('sourceable.contact');
+            // $query->with('sourceable.contact');
+            // dd($query->toSql());
 
             if ($district_id) {
-                $query->whereHas('sourceable.contact', function ($q) use ($district_id) {
-                    $q->where('district_id', $district_id);
-                });
+                $query->whereHasMorph(
+                    'sourceable',
+                    '*',
+                    function ($q) use ($district_id) {
+                        $q->whereHas('contact', function ($contactQuery) use ($district_id) {
+                            $contactQuery->where('district_id', $district_id);
+                        });
+                    }
+                );
             }
-
             if ($blockurban) {
-                $query->whereHas('sourceable.contact', function ($q) use ($blockField, $blockurban) {
-                    $q->where($blockField, $blockurban);
-                });
+                $query->whereHasMorph(
+                    'sourceable',
+                    '*',
+                    function ($q) use ($blockField, $blockurban) {
+                        $q->whereHas('contact', function ($subQuery) use ($blockField, $blockurban) {
+                            $subQuery->where($blockField, $blockurban);
+                        });
+                    }
+                );
             }
+            // dd('fdf');
+            // $query->whereHas('sourceable.contact', function ($q) use ($blockField, $blockurban) {
+            //     $q->where($blockField, $blockurban);
+            // });
+            // }
 
             if ($gp_ward) {
-                $query->whereHas('sourceable.contact', function ($q) use ($gpWardField, $gp_ward) {
-                    $q->where($gpWardField, $gp_ward);
-                });
+                $query->whereHasMorph(
+                    'sourceable',
+                    '*',
+                    function ($q) use ($gpWardField, $gp_ward) {
+                        $q->whereHas('contact', function ($subQuery) use ($gpWardField, $gp_ward) {
+                            $subQuery->where($gpWardField, $gp_ward);
+                        });
+                    }
+                );
             }
         } else {
 
@@ -66,17 +94,17 @@ class EncryptionArray
             $query->where($blockField, $blockurban);
         }
 
-         if ($gp_ward) {
-        $query->whereHasMorph(
-            'sourceable',
-            '*',
-            function ($q) use ($gpWardField, $gp_ward) {
-                $q->whereHas('contact', function ($subQuery) use ($gpWardField, $gp_ward) {
-                    $subQuery->where($gpWardField, $gp_ward);
-                });
-            }
-        );
-    }
+        if ($gp_ward) {
+            $query->whereHasMorph(
+                'sourceable',
+                '*',
+                function ($q) use ($gpWardField, $gp_ward) {
+                    $q->whereHas('contact', function ($subQuery) use ($gpWardField, $gp_ward) {
+                        $subQuery->where($gpWardField, $gp_ward);
+                    });
+                }
+            );
+        }
 
         return $query;
     }
@@ -95,7 +123,7 @@ class EncryptionArray
             $query->whereHas('sourceable.contact', function ($q) use ($district_id) {
                 $q->where('district_id', $district_id);
             });
-            dd($query->toSql());
+            // dd($query->toSql());
         }
 
         if ($blockurban) {
@@ -153,34 +181,114 @@ class EncryptionArray
         ?int $rural_urban,
         ?int $blockurban,
         ?int $gp_ward,
-        ?int $filterCode = null
+        ?int $filterCode
     ): Builder {
-        $blockField  = $rural_urban == 2 ? 'block_id' : 'municipality_id';
+        // dump($filterCode);
+        // dd($gp_ward);
+        $blockField = $rural_urban == 2 ? 'block_id' : 'municipality_id';
         $gpWardField = $rural_urban == 2 ? 'panchayat_id' : 'ward_id';
 
-        // Base eager load
-        $query->with('commonList.sourceable.contacts');
+        // Eager load relationships
+        $query->with('commonList.sourceable.contact'); // Adjust to 'contacts' if needed
 
-        // ✅ Priority wise filter (deepest → highest)
+        // Priority-wise filter (deepest → highest)
         if ($gp_ward) {
-            $query->whereHas('commonList.sourceable.contacts', function ($q) use ($gpWardField, $gp_ward) {
-                $q->where($gpWardField, $gp_ward);
+            // dump('bjj');
+            $query->whereHas('commonList', function ($q) use ($gpWardField, $gp_ward) {
+                $q->whereHasMorph('sourceable', '*', function ($q, $type) use ($gpWardField, $gp_ward) {
+                    // Only apply the contact filter if the model has a 'contact' relationship
+                    if (method_exists($q->getModel(), 'contact')) {
+                        $q->whereHas('contact', function ($subQuery) use ($gpWardField, $gp_ward) {
+                            $subQuery->where($gpWardField, $gp_ward);
+                        });
+                    }
+                });
             });
-        } elseif ($blockurban) {
-            $query->whereHas('commonList.sourceable.contacts', function ($q) use ($blockField, $blockurban) {
-                $q->where($blockField, $blockurban);
+        } if ($blockurban) {
+            // dump('ddfff');
+            $query->whereHas('commonList', function ($q) use ($blockField, $blockurban) {
+                $q->whereHasMorph('sourceable', '*', function ($q, $type) use ($blockField, $blockurban) {
+                    if (method_exists($q->getModel(), 'contact')) {
+                        $q->whereHas('contact', function ($subQuery) use ($blockField, $blockurban) {
+                            $subQuery->where($blockField, $blockurban);
+                        });
+                    }
+                });
             });
-        } elseif ($district_id) {
-            $query->whereHas('commonList.sourceable.contacts', function ($q) use ($district_id) {
-                $q->where('district_id', $district_id);
+        } if ($district_id) {
+            // dump('dfdsf');
+            $query->whereHas('commonList', function ($q) use ($district_id) {
+                $q->whereHasMorph('sourceable', '*', function ($q, $type) use ($district_id) {
+                    if (method_exists($q->getModel(), 'contact')) {
+                        $q->whereHas('contact', function ($subQuery) use ($district_id) {
+                            $subQuery->where('district_id', $district_id);
+                        });
+                    }
+                });
             });
-        } elseif ($filterCode) {
-            $query->whereHas('commonList.sourceable.contacts', function ($q) use ($filterCode) {
-                $q->where('incomplet_type', $filterCode);
-            });
-            //  $query->where('incomplet_type', $filterCode);
+        }
+        // dd($filterCode);
+        if ($filterCode) {
+            // dd('dscsfsae');
+            // dump($filterCode);
+            // $gjjj=Codemaster::getIdByCode($filterCode);
+            // dd(Codemaster::getIdByCode($filterCode));
+            $query->where('incomplet_type',  $filterCode);
         }
 
         return $query;
     }
+
+// public function applyIncompletLocationFilter(
+//     Builder $query,
+//     ?int $district_id,
+//     ?int $rural_urban,
+//     ?int $blockurban,
+//     ?int $gp_ward,
+//     ?int $filterCode = null
+// ): Builder {
+
+//     // Determine correct fields based on rural/urban
+//     $blockField  = $rural_urban === 2 ? 'block_id' : 'municipality_id';
+//     $gpWardField = $rural_urban === 2 ? 'panchayat_id' : 'ward_id';
+
+//     // Base eager load
+//     $query->with(['commonList.sourceable.contact']);
+
+//     // Apply filters in priority order: GP/Ward → Block → District → Filter Code
+//     if ($gp_ward) {
+//         $query->whereHasMorph('commonList', '*', function ($q) use ($gpWardField, $gp_ward) {
+//             $q->whereHasMorph('sourceable', '*', function ($sq) use ($gpWardField, $gp_ward) {
+//                 $sq->whereHas('contact', function ($contactQuery) use ($gpWardField, $gp_ward) {
+//                     $contactQuery->where($gpWardField, $gp_ward);
+//                 });
+//             });
+//         });
+//     } elseif ($blockurban) {
+//         $query->whereHasMorph('commonList', '*', function ($q) use ($blockField, $blockurban) {
+//             $q->whereHasMorph('sourceable', '*', function ($sq) use ($blockField, $blockurban) {
+//                 $sq->whereHas('contact', function ($contactQuery) use ($blockField, $blockurban) {
+//                     $contactQuery->where($blockField, $blockurban);
+//                 });
+//             });
+//         });
+//     } elseif ($district_id) {
+//         $query->whereHasMorph('commonList', '*', function ($q) use ($district_id) {
+//             $q->whereHasMorph('sourceable', '*', function ($sq) use ($district_id) {
+//                 $sq->whereHas('contact', function ($contactQuery) use ($district_id) {
+//                     $contactQuery->where('district_id', $district_id);
+//                 });
+//             });
+//         });
+//     }
+
+//     // Optional filter by code
+//     if ($filterCode) {
+//         $query->where('incomplete_type_code', $filterCode);
+//     }
+
+//     return $query;
+// }
+
+
 }
