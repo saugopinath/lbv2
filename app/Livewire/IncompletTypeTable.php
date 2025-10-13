@@ -25,7 +25,10 @@ class IncompletTypeTable extends DataTableComponent
     public ?string $filterCode = null;
     public $district_id, $rural_urban, $blockurban, $gp_ward, $selectedSubdivision;
 
-    protected $listeners = ['doSearch' => 'doSearch'];
+    // protected $listeners = ['doSearch' => 'doSearch'];
+    protected $listeners = [
+        'doSearch' => 'updateFilters',
+    ];
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
     public array $filter_condition = [];
@@ -48,8 +51,9 @@ class IncompletTypeTable extends DataTableComponent
         }
     }
 
-    public function doSearch(array $filters)
+    public function updateFilters($filters)
     {
+        // dd($filters);
         $this->district_id = $filters['district_id'] ?? null;
         $this->rural_urban = $filters['rural_urban'] ?? null;
         $this->selectedSubdivision = $filters['subdivision_id'] ?? null;
@@ -251,7 +255,7 @@ class IncompletTypeTable extends DataTableComponent
     {
         $rows = $this->getRows();
 
-        $this->dispatch('hideLoader');
+        // $this->dispatch('hideLoader');
 
         return view('livewire.incomplet-type-table', [
             'rows'  => $rows,

@@ -181,114 +181,184 @@ class EncryptionArray
         ?int $rural_urban,
         ?int $blockurban,
         ?int $gp_ward,
-        ?int $filterCode
+        ?int $filterCode = null
     ): Builder {
-        // dump($filterCode);
-        // dd($gp_ward);
         $blockField = $rural_urban == 2 ? 'block_id' : 'municipality_id';
         $gpWardField = $rural_urban == 2 ? 'panchayat_id' : 'ward_id';
 
-        // Eager load relationships
-        $query->with('commonList.sourceable.contact'); // Adjust to 'contacts' if needed
+        $query->with('commonList.sourceable.contacts');
 
-        // Priority-wise filter (deepest → highest)
         if ($gp_ward) {
-            // dump('bjj');
             $query->whereHas('commonList', function ($q) use ($gpWardField, $gp_ward) {
                 $q->whereHasMorph('sourceable', '*', function ($q, $type) use ($gpWardField, $gp_ward) {
-                    // Only apply the contact filter if the model has a 'contact' relationship
-                    if (method_exists($q->getModel(), 'contact')) {
-                        $q->whereHas('contact', function ($subQuery) use ($gpWardField, $gp_ward) {
+                    if (method_exists($q->getModel(), 'contacts')) {
+                        $q->whereHas('contacts', function ($subQuery) use ($gpWardField, $gp_ward) {
                             $subQuery->where($gpWardField, $gp_ward);
                         });
                     }
                 });
             });
-        } if ($blockurban) {
-            // dump('ddfff');
+        } elseif ($blockurban) {
             $query->whereHas('commonList', function ($q) use ($blockField, $blockurban) {
                 $q->whereHasMorph('sourceable', '*', function ($q, $type) use ($blockField, $blockurban) {
-                    if (method_exists($q->getModel(), 'contact')) {
-                        $q->whereHas('contact', function ($subQuery) use ($blockField, $blockurban) {
+                    if (method_exists($q->getModel(), 'contacts')) {
+                        $q->whereHas('contacts', function ($subQuery) use ($blockField, $blockurban) {
                             $subQuery->where($blockField, $blockurban);
                         });
                     }
                 });
             });
-        } if ($district_id) {
-            // dump('dfdsf');
+        } elseif ($district_id) {
             $query->whereHas('commonList', function ($q) use ($district_id) {
                 $q->whereHasMorph('sourceable', '*', function ($q, $type) use ($district_id) {
-                    if (method_exists($q->getModel(), 'contact')) {
-                        $q->whereHas('contact', function ($subQuery) use ($district_id) {
+                    if (method_exists($q->getModel(), 'contacts')) {
+                        $q->whereHas('contacts', function ($subQuery) use ($district_id) {
                             $subQuery->where('district_id', $district_id);
                         });
                     }
                 });
             });
-        }
-        // dd($filterCode);
-        if ($filterCode) {
-            // dd('dscsfsae');
-            // dump($filterCode);
-            // $gjjj=Codemaster::getIdByCode($filterCode);
-            // dd(Codemaster::getIdByCode($filterCode));
-            $query->where('incomplet_type',  $filterCode);
+        } elseif ($filterCode) {
+            $query->whereHas('commonList', function ($q) use ($filterCode) {
+                $q->whereHasMorph('sourceable', '*', function ($q, $type) use ($filterCode) {
+                    if (method_exists($q->getModel(), 'contacts')) {
+                        $q->whereHas('contacts', function ($subQuery) use ($filterCode) {
+                            $subQuery->where('incomplet_type', $filterCode);
+                        });
+                    }
+                });
+            });
         }
 
         return $query;
     }
 
-// public function applyIncompletLocationFilter(
-//     Builder $query,
-//     ?int $district_id,
-//     ?int $rural_urban,
-//     ?int $blockurban,
-//     ?int $gp_ward,
-//     ?int $filterCode = null
-// ): Builder {
+    // public static function applyIncompletLocationFilter(
+    //     Builder $query,
+    //     ?int $district_id,
+    //     ?int $rural_urban,
+    //     ?int $blockurban,
+    //     ?int $gp_ward,
+    //     ?int $filterCode
+    // ): Builder {
+    //     // dump($filterCode);
+    //     // dd($gp_ward);
+    //     $blockField = $rural_urban == 2 ? 'block_id' : 'municipality_id';
+    //     $gpWardField = $rural_urban == 2 ? 'panchayat_id' : 'ward_id';
 
-//     // Determine correct fields based on rural/urban
-//     $blockField  = $rural_urban === 2 ? 'block_id' : 'municipality_id';
-//     $gpWardField = $rural_urban === 2 ? 'panchayat_id' : 'ward_id';
+    //     // Eager load relationships
+    //     $query->with('commonList.sourceable.contact'); // Adjust to 'contacts' if needed
 
-//     // Base eager load
-//     $query->with(['commonList.sourceable.contact']);
+    //     // Priority-wise filter (deepest → highest)
+    //     if ($gp_ward) {
+    //         // dump('bjj');
+    //         $query->whereHas('commonList', function ($q) use ($gpWardField, $gp_ward) {
+    //             $q->whereHasMorph('sourceable', '*', function ($q, $type) use ($gpWardField, $gp_ward) {
+    //                 // Only apply the contact filter if the model has a 'contact' relationship
+    //                 if (method_exists($q->getModel(), 'contact')) {
+    //                     $q->whereHas('contact', function ($subQuery) use ($gpWardField, $gp_ward) {
+    //                         $subQuery->where($gpWardField, $gp_ward);
+    //                     });
+    //                 }
+    //             });
+    //         });
+    //     } if ($blockurban) {
+    //         // dump('ddfff');
+    //         $query->whereHas('commonList', function ($q) use ($blockField, $blockurban) {
+    //             $q->whereHasMorph('sourceable', '*', function ($q, $type) use ($blockField, $blockurban) {
+    //                 if (method_exists($q->getModel(), 'contact')) {
+    //                     $q->whereHas('contact', function ($subQuery) use ($blockField, $blockurban) {
+    //                         $subQuery->where($blockField, $blockurban);
+    //                     });
+    //                 }
+    //             });
+    //         });
+    //     } if ($district_id) {
+    //         // dump('dfdsf');
+    //         $query->whereHas('commonList', function ($q) use ($district_id) {
+    //             $q->whereHasMorph('sourceable', '*', function ($q, $type) use ($district_id) {
+    //                 if (method_exists($q->getModel(), 'contact')) {
+    //                     $q->whereHas('contact', function ($subQuery) use ($district_id) {
+    //                         $subQuery->where('district_id', $district_id);
+    //                     });
+    //                 }
+    //             });
+    //         });
+    //     }
+    //     // dd($filterCode);
+    //     if ($filterCode) {
+    //         // dd('dscsfsae');
+    //         // dump($filterCode);
+    //         // $gjjj=Codemaster::getIdByCode($filterCode);
+    //         // dd(Codemaster::getIdByCode($filterCode));
+    //         // $query->where('incomplet_type',  $filterCode);
 
-//     // Apply filters in priority order: GP/Ward → Block → District → Filter Code
-//     if ($gp_ward) {
-//         $query->whereHasMorph('commonList', '*', function ($q) use ($gpWardField, $gp_ward) {
-//             $q->whereHasMorph('sourceable', '*', function ($sq) use ($gpWardField, $gp_ward) {
-//                 $sq->whereHas('contact', function ($contactQuery) use ($gpWardField, $gp_ward) {
-//                     $contactQuery->where($gpWardField, $gp_ward);
-//                 });
-//             });
-//         });
-//     } elseif ($blockurban) {
-//         $query->whereHasMorph('commonList', '*', function ($q) use ($blockField, $blockurban) {
-//             $q->whereHasMorph('sourceable', '*', function ($sq) use ($blockField, $blockurban) {
-//                 $sq->whereHas('contact', function ($contactQuery) use ($blockField, $blockurban) {
-//                     $contactQuery->where($blockField, $blockurban);
-//                 });
-//             });
-//         });
-//     } elseif ($district_id) {
-//         $query->whereHasMorph('commonList', '*', function ($q) use ($district_id) {
-//             $q->whereHasMorph('sourceable', '*', function ($sq) use ($district_id) {
-//                 $sq->whereHas('contact', function ($contactQuery) use ($district_id) {
-//                     $contactQuery->where('district_id', $district_id);
-//                 });
-//             });
-//         });
-//     }
 
-//     // Optional filter by code
-//     if ($filterCode) {
-//         $query->where('incomplete_type_code', $filterCode);
-//     }
+    //         $query->whereHas('commonList', function ($q) use ($filterCode) {
+    //             $q->whereHasMorph('sourceable', '*', function ($q, $type) use ($filterCode) {
+    //                 if (method_exists($q->getModel(), 'contact')) {
+    //                     $q->whereHas('contact', function ($subQuery) use ($filterCode) {
+    //                         $subQuery->where('incomplet_type', $filterCode);
+    //                     });
+    //                 }
+    //             });
+    //         });
 
-//     return $query;
-// }
+    //     }
+
+    //     return $query;
+    // }
+
+    // public function applyIncompletLocationFilter(
+    //     Builder $query,
+    //     ?int $district_id,
+    //     ?int $rural_urban,
+    //     ?int $blockurban,
+    //     ?int $gp_ward,
+    //     ?int $filterCode = null
+    // ): Builder {
+
+    //     // Determine correct fields based on rural/urban
+    //     $blockField  = $rural_urban === 2 ? 'block_id' : 'municipality_id';
+    //     $gpWardField = $rural_urban === 2 ? 'panchayat_id' : 'ward_id';
+
+    //     // Base eager load
+    //     $query->with(['commonList.sourceable.contact']);
+
+    //     // Apply filters in priority order: GP/Ward → Block → District → Filter Code
+    //     if ($gp_ward) {
+    //         $query->whereHasMorph('commonList', '*', function ($q) use ($gpWardField, $gp_ward) {
+    //             $q->whereHasMorph('sourceable', '*', function ($sq) use ($gpWardField, $gp_ward) {
+    //                 $sq->whereHas('contact', function ($contactQuery) use ($gpWardField, $gp_ward) {
+    //                     $contactQuery->where($gpWardField, $gp_ward);
+    //                 });
+    //             });
+    //         });
+    //     } elseif ($blockurban) {
+    //         $query->whereHasMorph('commonList', '*', function ($q) use ($blockField, $blockurban) {
+    //             $q->whereHasMorph('sourceable', '*', function ($sq) use ($blockField, $blockurban) {
+    //                 $sq->whereHas('contact', function ($contactQuery) use ($blockField, $blockurban) {
+    //                     $contactQuery->where($blockField, $blockurban);
+    //                 });
+    //             });
+    //         });
+    //     } elseif ($district_id) {
+    //         $query->whereHasMorph('commonList', '*', function ($q) use ($district_id) {
+    //             $q->whereHasMorph('sourceable', '*', function ($sq) use ($district_id) {
+    //                 $sq->whereHas('contact', function ($contactQuery) use ($district_id) {
+    //                     $contactQuery->where('district_id', $district_id);
+    //                 });
+    //             });
+    //         });
+    //     }
+
+    //     // Optional filter by code
+    //     if ($filterCode) {
+    //         $query->where('incomplete_type_code', $filterCode);
+    //     }
+
+    //     return $query;
+    // }
 
 
 }

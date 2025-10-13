@@ -44,11 +44,20 @@ class DraftBeneficiaryPersonal extends Model implements Auditable
         return $this->hasMany(BeneficiaryEnclosure::class, 'application_id');
     }
 
-    public function relationships()
+    // public function relationships()
+    // {
+    //     return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id');
+    // }
+
+     public function contacts()
     {
-        return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id');
+        return $this->hasOne(BeneficiaryContact::class, 'application_id', 'application_id');
     }
 
+    public function relationships()
+    {
+        return $this->hasOne(BeneficiaryRelationship::class, 'application_id', 'application_id');
+    }
     public function contact()
     {
         return $this->hasOne(DraftBeneficiaryContact::class, 'application_id');
