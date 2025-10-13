@@ -9,7 +9,7 @@ use App\Models\DraftBeneficiaryPersonal;
 use App\Models\DraftBeneficiaryBank;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\BeneficiaryCommonList;
 class BankDetails extends Component
 {
     public $mode, $application_id;
@@ -32,6 +32,7 @@ class BankDetails extends Component
     }
     public function updatedIfscode()
     {
+        $this->resetErrorBag('ifscode');
         $ifs = Ifsccodemaster::with('bankmaster')
             ->where('code', $this->ifscode)
             ->where('is_active', 1)
@@ -43,6 +44,7 @@ class BankDetails extends Component
         } else {
             $this->bankname = '';
             $this->bankbranchname = '';
+            $this->addError('ifscode', 'This IFSC code is not registered in our portal.');
         }
     }
     public function mount($mode = null, $application_id = null)
@@ -90,6 +92,15 @@ class BankDetails extends Component
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->dispatch('hideLoader');
             throw $e;
+        }
+        $duplicate = BeneficiaryCommonList::where('bank_account_number', $validated['bankaccountnumber'])
+            ->where('sourceable_id', '!=', $this->application_id)
+            ->where('is_reject', false)
+            ->exists();
+        if ($duplicate) {
+            $this->dispatch('hideLoader');
+            $this->addError('bankaccountnumber', 'This bank account number is already registered in the portal.');
+            return;
         }
         $DraftBeneficiaryBank = DraftBeneficiaryBank::find($this->application_id);
         DB::beginTransaction();
