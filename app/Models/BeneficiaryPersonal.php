@@ -15,7 +15,7 @@ class BeneficiaryPersonal extends Model implements Auditable
 
     // protected $guarded = [];
 
-    public $timestamps = false;
+    // public $timestamps = false;
 
 
     public function father()
@@ -23,12 +23,12 @@ class BeneficiaryPersonal extends Model implements Auditable
         return $this->hasMany(BeneficiaryRelationship::class, 'beneficiary_id', 'beneficiary_id');
     }
 
-    public function contact()
-    {
-        return $this->hasOne(BeneficiaryContact::class, 'beneficiary_id', 'beneficiary_id');
-    }
+    // public function contact()
+    // {
+    //     return $this->hasOne(BeneficiaryContact::class, 'beneficiary_id', 'beneficiary_id');
+    // }
 
-    public function contacts()
+    public function contact()
     {
         return $this->hasOne(BeneficiaryContact::class, 'application_id', 'application_id');
     }

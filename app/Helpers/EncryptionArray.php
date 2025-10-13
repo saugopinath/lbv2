@@ -14,22 +14,22 @@ class EncryptionArray
 
         if ($reportType !== "4") {
 
-            $query->with('contact');
+            $query->with('sourceable.contact');
 
             if ($district_id) {
-                $query->whereHas('contact', function ($q) use ($district_id) {
+                $query->whereHas('sourceable.contact', function ($q) use ($district_id) {
                     $q->where('district_id', $district_id);
                 });
             }
 
             if ($blockurban) {
-                $query->whereHas('contact', function ($q) use ($blockField, $blockurban) {
+                $query->whereHas('sourceable.contact', function ($q) use ($blockField, $blockurban) {
                     $q->where($blockField, $blockurban);
                 });
             }
 
             if ($gp_ward) {
-                $query->whereHas('contact', function ($q) use ($gpWardField, $gp_ward) {
+                $query->whereHas('sourceable.contact', function ($q) use ($gpWardField, $gp_ward) {
                     $q->where($gpWardField, $gp_ward);
                 });
             }

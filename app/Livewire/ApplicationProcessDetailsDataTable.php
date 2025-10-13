@@ -190,7 +190,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 ->label(function ($row) {
                     $url = route('draft-application.view', Crypt::encryptString($row->sourceable->application_id));
                     return new HtmlString(
-                        '<button type="button" onclick="window.open(\'' . $url . '\', \'_blank\')" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">View</button>'
+                        '<button type="button" onclick="window.open(\'' . $url . '\', \'_self\')" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">View</button>'
                     );
                 }),
         ];

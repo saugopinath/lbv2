@@ -228,13 +228,13 @@ class CasteModificationListTable extends DataTableComponent
                         return view('coulmn_button.view', [
                             'link' => route('caste-modification.edit', [
                                 'application_id' => Crypt::encryptstring($row->application_id),
-                                'beneficiary_id'=> Crypt::encryptstring($row->beneficiary_id)
+                                'beneficiary_id' => Crypt::encryptstring($row->beneficiary_id)
                             ]),
                             'tooltip' => 'Edit Application',
                         ])->render();
                     }
 
-                    return ''; 
+                    return '';
                 })
                 ->html(),
 

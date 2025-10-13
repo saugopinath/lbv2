@@ -61,7 +61,7 @@ class ApprovedBeneficiaryDetailsTable extends DataTableComponent
             ->setPerPageAccepted([5,10])
             ->setPerPage($this->perPage)
             ->setPerPageVisibilityEnabled()
-            ->setSearchEnabled()
+            ->setSearchDisabled()
             ->setSearchLive()
             ->setBulkActionsEnabled();
 
@@ -92,7 +92,7 @@ class ApprovedBeneficiaryDetailsTable extends DataTableComponent
         // $this->setQueryStringForFilterEnabled();
         // $this->setQueryStringForSearchEnabled()
         //     ->setQueryStringForPerPageEnabled()
-        //     ->setQueryStringForFiltersEnabled();    
+        //     ->setQueryStringForFiltersEnabled();
         //         $this->setPerPageDropdownAttributes([
         //     'class' => 'border rounded px-3 py-1 bg-white text-gray-700 hover:border-gray-500',
         // ]);
@@ -252,7 +252,7 @@ class ApprovedBeneficiaryDetailsTable extends DataTableComponent
             );
         }
         // $result = $query->get();
-        // dd($result); 
+        // dd($result);
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
             $query = EncryptionArray::applyLocationFilte(
                 $query,
@@ -273,5 +273,5 @@ class ApprovedBeneficiaryDetailsTable extends DataTableComponent
     //     return view('livewire.custom-beneficiary-table', [
     //         'rows' => $this->getRows(),
     //     ]);
-    // 
+    //
     }

@@ -9,7 +9,7 @@
         <h2 class="text-xl font-semibold text-gray-700 mb-4 p-4">
              Beneficiary Report
         </h2>
-        <div>
+         <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
             <livewire:beneficiary-table :reportType="$reportType" />
         </div>
     </div>
