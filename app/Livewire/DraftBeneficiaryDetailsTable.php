@@ -203,13 +203,22 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
                 ->label(fn($row) => $row->mobile_no ?? 'N/A'),
 
 
-                 Column::make("Actions")
-                ->label(function ($row) {
-                    $url = route('draftedit', Crypt::encryptString($row->application_id));
-                    return new HtmlString(
-                        '<button type="button" onclick="window.open(\'' . $url . '\', \'_blank\')" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">Edit</button>'
-                    );
-                }),
+                //  Column::make("Actions")
+                // ->label(function ($row) {
+                //     $url = route('draftedit', Crypt::encryptString($row->application_id));
+                //     return new HtmlString(
+                //         '<button type="button" onclick="window.open(\'' . $url . '\', \'_blank\')" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">Edit</button>'
+                //     );
+                // }),
+
+                $columns[] = Column::make("Actions")
+            ->label(function ($row) {
+                    return view('coulmn_button.actions', [
+                        'link' => route('draftedit' , Crypt::encryptString($row->application_id)),
+                        'tooltip' => 'Edit Application',
+                    ])->render();
+            })
+            ->html(),
         ];
     }
     public function builder(): Builder
