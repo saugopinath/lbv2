@@ -184,37 +184,19 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
     {
         return [
             Column::make("Application ID", "application_id")
-                ->label(fn($row) => $row->application_id ?? 'N/A')
+                ->label(fn($row) => $row->sourceable->application_id ?? 'N/A')
                 ->sortable(),
-            // ->searchable(function ($query, $searchTerm) {
-            //     $query->whereHas('sourceable', function ($q) use ($searchTerm) {
-            //         $q->where('application_id', 'ILIKE', "%{$searchTerm}%");
-            //     });
-            // }),
-
-            // ->label(fn($row) => $row->sourceable->application_id ?? 'N/A'),
-
-
 
             Column::make("Applicant Name", "full_name")
-                ->label(fn($row) => $row->full_name ?? 'N/A'),
+                ->label(fn($row) =>  $row->sourceable->full_name ?? 'N/A'),
 
             Column::make("Mobile No", "mobile_no")
                 ->label(fn($row) => $row->mobile_no ?? 'N/A'),
 
-
-                //  Column::make("Actions")
-                // ->label(function ($row) {
-                //     $url = route('draftedit', Crypt::encryptString($row->application_id));
-                //     return new HtmlString(
-                //         '<button type="button" onclick="window.open(\'' . $url . '\', \'_blank\')" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">Edit</button>'
-                //     );
-                // }),
-
                 $columns[] = Column::make("Actions")
             ->label(function ($row) {
                     return view('coulmn_button.actions', [
-                        'link' => route('draftedit' , Crypt::encryptString($row->application_id)),
+                        'link' => route('draftedit' , Crypt::encryptString($row->sourceable->application_id)),
                         'tooltip' => 'Edit Application',
                     ])->render();
             })
@@ -223,14 +205,26 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
     }
     public function builder(): Builder
     {
-        // $query = BeneficiaryApprovedList::with('sourceable.bank')
-        //     ->with(['contact' => fn($q) => $q->where('relation_type_id', $relationFather)]);
-
-        // return $query;
+        $query = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact');
+        if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
+            $query = EncryptionArray::applyLocationFilters(
+                $query,
+                $this->district_id ? (int) $this->district_id : null,
+                $this->rural_urban ? (int) $this->rural_urban : null,
+                $this->blockurban ? (int) $this->blockurban : null,
+                $this->gp_ward ? (int) $this->gp_ward : null
+            );
+        }
 
          $next_level_role_id = Codemaster::getIdByCode(21);
-        $query = DraftBeneficiaryPersonal::with('contact', 'bank')
-            ->where('next_level_role_id',$next_level_role_id);
+         $query->whereHas(
+                'sourceable',
+                function ($q) use ($next_level_role_id) {
+                    $q->where('next_level_role_id', $next_level_role_id);
+                }
+            );
+        // $query = DraftBeneficiaryPersonal::with('contact', 'bank')
+        //     ->where('next_level_role_id',$next_level_role_id);
         // dd($query);
         //      ->whereIn('sourceable_type', [
         //     BeneficiaryPersonal::class,
@@ -270,6 +264,7 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
         //         $this->gp_ward ? (int) $this->gp_ward : null
         //     );
         // }
+         $this->dispatch('hideLoader');
         return $query;
     }
     // public function export()
