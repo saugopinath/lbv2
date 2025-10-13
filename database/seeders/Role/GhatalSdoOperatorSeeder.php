@@ -24,7 +24,7 @@ class GhatalSdoOperatorSeeder extends Seeder
         $password_expires_at= Carbon::now()->addDays(intval(Config::get('app.password_expire_day')))->format('Y/m/d H:i:s');
         $role = Role::findByName('Operator');
         $office = OfficeMaster::where('district_id',318)->where('subdivision_id',34401)->first();
-        $scheme = Scheme::where('short_name','OAP(WCD)')->first();
+        $scheme = Scheme::where('short_name','LB')->first();
     
         $user = User::create([
             'name' => 'GhatalSDOOperator',

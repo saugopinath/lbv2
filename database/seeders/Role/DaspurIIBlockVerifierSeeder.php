@@ -25,7 +25,7 @@ class DaspurIIBlockVerifierSeeder extends Seeder
         $role_verifier = Role::findByName('Verifier');
         $role_delegated_verifier = Role::findByName('Delegated Verifier');
         $office = OfficeMaster::where('district_id',318)->where('block_id',2979)->first();
-        $scheme = Scheme::where('short_name','OAP(WCD)')->first();
+        $scheme = Scheme::where('short_name','LB')->first();
     
         $user_verifier = User::create([
             'name' => 'DaspurIIBlockVerifier',

@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-         Schema::create('lb_scheme.beneficiary_personals', function (Blueprint $table) {
-           
-            $table->id('application_id')->unique();
+        Schema::create('lb_scheme.faulty_beneficiary_personals', function (Blueprint $table){
+        //    $table->id();
+            $table->id('application_id');
             $table->unsignedBigInteger('beneficiary_id')->unique();
             $table->smallInteger('district_id');
             $table->smallInteger('block_id')->nullable();
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->Integer('panchayat_id')->nullable();
             $table->string('full_name');
             $table->date('dob');
-            $table->string('mobile_no', 10);
+            $table->string('mobile_no');
             $table->string('email')->nullable();
             // $table->smallInteger('gender');
             $table->smallInteger('caste');
@@ -38,7 +38,6 @@ return new class extends Migration
             $table->Integer('created_by');
 
             $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.unique_app_ben_ids');
-            $table->foreign('application_id', 'application_id_fk')->references('application_id')->on('lb_scheme.unique_app_ben_ids');
 
             $table->foreign('created_by','user_id_fk')->references('id')->on('users');
             $table->foreign('district_id','district_id_fk')->references('id')->on('districts');
@@ -56,7 +55,7 @@ return new class extends Migration
             $table->index(['district_id','sub_division_id']);
             $table->index(['district_id','municipality_id','ward_id']);
             $table->index(['district_id','block_id','panchayat_id']);
-            $table->index('application_id');
+            $table->index('application_id');      
         });
     }
 
@@ -65,6 +64,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('lb_scheme.beneficiary_personals');
+        Schema::dropIfExists('lb_scheme.faulty_beneficiary_personals');
     }
 };

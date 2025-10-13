@@ -25,7 +25,7 @@ class PaschimMedinipurApproverSeeder extends Seeder
         $role_approver = Role::findByName('Approver');
         $role_delegated_approver = Role::findByName('Delegated Approver');
         $office = OfficeMaster::where('district_id',318)->where('office_type_id',152)->first();
-        $scheme = Scheme::where('short_name','OAP(WCD)')->first();
+        $scheme = Scheme::where('short_name','LB')->first();
     
         $user_approver = User::create([
             'name' => 'paschimedinipurapprover',

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pension.beneficiary_enclosures', function (Blueprint $table) {
+        Schema::create('lb_scheme.beneficiary_enclosures', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
             $table->unsignedBigInteger('beneficiary_id')->nullable();

@@ -25,7 +25,7 @@ class WbHodSeeder extends Seeder
         $role_hod = Role::findByName('HOD');
         $role_delegated_hod = Role::findByName('Delegated HOD');
         $office = OfficeMaster::where('office_type_id',151)->first();
-        $scheme = Scheme::where('short_name','OAP(WCD)')->first();
+        $scheme = Scheme::where('short_name','LB')->first();
     
         $user_hod = User::create([
             'name' => 'wbhod',

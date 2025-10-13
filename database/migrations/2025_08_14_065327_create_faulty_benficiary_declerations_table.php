@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('lb_scheme.beneficiary_declarations', function (Blueprint $table) {
+         Schema::create('lb_scheme.faulty_beneficiary_declarations', function (Blueprint $table) {
             $table->id();
-
             $table->unsignedBigInteger('beneficiary_id');
-            $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals')->onDelete('cascade');
+            $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.faulty_beneficiary_personals')->onDelete('cascade');
             $table->unsignedBigInteger('application_id');
             $table->Integer('created_by');
             $table->boolean('is_resident');
@@ -35,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('lb_scheme.beneficiary_declarations');
+        Schema::dropIfExists('lb_scheme.faulty_beneficiary_declarations');
     }
 };

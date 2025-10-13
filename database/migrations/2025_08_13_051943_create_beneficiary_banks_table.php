@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pension.beneficiary_banks', function (Blueprint $table) {
+        Schema::create('lb_scheme.beneficiary_banks', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('beneficiary_id')->unique();;
 
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('bank_account_number',30)->unique();
             $table->foreign('ifsc','ifsc_fk')->references('code')->on('ifsccodemasters');
             $table->foreign('created_by','user_id_fk')->references('id')->on('users');
-            $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('pension.beneficiary_personals')->onDelete('cascade');
+            $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.beneficiary_personals')->onDelete('cascade');
             $table->timestamps();
             $table->index('application_id');
             $table->index('bank_account_number');

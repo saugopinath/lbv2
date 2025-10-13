@@ -22,7 +22,7 @@ class DaspurIIBlockOperatorSeeder extends Seeder
     {
         $role = Role::findByName('Operator');
         $office = OfficeMaster::where('district_id',318)->where('block_id',2979)->first();
-        $scheme = Scheme::where('short_name','OAP(WCD)')->first();
+        $scheme = Scheme::where('short_name','LB')->first();
         $c_time=Carbon::now()->format('Y/m/d H:i:s');
         $password_expires_at= Carbon::now()->addDays(intval(Config::get('app.password_expire_day')))->format('Y/m/d H:i:s');
         $user = User::create([
