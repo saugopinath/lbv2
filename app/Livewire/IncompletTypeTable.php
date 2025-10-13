@@ -114,19 +114,29 @@ class IncompletTypeTable extends DataTableComponent
 
             Column::make("Address")
                 ->label(function ($row) {
-                    $common = $row->beneficiaryCommonList->sourceable;
-                    // dd($common);
+                    $common = $row->commonList?->sourceable;
 
-                    if ($common?->block_id && $common?->panchayat) {
-                        return $common->panchayat->name;
+                    if (!$common) {
+                        return 'N/A';
                     }
 
-                    if ($common?->sub_division_id && $common?->ward) {
-                        return $common->ward->name;
+                    $contact = $common->contacts ?? null;
+
+                    if (!$contact) {
+                        return 'N/A';
+                    }
+
+                    if ($contact->panchayat?->name) {
+                        return $contact->panchayat->name;
+                    }
+
+                    if ($contact->ward?->name) {
+                        return $contact->ward->name;
                     }
 
                     return 'N/A';
-                }),
+                })
+
         ];
 
         if ($this->stage === 'revert') {
@@ -139,6 +149,28 @@ class IncompletTypeTable extends DataTableComponent
                 ->label(fn($row) => $row->acceptRejectInfo?->revert_reason_remarks ?? 'N/A')
                 ->sortable();
         }
+
+        $columns[] = Column::make("Actions")
+            ->label(function ($row) {
+                $stage = request()->get('stage');
+
+                $buttonText = match ($stage) {
+                    'approver', 'revert' => 'View',
+                    default => 'Update',
+                };
+
+                $link = route('incomplet-type.view', [
+                    'id' => Crypt::encryptString($row->application_id),
+                    'stage' => Crypt::encryptString($stage),
+                ]);
+
+                return view('coulmn_button.view', [
+                    'link' => $link,
+                    'tooltip' => $buttonText,
+                    'text' => $buttonText,
+                ])->render();
+            })
+            ->html();
 
         return $columns;
     }
@@ -155,7 +187,7 @@ class IncompletTypeTable extends DataTableComponent
                     $q->where($col, $val);
                 }
             });
-// dd($query->get());
+        // dd($query->get());
         $user = auth()->user();
 
         $stage = $this->stage ?? null;
