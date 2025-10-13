@@ -186,13 +186,21 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             Column::make("Age", "age")
                 ->label(fn($row) => Carbon::parse($row->sourceable->dob)->age
                     ?? 'N/A'),
-            Column::make("Actions")
-                ->label(function ($row) {
-                    $url = route('draft-application.view', Crypt::encryptString($row->sourceable->application_id));
-                    return new HtmlString(
-                        '<button type="button" onclick="window.open(\'' . $url . '\', \'_self\')" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">View</button>'
-                    );
-                }),
+            // Column::make("Actions")
+            //     ->label(function ($row) {
+            //         $url = route('draft-application.view', Crypt::encryptString($row->sourceable->application_id));
+            //         return new HtmlString(
+            //             '<button type="button" onclick="window.open(\'' . $url . '\', \'_self\')" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">View</button>'
+            //         );
+            //     }),
+            $columns[] = Column::make("Actions")
+            ->label(function ($row) {
+                    return view('coulmn_button.view', [
+                        'link' => route('draft-application.view' , Crypt::encryptString($row->sourceable->application_id)),
+                        'tooltip' => 'View Application',
+                    ])->render();
+            })
+            ->html(),
         ];
     }
     public function builder(): Builder
