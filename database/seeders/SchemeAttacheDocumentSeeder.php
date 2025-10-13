@@ -19,7 +19,7 @@ class SchemeAttacheDocumentSeeder extends Seeder
                 "scheme_id" => 20,
                 "doc_type_id" => Codemaster::getIdByCode(169),
                 "is_required" => true,
-                "max_file_size" => "100KB",
+                "max_file_size" => "500KB",
                 "extension_type" => ['jpg', 'jpeg', 'png', 'pdf']
             ),
             array(
@@ -33,7 +33,7 @@ class SchemeAttacheDocumentSeeder extends Seeder
                 "scheme_id" => 20,
                 "doc_type_id" => Codemaster::getIdByCode(161),
                 "is_required" => true,
-                "max_file_size" => "500KB",
+                "max_file_size" => "100KB",
 
 
                 "extension_type" => ['jpg', 'jpeg', 'png']
