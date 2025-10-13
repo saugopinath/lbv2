@@ -1,8 +1,4 @@
-<div
-    x-show="showUploadModal"
-    x-cloak
-    x-transition
-    class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
+<div x-show="showUploadModal" x-cloak x-transition class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
     @click.outside="closeModal()">
 
     <div class="bg-white rounded shadow p-6 w-full max-w-md" @click.stop>
@@ -14,20 +10,14 @@
 
         <!-- File Input -->
         <div class="flex w-full border border-gray-300 rounded overflow-hidden">
-            <label
-                for="fileInput"
+            <label for="fileInput"
                 class="bg-blue-600 text-white px-4 py-2 cursor-pointer hover:bg-blue-700 text-sm flex items-center">
                 Choose File
             </label>
             <span class="flex items-center px-4 text-gray-600 text-sm truncate flex-1 bg-white">
                 <span x-text="currentFileName || 'No file chosen'"></span>
             </span>
-            <input
-                id="fileInput"
-                type="file"
-                class="hidden"
-                x-ref="fileInput"
-                wire:model="singleDocument"
+            <input id="fileInput" type="file" class="hidden" x-ref="fileInput" wire:model="singleDocument"
                 @change="handleFileChange($event)">
         </div>
 
@@ -38,6 +28,10 @@
             <p>Allowed file types: <strong>{{ $currentDocExtensions }}</strong></p>
             <p>Max file size: <strong>{{ $currentDocMaxSize }}</strong></p>
         </div>
+        @error('singleDocument')
+            <div class="mt-2 text-sm text-red-600">{{ $message }}</div>
+        @enderror
+        <div x-show="errorMessage" x-text="errorMessage" class="mt-2 text-sm text-red-600"></div>
 
         <!-- Image Preview -->
         <template x-if="currentFilePreview">
@@ -46,10 +40,17 @@
             </div>
         </template>
 
-        <!-- Buttons -->
+        <!-- Buttons -->       
+
         <div class="flex justify-end space-x-2 mt-4">
-            <button @click="closeModal()" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">Cancel</button>
-            <button @click="uploadFile()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Upload</button>
+            <x-button.primary @click="closeModal()"
+                class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">Cancel</x-button.primary>
+            <x-button.primary @click="uploadFile()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                wire:loading.attr="disabled" wire:target="saveSingleDocument">
+                <span wire:loading.remove wire:target="saveSingleDocument">Upload</span>
+                <span wire:loading wire:target="saveSingleDocument">Uploading...</span>
+            </x-button.primary>
         </div>
+
     </div>
 </div>

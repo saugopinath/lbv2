@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" x-data
-      x-init="$watch('$store.app.mode', mode => document.documentElement.classList.toggle('dark', mode === 'dark'))">
+    x-init="$watch('$store.app.mode', mode => document.documentElement.classList.toggle('dark', mode === 'dark'))">
+
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -29,23 +30,25 @@
         <div class="flex flex-1 bg-[#def0f4] dark:bg-dark text-dark dark:text-white">
 
             <!-- Sidebar -->
-            <x-layouts.das_side_menu/>
+            <x-layouts.das_side_menu />
 
             <!-- Content Area -->
             <div class="flex-1 flex flex-col">
                 <!-- Top Bar -->
-                <x-layouts.das_top_bar/>
-                
+                <x-layouts.das_top_bar />
+                 <livewire:loader />
                 <!-- Content -->
                 <div class="flex-1 p-2 overflow-auto">
-                <!-- Main Content -->
-                 <main class="p-2 space-y-2">
-                    {{ $slot }}
-                </main>
+                    <!-- Main Content -->
+                    <main class="p-2 space-y-2">
+                        <x-flash-message position="top-right" width="w-80" />
+
+                        {{ $slot }}
+                    </main>
                 </div>
 
                 <!-- Footer -->
-                <x-layouts.das_footer/>
+                <x-layouts.das_footer />
             </div>
         </div>
     </div>
@@ -71,4 +74,5 @@
     @livewireScripts
     @stack('scripts')
 </body>
+
 </html>

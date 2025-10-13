@@ -13,9 +13,8 @@ return new class extends Migration
     {
          Schema::create('pension.beneficiary_contacts', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('beneficiary_id')->unique();;
-
-            $table->unsignedBigInteger('application_id')->unique();;
+            $table->unsignedBigInteger('beneficiary_id')->unique();
+            $table->unsignedBigInteger('application_id')->unique();
             $table->smallInteger('district_id');
             $table->smallInteger('rural_urban_id');
             $table->smallInteger('block_id')->nullable();
@@ -25,10 +24,10 @@ return new class extends Migration
             $table->Integer('panchayat_id')->nullable();
             $table->string('police_station',200);
             $table->string('village_town_city',300);
-            $table->string('house_premise_no',300);
+            $table->string('house_premise_no',300)->nullable();
             $table->string('post_office',300);
-            $table->char('pincode',8);
-            $table->Integer('residency_period');
+            $table->string('pincode',6);
+            $table->Integer('residency_period')->nullable();
             $table->Integer('created_by');
             $table->foreign('created_by','user_id_fk')->references('id')->on('users');
              $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('pension.beneficiary_personals')->onDelete('cascade');

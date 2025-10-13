@@ -17,8 +17,7 @@ class Scheme extends Model
     public function Department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
-    }
-    
+    } 
   
     
 }

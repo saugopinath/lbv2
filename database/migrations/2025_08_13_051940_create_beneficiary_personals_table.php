@@ -23,7 +23,7 @@ return new class extends Migration
             $table->Integer('panchayat_id')->nullable();
             $table->string('full_name');
             $table->date('dob');
-            $table->string('mobile_no');
+            $table->string('mobile_no', 10);
             $table->string('email')->nullable();
             // $table->smallInteger('gender');
             $table->smallInteger('caste');

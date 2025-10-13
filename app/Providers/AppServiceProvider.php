@@ -18,7 +18,12 @@ use App\Services\ElasticsearchService;
 
 use App\Models\User;
 use App\Observers\UserObserver;
-
+use App\Models\DraftBeneficiaryPersonal;
+use App\Observers\DraftBeneficiaryPersonalObserver;
+use App\Models\BenRejectDetails;
+use App\Observers\BenRejectDetailsObserver;
+use App\Models\BeneficiaryPersonal;
+use App\Observers\BeneficiaryPersonalObserver;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -43,6 +48,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // User::observe(UserObserver::class);
+         User::observe(UserObserver::class);
+         BenRejectDetails::observe(BenRejectDetailsObserver::class);
+         DraftBeneficiaryPersonal::observe(DraftBeneficiaryPersonalObserver::class);
+         BeneficiaryPersonal::observe(BeneficiaryPersonalObserver::class);
+         
     }
 }

@@ -1,4 +1,4 @@
-
+<div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
     <div class="grid gap-6 mb-2 md:grid-cols-3">
 
         @if ($visible['district_dropdown'])
@@ -58,17 +58,21 @@
                 @endforeach
             </x-form.select>
         @endif
-        @if($button_show==1)
-         <div class="flex items-center mt-6 gap-3 space-y-3.5">
-                <x-button.primary wire:click="applyFilters"
+        @if ($button_show == 1)
+            <div class="flex items-center mt-6 gap-3">
+                <x-button.primary
+                    x-on:click="
+        Livewire.dispatch('showLoader');
+        $wire.applyFilters();
+    "
                     class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
                     Search
                 </x-button.primary>
-                <x-button.primary wire:click="resetFilters"
+                 <x-button.primary wire:click="resetFilters"
                     class="bg-green-500 text-white whitespace-nowrap cursor-pointer">
                     Reset
                 </x-button.primary>
-                
             </div>
-            @endif
+        @endif
     </div>
+</div>

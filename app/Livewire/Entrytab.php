@@ -23,6 +23,7 @@ class Entrytab extends Component
     public bool $showModal = false;
     protected $listeners = [
         'aadhaarChecked' => 'enableTabs',
+        'hideEntryTabs' => 'disableTabs',
         'perDet' => 'enableTab2',
         'conDet' => 'enableTab3',
         'bankDet' => 'enableTab4',
@@ -32,6 +33,15 @@ class Entrytab extends Component
         'selfDec' => 'openModalForApplicant',
         'modalClosed' => 'handleModalClosed'
     ];
+    public function disableTabs()
+    {
+        $this->showTabs = false;
+        $this->tab1Enabled = false;
+        $this->tab2Enabled = false;
+        $this->tab3Enabled = false;
+        $this->tab4Enabled = false;
+        $this->tab5Enabled = false;
+    }
     public function mount($application_id = null)
     {
         $this->application_id = $application_id;

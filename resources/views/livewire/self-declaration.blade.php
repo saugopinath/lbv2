@@ -1,5 +1,8 @@
 <div>
-    <form wire:submit.prevent="save">
+    <form x-on:submit.prevent="
+            Livewire.dispatch('showLoader');
+            $wire.save();
+        ">
         <div class="grid gap-6 mb-4 md:grid-cols-1 mt-4 pl-6 pr-4">
             <div>
                 <x-form.checkbox

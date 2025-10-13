@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class DraftBeneficiaryRelationship extends Model
+class DraftBeneficiaryRelationship extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $guarded = [];
     protected $table = 'lb_scheme.draft_beneficiary_relationships';
     public function personal()
