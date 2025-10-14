@@ -150,27 +150,27 @@ class IncompletTypeTable extends DataTableComponent
                 ->sortable();
         }
 
-        $columns[] = Column::make("Actions")
-            ->label(function ($row) {
-                $stage = request()->get('stage');
+        // $columns[] = Column::make("Actions")
+        //     ->label(function ($row) {
+        //         $stage = request()->get('stage');
 
-                $buttonText = match ($stage) {
-                    'approver', 'revert' => 'View',
-                    default => 'Update',
-                };
+        //         $buttonText = match ($stage) {
+        //             'approver', 'revert' => 'View',
+        //             default => 'Update',
+        //         };
 
-                $link = route('incomplet-type.view', [
-                    'id' => Crypt::encryptString($row->application_id),
-                    'stage' => Crypt::encryptString($stage),
-                ]);
+        //         $link = route('incomplet-type.view', [
+        //             'id' => Crypt::encryptString($row->application_id),
+        //             'stage' => Crypt::encryptString($stage),
+        //         ]);
 
-                return view('coulmn_button.view', [
-                    'link' => $link,
-                    'tooltip' => $buttonText,
-                    'text' => $buttonText,
-                ])->render();
-            })
-            ->html();
+        //         return view('coulmn_button.view', [
+        //             'link' => $link,
+        //             'tooltip' => $buttonText,
+        //             'text' => $buttonText,
+        //         ])->render();
+        //     })
+        //     ->html();
 
         return $columns;
     }
@@ -288,7 +288,7 @@ class IncompletTypeTable extends DataTableComponent
     {
         $rows = $this->getRows();
 
-        // $this->dispatch('hideLoader');
+        $this->dispatch('hideLoader');
 
         return view('livewire.incomplet-type-table', [
             'rows'  => $rows,
