@@ -124,8 +124,11 @@ class BeneficiaryTable extends DataTableComponent
             Column::make("Father's Name")
                 ->label(fn($row) => $row->sourceable->relationships
                     ->where('relation_type_id', $this->relationFather)->first()?->full_name),
-            Column::make("Age", "dob")
-                ->label(fn($row) => $row->sourceable->dob ?? 'N/A'),
+            Column::make('Age')
+                ->label(function ($row) {
+                    $dob = $row->sourceable->dob ?? null;
+                    return $dob ? Carbon::parse($dob)->age : 'N/A';
+                }),
             // Column::make("Age", "dob")
             // ->format(fn($value) => $value ? Carbon::parse($value)->age : 'N/A'),
         ];
@@ -265,7 +268,7 @@ class BeneficiaryTable extends DataTableComponent
         // );
 
 
-         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
+        if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
             // dd($this->gp_ward);
             $query = EncryptionArray::applyLocationFilter(
                 $query,
