@@ -59,7 +59,7 @@ class BeneficiaryPersonal extends Model implements Auditable
         return $this->hasOne(BeneficiaryAadhaar::class, 'application_id');
     }
 
- 
+
     public function lists()
     {
         return $this->morphOne(BeneficiaryCommonList::class, 'sourceable');
@@ -90,33 +90,33 @@ class BeneficiaryPersonal extends Model implements Auditable
     //         ]);
     //     });
     // }
-    protected static function booted()
-    {
-        static::created(function ($beneficiary) {
-
-            $beneficiary->lists()->create([
-                'beneficiary_id' => $beneficiary->beneficiary_id,
-                'mobile_no'      => $beneficiary->mobile_no,
-                // 'encoded_aadhar' => $beneficiary->aadhar ? $beneficiary->aadhar->encoded_aadhar : null,
-                'encoded_aadhar' => $beneficiary->aadhaar()->exists() ? $beneficiary->aadhaar->encoded_aadhar : null,
-
-                // 'bank_account_number' => $beneficiary->bank ? $beneficiary->bank->account_number : null,
-                'bank_account_number' => $beneficiary->bank()->exists() ? $beneficiary->bank->account_number : null,
-                'district_id'     => $beneficiary->district_id,
-                'block_id'        => $beneficiary->block_id,
-                'sub_division_id' => $beneficiary->sub_division_id,
-                'municipality_id' => $beneficiary->municipality_id,
-                'ward_id'         => $beneficiary->ward_id,
-                'panchayat_id'    => $beneficiary->panchayat_id,
-            ]);
-        });
-    }
     // protected static function booted()
     // {
     //     static::created(function ($beneficiary) {
-    //         if ($beneficiary) {
-    //             $beneficiary->lists()->update([]);
-    //         }
+
+    //         $beneficiary->lists()->create([
+    //             'beneficiary_id' => $beneficiary->beneficiary_id,
+    //             'mobile_no'      => $beneficiary->mobile_no,
+    //             // 'encoded_aadhar' => $beneficiary->aadhar ? $beneficiary->aadhar->encoded_aadhar : null,
+    //             'encoded_aadhar' => $beneficiary->aadhaar()->exists()? $beneficiary->aadhaar->aadhar_hash: null,
+
+    //             // 'bank_account_number' => $beneficiary->bank ? $beneficiary->bank->account_number : null,
+    //             'bank_account_number' => $beneficiary->bank()->exists() ? $beneficiary->bank->account_number : null,
+    //             'district_id'     => $beneficiary->district_id,
+    //             'block_id'        => $beneficiary->block_id,
+    //             'sub_division_id' => $beneficiary->sub_division_id,
+    //             'municipality_id' => $beneficiary->municipality_id,
+    //             'ward_id'         => $beneficiary->ward_id,
+    //             'panchayat_id'    => $beneficiary->panchayat_id,
+    //         ]);
     //     });
     // }
+    protected static function booted()
+    {
+        static::created(function ($beneficiary) {
+            if ($beneficiary) {
+                $beneficiary->lists()->update([]);
+            }
+        });
+    }
 }

@@ -29,7 +29,7 @@
                             error = '';
                             Livewire.dispatch('showLoader');
                             $wire.checkScore().then(() => {
-                Livewire.dispatch('hideLoader'); 
+                Livewire.dispatch('hideLoader');
             });
                         }
                     "
@@ -74,7 +74,7 @@
             </div>
             <div>
                 <x-form.input type="password" name="bankaccountnumber" label="Bank Account Number" required
-                    wire:model.defer="bankaccountnumber" />
+                    wire:model.defer="bankaccountnumber" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
             </div>
         </div>
         <div class="grid gap-6 mb-4 md:grid-cols-2 pl-4 pr-4">

@@ -188,13 +188,13 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     ?? 'N/A'),
 
             $columns[] = Column::make("Actions")
-            ->label(function ($row) {
+                ->label(function ($row) {
                     return view('coulmn_button.view', [
-                        'link' => route('draft-application.view' , Crypt::encryptString($row->sourceable->application_id)),
+                        'link' => route('draft-application.view', Crypt::encryptString($row->sourceable->application_id)),
                         'tooltip' => 'View Application',
                     ])->render();
-            })
-            ->html(),
+                })
+                ->html(),
         ];
     }
     public function builder(): Builder
@@ -229,6 +229,10 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 }
             );
         }
+
+        if (!empty($this->filter_condition)) {
+            $query->where($this->filter_condition);
+        }
         $this->dispatch('hideLoader');
         return $query;
     }
@@ -260,16 +264,15 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     ->value('id') ?? null;
                 $AcceptRejectInfo->save();
                 DB::commit();
-                $this->dispatch('toastr', [
-                    'type' => 'success',
-                    'message' => 'All applications verified successfully!'
-                ]);
             } catch (\Exception $e) {
                 DB::rollBack();
                 throw $e;
             }
         }
-
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'All applications verified successfully!'
+        ]);
         $this->clearSelected();
     }
 
@@ -304,16 +307,15 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     ->value('id') ?? null;
                 $AcceptRejectInfo->save();
                 DB::commit();
-                $this->dispatch('toastr', [
-                    'type' => 'success',
-                    'message' => 'All applications approved successfully!'
-                ]);
             } catch (\Exception $e) {
                 DB::rollBack();
                 throw $e;
             }
         }
-
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'All applications approved successfully!'
+        ]);
         $this->clearSelected();
     }
     public function bulkrevert()
@@ -366,15 +368,16 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     DB::commit();
-                    $this->dispatch('toastr', [
-                        'type' => 'warning',
-                        'message' => 'All applications reverted successfully!'
-                    ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
                 }
+
             }
+            $this->dispatch('toastr', [
+                    'type' => 'warning',
+                    'message' => 'All applications reverted successfully!'
+                ]);
             $this->clearSelected();
         } elseif ($this->revertrejectAction === 'reject') {
             $ids = $this->getSelected();
@@ -399,15 +402,16 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     DB::commit();
-                    $this->dispatch('toastr', [
-                        'type' => 'error',
-                        'message' => 'All applications rejected successfully!'
-                    ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
                 }
+
             }
+            $this->dispatch('toastr', [
+                    'type' => 'error',
+                    'message' => 'All applications rejected successfully!'
+                ]);
             $this->clearSelected();
         }
     }

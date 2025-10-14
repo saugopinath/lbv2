@@ -2,6 +2,7 @@
 
 namespace App\Livewire\CasteModification;
 
+use App\Models\BeneficiaryAadhaar;
 use App\Models\BeneficiaryCommonList;
 use App\Models\CasteModificationInfo;
 use Illuminate\Support\Facades\Crypt;
@@ -11,6 +12,7 @@ class SearchBeneficiary extends Component
 {
     public $searchType = '';
     public $searchValue = '';
+    public $searchBy = '';
     public $results = null;
     public $items = [];
     public $currentLabel = 'Select Search Type';
@@ -26,7 +28,7 @@ class SearchBeneficiary extends Component
     protected $searchTypeMap = [
         1 => 'sourceable_id',
         2 => 'beneficiary_id',
-        3 => 'aadhar_number',
+        3 => 'encoded_aadhar',
         4 => 'mobile_no',
     ];
 
@@ -41,7 +43,7 @@ class SearchBeneficiary extends Component
             $this->filter_condition['block_id'] = Crypt::decryptString($select_lgd['block_id']);
         }
         if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['subdivision_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+            $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
 
@@ -94,10 +96,24 @@ class SearchBeneficiary extends Component
 
     public function search()
     {
+        // dd('ok');
         $this->validate();
         $column = $this->searchTypeMap[$this->searchType];
-        $existingRecord = CasteModificationInfo::where('application_id', $this->searchValue)->first();
+        if($column == 'encoded_aadhar'){
+            $this->searchBy = md5($this->searchValue);
+        }
+        else{
+            $this->searchBy = $this->searchValue;
+        }
+        $application_id = BeneficiaryCommonList::where($column, $this->searchBy)->first();
+        // dd($application_id->sourceable_id);
+        $existingRecord = null;
+        if($application_id){
+            $existingRecord = CasteModificationInfo::where('application_id',  $application_id->sourceable_id)->first();
+        }
+        // dd($existingRecord);
         if ($existingRecord) {
+            // dd($existingRecord);
             if ($existingRecord->next_level_requested_id == 148) {
                 $message = "Request already Verified by the Verifier.";
             } elseif ($existingRecord->next_level_requested_id == 149) {
@@ -107,13 +123,19 @@ class SearchBeneficiary extends Component
             } else {
                 $message = "Caste modification already requested.";
             }
-            session()->flash('warning', $message);
+            // dd($message);
+            session()->flash('xwarning', $message);
             $this->items = [];
             return;
         } else {
+            // if($column == 'encoded_aadhar'){
+            //     // dump('encoded_aadhar');
+            // $this->searchValue =md5($this->searchValue);
+            // // dump($this->searchValue);
+            // }
             $query = BeneficiaryCommonList::query()->with('sourceable');
-            $query->where($column, $this->searchValue);
-
+            $query->where($column, $this->searchBy);
+            // dd($query->toSql(), $query->getBindings());
             if (!empty($this->filter_condition)) {
                 $query->where($this->filter_condition);
             }
@@ -123,7 +145,7 @@ class SearchBeneficiary extends Component
             if ($this->results->isEmpty()) {
                 $this->items = [];
                 $message = "No matching beneficiary found.";
-                session()->flash('warning', $message);
+                session()->flash('xerror', $message);
                 return;
             }
 
@@ -133,7 +155,7 @@ class SearchBeneficiary extends Component
 
             if ($approvedItems->isEmpty()) {
                 $message = "These Beneficiary is not approved Yet.";
-                session()->flash('warning', $message);
+                session()->flash('xwarning', $message);
                 $this->items = [];
                 return;
             } else {
@@ -143,7 +165,7 @@ class SearchBeneficiary extends Component
                         'beneficiary_id' => $item->sourceable->beneficiary_id ?? '-',
                         'mobile_no'      => $item->sourceable->mobile_no ?? '-',
                         'applicant_name' => $item->sourceable->full_name ?? '-',
-                        'Caste_name'     => $item->sourceable->castes->name ?? '-',
+                        'Caste_name'     => $item->sourceable->casteName->name ?? '-',
                     ];
                 })->values();
             }

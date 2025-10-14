@@ -49,7 +49,7 @@ class DraftBeneficiaryPersonal extends Model implements Auditable
         return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id');
     }
 
- 
+
     public function contact()
     {
         return $this->hasOne(DraftBeneficiaryContact::class, 'application_id');
@@ -81,7 +81,7 @@ class DraftBeneficiaryPersonal extends Model implements Auditable
                 'municipality_id' => $draftbenPar->municipality_id,
                 'ward_id'         => $draftbenPar->ward_id,
                 'panchayat_id'    => $draftbenPar->panchayat_id,
-                'encoded_aadhar'    => $draftbenPar->aadhaar->encoded_aadhar,
+                'encoded_aadhar'    => $draftbenPar->aadhaar->aadhar_hash,
                 'mobile_no' => $draftbenPar->mobile_no,
             ]);
         });

@@ -121,23 +121,24 @@ class BeneficiaryTable extends DataTableComponent
 
             Column::make("Applicant Name", "full_name")
                 ->label(fn($row) => $row->sourceable->full_name ?? 'N/A'),
+
             Column::make("Father's Name")
                 ->label(fn($row) => $row->sourceable->relationships
                     ->where('relation_type_id', $this->relationFather)->first()?->full_name),
-            Column::make('Age')
-                ->label(function ($row) {
-                    $dob = $row->sourceable->dob ?? null;
-                    return $dob ? Carbon::parse($dob)->age : 'N/A';
-                }),
+
+            Column::make("Age", "dob")
+                ->label(fn($row) => $row->sourceable->dob ?? 'N/A'),
             // Column::make("Age", "dob")
             // ->format(fn($value) => $value ? Carbon::parse($value)->age : 'N/A'),
         ];
 
         if (in_array($this->reportType, ['1', '5', '4'])) {
-            $columns[] = Column::make("Applicant Mobile No.", "mobile_no");
+            $columns[] = Column::make("Applicant Mobile No.", "mobile_no")
+                ->label(fn($row) => $row->sourceable->mobile_no ?? 'N/A');
         }
 
-        if ($this->reportType === '3') {
+
+        if ($this->reportType == '3') {
             $beneficiaryColumn = Column::make("Beneficiary ID", "beneficiary_id")
                 ->label(fn($row) => $row->sourceable->beneficiary_id ?? 'N/A');
 
@@ -145,7 +146,7 @@ class BeneficiaryTable extends DataTableComponent
         }
 
 
-        if ($this->reportType === '4') {
+        if ($this->reportType == '4') {
             $columns[2] = Column::make("Father's Name", "father_full_name");
             $columns[] = Column::make("Rejected Reason", "rejected_reason");
         }
@@ -154,7 +155,7 @@ class BeneficiaryTable extends DataTableComponent
 
         $columns[] = Column::make("Actions")
             ->label(function ($row) {
-                if ($this->reportType != '4') {
+                if (($this->reportType == '3') || ($this->reportType == '2') || ($this->reportType == '5')) {
                     return view('coulmn_button.view', [
                         'link' => route('custom_application.view', [
                             // 'application_id' => Crypt::encrypt($row->application_id),
@@ -162,6 +163,12 @@ class BeneficiaryTable extends DataTableComponent
                             'reportType' => $this->reportType,
                         ]),
                         'tooltip' => 'View Application',
+                    ])->render();
+                }
+                if (($this->reportType == '1')) {
+                    return view('coulmn_button.actions', [
+                        'link' => route('draftedit', Crypt::encryptString($row->sourceable->application_id)),
+                        'tooltip' => 'Edit Application',
                     ])->render();
                 }
             })
@@ -183,17 +190,16 @@ class BeneficiaryTable extends DataTableComponent
         $next_level_role_id = null;
         $sourceableClass = null;
 
-        // 🔹 Decide which model type to use based on reportType
-        if ($this->reportType === "2") {
+        if ($this->reportType == "2") {
             $sourceableClass = DraftBeneficiaryPersonal::class;
             $next_level_role_id = $roleVerified;
-        } elseif ($this->reportType === "3") {
+        } elseif ($this->reportType == "3") {
             $sourceableClass = BeneficiaryPersonal::class;
             $next_level_role_id = $roleApproved;
         } elseif (in_array($this->reportType, ["1", "5"])) {
             $sourceableClass = DraftBeneficiaryPersonal::class;
             $next_level_role_id = $roleReverted;
-        } elseif ($this->reportType === "4") {
+        } elseif ($this->reportType == "4") {
             $query = BenRejectDetail::query();
 
             return EncryptionArray::applyLocationFilter(
@@ -205,7 +211,6 @@ class BeneficiaryTable extends DataTableComponent
                 $this->gp_ward ? (int) $this->gp_ward : null
             );
         }
-
         $query = BeneficiaryCommonList::with('sourceable.contact', 'sourceable.relationships')
             ->whereHasMorph(
                 'sourceable',
@@ -215,47 +220,52 @@ class BeneficiaryTable extends DataTableComponent
                 }
             );
 
-        if (!empty($this->filter_condition['district_id'])) {
-            $districtId = $this->filter_condition['district_id'];
-
-            $query->whereHasMorph(
-                'sourceable',
-                $sourceableClass,
-                function ($q) use ($districtId) {
-                    $q->whereHas('contact', function ($contactQuery) use ($districtId) {
-                        $contactQuery->where('district_id', $districtId);
-                    });
-                }
-            );
+        // dd($query->get());
+        if (!empty($this->filter_condition)) {
+            $query->where($this->filter_condition);
         }
 
-        if (!empty($this->filter_condition['block_id'])) {
-            $blockId = $this->filter_condition['block_id'];
+        // if (!empty($this->filter_condition['district_id'])) {
+        //     $districtId = $this->filter_condition['district_id'];
 
-            $query->whereHasMorph(
-                'sourceable',
-                $sourceableClass,
-                function ($q) use ($blockId) {
-                    $q->whereHas('contact', function ($contactQuery) use ($blockId) {
-                        $contactQuery->where('block_id', $blockId);
-                    });
-                }
-            );
-        }
+        //     $query->whereHasMorph(
+        //         'sourceable',
+        //         $sourceableClass,
+        //         function ($q) use ($districtId) {
+        //             $q->whereHas('contact', function ($contactQuery) use ($districtId) {
+        //                 $contactQuery->where('district_id', $districtId);
+        //             });
+        //         }
+        //     );
+        // }
 
-        if (!empty($this->filter_condition['subdivision_id'])) {
-            $subdivisionId = $this->filter_condition['subdivision_id'];
+        // if (!empty($this->filter_condition['block_id'])) {
+        //     $blockId = $this->filter_condition['block_id'];
 
-            $query->whereHasMorph(
-                'sourceable',
-                $sourceableClass,
-                function ($q) use ($subdivisionId) {
-                    $q->whereHas('contact.municipality', function ($municipalityQuery) use ($subdivisionId) {
-                        $municipalityQuery->where('subdivision_id', $subdivisionId);
-                    });
-                }
-            );
-        }
+        //     $query->whereHasMorph(
+        //         'sourceable',
+        //         $sourceableClass,
+        //         function ($q) use ($blockId) {
+        //             $q->whereHas('contact', function ($contactQuery) use ($blockId) {
+        //                 $contactQuery->where('block_id', $blockId);
+        //             });
+        //         }
+        //     );
+        // }
+
+        // if (!empty($this->filter_condition['subdivision_id'])) {
+        //     $subdivisionId = $this->filter_condition['subdivision_id'];
+
+        //     $query->whereHasMorph(
+        //         'sourceable',
+        //         $sourceableClass,
+        //         function ($q) use ($subdivisionId) {
+        //             $q->whereHas('contact.municipality', function ($municipalityQuery) use ($subdivisionId) {
+        //                 $municipalityQuery->where('subdivision_id', $subdivisionId);
+        //             });
+        //         }
+        //     );
+        // }
 
         // dd($this->gp_ward);
         // $query = EncryptionArray::applyLocationFilter(
