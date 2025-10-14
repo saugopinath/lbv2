@@ -158,7 +158,7 @@ class BeneficiaryTable extends DataTableComponent
                     return view('coulmn_button.view', [
                         'link' => route('custom_application.view', [
                             // 'application_id' => Crypt::encrypt($row->application_id),
-                            'id' => $this->reportType == '3' ? encrypt($row->sourceable->beneficiary_id) : encrypt($row->sourceable->application_id),
+                            'id' => $this->reportType == '3' ? encrypt($row->sourceable->application_id) : encrypt($row->sourceable->application_id),
                             'reportType' => $this->reportType,
                         ]),
                         'tooltip' => 'View Application',

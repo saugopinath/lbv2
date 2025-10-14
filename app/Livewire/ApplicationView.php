@@ -26,10 +26,11 @@ class ApplicationView extends Component
 // dd( $this->reportType);
         if ($this->reportType === '3') {
             // $this->application = BeneficiaryPersonal::findOrFail($realId);
-             $this->application = BeneficiaryPersonal::where('beneficiary_id', $realId)->first();
+             $this->application = BeneficiaryPersonal::where('application_id', $realId)->first();
+            //  dd($this->application);
             $this->label = 'Beneficiary Id';
             $this->value = $this->application->beneficiary_id;
-            $this->passId = $this->application->beneficiary_id;
+            $this->passId = $this->application->application_id;
         } else {
             // $this->application = DraftBeneficiaryPersonal::findOrFail($realId);
             $this->application = DraftBeneficiaryPersonal::where('application_id', $realId)->first();
