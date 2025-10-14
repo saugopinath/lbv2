@@ -25,7 +25,10 @@ class IncompletTypeTable extends DataTableComponent
     public ?string $filterCode = null;
     public $district_id, $rural_urban, $blockurban, $gp_ward, $selectedSubdivision;
 
-    protected $listeners = ['doSearch' => 'doSearch'];
+    // protected $listeners = ['doSearch' => 'doSearch'];
+    protected $listeners = [
+        'doSearch' => 'updateFilters',
+    ];
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
     public array $filter_condition = [];
@@ -48,8 +51,9 @@ class IncompletTypeTable extends DataTableComponent
         }
     }
 
-    public function doSearch(array $filters)
+    public function updateFilters($filters)
     {
+        // dd($filters);
         $this->district_id = $filters['district_id'] ?? null;
         $this->rural_urban = $filters['rural_urban'] ?? null;
         $this->selectedSubdivision = $filters['subdivision_id'] ?? null;
@@ -110,19 +114,29 @@ class IncompletTypeTable extends DataTableComponent
 
             Column::make("Address")
                 ->label(function ($row) {
-                    $common = $row->beneficiaryCommonList->sourceable;
-                    // dd($common);
+                    $common = $row->commonList?->sourceable;
 
-                    if ($common?->block_id && $common?->panchayat) {
-                        return $common->panchayat->name;
+                    if (!$common) {
+                        return 'N/A';
                     }
 
-                    if ($common?->sub_division_id && $common?->ward) {
-                        return $common->ward->name;
+                    $contact = $common->contacts ?? null;
+
+                    if (!$contact) {
+                        return 'N/A';
+                    }
+
+                    if ($contact->panchayat?->name) {
+                        return $contact->panchayat->name;
+                    }
+
+                    if ($contact->ward?->name) {
+                        return $contact->ward->name;
                     }
 
                     return 'N/A';
-                }),
+                })
+
         ];
 
         if ($this->stage === 'revert') {
@@ -136,6 +150,28 @@ class IncompletTypeTable extends DataTableComponent
                 ->sortable();
         }
 
+        $columns[] = Column::make("Actions")
+            ->label(function ($row) {
+                $stage = request()->get('stage');
+
+                $buttonText = match ($stage) {
+                    'approver', 'revert' => 'View',
+                    default => 'Update',
+                };
+
+                $link = route('incomplet-type.view', [
+                    'id' => Crypt::encryptString($row->application_id),
+                    'stage' => Crypt::encryptString($stage),
+                ]);
+
+                return view('coulmn_button.view', [
+                    'link' => $link,
+                    'tooltip' => $buttonText,
+                    'text' => $buttonText,
+                ])->render();
+            })
+            ->html();
+
         return $columns;
     }
 
@@ -145,12 +181,13 @@ class IncompletTypeTable extends DataTableComponent
             ->select('application_id')
             ->groupBy('application_id')
             ->orderBy('application_id', 'asc')
+            ->with('commonList.sourceable.contacts.panchayat', 'commonList.sourceable.contacts.ward')
             ->whereHas('beneficiaryCommonList', function ($q) {
                 foreach ($this->filter_condition as $col => $val) {
                     $q->where($col, $val);
                 }
             });
-
+        // dd($query->get());
         $user = auth()->user();
 
         $stage = $this->stage ?? null;
@@ -251,7 +288,7 @@ class IncompletTypeTable extends DataTableComponent
     {
         $rows = $this->getRows();
 
-        $this->dispatch('hideLoader');
+        // $this->dispatch('hideLoader');
 
         return view('livewire.incomplet-type-table', [
             'rows'  => $rows,

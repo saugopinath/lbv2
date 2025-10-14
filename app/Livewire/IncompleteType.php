@@ -25,8 +25,10 @@ class IncompleteType extends Component
             ->get();
     }
 
-    public function updatedIncompleteList()
+    public function updatedIncompleteList($value)
     {
+        $this->incompleteList = $value;
+        // dd($this->incompleteList);
         $this->dispatch('filterIncompleteType', $this->incompleteList);
     }
 

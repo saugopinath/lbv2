@@ -23,7 +23,7 @@ class ApplicationView extends Component
         // dd($realId);
         $this->reportType = request()->query('reportType');
         $this->is_duplicate   = $is_duplicate;
-
+// dd( $this->reportType);
         if ($this->reportType === '3') {
             // $this->application = BeneficiaryPersonal::findOrFail($realId);
              $this->application = BeneficiaryPersonal::where('beneficiary_id', $realId)->first();
@@ -33,6 +33,7 @@ class ApplicationView extends Component
         } else {
             // $this->application = DraftBeneficiaryPersonal::findOrFail($realId);
             $this->application = DraftBeneficiaryPersonal::where('application_id', $realId)->first();
+            // dd( $this->application );
             $this->label = 'Application Id';
             $this->value = $this->application->application_id;
             $this->passId = $this->application->application_id;

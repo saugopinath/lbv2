@@ -186,7 +186,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             Column::make("Age", "age")
                 ->label(fn($row) => Carbon::parse($row->sourceable->dob)->age
                     ?? 'N/A'),
-           
+
             $columns[] = Column::make("Actions")
             ->label(function ($row) {
                     return view('coulmn_button.view', [
