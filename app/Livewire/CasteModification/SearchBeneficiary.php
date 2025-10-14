@@ -132,7 +132,7 @@ class SearchBeneficiary extends Component
             });
 
             if ($approvedItems->isEmpty()) {
-                $message = "These Beneficiaries are not approved Yet.";
+                $message = "These Beneficiary is not approved Yet.";
                 session()->flash('warning', $message);
                 $this->items = [];
                 return;
