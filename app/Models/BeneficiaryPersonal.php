@@ -11,11 +11,6 @@ class BeneficiaryPersonal extends Model implements Auditable
     protected $guarded = [];
     protected $primaryKey = 'application_id';
     protected $table = 'lb_scheme.beneficiary_personals';
-    // protected $primaryKey = 'application_id';
-
-    // protected $guarded = [];
-
-    // public $timestamps = false;
 
 
     public function father()
@@ -23,10 +18,6 @@ class BeneficiaryPersonal extends Model implements Auditable
         return $this->hasMany(BeneficiaryRelationship::class, 'beneficiary_id', 'beneficiary_id');
     }
 
-    // public function contact()
-    // {
-    //     return $this->hasOne(BeneficiaryContact::class, 'beneficiary_id', 'beneficiary_id');
-    // }
 
     public function contacts()
     {
@@ -38,10 +29,10 @@ class BeneficiaryPersonal extends Model implements Auditable
         return $this->hasOne(BeneficiaryRelationship::class, 'application_id', 'application_id');
     }
 
-    // public function contact()
-    // {
-    //     return $this->hasOne(BeneficiaryContact::class, 'application_id', 'application_id');
-    // }
+    public function contact()
+    {
+        return $this->hasOne(BeneficiaryContact::class, 'application_id', 'application_id');
+    }
 
     public function bank()
     {
@@ -68,11 +59,7 @@ class BeneficiaryPersonal extends Model implements Auditable
         return $this->hasOne(BeneficiaryAadhaar::class, 'application_id');
     }
 
-    // public function relationships()
-    // {
-    //     return $this->hasMany(BeneficiaryRelationship::class, 'application_id');
-    // }
-
+ 
     public function lists()
     {
         return $this->morphOne(BeneficiaryCommonList::class, 'sourceable');
