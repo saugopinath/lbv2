@@ -38,7 +38,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public string $login_type = '';
     public string $search = '';
 
-    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id, $revertrejectAction, $revertrejectCauses;
+    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id, $revertrejectAction, $revertrejectCauses, $sub_div;
     protected $listeners = ['filtersApplied'];
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
@@ -56,15 +56,17 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         }
 
         if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['subdivision_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+            $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
     public function filtersApplied($filters)
     {
+        // dd($filters);
         $this->district_id = $filters['district_id'];
         $this->rural_urban = $filters['rural_urban'] ?? null;
         $this->blockurban = $filters['blockurban'];
         $this->gp_ward = $filters['gp_ward'];
+        $this->sub_div = $filters['subdivision_id'];
     }
     public function configure(): void
     {
@@ -188,25 +190,26 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     ?? 'N/A'),
 
             $columns[] = Column::make("Actions")
-            ->label(function ($row) {
+                ->label(function ($row) {
                     return view('coulmn_button.view', [
-                        'link' => route('draft-application.view' , Crypt::encryptString($row->sourceable->application_id)),
+                        'link' => route('draft-application.view', Crypt::encryptString($row->sourceable->application_id)),
                         'tooltip' => 'View Application',
                     ])->render();
-            })
-            ->html(),
+                })
+                ->html(),
         ];
     }
     public function builder(): Builder
     {
         $query = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact');
-        if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
+        if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->sub_div) {
             $query = EncryptionArray::applyLocationFilters(
                 $query,
                 $this->district_id ? (int) $this->district_id : null,
                 $this->rural_urban ? (int) $this->rural_urban : null,
                 $this->blockurban ? (int) $this->blockurban : null,
-                $this->gp_ward ? (int) $this->gp_ward : null
+                $this->gp_ward ? (int) $this->gp_ward : null,
+                $this->sub_div ? (int) $this->sub_div : null
             );
         }
         $user = auth()->user();
@@ -221,13 +224,21 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         if ($user->hasRole('Operator')) {
             $next_level_role_id = Codemaster::getIdByCode(21);
         }
+
+          $sourceableClass = DraftBeneficiaryPersonal::class;
+
         if ($next_level_role_id) {
-            $query->whereHas(
+            $query->whereHasMorph(
                 'sourceable',
+                $sourceableClass,
                 function ($q) use ($next_level_role_id) {
                     $q->where('next_level_role_id', $next_level_role_id);
                 }
             );
+        }
+
+        if (!empty($this->filter_condition)) {
+            $query->where($this->filter_condition);
         }
         $this->dispatch('hideLoader');
         return $query;
@@ -260,16 +271,15 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     ->value('id') ?? null;
                 $AcceptRejectInfo->save();
                 DB::commit();
-                $this->dispatch('toastr', [
-                    'type' => 'success',
-                    'message' => 'All applications verified successfully!'
-                ]);
             } catch (\Exception $e) {
                 DB::rollBack();
                 throw $e;
             }
         }
-
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'All applications verified successfully!'
+        ]);
         $this->clearSelected();
     }
 
@@ -304,16 +314,15 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     ->value('id') ?? null;
                 $AcceptRejectInfo->save();
                 DB::commit();
-                $this->dispatch('toastr', [
-                    'type' => 'success',
-                    'message' => 'All applications approved successfully!'
-                ]);
             } catch (\Exception $e) {
                 DB::rollBack();
                 throw $e;
             }
         }
-
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'All applications approved successfully!'
+        ]);
         $this->clearSelected();
     }
     public function bulkrevert()
@@ -366,15 +375,15 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     DB::commit();
-                    $this->dispatch('toastr', [
-                        'type' => 'warning',
-                        'message' => 'All applications reverted successfully!'
-                    ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
                 }
             }
+            $this->dispatch('toastr', [
+                'type' => 'warning',
+                'message' => 'All applications reverted successfully!'
+            ]);
             $this->clearSelected();
         } elseif ($this->revertrejectAction === 'reject') {
             $ids = $this->getSelected();
@@ -399,16 +408,36 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     DB::commit();
-                    $this->dispatch('toastr', [
-                        'type' => 'error',
-                        'message' => 'All applications rejected successfully!'
-                    ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
                 }
             }
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'All applications rejected successfully!'
+            ]);
             $this->clearSelected();
         }
+    }
+
+    public function exportExcel()
+    {
+        $data = $this->builder()->get()->map(function ($row) {
+            return [
+                'Application ID' => $row->sourceable->application_id ?? 'N/A',
+                'Applicant Name' => $row->sourceable->full_name ?? 'N/A',
+                'Father Name' => optional(
+                    $row->sourceable->relationships->firstWhere(
+                        'relation_type_id',
+                        Codemaster::getIdByCode(131)
+                    )
+                )->full_name ?? 'N/A',
+                'DOB' => $row->sourceable->dob ?? 'N/A',
+                'Mobile' => $row->sourceable->mobile_no ?? 'N/A',
+            ];
+        });
+
+        return Excel::download(new BeneficiariesExport($data), 'applications_all.xlsx');
     }
 }

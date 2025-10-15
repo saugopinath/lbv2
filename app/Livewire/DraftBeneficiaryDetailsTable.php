@@ -47,7 +47,7 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
         }
 
         if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['subdivision_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+            $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
     public function filtersApplied($filters)
@@ -59,7 +59,7 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
     }
     public function configure(): void
     {
-        $this->setPrimaryKey('application_id')
+        $this->setPrimaryKey('sourceable_id')
             ->setPaginationEnabled()
             ->setPerPageAccepted([5, 10])
             ->setPerPage($this->perPage)
@@ -136,13 +136,13 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
             'class' => 'px-4 py-3 divide-y divide-gray-200 bg-white overflow-y-auto',
         ]);
     }
-    public function bulkActions(): array
-    {
-        return [
-            'bulkapprove' => 'Approve',
-            'exportSelected' => 'Export',
-        ];
-    }
+    // public function bulkActions(): array
+    // {
+    //     return [
+    //         'bulkapprove' => 'Approve',
+    //         'exportSelected' => 'Export',
+    //     ];
+    // }
     public function updatedSearch($value): void
     {
         $this->setSearch($value);
@@ -193,14 +193,14 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
             Column::make("Mobile No", "mobile_no")
                 ->label(fn($row) => $row->mobile_no ?? 'N/A'),
 
-                $columns[] = Column::make("Actions")
-            ->label(function ($row) {
+            $columns[] = Column::make("Actions")
+                ->label(function ($row) {
                     return view('coulmn_button.actions', [
-                        'link' => route('draftedit' , Crypt::encryptString($row->sourceable->application_id)),
+                        'link' => route('draftedit', Crypt::encryptString($row->sourceable->application_id)),
                         'tooltip' => 'Edit Application',
                     ])->render();
-            })
-            ->html(),
+                })
+                ->html(),
         ];
     }
     public function builder(): Builder
@@ -216,13 +216,13 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
             );
         }
 
-         $next_level_role_id = Codemaster::getIdByCode(21);
-         $query->whereHas(
-                'sourceable',
-                function ($q) use ($next_level_role_id) {
-                    $q->where('next_level_role_id', $next_level_role_id);
-                }
-            );
+        $next_level_role_id = Codemaster::getIdByCode(21);
+        $query->whereHas(
+            'sourceable',
+            function ($q) use ($next_level_role_id) {
+                $q->where('next_level_role_id', $next_level_role_id);
+            }
+        );
         // $query = DraftBeneficiaryPersonal::with('contact', 'bank')
         //     ->where('next_level_role_id',$next_level_role_id);
         // dd($query);
@@ -264,17 +264,27 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
         //         $this->gp_ward ? (int) $this->gp_ward : null
         //     );
         // }
-         $this->dispatch('hideLoader');
+        $this->dispatch('hideLoader');
         return $query;
     }
-    // public function export()
-    // {
-    //    return Excel::download(new BeneficiariesExport($this->getFilteredQuery()->get()), 'beneficiaries.xlsx');
-    // }
-    // public function render(): \Illuminate\View\View
-    // {
-    //     return view('livewire.custom-beneficiary-table', [
-    //         'rows' => $this->getRows(),
-    //     ]);
-    //
+
+    public function exportExcel()
+    {
+        $data = $this->builder()->get()->map(function ($row) {
+            return [
+                'Application ID' => $row->sourceable->application_id ?? 'N/A',
+                'Applicant Name' => $row->sourceable->full_name ?? 'N/A',
+                'Father Name' => optional(
+                    $row->sourceable->relationships->firstWhere(
+                        'relation_type_id',
+                        Codemaster::getIdByCode(131)
+                    )
+                )->full_name ?? 'N/A',
+                'DOB' => $row->sourceable->dob ?? 'N/A',
+                'Mobile' => $row->sourceable->mobile_no ?? 'N/A',
+            ];
+        });
+
+        return Excel::download(new BeneficiariesExport($data), 'applications_all.xlsx');
+    }
 }

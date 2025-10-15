@@ -25,8 +25,6 @@ class DraftBeneficiaryContact extends Model implements Auditable
     protected $primaryKey = 'application_id';
     protected $table = 'lb_scheme.draft_beneficiary_contacts';
 
-    public $timestamps = false;
-
     public function block()
     {
         return $this->belongsTo(Block::class, 'block_id');

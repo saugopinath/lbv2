@@ -21,7 +21,7 @@ class BankAccountDetails extends Component
         $this->mode = $mode;
         if ($reportType === '3') {
             $this->applicantDet = BeneficiaryPersonal::with('bank')
-                ->where('beneficiary_id', $id)
+                ->where('application_id', $id)
                 ->first();
         } else {
             $this->applicantDet = DraftBeneficiaryPersonal::with('bank')

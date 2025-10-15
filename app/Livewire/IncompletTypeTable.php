@@ -47,7 +47,7 @@ class IncompletTypeTable extends DataTableComponent
         }
 
         if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['subdivision_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+            $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
 
@@ -150,27 +150,27 @@ class IncompletTypeTable extends DataTableComponent
                 ->sortable();
         }
 
-        $columns[] = Column::make("Actions")
-            ->label(function ($row) {
-                $stage = request()->get('stage');
+        // $columns[] = Column::make("Actions")
+        //     ->label(function ($row) {
+        //         $stage = request()->get('stage');
 
-                $buttonText = match ($stage) {
-                    'approver', 'revert' => 'View',
-                    default => 'Update',
-                };
+        //         $buttonText = match ($stage) {
+        //             'approver', 'revert' => 'View',
+        //             default => 'Update',
+        //         };
 
-                $link = route('incomplet-type.view', [
-                    'id' => Crypt::encryptString($row->application_id),
-                    'stage' => Crypt::encryptString($stage),
-                ]);
+        //         $link = route('incomplet-type.view', [
+        //             'id' => Crypt::encryptString($row->application_id),
+        //             'stage' => Crypt::encryptString($stage),
+        //         ]);
 
-                return view('coulmn_button.view', [
-                    'link' => $link,
-                    'tooltip' => $buttonText,
-                    'text' => $buttonText,
-                ])->render();
-            })
-            ->html();
+        //         return view('coulmn_button.view', [
+        //             'link' => $link,
+        //             'tooltip' => $buttonText,
+        //             'text' => $buttonText,
+        //         ])->render();
+        //     })
+        //     ->html();
 
         return $columns;
     }
@@ -181,7 +181,6 @@ class IncompletTypeTable extends DataTableComponent
             ->select('application_id')
             ->groupBy('application_id')
             ->orderBy('application_id', 'asc')
-            ->with('commonList.sourceable.contacts.panchayat', 'commonList.sourceable.contacts.ward')
             ->whereHas('beneficiaryCommonList', function ($q) {
                 foreach ($this->filter_condition as $col => $val) {
                     $q->where($col, $val);
@@ -288,7 +287,7 @@ class IncompletTypeTable extends DataTableComponent
     {
         $rows = $this->getRows();
 
-        // $this->dispatch('hideLoader');
+        $this->dispatch('hideLoader');
 
         return view('livewire.incomplet-type-table', [
             'rows'  => $rows,

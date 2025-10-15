@@ -44,7 +44,9 @@ class DatabaseSeeder extends Seeder
             ApplicantIncompletDetailsSeeder::class,
             ValidationFailedCodemasterSeeder::class,
             UpdateNextLevelRoleIdSeeder::class,
-            OpTypeSeeder::class
+            OpTypeSeeder::class,
+            CasteRequestIdSeeder::class,
+            CasteRequestOpTypeSeeder::class
         ]);
     }
 }

@@ -47,11 +47,26 @@ class BenRejectDetails extends Model implements Auditable
         return $this->morphOne(BeneficiaryCommonList::class, 'sourceable');
     }
 
+    // protected static function booted()
+    // {
+    //     static::created(function ($benRejectDetails) {
+    //         if ($benRejectDetails) {
+    //             $benRejectDetails->lists()->update([]);
+    //         }
+    //     });
+    // }
+
     protected static function booted()
     {
-        static::created(function ($benRejectDetails) {
-            if ($benRejectDetails) {
-                $benRejectDetails->lists()->update([]);
+        static::created(function ($benrej) {
+            // dd($benrej->application_id);
+            $commonList = BeneficiaryCommonList::find($benrej->application_id);
+            // dd( get_class($benrej));
+            if ($commonList) {
+                $commonList->update([
+                'sourceable_type' => get_class($benrej),
+                'is_reject'       => true,
+            ]);
             }
         });
     }

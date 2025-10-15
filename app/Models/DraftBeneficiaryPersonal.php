@@ -17,8 +17,6 @@ class DraftBeneficiaryPersonal extends Model implements Auditable
     protected $primaryKey = 'application_id';
     protected $table = 'lb_scheme.draft_beneficiary_personals';
 
-    public $timestamps = true;
-
     public function father()
     {
         return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id', 'application_id');
@@ -44,20 +42,12 @@ class DraftBeneficiaryPersonal extends Model implements Auditable
         return $this->hasMany(BeneficiaryEnclosure::class, 'application_id');
     }
 
-    // public function relationships()
-    // {
-    //     return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id');
-    // }
-
-     public function contacts()
-    {
-        return $this->hasOne(BeneficiaryContact::class, 'application_id', 'application_id');
-    }
-
     public function relationships()
     {
-        return $this->hasOne(BeneficiaryRelationship::class, 'application_id', 'application_id');
+        return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id');
     }
+
+
     public function contact()
     {
         return $this->hasOne(DraftBeneficiaryContact::class, 'application_id');
@@ -89,7 +79,7 @@ class DraftBeneficiaryPersonal extends Model implements Auditable
                 'municipality_id' => $draftbenPar->municipality_id,
                 'ward_id'         => $draftbenPar->ward_id,
                 'panchayat_id'    => $draftbenPar->panchayat_id,
-                'encoded_aadhar'    => $draftbenPar->aadhaar->encoded_aadhar,
+                'encoded_aadhar'    => $draftbenPar->aadhaar->aadhar_hash,
                 'mobile_no' => $draftbenPar->mobile_no,
             ]);
         });

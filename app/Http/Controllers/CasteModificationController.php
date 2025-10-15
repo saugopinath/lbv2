@@ -19,7 +19,8 @@ class CasteModificationController extends Controller
     public function __construct()
     {
         $this->casteCodeMaster = 17;
-        $this->doctype = [101];
+        $this->doctype = [Codemaster::getIdByCode(162)];
+        // dd($this->doctype );
     }
 
     public function index()
