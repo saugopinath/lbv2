@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 class EncryptionArray
 {
 
-    public static function applyLocationFilter(Builder $query, string $reportType, ?int $district_id, ?int $rural_urban, ?int $blockurban, ?int $gp_ward): Builder
+    public static function applyLocationFilter(Builder $query, string $reportType, ?int $district_id, ?int $rural_urban, ?int $blockurban, ?int $gp_ward, ?int $sub_div): Builder
     {
         // dump($rural_urban);
         // dump($blockurban);
@@ -49,7 +49,17 @@ class EncryptionArray
             //     $q->where($blockField, $blockurban);
             // });
             // }
-
+            if ($sub_div) {
+                $query->whereHasMorph(
+                    'sourceable',
+                    '*', // use your morph model(s)
+                    function ($q) use ($sub_div) {
+                        $q->whereHas('contact.municipality', function ($municipalityQuery) use ($sub_div) {
+                            $municipalityQuery->where('subdivision_id', $sub_div);
+                        });
+                    }
+                );
+            }
             if ($gp_ward) {
                 $query->whereHasMorph(
                     'sourceable',
@@ -67,6 +77,10 @@ class EncryptionArray
                 $query->where('district_id', $district_id);
             }
 
+             if ($sub_div) {
+                $query->where('subdivision_id', $sub_div);
+            }
+
             if ($blockurban) {
                 $query->where($blockField, $blockurban);
             }
@@ -78,9 +92,9 @@ class EncryptionArray
 
         return $query;
     }
-    public static function applyLocationFilters(Builder $query, ?int $district_id, ?int $rural_urban, ?int $blockurban, ?int $gp_ward): Builder
+    public static function applyLocationFilters(Builder $query, ?int $district_id, ?int $rural_urban, ?int $blockurban, ?int $gp_ward, ?int $sub_div): Builder
     {
-        // dump($query);
+        // dump($sub_div);
         // dd($query);
         $blockField  = $rural_urban == 2 ? 'block_id'      : 'municipality_id';
         $gpWardField = $rural_urban == 2 ? 'panchayat_id'  : 'ward_id';
@@ -109,6 +123,19 @@ class EncryptionArray
                 }
             );
         }
+
+        if ($sub_div) {
+            $query->whereHasMorph(
+                'sourceable',
+                '*', // use your morph model(s)
+                function ($q) use ($sub_div) {
+                    $q->whereHas('contact.municipality', function ($municipalityQuery) use ($sub_div) {
+                        $municipalityQuery->where('subdivision_id', $sub_div);
+                    });
+                }
+            );
+        }
+
         // dd('fdf');
         // $query->whereHas('sourceable.contact', function ($q) use ($blockField, $blockurban) {
         //     $q->where($blockField, $blockurban);

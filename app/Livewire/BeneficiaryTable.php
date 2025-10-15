@@ -23,7 +23,7 @@ class BeneficiaryTable extends DataTableComponent
     public string $reportType;
     public string $search = '';
 
-    public $district_id, $rural_urban, $blockurban, $gp_ward;
+    public $district_id, $rural_urban, $blockurban, $gp_ward,$sub_div;
     protected $listeners = ['filtersApplied'];
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
@@ -57,6 +57,7 @@ class BeneficiaryTable extends DataTableComponent
         $this->rural_urban = $filters['rural_urban'] ?? null;
         $this->blockurban = $filters['blockurban'];
         $this->gp_ward = $filters['gp_ward'];
+        $this->sub_div = $filters['subdivision_id'];
         // dd($this->gp_ward );
     }
     public function configure(): void
@@ -286,7 +287,8 @@ class BeneficiaryTable extends DataTableComponent
                 $this->district_id ? (int) $this->district_id : null,
                 $this->rural_urban ? (int) $this->rural_urban : null,
                 $this->blockurban ? (int) $this->blockurban : null,
-                $this->gp_ward ? (int) $this->gp_ward : null
+                $this->gp_ward ? (int) $this->gp_ward : null,
+                $this->sub_div ? (int) $this->sub_div : null
             );
         }
 

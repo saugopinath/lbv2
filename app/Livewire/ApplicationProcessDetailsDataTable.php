@@ -38,7 +38,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public string $login_type = '';
     public string $search = '';
 
-    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id, $revertrejectAction, $revertrejectCauses;
+    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id, $revertrejectAction, $revertrejectCauses, $sub_div;
     protected $listeners = ['filtersApplied'];
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
@@ -61,10 +61,12 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     }
     public function filtersApplied($filters)
     {
+        // dd($filters);
         $this->district_id = $filters['district_id'];
         $this->rural_urban = $filters['rural_urban'] ?? null;
         $this->blockurban = $filters['blockurban'];
         $this->gp_ward = $filters['gp_ward'];
+        $this->sub_div = $filters['subdivision_id'];
     }
     public function configure(): void
     {
@@ -200,13 +202,14 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public function builder(): Builder
     {
         $query = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact');
-        if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
+        if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->sub_div) {
             $query = EncryptionArray::applyLocationFilters(
                 $query,
                 $this->district_id ? (int) $this->district_id : null,
                 $this->rural_urban ? (int) $this->rural_urban : null,
                 $this->blockurban ? (int) $this->blockurban : null,
-                $this->gp_ward ? (int) $this->gp_ward : null
+                $this->gp_ward ? (int) $this->gp_ward : null,
+                $this->sub_div ? (int) $this->sub_div : null
             );
         }
         $user = auth()->user();
