@@ -46,7 +46,7 @@ class BeneficiaryTable extends DataTableComponent
         }
 
         if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['subdivision_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+            $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
     public function filtersApplied($filters)
@@ -320,32 +320,20 @@ class BeneficiaryTable extends DataTableComponent
                 }),
         ];
     }
-    // public function export()
-    // {
-    //     $reportTypeFormatted = ucfirst($this->reportType);
-    //     $timestamp = Carbon::now('Asia/Kolkata')->format('Ymd_Hi');
-    //     $filename = "{$reportTypeFormatted}_Beneficiaries_{$timestamp}.xlsx";
-    //     $select_lgd = session('lgd_session');
-    //     $login_type =  Crypt::decryptString($select_lgd['office_type_id']);
+    public function exportExcel()
+    {
+        $data = $this->builder()->get()->map(function ($row) {
+            return [
+                'application_id' => $row->sourceable->application_id ?? 'N/A',
+                'full_name' => $row->sourceable->full_name ?? 'N/A',
+                'father_name' => optional($row->sourceable->relationships
+                    ->where('relation_type_id', $this->relationFather ?? null)
+                    ->first())->full_name ?? 'N/A',
+                'dob' => $row->sourceable->dob ?? 'N/A',
+                'mobile_no' => $row->sourceable->mobile_no ?? 'N/A',
+            ];
+        });
 
-
-    //     return Excel::download(
-    //         new BeneficiariesExport(
-    //             $this->reportType,
-    //             $login_type,
-    //             $this->loginDistrictCode,
-    //             $this->loginSubdivisionCode,
-    //             $this->loginBlockCode
-    //         ),
-    //         $filename
-    //     );
-    // }
-    // public function render(): \Illuminate\View\View
-    // {
-    //     $this->dispatch('hideLoader');
-    //     return view('livewire.custom-beneficiary-table', [
-    //         'rows' => $this->getRows(),
-    //         'reportType' => $this->reportType,
-    //     ]);
-    // }
+        return Excel::download(new BeneficiariesExport($data), 'beneficiaries_all.xlsx');
+    }
 }

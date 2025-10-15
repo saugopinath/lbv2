@@ -56,7 +56,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         }
 
         if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['subdivision_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+            $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
     public function filtersApplied($filters)
@@ -372,12 +372,11 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     DB::rollBack();
                     throw $e;
                 }
-
             }
             $this->dispatch('toastr', [
-                    'type' => 'warning',
-                    'message' => 'All applications reverted successfully!'
-                ]);
+                'type' => 'warning',
+                'message' => 'All applications reverted successfully!'
+            ]);
             $this->clearSelected();
         } elseif ($this->revertrejectAction === 'reject') {
             $ids = $this->getSelected();
@@ -406,13 +405,32 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     DB::rollBack();
                     throw $e;
                 }
-
             }
             $this->dispatch('toastr', [
-                    'type' => 'error',
-                    'message' => 'All applications rejected successfully!'
-                ]);
+                'type' => 'error',
+                'message' => 'All applications rejected successfully!'
+            ]);
             $this->clearSelected();
         }
+    }
+
+    public function exportExcel()
+    {
+        $data = $this->builder()->get()->map(function ($row) {
+            return [
+                'Application ID' => $row->sourceable->application_id ?? 'N/A',
+                'Applicant Name' => $row->sourceable->full_name ?? 'N/A',
+                'Father Name' => optional(
+                    $row->sourceable->relationships->firstWhere(
+                        'relation_type_id',
+                        Codemaster::getIdByCode(131)
+                    )
+                )->full_name ?? 'N/A',
+                'DOB' => $row->sourceable->dob ?? 'N/A',
+                'Mobile' => $row->sourceable->mobile_no ?? 'N/A',
+            ];
+        });
+
+        return Excel::download(new BeneficiariesExport($data), 'applications_all.xlsx');
     }
 }

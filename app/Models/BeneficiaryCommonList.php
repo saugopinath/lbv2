@@ -28,7 +28,7 @@ class BeneficiaryCommonList extends Model implements Auditable
     }
     public function failedPaymentDetails()
     {
-        return $this->hasOne(FailedPaymentDetailNew::class, 'ben_id', 'beneficiary_id');
+        return $this->hasOne(FailedPaymentDetails::class, 'ben_id', 'beneficiary_id');
     }
     public function benPaymentDetails()
     {
@@ -54,10 +54,10 @@ class BeneficiaryCommonList extends Model implements Auditable
         return $this->hasMany(BeneficiaryEnclosure::class, 'application_id', 'sourceable_id');
     }
 
-    // public function beneficiaryPersonal()
-    // {
-    //     return $this->hasOne(BeneficiaryPersonal::class, 'application_id', 'sourceable_id');
-    // }
+    public function beneficiaryPersonal()
+    {
+        return $this->hasOne(BeneficiaryPersonal::class, 'application_id', 'sourceable_id');
+    }
 
     public function beneficiaryBank()
     {

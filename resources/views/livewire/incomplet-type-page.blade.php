@@ -32,7 +32,7 @@
             </div>
         </div>
     @endif
-  
+
     @if ($errors->has('duplicate_check'))
         <div class="mt-2 mb-0 p-3 border border-red-400 bg-red-100 text-red-700 rounded-md shadow-sm">
             <ul class="list-disc list-inside text-sm">
