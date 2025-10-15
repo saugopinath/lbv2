@@ -56,8 +56,8 @@
                         value="{{ old('cast_no', $oldData['caste_certificate_no'] ?? '') }}" />
                 </div>
             </div>
-
-            <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="$doctype" :enclosureSource="5" />
+{{--  @dd($doctype);  --}}
+            <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="$doctype" enclosureSource="5" />
 
             <div class="flex justify-end">
                 <x-button.loading-button type="submit" text="Submit" x-data

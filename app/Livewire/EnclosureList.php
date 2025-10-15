@@ -192,7 +192,7 @@ class EnclosureList extends Component
                 'ip_address' => request()->ip(),
                 'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
                 'document_mime_type' => $this->singleDocument->getMimeType(),
-                'created_by' => 1,
+                'created_by' => Auth::id(),
             ]);
         } else {
             $model::create([
@@ -202,7 +202,7 @@ class EnclosureList extends Component
                 'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
                 'document_mime_type' => $this->singleDocument->getMimeType(),
                 'document_type' => $this->currentDocId,
-                'created_by' => 1,
+                'created_by' => Auth::id(),
             ]);
             // dd($is_upload);
         }

@@ -20,7 +20,7 @@ class ContactDetails extends Component
         $this->mode = $mode;
         if ($reportType === '3') {
             $this->applicantDet = BeneficiaryPersonal::with('contact')
-                ->where('beneficiary_id', $id)
+                ->where('application_id', $id)
                 ->firstOrFail();
         } else {
             $this->applicantDet = DraftBeneficiaryPersonal::with('contact')
