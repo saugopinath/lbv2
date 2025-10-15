@@ -200,18 +200,19 @@ class BeneficiaryTable extends DataTableComponent
         } elseif (in_array($this->reportType, ["1", "5"])) {
             $sourceableClass = DraftBeneficiaryPersonal::class;
             $next_level_role_id = $roleReverted;
-        } elseif ($this->reportType == "4") {
-            $query = BenRejectDetail::query();
-
-            return EncryptionArray::applyLocationFilter(
-                $query,
-                $this->reportType,
-                $this->district_id ? (int) $this->district_id : null,
-                $this->rural_urban ? (int) $this->rural_urban : null,
-                $this->blockurban ? (int) $this->blockurban : null,
-                $this->gp_ward ? (int) $this->gp_ward : null
-            );
         }
+        //  elseif ($this->reportType == "4") {
+        //     $query = BenRejectDetail::query();
+
+        //     return EncryptionArray::applyLocationFilter(
+        //         $query,
+        //         $this->reportType,
+        //         $this->district_id ? (int) $this->district_id : null,
+        //         $this->rural_urban ? (int) $this->rural_urban : null,
+        //         $this->blockurban ? (int) $this->blockurban : null,
+        //         $this->gp_ward ? (int) $this->gp_ward : null
+        //     );
+        // }
         $query = BeneficiaryCommonList::with('sourceable.contact', 'sourceable.relationships')
             ->whereHasMorph(
                 'sourceable',

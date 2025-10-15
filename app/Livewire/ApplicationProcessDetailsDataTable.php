@@ -224,9 +224,13 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         if ($user->hasRole('Operator')) {
             $next_level_role_id = Codemaster::getIdByCode(21);
         }
+
+          $sourceableClass = DraftBeneficiaryPersonal::class;
+
         if ($next_level_role_id) {
-            $query->whereHas(
+            $query->whereHasMorph(
                 'sourceable',
+                $sourceableClass,
                 function ($q) use ($next_level_role_id) {
                     $q->where('next_level_role_id', $next_level_role_id);
                 }

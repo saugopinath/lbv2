@@ -114,8 +114,12 @@ class BeneficiaryPersonal extends Model implements Auditable
     protected static function booted()
     {
         static::created(function ($beneficiary) {
-            if ($beneficiary) {
-                $beneficiary->lists()->update([]);
+             $commonList = BeneficiaryCommonList::find($beneficiary->application_id);
+            // dd( get_class($beneficiary));
+            if ($commonList) {
+                $commonList->update([
+                'sourceable_type' => get_class($beneficiary),
+            ]);
             }
         });
     }

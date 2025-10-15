@@ -9,7 +9,7 @@ class BeneficiaryCommonList extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
     protected $guarded = [];
-    // protected $primaryKey = 'beneficiary_id';
+    protected $primaryKey = 'sourceable_id';
     protected $table = 'lb_scheme.beneficiary_common_lists';
     public function sourceable()
     {
