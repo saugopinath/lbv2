@@ -81,7 +81,7 @@ class CasteModificationListTable extends DataTableComponent
             $this->filter_condition['block_id'] = Crypt::decryptString($select_lgd['block_id']);
         }
         if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['subdivision_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+            $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
         if (!empty($select_lgd['role_id'])) {
             $this->roleId = (int) Crypt::decryptString($select_lgd['role_id']);
