@@ -5,7 +5,9 @@ namespace App\Livewire;
 use App\Models\CasteModificationInfo;
 use App\Models\Codemaster;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Database\Eloquent\Builder;
+use App\Exports\BeneficiariesExport;
 use Illuminate\Support\Facades\Crypt;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
@@ -66,6 +68,9 @@ class CasteModificationListTable extends DataTableComponent
             'class' => 'px-4 py-3 divide-y divide-gray-200 bg-white overflow-y-auto',
         ]);
         $this->setLoadingPlaceholderEnabled();
+         $this->setConfigurableAreas([
+            'toolbar-left-start' => 'livewire.export_excel_buttons',
+        ]);
     }
     public function mount($applicantStatus = '', $casteId = '')
     {
@@ -249,4 +254,27 @@ class CasteModificationListTable extends DataTableComponent
 
         return parent::render();
     }
+
+   public function exportExcel()
+{
+    $data = $this->builder()->get()->map(function ($row) {
+        $source = $row->beneficiaryCommonList?->sourceable;
+// dd($row->beneficiaryCommonList?->sourceable->mobile_no);
+        return [
+            'Application ID' => $source?->application_id ?? 'N/A',
+            'Applicant Name' => $source?->full_name ?? 'N/A',
+            'Father Name'    => optional(
+                $source?->relationships?->firstWhere(
+                    'relation_type_id',
+                    Codemaster::getIdByCode(131)
+                )
+            )?->full_name ?? 'N/A',
+            'DOB'            => $source?->dob ?? 'N/A',
+            'Mobile'         => $row->beneficiaryCommonList?->sourceable->mobile_no ?? 'N/A',
+        ];
+    });
+
+    return Excel::download(new BeneficiariesExport($data), 'applications_all.xlsx');
+}
+
 }
