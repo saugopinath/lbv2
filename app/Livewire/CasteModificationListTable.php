@@ -68,7 +68,7 @@ class CasteModificationListTable extends DataTableComponent
             'class' => 'px-4 py-3 divide-y divide-gray-200 bg-white overflow-y-auto',
         ]);
         $this->setLoadingPlaceholderEnabled();
-         $this->setConfigurableAreas([
+        $this->setConfigurableAreas([
             'toolbar-left-start' => 'livewire.export_excel_buttons',
         ]);
     }
@@ -255,26 +255,25 @@ class CasteModificationListTable extends DataTableComponent
         return parent::render();
     }
 
-   public function exportExcel()
-{
-    $data = $this->builder()->get()->map(function ($row) {
-        $source = $row->beneficiaryCommonList?->sourceable;
-// dd($row->beneficiaryCommonList?->sourceable->mobile_no);
-        return [
-            'Application ID' => $source?->application_id ?? 'N/A',
-            'Applicant Name' => $source?->full_name ?? 'N/A',
-            'Father Name'    => optional(
-                $source?->relationships?->firstWhere(
-                    'relation_type_id',
-                    Codemaster::getIdByCode(131)
-                )
-            )?->full_name ?? 'N/A',
-            'DOB'            => $source?->dob ?? 'N/A',
-            'Mobile'         => $row->beneficiaryCommonList?->sourceable->mobile_no ?? 'N/A',
-        ];
-    });
+    public function exportExcel()
+    {
+        $data = $this->builder()->get()->map(function ($row) {
+            $source = $row->beneficiaryCommonList?->sourceable;
+            // dd($row->beneficiaryCommonList?->sourceable->mobile_no);
+            return [
+                'Application ID' => $source?->application_id ?? 'N/A',
+                'Applicant Name' => $source?->full_name ?? 'N/A',
+                'Father Name'    => optional(
+                    $source?->relationships?->firstWhere(
+                        'relation_type_id',
+                        Codemaster::getIdByCode(131)
+                    )
+                )?->full_name ?? 'N/A',
+                'DOB'            => $source?->dob ?? 'N/A',
+                'Mobile'         => $row->beneficiaryCommonList?->sourceable->mobile_no ?? 'N/A',
+            ];
+        });
 
-    return Excel::download(new BeneficiariesExport($data), 'applications_all.xlsx');
-}
-
+        return Excel::download(new BeneficiariesExport($data), 'applications_all.xlsx');
+    }
 }
