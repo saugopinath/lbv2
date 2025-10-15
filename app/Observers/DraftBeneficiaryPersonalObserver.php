@@ -94,9 +94,11 @@ class DraftBeneficiaryPersonalObserver
                 $benrej->relationship_details = DraftBeneficiaryRelationship::where('application_id', $draftBeneficiaryPersonal->application_id)->get()->toArray();
                 $benrej->aadhar_details       = BeneficiaryAadhaar::where('application_id', $draftBeneficiaryPersonal->application_id)->get()->toArray();
                 $benrej->save();
+
                 $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($draftBeneficiaryPersonal->application_id);
                 $DraftBeneficiaryPersonal->delete();
                 $BeneficiaryAadhaar = BeneficiaryAadhaar::find($draftBeneficiaryPersonal->application_id);
+                // dd($BeneficiaryAadhaar);
                 $BeneficiaryAadhaar->delete();
             }
         }

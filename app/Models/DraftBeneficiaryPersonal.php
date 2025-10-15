@@ -17,8 +17,6 @@ class DraftBeneficiaryPersonal extends Model implements Auditable
     protected $primaryKey = 'application_id';
     protected $table = 'lb_scheme.draft_beneficiary_personals';
 
-    public $timestamps = true;
-
     public function father()
     {
         return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id', 'application_id');
