@@ -88,11 +88,32 @@ class EncryptionArray
         // $query->with('sourceable.contact');
         // dd($query1->toSql(), $query1->getBindings());
         if ($district_id) {
-            $query->where('district_id', $district_id);
+            $query->whereHasMorph(
+                'sourceable',
+                '*',
+                function ($q) use ($district_id) {
+                    $q->whereHas('contact', function ($contactQuery) use ($district_id) {
+                        $contactQuery->where('district_id', $district_id);
+                    });
+                }
+            );
         }
         if ($blockurban) {
-            $query->where($blockField, $blockurban);
+            $query->whereHasMorph(
+                'sourceable',
+                '*',
+                function ($q) use ($blockField, $blockurban) {
+                    $q->whereHas('contact', function ($subQuery) use ($blockField, $blockurban) {
+                        $subQuery->where($blockField, $blockurban);
+                    });
+                }
+            );
         }
+        // dd('fdf');
+        // $query->whereHas('sourceable.contact', function ($q) use ($blockField, $blockurban) {
+        //     $q->where($blockField, $blockurban);
+        // });
+        // }
 
         if ($gp_ward) {
             $query->whereHasMorph(
@@ -210,7 +231,7 @@ class EncryptionArray
                 });
             });
         }
-         if ($district_id) {
+        if ($district_id) {
             $query->whereHas('commonList', function ($q) use ($district_id) {
                 $q->whereHasMorph('sourceable', '*', function ($q, $type) use ($district_id) {
                     if (method_exists($q->getModel(), 'contacts')) {
