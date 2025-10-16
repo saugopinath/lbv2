@@ -197,7 +197,7 @@ class CasteModificationListTable extends DataTableComponent
         }
         return $query;
     }
-    public function columns(): array
+    /*public function columns(): array
     {
         return [
             Column::make("ID", "id"),
@@ -244,7 +244,56 @@ class CasteModificationListTable extends DataTableComponent
                 ->html(),
 
         ];
+    }*/
+        public function columns(): array
+{
+    $columns = [
+        Column::make("ID", "id"),
+        Column::make("Application Id", "application_id"),
+        Column::make("Name")
+            ->label(fn($row) => $row->beneficiaryCommonList?->sourceable?->full_name ?? 'N/A'),
+        Column::make("Father's Name")
+            ->label(fn($row) => $row->beneficiaryCommonList?->sourceable?->relationships
+                ->where('relation_type_id', 79)->first()?->full_name ?? 'N/A'),
+    ];
+
+    // ✅ Actions column will show for:
+    // - Verifier / Approver (any applicantStatus)
+    // - Operator (only when applicantStatus != 'RL')
+    if (
+        auth()->user()?->hasAnyRole(['Verifier', 'Approver']) ||
+        (auth()->user()?->hasRole('Operator') && $this->applicantStatus != 'RL')
+    ) {
+        $columns[] = Column::make("Actions")
+            ->label(function ($row) {
+
+                if (auth()->user()?->hasAnyRole(['Verifier', 'Approver'])) {
+                    return view('coulmn_button.view', [
+                        'link' => route('view-beneficiary-details', [
+                            'application_id' => Crypt::encrypt($row->application_id)
+                        ]),
+                        'tooltip' => 'View Application',
+                    ])->render();
+                }
+
+                if (auth()->user()?->hasRole('Operator')) {
+                    return view('coulmn_button.actions', [
+                        'link' => route('caste-modification.edit', [
+                            'application_id' => Crypt::encryptString($row->application_id),
+                            'beneficiary_id' => Crypt::encryptString($row->beneficiary_id)
+                        ]),
+                        'tooltip' => 'Edit Application',
+                    ])->render();
+                }
+
+                return '';
+            })
+            ->html();
     }
+
+    return $columns;
+}
+
 
     public function render(): \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
