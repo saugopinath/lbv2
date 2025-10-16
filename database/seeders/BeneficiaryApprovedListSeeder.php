@@ -29,7 +29,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
         try {
 
 
-            for ($i = 0; $i < 55; $i++) {
+            for ($i = 0; $i < 200; $i++) {
                 // Create a BeneficiaryPersonal
                 $office = OfficeMaster::where('district_id', 318)->where('block_id', 2979)->first();
                 $mapping = UserRoleSchemeOfficeMapping::where('office_id', $office->id)->where('role_id', 8)->first();
@@ -107,14 +107,21 @@ class BeneficiaryApprovedListSeeder extends Seeder
                     ]
                 ]);
                 // dd($beneficiary);
-                // $beneficiary->lists()->create([
-                //     'district_id' => $beneficiary->district_id,
-                //     'block_id' => $beneficiary->block_id,
-                //     'sub_division_id' => $beneficiary->sub_division_id,
-                //     'municipality_id' => $beneficiary->municipality_id,
-                //     'ward_id' => $beneficiary->ward_id,
-                //     'panchayat_id' => $beneficiary->panchayat_id,
-                // ]);
+                $beneficiaryCommonList = $beneficiary->lists()->create([
+                'beneficiary_id' => $beneficiary->beneficiary_id,
+                'mobile_no'      => $beneficiary->mobile_no,
+                // 'encoded_aadhar' => $beneficiary->aadhar ? $beneficiary->aadhar->encoded_aadhar : null,
+                'encoded_aadhar' => $beneficiary->aadhaar()->exists()? $beneficiary->aadhaar->aadhar_hash: null,
+
+                // 'bank_account_number' => $beneficiary->bank ? $beneficiary->bank->account_number : null,
+                'bank_account_number' => $beneficiary->bank()->exists() ? $beneficiary->bank->account_number : null,
+                'district_id'     => $beneficiary->district_id,
+                'block_id'        => $beneficiary->block_id,
+                'sub_division_id' => $beneficiary->sub_division_id,
+                'municipality_id' => $beneficiary->municipality_id,
+                'ward_id'         => $beneficiary->ward_id,
+                'panchayat_id'    => $beneficiary->panchayat_id,
+            ]);
 
                 $beneficiary_contact = BeneficiaryContact::create([
                     'beneficiary_id' => $beneficiary->beneficiary_id,
@@ -163,7 +170,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
                         'created_by'         => $user_id,
                     ]);
                 }
-                if ($uniqueAppBenId && $beneficiary_aadhar && $beneficiary && $beneficiaryrelationship && $beneficiary_contact && $beneficiary_bank && $beneficiary_enclosure) {
+                if ($uniqueAppBenId && $beneficiary_aadhar && $beneficiary && $beneficiaryCommonList && $beneficiaryrelationship && $beneficiary_contact && $beneficiary_bank && $beneficiary_enclosure) {
                     DB::commit();
                     $this->command->info("Beneficiary inserted successfully.");
                 } else {
