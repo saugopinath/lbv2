@@ -364,6 +364,8 @@ class IncompletTypePage extends Component
     }
     public function revert()
     {
+       
+        dd('ok');
         DB::beginTransaction();
 
         try {
@@ -553,13 +555,23 @@ class IncompletTypePage extends Component
             }
         }
 
-        $this->aadhaarIssues = $aadhaarIssues;
-        $this->mobileIssues = $mobileIssues;
-
-        $this->sortedBankIssues = collect($bankIssues)->sortBy(
+        // Priority অনুযায়ী sort করা
+        $sorted = collect($bankIssues)->sortBy(
             fn($item) => array_search($item->incompletType->name, $bankPriority)
         )->values();
+
+        // ✅ Check করো — duplicate আছে কিনা
+        $hasDuplicate = $sorted->contains(fn($item) => $item->incompletType->name === 'DUPLICATE BANK ACCOUNT NUMBER');
+
+        // ✅ যদি duplicate থাকে তাহলে dupAction = 1, না থাকলে null
+        $item->dupAction = $hasDuplicate ? 1 : null;
+
+        // ✅ Assign to component properties
+        $this->aadhaarIssues = $aadhaarIssues;
+        $this->mobileIssues = $mobileIssues;
+        $this->sortedBankIssues = $sorted;
     }
+
 
     public function render()
     {

@@ -9,14 +9,14 @@
                     <label class="flex items-center space-x-2 ">
                         <input type="radio" class="form-radio text-blue-600" name="bank_action"
                             wire:model.lazy="bank_action" value="4"
-                            @if ($dupAction === '2') disabled @endif />
+                            @if ($dupAction === '2' || (!empty($stage) && $stage === 'approver')) disabled @endif />
                         <span>KEEP SAME</span>
                     </label>
 
                     <label class="flex items-center space-x-2">
                         <input type="radio" class="form-radio text-blue-600" name="bank_action"
                             wire:model.lazy="bank_action" value="3"
-                            @if ($dupAction === '1' || $dupAction === '2') disabled @endif
+                            @if ($dupAction === '1' || $dupAction === '2' || (!empty($stage) && $stage === 'approver')) disabled @endif
                             {{ old('bank_action', $bank_action) == '3' ? 'checked' : '' }}
                             x-on:change="Livewire.dispatch('showLoader')" />
                         <span>CHANGE</span>
@@ -30,6 +30,7 @@
         @endif
 
         {{-- Existing Bank Details (readonly) --}}
+        @if (!empty($stage) && $stage == 'verifier')
         @if ($bank_action === '' || $bank_action === '4')
             <div class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
                 <x-form.input name="ifscode" label="IFSC Code" wire:model.defer="ifscode" readonly />
@@ -149,6 +150,62 @@
                     </div>
                 </div>
 
+            </div>
+        @endif
+        @endif
+        @if (!empty($stage) && $stage === 'approver' && $dupAction == '1')
+        {{--  @dd('ok2');  --}}
+            {{-- ✅ Approver view (read-only labels only) --}}
+            @if ($bank_action === '1')
+                <div class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
+                    <div class="col-span-3">
+                        <div class="p-4 rounded-md bg-blue-100 border border-blue-300 text-blue-800 text-sm">
+                            ℹ️ As keep same has been accepted in duplicate bank, the modification in this portion will
+                            not
+                            be required further.
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Message for bank_action = 2 --}}
+            @if ($bank_action === '2')
+                <div class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
+                    <div class="col-span-3">
+                        <div class="p-4 rounded-md bg-yellow-100 border border-yellow-300 text-yellow-800 text-sm">
+                            ⚠️ As Duplicate Bank Account has been changed, the modification in this portion will not be
+                            required further.
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+        @endif
+         @if ((!empty($stage) && $stage === 'approver' && $dupAction == null))
+        {{--  @dd('ok');  --}}
+            <div class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
+                <div>
+                    <label class="font-semibold">IFS Code:</label>
+                    <p>{{ $ifscode ?? 'N/A' }}</p>
+                </div>
+                <div>
+                    <label class="font-semibold">Bank Name:</label>
+                    <p>{{ $bankname ?? 'N/A' }}</p>
+                </div>
+                <div>
+                    <label class="font-semibold">Branch Name:</label>
+                    <p>{{ $bankbranchname ?? 'N/A' }}</p>
+                </div>
+                <div>
+                    <label class="font-semibold">Bank Account Number:</label>
+                    <p>{{ $bank_account_number }}</p>
+                    </p>
+                </div>
+            </div>
+            <div class="w-1/3">
+                <h3 class="font-semibold mb-2">Newly Temp Document</h3>
+
+                <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[111]" :is_page="1" enclosureSource="5" />
             </div>
         @endif
     </div>

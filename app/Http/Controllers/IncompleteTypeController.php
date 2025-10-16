@@ -98,7 +98,7 @@ class IncompleteTypeController extends Controller
 
                     if (in_array($bankActionData, [2, 3])) {
                         $rules += [
-                            'bank_account_number'      => 'required|digits_between:9,18',
+                            'bank_account_number'      => 'required',
                             'confirmbankaccountnumber' => 'required|same:bank_account_number',
                             'ifscode'                  => 'required|regex:/^[A-Z]{4}0[A-Z0-9]{6}$/i',
                         ];

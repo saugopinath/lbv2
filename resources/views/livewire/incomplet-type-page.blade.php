@@ -68,19 +68,24 @@
                     <h2 class="font-semibold text-lg text-blue-700 mb-2">{{ $item->incompletType->name }}</h2>
 
                     @if ($item->incomplet_type == '1411')
-                        <livewire:incomplete.dup-bank :item="$item" :wire:key="'dup-'.$item->id" />
+                        <livewire:incomplete.dup-bank :item="$item" :dupAction="$item->dupAction"
+                            :wire:key="'dup-'.$item->id" />
                     @elseif ($item->incomplet_type == '145')
-                        <livewire:incomplete.bank-name-fail :item="$item" :wire:key="'name-'.$item->id" />
+                        <livewire:incomplete.bank-name-fail :item="$item" :dupAction="$item->dupAction"
+                            :wire:key="'name-'.$item->id" />
                     @elseif ($item->incomplet_type == '146')
-                        <livewire:incomplete.bank-account-fail :item="$item" :wire:key="'account-'.$item->id" />
+                        <livewire:incomplete.bank-account-fail :item="$item" :dupAction="$item->dupAction"
+                            :wire:key="'account-'.$item->id" />
                     @elseif ($item->incomplet_type == '1412')
-                        <livewire:incomplete.mismatch-low :item="$item" :wire:key="'mismatch-low-'.$item->id" />
+                        <livewire:incomplete.mismatch-low :item="$item" :dupAction="$item->dupAction"
+                            :wire:key="'mismatch-low-'.$item->id" />
                     @elseif ($item->incomplet_type == '1413')
-                        <livewire:incomplete.mismatch-high :item="$item" :wire:key="'mismatch-high-'.$item->id" />
+                        <livewire:incomplete.mismatch-high :item="$item" :dupAction="$item->dupAction"
+                            :wire:key="'mismatch-high-'.$item->id" />
                     @endif
-
                 </div>
             @endforeach
+
         @endif
 
         <div class="flex justify-end mt-4 space-x-2">
@@ -111,24 +116,18 @@
                             {{-- Dropdown --}}
                             <div class="mb-4">
                                 <x-form.select name="revert_reason_cause_id" id="revert_reason_cause_id"
-                                    label="Revert Reason" required wire:model.live="revert_reason_cause_id">
+                                    label="Revert Reason" wire:model.live="revert_reason_cause_id" required>
                                     <option value="">-- Select Reason --</option>
                                     @foreach ($revertReasons as $reason)
                                         <option value="{{ $reason->id }}">{{ $reason->name }}</option>
                                     @endforeach
                                 </x-form.select>
-                                @error('revert_reason_cause_id')
-                                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                                @enderror
                             </div>
 
                             {{-- Remarks --}}
                             <div class="mb-4">
                                 <x-form.textarea id="revert_reason_remarks" name="revert_reason_remarks" label="Remarks"
-                                    required wire:model="revert_reason_remarks" />
-                                @error('revert_reason_remarks')
-                                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                                @enderror
+                                    required wire:model="revert_reason_remarks" required/>
                             </div>
 
                             {{-- Buttons --}}
@@ -146,7 +145,7 @@
                 </div>
             @elseif ($stage === 'revert')
                 <x-button.primary
-                    x-on:click="if(confirm('Are you sure you want to verify this reverted request?')) { $wire.revertVerify() }">
+                    >
                     Revert Request Send to Approver
                 </x-button.primary>
             @endif

@@ -47,9 +47,10 @@ class BankAccountFail extends Component
     //     $this->ifscode = $old['ifsc'] ?? '';
     //     $this->bank_account_number = $old['bank_account_number'] ?? '';
     // }
-    public function mount($item)
+    public function mount($item,$dupAction = null)
     {
         $this->item = $item;
+         $this->dupAction = $dupAction;
 
         $old_value = $item->old_value ?? [];
         $new_value = $item->new_value ?? [];
@@ -127,6 +128,20 @@ class BankAccountFail extends Component
     }
     public function render()
     {
-        return view('livewire.incomplete.bank-account-fail');
+        $user = auth()->user();
+
+        $stage = $this->stage ?? null;
+
+
+        if (!$stage) {
+            if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+                $stage = 'verifier';
+
+            } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+                $stage = 'approver';
+            }
+
+        }
+        return view('livewire.incomplete.bank-account-fail', compact('stage'));
     }
 }
