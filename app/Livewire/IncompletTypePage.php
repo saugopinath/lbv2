@@ -20,7 +20,7 @@ class IncompletTypePage extends Component
 {
     public $id, $page, $stage, $applicantInfo, $formData = [], $revertReasons = [], $user_id, $revert_reason_cause_id, $revert_reason_remarks, $aadhaarIssues = [], $mobileIssues = [], $sortedBankIssues = [], $ifscode, $bank_account_number, $bank_action, $confirmbankaccountnumber;
 
-    protected $listeners = ['trigger-update' => 'recivedupdateddata'];
+    protected $listeners = ['trigger-update' => 'recivedupdateddata', 'validate-revert' => 'validateRevert', 'do-revert' => 'revert'];
 
     public function mount($id)
     {
@@ -362,16 +362,27 @@ class IncompletTypePage extends Component
                 break;
         }
     }
+
+    public function validateRevert()
+    {
+        $this->validate([
+            'revert_reason_cause_id' => 'required|exists:codemasters,id',
+            'revert_reason_remarks'  => 'required|string|max:255',
+        ], [
+            'revert_reason_cause_id.required' => 'Please select a revert reason.',
+            'revert_reason_cause_id.exists'   => 'Invalid revert reason selected.',
+            'revert_reason_remarks.required'  => 'Remarks are required.',
+            'revert_reason_remarks.max'       => 'Remarks cannot exceed 255 characters.',
+        ]);
+
+        $this->dispatch('confirm-revert');
+    }
     public function revert()
     {
-       
-        dd('ok');
+        // dd('ok');
         DB::beginTransaction();
 
         try {
-            // $previousId = AcceptRejectInfo::where('application_id', $this->id)
-            //     ->orderByDesc('id')
-            //     ->value('id');
 
             $opType = Codemaster::where('code', 2104)->value('id');
             $previousId = AcceptRejectInfo::where('application_id', $this->id)
@@ -419,6 +430,7 @@ class IncompletTypePage extends Component
 
     public function revertVerify()
     {
+        // dd('ok');
         DB::beginTransaction();
 
         try {

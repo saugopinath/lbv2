@@ -1,8 +1,10 @@
 <div class="mt-4">
     <div class="p-4 mb-4 border rounded-lg bg-gray-50 shadow-sm">
-        <div class="p-4 mb-2 border rounded-lg bg-gray-50 shadow-sm">
-            <h2>Select Opertion Type</h2>
-            {{--  <div class="flex gap-6 pl-4 pr-4 mt-2">
+        @if (!empty($stage) && $stage == 'verifier')
+            <div class="p-4 mb-2 border rounded-lg bg-gray-50 shadow-sm">
+
+                <h2>Select Opertion Type</h2>
+                {{--  <div class="flex gap-6 pl-4 pr-4 mt-2">
                 <label class="flex items-center space-x-2">
                     <input type="radio" class="form-radio text-blue-600" name="bank_action" wire:model.lazy="bank_action"
                         value="1" />
@@ -16,29 +18,43 @@
                     <span>CHANGE</span>
                 </label>
             </div>  --}}
-            <div class="flex gap-6 pl-4 pr-4 mt-2">
-                <label class="flex items-center space-x-2">
-                    <input type="radio" class="form-radio text-blue-600" name="bank_action" wire:model.lazy="bank_action"
-                        value="1" @if (!empty($stage) && $stage === 'approver') disabled @endif />
-                    <span>KEEP SAME</span>
-                </label>
+                <div class="flex gap-6 pl-4 pr-4 mt-2">
+                    <label class="flex items-center space-x-2">
+                        <input type="radio" class="form-radio text-blue-600" name="bank_action"
+                            wire:model.lazy="bank_action" value="1"
+                            @if (!empty($stage) && $stage === 'approver') disabled @endif />
+                        <span>KEEP SAME</span>
+                    </label>
 
-                <label class="flex items-center space-x-2">
-                    <input type="radio" class="form-radio text-blue-600" name="bank_action"
-                        wire:model.lazy="bank_action" value="2"
-                        {{ old('bank_action', $bank_action) == '2' ? 'checked' : '' }}
-                        x-on:change="Livewire.dispatch('showLoader')"
-                        @if (!empty($stage) && $stage === 'approver') disabled @endif />
-                    <span>CHANGE</span>
-                </label>
+                    <label class="flex items-center space-x-2">
+                        <input type="radio" class="form-radio text-blue-600" name="bank_action"
+                            wire:model.lazy="bank_action" value="2"
+                            {{ old('bank_action', $bank_action) == '2' ? 'checked' : '' }}
+                            x-on:change="Livewire.dispatch('showLoader')"
+                            @if (!empty($stage) && $stage === 'approver') disabled @endif />
+                        <span>CHANGE</span>
+                    </label>
+                </div>
+
+
+                @if ($errors->has('bank_action'))
+                    <span class="text-red-800 text-sm">
+                        <li>{{ $errors->first('bank_action') }}</li>
+                @endif
             </div>
-
-
-            @if ($errors->has('bank_action'))
-                <span class="text-red-800 text-sm">
-                    <li>{{ $errors->first('bank_action') }}</li>
-            @endif
-        </div>
+        @endif
+        @if (!empty($stage) && $stage === 'approver')
+            <div class="flex items-center space-x-2">
+                <span class="font-semibold text-gray-700">Bank Action:</span>
+                <span class="text-blue-600">
+                    @if ($bank_action == '4')
+                        KEEP SAME
+                    @else ($bank_action == '3')
+                        CHANGE
+                    @endif
+                </span>
+            </div>
+        @endif
         @if (!empty($stage) && $stage == 'verifier')
             @if ($bank_action === '' || $bank_action === '1')
                 <div class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">

@@ -17,9 +17,8 @@ class ApplicantIncompletDetailsSeeder extends Seeder
             return;
         }
 
-        // ✅ Define all required combinations
         $combinations = [
-            // Single combinations
+
             ['141'], // NO AADHAR
             ['142'], // NO MOBILE
 
@@ -30,7 +29,12 @@ class ApplicantIncompletDetailsSeeder extends Seeder
             ['1411', '1413'],            // DUPLICATE BANK + Mismatch(90–100)
             ['1411', '1412'],            // DUPLICATE BANK + Mismatch(40–89)
             ['1411', '146'],             // DUPLICATE BANK + ACCOUNT FAILED
-            ['1411', '145'],             // DUPLICATE BANK + NAME FAILED
+            ['1411', '145'],
+            ['1411'],
+            ['146'],
+            ['1412'],
+            ['146'],
+            ['145'],
 
             // 3–4 type combinations
             ['1411', '141', '142', '146'],          // BANK DUP + NO AADHAR + NO MOBILE + ACC FAILED

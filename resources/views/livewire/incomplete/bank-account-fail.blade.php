@@ -2,30 +2,44 @@
     <div class="p-4 mb-4 border rounded-lg bg-gray-50 shadow-sm">
 
         {{-- Select Operation Type block (hide if bank_action === 1 or 2) --}}
-        @if (!in_array($bank_action, ['1', '2']))
-            <div class="p-4 mb-2 border rounded-lg bg-gray-50 shadow-sm">
-                <h2>Select Operation Type</h2>
-                <div class="flex gap-6 pl-4 pr-4 mt-2">
-                    <label class="flex items-center space-x-2 ">
-                        <input type="radio" class="form-radio text-blue-600" name="bank_action"
-                            wire:model.lazy="bank_action" value="4"
-                            @if ($dupAction === '2' || (!empty($stage) && $stage === 'approver')) disabled @endif />
-                        <span>KEEP SAME</span>
-                    </label>
+        @if (!empty($stage) && $stage == 'verifier')
+            @if (!in_array($bank_action, ['1', '2']))
+                <div class="p-4 mb-2 border rounded-lg bg-gray-50 shadow-sm">
+                    <h2>Select Operation Type</h2>
+                    <div class="flex gap-6 pl-4 pr-4 mt-2">
+                        <label class="flex items-center space-x-2 ">
+                            <input type="radio" class="form-radio text-blue-600" name="bank_action"
+                                wire:model.lazy="bank_action" value="4"
+                                @if ($dupAction === '2' || (!empty($stage) && $stage === 'approver')) disabled @endif />
+                            <span>KEEP SAME</span>
+                        </label>
 
-                    <label class="flex items-center space-x-2">
-                        <input type="radio" class="form-radio text-blue-600" name="bank_action"
-                            wire:model.lazy="bank_action" value="3"
-                            @if ($dupAction === '1' || $dupAction === '2' || (!empty($stage) && $stage === 'approver')) disabled @endif
-                            {{ old('bank_action', $bank_action) == '3' ? 'checked' : '' }}
-                            x-on:change="Livewire.dispatch('showLoader')" />
-                        <span>CHANGE</span>
-                    </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="radio" class="form-radio text-blue-600" name="bank_action"
+                                wire:model.lazy="bank_action" value="3"
+                                @if ($dupAction === '1' || $dupAction === '2' || (!empty($stage) && $stage === 'approver')) disabled @endif
+                                {{ old('bank_action', $bank_action) == '3' ? 'checked' : '' }}
+                                x-on:change="Livewire.dispatch('showLoader')" />
+                            <span>CHANGE</span>
+                        </label>
+                    </div>
+                    @if ($errors->has('bank_action'))
+                        <span class="text-red-800 text-sm">
+                            <li>{{ $errors->first('bank_action') }}</li>
+                    @endif
                 </div>
-                @if ($errors->has('bank_action'))
-                    <span class="text-red-800 text-sm">
-                        <li>{{ $errors->first('bank_action') }}</li>
-                @endif
+            @endif
+        @endif
+        @if (!empty($stage) && $stage === 'approver' && $dupAction == null)
+            <div class="flex items-center space-x-2">
+                <span class="font-semibold text-gray-700">Bank Action:</span>
+                <span class="text-blue-600">
+                    @if ($bank_action == '4')
+                        KEEP SAME
+                    @else ($bank_action == '3')
+                        CHANGE
+                    @endif
+                </span>
             </div>
         @endif
 

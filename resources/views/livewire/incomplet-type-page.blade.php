@@ -127,28 +127,38 @@
                             {{-- Remarks --}}
                             <div class="mb-4">
                                 <x-form.textarea id="revert_reason_remarks" name="revert_reason_remarks" label="Remarks"
-                                    required wire:model="revert_reason_remarks" required/>
+                                    wire:model="revert_reason_remarks" required />
                             </div>
 
                             {{-- Buttons --}}
                             <div class="flex justify-end space-x-2">
                                 <x-button.primary x-on:click="open = false">Cancel</x-button.primary>
 
-                                <x-button.primary
-                                    x-on:click="if(confirm('Are you sure you want to revert this request?')) { $wire.revert(); open = false }">
+                                <x-button.primary x-on:click="$wire.validateRevert()">
                                     Submit
                                 </x-button.primary>
                             </div>
                         </div>
                     </div>
 
+                    {{-- Confirm Alert --}}
+                    <script>
+                        document.addEventListener('livewire:init', () => {
+                            Livewire.on('confirm-revert', () => {
+                                if (confirm('Are you sure you want to revert this request?')) {
+                                    Livewire.dispatch('do-revert');
+                                }
+                            });
+                        });
+                    </script>
                 </div>
             @elseif ($stage === 'revert')
                 <x-button.primary
-                    >
+                    x-on:click="if(confirm('Are you sure you want to send revert request to approver?')) { $wire.revertVerify() }">
                     Revert Request Send to Approver
                 </x-button.primary>
             @endif
+
         </div>
     </form>
 </div>

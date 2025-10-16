@@ -15,7 +15,8 @@ class ChechDupHelper
 
         if ($type === 'aadhaar') {
             // dd($value);
-            $existsInCommonList = BeneficiaryCommonList::where('encoded_aadhar', $value)->exists();
+            $existsInCommonList = BeneficiaryCommonList::where('encoded_aadhar', $value)
+            ->where('is_reject', false)->exists();
 
             $existsInIncomplete = ApplicantIncompletDeatil::whereJsonContains('new_value->aadhaar_no', $value)
                 ->whereHas('incompleteType', function ($q) use ($incompleteType) {
@@ -31,7 +32,8 @@ class ChechDupHelper
         }
 
         if ($type === 'mobile') {
-            $existsInCommonList = BeneficiaryCommonList::where('mobile_no', $value)->exists();
+            $existsInCommonList = BeneficiaryCommonList::where('mobile_no', $value)
+            ->where('is_reject', false)->exists();
 
             $existsInIncomplete = ApplicantIncompletDeatil::whereJsonContains('new_value->mobile_no', $value)
                 ->whereHas('incompleteType', function ($q) use ($incompleteType) {
@@ -47,7 +49,8 @@ class ChechDupHelper
         }
 
         if ($type === 'bank') {
-            $existsInCommonList = BeneficiaryCommonList::where('bank_account_number', $value)->exists();
+            $existsInCommonList = BeneficiaryCommonList::where('bank_account_number', $value)
+            ->where('is_reject', false)->exists();
 
             $existsInIncomplete = ApplicantIncompletDeatil::whereJsonContains('new_value->account_number', $value)
                 ->whereHas('incompleteType', function ($q) use ($incompleteType) {
