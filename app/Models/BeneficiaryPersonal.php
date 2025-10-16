@@ -89,5 +89,5 @@ class BeneficiaryPersonal extends Model implements Auditable
             }
         });
     }
-    
+
 }
