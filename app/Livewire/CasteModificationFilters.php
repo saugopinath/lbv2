@@ -53,10 +53,12 @@ class CasteModificationFilters extends Component
         try {
 
             $this->validate();
+           
             $this->dispatch('filtersApplied', [
                 'status' => $this->applicantStatus,
                 'caste'  => $this->casteId,
             ]);
+            
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->resettable();
             throw $e;

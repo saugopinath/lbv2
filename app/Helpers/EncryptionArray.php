@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 class EncryptionArray
 {
 
-    public static function applyLocationFilters(Builder $query, ?int $district_id, ?int $rural_urban, ?int $blockurban, ?int $gp_ward): Builder
+    public static function applybeneficiaryLocationFilters(Builder $query, ?int $district_id, ?int $rural_urban, ?int $blockurban, ?int $gp_ward): Builder
     {
         $blockField  = $rural_urban == 2 ? 'block_id'      : 'municipality_id';
         $gpWardField = $rural_urban == 2 ? 'panchayat_id'  : 'ward_id';

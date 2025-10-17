@@ -127,7 +127,7 @@ class CasteModificationAction extends Component
                 }
 
                 // Update CasteModification
-                $casteModification->is_active = false;
+                $casteModification->is_active = 0;
                 $casteModification->updated_by = Auth::id();
                 $casteUpdated = $casteModification->save();
             }

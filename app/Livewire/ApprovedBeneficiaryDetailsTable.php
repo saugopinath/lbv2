@@ -254,7 +254,7 @@ class ApprovedBeneficiaryDetailsTable extends DataTableComponent
         // $result = $query->get();
         // dd($result); 
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
-            $query = EncryptionArray::applyLocationFilters(
+            $query = EncryptionArray::applybeneficiaryLocationFilters(
                 $query,
                 $this->district_id ? (int) $this->district_id : null,
                 $this->rural_urban ? (int) $this->rural_urban : null,

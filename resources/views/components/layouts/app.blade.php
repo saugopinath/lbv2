@@ -36,7 +36,7 @@
             <div class="flex-1 flex flex-col">
                 <!-- Top Bar -->
                 <x-layouts.das_top_bar />
-
+                <livewire:loader />
                 <!-- Content -->
                 <div class="flex-1 p-2 overflow-auto">
                     <!-- Main Content -->

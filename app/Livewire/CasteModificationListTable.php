@@ -120,6 +120,7 @@ class CasteModificationListTable extends DataTableComponent
     public function setFilters($filters): void
     {
         // dd('bhbhbjhb');
+        // $this->dispatch('hideLoader');
         $this->applicantStatus = $filters['status'] ?? '';
         $this->casteId         = $filters['caste'] ?? '';
         $this->action_visible = ($this->applicantStatus == 'PL') ? 1 : 0;
@@ -162,10 +163,9 @@ class CasteModificationListTable extends DataTableComponent
                     $q->where($col, $val);
                 }
             });
-        if (!empty($this->casteId)) {
-            $query->where('caste_request_type', $this->casteId);
-        }
-
+            // if (!empty($this->filter_condition)) {
+            //     $query->where($this->filter_condition);
+            // }
         if (!empty($this->applicantStatus)) {
             if ($this->applicantStatus == 'PL') {
                 if (in_array($this->roleId, [4, 5])) {

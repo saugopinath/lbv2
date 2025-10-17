@@ -22,6 +22,12 @@
                 <h2 class="text-lg font-semibold text-gray-800">Create Permission</h2>
                 <button wire:click="cancel" class="text-gray-500 hover:text-red-500 text-xl">×</button>
             </div>
+            @if($errors->has('checkname'))
+            <div class="mb-4 p-3 rounded bg-red-600 text-white">
+                {{ $errors->first('checkname') }}
+            </div>
+            @endif
+
 
             <form wire:submit.prevent="save" class="space-y-4">
                 <!-- Permission Name -->
@@ -32,7 +38,7 @@
                         name="name"
                         label="Permission Name"
                         placeholder="Enter Permission Name"
-                        required wire:model="name"/>
+                        required wire:model="name" />
 
                 </div>
 
@@ -55,7 +61,7 @@
                         <option value="0">No</option>
                     </x-form.select>
                 </div>
-                
+
                 <!-- Select Parent -->
                 @elseif($is_parent == 1)
                 <div>
@@ -69,7 +75,7 @@
                 </div>
                 @endif
                 <!-- Has Score? -->
-                
+
 
                 @if($has_score == 1)
                 <div class="mt-3">
@@ -78,14 +84,14 @@
                         name="min_score"
                         label="Min Score"
                         placeholder="Enter Min Score"
-                         wire:model="min_score" />
+                        wire:model="min_score" />
 
                     <x-form.input
                         id="max_score"
                         name="max_score"
                         label="Max Score"
                         placeholder="Enter Max Score"
-                         wire:model="max_score" />
+                        wire:model="max_score" />
                 </div>
                 @endif
 

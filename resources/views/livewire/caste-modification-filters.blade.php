@@ -24,7 +24,7 @@
 
     {{-- Buttons --}}
     <div class="flex justify-end gap-2">
-        <x-button.loading-button action="applyFilters" text="Search" color="indigo" />
+        <x-button.loading-button action="applyFilters" text="Search"  color="indigo" />
         <x-button.loading-button action="resetFilters" text="Reset" color="red" />
     </div>
 </div>

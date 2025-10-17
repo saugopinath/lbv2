@@ -44,7 +44,7 @@ class BeneficiaryPersonal extends Model implements Auditable
                 'beneficiary_id' => $beneficiary->beneficiary_id,
                 'mobile_no'      => $beneficiary->mobile_no,
                 // 'encoded_aadhar' => $beneficiary->aadhar ? $beneficiary->aadhar->encoded_aadhar : null,
-                'encoded_aadhar' => $beneficiary->aadhaar()->exists()? $beneficiary->aadhaar->encoded_aadhar: null,
+                'encoded_aadhar' => $beneficiary->aadhaar()->exists()? $beneficiary->aadhaar->aadhar_hash: null,
 
                 // 'bank_account_number' => $beneficiary->bank ? $beneficiary->bank->account_number : null,
                 'bank_account_number' => $beneficiary->bank()->exists() ? $beneficiary->bank->account_number : null,

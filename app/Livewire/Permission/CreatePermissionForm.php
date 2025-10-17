@@ -63,6 +63,10 @@ class CreatePermissionForm extends Component
         if ($this->is_parent == '0') {
             $this->parent_id = null;
         }
+        if (Permission::where('name', $this->name)->exists()) {
+            $this->addError('checkname', 'Permission name already exists!');
+            return;
+        }
         // dd([
         //             'name'       => $this->name,
         //             'is_parent'  => $this->is_parent,

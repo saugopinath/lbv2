@@ -17,20 +17,18 @@
         </div>
 
         <div>
-            <x-form.input
-                name="searchValue"
-                id="searchValue"
-                wire:model.defer="searchValue"
-                label=" {{ $this->currentLabel }}"
-                placeholder="Enter {{ $this->currentLabel }}"
-                required />
+            <x-form.input name="searchValue" id="searchValue" wire:model.defer="searchValue"
+                label="{{ $this->currentLabel }}" placeholder="Enter {{ $this->currentLabel }}" required
+                type="text" 
+                oninput="this.value = this.value.replace(/[^0-9]/g);"
+                maxlength="{{ ($searchType == '3') ? 12 : (($searchType == '4') ? 10 : '') }}" 
+            />
         </div>
     </div>
     <x-button.loading-button action="search" text="Search"></x-button.loading-button>
-
-    @if ($items)
+    <x-alart />
+    @if(count($items) > 0)
     <div class="mt-6">
-        @if(count($items) > 0)
         <div class="overflow-x-auto bg-white shadow-md rounded-lg">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-indigo-500 text-white">
@@ -55,7 +53,7 @@
                             <form action="{{ route('caste-modification.edit') }}" method="GET">
                                 <input type="hidden" name="application_id" value="{{ Crypt::encryptString($row['application_id']) }}">
                                 <input type="hidden" name="beneficiary_id" value="{{ Crypt::encryptString($row['beneficiary_id']) }}">
-                                <x-button.loading-button type="submit" text="change">                                  
+                                <x-button.loading-button type="submit" text="change">
                                 </x-button.loading-button>
                             </form>
 
@@ -65,11 +63,7 @@
                 </tbody>
             </table>
         </div>
-        @else
-        <div class="bg-red-50 border border-red-200 text-yellow-700 px-4 py-3 rounded mt-4">
-            No beneficiary found.
-        </div>
-        @endif
+
     </div>
     @endif
 
