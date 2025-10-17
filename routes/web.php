@@ -28,7 +28,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UserPermissionController;
 use App\Livewire\MasterParameterSetting\Index as MasterParameterSettingCreate;
 use App\Livewire\UserPermission\AssignPermissionsPage;
-
+use App\Http\Controllers\CmoController;
 
 
 Route::get('/', function () {
@@ -131,3 +131,5 @@ Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'u
 Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])->name('caste-modification-list');
 
 Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])->name('view-beneficiary-details');
+
+Route::get('/check-json', [CmoController::class, 'checkJson'])->name('check-json');
