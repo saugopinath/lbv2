@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+
 class CmoController extends Controller
 {
-   public function checkJson()
+    public function checkJson()
     {
         $client = new Client();
         try {
@@ -15,6 +16,8 @@ class CmoController extends Controller
             $response = $client->get($url);
             if ($response->getStatusCode() === 200) {
                 $data = json_decode($response->getBody(), true);
+                // $collection = collect($data);
+                // dd($collection);
                 return response()->json([
                     'status' => 'success',
                     'message' => 'File found and loaded successfully',
@@ -23,13 +26,13 @@ class CmoController extends Controller
             } else {
                 return response()->json([
                     'status' => 'warning',
-                    'message' => 'File found but returned status: '.$response->getStatusCode(),
+                    'message' => 'File found but returned status: ' . $response->getStatusCode(),
                 ]);
             }
         } catch (RequestException $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Error: '.$e->getMessage(),
+                'message' => 'Error: ' . $e->getMessage(),
             ]);
         }
     }
