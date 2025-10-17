@@ -12,11 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('cmo.cmo_atr_masters', function (Blueprint $table) {
-            $table->id();
-            $table->string('atr_desc');
-            $table->string('atr_code')->unique();
-            $table->boolean('can_find_applicant')->nullable()->default(null);
-            $table->timestamps();
+            $table->integer('atn_id')->nullable();
+            $table->string('atr_code', 3)->nullable();
+            $table->string('atr_desc', 200)->nullable();
+            $table->smallInteger('can_find_applicant')->nullable()->default(0);
         });
     }
 
