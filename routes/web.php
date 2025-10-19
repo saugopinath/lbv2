@@ -1,33 +1,34 @@
 <?php
 
 use App\Livewire\ApplicationView;
+use App\Livewire\IncompletTypePage;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LBController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\DesignController;
+use App\Http\Controllers\WorkFlowController;
 use App\Http\Controllers\DashboardController;
+use App\Livewire\Users\Create as UsersCreate;
+use App\Http\Controllers\PermissionController;
+use App\Livewire\RoleOfficeTypeMappings\Create;
 use App\Http\Controllers\CMOGrievanceController;
+use App\Http\Controllers\IncompletPageController;
 use App\Http\Controllers\OfficeMastersController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\IncompleteTypeController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\UserPermissionController;
 use App\Http\Controllers\BeneficiaryListController;
+use App\Http\Controllers\CasteModificationController;
+use App\Http\Controllers\UpdateBankDetailsController;
 use App\Http\Controllers\UserDutyManagementController;
+use App\Livewire\UserPermission\AssignPermissionsPage;
+use App\Livewire\ProcessApplication\DraftApplicationView;
+use App\Http\Controllers\MasterParameterSettingController;
 use App\Http\Controllers\RoleOfficeTypeMappingsController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
-use App\Livewire\RoleOfficeTypeMappings\Create;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
-use App\Livewire\Users\Create as UsersCreate;
-use App\Livewire\IncompletTypePage;
-use App\Http\Controllers\IncompleteTypeController;
-use App\Http\Controllers\IncompletPageController;
-use App\Http\Controllers\WorkFlowController;
-use App\Livewire\ProcessApplication\DraftApplicationView;
-use App\Http\Controllers\CasteModificationController;
-use App\Http\Controllers\MasterParameterSettingController;
-use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\UserPermissionController;
 use App\Livewire\MasterParameterSetting\Index as MasterParameterSettingCreate;
-use App\Livewire\UserPermission\AssignPermissionsPage;
 
 
 
@@ -104,7 +105,7 @@ Route::get('/incomplet-type/{id}', IncompletTypePage::class)
 
 
 
-    Route::post('/incomplete/update/{id}', [IncompleteTypeController::class, 'fullUpdate'])
+Route::post('/incomplete/update/{id}', [IncompleteTypeController::class, 'fullUpdate'])
     ->name('incomplete-full-deatils-update');
 
 
@@ -127,7 +128,17 @@ Route::get('/assign-users-permissions', AssignPermissionsPage::class)
 Route::get('/Caste-modification-info', [CasteModificationController::class, 'index'])->name('Caste-modification-info');
 Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])->name('caste-modification.edit');
 Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
-     ->name('beneficiary.updateCaste');
+    ->name('beneficiary.updateCaste');
 Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])->name('caste-modification-list');
 
 Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])->name('view-beneficiary-details');
+
+Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])->name('bankUpdate');
+
+Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])
+    ->name('bank-update.search-beneficiary');
+
+Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])
+    ->name('update-mobile');
+Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
+    ->name('update-bank');

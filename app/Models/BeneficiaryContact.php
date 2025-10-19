@@ -14,7 +14,7 @@ class BeneficiaryContact extends Model implements Auditable
     // protected $primaryKey = 'application_id';
     protected $table = 'lb_scheme.beneficiary_contacts';
 
-    public $timestamps = false;
+    // public $timestamps = false;
 
     public function block()
     {

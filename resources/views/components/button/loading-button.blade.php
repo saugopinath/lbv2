@@ -15,7 +15,7 @@
     @endif
 
     {{ $attributes->merge([
-        'class' => "px-4 py-2 bg-{$color}-500 text-white rounded-lg hover:bg-{$color}-700 flex items-center gap-2"
+        'class' => "px-4 py-2 bg-{$color}-500 text-white rounded-lg hover:bg-{$color}-700 flex items-center gap-2 cursor-pointer"
     ]) }}
     type="{{ $type }}"
 >
