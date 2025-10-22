@@ -108,6 +108,10 @@ Route::get('/incomplet-type/{id}', IncompletTypePage::class)
 Route::post('/incomplete/update/{id}', [IncompleteTypeController::class, 'fullUpdate'])
     ->name('incomplete-full-deatils-update');
 
+Route::post('/incomplete/revert/{id}', [IncompleteTypeController::class, 'revertVerify'])
+    ->name('incomplete-revert-update');
+
+
 
 
 // Route::get('/incomplet-type/{id}', [IncompletPageController::class, 'page'])

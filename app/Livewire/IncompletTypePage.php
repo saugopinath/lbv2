@@ -428,118 +428,118 @@ class IncompletTypePage extends Component
         }
     }
 
-    public function revertVerify()
-    {
-        // dd('ok');
-        DB::beginTransaction();
+    // public function revertVerify()
+    // {
+    //     // dd('ok');
+    //     DB::beginTransaction();
 
-        try {
-            $previousId = AcceptRejectInfo::where('application_id', $this->id)
-                ->orderByDesc('id')
-                ->value('id');
+    //     try {
+    //         $previousId = AcceptRejectInfo::where('application_id', $this->id)
+    //             ->orderByDesc('id')
+    //             ->value('id');
 
-            $request = AcceptRejectInfo::create([
-                'application_id'         => $this->id,
-                'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
-                'ip_address'             => request()->ip(),
-                'user_id'                => $this->user_id,
-                'browser'                => request()->header('User-Agent'),
-                'model_name'             => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
-                'op_type'                => Codemaster::where('code', 2103)->value('id'),
-                'revert_reason_cause_id' => null,
-                'revert_reason_remarks'  => null,
-                'parent_id'              => $previousId,
-            ]);
+    //         $request = AcceptRejectInfo::create([
+    //             'application_id'         => $this->id,
+    //             'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
+    //             'ip_address'             => request()->ip(),
+    //             'user_id'                => $this->user_id,
+    //             'browser'                => request()->header('User-Agent'),
+    //             'model_name'             => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
+    //             'op_type'                => Codemaster::where('code', 2103)->value('id'),
+    //             'revert_reason_cause_id' => null,
+    //             'revert_reason_remarks'  => null,
+    //             'parent_id'              => $previousId,
+    //         ]);
 
-            $allIssues  = $this->page;
-            $bankIssues = $allIssues->filter(fn($i) => in_array($i->incomplet_type, ['145', '146', '1411', '1412', '1413']));
-            $dupbankacc = $bankIssues->contains(fn($i) => $i->incomplet_type == '1411');
+    //         $allIssues  = $this->page;
+    //         $bankIssues = $allIssues->filter(fn($i) => in_array($i->incomplet_type, ['145', '146', '1411', '1412', '1413']));
+    //         $dupbankacc = $bankIssues->contains(fn($i) => $i->incomplet_type == '1411');
 
-            foreach ($allIssues as $item) {
-                $typeCode = $item->incomplet_type ?? null;
-                if (!$typeCode) continue;
+    //         foreach ($allIssues as $item) {
+    //             $typeCode = $item->incomplet_type ?? null;
+    //             if (!$typeCode) continue;
 
-                $jsonValue = [];
-                // dd($this->formData['aadhar_modification'][$item->application_id]);
-                // Aadhaar related
-                if (in_array($typeCode, ['141', '149', '1414'])) {
+    //             $jsonValue = [];
+    //             // dd($this->formData['aadhar_modification'][$item->application_id]);
+    //             // Aadhaar related
+    //             if (in_array($typeCode, ['141', '149', '1414'])) {
 
-                    $jsonValue = [
-                        'aadhaar_no'     => $this->formData['aadhar_modification'][$item->application_id] ?? null,
-                        'application_id' => $this->id,
-                    ];
-                    // dd($jsonValue );
-                }
-                // Mobile related
-                elseif (in_array($typeCode, ['142', '1410'])) {
-                    $jsonValue = [
-                        'mobile_no'      => $this->formData['dup_mobile'][$item->application_id] ?? null,
-                        'application_id' => $this->id,
-                    ];
-                }
-                // Bank related
-                elseif (in_array($typeCode, ['145', '146', '1411', '1412', '1413'])) {
-                    $jsonValue = [
-                        'ifscode'             => $this->ifscode,
-                        'bank_account_number' => $this->bank_account_number,
-                        'confirmbankaccountnumber' => $this->confirmbankaccountnumber,
-                    ];
+    //                 $jsonValue = [
+    //                     'aadhaar_no'     => $this->formData['aadhar_modification'][$item->application_id] ?? null,
+    //                     'application_id' => $this->id,
+    //                 ];
+    //                 // dd($jsonValue );
+    //             }
+    //             // Mobile related
+    //             elseif (in_array($typeCode, ['142', '1410'])) {
+    //                 $jsonValue = [
+    //                     'mobile_no'      => $this->formData['dup_mobile'][$item->application_id] ?? null,
+    //                     'application_id' => $this->id,
+    //                 ];
+    //             }
+    //             // Bank related
+    //             elseif (in_array($typeCode, ['145', '146', '1411', '1412', '1413'])) {
+    //                 $jsonValue = [
+    //                     'ifscode'             => $this->ifscode,
+    //                     'bank_account_number' => $this->bank_account_number,
+    //                     'confirmbankaccountnumber' => $this->confirmbankaccountnumber,
+    //                 ];
 
-                    $relatedIssues = $allIssues->whereIn('incomplet_type', ['145', '146', '1411', '1412', '1413']);
+    //                 $relatedIssues = $allIssues->whereIn('incomplet_type', ['145', '146', '1411', '1412', '1413']);
 
-                    if ($relatedIssues->count() === 1) {
-                        $isActive    = 1;
-                        $updateValue = $jsonValue;
-                    } else {
-                        if ($typeCode == '1411') {
-                            $isActive    = 1;
-                            $updateValue = $jsonValue;
-                        } else {
-                            if ($dupbankacc) {
-                                $isActive    = 0;
-                                $updateValue = null;
-                            } else {
-                                $isActive    = ($this->bank_action == 1 ? 1 : 0);
-                                $updateValue = $jsonValue;
-                            }
-                        }
-                    }
+    //                 if ($relatedIssues->count() === 1) {
+    //                     $isActive    = 1;
+    //                     $updateValue = $jsonValue;
+    //                 } else {
+    //                     if ($typeCode == '1411') {
+    //                         $isActive    = 1;
+    //                         $updateValue = $jsonValue;
+    //                     } else {
+    //                         if ($dupbankacc) {
+    //                             $isActive    = 0;
+    //                             $updateValue = null;
+    //                         } else {
+    //                             $isActive    = ($this->bank_action == 1 ? 1 : 0);
+    //                             $updateValue = $jsonValue;
+    //                         }
+    //                     }
+    //                 }
 
-                    $item->update([
-                        'new_value'             => $updateValue,
-                        'change_type'           => $this->bank_action ?? null,
-                        'next_level_request_id' => 1,
-                        'request_id'            => $request->id,
-                        'is_active'             => $isActive,
-                    ]);
+    //                 $item->update([
+    //                     'new_value'             => $updateValue,
+    //                     'change_type'           => $this->bank_action ?? null,
+    //                     'next_level_request_id' => 1,
+    //                     'request_id'            => $request->id,
+    //                     'is_active'             => $isActive,
+    //                 ]);
 
-                    continue;
-                }
+    //                 continue;
+    //             }
 
-                if (!empty($jsonValue)) {
-                    $item->update([
-                        'new_value'             => $jsonValue,
-                        'change_type'           => $this->bank_action ?? null,
-                        'next_level_request_id' => 1,
-                        'request_id'            => $request->id,
-                    ]);
-                }
-            }
+    //             if (!empty($jsonValue)) {
+    //                 $item->update([
+    //                     'new_value'             => $jsonValue,
+    //                     'change_type'           => $this->bank_action ?? null,
+    //                     'next_level_request_id' => 1,
+    //                     'request_id'            => $request->id,
+    //                 ]);
+    //             }
+    //         }
 
-            DB::commit();
+    //         DB::commit();
 
-            session()->flash('success', "Revert details updated and Request sent to approver for Application ID: {$this->id}");
-            return redirect()->route('incomplete.types', ['stage' => 'revert', 'id' => $this->id]);
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            Log::error("Revert Verify failed for Application ID {$this->id}: " . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
+    //         session()->flash('success', "Revert details updated and Request sent to approver for Application ID: {$this->id}");
+    //         return redirect()->route('incomplete.types', ['stage' => 'revert', 'id' => $this->id]);
+    //     } catch (\Throwable $e) {
+    //         DB::rollBack();
+    //         Log::error("Revert Verify failed for Application ID {$this->id}: " . $e->getMessage(), [
+    //             'trace' => $e->getTraceAsString()
+    //         ]);
 
-            session()->flash('error', 'Something went wrong while reverting. Please try again.');
-            return redirect()->back()->withInput();
-        }
-    }
+    //         session()->flash('error', 'Something went wrong while reverting. Please try again.');
+    //         return redirect()->back()->withInput();
+    //     }
+    // }
 
     private function classifyIssues()
     {
