@@ -13,7 +13,7 @@
     </h1>
 
     {{-- Applicant Info --}}
-    @if ($applicantInfo)
+    {{--  @if ($applicantInfo)
         <div class="mb-6 p-4 border rounded-lg bg-gray-100 shadow-sm">
             <div class="flex flex-wrap gap-6 text-sm">
                 <p><strong>Application ID:</strong> {{ $id }}</p>
@@ -31,7 +31,21 @@
                 </p>
             </div>
         </div>
-    @endif
+    @endif  --}}
+    <!-- Accordion Section -->
+    <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-4 mb-6">
+        <div x-data="{
+            openSection: 'personal-details',
+            toggleSection(section) {
+                this.openSection = this.openSection === section ? '' : section;
+            }
+        }" class="space-y-2">
+
+            <x-accordion-section title="Personal Details" sectionId="personal-details" color="pink-500">
+                <x-apllicant-modal.personal-details :id=$id :reportType="3" mode="page" />
+            </x-accordion-section>
+        </div>
+    </div>
 
     @if ($errors->has('duplicate_check'))
         <div class="mt-2 mb-0 p-3 border border-red-400 bg-red-100 text-red-700 rounded-md shadow-sm">

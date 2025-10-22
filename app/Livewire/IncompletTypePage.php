@@ -38,13 +38,13 @@ class IncompletTypePage extends Component
         $this->page = ApplicantIncompletDeatil::where('application_id', $this->id)
             ->with([
                 'incompletType',
-                'beneficiaryCommonList.enclosures',
-                'beneficiaryCommonList.aadhaar',
-                'beneficiaryCommonList.bank',
-                'beneficiaryCommonList.sourceable.bank',
-                'beneficiaryCommonList.sourceable.father',
-                'beneficiaryCommonList.panchayat',
-                'beneficiaryCommonList.ward',
+                // 'beneficiaryCommonList.enclosures',
+                // 'beneficiaryCommonList.aadhaar',
+                // 'beneficiaryCommonList.bank',
+                // 'beneficiaryCommonList.sourceable.bank',
+                // 'beneficiaryCommonList.sourceable.father',
+                // 'beneficiaryCommonList.panchayat',
+                // 'beneficiaryCommonList.ward',
             ])->get();
 
         $this->applicantInfo = $this->page->first()?->beneficiaryCommonList;
@@ -197,7 +197,7 @@ class IncompletTypePage extends Component
             case 141: // NO AADHAR NUMBER
             case 149: // DUPLICATE AADHAR NUMBER
             case 1414: // PDS Mismatch
-                $beneficiary->aadhaar()->updateOrCreate(
+                $beneficiary->sourceable->aadhaar()->updateOrCreate(
                     ['application_id' => $this->id],
                     [
                         'encoded_aadhar' => Crypt::encryptString($newAadhaar),
@@ -208,7 +208,7 @@ class IncompletTypePage extends Component
 
                 $temp = BeneficiaryTemEnclosure::where('application_id', $this->id)->first();
                 if ($temp) {
-                    $beneficiary->enclosuresUpdated()->updateOrCreate(
+                    $beneficiary->sourceable->enclosers()->updateOrCreate(
                         ['application_id' => $this->id],
                         [
                             'attched_document'   => $temp->attched_document,
@@ -226,13 +226,13 @@ class IncompletTypePage extends Component
 
                 BeneficiaryCommonList::where('sourceable_id', $this->id)
                     ->update([
-                        'encoded_aadhar' => Crypt::encryptString($newAadhaar),
+                        'encoded_aadhar' => md5($newAadhaar),
                     ]);
                 break;
 
             case 142: // NO MOBILE NUMBER
             case 1410: // DUPLICATE MOBILE NUMBER
-                $beneficiary->beneficiaryPersonal()->updateOrCreate(
+                $beneficiary->sourceable()->updateOrCreate(
                     ['application_id' => $this->id],
                     [
                         'mobile_no'  => $newMobile,
@@ -267,7 +267,7 @@ class IncompletTypePage extends Component
                     $temp = BeneficiaryTemEnclosure::where('application_id', $this->id)->first();
 
                     if ($temp) {
-                        $beneficiary->enclosuresUpdated()->updateOrCreate(
+                        $beneficiary->sourceable->enclosers()->updateOrCreate(
                             ['application_id' => $this->id],
                             [
                                 'attched_document'   => $temp->attched_document,
@@ -292,7 +292,7 @@ class IncompletTypePage extends Component
 
             case 146: // ACCOUNT NUMBER VALIDATION FAILED IN BANK
             case 1411: // DUPLICATE BANK ACCOUNT NUMBER
-                $beneficiary->bank()->updateOrCreate(
+                $beneficiary->sourceable->bank()->updateOrCreate(
                     ['application_id' => $this->id],
                     [
                         'bank_account_number' => $newBankAccountNumber,
@@ -305,7 +305,7 @@ class IncompletTypePage extends Component
                     $temp = BeneficiaryTemEnclosure::where('application_id', $this->id)->first();
 
                     if ($temp) {
-                        $beneficiary->enclosuresUpdated()->updateOrCreate(
+                        $beneficiary->sourceable->enclosers()->updateOrCreate(
                             ['application_id' => $this->id],
                             [
                                 'attched_document'   => $temp->attched_document,
