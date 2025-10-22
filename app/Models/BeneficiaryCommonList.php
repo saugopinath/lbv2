@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 use OwenIt\Auditing\Contracts\Auditable;
+
 class BeneficiaryCommonList extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
@@ -18,22 +19,22 @@ class BeneficiaryCommonList extends Model implements Auditable
 
 
     //jodi commonlist model thake ei gula bandha kore dibo
-    public function faultyBeneficiaryPersonal()
-    {
-        return $this->hasOne(FaultyBeneficiaryPersonal::class, 'application_id', 'sourceable_id');
-    }
-    public function faultyBeneficiaryBank()
-    {
-        return $this->hasOne(FaultyBeneficiaryBank::class, 'application_id', 'sourceable_id');
-    }
-    public function failedPaymentDetails()
-    {
-        return $this->hasOne(FailedPaymentDetails::class, 'ben_id', 'beneficiary_id');
-    }
-    public function benPaymentDetails()
-    {
-        return $this->hasOne(BenPaymentDetails::class, 'ben_id', 'beneficiary_id');
-    }
+    // public function faultyBeneficiaryPersonal()
+    // {
+    //     return $this->hasOne(FaultyBeneficiaryPersonal::class, 'application_id', 'sourceable_id');
+    // }
+    // public function faultyBeneficiaryBank()
+    // {
+    //     return $this->hasOne(FaultyBeneficiaryBank::class, 'application_id', 'sourceable_id');
+    // }
+    // public function failedPaymentDetails()
+    // {
+    //     return $this->hasOne(FailedPaymentDetails::class, 'ben_id', 'beneficiary_id');
+    // }
+    // public function benPaymentDetails()
+    // {
+    //     return $this->hasOne(BenPaymentDetails::class, 'ben_id', 'beneficiary_id');
+    // }
     // public function aadhaar()
     // {
     //     return $this->hasOne(BeneficiaryAadhaar::class, 'application_id', 'sourceable_id');

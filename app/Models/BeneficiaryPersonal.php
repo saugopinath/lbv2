@@ -39,6 +39,23 @@ class BeneficiaryPersonal extends Model implements Auditable
         return $this->hasOne(BeneficiaryBank::class, 'application_id', 'application_id');
     }
 
+    public function faultyBeneficiaryPersonal()
+    {
+        return $this->hasOne(FaultyBeneficiaryPersonal::class, 'application_id', 'application_id');
+    }
+    public function faultyBeneficiaryBank()
+    {
+        return $this->hasOne(FaultyBeneficiaryBank::class, 'application_id', 'application_id');
+    }
+
+    public function failedPaymentDetails()
+    {
+        return $this->hasOne(FailedPaymentDetails::class, 'ben_id', 'beneficiary_id');
+    }
+    public function benPaymentDetails()
+    {
+        return $this->hasOne(BenPaymentDetails::class, 'ben_id', 'beneficiary_id');
+    }
 
     public function casteName()
     {

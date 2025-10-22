@@ -244,7 +244,7 @@ class IncompletTypePage extends Component
                 );
 
                 if ($typeId == 142) {
-                    $beneficiary->faultyBeneficiaryPersonal()
+                    $beneficiary->sourceable->faultyBeneficiaryPersonal()
                         ->where('application_id', $this->id)
                         ->delete();
                 }
@@ -256,7 +256,7 @@ class IncompletTypePage extends Component
                 break;
 
             case 145: // NAME VALIDATION FAILED IN BANK
-                $beneficiary->failedPaymentDetails()->update([
+                $beneficiary->sourceable->failedPaymentDetails()->updateOrCreate([
                     'edited_status' => 2,
                     'failed_type'   => 3,
                     'accno'         => $newBankAccountNumber,
@@ -320,19 +320,19 @@ class IncompletTypePage extends Component
 
                         $temp->delete();
                     }
-                    $beneficiary->benPaymentDetails()->update([
+                    $beneficiary->sourceable->benPaymentDetails()->update([
                         'acc_validated' => 0,
                         'last_accno'    => $newBankAccountNumber,
                         'last_ifsc'     => $newifscode,
                     ]);
                 } else {
-                    $beneficiary->benPaymentDetails()->update([
+                    $beneficiary->sourceable->benPaymentDetails()->update([
                         'acc_validated' => 2,
                     ]);
                 }
 
                 if ($typeId == 1411) {
-                    $beneficiary->faultyBeneficiaryPersonal()
+                    $beneficiary->sourceable->faultyBeneficiaryPersonal()
                         ->where('application_id', $this->id)
                         ->delete();
                 }
@@ -345,7 +345,7 @@ class IncompletTypePage extends Component
 
             case 1412: // Minor Mismatch(40% - 89%)
             case 1413: // Minor Mismatch(90% - 100%)
-                $beneficiary->failedPaymentDetails()->updateOrCreate([
+                $beneficiary->sourceable->failedPaymentDetails()->updateOrCreate([
                     'edited_status' => 2,
                     'failed_type'   => 3,
                     'accno'         => $newBankAccountNumber,
