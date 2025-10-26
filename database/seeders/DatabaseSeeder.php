@@ -38,15 +38,14 @@ class DatabaseSeeder extends Seeder
             Role\DaspurIIBlockOperatorSeeder::class,
             Role\GhatalSdoOperatorSeeder::class,
             Role\GhatalSdoVerifierSeeder::class,
-            BeneficiaryCommonListSeeder::class,
-            ApplicantIncompletDetailsSeeder::class,
             IncompletTypeModeSeeder::class,
-            ApplicantIncompletDetailsSeeder::class,
             ValidationFailedCodemasterSeeder::class,
             UpdateNextLevelRoleIdSeeder::class,
             OpTypeSeeder::class,
             CasteRequestIdSeeder::class,
-            CasteRequestOpTypeSeeder::class
+            CasteRequestOpTypeSeeder::class,
+            BeneficiaryApprovedListSeeder::class,
+            ApplicantIncompletDetailsSeeder::class,
         ]);
     }
 }

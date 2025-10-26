@@ -39,7 +39,7 @@ class ApplicantIncompletDetailsSeeder extends Seeder
             // 3–4 type combinations
             ['1411', '141', '142', '146'],          // BANK DUP + NO AADHAR + NO MOBILE + ACC FAILED
             ['1411', '141', '1410', '146'],         // BANK DUP + NO AADHAR + DUP MOBILE + ACC FAILED
-            ['1411', '1410', '142', '146'],         // BANK DUP + DUP MOBILE + NO MOBILE + ACC FAILED
+            ['1411', '1410', '146'],         // BANK DUP + DUP MOBILE + ACC FAILED
         ];
 
         $count = 0;
