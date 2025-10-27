@@ -134,7 +134,7 @@ class SearchBeneficiary extends Component
             // // dump($this->searchValue);
             // }
             $query = BeneficiaryCommonList::query()->with('sourceable');
-            $query->where($column, $this->searchBy);
+            $query->where('sourceable_type', 'App\Models\BeneficiaryPersonal')->where($column, $this->searchBy);
             // dd($query->toSql(), $query->getBindings());
             if (!empty($this->filter_condition)) {
                 $query->where($this->filter_condition);
@@ -144,7 +144,7 @@ class SearchBeneficiary extends Component
 
             if ($this->results->isEmpty()) {
                 $this->items = [];
-                $message = "No matching beneficiary found.";
+                $message = "No matching beneficiary found Or Beneficiary is not approved Yet.";
                 session()->flash('xerror', $message);
                 return;
             }
@@ -165,7 +165,7 @@ class SearchBeneficiary extends Component
                         'beneficiary_id' => $item->sourceable->beneficiary_id ?? '-',
                         'mobile_no'      => $item->sourceable->mobile_no ?? '-',
                         'applicant_name' => $item->sourceable->full_name ?? '-',
-                        'Caste_name'     => $item->sourceable->casteName->name ?? '-',
+                        'Caste_name'     => $item->sourceable->casteName->name ?? 'N/A',
                     ];
                 })->values();
             }
