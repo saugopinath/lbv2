@@ -82,7 +82,7 @@ class Users extends DataTableComponent
                 if (!empty($this->office)) {
                     $q->where('office_id', $this->office);
                 }
-                 if (!empty($this->selectedDistrict)) {
+                if (!empty($this->selectedDistrict)) {
                     $q->where('district_id', $this->selectedDistrict);
                 }
                 if (!empty($this->selectedMappingLevel)) {
@@ -103,7 +103,7 @@ class Users extends DataTableComponent
             User::where('id', $userId)->delete();
         });
 
-        Session::flash('success', 'User deleted successfully.');
+        $this->dispatch('notify', message: 'User deleted successfully!', type: 'success');
     }
     public function render(): \Illuminate\View\View
     {

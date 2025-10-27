@@ -1,3 +1,12 @@
+<div x-data="{ show: false, message: '', type: 'success' }" @notify.window="
+        message = $event.detail.message;
+        type = $event.detail.type || 'success';
+        show = true;
+        setTimeout(() => show = false, 3000);
+    " x-cloak>
+    <!-- Success Message -->
+    <div x-show="message" class="fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow"> <span
+            x-text="message"></span> </div>
 <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4" x-data="{
         confirmDelete(id) {
             if (confirm('Do you want to delete this user?')) {
