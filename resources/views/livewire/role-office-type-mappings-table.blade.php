@@ -28,7 +28,7 @@
                     <th class="py-3">ID</th>
                     <th class="py-3">Office Type</th>
                     <th class="py-3">Role</th>
-                    <th class="py-3">Action</th>
+                    {{--  <th class="py-3">Action</th>  --}}
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white overflow-y-auto">
@@ -37,12 +37,12 @@
                         <td class="py-3">{{ $row->id ?? 'N/A' }}</td>
                         <td class="py-3">{{ $row['officeType.name'] ?? 'N/A' }}</td>
                         <td class="py-3">{{ $row['role.name'] ?? 'N/A' }}</td>
-                        <td class="py-3">
+                        {{--  <td class="py-3">
                             <x-button.warning wire:click="deleteUser({{ $row->id }})"
                                 class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
                                 Delete
                             </x-button.warning>
-                        </td>
+                        </td>  --}}
                         </td>
                     </tr>
                 @empty
