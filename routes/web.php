@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RejectApprovedBeneficiaryController;
 use App\Livewire\ApplicationView;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LBController;
@@ -131,3 +132,8 @@ Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'u
 Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])->name('caste-modification-list');
 
 Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])->name('view-beneficiary-details');
+//Reject module
+Route::get('/reject-approved-beneficiary', [RejectApprovedBeneficiaryController::class, 'index'])->name('reject-approved-beneficiary');
+Route::get('/reject-approved-beneficiary/de-activate', [RejectApprovedBeneficiaryController::class, 'editview'])->name('reject-approved-beneficiary.de-activate');
+Route::post('/deActivebeneficiary', [RejectApprovedBeneficiaryController::class, 'deActiveBeneficiary'])
+     ->name('beneficiary.deActivebeneficiary');
