@@ -3,7 +3,7 @@
 
         <div class="flex justify-between items-center ">
             <h1 class="text-xl font-bold">Assigned User's Permissions Details</h1>
-             <x-button.primary href="{{ route('assign-users-permissions') }}">Assign New Permission</x-button.primary>
+             {{--  <x-button.primary href="{{ route('assign-users-permissions') }}">Assign New Permission</x-button.primary>  --}}
 
         </div>
     </div>
