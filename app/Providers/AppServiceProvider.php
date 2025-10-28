@@ -16,6 +16,9 @@ use App\Services\UserService;
 use App\Interfaces\ElasticsearchInterface;
 use App\Services\ElasticsearchService;
 
+use App\Interfaces\CmoAuthenticationInterface;
+use App\Services\CmoAuthenticationService;
+
 use App\Models\User;
 use App\Observers\UserObserver;
 use App\Models\DraftBeneficiaryPersonal;
@@ -39,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(ElasticsearchInterface::class, ElasticsearchService::class);
 
-        
+        $this->app->bind(CmoAuthenticationInterface::class, CmoAuthenticationService::class);
        
     }
 

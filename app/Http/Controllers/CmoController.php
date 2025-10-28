@@ -5,9 +5,16 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-
+use App\Interfaces\CmoAuthenticationInterface;
 class CmoController extends Controller
 {
+    protected $cmoAuthenticationService;
+
+    public function __construct(CmoAuthenticationInterface $cmoAuthenticationService)
+    {
+        $this->cmoAuthenticationService = $cmoAuthenticationService;
+    }
+
     public function checkJson()
     {
         $client = new Client();
@@ -34,6 +41,16 @@ class CmoController extends Controller
                 'status' => 'error',
                 'message' => 'Error: ' . $e->getMessage(),
             ]);
+        }
+    }
+
+    public function pull()
+    {
+        $status = $this->cmoAuthenticationService->generateOTP();
+        if ($status) {
+            dd('OTP Sent');
+        } else {
+            dd('Failed to send OTP');
         }
     }
 }
