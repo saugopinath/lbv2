@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use App\Interfaces\CmoAuthenticationInterface;
+
 class CmoController extends Controller
 {
     protected $cmoAuthenticationService;
@@ -46,11 +47,13 @@ class CmoController extends Controller
 
     public function pull()
     {
+        $token = '';
         $status = $this->cmoAuthenticationService->generateOTP();
         if ($status) {
-            dd('OTP Sent');
+            $token = $this->cmoAuthenticationService->authiticated();
         } else {
-            dd('Failed to send OTP');
+            $token = $this->cmoAuthenticationService->authiticated();
         }
+        dd($token);
     }
 }

@@ -10,12 +10,13 @@ class CmoAuthenticationService implements CmoAuthenticationInterface
 {
     public function generateOTP()
     {
-        if (app()->environment(['local', 'staging'])) {
-            return true;
-        }
         try {
             $client = new Client();
-            $url = 'https://cmo.wb.gov.in/cmosvc/user/generateotp/';
+            if (app()->environment(['local', 'staging'])) {
+                $url = 'http://laravel.test/api/cmosvc/user/generateotp/';
+            } else {
+                $url = 'https://cmo.wb.gov.in/cmosvc/user/generateotp/';
+            }
             $response = $client->post($url, [
                 'json' => [
                     'user_name' => '9559000099'
@@ -36,18 +37,20 @@ class CmoAuthenticationService implements CmoAuthenticationInterface
                 return 0;
             }
         } catch (\Exception $e) {
-            return -1;
+            // return -1;/
+            return 'Error: ' . $e->getMessage();
         }
     }
 
     public function authiticated()
     {
-        if (app()->environment(['local', 'staging'])) {
-            return true;
-        }
         try {
             $client = new Client();
-            $url = 'https://cmo.wb.gov.in/cmosvc/user/login/';
+            if (app()->environment(['local', 'staging'])) {
+                $url = 'http://laravel.test/api/cmosvc/user/login/';
+            } else {
+                $url = 'https://cmo.wb.gov.in/cmosvc/user/login/';
+            }
             $response = $client->post($url, [
                 'json' => [
                     'user_name' => '9559000099',
