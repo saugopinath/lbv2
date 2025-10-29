@@ -45,15 +45,15 @@ class CmoController extends Controller
         }
     }
 
-    public function pull()
+    public function pullnewcmo(Request $request)
     {
-        $token = '';
-        $status = $this->cmoAuthenticationService->generateOTP();
-        if ($status) {
-            $token = $this->cmoAuthenticationService->authiticated();
-        } else {
-            $token = $this->cmoAuthenticationService->authiticated();
+        if ($request->isMethod('post')) {
+
+            $from_date = $request->from_date;
+            $to_date = $request->to_date;
+            $data = $this->cmoAuthenticationService->pullNewCmo($from_date, $to_date);
         }
-        dd($token);
+        $header = 'CMO Data Fetching';
+        return view('cmo.list', compact('header'));
     }
 }
