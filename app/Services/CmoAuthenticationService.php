@@ -9,15 +9,20 @@ use App\Interfaces\CmoAuthenticationInterface;
 
 class CmoAuthenticationService implements CmoAuthenticationInterface
 {
+    protected $baseurl;
+    public function __construct()
+    {
+        if (app()->environment(['local', 'staging'])) {
+            $this->baseurl = 'http://laravel.test/api/';
+        } else {
+            $this->baseurl = 'https://cmo.wb.gov.in/';
+        }
+    }
     public function generateOTP()
     {
         try {
             $client = new Client();
-            if (app()->environment(['local', 'staging'])) {
-                $url = 'http://laravel.test/api/cmosvc/user/generateotp/';
-            } else {
-                $url = 'https://cmo.wb.gov.in/cmosvc/user/generateotp/';
-            }
+            $url = $this->baseurl . 'cmosvc/user/generateotp/';
             $response = $client->post($url, [
                 'json' => [
                     'user_name' => '9559000099'
@@ -25,14 +30,12 @@ class CmoAuthenticationService implements CmoAuthenticationInterface
             ]);
             $body = json_decode($response->getBody());
             if ($body->Exception == false && $body->Errors == null) {
-                Cache::put('cmo_otp_status', 'sent', 600);
                 return 1;
             } elseif (
                 $body->Exception == true &&
                 isset($body->Errors->Info[0]->Code) &&
                 $body->Errors->Info[0]->Code == "IN043"
             ) {
-                Cache::put('cmo_otp_status', 'already_sent', 600);
                 return 1;
             } else {
                 return 0;
@@ -47,11 +50,7 @@ class CmoAuthenticationService implements CmoAuthenticationInterface
     {
         try {
             $client = new Client();
-            if (app()->environment(['local', 'staging'])) {
-                $url = 'http://laravel.test/api/cmosvc/user/login/';
-            } else {
-                $url = 'https://cmo.wb.gov.in/cmosvc/user/login/';
-            }
+            $url = $this->baseurl . 'cmosvc/user/login/';
             $response = $client->post($url, [
                 'json' => [
                     'user_name' => '9559000099',
@@ -89,14 +88,9 @@ class CmoAuthenticationService implements CmoAuthenticationInterface
             $currentTime = time();
             if ($tokenExpirationTime <= $currentTime) {
                 $this->authiticated();
-                $token = Cache::get('CMO_validate_token');
             }
         }
-        if (app()->environment(['local', 'staging'])) {
-            $base_url = 'http://laravel.test/api/cmosvc/shared/';
-        } else {
-            $base_url = 'https://cmo.wb.gov.in/cmosvc/shared/';
-        }
+        $base_url = $this->baseurl . 'cmosvc/shared/';
         $client = new \GuzzleHttp\Client([
             'base_uri' => $base_url,
             'timeout'  => 30,
@@ -116,10 +110,9 @@ class CmoAuthenticationService implements CmoAuthenticationInterface
                 'headers' => $headers,
                 'json' => $data
             ]);
-            $statusCode = $response->getStatusCode();
-            $body = json_decode($response->getBody()->getContents());
+            $body = json_decode($response->getBody());
             if ($body->Exception == false && $body->Errors == null) {
-                dd(json_encode($body->Data));
+                dd(json_encode($body->Data->details));
                 DB::beginTransaction();
                 $insert = DB::table('cmo.cmo_response_json')->insert([
                     'fetch_request_token' => $token,

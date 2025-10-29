@@ -132,5 +132,5 @@ Route::get('/caste-modification-list', [CasteModificationController::class, 'lis
 
 Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])->name('view-beneficiary-details');
 
-Route::get('/check-json', [CmoController::class, 'checkJson'])->name('check-json');
+
 Route::any('/pullnewcmo', [CmoController::class, 'pullnewcmo'])->name('pullnewcmo');
