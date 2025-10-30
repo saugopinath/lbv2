@@ -16,19 +16,25 @@ use Illuminate\Support\Facades\Crypt;
 class UpdateBankDetailsController extends Controller
 {
     protected $doctype;
+
     public function index()
     {
-        if(CheckAuthHelper::isCommonApprover()){
-            $header = 'Update Bank Details For Approved Beneficiary';
-            return view('UpdateBankDetailsView.bank_deatils_index', compact('header'));
-        }else{
-             $header = 'Opps! you are not able to perform any action';
+        if (CheckAuthHelper::isCommonApprover()) {
+            if (Auth::user()->can('update bank details')) {
+
+                $header = 'Update Bank Details For Approved Beneficiary';
+                return view('UpdateBankDetailsView.bank_deatils_index', compact('header'));
+            } else {
+                $header = 'Oops! You do not have permission to update bank details.';
+                return view('CommonRestictedpage.index', compact('header'));
+            }
+        } else {
+            $header = 'Oops! You are not authorized to perform this action.';
             return view('CommonRestictedpage.index', compact('header'));
         }
     }
     public function updateBeneficiaryBank($type, Request $request)
-    {
-        $header = 'Caste Modification Details';
+    {      
         $reportType = 3;
         $doctype = $this->doctype;
         $application_id = Crypt::decryptString($request->application_id);

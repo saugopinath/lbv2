@@ -9,80 +9,13 @@ use Illuminate\Support\Facades\Cache;
 
 class CheckAuthHelper
 {
-    /**
-     * Get role_id from LGD session
-     */
     public static function getRoleId(): ?int
     {
         return session('lgd_session')
             ? (int) Crypt::decryptString(session('lgd_session.role_id'))
             : null;
     }
-
-    /**
-     * Get current user from LGD session OR Auth
-     * Also logs in the user to Laravel Auth if not already
-     */
-    public static function getUser(): ?User
-    {
-        // If already logged in
-        if (Auth::check()) {
-            return Auth::user();
-        }
-
-        // If LGD session exists but Auth not logged in
-        if (session('lgd_session')) {
-            $userId = Crypt::decryptString(session('lgd_session.user_id'));
-            $user = User::find($userId);
-
-            if ($user) {
-                Auth::login($user); // Critical: Enable Spatie
-                return $user;
-            }
-        }
-
-        return null;
-    }
-
-    // ===================== PERMISSION CHECKS (Spatie) =====================
-
-    public static function hasPermission(string $permission): bool
-    {
-        $user = self::getUser();
-        if (!$user) return false;
-
-        // Cache permissions for 30 mins
-        return Cache::remember("user_{$user->id}_perm_{$permission}", 1800, function () use ($user, $permission) {
-            return $user->hasPermissionTo($permission);
-        });
-    }
-
-    public static function hasAnyPermission(array $permissions): bool
-    {
-        $user = self::getUser();
-        if (!$user) return false;
-
-        return Cache::remember("user_{$user->id}_any_perm", 1800, function () use ($user, $permissions) {
-            return $user->hasAnyPermission($permissions);
-        });
-    }
-
-    // ===================== ROLE CHECKS (Spatie) =====================
-
-    public static function hasRole(string $role): bool
-    {
-        $user = self::getUser();
-        return $user?->hasRole($role) ?? false;
-    }
-
-    public static function hasAnyRole(array $roles): bool
-    {
-        $user = self::getUser();
-        return $user?->hasAnyRole($roles) ?? false;
-    }
-
-    // ===================== LEGACY ROLE-ID CHECKS (Keep for backward) =====================
-
+   
     public static function isSuperAdmin(): bool
     {
         return in_array(self::getRoleId(), [1]);
