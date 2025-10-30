@@ -26,7 +26,7 @@
                 Import Data
             </x-button.primary>
         </form>
-        @if (session('success'))
+        @if ($inserted_id)
         <x-button.primary>
             Populate into LB Portal
         </x-button.primary>

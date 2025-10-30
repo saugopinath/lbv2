@@ -122,7 +122,7 @@ class CmoAuthenticationService implements CmoAuthenticationInterface
                 $insert = $CmoResponseJson->save();
                 if ($insert) {
                     DB::commit();
-                    return response()->json(['status' => 200]);
+                    return response()->json(['status' => 200,'inserted_id' => $CmoResponseJson->id]);
                 } else {
                     DB::rollback();
                     return response()->json(['status' => 400]);
