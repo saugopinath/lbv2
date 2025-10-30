@@ -6,7 +6,10 @@ use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use App\Interfaces\CmoAuthenticationInterface;
-
+use App\Models\CmoResponseJson;
+use App\Models\CmoSmData;
+use Illuminate\Support\Collection;
+use App\Models\Municipality;
 class CmoController extends Controller
 {
     protected $cmoAuthenticationService;
@@ -14,35 +17,6 @@ class CmoController extends Controller
     public function __construct(CmoAuthenticationInterface $cmoAuthenticationService)
     {
         $this->cmoAuthenticationService = $cmoAuthenticationService;
-    }
-
-    public function checkJson()
-    {
-        $client = new Client();
-        try {
-            $url = url('example.json');
-            $response = $client->get($url);
-            if ($response->getStatusCode() === 200) {
-                $data = json_decode($response->getBody(), true);
-                // $collection = collect($data);
-                // dd($collection);
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'File found and loaded successfully',
-                    'data' => $data,
-                ]);
-            } else {
-                return response()->json([
-                    'status' => 'warning',
-                    'message' => 'File found but returned status: ' . $response->getStatusCode(),
-                ]);
-            }
-        } catch (RequestException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Error: ' . $e->getMessage(),
-            ]);
-        }
     }
 
     public function pullnewcmo(Request $request)
@@ -55,11 +29,11 @@ class CmoController extends Controller
             $response = json_decode($data->getContent(), true);
             if (isset($response['inserted_id']) && $response['status'] == 200) {
                 $inserted_id = $response['inserted_id'];
+                return redirect()->route('pullnewcmo', ['inserted_id' => $inserted_id]);
                 session()->flash('success', 'Data pulled successfully!');
             } else {
                 session()->flash('error', 'Failed to pull data.');
             }
-            return redirect()->route('pullnewcmo', ['inserted_id' => $inserted_id]);
         }
         $header = 'CMO Data Fetching';
         return view('cmo.list', compact('header', 'inserted_id'));
@@ -68,5 +42,34 @@ class CmoController extends Controller
     public function populatelbportal(Request $request)
     {
         $id = $request->query('inserted_id');
+        $record = CmoResponseJson::find($id);
+        $records = json_decode($record->received_data, true);
+        $collection = new Collection($records);
+        $datas = $collection->map(function ($datas) {
+            if (isset($datas['lgd_mun'])) {
+                $datas['lgd_muni'] = $datas['lgd_mun'];
+            }
+            unset($datas['doc_updated'], $datas['migration_id'], $datas['lgd_mun']);
+            return $datas;
+        });
+        if (!empty($datas)) {
+            foreach ($datas as $data) {
+                $cmoData = new CmoSmData();
+                $cmoData->fill($data);
+                // dd($data['lgd_muni']);
+                $cmoData->lb_dist_code = $data['lgd_dist'];
+                // $cmoData->lb_local_body_code = $data['lgd_block'] ?? $data['lgd_muni'];
+                // dd($data['lgd_muni']);
+                if (isset($data['lgd_muni'])) {
+                    $cmoData->lb_local_body_code = Municipality::where('lgd_code', $data['lgd_muni'])->first()->subdivision_id;
+                } else {
+                    $cmoData->lb_local_body_code = $data['lgd_block'];
+                }
+                $cmoData->lb_gp_ward_code = $data['ward_id'] ?? $data['gp_id'];
+                $cmoData->save();
+            }
+            $record->is_fetched = 1;
+            $record->save();
+        }
     }
 }
