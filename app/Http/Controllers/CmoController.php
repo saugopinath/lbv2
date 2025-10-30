@@ -64,4 +64,9 @@ class CmoController extends Controller
         $header = 'CMO Data Fetching';
         return view('cmo.list', compact('header', 'inserted_id'));
     }
+
+    public function populatelbportal(Request $request)
+    {
+        $id = $request->query('inserted_id');
+    }
 }

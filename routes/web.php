@@ -134,3 +134,4 @@ Route::get('/view-beneficiary-details', [CasteModificationController::class, 'vi
 
 
 Route::any('/pullnewcmo', [CmoController::class, 'pullnewcmo'])->name('pullnewcmo');
+Route::any('/populatelbportal', [CmoController::class, 'populatelbportal'])->name('populatelbportal');

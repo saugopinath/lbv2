@@ -27,9 +27,11 @@
             </x-button.primary>
         </form>
         @if ($inserted_id)
-        <x-button.primary>
-            Populate into LB Portal
-        </x-button.primary>
+        <a href="{{ route('populatelbportal', ['inserted_id' => $inserted_id]) }}">
+            <x-button.primary>
+                Populate into LB Portal
+            </x-button.primary>
+        </a>
         @endif
     </div>
 </x-layouts.app>
