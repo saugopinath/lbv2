@@ -5,15 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use App\Interfaces\CmoInterface;
+use App\Interfaces\CmoAuthenticationInterface;
 
 class CmoController extends Controller
 {
-    protected $cmoService;
+    protected $cmoAuthenticationService;
 
-    public function __construct(CmoInterface $cmoService)
+    public function __construct(CmoAuthenticationInterface $cmoAuthenticationService)
     {
-        $this->cmoService = $cmoService;
+        $this->cmoAuthenticationService = $cmoAuthenticationService;
     }
 
     public function checkJson()
@@ -51,7 +51,7 @@ class CmoController extends Controller
 
             $from_date = $request->from_date;
             $to_date = $request->to_date;
-            $data = $this->cmoService->pullNewCmo($from_date, $to_date);
+            $data = $this->cmoAuthenticationService->pullNewCmo($from_date, $to_date);
         }
         $header = 'CMO Data Fetching';
         return view('cmo.list', compact('header'));
