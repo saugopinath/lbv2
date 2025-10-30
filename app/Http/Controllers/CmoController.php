@@ -48,10 +48,16 @@ class CmoController extends Controller
     public function pullnewcmo(Request $request)
     {
         if ($request->isMethod('post')) {
-
             $from_date = $request->from_date;
             $to_date = $request->to_date;
             $data = $this->cmoAuthenticationService->pullNewCmo($from_date, $to_date);
+            $response = json_decode($data->getContent(), true);
+            if ($response['status'] == 200) {
+                session()->flash('success', 'Data pulled successfully!');
+            } else {
+                session()->flash('error', 'Failed to pull data.');
+            }
+            return redirect()->route('pullnewcmo');
         }
         $header = 'CMO Data Fetching';
         return view('cmo.list', compact('header'));

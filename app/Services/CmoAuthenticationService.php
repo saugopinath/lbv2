@@ -6,7 +6,7 @@ use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CmoAuthenticationInterface;
-
+use App\Models\CmoResponseJson;
 class CmoAuthenticationService implements CmoAuthenticationInterface
 {
     protected $baseurl;
@@ -88,6 +88,7 @@ class CmoAuthenticationService implements CmoAuthenticationInterface
             $currentTime = time();
             if ($tokenExpirationTime <= $currentTime) {
                 $this->authiticated();
+                $token = null;
             }
         }
         $base_url = $this->baseurl . 'cmosvc/shared/';
@@ -112,14 +113,13 @@ class CmoAuthenticationService implements CmoAuthenticationInterface
             ]);
             $body = json_decode($response->getBody());
             if ($body->Exception == false && $body->Errors == null) {
-                dd(json_encode($body->Data->details));
                 DB::beginTransaction();
-                $insert = DB::table('cmo.cmo_response_json')->insert([
-                    'fetch_request_token' => $token,
-                    'received_data' => json_encode($body->Data->details),
-                    'from_date' => $from_date,
-                    'to_date' => $to_date
-                ]);
+                $CmoResponseJson = new CmoResponseJson;
+                $CmoResponseJson->fetch_request_token = $token;
+                $CmoResponseJson->received_data = json_encode($body->Data->details);
+                $CmoResponseJson->from_date = $from_date;
+                $CmoResponseJson->to_date = $to_date;
+                $insert = $CmoResponseJson->save();
                 if ($insert) {
                     DB::commit();
                     return response()->json(['status' => 200]);

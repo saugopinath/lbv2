@@ -3,8 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
-class CmoResponseJson extends Model
+use OwenIt\Auditing\Contracts\Auditable;
+class CmoResponseJson extends Model implements Auditable
 {
-    protected $table = 'cmo.cmo_response_jsons';
+    use \OwenIt\Auditing\Auditable;
+    protected $table = 'cmo.cmo_response_json';
+    public $timestamps = false;
+    protected $guarded = [];
 }
