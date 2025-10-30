@@ -3,7 +3,7 @@
 namespace App\Interfaces;
 
 
-interface CmoAuthenticationInterface
+interface CmoInterface
 {
     public function generateOTP();
     public function authiticated();

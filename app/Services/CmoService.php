@@ -3,11 +3,10 @@
 namespace App\Services;
 
 use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use App\Interfaces\CmoAuthenticationInterface;
+use App\Interfaces\CmoInterface;
 
-class CmoAuthenticationService implements CmoAuthenticationInterface
+class CmoService implements CmoInterface
 {
     protected $baseurl;
     public function __construct()
