@@ -12,7 +12,6 @@ use App\Livewire\Users\Create as UsersCreate;
 use App\Http\Controllers\PermissionController;
 use App\Livewire\RoleOfficeTypeMappings\Create;
 use App\Http\Controllers\CMOGrievanceController;
-use App\Http\Controllers\IncompletPageController;
 use App\Http\Controllers\OfficeMastersController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\IncompleteTypeController;
@@ -28,121 +27,168 @@ use App\Http\Controllers\MasterParameterSettingController;
 use App\Http\Controllers\RoleOfficeTypeMappingsController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
-use App\Livewire\MasterParameterSetting\Index as MasterParameterSettingCreate;
 
+// Guest Routes
+Route::get('/', fn() => view('welcome'));
+Route::get('refresh-captcha', [App\Http\Controllers\CaptchaController::class, 'refreshCaptcha'])
+    ->name('refresh-captcha');
 
-
-Route::get('/', function () {
-    return view('welcome');
-});
-Route::get('refresh-captcha', [App\Http\Controllers\CaptchaController::class, 'refreshCaptcha'])->name('refresh-captcha');
 Route::controller(AuthenticationController::class)->group(function () {
     Route::get('/login', 'login')->name('login');
     Route::post('/loginPost', 'loginCheck')->name('loginPost');
     Route::post('/resendOtp', 'resendOtp')->name('resendOtp');
-    Route::get('/otp-validate', 'otpVerification')->middleware(['2fa'])->name('otp-validate');
-    Route::post('/otp-validate-post', 'otpValidate')->middleware(['2fa'])->name('otp-validate-post');
+    Route::get('/otp-validate', 'otpVerification')->middleware('2fa')->name('otp-validate');
+    Route::post('/otp-validate-post', 'otpValidate')->middleware('2fa')->name('otp-validate-post');
     Route::get('/forget-password', 'forgetPassword')->name('forget-password');
     Route::post('/forgetpasswordPost', 'forgetPasswordPost')->name('forgetpasswordPost');
-    Route::get('/reset-password', 'resetPassword')->middleware(['2fa'])->name('reset-password');
-    Route::post('/resetPasswordPost', 'resetPasswordPost')->middleware(['2fa'])->name('resetPasswordPost');
+    Route::get('/reset-password', 'resetPassword')->middleware('2fa')->name('reset-password');
+    Route::post('/resetPasswordPost', 'resetPasswordPost')->middleware('2fa')->name('resetPasswordPost');
     Route::post('/logout', 'logout')->name('logout');
 });
-// Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('filter', [App\Http\Controllers\FilterController::class, 'index'])->middleware(['auth', 'verified'])->name('filter');
+// Authenticated Routes
+Route::middleware(['auth', 'verified'])->group(function () {
 
-Route::resource('cmo-grievances', CMOGrievanceController::class);
-Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])->middleware(['auth', 'verified'])->name('beneficiaries_selection.index')->middleware('auth');
-Route::get('/report', [BeneficiaryListController::class, 'show'])->name('report.show');
-Route::get('/custom_application/{id}', ApplicationView::class)->name('custom_application.view');
+    // Dashboard
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-// Route::get('/report/show', ReportPage::class)->name('report.show');
+    // User Management
+    Route::get('/user-managements', [UsersController::class, 'index'])
+        ->middleware('permission:view users')
+        ->name('user-managements.index');
 
-//  Route::resources([
-//         'roles' => App\Http\Controllers\RoleController::class
-//     ]);
-Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard')->middleware('auth');
-//  Route::resources([
-//         'roles' => App\Http\Controllers\RoleController::class
-//     ]);
-Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
-Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
-Route::get('lbform', [LBController::class, 'index'])->middleware(['auth', 'verified'])->name('lbform');
-Route::get('draftlist', [LBController::class, 'draftlist'])->middleware(['auth', 'verified'])->name('draftlist');
-Route::get('draftedit/{id}', [LBController::class, 'draftedit'])->middleware(['auth', 'verified'])->name('draftedit');
+    Route::get('/users/create', UsersCreate::class)
+        ->middleware('permission:create users')
+        ->name('users.create');
 
+    // Role & Office Mappings
+    Route::get('/role-office-master-mappings', [RoleOfficeTypeMappingsController::class, 'index'])
+        ->middleware('permission:manage role mappings')
+        ->name('role-office-master-mappings.index');
 
-Route::get('/userDutymanagement', [UserDutyManagementController::class, 'index'])->middleware(['auth', 'verified'])->name('userDutymanagement.index')->middleware('auth');
+    Route::get('/role-office-type-mappings/create', Create::class)
+        ->middleware('permission:create role mappings')
+        ->name('role-office-type-mappings.create');
 
+    // Office Masters
+    Route::get('/officemasters', [OfficeMastersController::class, 'index'])
+        ->middleware('permission:view offices')
+        ->name('officemasters.index');
 
-Route::get('/role-office-master-mappings', [RoleOfficeTypeMappingsController::class, 'index'])->middleware(['auth', 'verified'])->name('role-office-master-mappings.index')->middleware('auth');
-Route::get('/role-office-type-mappings/create', Create::class)
-    ->name('role-office-type-mappings.create');
+    Route::get('/office-masters/create', OfficeMasterCreate::class)
+        ->middleware('permission:create offices')
+        ->name('office-masters.create');
 
-Route::get('/officemasters', [OfficeMastersController::class, 'index'])->middleware(['auth', 'verified'])->name('officemasters.index')->middleware('auth');
-Route::get('/office-masters/create', OfficeMasterCreate::class)
-    ->name('office-masters.create');
+    // Permissions
+    Route::get('/permission', [PermissionController::class, 'index'])
+        // ->middleware('permission:view permissions')
+        ->name('permission');
 
-Route::get('/user-managements', [UsersController::class, 'index'])->middleware(['auth', 'verified'])->name('user-managements.index')->middleware('auth');
-Route::get('/users/create', UsersCreate::class)
-    ->name('users.create');
+    Route::get('/user-permission', [UserPermissionController::class, 'index'])
+        // ->middleware('permission:view user permissions')
+        ->name('user-permission');
 
-// Route::get('/incomplete-types', IncompleteType::class)->name('incomplete.types');
-// Route::get('/incomplete-types', [IncompleteTypeController::class, 'index'])->middleware(['auth', 'verified'])->name('incomplete.types')->middleware('auth');
+    Route::get('/assign-users-permissions', AssignPermissionsPage::class)
+        // ->middleware('permission:assign permissions')
+        ->name('assign-users-permissions');
 
-Route::get('/incomplete-types/{stage?}', [IncompleteTypeController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('incomplete.types');
+    // Duty Management
+    Route::get('/userDutymanagement', [UserDutyManagementController::class, 'index'])
+        ->middleware('permission:manage user duties')
+        ->name('userDutymanagement.index');
 
-Route::get('/incomplet-type/{id}', IncompletTypePage::class)
-    ->name('incomplet-type.view');
+    // LB & Workflow
+    Route::get('lbform', [LBController::class, 'index'])
+        ->middleware('permission:submit lb form')
+        ->name('lbform');
 
+    Route::get('draftlist', [LBController::class, 'draftlist'])
+        ->middleware('permission:view draft list')
+        ->name('draftlist');
 
-// Route::post('incomplete-full-deatils-update', [IncompleteTypeController::class, 'fullUpdate'])
-//     ->middleware(['auth', 'verified'])
-//     ->name('incomplete-full-deatils-update');
+    Route::get('draftedit/{id}', [LBController::class, 'draftedit'])
+        ->middleware('permission:edit draft')
+        ->name('draftedit');
 
+    Route::get('lb-application-list', [WorkFlowController::class, 'index'])
+        ->middleware('permission:view lb applications')
+        ->name('lb-application-list');
 
+    Route::get('/application/{id}', DraftApplicationView::class)
+        ->middleware('permission:view application')
+        ->name('draft-application.view');
 
-Route::post('/incomplete/update/{id}', [IncompleteTypeController::class, 'fullUpdate'])
-    ->name('incomplete-full-deatils-update');
+    // Incomplete Types
+    Route::get('/incomplete-types/{stage?}', [IncompleteTypeController::class, 'index'])
+        ->middleware('permission:view incomplete applications')
+        ->name('incomplete.types');
 
-Route::post('/incomplete/revert/{id}', [IncompleteTypeController::class, 'revertVerify'])
-    ->name('incomplete-revert-update');
+    Route::get('/incomplet-type/{id}', IncompletTypePage::class)
+        // ->middleware('permission:view incomplete details')
+        ->name('incomplet-type.view');
 
+    Route::post('/incomplete/update/{id}', [IncompleteTypeController::class, 'fullUpdate'])
+        // ->middleware('permission:update incomplete')
+        ->name('incomplete-full-deatils-update');
 
+    Route::post('/incomplete/revert/{id}', [IncompleteTypeController::class, 'revertVerify'])
+        // ->middleware('permission:revert incomplete')
+        ->name('incomplete-revert-update');
 
+    // Beneficiary & Reports
+    Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])
+        ->middleware('permission:view beneficiaries')
+        ->name('beneficiaries_selection.index');
 
-// Route::get('/incomplet-type/{id}', [IncompletPageController::class, 'page'])
-//     ->name('incomplet-type.page');
-Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
-Route::get('/approved-lists', [BeneficiaryApprovedListController::class, 'index'])->name('approved-lists');
-Route::get('/approved-lists-BA-Wise', [BeneficiaryApprovedListController::class, 'beneficiaryContactwiseList'])->name('approved-lists-BA-Wise');
-Route::get('lb-application-list', [WorkFlowController::class, 'index'])->middleware(['auth', 'verified'])->name('lb-application-list');
-Route::get('/application/{id}', DraftApplicationView::class)->name('draft-application.view');
+    Route::get('/report', [BeneficiaryListController::class, 'show'])
+        ->middleware('permission:view reports')
+        ->name('report.show');
 
-Route::get('/permission', [PermissionController::class, 'index'])->name('permission');
-Route::get('/user-permission', [UserPermissionController::class, 'index'])->name('user-permission');
+    Route::get('/approved-lists', [BeneficiaryApprovedListController::class, 'index'])
+        ->middleware('permission:view approved list')
+        ->name('approved-lists');
 
+    Route::get('/approved-lists-BA-Wise', [BeneficiaryApprovedListController::class, 'beneficiaryContactwiseList'])
+        ->middleware('permission:view approved ba wise')
+        ->name('approved-lists-BA-Wise');
 
-Route::get('/assign-users-permissions', AssignPermissionsPage::class)
-    ->name('assign-users-permissions');
+    // Caste & Bank Update
+    Route::get('/Caste-modification-info', [CasteModificationController::class, 'index'])
+        ->middleware('permission:modify caste')
+        ->name('Caste-modification-info');
 
-Route::get('/Caste-modification-info', [CasteModificationController::class, 'index'])->name('Caste-modification-info');
-Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])->name('caste-modification.edit');
-Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
-    ->name('beneficiary.updateCaste');
-Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])->name('caste-modification-list');
+    Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])
+        ->middleware('permission:edit caste')
+        ->name('caste-modification.edit');
 
-Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])->name('view-beneficiary-details');
+    Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
+        ->middleware('permission:update caste')
+        ->name('beneficiary.updateCaste');
 
-Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])->name('bankUpdate');
+    Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])
+        ->middleware('permission:view caste modification list')
+        ->name('caste-modification-list');
 
-Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])
-    ->name('bank-update.search-beneficiary');
+    Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])
+        ->middleware('permission:update bank details')
+        ->name('bankUpdate');
 
-Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])
-    ->name('update-mobile');
-Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
-    ->name('update-bank');
+    Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])
+        // ->middleware('permission:search bank update')
+        ->name('bank-update.search-beneficiary');
+
+    Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])
+        // ->middleware('permission:update mobile')
+        ->name('update-mobile');
+
+    Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
+        // ->middleware('permission:update bank')
+        ->name('update-bank');
+
+    // Design Pages (Dev Only – Remove in Prod)
+    Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
+    Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
+    Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
+    Route::get('/custom_application/{id}', ApplicationView::class)->name('custom_application.view');
+});
+

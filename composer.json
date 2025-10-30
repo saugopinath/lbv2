@@ -13,7 +13,7 @@
         "mews/captcha": "3.3.3",
         "owen-it/laravel-auditing": "^14.0",
         "rappasoft/laravel-livewire-tables": "^3.7",
-        "spatie/laravel-permission": "^6.21",
+        "spatie/laravel-permission": "^6.22",
         "staudenmeir/belongs-to-through": "^2.16"
     },
     "require-dev": {

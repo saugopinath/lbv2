@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Codemaster;
 use Illuminate\Http\Request;
 use App\Helpers\ChechDupHelper;
+use App\Helpers\CheckAuthHelper;
 use App\Models\AcceptRejectInfo;
 use Illuminate\Support\Facades\DB;
 use App\Models\BeneficiaryEnclosure;
@@ -17,7 +18,13 @@ class UpdateBankDetailsController extends Controller
     protected $doctype;
     public function index()
     {
-        return view('UpdateBankDetailsView.bank_deatils_index');
+        if(CheckAuthHelper::isCommonApprover()){
+            $header = 'Update Bank Details For Approved Beneficiary';
+            return view('UpdateBankDetailsView.bank_deatils_index', compact('header'));
+        }else{
+             $header = 'Opps! you are not able to perform any action';
+            return view('CommonRestictedpage.index', compact('header'));
+        }
     }
     public function updateBeneficiaryBank($type, Request $request)
     {
