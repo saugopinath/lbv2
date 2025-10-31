@@ -24,12 +24,8 @@ class IncompletTypePage extends Component
 
     public function mount($id)
     {
-        // $this->stage = request()->query('stage');
-        // $this->id = $id;
         $this->id = decrypt($id);
-        // dd($this->id);
         $this->stage = decrypt(request()->query('stage'));
-        // dd($this->stage );
         $select_lgd = session('lgd_session');
         $this->user_id = Crypt::decryptString($select_lgd['role_id']);
 
@@ -38,13 +34,6 @@ class IncompletTypePage extends Component
         $this->page = ApplicantIncompletDeatil::where('application_id', $this->id)
             ->with([
                 'incompletType',
-                // 'beneficiaryCommonList.enclosures',
-                // 'beneficiaryCommonList.aadhaar',
-                // 'beneficiaryCommonList.bank',
-                // 'beneficiaryCommonList.sourceable.bank',
-                // 'beneficiaryCommonList.sourceable.father',
-                // 'beneficiaryCommonList.panchayat',
-                // 'beneficiaryCommonList.ward',
             ])->get();
 
         $this->applicantInfo = $this->page->first()?->beneficiaryCommonList;
@@ -69,7 +58,6 @@ class IncompletTypePage extends Component
 
     public function recivedupdateddata($data)
     {
-        // dd($data);
         $this->ifscode = $data['ifscode'];
         $this->bank_account_number = $data['bank_account_number'];
         $this->bank_action = $data['bank_action'];

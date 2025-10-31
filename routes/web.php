@@ -124,7 +124,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('incomplete.types');
 
     Route::get('/incomplet-type/{id}', IncompletTypePage::class)
-        // ->middleware('permission:view incomplete details')
         ->name('incomplet-type.view');
 
     Route::post('/incomplete/update/{id}', [IncompleteTypeController::class, 'fullUpdate'])
