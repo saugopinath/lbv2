@@ -2,11 +2,11 @@
     {{-- Page Header --}}
     <h1 class="text-xl font-bold mb-4">
         @if ($stage === 'verifier')
-            Update Incomplete
+            Update Incomplete Details
         @elseif ($stage === 'approver')
             Approver Incomplete
         @elseif ($stage === 'revert')
-            Revert Incomplete
+            Revert Incomplete Details
         @else
             Update Incomplete
         @endif

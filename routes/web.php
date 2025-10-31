@@ -128,11 +128,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('incomplet-type.view');
 
     Route::post('/incomplete/update/{id}', [IncompleteTypeController::class, 'fullUpdate'])
-        // ->middleware('permission:update incomplete')
+        ->middleware('permission:update incomplete')
         ->name('incomplete-full-deatils-update');
 
     Route::post('/incomplete/revert/{id}', [IncompleteTypeController::class, 'revertVerify'])
-        // ->middleware('permission:revert incomplete')
+        ->middleware('permission:revert incomplete')
         ->name('incomplete-revert-update');
 
     // Beneficiary & Reports
@@ -169,20 +169,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission:view caste modification list')
         ->name('caste-modification-list');
 
+    Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
+        ->middleware('permission:view beneficiary details')
+        ->name('view-beneficiary-details');
+
     Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])
         ->middleware('permission:update bank details')
         ->name('bankUpdate');
 
     Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])
-        // ->middleware('permission:search bank update')
+        ->middleware('permission:search bank update')
         ->name('bank-update.search-beneficiary');
 
     Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])
-        // ->middleware('permission:update mobile')
+        ->middleware('permission:update mobile')
         ->name('update-mobile');
 
     Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
-        // ->middleware('permission:update bank')
+        ->middleware('permission:update bank')
         ->name('update-bank');
 
     // Design Pages (Dev Only – Remove in Prod)
@@ -191,4 +195,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
     Route::get('/custom_application/{id}', ApplicationView::class)->name('custom_application.view');
 });
-
