@@ -133,5 +133,8 @@ Route::get('/caste-modification-list', [CasteModificationController::class, 'lis
 Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])->name('view-beneficiary-details');
 
 
-Route::any('/pullnewcmo', [CmoController::class, 'pullnewcmo'])->name('pullnewcmo');
-Route::any('/populatelbportal', [CmoController::class, 'populatelbportal'])->name('populatelbportal');
+Route::controller(CmoController::class)->group(function () {
+    Route::any('/pullnewcmo', 'pullnewcmo')->name('pullnewcmo');
+    Route::any('/populatelbportal', 'populatelbportal')->name('populatelbportal');
+    Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')->name('cmo-grievance-workflow');
+});

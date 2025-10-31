@@ -10,6 +10,7 @@ use App\Models\CmoResponseJson;
 use App\Models\CmoSmData;
 use Illuminate\Support\Collection;
 use App\Models\Municipality;
+
 class CmoController extends Controller
 {
     protected $cmoAuthenticationService;
@@ -29,8 +30,8 @@ class CmoController extends Controller
             $response = json_decode($data->getContent(), true);
             if (isset($response['inserted_id']) && $response['status'] == 200) {
                 $inserted_id = $response['inserted_id'];
-                return redirect()->route('pullnewcmo', ['inserted_id' => $inserted_id]);
                 session()->flash('success', 'Data pulled successfully!');
+                return redirect()->route('pullnewcmo', ['inserted_id' => $inserted_id]);
             } else {
                 session()->flash('error', 'Failed to pull data.');
             }
@@ -71,5 +72,10 @@ class CmoController extends Controller
             $record->is_fetched = 1;
             $record->save();
         }
+    }
+
+    public function cmogrievanceworkflow() {
+        $header = 'Sarasori Mukhyamantri (CMO Grievance) List';
+        return view('cmo.cmogrievanceworkflow',compact('header'));
     }
 }
