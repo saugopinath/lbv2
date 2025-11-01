@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
 use App\Models\BeneficiaryTemEnclosure;
 use App\Models\ApplicantIncompletDeatil;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Illuminate\Support\Facades\Route;
 
 class IncompletTypePage extends Component
@@ -66,6 +67,12 @@ class IncompletTypePage extends Component
 
     public function approve()
     {
+        if (!Auth::user()->can('approve application')) {
+            session()->flash('error', 'Oops! You do not have permission to approve applications.');
+            return redirect()->route('dashboard');
+
+        }
+
         try {
             DB::beginTransaction();
 
@@ -367,7 +374,11 @@ class IncompletTypePage extends Component
     }
     public function revert()
     {
-        // dd('ok');
+
+        if (!Auth::user()->can('revert application')) {
+            session()->flash('error', 'Oops! You do not have permission to revert applications.');
+            return redirect()->route('dashboard');
+        }
         DB::beginTransaction();
 
         try {

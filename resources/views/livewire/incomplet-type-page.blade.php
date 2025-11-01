@@ -45,8 +45,8 @@
     <form method="POST" action="@if ($stage === 'verifier')
         {{ route('incomplete-full-deatils-update', ['id' => encrypt($id)]) }}
     @elseif ($stage === 'revert')
-            {{ route('incomplete-revert-update', ['id' => encrypt($id)]) }}
-        @else
+        {{ route('incomplete-revert-update', ['id' => encrypt($id)]) }}
+    @else
             {{ route('incomplete-full-deatils-update', ['id' => encrypt($id)]) }}
         @endif">
         @csrf
@@ -94,15 +94,18 @@
                 </x-button.primary>
             @elseif ($stage === 'approver')
                 <div class="flex justify-center w-full space-x-4">
-                    <x-button.primary type="submit"
-                        x-on:click="if(confirm('Are you sure you want to approve this request?')) { $wire.approve() }">
-                        Approve
-                    </x-button.primary>
+                    @can('approve application')
+                        <x-button.primary type="submit"
+                            x-on:click="if(confirm('Are you sure you want to approve this request?')) { $wire.approve() }">
+                            Approve
+                        </x-button.primary>
+                    @endcan
                     <!-- Revert Button -->
-                    <x-button.danger x-on:click="$dispatch('open-revert-modal')">
-                        Revert
-                    </x-button.danger>
-
+                    @can('revert application')
+                        <x-button.danger x-on:click="$dispatch('open-revert-modal')">
+                            Revert
+                        </x-button.danger>
+                    @endcan
                     <!-- Revert Modal -->
                     <div x-data="{ open: false }" x-on:open-revert-modal.window="open = true" x-show="open"
                         class="fixed inset-0 flex items-center justify-center text-gray-800 bg-black/60 z-50"
