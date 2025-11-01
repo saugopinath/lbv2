@@ -14,9 +14,9 @@ class UsersController extends Controller
         if (CheckAuthHelper::isSuperAdmin() || CheckAuthHelper::isCommmonVerifier() || CheckAuthHelper::isCommonApprover() || CheckAuthHelper::isCommonHOD()) {
             $this->isAuthorized = true;
         } else {
-            abort(response()->view('CommonRestictedpage.index', [
-                'header' => 'Oops! You are not authorized to perform this action.'
-            ]));
+             redirect()->route('dashboard')
+                ->with('error', 'Oops! You are not authorized to perform this action.')
+                ->send();
         }
     }
     public function index()
