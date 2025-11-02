@@ -79,14 +79,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission.redirect:create offices')
         ->name('office-masters.create');
 
-    // Permissions
+    // Permissions Management
     Route::get('/permission', [PermissionController::class, 'index'])
+        // ->middleware('permission.redirect:view permission')
         ->name('permission');
 
     Route::get('/user-permission', [UserPermissionController::class, 'index'])
+        // ->middleware('permission.redirect:view user permission')
         ->name('user-permission');
 
     Route::get('/assign-users-permissions', AssignPermissionsPage::class)
+        // ->middleware('permission:assign user permission')
         ->name('assign-users-permissions');
 
     // Duty Management
@@ -131,11 +134,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission.redirect:revert incomplete')
         ->name('incomplete-revert-update');
 
-
     Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])
         ->middleware('permission.redirect:view beneficiaries')
         ->name('beneficiaries_selection.index');
-
 
     Route::get('/report', [BeneficiaryListController::class, 'show'])
         ->middleware('permission.redirect:view reports')
