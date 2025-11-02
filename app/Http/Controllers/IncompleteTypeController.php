@@ -25,19 +25,28 @@ class IncompleteTypeController extends Controller
         if (CheckAuthHelper::isCommmonVerifier() || CheckAuthHelper::isCommonApprover()) {
             $this->isAuthorized = true;
         } else {
-             redirect()->route('dashboard')
+            redirect()->route('dashboard')
                 ->with('error', 'Oops! You are not authorized to perform this action.')
                 ->send();
         }
     }
+
     public function index($stage = 'verifier')
     {
-        if (Auth::user()->can('view incomplete applications')) {
-            return view('incomplete_types.index', ['stage' => $stage]);
+        $user = Auth::user();
+
+        if ($stage === 'verifier' && $user->can('view verifier incomplete')) {
+            return view('incomplete_types.index', ['stage' => 'verifier']);
         }
-        $header = 'Oops! You do not have permission to view incomplete applications.';
+
+        if ($stage === 'approver' && $user->can('view approver incomplete')) {
+            return view('incomplete_types.index', ['stage' => 'approver']);
+        }
+
+        $header = 'Oops! You do not have permission to view this incomplete stage.';
         return view('CommonRestictedpage.index', compact('header'));
     }
+
 
     public function fullUpdate(Request $request, $id)
     {

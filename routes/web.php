@@ -89,7 +89,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('user-permission');
 
     Route::get('/assign-users-permissions', AssignPermissionsPage::class)
-        // ->middleware('permission:assign user permission')
         ->name('assign-users-permissions');
 
     // Duty Management
@@ -120,7 +119,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Incomplete Types
     Route::get('/incomplete-types/{stage?}', [IncompleteTypeController::class, 'index'])
-        ->middleware('permission.redirect:view incomplete applications')
         ->name('incomplete.types');
 
     Route::get('/incomplet-type/{id}', IncompletTypePage::class)
