@@ -30,7 +30,6 @@ class IncompleteTypeController extends Controller
                 ->send();
         }
     }
-
     public function index($stage = 'verifier')
     {
         $user = Auth::user();
@@ -46,8 +45,6 @@ class IncompleteTypeController extends Controller
         $header = 'Oops! You do not have permission to view this incomplete stage.';
         return view('CommonRestictedpage.index', compact('header'));
     }
-
-
     public function fullUpdate(Request $request, $id)
     {
         if (Auth::user()->can('update incomplete')) {
@@ -269,7 +266,6 @@ class IncompleteTypeController extends Controller
         $header = 'Oops! You do not have permission to update incomplete.';
         return view('CommonRestictedpage.index', compact('header'));
     }
-
     public function revertVerify(Request $request, $id)
     {
         if (Auth::user()->can('revert incomplete')) {
@@ -497,8 +493,6 @@ class IncompleteTypeController extends Controller
         $header = 'Oops! You do not have permission to revert incomplete.';
         return view('CommonRestictedpage.index', compact('header'));
     }
-
-
     public function checkduplicate(Request $request, $id)
     {
         $realId = Crypt::decrypt($id);
@@ -537,54 +531,5 @@ class IncompleteTypeController extends Controller
         }
 
         return true; // No duplicates found
-    }
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

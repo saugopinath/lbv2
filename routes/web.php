@@ -81,11 +81,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Permissions Management
     Route::get('/permission', [PermissionController::class, 'index'])
-        // ->middleware('permission.redirect:view permission')
+        ->middleware('permission.redirect:view permission')
         ->name('permission');
 
     Route::get('/user-permission', [UserPermissionController::class, 'index'])
-        // ->middleware('permission.redirect:view user permission')
+        ->middleware('permission.redirect:view user permission')
         ->name('user-permission');
 
     Route::get('/assign-users-permissions', AssignPermissionsPage::class)

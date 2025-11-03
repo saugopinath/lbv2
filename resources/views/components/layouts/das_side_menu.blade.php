@@ -32,7 +32,7 @@
             </a>
         </div>
 
-        {{-- 🔹 Lakshmir Bhandar Menu --}}
+        {{-- Lakshmir Bhandar Menu --}}
         @canany(['submit lb form', 'view draft list', 'view lb applications'])
             <div>
                 <button @click="activeMenu === 'LBFrom' ? activeMenu = null : activeMenu = 'LBFrom'"
@@ -132,8 +132,8 @@
                 </a>
             </div>
         @endcan
-        <!-- Update Bank Details -->
 
+        <!-- Update Bank Details -->
         @can('permission.redirect:update bank details')
             <div>
                 <a href="{{ route('bankUpdate') }}"
@@ -209,6 +209,7 @@
                 </div>
             </div>
         @endcanany
+
         {{-- Duty Management Menu --}}
         @canany(['permission.redirect:manage role mappings', 'permission.redirect:view offices', 'permission.redirect:view users'])
             <div>
@@ -342,7 +343,8 @@
                 </div>
             </div>
         @endcanany
-        {{--  @canany(['view permission', 'view user permission'])  --}}
+
+        @canany(['view permission', 'view user permission'])
             <div>
                 <button @click="activeMenu === 'CreatePermission' ? activeMenu = null : activeMenu = 'CreatePermission'"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -366,7 +368,7 @@
 
                 <div id="list_menu" x-show="activeMenu === 'CreatePermission'" x-collapse x-transition class="pl-4">
                     <ul>
-                        {{--  @can('view permission')  --}}
+                        @can('view permission')
                             <li>
                                 <a href="{{ route('permission') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
@@ -381,8 +383,8 @@
                                     </svg><span x-show="sidebar" class="truncate" svg="truncate">Create
                                         Permission</span></a>
                             </li>
-                        {{--  @endcan
-                        @can('view user permission')  --}}
+                        @endcan
+                        @can('view user permission')
                             <li>
                                 <a href="{{ route('user-permission') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
@@ -397,11 +399,12 @@
                                     </svg><span x-show="sidebar" class="truncate" svg="truncate">Assign
                                         Permission</span></a>
                             </li>
-                        {{--  @endcan  --}}
+                        @endcan
                     </ul>
                 </div>
             </div>
-        {{--  @endcanany  --}}
+        @endcanany
+
         <!-- Menu Item: Reports -->
         <!-- <div>
       <button
