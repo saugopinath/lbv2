@@ -48,7 +48,7 @@ class CasteModificationController extends Controller
         }
 
         if (in_array($currentRoute, $verifierRoutes)) {
-            if (CheckAuthHelper::isCommmonVerifier() || CheckAuthHelper::isCommonApprover()) {
+            if (CheckAuthHelper::isCommonWorkFlow2ndStep()) {
                 $this->isAuthorized = true;
             } else {
                  redirect()->route('dashboard')

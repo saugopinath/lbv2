@@ -15,7 +15,7 @@ class CheckAuthHelper
             ? (int) Crypt::decryptString(session('lgd_session.role_id'))
             : null;
     }
-   
+
     public static function isSuperAdmin(): bool
     {
         return in_array(self::getRoleId(), [1]);
@@ -94,5 +94,24 @@ class CheckAuthHelper
     public static function isCommonDDO(): bool
     {
         return in_array(self::getRoleId(), [10, 11]);
+    }
+
+    public static function isCommonWorkFlow2ndStep(): bool
+    {
+        return self::isCommmonVerifier() || self::isCommonApprover();
+    }
+
+    public static function isCommonWorkFlow3rdStep(): bool
+    {
+        return self::isCommonOperator() || self::isCommmonVerifier() || self::isCommonApprover();
+    }
+
+    public static function isCommonWorkFlow4thStep(): bool
+    {
+        return self::isCommonOperator() || self::isCommmonVerifier() || self::isCommonApprover() || self::isCommonDDO();
+    }
+    public static function isCommonPrivilegedUser(): bool
+    {
+        return self::isSuperAdmin() || self::isCommmonVerifier() || self::isCommonApprover() || self::isCommonHOD();
     }
 }

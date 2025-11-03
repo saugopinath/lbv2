@@ -22,7 +22,7 @@ class IncompleteTypeController extends Controller
     protected $isAuthorized = false;
     public function __construct()
     {
-        if (CheckAuthHelper::isCommmonVerifier() || CheckAuthHelper::isCommonApprover()) {
+        if (CheckAuthHelper::isCommonWorkFlow2ndStep()) {
             $this->isAuthorized = true;
         } else {
             redirect()->route('dashboard')
