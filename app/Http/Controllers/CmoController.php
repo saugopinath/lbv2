@@ -11,6 +11,7 @@ use App\Models\CmoSmData;
 use Illuminate\Support\Collection;
 use App\Models\Municipality;
 use App\Models\Codemaster;
+use Illuminate\Support\Facades\Crypt;
 class CmoController extends Controller
 {
     protected $cmoAuthenticationService;
@@ -80,4 +81,9 @@ class CmoController extends Controller
         $header = 'Sarasori Mukhyamantri (CMO Grievance) List';
         return view('cmo.cmogrievanceworkflow', compact('header'));
     }
+
+   public function cmogrievancefind($id)
+   {
+    dd(Crypt::decryptString($id));
+   }
 }

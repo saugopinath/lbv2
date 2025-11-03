@@ -5,5 +5,12 @@
         </div>
     </div>
     <livewire:cmo-grievance-workflow-dropdown />
-    <livewire:cmo-work-flow-data-table />
+    <div class="bg-white shadow-xl rounded-2xl ">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4 p-4">
+            Grievance List
+        </h2>
+        <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
+            <livewire:cmo-work-flow-data-table />
+        </div>
+    </div>
 </x-layouts.app>

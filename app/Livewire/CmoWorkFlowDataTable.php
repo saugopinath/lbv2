@@ -137,21 +137,30 @@ class CmoWorkFlowDataTable extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make("Application ID", "application_id")
+            Column::make("Grievance ID", "grievance_id")
                 ->label(fn($row) => $row->grievance_id ?? 'N/A')
                 ->sortable()
                 ->searchable(function ($query, $searchTerm) {
                     $query->whereHas('sourceable', function ($q) use ($searchTerm) {
-                        $q->where('application_id', 'ILIKE', "%{$searchTerm}%");
+                        $q->where('grievance_id', 'ILIKE', "%{$searchTerm}%");
                     });
                 }),
 
-            Column::make("Applicant Name", "full_name")
+            Column::make("Caller Name", "full_name")
                 ->label(fn($row) => $row->applicant_name ?? 'N/A'),
 
-            Column::make("Age", "age")
-                ->label(fn($row) => $row->applicant_age ?? 'N/A'),
-
+            Column::make("Caller Mobile No", "caller_mobile_no")
+                ->label(fn($row) => $row->pri_cont_no ?? 'N/A'),
+            Column::make("CMO Received Date(YYYY-MM-DD)", "CMO_Received_Date(YYYY-MM-DD)")
+                ->label(fn($row) => Carbon::parse($row->grievance_generate_date)->toDateString() ?? 'N/A'),
+            $columns[] = Column::make("Action")
+                ->label(function ($row) {
+                    return view('coulmn_button.view', [
+                        'link' => route('cmo-grievance-find', Crypt::encryptString($row->grievance_id)),
+                        'tooltip' => 'Find',
+                    ])->render();
+                })
+                ->html(),
 
         ];
     }
