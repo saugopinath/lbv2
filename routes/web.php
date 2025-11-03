@@ -137,5 +137,6 @@ Route::controller(CmoController::class)->group(function () {
     Route::any('/pullnewcmo', 'pullnewcmo')->name('pullnewcmo');
     Route::any('/populatelbportal', 'populatelbportal')->name('populatelbportal');
     Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')->name('cmo-grievance-workflow');
-    Route::any('/cmo-grievance-find/{id}', 'cmogrievancefind')->name('cmo-grievance-find');
+    // Route::any('/cmo-grievance-find/{id}', 'cmogrievancefind')->name('cmo-grievance-find');
+    Route::any('/cmo-grievance-find', 'cmogrievancefind')->name('cmo-grievance-find');
 });

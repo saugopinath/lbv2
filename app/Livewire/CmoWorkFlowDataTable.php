@@ -156,7 +156,8 @@ class CmoWorkFlowDataTable extends DataTableComponent
             $columns[] = Column::make("Action")
                 ->label(function ($row) {
                     return view('coulmn_button.view', [
-                        'link' => route('cmo-grievance-find', Crypt::encryptString($row->grievance_id)),
+                        // 'link' => route('cmo-grievance-find', Crypt::encryptString($row->grievance_id)),
+                        'link' => route('cmo-grievance-find') . '?id=' . Crypt::encryptString($row->grievance_id),
                         'tooltip' => 'Find',
                     ])->render();
                 })

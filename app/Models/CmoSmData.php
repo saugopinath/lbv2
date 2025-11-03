@@ -10,4 +10,5 @@ class CmoSmData extends Model implements Auditable
     protected $table = 'cmo.cmo_sm_data';
     public $timestamps = false;
     protected $guarded = [];
+    protected $primaryKey = 'grievance_id';
 }

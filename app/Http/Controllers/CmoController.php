@@ -12,6 +12,7 @@ use Illuminate\Support\Collection;
 use App\Models\Municipality;
 use App\Models\Codemaster;
 use Illuminate\Support\Facades\Crypt;
+
 class CmoController extends Controller
 {
     protected $cmoAuthenticationService;
@@ -82,8 +83,16 @@ class CmoController extends Controller
         return view('cmo.cmogrievanceworkflow', compact('header'));
     }
 
-   public function cmogrievancefind($id)
-   {
-    dd(Crypt::decryptString($id));
-   }
+    //    public function cmogrievancefind($id)
+    //    {
+    //     dd(Crypt::decryptString($id));
+    //    }
+
+    public function cmogrievancefind(Request $request)
+    {
+        $grievance_id = Crypt::decryptString($request->id);
+        $record = CmoSmData::find($grievance_id);
+        $header = 'Find CMO Grievance Beneficiary';
+        return view('cmo.cmo_details',compact('header','record'));
+    }
 }
