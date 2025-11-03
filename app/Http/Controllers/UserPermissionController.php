@@ -1,13 +1,30 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Auth;
+use App\Helpers\CheckAuthHelper;
 use Illuminate\Http\Request;
 
 class UserPermissionController extends Controller
 {
-    public function index()
+    protected $isAuthorized = false;
+    public function __construct()
     {
-        return view('UserPermissions.user_permission_index');
+        if (CheckAuthHelper::isCommonWorkFlow4thStep()) {
+            $this->isAuthorized = true;
+        } else {
+             redirect()->route('dashboard')
+                ->with('error', 'Oops! You are not authorized to perform this action.')
+                ->send();
+        }
+    }
+     public function index()
+    {
+        if (Auth::user()->can('view user permission')) {
+            return view('UserPermissions.user_permission_index');
+        }
+
+        $header = 'Oops! You do not have permission to view user permission.';
+        return view('CommonRestictedpage.index', compact('header'));
     }
 }
