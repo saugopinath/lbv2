@@ -114,7 +114,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('lb-application-list');
 
     Route::get('/application/{id}', DraftApplicationView::class)
-        ->middleware('permission.redirect:view application')
+        // ->middleware('permission.redirect:view application')
         ->name('draft-application.view');
 
     // Incomplete Types
@@ -133,11 +133,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('incomplete-revert-update');
 
     Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])
-        ->middleware('permission.redirect:view beneficiaries')
+        // ->middleware('permission.redirect:view beneficiaries')
         ->name('beneficiaries_selection.index');
 
     Route::get('/report', [BeneficiaryListController::class, 'show'])
-        ->middleware('permission.redirect:view reports')
+        // ->middleware('permission.redirect:view reports')
         ->name('report.show');
 
     Route::get('/approved-lists', [BeneficiaryApprovedListController::class, 'index'])

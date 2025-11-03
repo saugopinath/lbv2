@@ -124,7 +124,7 @@
         </div>
 
         <!-- Menu Item: Beneficiary List -->
-        @can('permission.redirect:view beneficiaries')
+        @can('view beneficiaries')
             <div>
                 <a href="{{ route('beneficiaries_selection.index') }}"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -142,7 +142,7 @@
         @endcan
 
         <!-- Update Bank Details -->
-        @can('permission.redirect:update bank details')
+        @can('update bank details')
             <div>
                 <a href="{{ route('bankUpdate') }}"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -219,7 +219,7 @@
         @endcanany
 
         {{-- Duty Management Menu --}}
-        @canany(['permission.redirect:manage role mappings', 'permission.redirect:view offices', 'permission.redirect:view users'])
+        @canany(['manage role mappings', 'view offices', 'view users'])
             <div>
                 <button @click="activeMenu === 'DutyManagement' ? activeMenu = null : activeMenu = 'DutyManagement'"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
