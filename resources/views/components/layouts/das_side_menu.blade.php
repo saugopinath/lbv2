@@ -33,12 +33,12 @@
         </div>
 
         {{-- Lakshmir Bhandar Menu --}}
-        <div x-data="{ activeMenu: 
+        <div x-data="{ activeMenu:
         @if (request()->routeIs('lbform') || request()->routeIs('draftlist') || request()->routeIs('lb-application-list'))
             'LBFrom'
         @else
             null
-        @endif 
+        @endif
     }">
             @canany(['submit lb form', 'view draft list', 'view lb applications'])
                 <div>
@@ -241,7 +241,7 @@
                 <div id="list_menu" x-show="activeMenu === 'DutyManagement'" x-collapse x-transition class="pl-4">
                     <ul>
                         {{-- Role Office Type Mapping --}}
-                        @can('permission.redirect:manage role mappings')
+                        @can('manage role mappings')
                             <li>
                                 <a href="{{ route('role-office-master-mappings.index') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white">
@@ -257,7 +257,7 @@
                         @endcan
 
                         {{-- Office Masters --}}
-                        @can('permission.redirect:view offices')
+                        @can('view offices')
                             <li>
                                 <a href="{{ route('officemasters.index') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white">
@@ -273,7 +273,7 @@
                         @endcan
 
                         {{-- Users --}}
-                        @can('permission.redirect:view users')
+                        @can('view users')
                             <li>
                                 <a href="{{ route('user-managements.index') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white">
@@ -292,13 +292,13 @@
             </div>
         @endcanany
 
-        <div x-data="{ 
-        activeMenu: 
+        <div x-data="{
+        activeMenu:
             @if (request()->routeIs('Caste-modification-info') || request()->routeIs('caste-modification-list'))
                 'CasteManagement'
             @else
                 null
-            @endif 
+            @endif
     }">
             @canany(['modify caste', 'view caste modification list'])
                 <div>
@@ -360,7 +360,7 @@
                 </div>
             @endcanany
         </div>
-        
+
         @canany(['view permission', 'view user permission'])
             <div>
                 <button @click="activeMenu === 'CreatePermission' ? activeMenu = null : activeMenu = 'CreatePermission'"
