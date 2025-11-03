@@ -10,7 +10,7 @@ use App\Models\CmoResponseJson;
 use App\Models\CmoSmData;
 use Illuminate\Support\Collection;
 use App\Models\Municipality;
-
+use App\Models\Codemaster;
 class CmoController extends Controller
 {
     protected $cmoAuthenticationService;
@@ -67,6 +67,7 @@ class CmoController extends Controller
                     $cmoData->lb_local_body_code = $data['lgd_block'];
                 }
                 $cmoData->lb_gp_ward_code = $data['ward_id'] ?? $data['gp_id'];
+                $cmoData->redressed_status = Codemaster::getIdByCode(3301);
                 $cmoData->save();
             }
             $record->is_fetched = 1;
@@ -74,8 +75,9 @@ class CmoController extends Controller
         }
     }
 
-    public function cmogrievanceworkflow() {
+    public function cmogrievanceworkflow()
+    {
         $header = 'Sarasori Mukhyamantri (CMO Grievance) List';
-        return view('cmo.cmogrievanceworkflow',compact('header'));
+        return view('cmo.cmogrievanceworkflow', compact('header'));
     }
 }

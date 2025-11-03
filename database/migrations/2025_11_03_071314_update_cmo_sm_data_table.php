@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('applicant_cmo_mappings', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::table('cmo.cmo_sm_data', function (Blueprint $table) {
+            $table->string('redressed_status')->nullable();
         });
     }
 
@@ -22,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('applicant_cmo_mappings');
+        Schema::table('cmo.cmo_sm_data', function (Blueprint $table) {
+            $table->dropColumn('redressed_status');
+        });
     }
 };
