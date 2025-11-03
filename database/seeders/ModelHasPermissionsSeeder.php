@@ -44,7 +44,7 @@ class ModelHasPermissionsSeeder extends Seeder
             foreach ($roleIds as $roleId) {
                 $insertData[] = [
                     'permission_id' => $permissionId,
-                    'model_type' => 'App\\Models\\User',
+                    'model_type' => 'App\Models\User',
                     'model_id' => $roleId,
                 ];
             }
