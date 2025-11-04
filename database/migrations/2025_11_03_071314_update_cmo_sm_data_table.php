@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('cmo.cmo_sm_data', function (Blueprint $table) {
             $table->string('redressed_status')->nullable();
+            $table->jsonb('old_data')->nullable();
         });
     }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('cmo.cmo_sm_data', function (Blueprint $table) {
             $table->dropColumn('redressed_status');
+            $table->dropColumn('old_data');
         });
     }
 };

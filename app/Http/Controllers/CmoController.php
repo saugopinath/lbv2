@@ -13,6 +13,7 @@ use App\Models\Municipality;
 use App\Models\Codemaster;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\CmoAtrMaster;
+use Illuminate\Support\Facades\Auth;
 
 class CmoController extends Controller
 {
@@ -101,6 +102,34 @@ class CmoController extends Controller
 
     public function cmodetailsaction(Request $request)
     {
-        dd($request->all());
+        $atr_type = json_decode($request->atr_type, true);
+        $action_type = $request->action_type;
+        $grievance_id = Crypt::decryptString($request->id);
+        $CmoSmData = CmoSmData::find($grievance_id);
+        $old_data = $CmoSmData->toArray();
+        $CmoSmData->atr_type = $atr_type['id'];
+        $CmoSmData->remarks = $request->remarks;
+        switch ($action_type) {
+            case 'map_applicant':
+                echo "map_applicant";
+                break;
+            case 'send_another_block':
+                $CmoSmData->lb_dist_code = $request->district_id;
+                if ($request->rural_urban == 1) {
+                    $CmoSmData->lb_local_body_code = Municipality::where('lgd_code', $request->blockurban)->first()->subdivision_id;
+                } else {
+                    $CmoSmData->lb_local_body_code = $request->blockurban;
+                }
+                $CmoSmData->old_data = $old_data;
+                break;
+            case 'grievance_redressed':
+                $CmoSmData->is_redressed = 1;
+                $CmoSmData->redressed_status = Codemaster::getIdByCode(3302);
+                $CmoSmData->redressed_by = Auth::id();
+                $CmoSmData->redressed_date = now()->toDateString();
+                break;
+        }
+        // dd($CmoSmData);
+        $CmoSmData->save();
     }
 }

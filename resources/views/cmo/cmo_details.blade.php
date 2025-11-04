@@ -86,6 +86,12 @@
                             </x-form.select>
                         </div>
 
+                        <template x-if="atr.can_find_applicant == 1 && atr.atr_code == '002'">
+                            <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                                <livewire:filter-lgd-master-entry :login_type="'state_office'" />
+                            </div>
+                        </template>
+                        
                         <!-- Remarks -->
                         <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
                             <x-form.input
@@ -99,20 +105,20 @@
                         <!-- Conditional Section -->
                         <template x-if="atr.can_find_applicant == 1 && atr.atr_code != '002'">
                             <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                                <x-button.primary type="submit">Map Applicant</x-button.primary>
+                                <x-button.primary type="submit" name="action_type" value="map_applicant">Map Applicant</x-button.primary>
                             </div>
                         </template>
 
                         <template x-if="atr.can_find_applicant == null">
                             <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                                <x-button.danger type="submit">Grievance Redressed</x-button.danger>
+                                <x-button.danger type="submit" name="action_type" value="grievance_redressed">Grievance Redressed</x-button.danger>
                             </div>
                         </template>
 
+
                         <template x-if="atr.can_find_applicant == 1 && atr.atr_code == '002'">
                             <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                                <livewire:filter-lgd-master-entry :login_type="'state_office'" />
-                                <x-button.primary type="submit">Send to another Block/Subdivision</x-button.primary>
+                                <x-button.primary type="submit" name="action_type" value="send_another_block">Send to another Block/Subdivision</x-button.primary>
                             </div>
                         </template>
 
