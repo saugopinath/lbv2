@@ -68,7 +68,11 @@
                             name="atr_type"
                             required
                             class="border rounded p-2 w-full"
-                            x-on:change="atr = JSON.parse($event.target.value)" label="ATR Type">
+                            x-on:change=" if ($event.target.value) {
+            atr = JSON.parse($event.target.value)
+        } else {
+            atr = { id: '', can_find_applicant: '', atr_code: '' }
+        }" label="ATR Type">
                             <option value="">-----ATR Type----</option>
                             @foreach ($atrs as $type)
                             <option value='@json(["id" => $type->atn_id, "can_find_applicant" => $type->can_find_applicant,
