@@ -1,22 +1,28 @@
 <x-layouts.app>
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-2 space-y-4">
         <div class="flex justify-between items-center text-center">
-            <h1 class="text-xl font-bold text-indigo-800 dark:text-white">{{$header}}</h1>
+            <h1 class="text-xl font-bold text-indigo-800 dark:text-white">{{ $header }}</h1>
         </div>
     </div>
 
     <div
         x-data="{
-        openSection: 'grievance-details',
-        toggleSection(section) {
-            if (this.openSection === section) {
-                this.openSection = 'grievance-details';
-            } else {
-                this.openSection = section;
+            openSection: 'grievance-details',
+            atr: { id: '', can_find_applicant: '', atr_code: '' },
+            toggleSection(section) {
+                if (this.openSection === section) {
+                    this.openSection = 'grievance-details';
+                } else {
+                    this.openSection = section;
+                }
+            },
+            openSearchSection() {
+                this.openSection = 'search-details';
             }
-        }
-    }"
+        }"
         class="bg-white dark:bg-gray-800 shadow-md rounded p-8 space-y-2">
+
+        {{-- ---------------- Grievance Details Section ---------------- --}}
         <x-accordion-section title="Grievance Details" sectionId="grievance-details" color="pink-500">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
@@ -58,75 +64,92 @@
             </div>
         </x-accordion-section>
 
+        {{-- ---------------- ATR Tagging Section ---------------- --}}
         <x-accordion-section title="ATR Tagging" sectionId="atr_tagging" color="indigo-500">
-            <div class="">
-                <form action="{{ route('cmo-grievance-action'). '?id=' . Crypt::encryptString($record->grievance_id) }}" method="POST">
-                    @csrf
-                    <div
-                        x-data="{ atr: { id: '', can_find_applicant: '', atr_code: '' } }"
-                        class="space-y-3">
-                        <!-- ATR Type Dropdown -->
-                        <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                            <x-form.select
-                                name="atr_type"
-                                required
-                                class="border rounded p-2 w-full"
-                                x-on:change=" if ($event.target.value) {
+            <form action="{{ route('cmo-grievance-action') . '?id=' . Crypt::encryptString($record->grievance_id) }}" method="POST">
+                @csrf
+                <div class="space-y-3">
+
+                    <!-- ATR Type Dropdown -->
+                    <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                        <x-form.select
+                            name="atr_type"
+                            required
+                            class="border rounded p-2 w-full"
+                            x-on:change="
+                                if ($event.target.value) {
                                     atr = JSON.parse($event.target.value)
                                 } else {
                                     atr = { id: '', can_find_applicant: '', atr_code: '' }
-                                }" label="ATR Type">
-                                <option value="">-----ATR Type----</option>
-                                @foreach ($atrs as $type)
-                                <option value='@json(["id" => $type->atn_id, "can_find_applicant" =>    $type->can_find_applicant,
-                                "atr_code" => $type->atr_code])'>
-                                    {{ $type->atr_desc }}
-                                </option>
-                                @endforeach
-                            </x-form.select>
-                        </div>
-
-                        <template x-if="atr.can_find_applicant == 1 && atr.atr_code == '002'">
-                            <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                                <livewire:filter-lgd-master-entry :login_type="'state_office'" />
-                            </div>
-                        </template>
-                        
-                        <!-- Remarks -->
-                        <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                            <x-form.input
-                                id="remarks"
-                                name="remarks"
-                                label="Remarks"
-                                required
-                                type="text" />
-                        </div>
-
-                        <!-- Conditional Section -->
-                        <template x-if="atr.can_find_applicant == 1 && atr.atr_code != '002'">
-                            <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                                <x-button.primary type="submit" name="action_type" value="map_applicant">Map Applicant</x-button.primary>
-                            </div>
-                        </template>
-
-                        <template x-if="atr.can_find_applicant == null">
-                            <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                                <x-button.danger type="submit" name="action_type" value="grievance_redressed">Grievance Redressed</x-button.danger>
-                            </div>
-                        </template>
-
-
-                        <template x-if="atr.can_find_applicant == 1 && atr.atr_code == '002'">
-                            <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                                <x-button.primary type="submit" name="action_type" value="send_another_block">Send to another Block/Subdivision</x-button.primary>
-                            </div>
-                        </template>
-
+                                }
+                            "
+                            label="ATR Type">
+                            <option value="">-----ATR Type----</option>
+                            @foreach ($atrs as $type)
+                            <option value='@json(["id" => $type->atn_id, "can_find_applicant" => $type->can_find_applicant, "atr_code" => $type->atr_code])'>
+                                {{ $type->atr_desc }}
+                            </option>
+                            @endforeach
+                        </x-form.select>
                     </div>
-                </form>
-            </div>
+
+                    <!-- Livewire Component if atr_code == '002' -->
+                    <template x-if="atr.can_find_applicant == 1 && atr.atr_code == '002'">
+                        <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                            <livewire:filter-lgd-master-entry :login_type="'state_office'" />
+                        </div>
+                    </template>
+
+                    <!-- Remarks -->
+                    <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                        <x-form.input id="remarks" name="remarks" label="Remarks" required type="text" />
+                    </div>
+
+                    <!-- Map Applicant Button -->
+                    <template x-if="atr.can_find_applicant == 1 && atr.atr_code != '002'">
+                        <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                            <x-button.primary type="button" name="action_type" value="map_applicant" x-on:click="openSearchSection()">
+                                Map Applicant
+                            </x-button.primary>
+                        </div>
+                    </template>
+
+                    <!-- Grievance Redressed Button -->
+                    <template x-if="atr.can_find_applicant == null">
+                        <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                            <x-button.danger type="submit" name="action_type" value="grievance_redressed">
+                                Grievance Redressed
+                            </x-button.danger>
+                        </div>
+                    </template>
+
+                    <!-- Send to another Block Button -->
+                    <template x-if="atr.can_find_applicant == 1 && atr.atr_code == '002'">
+                        <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                            <x-button.primary type="submit" name="action_type" value="send_another_block">
+                                Send to another Block/Subdivision
+                            </x-button.primary>
+                        </div>
+                    </template>
+
+                </div>
+            </form>
         </x-accordion-section>
 
-    </div>
+        {{-- ---------------- Search Section ---------------- --}}
+        <div
+            x-show="openSection === 'search-details'"
+            x-collapse
+            class="">
+            <x-accordion-section title="Search using Application Id, Beneficiary name, Applicant mobile no, Aadhaar no, Bank account number" sectionId="search-details" color="indigo-500">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-gray-50 p-3 rounded-lg shadow hover:shadow-md transition">
+                        <p class="text-xs text-gray-500">Grievance ID :</p>
+                        <p class="font-semibold text-gray-800">AA</p>
+                    </div>
+                </div>
+            </x-accordion-section>
+        </div>
 
+    </div>
 </x-layouts.app>
