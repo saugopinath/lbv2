@@ -132,4 +132,8 @@ class CmoController extends Controller
         // dd($CmoSmData);
         $CmoSmData->save();
     }
+
+    public function cmogrievancesearch(Request $request){
+        dd($request->all());
+    }
 }
