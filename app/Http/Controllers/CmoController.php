@@ -12,7 +12,7 @@ use Illuminate\Support\Collection;
 use App\Models\Municipality;
 use App\Models\Codemaster;
 use Illuminate\Support\Facades\Crypt;
-
+use App\Models\CmoAtrMaster;
 class CmoController extends Controller
 {
     protected $cmoAuthenticationService;
@@ -93,6 +93,8 @@ class CmoController extends Controller
         $grievance_id = Crypt::decryptString($request->id);
         $record = CmoSmData::find($grievance_id);
         $header = 'Find CMO Grievance Beneficiary';
-        return view('cmo.cmo_details',compact('header','record'));
+        $atrs = CmoAtrMaster::all();
+        // dd($atrs);
+        return view('cmo.cmo_details',compact('header','record','atrs'));
     }
 }
