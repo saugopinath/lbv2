@@ -79,7 +79,6 @@ class Create extends Component
             $this->selectedDistrict = null;
         }
     }
-
     public function submit()
     {
         $this->validate();
@@ -92,19 +91,32 @@ class Create extends Component
         try {
             DB::beginTransaction();
 
-            $user = User::create([
-                'name' => $this->name,
-                'mobile_no' => $this->mobile,
-                'email' => $this->email,
-                'password' => Hash::make($this->password),
-                'password_set_time' => $c_time,
-                'password_expires_at' => $password_expires_at,
-            ]);
+            $existingMapping = UserRoleSchemeOfficeMapping::where('role_id', $this->role)
+                ->first();
 
-            UserPersonal::create([
-                'user_id' => $user->id,
-                'name' => $user->name,
-            ]);
+            $isBase = false;
+
+            if ($existingMapping) {
+                $existingUser = User::find($existingMapping->user_id);
+                if ($existingUser && $existingUser->is_base) {
+                    $isBase = true;
+                }
+            }
+
+            $user = new User();
+            $user->name = $this->name;
+            $user->mobile_no = $this->mobile;
+            $user->email = $this->email;
+            $user->password = Hash::make($this->password);
+            $user->password_set_time = $c_time;
+            $user->password_expires_at = $password_expires_at;
+            $user->is_base = $isBase;
+            $user->save();
+
+            $userPersonal = new UserPersonal();
+            $userPersonal->user_id = $user->id;
+            $userPersonal->name = $user->name;
+            $userPersonal->save();
 
             $role = Role::find($this->role);
 
@@ -112,24 +124,24 @@ class Create extends Component
                 $user->assignRole($role);
             }
 
-            UserRoleSchemeOfficeMapping::create([
-                'user_id' => $user->id,
-                'scheme_id' => $this->selectscheme,
-                'role_id' => $this->role,
-                'office_id' => $this->office,
-            ]);
-            
+            $UserOfficeRoles  = new UserRoleSchemeOfficeMapping();
+            $UserOfficeRoles->user_id = $user->id;
+            $UserOfficeRoles->scheme_id = $this->selectscheme;
+            $UserOfficeRoles->role_id = $this->role;
+            $UserOfficeRoles->office_id = $this->office;
+            $UserOfficeRoles->save();
+
             DB::commit();
 
             session()->flash('success', 'User created successfully!');
             return redirect()->route('user-managements.index');
-
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
         }
     }
+
 
     public function render()
     {
