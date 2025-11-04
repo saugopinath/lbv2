@@ -104,7 +104,7 @@ Route::get('/incomplet-type/{id}', IncompletTypePage::class)
 
 
 
-    Route::post('/incomplete/update/{id}', [IncompleteTypeController::class, 'fullUpdate'])
+Route::post('/incomplete/update/{id}', [IncompleteTypeController::class, 'fullUpdate'])
     ->name('incomplete-full-deatils-update');
 
 
@@ -127,7 +127,7 @@ Route::get('/assign-users-permissions', AssignPermissionsPage::class)
 Route::get('/Caste-modification-info', [CasteModificationController::class, 'index'])->name('Caste-modification-info');
 Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])->name('caste-modification.edit');
 Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
-     ->name('beneficiary.updateCaste');
+    ->name('beneficiary.updateCaste');
 Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])->name('caste-modification-list');
 
 Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])->name('view-beneficiary-details');
@@ -139,4 +139,5 @@ Route::controller(CmoController::class)->group(function () {
     Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')->name('cmo-grievance-workflow');
     // Route::any('/cmo-grievance-find/{id}', 'cmogrievancefind')->name('cmo-grievance-find');
     Route::any('/cmo-grievance-find', 'cmogrievancefind')->name('cmo-grievance-find');
+    Route::post('/cmo-grievance-action', 'cmodetailsaction')->name('cmo-grievance-action');
 });

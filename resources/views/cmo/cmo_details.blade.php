@@ -57,63 +57,67 @@
 
             </div>
         </x-accordion-section>
+
         <x-accordion-section title="ATR Tagging" sectionId="atr_tagging" color="indigo-500">
             <div class="">
-                <div
-                    x-data="{ atr: { id: '', can_find_applicant: '', atr_code: '' } }"
-                    class="space-y-3">
-                    <!-- ATR Type Dropdown -->
-                    <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                        <x-form.select
-                            name="atr_type"
-                            required
-                            class="border rounded p-2 w-full"
-                            x-on:change=" if ($event.target.value) {
-            atr = JSON.parse($event.target.value)
-        } else {
-            atr = { id: '', can_find_applicant: '', atr_code: '' }
-        }" label="ATR Type">
-                            <option value="">-----ATR Type----</option>
-                            @foreach ($atrs as $type)
-                            <option value='@json(["id" => $type->atn_id, "can_find_applicant" => $type->can_find_applicant,
-                "atr_code" => $type->atr_code])'>
-                                {{ $type->atr_desc }}
-                            </option>
-                            @endforeach
-                        </x-form.select>
+                <form action="{{ route('cmo-grievance-action'). '?id=' . Crypt::encryptString($record->grievance_id) }}" method="POST">
+                    @csrf
+                    <div
+                        x-data="{ atr: { id: '', can_find_applicant: '', atr_code: '' } }"
+                        class="space-y-3">
+                        <!-- ATR Type Dropdown -->
+                        <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                            <x-form.select
+                                name="atr_type"
+                                required
+                                class="border rounded p-2 w-full"
+                                x-on:change=" if ($event.target.value) {
+                                    atr = JSON.parse($event.target.value)
+                                } else {
+                                    atr = { id: '', can_find_applicant: '', atr_code: '' }
+                                }" label="ATR Type">
+                                <option value="">-----ATR Type----</option>
+                                @foreach ($atrs as $type)
+                                <option value='@json(["id" => $type->atn_id, "can_find_applicant" =>    $type->can_find_applicant,
+                                "atr_code" => $type->atr_code])'>
+                                    {{ $type->atr_desc }}
+                                </option>
+                                @endforeach
+                            </x-form.select>
+                        </div>
+
+                        <!-- Remarks -->
+                        <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                            <x-form.input
+                                id="remarks"
+                                name="remarks"
+                                label="Remarks"
+                                required
+                                type="text" />
+                        </div>
+
+                        <!-- Conditional Section -->
+                        <template x-if="atr.can_find_applicant == 1 && atr.atr_code != '002'">
+                            <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                                <x-button.primary type="submit">Map Applicant</x-button.primary>
+                            </div>
+                        </template>
+
+                        <template x-if="atr.can_find_applicant == null">
+                            <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                                <x-button.danger type="submit">Grievance Redressed</x-button.danger>
+                            </div>
+                        </template>
+
+                        <template x-if="atr.can_find_applicant == 1 && atr.atr_code == '002'">
+                            <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                                <livewire:filter-lgd-master-entry :login_type="'state_office'" />
+                                <x-button.primary type="submit">Send to another Block/Subdivision</x-button.primary>
+                            </div>
+                        </template>
+
                     </div>
-
-                    <!-- Remarks -->
-                    <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                        <x-form.input
-                            id="remarks"
-                            name="remarks"
-                            label="Remarks"
-                            required
-                            type="text" />
-                    </div>
-
-                    <!-- Conditional Section -->
-                    <template x-if="atr.can_find_applicant == 1 && atr.atr_code != '002'">
-                        <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                            <x-button.primary>Map Applicant</x-button.primary>
-                        </div>
-                    </template>
-
-                    <template x-if="atr.can_find_applicant == null">
-                        <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                            <x-button.danger>Grievance Redressed</x-button.danger>
-                        </div>
-                    </template>
-
-                    <template x-if="atr.can_find_applicant == 1 && atr.atr_code == '002'">
-                        <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                            <livewire:filter-lgd-master-entry :login_type="'state_office'" />
-                            <x-button.primary>Send to another Block/Subdivision</x-button.primary>
-                        </div>
-                    </template>
-
-                </div>
+                </form>
             </div>
         </x-accordion-section>
 
