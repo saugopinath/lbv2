@@ -16,7 +16,7 @@ class BeneficiaryListController extends Controller
         if (CheckAuthHelper::isCommonWorkFlow4thStep()) {
             $this->isAuthorized = true;
         } else {
-             redirect()->route('dashboard')
+            redirect()->route('dashboard')
                 ->with('error', 'Oops! You are not authorized to perform this action.')
                 ->send();
         }
@@ -34,10 +34,20 @@ class BeneficiaryListController extends Controller
     }
 
     /** Report View */
+
     public function show(Request $request)
     {
+        // Backend validation
+        $validated = $request->validate([
+            'report_type' => 'required|in:1,2,3,4,5',
+        ], [
+            'report_type.required' => 'Please select a report type before proceeding.',
+            'report_type.in' => 'Invalid report type selected.',
+        ]);
+
+        // Permission check
         if (Auth::user()->can('view reports')) {
-            $reportType = $request->input('report_type');
+            $reportType = $validated['report_type'];
             return view('beneficiaries.report', compact('reportType'));
         }
 
