@@ -10,7 +10,7 @@ class UserPermissionController extends Controller
     protected $isAuthorized = false;
     public function __construct()
     {
-        if (CheckAuthHelper::isCommonWorkFlow4thStep()) {
+        if (CheckAuthHelper::isCommonPrivilegedUser()) {
             $this->isAuthorized = true;
         } else {
              redirect()->route('dashboard')

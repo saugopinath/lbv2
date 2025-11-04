@@ -10,7 +10,9 @@ use App\Models\Scheme;
 use Livewire\Component;
 use App\Models\District;
 use App\Models\Codemaster;
+use App\Models\ModelHasPermission;
 use App\Models\OfficeMaster;
+use App\Models\Permission;
 use App\Models\UserPersonal;
 use Illuminate\Support\Facades\Hash;
 use App\Models\RoleOfficeTypeMapping;
@@ -79,27 +81,43 @@ class Create extends Component
             $this->selectedDistrict = null;
         }
     }
+
+    public function updatedSelectedDistrict($districtId)
+    {
+        $this->office = null;
+        $this->offices = [];
+
+        if ($districtId && in_array($this->selectedMappingLevel, [153, 154])) {
+            $this->offices = OfficeMaster::where('office_type_id', $this->selectedMappingLevel)
+                ->where('district_id', $districtId)
+                ->get();
+        }
+    }
+
     public function submit()
     {
         $this->validate();
 
-        $c_time = Carbon::now()->format('Y-m-d H:i:s');
-        $password_expires_at = Carbon::now()
+        $c_time = now()->format('Y-m-d H:i:s');
+        $password_expires_at = now()
             ->addDays(intval(Config::get('app.password_expire_day')))
             ->format('Y/m/d H:i:s');
 
         try {
             DB::beginTransaction();
 
-            $existingMapping = UserRoleSchemeOfficeMapping::where('role_id', $this->role)
-                ->first();
+            $existingMapping = UserRoleSchemeOfficeMapping::where('role_id', $this->role)->first();
 
             $isBase = false;
+            $existingUser = null;
 
             if ($existingMapping) {
-                $existingUser = User::find($existingMapping->user_id);
-                if ($existingUser && $existingUser->is_base) {
-                    $isBase = true;
+                $existingUser = User::where('id', $existingMapping->user_id)
+                    ->where('is_base', true)
+                    ->first();
+
+                if ($existingUser) {
+                    $isBase = false;
                 }
             }
 
@@ -113,23 +131,33 @@ class Create extends Component
             $user->is_base = $isBase;
             $user->save();
 
-            $userPersonal = new UserPersonal();
-            $userPersonal->user_id = $user->id;
-            $userPersonal->name = $user->name;
-            $userPersonal->save();
+            $personal = new UserPersonal();
+            $personal->user_id = $user->id;
+            $personal->name = $user->name;
+            $personal->save();
 
             $role = Role::find($this->role);
-
             if ($role) {
                 $user->assignRole($role);
             }
 
-            $UserOfficeRoles  = new UserRoleSchemeOfficeMapping();
-            $UserOfficeRoles->user_id = $user->id;
-            $UserOfficeRoles->scheme_id = $this->selectscheme;
-            $UserOfficeRoles->role_id = $this->role;
-            $UserOfficeRoles->office_id = $this->office;
-            $UserOfficeRoles->save();
+            $mapping = new UserRoleSchemeOfficeMapping();
+            $mapping->user_id = $user->id;
+            $mapping->scheme_id = $this->selectscheme;
+            $mapping->role_id = $this->role;
+            $mapping->office_id = $this->office;
+            $mapping->save();
+
+            if ($existingUser && $existingUser->is_base) {
+                $basePermissions = ModelHasPermission::where('model_type', 'App\Models\User')
+                    ->where('model_id', $existingMapping->user_id)
+                    ->pluck('permission_id');
+
+                if ($basePermissions->isNotEmpty()) {
+                    $permissions = Permission::whereIn('id', $basePermissions)->get();
+                    $user->syncPermissions($permissions);
+                }
+            }
 
             DB::commit();
 
@@ -137,11 +165,9 @@ class Create extends Component
             return redirect()->route('user-managements.index');
         } catch (\Exception $e) {
             DB::rollBack();
-
-            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
+            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
     }
-
 
     public function render()
     {

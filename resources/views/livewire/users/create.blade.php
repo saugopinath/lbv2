@@ -60,7 +60,7 @@
                     </x-form.select>
 
                     @if (in_array($selectedMappingLevel, [153, 154]))
-                        <x-form.select name="district" label="District" wire:model="selectedDistrict" required>
+                        <x-form.select name="district" label="District" wire:model.live="selectedDistrict" required>
                             <option value="">-- Select District --</option>
                             @foreach ($districts as $district)
                                 <option value="{{ $district->id }}">{{ $district->name }}</option>
@@ -70,9 +70,14 @@
 
                     <x-form.select name="office" id="office" label="Offices" required wire:model="office">
                         <option value="">-- Select Office --</option>
-                        @foreach ($offices as $office)
+                        {{-- @foreach ($offices as $office)
+                        <option value="{{ $office->id }}">{{ $office->name }}</option>
+                        @endforeach --}}
+                        @forelse ($offices as $office)
                             <option value="{{ $office->id }}">{{ $office->name }}</option>
-                        @endforeach
+                        @empty
+                            <option disabled>No offices found for this selection</option>
+                        @endforelse
                     </x-form.select>
                 </div>
             </fieldset>
