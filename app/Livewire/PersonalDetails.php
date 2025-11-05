@@ -22,7 +22,7 @@ class PersonalDetails extends Component
     public $app_type, $app_date, $reg_no, $ds_date, $application_id;
     public $name, $mobile, $email, $dob, $age, $mar_statu;
     public $ffname, $mfname, $sfname;
-    public $caste, $cas_cer_no, $encoded, $hash;
+    public $caste, $cas_cer_no, $encoded, $hash, $grievance_id;
     public function updatedDob($value)
     {
         try {
@@ -88,6 +88,7 @@ class PersonalDetails extends Component
         if ($aadhaarData) {
             $this->encoded = $aadhaarData['encoded'];
             $this->hash = $aadhaarData['hash'];
+            $this->grievance_id = $aadhaarData['grievance_id'];
         }
         $this->currentDate = Carbon::now()->format('d/m/Y');
         $this->minDOB = now()->subYears(60)->format('Y-m-d');
@@ -141,7 +142,10 @@ class PersonalDetails extends Component
         DB::beginTransaction();
         try {
             if ($this->mode === null && $this->application_id === null) {
-
+                if ($this->grievance_id) {
+                    dump(Crypt::decryptString($this->grievance_id));
+                }
+                dd('ok');
                 $uniqueApp = new UniqueAppBenId;
                 $uniqueApp->save();
 
