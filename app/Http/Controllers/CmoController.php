@@ -133,7 +133,21 @@ class CmoController extends Controller
         $CmoSmData->save();
     }
 
-    public function cmogrievancesearch(Request $request){
-        dd($request->all());
+    public function cmogrievancesearch(Request $request)
+    {
+        // dd($request->all());
+        $action_type = $request->action_type;
+        if ($action_type == 'send_to_operator') {
+            $grievance_id = Crypt::decryptString($request->id);
+            $CmoSmData = CmoSmData::find($grievance_id);
+            $CmoSmData->send_to_op = 1;
+            $CmoSmData->send_to_op_by = Auth::id();
+            $CmoSmData->send_to_op_date = now()->toDateString();
+            $CmoSmData->redressed_status = Codemaster::getIdByCode(3304);
+            $CmoSmData->save();
+            session()->flash('success', 'The Grievance Is Sent To Operator For New Entry');
+            return redirect()->route('cmo-grievance-workflow');
+        } elseif ($action_type == 'search') {
+        }
     }
 }

@@ -117,7 +117,7 @@
                 title="Search using Application Id, Beneficiary name, Applicant mobile no, Aadhaar no, Bank account number"
                 sectionId="search-details"
                 color="indigo-500">
-                <form action="{{ route('cmo-grievance-search') }}" method="POST">
+                <form action="{{ route('cmo-grievance-search') . '?id=' . Crypt::encryptString($record->grievance_id) }}" method="POST">
                     @csrf
                     <div x-data="{ selectedOption: 'Mobile Number' }">
                         <div class="bg-gray-50 p-3 rounded-lg shadow hover:shadow-md transition">
