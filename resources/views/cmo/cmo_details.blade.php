@@ -119,29 +119,72 @@
                 color="indigo-500">
                 <form action="{{ route('cmo-grievance-search') . '?id=' . Crypt::encryptString($record->grievance_id) }}" method="POST">
                     @csrf
-                    <div x-data="{ selectedOption: 'Mobile Number' }">
+                    <div
+                        x-data="{
+        selectedOption: 'Mobile Number',
+        inputValue: '{{ $record->pri_cont_no }}'
+    }">
                         <div class="bg-gray-50 p-3 rounded-lg shadow hover:shadow-md transition">
                             <x-form.label
                                 name="Please select which one do you want to Search?"
                                 label="Please select which one do you want to Search?">
                             </x-form.label>
-                            <x-form.radio name="search-details" id="application-id" value="Application ID" x-model="selectedOption"></x-form.radio>
-                            <x-form.radio name="search-details" id="beneficiary-name" value="Beneficiary Name" x-model="selectedOption"></x-form.radio>
-                            <x-form.radio name="search-details" id="mobile-number" value="Mobile Number" x-model="selectedOption"></x-form.radio>
-                            <x-form.radio name="search-details" id="aadhaar-number" value="Aadhaar Number" x-model="selectedOption"></x-form.radio>
-                            <x-form.radio name="search-details" id="bank-account-number" value="Bank Account Number" x-model="selectedOption"></x-form.radio>
+
+                            <x-form.radio
+                                name="search-details"
+                                id="application-id"
+                                value="Application ID"
+                                x-model="selectedOption"
+                                x-on:change="inputValue = ''">
+                            </x-form.radio>
+
+                            <x-form.radio
+                                name="search-details"
+                                id="beneficiary-name"
+                                value="Beneficiary Name"
+                                x-model="selectedOption"
+                                x-on:change="inputValue = ''">
+                            </x-form.radio>
+
+                            <x-form.radio
+                                name="search-details"
+                                id="mobile-number"
+                                value="Mobile Number"
+                                x-model="selectedOption"
+                                x-on:change="inputValue = ''">
+                            </x-form.radio>
+
+                            <x-form.radio
+                                name="search-details"
+                                id="aadhaar-number"
+                                value="Aadhaar Number"
+                                x-model="selectedOption"
+                                x-on:change="inputValue = ''">
+                            </x-form.radio>
+
+                            <x-form.radio
+                                name="search-details"
+                                id="bank-account-number"
+                                value="Bank Account Number"
+                                x-model="selectedOption"
+                                x-on:change="inputValue = ''">
+                            </x-form.radio>
                         </div>
+
                         <div class="mt-4 bg-gray-50 p-3 rounded-lg shadow hover:shadow-md transition">
                             <label class="block text-sm font-medium text-gray-700">
                                 <span x-text="selectedOption ? selectedOption : 'Enter value'"></span>
                                 <span class="text-red-600 font-bold">*</span>
                             </label>
+
                             <input
                                 type="text"
-                                class="border border-gray-300 hover:border-blue-500 focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                x-model="inputValue"
                                 x-bind:name="selectedOption"
                                 x-bind:placeholder="selectedOption ? 'Enter ' + selectedOption : 'Enter value'"
-                                required value="{{$record->pri_cont_no}}">
+                                class="border border-gray-300 hover:border-blue-500 focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                required>
+
                             <div class="flex justify-end mt-4 space-x-2">
                                 <x-button.primary
                                     type="submit"
@@ -150,7 +193,6 @@
                                     class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
                                     GO
                                 </x-button.primary>
-
                                 <x-button.danger
                                     type="submit"
                                     name="action_type"
@@ -159,9 +201,10 @@
                                     Send To Operator For New Entry
                                 </x-button.danger>
                             </div>
-
                         </div>
                     </div>
+
+
                 </form>
             </x-accordion-section>
         </div>

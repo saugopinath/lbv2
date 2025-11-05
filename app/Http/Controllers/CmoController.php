@@ -154,6 +154,9 @@ class CmoController extends Controller
             session()->flash('success', 'The Grievance Is Sent To Operator For New Entry');
             return redirect()->route('cmo-grievance-workflow');
         } elseif ($action_type == 'search') {
+
+            dd($request->all());
+
         }
     }
 }
