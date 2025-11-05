@@ -153,16 +153,30 @@ class CmoWorkFlowDataTable extends DataTableComponent
                 ->label(fn($row) => $row->pri_cont_no ?? 'N/A'),
             Column::make("CMO Received Date(YYYY-MM-DD)", "CMO_Received_Date(YYYY-MM-DD)")
                 ->label(fn($row) => Carbon::parse($row->grievance_generate_date)->toDateString() ?? 'N/A'),
+            // $columns[] = Column::make("Action")
+            //     ->label(function ($row) {
+            //         return view('coulmn_button.view', [
+            //             // 'link' => route('cmo-grievance-find', Crypt::encryptString($row->grievance_id)),
+            //             'link' => route('cmo-grievance-find') . '?id=' . Crypt::encryptString($row->grievance_id),
+            //             'tooltip' => 'Find',
+            //         ])->render();
+            //     })
+            //     ->html(),
             $columns[] = Column::make("Action")
                 ->label(function ($row) {
+                    $user = auth()->user();
+                    if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+                        $routeName = 'cmo-grievance-find';
+                    } elseif ($user->hasRole('Operator')) {
+                        $routeName = 'lbform';
+                    }
+                    $link = route($routeName) . '?id=' . Crypt::encryptString($row->grievance_id);
                     return view('coulmn_button.view', [
-                        // 'link' => route('cmo-grievance-find', Crypt::encryptString($row->grievance_id)),
-                        'link' => route('cmo-grievance-find') . '?id=' . Crypt::encryptString($row->grievance_id),
+                        'link' => $link,
                         'tooltip' => 'Find',
                     ])->render();
                 })
-                ->html(),
-
+                ->html()
         ];
     }
     public function builder(): Builder
