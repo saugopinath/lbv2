@@ -23,6 +23,7 @@ class PersonalDetails extends Component
     public $name, $mobile, $email, $dob, $age, $mar_statu;
     public $ffname, $mfname, $sfname;
     public $caste, $cas_cer_no, $encoded, $hash;
+    public bool $hideAppTypeSection = false;
     public function updatedDob($value)
     {
         try {
@@ -89,13 +90,36 @@ class PersonalDetails extends Component
             $this->encoded = $aadhaarData['encoded'];
             $this->hash = $aadhaarData['hash'];
         }
+
+        $user = Auth::user();
+
+        $entryTypes = collect();
+
+        if ($user->can('Normal Entry Allow')) {
+            $normal = Codemaster::where('short_name', 'entry_type_normal')->get();
+            $entryTypes = $entryTypes->merge($normal);
+        }
+
+        if ($user->can('Duare Sarkar Entry Allow')) {
+            $duare = Codemaster::where('short_name', 'entry_type_duare_sarkar')->get();
+            $entryTypes = $entryTypes->merge($duare);
+        }
+
+        if ($entryTypes->isNotEmpty()) {
+            $this->hideAppTypeSection = true;
+            $this->app_types = $entryTypes;
+        } else {
+            $this->hideAppTypeSection = false;
+            $this->app_types = [];
+        }
+
         $this->currentDate = Carbon::now()->format('d/m/Y');
         $this->minDOB = now()->subYears(60)->format('Y-m-d');
         $this->maxDOB = now()->subYears(25)->format('Y-m-d');
         $this->cdate = Carbon::now()->format('Y-m-d');
         $this->pdate = Carbon::now()->subYears(2)->format('Y-m-d');
         $this->mode = $mode;
-        $this->app_types = Codemaster::where('code', 4)->first()->children()->get();
+        // $this->app_types = Codemaster::where('code', 4)->first()->children()->get();
         $this->mar_status = Codemaster::where('code', 3)->first()->children()->where('code', '!=', 35)->get();
         $this->castes = Codemaster::where('code', 17)->first()->children()->get();
         if ($application_id != null) {
