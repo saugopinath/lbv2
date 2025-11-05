@@ -4,7 +4,9 @@
             <h1 class="text-xl font-bold text-indigo-800 dark:text-white">{{$header}}</h1>
         </div>
     </div>
+    @if($workflow_dropdown_show)
     <livewire:cmo-grievance-workflow-dropdown />
+    @endif
     <div class="bg-white shadow-xl rounded-2xl ">
         <h2 class="text-xl font-semibold text-gray-700 mb-4 p-4">
             Grievance List

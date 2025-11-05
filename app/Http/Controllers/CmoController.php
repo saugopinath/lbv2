@@ -82,7 +82,13 @@ class CmoController extends Controller
     public function cmogrievanceworkflow()
     {
         $header = 'Sarasori Mukhyamantri (CMO Grievance) List';
-        return view('cmo.cmogrievanceworkflow', compact('header'));
+        $user = auth()->user();
+        if ($user->hasRole('Operator')) {
+            $workflow_dropdown_show = 0;
+        } else{
+            $workflow_dropdown_show = 1;
+        }
+        return view('cmo.cmogrievanceworkflow', compact('header','workflow_dropdown_show'));
     }
 
     //    public function cmogrievancefind($id)

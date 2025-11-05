@@ -41,7 +41,12 @@ class CmoWorkFlowDataTable extends DataTableComponent
     }
     public function mount(): void
     {
-        $this->process_type = Codemaster::getIdByCode(3301);
+        $user = auth()->user();
+        if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+            $this->process_type = Codemaster::getIdByCode(3301);
+        } elseif ($user->hasRole('Operator')) {
+            $this->process_type = Codemaster::getIdByCode(3304);
+        }
 
         $select_lgd = session('lgd_session');
 

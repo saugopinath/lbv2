@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use App\Traits\WithLiveValidation;
 use Illuminate\Support\Facades\DB;
+use App\Models\CmoSmData;
 
 class PersonalDetails extends Component
 {
@@ -142,10 +143,7 @@ class PersonalDetails extends Component
         DB::beginTransaction();
         try {
             if ($this->mode === null && $this->application_id === null) {
-                if ($this->grievance_id) {
-                    dump(Crypt::decryptString($this->grievance_id));
-                }
-                dd('ok');
+
                 $uniqueApp = new UniqueAppBenId;
                 $uniqueApp->save();
 
@@ -209,7 +207,12 @@ class PersonalDetails extends Component
                     ];
                 }
                 $draftbenPar->relationships()->createMany($relations);
-
+                if ($this->grievance_id) {
+                    $grievance_id = Crypt::decryptString($this->grievance_id);
+                    $CmoSmData = CmoSmData::find($grievance_id);
+                    $CmoSmData->lb_application_id = $draftbenPar->application_id;
+                    $CmoSmData->save();
+                }
                 $this->dispatch('perDet', [
                     'application_id' => $draftbenPar->application_id,
                     'message' => "Personal Details saved successfully and the application id is: {$draftbenPar->application_id}"
