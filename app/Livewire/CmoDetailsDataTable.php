@@ -75,6 +75,7 @@ class CmoDetailsDataTable extends DataTableComponent
             ->setSearchEnabled()
             ->setSearchLive()
             // ->setBulkActionsEnabled()
+            ->setColumnSelectDisabled()
         ;
 
 
@@ -120,66 +121,54 @@ class CmoDetailsDataTable extends DataTableComponent
     }
     public function filters(): array
     {
-        return [
-            TextFilter::make('Application ID')
-                ->filter(function ($query, $value) {
-                    $query->whereHas('sourceable', function ($q) use ($value) {
-                        $q->where('application_id', 'ILIKE', "%{$value}%");
-                    });
-                }),
-
-            TextFilter::make('Applicant Name')
-                ->filter(function ($query, $value) {
-                    $query->whereHas('sourceable', function ($q) use ($value) {
-                        $q->where('full_name', 'ILIKE', "%{$value}%");
-                    });
-                }),
-        ];
+        return [];
     }
 
     public function columns(): array
     {
         return [
-            Column::make("Grievance ID", "grievance_id")
-                ->label(fn($row) => $row->grievance_id ?? 'N/A')
+            Column::make("Application ID", "application_id")
+                ->label(fn($row) => $row->sourceable->application_id ?? 'N/A')
                 ->sortable()
                 ->searchable(function ($query, $searchTerm) {
                     $query->whereHas('sourceable', function ($q) use ($searchTerm) {
-                        $q->where('grievance_id', 'ILIKE', "%{$searchTerm}%");
+                        $q->where('application_id', 'ILIKE', "%{$searchTerm}%");
                     });
                 }),
 
-            Column::make("Caller Name", "full_name")
-                ->label(fn($row) => $row->applicant_name ?? 'N/A'),
+            Column::make("Applicant Name", "full_name")
+                ->label(fn($row) => $row->sourceable->full_name ?? 'N/A'),
 
-            Column::make("Caller Mobile No", "caller_mobile_no")
-                ->label(fn($row) => $row->pri_cont_no ?? 'N/A'),
-            Column::make("CMO Received Date(YYYY-MM-DD)", "CMO_Received_Date(YYYY-MM-DD)")
-                ->label(fn($row) => Carbon::parse($row->grievance_generate_date)->toDateString() ?? 'N/A'),
-            // $columns[] = Column::make("Action")
-            //     ->label(function ($row) {
-            //         return view('coulmn_button.view', [
-            //             // 'link' => route('cmo-grievance-find', Crypt::encryptString($row->grievance_id)),
-            //             'link' => route('cmo-grievance-find') . '?id=' . Crypt::encryptString($row->grievance_id),
-            //             'tooltip' => 'Find',
-            //         ])->render();
-            //     })
-            //     ->html(),
-            $columns[] = Column::make("Action")
+            Column::make("Father's Name", "fullname")
                 ->label(function ($row) {
-                    $user = auth()->user();
-                    if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
-                        $routeName = 'cmo-grievance-find';
-                    } elseif ($user->hasRole('Operator')) {
-                        $routeName = 'lbform';
-                    }
-                    $link = route($routeName) . '?id=' . Crypt::encryptString($row->grievance_id);
+                    return optional(
+                        $row->sourceable->relationships->firstWhere(
+                            'relation_type_id',
+                            Codemaster::getIdByCode(131)
+                        )
+                    )->full_name ?? 'N/A';
+                }),
+
+            Column::make("Mobile No", "Mobile No")
+                ->label(fn($row) => $row->sourceable->mobile_no
+                    ?? 'N/A'),
+
+            Column::make("Address", "Address")
+                ->label(fn($row) => $row->sourceable->contact->getFullAddress() ?? 'N/A')
+                ->html(),
+
+            Column::make("Status", "Status")
+                ->label(fn($row) => $row->sourceable->getStatusText()
+                    ?? 'N/A'),
+
+            $columns[] = Column::make("Actions")
+                ->label(function ($row) {
                     return view('coulmn_button.view', [
-                        'link' => $link,
-                        'tooltip' => 'Find',
+                        'link' => route('draft-application.view', Crypt::encryptString($row->sourceable->application_id)),
+                        'tooltip' => 'Process',
                     ])->render();
                 })
-                ->html()
+                ->html(),
         ];
     }
     public function builder(): Builder

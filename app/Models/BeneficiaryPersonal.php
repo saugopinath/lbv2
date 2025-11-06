@@ -76,18 +76,22 @@ class BeneficiaryPersonal extends Model implements Auditable
     // {
     //     return $this->hasMany(BeneficiaryRelationship::class, 'application_id');
     // }
+    
+    public function getStatusText()
+    {
+        return 'Approved';
+    }
 
     protected static function booted()
     {
         static::created(function ($beneficiary) {
-             $commonList = BeneficiaryCommonList::find($beneficiary->application_id);
+            $commonList = BeneficiaryCommonList::find($beneficiary->application_id);
             // dd( get_class($beneficiary));
             if ($commonList) {
                 $commonList->update([
-                'sourceable_type' => get_class($beneficiary),
-            ]);
+                    'sourceable_type' => get_class($beneficiary),
+                ]);
             }
         });
     }
-    
 }

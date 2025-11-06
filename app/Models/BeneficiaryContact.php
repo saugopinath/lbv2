@@ -44,4 +44,49 @@ class BeneficiaryContact extends Model implements Auditable
     {
         return $this->belongsTo(Municipality::class, 'municipality_id', 'id');
     }
+    public function subdivision()
+    {
+        return $this->belongsTo(Subdivision::class, 'sub_division_id', 'id');
+    }
+
+    public function getFullAddress(): string
+    {
+        $district = optional($this->district)->name;
+        $subdivision = optional($this->subdivision)->name;
+        $block = optional($this->block)->name;
+        $panchayat = optional($this->panchayat)->name;
+        $municipality = optional($this->municipality)->name;
+        $ward = optional($this->ward)->name;
+
+        $parts = [];
+
+        if ($district) {
+            $parts[] = "District - " . strtoupper($district);
+        }
+
+        // Rural
+        if ($this->rural_urban_id == 2) {
+            if ($block) {
+                $parts[] = "Block - " . strtoupper($block);
+            }
+            if ($panchayat) {
+                $parts[] = "GP - " . strtoupper($panchayat);
+            }
+        }
+        // Urban
+        else {
+            if ($subdivision) {
+                $parts[] = "Subdivision - " . strtoupper($subdivision);
+            }
+            if ($municipality) {
+                $parts[] = "Municipality - " . strtoupper($municipality);
+            }
+            if ($ward) {
+                $parts[] = "Ward - " . strtoupper($ward);
+            }
+        }
+
+        // Use <br> for line breaks in HTML
+        return !empty($parts) ? implode('<br>', $parts) : 'N/A';
+    }
 }

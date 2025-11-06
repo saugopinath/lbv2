@@ -68,6 +68,17 @@ class DraftBeneficiaryPersonal extends Model implements Auditable
     {
         return $this->morphOne(BeneficiaryCommonList::class, 'sourceable');
     }
+    public function getStatusText(): string
+    {
+        if ($this->next_level_role_id == Codemaster::getIdByCode(22)) {
+            return 'Submitted but Verification Pending';
+        } elseif ($this->next_level_role_id == Codemaster::getIdByCode(23)) {
+            return 'Verified but Approval Pending';
+        } else {
+            return 'Partially Submitted';
+        }
+    }
+
     protected static function booted()
     {
         static::created(function ($draftbenPar) {
