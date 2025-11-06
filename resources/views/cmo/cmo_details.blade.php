@@ -117,8 +117,7 @@
                 title="Search using Application Id, Beneficiary name, Applicant mobile no, Aadhaar no, Bank account number"
                 sectionId="search-details"
                 color="indigo-500">
-                <livewire:grievance-search :initial-mobile="$record->pri_cont_no" />
-
+                <livewire:grievance-search :initial-mobile="$record->pri_cont_no" :grievance-id="Crypt::encryptString($record->grievance_id)" />
             </x-accordion-section>
         </div>
     </div>

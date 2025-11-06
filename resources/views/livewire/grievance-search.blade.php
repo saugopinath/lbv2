@@ -50,15 +50,20 @@
         </div>
 
         <div class="flex justify-end gap-2">
-           <button
-    type="button"
-    class="px-4 py-2 bg-blue-600 text-white rounded"
-    x-on:click="$wire.dispatch('searchTriggered', [selectedOption, inputValue])">
-    GO
-</button>
-
-
-
+            <button
+                type="button"
+                class="px-4 py-2 bg-blue-600 text-white rounded"
+                x-on:click="$wire.dispatch('searchTriggered', [selectedOption, inputValue])">
+                GO
+            </button>
+            <form action="{{ route('cmo-grievance-search') . '?id=' . $grievanceId }}" method="POST">
+                @csrf
+                <x-button.danger
+                    type="submit"
+                    name="action_type" value="send_to_operator" class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
+                    Send To Operator For New Entry
+                </x-button.danger>
+            </form>
 
 
         </div>

@@ -10,6 +10,7 @@ class GrievanceSearch extends Component
     public $selectedOption = 'Mobile Number';
     public $inputValue = '';
     public $initialMobile = '';
+    public $grievanceId = '';
 
     #[On('searchTriggered')]
     public function handleSearchTriggered($selectedOption, $inputValue)
@@ -21,9 +22,10 @@ class GrievanceSearch extends Component
         dd($selectedOption, $inputValue);
     }
 
-    public function mount($initialMobile = '')
+    public function mount($initialMobile = '', $grievanceId = '')
     {
         $this->initialMobile = $initialMobile;
+        $this->grievanceId = $grievanceId;
         $this->inputValue = $initialMobile;
     }
 

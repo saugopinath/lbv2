@@ -85,10 +85,10 @@ class CmoController extends Controller
         $user = auth()->user();
         if ($user->hasRole('Operator')) {
             $workflow_dropdown_show = 0;
-        } else{
+        } else {
             $workflow_dropdown_show = 1;
         }
-        return view('cmo.cmogrievanceworkflow', compact('header','workflow_dropdown_show'));
+        return view('cmo.cmogrievanceworkflow', compact('header', 'workflow_dropdown_show'));
     }
 
     //    public function cmogrievancefind($id)
@@ -153,10 +153,6 @@ class CmoController extends Controller
             $CmoSmData->save();
             session()->flash('success', 'The Grievance Is Sent To Operator For New Entry');
             return redirect()->route('cmo-grievance-workflow');
-        } elseif ($action_type == 'search') {
-
-            dd($request->all());
-
         }
     }
 }
