@@ -1,10 +1,12 @@
 <?php
 
 namespace App\Livewire\ProcessApplication;
+
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Models\DraftBeneficiaryPersonal;
 use Illuminate\Support\Facades\Crypt;
+
 class DraftApplicationView extends Component
 {
     public $applicationId;
@@ -26,7 +28,14 @@ class DraftApplicationView extends Component
     public function openActionModal()
     {
         $this->dispatch('hideLoader');
-        $this->dispatch('openBulkActionModal', selectedIds: [$this->application->application_id]);
+        // $this->dispatch('openBulkActionModal', selectedIds: [$this->application->application_id]);
+        
+        $this->dispatch('openBulkActionModal', [
+            'selectedIds' => [
+                'application_id' => $this->application->application_id,
+                'entry_type' => $this->application->entry_type,
+            ]
+        ]);
     }
 
     #[On('actionPerformedAndRedirect')]

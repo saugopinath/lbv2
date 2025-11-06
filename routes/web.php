@@ -114,7 +114,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('lb-application-list');
 
     Route::get('/application/{id}', DraftApplicationView::class)
-        // ->middleware('permission.redirect:view application')
         ->name('draft-application.view');
 
     // Incomplete Types

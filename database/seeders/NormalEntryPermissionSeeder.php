@@ -20,6 +20,10 @@ class NormalEntryPermissionSeeder extends Seeder
             'Normal Entry Approver Allow',
             'Normal Entry Reject Allow',
             'Normal Entry Revert Allow',
+            'Bulk Actions Normal Entry Verification Allow',
+            'Bulk Actions Normal Entry Approver Allow',
+            'Bulk Actions Normal Entry Reject Allow',
+            'Bulk Actions Normal Entry Revert Allow',
         ];
 
         foreach ($childPermissions as $permissionName) {

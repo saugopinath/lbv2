@@ -20,6 +20,10 @@ class DuareSarkarPermissionSeeder extends Seeder
             'Duare Sarkar Entry Approver Allow',
             'Duare Sarkar Entry Reject Allow',
             'Duare Sarkar Entry Revert Allow',
+            'Bulk Actions Duare Sarkar Entry Verification Allow',
+            'Bulk Actions Duare Sarkar Entry Approver Allow',
+            'Bulk Actions Duare Sarkar Entry Reject Allow',
+            'Bulk Actions Duare Sarkar Entry Revert Allow',
         ];
 
         foreach ($childPermissions as $permissionName) {

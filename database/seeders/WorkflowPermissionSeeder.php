@@ -20,6 +20,10 @@ class WorkflowPermissionSeeder extends Seeder
             'Approver Allow',
             'Reject Allow',
             'Revert Allow',
+            'Bulk Actions Verification Allow',
+            'Bulk Actions Approver Allow',
+            'Bulk Actions Reject Allow',
+            'Bulk Actions Revert Allow',
         ];
 
         foreach ($childPermissions as $permissionName) {

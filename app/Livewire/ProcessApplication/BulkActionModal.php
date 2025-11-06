@@ -32,6 +32,7 @@ class BulkActionModal extends Component
     public array $reasons = [];
     public array $availableActions = [];
     public int $currentUserId;
+    public $applicationId, $entryType;
 
     public string $bulkActionTypeLabel = 'Select Operation';
 
@@ -41,26 +42,58 @@ class BulkActionModal extends Component
         $this->reset(['bulkActionType', 'reason', 'remark', 'availableActions', 'bulkActionTypeLabel']);
         $this->selectedRows = $selectedIds;
         // dd($this->selectedRows);
-
+        $this->applicationId = $this->selectedRows['selectedIds']['application_id'];
+        $this->entryType = $this->selectedRows['selectedIds']['entry_type'];
         $user = Auth::user();
         // dump($user);
 
+        $this->availableActions = [];
 
-        if ($user->hasRole(['Verifier', 'Delegated Verifier'])) {
-
-            $this->availableActions = [
-                'V' => 'Verify',
-                'R' => 'Reject',
-                'T' => 'Revert',
-            ];
-        } elseif ($user->hasRole(['Approver', 'Delegated Approver'])) {
-
-            $this->availableActions = [
-                'A' => 'Approve',
-                'R' => 'Reject',
-                'T' => 'Revert',
-            ];
+        if ($this->entryType == Codemaster::getIdByCode(41)) {
+            // 🔹 Normal Entry Permissions
+            if ($user->can('Normal Entry Verification Allow')) {
+                $this->availableActions['V'] = 'Verify';
+            }
+            if ($user->can('Normal Entry Approver Allow')) {
+                $this->availableActions['A'] = 'Approve';
+            }
+            if ($user->can('Normal Entry Reject Allow')) {
+                $this->availableActions['R'] = 'Reject';
+            }
+            if ($user->can('Normal Entry Revert Allow')) {
+                $this->availableActions['T'] = 'Revert';
+            }
+        } elseif ($this->entryType == Codemaster::getIdByCode(42)) {
+            // 🔹 Duare Sarkar Permissions
+            if ($user->can('Duare Sarkar Entry Verification Allow')) {
+                $this->availableActions['V'] = 'Verify';
+            }
+            if ($user->can('Duare Sarkar Entry Approver Allow')) {
+                $this->availableActions['A'] = 'Approve';
+            }
+            if ($user->can('Duare Sarkar Entry Reject Allow')) {
+                $this->availableActions['R'] = 'Reject';
+            }
+            if ($user->can('Duare Sarkar Entry Revert Allow')) {
+                $this->availableActions['T'] = 'Revert';
+            }
         }
+
+        // if ($user->hasRole(['Verifier', 'Delegated Verifier'])) {
+
+        //     $this->availableActions = [
+        //         'V' => 'Verify',
+        //         'R' => 'Reject',
+        //         'T' => 'Revert',
+        //     ];
+        // } elseif ($user->hasRole(['Approver', 'Delegated Approver'])) {
+
+        //     $this->availableActions = [
+        //         'A' => 'Approve',
+        //         'R' => 'Reject',
+        //         'T' => 'Revert',
+        //     ];
+        // }
 
 
         $this->bulkActionModal = true; //render again
@@ -98,7 +131,9 @@ class BulkActionModal extends Component
 
 
         // DB::transaction(function () use (&$successMessage, $approverRoleId, $operatorRoleId, $currentUserId) {
-        $ids = $this->selectedRows;
+        // $ids = $this->applicationId;
+        $ids = (array) $this->applicationId;
+
         if ($this->bulkActionType === 'V') {
             foreach ($ids as $id) {
                 DB::beginTransaction();
@@ -152,10 +187,10 @@ class BulkActionModal extends Component
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     DB::commit();
-                     $this->dispatch('toastr', [
-                    'type' => 'success',
-                    'message' => 'Application approved successfully!'
-                ]);
+                    $this->dispatch('toastr', [
+                        'type' => 'success',
+                        'message' => 'Application approved successfully!'
+                    ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
@@ -191,10 +226,10 @@ class BulkActionModal extends Component
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     DB::commit();
-                     $this->dispatch('toastr', [
-                    'type' => 'warning',
-                    'message' => 'Application reverted successfully!'
-                ]);
+                    $this->dispatch('toastr', [
+                        'type' => 'warning',
+                        'message' => 'Application reverted successfully!'
+                    ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
@@ -222,10 +257,10 @@ class BulkActionModal extends Component
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     DB::commit();
-                     $this->dispatch('toastr', [
-                    'type' => 'error',
-                    'message' => 'Application rejected successfully!'
-                ]);
+                    $this->dispatch('toastr', [
+                        'type' => 'error',
+                        'message' => 'Application rejected successfully!'
+                    ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
