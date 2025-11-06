@@ -15,11 +15,8 @@ class GrievanceSearch extends Component
     #[On('searchTriggered')]
     public function handleSearchTriggered($selectedOption, $inputValue)
     {
-        // এখন এগুলো ঠিকভাবে পাওয়া যাবে
         $this->selectedOption = $selectedOption;
         $this->inputValue = $inputValue;
-
-        dd($selectedOption, $inputValue);
     }
 
     public function mount($initialMobile = '', $grievanceId = '')

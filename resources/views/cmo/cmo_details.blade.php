@@ -118,6 +118,7 @@
                 sectionId="search-details"
                 color="indigo-500">
                 <livewire:grievance-search :initial-mobile="$record->pri_cont_no" :grievance-id="Crypt::encryptString($record->grievance_id)" />
+                <livewire:cmo-details-data-table :initial-mobile="$record->pri_cont_no" />
             </x-accordion-section>
         </div>
     </div>
