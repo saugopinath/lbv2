@@ -156,7 +156,14 @@ class CmoController extends Controller
         }
     }
 
-    public function mapapplicant(Request $request) {
-        dd(Crypt::decryptString($request->id),Crypt::decryptString($request->params));
+    public function mapapplicant(Request $request)
+    {
+        $id = Crypt::decryptString($request->id);
+        $grievance_id = Crypt::decryptString($request->params);
+        $CmoSmData = CmoSmData::find($grievance_id);
+        $CmoSmData->lb_application_id = $id;
+        // $CmoSmData->save();
+        session()->flash('success', 'The Grievance Is Sent To Operator For New Entry');
+        return redirect()->route('cmo-grievance-workflow');
     }
 }

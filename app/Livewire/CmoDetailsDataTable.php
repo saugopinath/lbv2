@@ -199,15 +199,6 @@ class CmoDetailsDataTable extends DataTableComponent
         } else {
             $query->where('mobile_no', $this->initialMobile);
         }
-
-
-        // if (!empty($this->filter_condition)) {
-        //     foreach ($this->filter_condition as $column => $value) {
-        //         if (!empty($value)) {
-        //             $query->where($column, $value);
-        //         }
-        //     }
-        // }
         return $query;
     }
 
