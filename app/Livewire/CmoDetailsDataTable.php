@@ -41,9 +41,9 @@ class CmoDetailsDataTable extends DataTableComponent
     }
 
     #[On('searchTriggered')]
-    public function handleSearchTriggered($selectedOption, $inputValue)
+    public function handleSearchTriggered($data)
     {
-        dd($selectedOption, $inputValue);
+        dd($data);
     }
 
     public function mount($initialMobile): void

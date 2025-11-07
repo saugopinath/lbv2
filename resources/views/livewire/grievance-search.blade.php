@@ -21,6 +21,7 @@
                     <input
                         type="radio"
                         value="{{ $label }}"
+                        name="{{$key}}"
                         x-model="selectedOption"
                         class="text-indigo-600">
                     <span class="text-sm">{{ $label }}</span>
@@ -46,7 +47,10 @@
             <button
                 type="button"
                 class="px-4 py-2 bg-blue-600 text-white rounded"
-                x-on:click="$wire.dispatch('searchTriggered', [selectedOption, inputValue])">
+                x-on:click="let selected = document.querySelector('input[x-model=\'selectedOption\']:checked');
+        let nameKey = selected ? selected.getAttribute('name') : null;
+        let payload = { key: nameKey, value: inputValue };
+                $wire.dispatch('searchTriggered', [payload])">
                 GO
             </button>
 
@@ -54,8 +58,8 @@
                 @csrf
                 <x-button.danger
                     type="submit"
-                    name="action_type" 
-                    value="send_to_operator" 
+                    name="action_type"
+                    value="send_to_operator"
                     class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
                     Send To Operator For New Entry
                 </x-button.danger>
