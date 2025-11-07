@@ -92,12 +92,14 @@ class DraftBeneficiaryPersonal extends Model implements Auditable
                 'panchayat_id'    => $draftbenPar->panchayat_id,
                 'encoded_aadhar'    => $draftbenPar->aadhaar->aadhar_hash,
                 'mobile_no' => $draftbenPar->mobile_no,
+                'beneficiary_name' => $draftbenPar->full_name,
             ]);
         });
         static::updated(function ($draftbenPar) {
             if ($draftbenPar->lists) {
                 $draftbenPar->lists->update([
                     'mobile_no' => $draftbenPar->mobile_no,
+                    'beneficiary_name' => $draftbenPar->full_name,
                 ]);
             }
         });

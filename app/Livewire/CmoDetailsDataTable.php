@@ -178,30 +178,26 @@ class CmoDetailsDataTable extends DataTableComponent
                 ->html(),
         ];
     }
+    
     public function builder(): Builder
     {
         $query = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact');
-
         if ($this->searchValue) {
-            $key = $this->searchValue['key'];
-            $value = $this->searchValue['value'];
-            if ($key == 'application_id') {
-                $query->where('sourceable_id', $value);
-            } elseif ($key == 'beneficiary_name') {
-                $query->where('beneficiary_name', 'ILIKE', "%{$value}%");
-            } elseif ($key == 'mobile_number') {
-                $query->where('mobile_no', $value);
-            } elseif ($key == 'aadhaar_number') {
-                $query->where('encoded_aadhar', md5($value));
-            } elseif ($key == 'bank_account_number') {
-                $query->where('bank_account_number', $value);
-            }
+            $key = $this->searchValue['key'] ?? null;
+            $value = $this->searchValue['value'] ?? null;
+            match ($key) {
+                'application_id' => $query->where('sourceable_id', $value),
+                'beneficiary_name' => $query->where('beneficiary_name', 'ILIKE', "%{$value}%"),
+                'mobile_number' => $query->where('mobile_no', $value),
+                'aadhaar_number' => $query->where('encoded_aadhar', md5($value)),
+                'bank_account_number' => $query->where('bank_account_number', $value),
+                default => $query,
+            };
         } else {
             $query->where('mobile_no', $this->initialMobile);
         }
         return $query;
     }
-
 
     public function exportExcel()
     {

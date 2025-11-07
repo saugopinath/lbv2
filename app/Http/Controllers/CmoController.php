@@ -162,8 +162,8 @@ class CmoController extends Controller
         $grievance_id = Crypt::decryptString($request->params);
         $CmoSmData = CmoSmData::find($grievance_id);
         $CmoSmData->lb_application_id = $id;
-        // $CmoSmData->save();
-        session()->flash('success', 'The Grievance Is Sent To Operator For New Entry');
+        $CmoSmData->save();
+        session()->flash('success', 'The Grievance Is Mapped Successfully');
         return redirect()->route('cmo-grievance-workflow');
     }
 }
