@@ -155,4 +155,8 @@ class CmoController extends Controller
             return redirect()->route('cmo-grievance-workflow');
         }
     }
+
+    public function mapapplicant(Request $request) {
+        dd(Crypt::decryptString($request->id),Crypt::decryptString($request->params));
+    }
 }

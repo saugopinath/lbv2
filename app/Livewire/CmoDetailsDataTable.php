@@ -31,7 +31,7 @@ class CmoDetailsDataTable extends DataTableComponent
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
     public array $filter_condition = [];
-    public $process_type, $initialMobile;
+    public $process_type, $initialMobile, $searchValue, $grievanceId;
 
     protected $listeners = ['processTypeChanged' => 'updateProcessType'];
 
@@ -43,12 +43,12 @@ class CmoDetailsDataTable extends DataTableComponent
     #[On('searchTriggered')]
     public function handleSearchTriggered($data)
     {
-        dd($data);
+        $this->searchValue = $data;
     }
 
-    public function mount($initialMobile): void
+    public function mount($initialMobile, $grievanceId): void
     {
-        // dd($initialMobile);
+        $this->grievanceId = $grievanceId;
         $this->initialMobile = $initialMobile;
         $select_lgd = session('lgd_session');
 
@@ -163,8 +163,15 @@ class CmoDetailsDataTable extends DataTableComponent
 
             $columns[] = Column::make("Actions")
                 ->label(function ($row) {
+                    // return view('coulmn_button.view', [
+                    //     'link' => route('map-applicant', [
+                    //         'id' => Crypt::encryptString($row->sourceable->application_id),
+                    //         'grievance' => $this->grievanceId,
+                    //     ]),
+                    //     'tooltip' => 'Process',
+                    // ])->render();
                     return view('coulmn_button.view', [
-                        'link' => route('draft-application.view', Crypt::encryptString($row->sourceable->application_id)),
+                        'link' => route('map-applicant') . '?id=' . Crypt::encryptString($row->sourceable->application_id) . '&params=' . $this->grievanceId,
                         'tooltip' => 'Process',
                     ])->render();
                 })
@@ -174,9 +181,26 @@ class CmoDetailsDataTable extends DataTableComponent
     public function builder(): Builder
     {
         $query = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact');
-        if ($this->initialMobile) {
+
+        if ($this->searchValue) {
+            $key = $this->searchValue['key'];
+            $value = $this->searchValue['value'];
+            if ($key == 'application_id') {
+                $query->where('sourceable_id', $value);
+            } elseif ($key == 'beneficiary_name') {
+                $query->where('beneficiary_name', 'ILIKE', "%{$value}%");
+            } elseif ($key == 'mobile_number') {
+                $query->where('mobile_no', $value);
+            } elseif ($key == 'aadhaar_number') {
+                $query->where('encoded_aadhar', md5($value));
+            } elseif ($key == 'bank_account_number') {
+                $query->where('bank_account_number', $value);
+            }
+        } else {
             $query->where('mobile_no', $this->initialMobile);
         }
+
+
         // if (!empty($this->filter_condition)) {
         //     foreach ($this->filter_condition as $column => $value) {
         //         if (!empty($value)) {

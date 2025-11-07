@@ -120,7 +120,7 @@
                 <livewire:grievance-search :mobile-number="$record->pri_cont_no" :grievance-id="Crypt::encryptString($record->grievance_id)" />
 
                 <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                    <livewire:cmo-details-data-table :initial-mobile="$record->pri_cont_no" />
+                    <livewire:cmo-details-data-table :initial-mobile="$record->pri_cont_no" :grievance-id="Crypt::encryptString($record->grievance_id)" />
                 </div>
             </x-accordion-section>
         </div>
