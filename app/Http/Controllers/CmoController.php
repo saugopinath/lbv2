@@ -158,6 +158,7 @@ class CmoController extends Controller
 
     public function mapapplicant(Request $request)
     {
+        dd($request->all());
         $id = Crypt::decryptString($request->id);
         $grievance_id = Crypt::decryptString($request->params);
         $CmoSmData = CmoSmData::find($grievance_id);

@@ -32,8 +32,9 @@ class CmoDetailsDataTable extends DataTableComponent
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
     public array $filter_condition = [];
     public $process_type, $initialMobile, $searchValue, $grievanceId;
-
-    protected $listeners = ['processTypeChanged' => 'updateProcessType'];
+    public $remarks;
+    public $atr_type;
+    protected $listeners = ['processTypeChanged' => 'updateProcessType', 'updateGrievanceData' => 'setData'];
 
     public function updateProcessType($type)
     {
@@ -45,11 +46,17 @@ class CmoDetailsDataTable extends DataTableComponent
     {
         $this->searchValue = $data;
     }
-
+    public function setData($remarks, $atr_type)
+    {
+        $this->remarks = $remarks;
+        $atr_type = json_decode($atr_type, true);
+        $this->atr_type = $atr_type['id'];
+    }
     public function mount($initialMobile, $grievanceId): void
     {
         $this->grievanceId = $grievanceId;
         $this->initialMobile = $initialMobile;
+
         $select_lgd = session('lgd_session');
 
         if (!empty($select_lgd['district_id'])) {
@@ -170,15 +177,16 @@ class CmoDetailsDataTable extends DataTableComponent
                     //     ]),
                     //     'tooltip' => 'Process',
                     // ])->render();
-                    return view('coulmn_button.view', [
-                        'link' => route('map-applicant') . '?id=' . Crypt::encryptString($row->sourceable->application_id) . '&params=' . $this->grievanceId,
+                    return view('coulmn_button.actions', [
+                        'link' => route('map-applicant') . '?id=' . Crypt::encryptString($row->sourceable->application_id) . '&grievance_id=' . $this->grievanceId. '&remarks=' .  $this->remarks. '&atr_type=' . $this->atr_type,
                         'tooltip' => 'Process',
+                        'method' => 'POST', 
                     ])->render();
                 })
                 ->html(),
         ];
     }
-    
+
     public function builder(): Builder
     {
         $query = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact');

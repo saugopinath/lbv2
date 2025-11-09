@@ -180,9 +180,10 @@ class CmoWorkFlowDataTable extends DataTableComponent
                         $routeName = 'lbform';
                     }
                     $link = route($routeName) . '?id=' . Crypt::encryptString($row->grievance_id);
-                    return view('coulmn_button.view', [
+                    return view('coulmn_button.actions', [
                         'link' => $link,
                         'tooltip' => 'Find',
+                        'method' => 'POST', 
                     ])->render();
                 })
                 ->html()

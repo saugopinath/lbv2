@@ -8,6 +8,8 @@
         x-data="{
             openSection: 'grievance-details',
             atr: { id: '', can_find_applicant: '', atr_code: '' },
+             remarks: '',
+        atr_type: '',
             toggleSection(section) {
                 if (this.openSection === section) {
                     this.openSection = 'grievance-details';
@@ -16,7 +18,12 @@
                 }
             },
             openSearchSection() {
+             Livewire.dispatch('updateGrievanceData', { 
+                remarks: this.remarks, 
+                atr_type: this.atr_type 
+            });
                 this.openSection = 'search-details';
+            
             }
         }"
         class="bg-white dark:bg-gray-800 shadow-md rounded p-8 space-y-2">
@@ -58,7 +65,7 @@
                 <div class="space-y-3">
                     <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
                         <x-form.select
-                            name="atr_type"
+                            name="atr_type" x-model="atr_type"
                             required
                             class="border rounded p-2 w-full"
                             x-on:change="
@@ -83,7 +90,7 @@
                         </div>
                     </template>
                     <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                        <x-form.input id="remarks" name="remarks" label="Remarks" required type="text" />
+                        <x-form.input id="remarks" name="remarks" label="Remarks" required type="text" x-model="remarks" />
                     </div>
                     <template x-if="atr.can_find_applicant == 1 && atr.atr_code != '002'">
                         <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
@@ -120,7 +127,11 @@
                 <livewire:grievance-search :mobile-number="$record->pri_cont_no" :grievance-id="Crypt::encryptString($record->grievance_id)" />
 
                 <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
-                    <livewire:cmo-details-data-table :initial-mobile="$record->pri_cont_no" :grievance-id="Crypt::encryptString($record->grievance_id)" />
+                    <livewire:cmo-details-data-table
+                        :initial-mobile="$record->pri_cont_no"
+                        :grievance-id="Crypt::encryptString($record->grievance_id)"
+                        />
+
                 </div>
             </x-accordion-section>
         </div>
