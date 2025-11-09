@@ -1,4 +1,8 @@
 <?php
+<<<<<<< HEAD
+=======
+
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 namespace App\Livewire\UserPermissionFilter;
 
 use App\Models\District;
@@ -11,7 +15,11 @@ use Livewire\Component;
 
 class FilterUserPermission extends Component
 {
+<<<<<<< HEAD
     public $role, $mapping_level, $selectscheme, $office, $selectedMappingLevel, $selectedState, $scheme, $selectedDistrict, $Role, $role_id;
+=======
+    public $role, $mapping_level, $selectscheme, $office, $selectedMappingLevel, $selectedState, $scheme, $selectedDistrict, $Role, $role_id, $ml;
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 
     public $roles = [], $schemes = [], $offices = [], $states = [], $mapping_levels = [], $districts = [];
 
@@ -31,9 +39,16 @@ class FilterUserPermission extends Component
         $this->selectedMappingLevel = null;
         $this->selectedDistrict = null;
         $this->selectedState = null;
+<<<<<<< HEAD
         
 
         if ($value) {
+=======
+
+
+        if ($value) {
+
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
             $this->mapping_levels = RoleOfficeTypeMapping::with('officeType')
                 ->where('role_id', $value)
                 ->whereHas('officeType', function ($q) {
@@ -52,7 +67,11 @@ class FilterUserPermission extends Component
     {
         $this->office = null;
         $this->offices = [];
+<<<<<<< HEAD
 
+=======
+        $this->ml = $value;
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         if ($value) {
             $this->offices = OfficeMaster::where('office_type_id', $value)->get();
         }
@@ -70,7 +89,16 @@ class FilterUserPermission extends Component
             $this->districts = District::where('state_id', $value)->orderBy('name', 'asc')->get();
         }
     }
+<<<<<<< HEAD
  
+=======
+    public function updatedSelectedDistrict($value)
+    {
+        if ($value) {
+            $this->offices = OfficeMaster::where('office_type_id', $this->ml)->where('district_id', $value)->get();
+        }
+    }
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 
     public function applyFilters()
     {
@@ -98,6 +126,10 @@ class FilterUserPermission extends Component
 
     public function render()
     {
+<<<<<<< HEAD
+=======
+        $this->dispatch('hideLoader');
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         return view('livewire.user-permission-filter.filter-user-permission');
     }
 }

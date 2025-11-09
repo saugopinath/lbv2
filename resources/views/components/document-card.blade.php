@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @props(['docName', 'isRequired', 'docTypeId', 'existingDoc', 'xIsDuplicate' => 0, 'showErrors' => false])
 
 <div x-data="{
@@ -5,6 +6,21 @@
     modalSrc: '',
     modalDocName: '',
 }" class="relative">
+=======
+@props([
+    'docName',
+    'isRequired',
+    'docTypeId',
+    'existingDoc',
+    'xIsDuplicate' => 0,
+    'showErrors' => false,
+    'singleDocument' => null,
+])
+
+<div x-data="{ modalOpen: false, modalSrc: '', modalDocName: '', successMessage: '', }"
+    x-on:enclosure-saved.window="successMessage = $event.detail.message; setTimeout(() => successMessage = '', 3000);"
+    class="relative">
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 
     <!-- Single card -->
     <div class="backdrop-blur-md bg-white/80 rounded-lg p-4 shadow-sm flex flex-col justify-between">
@@ -76,9 +92,21 @@
                 </x-button.primary>
             </div>
         @endif
+<<<<<<< HEAD
         @if ($isRequired && empty($existingDoc) && $showErrors)
+=======
+        {{--  @if ($isRequired && empty($existingDoc) && $showErrors)
+            <p class="text-red-500 text-sm mt-2">{{ $docName }} document is required.</p>
+        @endif  --}}
+        @if ($isRequired && empty($existingDoc) && !$singleDocument && $showErrors)
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
             <p class="text-red-500 text-sm mt-2">{{ $docName }} document is required.</p>
         @endif
+        <template x-if="successMessage">
+            <div class="mt-2 p-2 rounded bg-green-100 text-green-700 text-sm">
+                <span x-text="successMessage"></span>
+            </div>
+        </template>
     </div>
 
     <!-- popup view modal -->

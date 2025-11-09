@@ -11,6 +11,7 @@ class CasteRequestOpTypeSeeder extends Seeder
     /**
      * Run the database seeds.
      */
+<<<<<<< HEAD
    
     public function run(): void
     {
@@ -31,6 +32,28 @@ class CasteRequestOpTypeSeeder extends Seeder
         }
         $codemasterChilds = array(
         
+=======
+
+    public function run(): void
+    {
+        //  $codemasterParents = array(
+        //     array(
+        //         "name" => "OPTYPE",
+        //         "short_name" => "op_type",
+        //         "code" => "210",
+        //     ),
+
+        // );
+        // foreach ($codemasterParents as $codemasterParent_item) {
+        //     Codemaster::create([
+        //         'name'     => strtoupper($codemasterParent_item['name']),
+        //         'code'     => $codemasterParent_item['code'],
+        //         'short_name'     => $codemasterParent_item['short_name'],
+        //     ]);
+        // }
+        $codemasterChilds = array(
+
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
             array(
                 "name" => "REQUEST CASTE MODIFICATION",
                 "short_name" => "request_caste_modification",
@@ -55,7 +78,11 @@ class CasteRequestOpTypeSeeder extends Seeder
                 "parent_short_code" => "op_type",
                 "code" => "2109",
             ),
+<<<<<<< HEAD
             
+=======
+
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 
         );
         foreach ($codemasterChilds as $codemasterChild_item) {

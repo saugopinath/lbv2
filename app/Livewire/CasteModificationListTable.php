@@ -5,7 +5,13 @@ namespace App\Livewire;
 use App\Models\CasteModificationInfo;
 use App\Models\Codemaster;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+<<<<<<< HEAD
 use Illuminate\Database\Eloquent\Builder;
+=======
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Database\Eloquent\Builder;
+use App\Exports\BeneficiariesExport;
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 use Illuminate\Support\Facades\Crypt;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
@@ -66,6 +72,12 @@ class CasteModificationListTable extends DataTableComponent
             'class' => 'px-4 py-3 divide-y divide-gray-200 bg-white overflow-y-auto',
         ]);
         $this->setLoadingPlaceholderEnabled();
+<<<<<<< HEAD
+=======
+        $this->setConfigurableAreas([
+            'toolbar-left-start' => 'livewire.export_excel_buttons',
+        ]);
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
     }
     public function mount($applicantStatus = '', $casteId = '')
     {
@@ -81,7 +93,11 @@ class CasteModificationListTable extends DataTableComponent
             $this->filter_condition['block_id'] = Crypt::decryptString($select_lgd['block_id']);
         }
         if (!empty($select_lgd['subdivision_id'])) {
+<<<<<<< HEAD
             $this->filter_condition['subdivision_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+=======
+            $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         }
         if (!empty($select_lgd['role_id'])) {
             $this->roleId = (int) Crypt::decryptString($select_lgd['role_id']);
@@ -120,7 +136,10 @@ class CasteModificationListTable extends DataTableComponent
     public function setFilters($filters): void
     {
         // dd('bhbhbjhb');
+<<<<<<< HEAD
         // $this->dispatch('hideLoader');
+=======
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         $this->applicantStatus = $filters['status'] ?? '';
         $this->casteId         = $filters['caste'] ?? '';
         $this->action_visible = ($this->applicantStatus == 'PL') ? 1 : 0;
@@ -163,9 +182,16 @@ class CasteModificationListTable extends DataTableComponent
                     $q->where($col, $val);
                 }
             });
+<<<<<<< HEAD
             // if (!empty($this->filter_condition)) {
             //     $query->where($this->filter_condition);
             // }
+=======
+        if (!empty($this->casteId)) {
+            $query->where('caste_request_type', $this->casteId);
+        }
+
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         if (!empty($this->applicantStatus)) {
             if ($this->applicantStatus == 'PL') {
                 if (in_array($this->roleId, [4, 5])) {
@@ -225,16 +251,27 @@ class CasteModificationListTable extends DataTableComponent
                     }
 
                     if (auth()->user()?->hasRole('Operator')) {
+<<<<<<< HEAD
                         return view('coulmn_button.view', [
                             'link' => route('caste-modification.edit', [
                                 'application_id' => Crypt::encryptstring($row->application_id),
                                 'beneficiary_id'=> Crypt::encryptstring($row->beneficiary_id)
+=======
+                        return view('coulmn_button.actions', [
+                            'link' => route('caste-modification.edit', [
+                                'application_id' => Crypt::encryptstring($row->application_id),
+                                'beneficiary_id' => Crypt::encryptstring($row->beneficiary_id)
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
                             ]),
                             'tooltip' => 'Edit Application',
                         ])->render();
                     }
 
+<<<<<<< HEAD
                     return ''; 
+=======
+                    return '';
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
                 })
                 ->html(),
 
@@ -249,4 +286,29 @@ class CasteModificationListTable extends DataTableComponent
 
         return parent::render();
     }
+<<<<<<< HEAD
+=======
+
+    public function exportExcel()
+    {
+        $data = $this->builder()->get()->map(function ($row) {
+            $source = $row->beneficiaryCommonList?->sourceable;
+            // dd($row->beneficiaryCommonList?->sourceable->mobile_no);
+            return [
+                'Application ID' => $source?->application_id ?? 'N/A',
+                'Applicant Name' => $source?->full_name ?? 'N/A',
+                'Father Name'    => optional(
+                    $source?->relationships?->firstWhere(
+                        'relation_type_id',
+                        Codemaster::getIdByCode(131)
+                    )
+                )?->full_name ?? 'N/A',
+                'DOB'            => $source?->dob ?? 'N/A',
+                'Mobile'         => $row->beneficiaryCommonList?->sourceable->mobile_no ?? 'N/A',
+            ];
+        });
+
+        return Excel::download(new BeneficiariesExport($data), 'applications_all.xlsx');
+    }
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 }

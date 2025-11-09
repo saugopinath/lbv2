@@ -36,13 +36,21 @@
             <div class="flex-1 flex flex-col">
                 <!-- Top Bar -->
                 <x-layouts.das_top_bar />
+<<<<<<< HEAD
                 <livewire:loader />
+=======
+                 <livewire:loader />
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
                 <!-- Content -->
                 <div class="flex-1 p-2 overflow-auto">
                     <!-- Main Content -->
                     <main class="p-2 space-y-2">
                         <x-flash-message position="top-right" width="w-80" />
+<<<<<<< HEAD
                 
+=======
+
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
                         {{ $slot }}
                     </main>
                 </div>
@@ -75,4 +83,8 @@
     @stack('scripts')
 </body>
 
+<<<<<<< HEAD
 </html>
+=======
+</html>
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5

@@ -110,7 +110,10 @@ class SearchBeneficiary extends Component
         $existingRecord = null;
         if($application_id){
             $existingRecord = CasteModificationInfo::where('application_id',  $application_id->sourceable_id)->first();
+<<<<<<< HEAD
             // ->where('is_active',1)->first();
+=======
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         }
         // dd($existingRecord);
         if ($existingRecord) {
@@ -166,7 +169,11 @@ class SearchBeneficiary extends Component
                         'beneficiary_id' => $item->sourceable->beneficiary_id ?? '-',
                         'mobile_no'      => $item->sourceable->mobile_no ?? '-',
                         'applicant_name' => $item->sourceable->full_name ?? '-',
+<<<<<<< HEAD
                         'Caste_name'     => $item->sourceable->castes->name ?? '-',
+=======
+                        'Caste_name'     => $item->sourceable->casteName->name ?? '-',
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
                     ];
                 })->values();
             }

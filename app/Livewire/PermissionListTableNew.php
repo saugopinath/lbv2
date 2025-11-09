@@ -60,6 +60,7 @@ class PermissionListTableNew extends DataTableComponent
             Column::make("Parent", "parent_id")
                 ->format(fn($value, $row) => $row->parent_id == null ? 'Parent' : $row->parent->name),
             Column::make("Created At", "created_at"),
+<<<<<<< HEAD
             Column::make('Actions')
                 ->label(fn($row) => view('coulmn_button.ConfirmDeleteButton', [
                     'itemId' => $row->id,
@@ -70,6 +71,17 @@ class PermissionListTableNew extends DataTableComponent
                     'Name' => $row->name,
                 ])->render())
                 ->html(),
+=======
+            Column::make("Actions")
+    ->label(fn($row) => '
+        <button wire:click="delete(' . $row->id . ')"
+            onclick="return confirm(\'Are you sure you want to delete permission: ' . addslashes($row->name) . '?\')"
+            class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 text-xs">
+            Delete
+        </button>
+    ')
+    ->html(),
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         ];
     }
 

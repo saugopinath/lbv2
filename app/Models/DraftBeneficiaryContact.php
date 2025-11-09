@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
-class DraftBeneficiaryContact extends Model
+use OwenIt\Auditing\Contracts\Auditable;
+class DraftBeneficiaryContact extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $fillable = [
         'application_id',
         'district_id',
@@ -21,25 +22,36 @@ class DraftBeneficiaryContact extends Model
         'ward_id',
         'created_by',
     ];
+    protected $primaryKey = 'application_id';
     protected $table = 'lb_scheme.draft_beneficiary_contacts';
+
+    public function block()
+    {
+        return $this->belongsTo(Block::class, 'block_id');
+    }
+
+    public function panchayat()
+    {
+        return $this->belongsTo(Panchayat::class, 'panchayat_id');
+    }
+
     public function district()
     {
-        return $this->belongsTo(District::class, 'district_id', 'id');
+        return $this->belongsTo(District::class, 'district_id');
     }
+
+    public function ward()
+    {
+        return $this->belongsTo(Ward::class, 'ward_id');
+    }
+
+    public function father()
+    {
+        return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id', 'application_id');
+    }
+
     public function municipality()
     {
         return $this->belongsTo(Municipality::class, 'municipality_id', 'id');
-    }
-    public function block()
-    {
-        return $this->belongsTo(Block::class, 'block_id', 'id');
-    }
-    public function ward()
-    {
-        return $this->belongsTo(Ward::class, 'ward_id', 'id');
-    }
-    public function panchayat()
-    {
-        return $this->belongsTo(Panchayat::class, 'panchayat_id', 'id');
     }
 }

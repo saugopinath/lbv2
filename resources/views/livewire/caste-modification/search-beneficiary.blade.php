@@ -19,9 +19,15 @@
         <div>
             <x-form.input name="searchValue" id="searchValue" wire:model.defer="searchValue"
                 label="{{ $this->currentLabel }}" placeholder="Enter {{ $this->currentLabel }}" required
+<<<<<<< HEAD
                 type="text" 
                 oninput="this.value = this.value.replace(/[^0-9]/g);"
                 maxlength="{{ ($searchType == '3') ? 12 : (($searchType == '4') ? 10 : '') }}" 
+=======
+                type="text"
+                oninput="this.value = this.value.replace(/[^0-9]/g);"
+                maxlength="{{ ($searchType == '3') ? 12 : (($searchType == '4') ? 10 : '') }}"
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
             />
         </div>
     </div>
@@ -67,4 +73,8 @@
     </div>
     @endif
 
+<<<<<<< HEAD
 </div>
+=======
+</div>
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5

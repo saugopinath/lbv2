@@ -35,35 +35,66 @@
           <table class="min-w-full text-sm text-gray-700 text-center">
               <thead class="bg-violet-800 text-xs uppercase py-3 text-white">
                   <tr>
+                      @if ($reportType === '3')
+                          <th class="py-3">Beneficiary ID</th>
+                      @endif
                       <th class="py-3">Application ID</th>
-                       <th class="py-3">Beneficiary ID</th>
-                       <th class="py-3">Applicant Name</th>
-                       <th class="py-3">Mobile No</th>
-                       <th class="py-3">Bank AC No</th>
-                       <th class="py-3">IFSC</th>
-                       <th class="py-3">Branch</th>
-                       <th class="py-3">Bank Name</th>
-                       <th class="py-3">Type</th>
+                      <th class="py-3">Applicant Name</th>
+                      <th class="py-3">Father's Name</th>
+                      <th class="py-3">Age</th>
+                      @if ($reportType === '1' || $reportType === '4' || $reportType === '5')
+                          <th class="py-3">Applicant Mobile No.</th>
+                      @endif
+                      @if ($reportType === '4')
+                          <th class="py-3">Rejected Reason</th>
+                      @endif
+                      @if ($reportType === '1' || $reportType === '2' || $reportType === '3' || $reportType === '5')
+                          <th class="py-3">ACTIONS</th>
+                      @endif
                   </tr>
               </thead>
               <tbody class="divide-y divide-gray-200 bg-white y-overflow-y-auto">
                   @forelse($rows as $row)
                       <tr class="hover:bg-gray-50">
-                         
-                              <td class="py-3">{{ $row->sourceable->application_id ?? 'N/A' }}</td>
-                              <td class="py-3">{{ $row->sourceable->beneficiary_id ?? 'N/A' }}</td>
-                              <td class="py-3">{{ $row->sourceable->full_name ?? 'N/A' }}</td>
-                              <td class="py-3">{{ $row->sourceable->mobile_no ?? 'N/A'}}</td>
-                              <td class="py-3">{{ $row->sourceable->bank->bank_account_number ?? 'N/A' }}</td>
-                              <td class="py-3">{{ $row->sourceable->bank->ifsc ?? 'N/A' }}</td>
-                              <td class="py-3">{{ $row->sourceable->bank->ifscMaster->branch ?? 'N/A' }}</td>
-                              <td class="py-3">{{ $row->sourceable->bank->ifscMaster->bankmaster->name ?? 'N/A'}}</td>
-                              <td class="py-3">{{ class_basename($row->sourceable_type)}}</td>
-                          
+                          @if ($reportType === '3')
+                              <td class="py-3">{{ $row->beneficiary_id }}</td>
+                          @endif
+                          <td class="py-3">{{ $row->application_id ?? '-' }}</td>
+                          <td class="py-3 font-medium text-gray-900">{{ $row->full_name }}</td>
+                          @if ($reportType === '3' || $reportType === '5' || $reportType === '1' || $reportType === '2')
+                              <td class="py-3">
+                                  {{ optional($row->father->first())->full_name ?? 'N/A' }}
+
+                              </td>
+                          @endif
+                          @if ($reportType === '4')
+                              <td class="py-3">{{ $row->father_full_name }}</td>
+                          @endif
+                          <td class="py-3">
+                              {{ $row->dob ? \Carbon\Carbon::parse($row->dob)->age : 'N/A' }}
+                          </td>
+                          @if ($reportType === '1' || $reportType === '4' || $reportType === '5')
+                              <td class="py-3">{{ $row->mobile_no }}</td>
+                          @endif
+                          @if ($reportType === '4')
+                              <td class="py-3">{{ $row->rejected_reason }}</td>
+                          @endif
+                          <td class="py-3 space-x-4">
+                              @if ($reportType != '4')
+                                  <x-icon.view
+                                      href="{{ route('custom_application.view', [
+                                          'id' => $reportType == '3' ? encrypt($row->beneficiary_id) : encrypt($row->application_id),
+                                          'reportType' => $reportType,
+                                      ]) }}">
+                                      View
+                                  </x-icon.view>
+                              @endif
+                          </td>
                       </tr>
                   @empty
                       <tr>
-                          <td class="text-center py-4">No data found.</td>
+                          <td colspan="{{ $reportType === '3' ? 6 : ($reportType === '4' ? 6 : 5) }}"
+                              class="text-center py-4">No data found.</td>
                       </tr>
                   @endforelse
               </tbody>
@@ -75,6 +106,6 @@
           <div class="text-sm text-gray-600">
               Showing {{ $rows->firstItem() ?? 0 }} to {{ $rows->lastItem() ?? 0 }} of {{ $rows->total() }} entries
           </div>
-          <div>{{ $rows->links() }}</div>
+          <div>{{ $rows->links('vendor.livewire.simple') }}</div>
       </div>
   </div>

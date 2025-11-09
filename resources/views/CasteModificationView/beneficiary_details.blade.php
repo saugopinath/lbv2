@@ -23,7 +23,11 @@
             }"
             class="space-y-2">
             <x-accordion-section title="Personal Details" sectionId="personal-details" color="pink-500">
+<<<<<<< HEAD
                 <x-apllicant-modal.personal-detail-view :id=$application_id :reportType="3" />
+=======
+                <x-apllicant-modal.personal-details :id=$application_id :reportType="$reportType" mode="page" />
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
             </x-accordion-section>
         </div>
     </div>
@@ -93,4 +97,8 @@
         </div>
 
     </div>
+<<<<<<< HEAD
 </x-layouts.app>
+=======
+</x-layouts.app>
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5

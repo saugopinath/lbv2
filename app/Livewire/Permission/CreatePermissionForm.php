@@ -57,21 +57,32 @@ class CreatePermissionForm extends Component
     }
     public function save()
     {
+<<<<<<< HEAD
 
+=======
+        $this->dispatch('showLoader');
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         $this->validate();
 
         if ($this->is_parent == '0') {
             $this->parent_id = null;
         }
+<<<<<<< HEAD
         if (Permission::where('name', $this->name)->exists()) {
             $this->addError('checkname', 'Permission name already exists!');
             return;
         }
+=======
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         // dd([
         //             'name'       => $this->name,
         //             'is_parent'  => $this->is_parent,
         //             'parent_id'  => $this->parent_id,
+<<<<<<< HEAD
         //         ]);  
+=======
+        //         ]);
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         $permission = Permission::create([
             'name'       => $this->name,
             'guard_name' => 'web',
@@ -87,6 +98,10 @@ class CreatePermissionForm extends Component
 
         $this->reset(['name', 'is_parent', 'parent_id', 'has_score', 'min_score', 'max_score']);
         $this->dispatch('close-modal');
+<<<<<<< HEAD
+=======
+        $this->dispatch('hideLoader');
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         // $this->dispatch('notify', 'Permission created successfully!', 'success');
         $this->dispatch('notify', message: 'Permission created successfully!');
         $this->dispatch('refreshDatatable');

@@ -31,6 +31,10 @@
         @error('singleDocument')
             <div class="mt-2 text-sm text-red-600">{{ $message }}</div>
         @enderror
+<<<<<<< HEAD
+=======
+        <div x-show="errorMessage" x-text="errorMessage" class="mt-2 text-sm text-red-600"></div>
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 
         <!-- Image Preview -->
         <template x-if="currentFilePreview">
@@ -39,6 +43,7 @@
             </div>
         </template>
 
+<<<<<<< HEAD
         <!-- Buttons -->
         {{--  <div class="flex justify-end space-x-2 mt-4">
             <button @click="closeModal()"
@@ -46,6 +51,9 @@
             <button @click="uploadFile()"
                 class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 cursor-pointer">Upload</button>
         </div>  --}}
+=======
+        <!-- Buttons -->       
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 
         <div class="flex justify-end space-x-2 mt-4">
             <x-button.primary @click="closeModal()"

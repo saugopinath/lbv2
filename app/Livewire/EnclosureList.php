@@ -34,6 +34,7 @@ class EnclosureList extends Component
         $this->is_page        = $is_page;
         $this->enclosureSource = $enclosureSource;
         // dd($this->enclosureSource);
+<<<<<<< HEAD
 
         $this->doc_type_id_array_list = $doc_type_id_array_list;
         $this->doc_type_id_array      = $doc_type_id_array;
@@ -42,6 +43,12 @@ class EnclosureList extends Component
         if (!empty($this->doc_type_id_array)) {
 
 
+=======
+        $this->doc_type_id_array_list = $doc_type_id_array_list;
+        $this->doc_type_id_array      = $doc_type_id_array;
+
+        if (!empty($this->doc_type_id_array)) {
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
             $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
                 ->whereIn('doc_type_id', $this->doc_type_id_array)
                 ->get();
@@ -57,10 +64,15 @@ class EnclosureList extends Component
             }
         } else {
             if (!empty($this->doc_type_id_array_list)) {
+<<<<<<< HEAD
                
                 if ($this->enclosureSource == 5) {
                     // dd('ok');
 
+=======
+
+                if ($this->enclosureSource == 5) {
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
                     $app = BeneficiaryTemEnclosure::where('application_id', $application_id)
                         ->whereIn('document_type', $this->doc_type_id_array_list)
                         ->get();
@@ -126,6 +138,7 @@ class EnclosureList extends Component
 
         $this->resetErrorBag('singleDocument');
     }
+<<<<<<< HEAD
     // protected function rules()
     // {
     //     $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
@@ -152,6 +165,18 @@ class EnclosureList extends Component
             return [
                 'singleDocument' => 'nullable|file',
             ];
+=======
+
+    protected function rules()
+    {
+        if (!$this->currentDocId) {
+            return ['singleDocument' => 'nullable|file'];
+        }
+
+        $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
+        if (!$doc) {
+            return ['singleDocument' => 'nullable|file'];
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         }
 
         preg_match('/(\d+)/', $doc->max_file_size, $matches);
@@ -162,26 +187,64 @@ class EnclosureList extends Component
 
         $requiredRule = $doc->is_required ? 'required' : 'nullable';
 
+<<<<<<< HEAD
+=======
+        // Set properties early
+        $this->currentDocMaxSize = $maxSizeKB . ' KB';
+        $this->currentDocExtensions = strtoupper($mimesRule);
+
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         return [
             'singleDocument' => "$requiredRule|file|mimes:$mimesRule|max:$maxSizeKB",
         ];
     }
 
+<<<<<<< HEAD
+=======
+    protected function messages()
+    {
+        $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
+        $docName = $doc?->codemaster?->name ?? 'Document';
+        $extensions = $this->currentDocExtensions ?: 'JPG, PNG, PDF';
+        $maxSize    = $this->currentDocMaxSize ?: '1024 KB';
+
+        return [
+            'singleDocument.required' => "{$docName} is required.",
+            'singleDocument.mimes'    => "{$docName} must be of type: {$extensions}.",
+            'singleDocument.max'      => "{$docName} must not be greater than {$maxSize}.",
+        ];
+    }
+
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
     public function resetSingleDocumentErrors()
     {
         $this->resetErrorBag('singleDocument');
     }
     protected function enclosureModel()
     {
+<<<<<<< HEAD
         return $this->enclosureSource == '5'
+=======
+        return $this->enclosureSource === '5'
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
             ? new BeneficiaryTemEnclosure
             : new BeneficiaryEnclosure;
     }
 
     public function saveSingleDocument()
     {
+<<<<<<< HEAD
         // dd('ok');
         dd($this->singleDocument);
+=======
+        if (!$this->singleDocument) {
+            $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
+            $docName = $doc?->codemaster?->name ?? 'Document';
+            $this->addError('singleDocument', "{$docName} is required.");
+            return;
+        }
+
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         $this->validate();
 
         $base64 = base64_encode(file_get_contents($this->singleDocument->getRealPath()));
@@ -198,7 +261,7 @@ class EnclosureList extends Component
                 'ip_address' => request()->ip(),
                 'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
                 'document_mime_type' => $this->singleDocument->getMimeType(),
-                'created_by' => 1,
+                'created_by' => Auth::id(),
             ]);
         } else {
             $model::create([
@@ -208,7 +271,7 @@ class EnclosureList extends Component
                 'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
                 'document_mime_type' => $this->singleDocument->getMimeType(),
                 'document_type' => $this->currentDocId,
-                'created_by' => 1,
+                'created_by' => Auth::id(),
             ]);
             // dd($is_upload);
         }
@@ -237,6 +300,7 @@ class EnclosureList extends Component
                 }
             }
         }
+<<<<<<< HEAD
         $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.');
     }
 
@@ -292,6 +356,13 @@ class EnclosureList extends Component
     //     ]);
     // }
 
+=======
+
+        $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.');
+        $this->dispatch('$refresh');
+    }
+
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
     public function downloadDocument($id)
     {
         $model = $this->enclosureModel();

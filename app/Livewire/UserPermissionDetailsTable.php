@@ -78,7 +78,11 @@ class UserPermissionDetailsTable extends DataTableComponent
     public function builder(): Builder
     {
         $query = User::query()
+<<<<<<< HEAD
             ->whereHas('RoleSchemeOfficeMappings', function ($q) {
+=======
+            ->whereHas('RoleSchemeOfficeMappings.office', function ($q) {
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
                 $q->where('is_active', 1);
 
                 if (!empty($this->role)) {
@@ -88,6 +92,15 @@ class UserPermissionDetailsTable extends DataTableComponent
                 if (!empty($this->office)) {
                     $q->where('office_id', $this->office);
                 }
+<<<<<<< HEAD
+=======
+                if (!empty($this->selectedDistrict)) {
+                    $q->where('district_id', $this->selectedDistrict);
+                }
+                if (!empty($this->selectedMappingLevel)) {
+                    $q->where('office_type_id', $this->selectedMappingLevel);
+                }
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
             })
             ->with(['mappedRoles', 'mappedPermissions']);
 
@@ -136,7 +149,11 @@ class UserPermissionDetailsTable extends DataTableComponent
                     </template>
                 </div>
                 " . ($permissions->count() > 3 ? "
+<<<<<<< HEAD
                     <button type='button' 
+=======
+                    <button type='button'
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
                         class='text-blue-600 text-xs mt-1 focus:outline-none'
                         @click='open = !open'
                         x-text='open ? \"Show less\" : \"Show more\"'></button>" : "") . "</div>";

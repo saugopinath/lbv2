@@ -3,49 +3,53 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use Illuminate\Support\Facades\Session;
 use App\Models\BeneficiaryAadhaar;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Auth;
+use App\Helpers\AadhaarHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 
 class DupAadhaarCheck extends Component
 {
     public $aadhaar;
     public $error = null;
-    public $valid = false;
     public function checkDuplicate()
     {
         $this->error = null;
-        $this->valid = false;
         $this->aadhaar = trim($this->aadhaar);
-
-        // Basic validation
-        if (!ctype_digit($this->aadhaar) || strlen($this->aadhaar) !== 12) {
-            $this->error = "Please enter a valid 12-digit Aadhaar number.";
+        if (!AadhaarHelper::validate($this->aadhaar)) {
+            $this->error = "Invalid Aadhaar number sc";
+            $this->dispatch('hideLoader');
             return ['status' => 'error', 'message' => $this->error];
         }
-
         $encoded_aadhar = Crypt::encryptString($this->aadhaar);
         $aadhaar_hash = md5($this->aadhaar);
-
-        // Check duplicate
         if (BeneficiaryAadhaar::where('aadhar_hash', $aadhaar_hash)->exists()) {
             $this->error = "Duplicate Aadhaar found!";
+            $this->dispatch('hideLoader');
             return ['status' => 'duplicate', 'message' => $this->error];
         }
 
-        // Aadhaar is valid
-        $this->valid = true;
-        Session::put('aadhaar_data', [
+        // $user = Auth::user();
+        // if (!$user->can('Normal Entry Allow') && !$user->can('Duare Sarkar Entry Allow')) {
+        //     $this->error = "Not authorized to create entry.";
+        //     $this->dispatch('hideLoader');
+        //     return ['status' => 'unauthorized', 'message' => $this->error];
+        // }
+
+        if (!WorkFlowPermissionHelper::canCreateEntry()) {
+            $this->error = "Not authorized to create entry.";
+            $this->dispatch('hideLoader');
+            return ['status' => 'unauthorized', 'message' => $this->error];
+        }
+
+        $this->dispatch('aadhaarChecked', [
             'encoded' => $encoded_aadhar,
             'hash' => $aadhaar_hash,
         ]);
-
-        $this->dispatch('aadhaarChecked');
-
+        $this->dispatch('hideLoader');
         return ['status' => 'success', 'message' => '✅ Aadhaar is valid and not duplicate.'];
     }
-
-
     public function render()
     {
         return view('livewire.dup-aadhaar-check');

@@ -22,8 +22,8 @@ class RolePermissionSeeder extends Seeder
         DB::table($tableNames['role_has_permissions'])->truncate();
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-      
-       
+
+
         $roles = [
             'Super Admin',
             'HOD',
@@ -48,7 +48,7 @@ class RolePermissionSeeder extends Seeder
             'Super Admin'           => ['HOD','Delegated HOD','Approver','Delegated Approver','Checker','Delegated Checker','Maker','Delegated Maker',
                                         'DDO','Delegated DDO','Mis User State','Mis User District','Mis User Block','Mis User GP',
                                         'Mis User Sub Division','Mis User Municipality','Mis User Ward'],
-           
+
             'HOD'           => ['Delegated HOD','Approver','Delegated Approver','Checker','Delegated Checker','Maker','Delegated Maker',
                                         'DDO','Delegated DDO','Mis User State','Mis User District','Mis User Block','Mis User GP',
                                         'Mis User Sub Division','Mis User Municipality','Mis User Ward'],
@@ -73,8 +73,8 @@ class RolePermissionSeeder extends Seeder
             'Mis User Municipality'           => '',
             'Mis User Ward'           => '',
         ];
-         
-       
+
+
 
         $permissions = [
             // Validation Lot
@@ -98,13 +98,13 @@ class RolePermissionSeeder extends Seeder
             'submit to tresury IFMS',
             'sent to rbi IFMS',
             'get payment lot response IFMS',
-         
+
             //User Model
             'create user',
             'read user',
             'update user',
             'delete user',
-           
+
             //Role
             'create role',
             'read role',
@@ -172,7 +172,39 @@ class RolePermissionSeeder extends Seeder
             'application recommanded',
             'application recommanded bulk',
             'application entryverifyapproval',
-            
+            // Add your new permissions here
+            'update bank',
+            'search bank update',
+            'update mobile',
+            'view beneficiary details',
+            'update bank details',
+            'submit lb form',
+            'view draft list',
+            'edit draft',
+            'view lb applications',
+            'view application',
+            'view beneficiaries',
+            'revert incomplete',
+            'manage role mappings',
+            'create users',
+            'create role mappings',
+            'view offices',
+            'view reports',
+            'update caste',
+            'edit caste',
+            'view approved ba wise',
+            'view approved list',
+            'modify caste',
+            'view caste modification list',
+            'view incomplete applications',
+            'view users',
+            'update incomplete',
+            'view verifier incomplete',
+            'view approver incomplete',
+            'view permission',
+            'view user permission',
+            'create offices',
+
         ];
         $rolesArr = collect($roles)->map(function ($role) {
             return [
@@ -194,7 +226,7 @@ class RolePermissionSeeder extends Seeder
         Role::insert($rolesArr);
         Permission::insert($permissionsArr);
 
-    
+
          $role_permission_map = [
             'Super Admin'           => [
                 //User Model
@@ -313,7 +345,7 @@ class RolePermissionSeeder extends Seeder
                  'application view',
                  'application list',
                  'application entry',
-          
+
             ],
             'DDO'              => [
                     // Validation Lot
@@ -367,6 +399,6 @@ class RolePermissionSeeder extends Seeder
             $role = Role::findByName($role_name);
             $role->givePermissionTo($permissions);
         }
-       
+
     }
 }

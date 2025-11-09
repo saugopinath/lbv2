@@ -7,9 +7,14 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Permission\Models\Role as SpatieRole;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Role extends SpatieRole
+class Role extends SpatieRole implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+    protected $table = 'roles';
+    public $timestamps = false;
+
     use HasFactory, HasUlids;
 
     /**
@@ -38,7 +43,7 @@ class Role extends SpatieRole
      *
      * @var array<string, string>
      */
-   
+
     public function parentRole()
     {
         return $this->belongsTo(self::class, 'parent_role_id');
@@ -52,6 +57,7 @@ class Role extends SpatieRole
     {
         return $this->hasMany(RoleOfficeTypeMapping::class);
     }
+<<<<<<< HEAD
      public function mappings(): HasMany
     {
         return $this->hasMany(UserRoleSchemeOfficeMapping::class, 'role_id');
@@ -61,4 +67,6 @@ class Role extends SpatieRole
 
 
     
+=======
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 }

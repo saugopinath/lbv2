@@ -1,6 +1,10 @@
 <div class="bg-white shadow rounded-lg p-4 border border-gray-200">
     <fieldset class="space-y-4">
+<<<<<<< HEAD
         <legend class="text-sm font-semibold text-gray-600 mb-2">🔎 Filter Users</legend>
+=======
+        <legend class="text-sm font-semibold text-gray-600 mb-2">Filter Users</legend>
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 
         <div class="grid gap-4 md:grid-cols-2">
             {{-- Role --}}
@@ -39,7 +43,11 @@
             {{-- District (only for specific mapping levels) --}}
             @if (in_array($selectedMappingLevel, [153, 154]))
                 <div class="relative">
+<<<<<<< HEAD
                     <x-form.select name="district" label="District" wire:model="selectedDistrict" required>
+=======
+                    <x-form.select name="district" label="District" wire:model.live="selectedDistrict" required>
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
                         <option value="">Select District</option>
                         @foreach ($districts as $district)
                             <option value="{{ $district->id }}">{{ $district->name }}</option>
@@ -64,6 +72,7 @@
 
     {{-- Buttons --}}
     <div class="flex justify-end items-center gap-3 mt-4">
+<<<<<<< HEAD
         <button
             wire:click="applyFilters"
             type="button"
@@ -79,5 +88,25 @@
         >
             ♻️ Reset
         </button>
+=======
+        <x-button.primary
+             x-on:click="
+        Livewire.dispatch('showLoader');
+        $wire.applyFilters();
+    "
+            type="button"
+            class="bg-blue-500 text-white whitespace-nowrap cursor-pointer"
+        >
+            Search
+        </x-button.primary >
+
+        <x-button.primary
+            wire:click="resetFilters"
+            type="button"
+            class="bg-green-500 text-white whitespace-nowrap cursor-pointer"
+        >
+            Reset
+        </x-button.primary >
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
     </div>
 </div>

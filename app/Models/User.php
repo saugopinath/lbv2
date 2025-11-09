@@ -4,21 +4,29 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+<<<<<<< HEAD
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Models\Permission;
 
 
 
+=======
+use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Permission\Models\Permission;
+
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 class User extends Authenticatable implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
 
     use HasFactory, Notifiable, HasRoles;
+    use \OwenIt\Auditing\Auditable;
 
     /**
      * The attributes that are mass assignable.
@@ -55,10 +63,15 @@ class User extends Authenticatable implements Auditable
     }
     public function RoleSchemeOfficeMappings(): HasMany
     {
-        
+
         return $this->hasMany(UserRoleSchemeOfficeMapping::class);
     }
+<<<<<<< HEAD
     public function mappedRoles(): BelongsToMany
+=======
+
+     public function mappedRoles(): BelongsToMany
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
     {
         return $this->belongsToMany(
             Role::class,
@@ -83,4 +96,10 @@ class User extends Authenticatable implements Auditable
             'permission_id'
         );
     }
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 }

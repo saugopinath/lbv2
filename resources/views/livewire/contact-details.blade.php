@@ -1,11 +1,14 @@
 <div>
-    <form wire:submit.prevent="save">
+    <form x-on:submit.prevent="
+            Livewire.dispatch('showLoader');
+            $wire.save();
+        ">
         <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
             <div>
                 <x-form.input name="state" label="State" wire:model="stateName" required disabled />
             </div>
         </div>
-        <livewire:filter-lgd-master :login_type="'state_office'" :selectedDistrict="$selectedDistrict"
+        <livewire:filter-lgd-master-entry :login_type="'state_office'" :selectedDistrict="$selectedDistrict"
             :selectedRuralurban="$selectedRuralurban"
             :selectedBlockurban="$selectedBlockurban"
             :selectedGpWard="$selectedGpWard" />
@@ -23,7 +26,16 @@
                 <x-form.input name="postoffice" label="Post Office" wire:model="postoffice" required x-on:input="$el.value = $el.value.replace(/[^A-Za-z\s]/g, '')" />
             </div>
             <div>
-                <x-form.input name="pincode" label="Pin Code" wire:model="pincode" required x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,6)" />
+                <x-form.input
+                    name="pincode"
+                    label="Pin Code"
+                    wire:model="pincode"
+                    required
+                    x-on:input="
+        $el.value = $el.value.replace(/[^0-9]/g, '').slice(0,6);
+        $wire.set('pincode', $el.value);
+    " />
+
             </div>
         </div>
         <div class="flex justify-between mt-4 pl-6 pr-6">

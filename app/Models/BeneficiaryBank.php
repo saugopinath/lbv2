@@ -3,12 +3,33 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class BeneficiaryBank extends Model
+class BeneficiaryBank extends Model implements Auditable
 {
-    protected $guarded = [];
-    // protected $primaryKey = 'beneficiary_id';
+    use \OwenIt\Auditing\Auditable;
+    protected $primaryKey = 'application_id';
     protected $table = 'lb_scheme.beneficiary_banks';
+    protected $fillable = [
+        'application_id',
+        'beneficiary_id',
+        'bank_account_number',
+        'ifsc',
+        'bank_name',
+        'branch_name',
+        'created_by',
+        'updated_by',
+    ];
+
+    public function ifscCodeMaster()
+    {
+        return $this->belongsTo(IfscCodeMaster::class, 'ifsc', 'code');
+    }
+
+    public function ifscbranch()
+    {
+        return $this->belongsTo(IfscCodeMaster::class, 'ifsc', 'code');
+    }
 
     // public function beneficiaryPersonal()
     // {

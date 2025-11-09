@@ -44,7 +44,7 @@ class ApprovedBeneficiaryDetailsTable extends DataTableComponent
         }
 
         if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['subdivision_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+            $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
     public function filtersApplied($filters)
@@ -61,7 +61,7 @@ class ApprovedBeneficiaryDetailsTable extends DataTableComponent
             ->setPerPageAccepted([5,10])
             ->setPerPage($this->perPage)
             ->setPerPageVisibilityEnabled()
-            ->setSearchEnabled()
+            ->setSearchDisabled()
             ->setSearchLive()
             ->setBulkActionsEnabled();
 
@@ -92,7 +92,7 @@ class ApprovedBeneficiaryDetailsTable extends DataTableComponent
         // $this->setQueryStringForFilterEnabled();
         // $this->setQueryStringForSearchEnabled()
         //     ->setQueryStringForPerPageEnabled()
-        //     ->setQueryStringForFiltersEnabled();    
+        //     ->setQueryStringForFiltersEnabled();
         //         $this->setPerPageDropdownAttributes([
         //     'class' => 'border rounded px-3 py-1 bg-white text-gray-700 hover:border-gray-500',
         // ]);
@@ -252,9 +252,13 @@ class ApprovedBeneficiaryDetailsTable extends DataTableComponent
             );
         }
         // $result = $query->get();
-        // dd($result); 
+        // dd($result);
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
+<<<<<<< HEAD
             $query = EncryptionArray::applybeneficiaryLocationFilters(
+=======
+            $query = EncryptionArray::applyLocationFilte(
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
                 $query,
                 $this->district_id ? (int) $this->district_id : null,
                 $this->rural_urban ? (int) $this->rural_urban : null,
@@ -273,5 +277,5 @@ class ApprovedBeneficiaryDetailsTable extends DataTableComponent
     //     return view('livewire.custom-beneficiary-table', [
     //         'rows' => $this->getRows(),
     //     ]);
-    // 
+    //
     }

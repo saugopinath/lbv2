@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Codemaster extends Model
 {
-    protected $fillable = [
+   protected $fillable = [
         'name',
         'short_name',
         'parent_id',
@@ -24,6 +24,7 @@ class Codemaster extends Model
     {
         return self::where('code', $code)->value('id');
     }
+<<<<<<< HEAD
      public function menus()
     {
         return $this->hasMany(SchemeValidationParameterSetting::class, 'master_code', 'id');
@@ -34,4 +35,8 @@ class Codemaster extends Model
         return $this->hasMany(SchemeValidationParameterSetting::class, 'parameter_code', 'id');
     }
 
+=======
+
+   
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 }

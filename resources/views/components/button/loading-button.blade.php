@@ -1,13 +1,23 @@
 @props([
+<<<<<<< HEAD
     'action' => null,   
+=======
+    'action' => null,
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
     'text' => 'Submit',
     'color' => 'indigo',
     'type' => 'button', ])
 
 <button
+<<<<<<< HEAD
     @if($action) 
         wire:click="{{ $action }}" 
         wire:loading.attr="disabled" 
+=======
+    @if($action)
+        wire:click="{{ $action }}"
+        wire:loading.attr="disabled"
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
     @else
         x-data="{ loading: false }"
         x-on:click="if($el.type === 'submit'){ loading = true; $el.form.submit(); }"
@@ -15,7 +25,11 @@
     @endif
 
     {{ $attributes->merge([
+<<<<<<< HEAD
         'class' => "px-4 py-2 bg-{$color}-500 text-white rounded-lg hover:bg-{$color}-700 flex items-center gap-2"
+=======
+        'class' => "px-4 py-2 bg-{$color}-500 text-white rounded-lg hover:bg-{$color}-700 flex items-center gap-2 cursor-pointer"
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
     ]) }}
     type="{{ $type }}"
 >

@@ -53,12 +53,18 @@ class CasteModificationFilters extends Component
         try {
 
             $this->validate();
+<<<<<<< HEAD
            
+=======
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
             $this->dispatch('filtersApplied', [
                 'status' => $this->applicantStatus,
                 'caste'  => $this->casteId,
             ]);
+<<<<<<< HEAD
             
+=======
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->resettable();
             throw $e;
@@ -80,6 +86,10 @@ class CasteModificationFilters extends Component
 
     public function render()
     {
+<<<<<<< HEAD
+=======
+        $this->dispatch('hideLoader');
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
         return view('livewire.caste-modification-filters');
     }
 }

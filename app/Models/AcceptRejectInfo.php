@@ -7,8 +7,12 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 class AcceptRejectInfo extends Model implements Auditable
 {
+<<<<<<< HEAD
     use \OwenIt\Auditing\Auditable; 
     
+=======
+    use \OwenIt\Auditing\Auditable;
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
     protected $table = 'accept_reject_infos';
 
     protected $fillable = [

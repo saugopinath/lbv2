@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use App\Models\User;
@@ -12,7 +13,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-         $this->call([
+        $this->call([
             LGD\StateSeeder::class,
             LGD\DistrictSeeder::class,
             LGD\BlockSeeder::class,
@@ -20,6 +21,7 @@ class DatabaseSeeder extends Seeder
             LGD\SubdivisionSeeder::class,
             LGD\MunicipalitiesSeeder::class,
             LGD\WardSeeder::class,
+            MasterMimeTypeSeeder::class,
             Bank\BankSeeder::class,
             Bank\IfscSeeder::class,
             DepartmentSeeder::class,
@@ -36,7 +38,14 @@ class DatabaseSeeder extends Seeder
             Role\DaspurIIBlockOperatorSeeder::class,
             Role\GhatalSdoOperatorSeeder::class,
             Role\GhatalSdoVerifierSeeder::class,
-            ValidationFailedCodemasterSeeder::class
+            IncompletTypeModeSeeder::class,
+            ValidationFailedCodemasterSeeder::class,
+            UpdateNextLevelRoleIdSeeder::class,
+            OpTypeSeeder::class,
+            CasteRequestIdSeeder::class,
+            CasteRequestOpTypeSeeder::class,
+            BeneficiaryApprovedListSeeder::class,
+            ApplicantIncompletDetailsSeeder::class,
         ]);
     }
 }

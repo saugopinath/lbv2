@@ -3,25 +3,32 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class OfficeMaster extends Model
+class OfficeMaster extends Model implements Auditable
 {
+    use HasFactory;
+    use \OwenIt\Auditing\Auditable;
     protected $fillable = [
         'name',
         'address',
         'zip',
-        'office_type',
+        'office_type_id',
         'state_id',
         'district_id',
-        'block_id',
         'subdivision_id',
-        'state_id',
-        'municipality_id',
-        'ward_id'
+        'municipalitiy_id',
+        'ward_id',
+        'block_id',
+        'panchayat_id',
+        'is_active',
     ];
+
     public function officeType()
     {
-        return $this->belongsTo(Codemaster::class, 'office_type', 'code');
+        return $this->belongsTo(Codemaster::class, 'office_type_id', 'code');
     }
 
     public function district()
@@ -49,4 +56,5 @@ class OfficeMaster extends Model
         return $this->belongsTo(Ward::class, 'ward_id', 'id');
     }
 
+   
 }

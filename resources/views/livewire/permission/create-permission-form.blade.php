@@ -22,12 +22,15 @@
                 <h2 class="text-lg font-semibold text-gray-800">Create Permission</h2>
                 <button wire:click="cancel" class="text-gray-500 hover:text-red-500 text-xl">×</button>
             </div>
+<<<<<<< HEAD
             @if($errors->has('checkname'))
             <div class="mb-4 p-3 rounded bg-red-600 text-white">
                 {{ $errors->first('checkname') }}
             </div>
             @endif
 
+=======
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 
             <form wire:submit.prevent="save" class="space-y-4">
                 <!-- Permission Name -->
@@ -38,7 +41,11 @@
                         name="name"
                         label="Permission Name"
                         placeholder="Enter Permission Name"
+<<<<<<< HEAD
                         required wire:model="name" />
+=======
+                        required wire:model="name"/>
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 
                 </div>
 
@@ -84,23 +91,42 @@
                         name="min_score"
                         label="Min Score"
                         placeholder="Enter Min Score"
+<<<<<<< HEAD
                         wire:model="min_score" />
+=======
+                         wire:model="min_score" />
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
 
                     <x-form.input
                         id="max_score"
                         name="max_score"
                         label="Max Score"
                         placeholder="Enter Max Score"
+<<<<<<< HEAD
                         wire:model="max_score" />
+=======
+                         wire:model="max_score" />
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
                 </div>
                 @endif
 
 
                 <div class="flex justify-end space-x-2 mt-4">
+<<<<<<< HEAD
                     <x-button.primary type="submit"
                         class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 cursor-pointer">
                         Save
                     </x-button.primary>
+=======
+                    <x-button.primary
+    type="submit"
+    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 cursor-pointer"
+    x-on:click="Livewire.dispatch('showLoader')"
+>
+    Save
+</x-button.primary>
+
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5
                     <x-button.primary
                         wire:click="cancel"
                         class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer">
@@ -111,4 +137,8 @@
             </form>
         </div>
     </div>
+<<<<<<< HEAD
 </div>
+=======
+</div>
+>>>>>>> d726694e2ff4cbf8a12d9642a72f953c3c34c7b5

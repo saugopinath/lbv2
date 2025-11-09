@@ -14,77 +14,77 @@ class ElasticsearchService
 
     /**
      * Test the connection to the Elasticsearch server.
-     * 
+     *
      * @return string
      */
-    public function testConnection()
-    {
-        try{
-        $response = $this->client->ping();
-        } catch (NetworkExceptionInterface $e) {
-           die(var_dump($e->getMessage()));
-        }
-        return $response ? 'Connection successful' : 'Connection failed';
-    }
+    // public function testConnection()
+    // {
+    //     try{
+    //     $response = $this->client->ping();
+    //     } catch (NetworkExceptionInterface $e) {
+    //        die(var_dump($e->getMessage()));
+    //     }
+    //     return $response ? 'Connection successful' : 'Connection failed';
+    // }
 
     /**
      * Create an index in Elasticsearch with the given name and default settings.
-     * 
+     *
      * @param string $indexName
      * @return array
      */
-    public function createIndex($indexName)
-    {
-        $params = [
-            'index' => $indexName,
-            'body' => [
-                'settings' => [
-                    'number_of_shards' => 1,
-                    'number_of_replicas' => 0
-                ],
-                'mappings' => [
-                    'properties' => [
-                        'title' => [
-                            'type' => 'text'
-                        ],
-                        'content' => [
-                            'type' => 'text'
-                        ]
-                    ]
-                ]
-            ]
-        ];
+    // public function createIndex($indexName)
+    // {
+    //     $params = [
+    //         'index' => $indexName,
+    //         'body' => [
+    //             'settings' => [
+    //                 'number_of_shards' => 1,
+    //                 'number_of_replicas' => 0
+    //             ],
+    //             'mappings' => [
+    //                 'properties' => [
+    //                     'title' => [
+    //                         'type' => 'text'
+    //                     ],
+    //                     'content' => [
+    //                         'type' => 'text'
+    //                     ]
+    //                 ]
+    //             ]
+    //         ]
+    //     ];
 
-        if($this->client->indices()->create($params))
-            return true;
-        else
-             return false;
-    }
+    //     if($this->client->indices()->create($params))
+    //         return true;
+    //     else
+    //          return false;
+    // }
 
     /**
      * Populate an index with the given data.
-     * 
+     *
      * @param string $indexName
      * @param array $data
      * @return array
      */
-    public function populateIndex($indexName, $data)
-    {
-        //dd($indexName);
-        $params = [
-            'index' => $indexName,
-            'body' => $data
-        ];
+    // public function populateIndex($indexName, $data)
+    // {
+    //     //dd($indexName);
+    //     $params = [
+    //         'index' => $indexName,
+    //         'body' => $data
+    //     ];
 
-        if($this->client->index($params))
-           return true;
-        else
-             return false;  
-    }
+    //     if($this->client->index($params))
+    //        return true;
+    //     else
+    //          return false;
+    // }
 
     /**
      * Verify if a document with the given ID exists in the specified index.
-     * 
+     *
      * @param string $index
      * @param string $id
      * @return array
@@ -99,7 +99,7 @@ class ElasticsearchService
 
     /**
      * Perform a bulk index operation with the given data.
-     * 
+     *
      * @param string $indexName
      * @param array $data
      * @return array
@@ -145,7 +145,7 @@ class ElasticsearchService
 
     /**
      * Get paginated data from the specified index.
-     * 
+     *
      * @param string $indexName
      * @param int $page
      * @param int $pageSize
@@ -182,7 +182,7 @@ class ElasticsearchService
 
     /**
      * Get data from the specified index by document ID.
-     * 
+     *
      * @param string $indexName
      * @param string $id
      * @return array|string
