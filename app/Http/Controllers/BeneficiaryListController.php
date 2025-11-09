@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\CheckAuthHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
 
@@ -25,7 +26,8 @@ class BeneficiaryListController extends Controller
     /** Beneficiary List View */
     public function index()
     {
-        if (Auth::user()->can('view beneficiaries')) {
+        // if (Auth::user()->can('view beneficiaries')) {
+        if (WorkFlowPermissionHelper::canViewBeneficiaries()) {
             return view('beneficiaries.index');
         }
 
@@ -46,7 +48,8 @@ class BeneficiaryListController extends Controller
         ]);
 
         // Permission check
-        if (Auth::user()->can('view reports')) {
+        if (WorkFlowPermissionHelper::canViewReport()) {
+            // if (Auth::user()->can('view reports')) {
             $reportType = $validated['report_type'];
             return view('beneficiaries.report', compact('reportType'));
         }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\CheckAuthHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use Illuminate\Http\Request;
 
 class UsersController extends Controller
@@ -21,7 +22,8 @@ class UsersController extends Controller
     }
     public function index()
     {
-        if (Auth::user()->can('view users')) {
+        if (WorkFlowPermissionHelper::canViewUser()) {
+        // if (Auth::user()->can('view users')) {
             return view('users.index');
         }
         $header = 'Oops! You do not have permission to view users.';

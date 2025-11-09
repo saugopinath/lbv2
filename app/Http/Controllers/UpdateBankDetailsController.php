@@ -6,6 +6,7 @@ use App\Models\Codemaster;
 use Illuminate\Http\Request;
 use App\Helpers\ChechDupHelper;
 use App\Helpers\CheckAuthHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use App\Models\AcceptRejectInfo;
 use Illuminate\Support\Facades\DB;
 use App\Models\BeneficiaryEnclosure;
@@ -29,7 +30,8 @@ class UpdateBankDetailsController extends Controller
     }
     public function index()
     {
-        if (Auth::user()->can('update bank details')) {
+           if (WorkFlowPermissionHelper::canUpdateBankDetails()) {
+        // if (Auth::user()->can('update bank details')) {
             $header = 'Update Bank Details For Approved Beneficiary';
             return view('UpdateBankDetailsView.bank_deatils_index', compact('header'));
         }
@@ -38,7 +40,8 @@ class UpdateBankDetailsController extends Controller
     }
     public function updateBeneficiaryBank($type, Request $request)
     {
-        if (Auth::user()->can('search bank update')) {
+        if (WorkFlowPermissionHelper::canSearchBankUpdate()) {
+        // if (Auth::user()->can('search bank update')) {
             $reportType = 3;
             $doctype = $this->doctype;
             $application_id = Crypt::decryptString($request->application_id);
@@ -61,7 +64,8 @@ class UpdateBankDetailsController extends Controller
     }
     public function updateMobile(Request $request)
     {
-        if (Auth::user()->can('update mobile')) {
+        if (WorkFlowPermissionHelper::canUpdateMobile()) {
+        // if (Auth::user()->can('update mobile')) {
 
             if (!Auth::check()) {
                 return redirect()->route('login')->with('error', 'Please login first!');
@@ -136,7 +140,8 @@ class UpdateBankDetailsController extends Controller
     }
     public function updateBank(Request $request)
     {
-        if (Auth::user()->can('update bank')) {
+         if (WorkFlowPermissionHelper::canUpdateBank()) {
+        // if (Auth::user()->can('update bank')) {
             if (!Auth::check()) {
                 return redirect()->route('login')->with('error', 'Please login first!');
             }

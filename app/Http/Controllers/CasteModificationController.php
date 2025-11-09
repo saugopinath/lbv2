@@ -8,6 +8,7 @@ use App\Models\CasteModificationInfo;
 use App\Models\Codemaster;
 use Illuminate\Http\Request;
 use App\Helpers\CheckAuthHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -61,7 +62,8 @@ class CasteModificationController extends Controller
     /** -------------------- OPERATOR ACCESS -------------------- **/
     public function index()
     {
-        if (Auth::user()->can('modify caste')) {
+        if (WorkFlowPermissionHelper::canModifyCaste()) {
+        // if (Auth::user()->can('modify caste')) {
             $header = 'Caste Modification Information';
             return view('CasteModificationView.caste_modification_index', compact('header'));
         }
@@ -71,7 +73,8 @@ class CasteModificationController extends Controller
 
     public function editview(Request $request)
     {
-        if (Auth::user()->can('edit caste')) {
+        if (WorkFlowPermissionHelper::canEditCaste()) {
+        // if (Auth::user()->can('edit caste')) {
             $header = 'Caste Modification Details';
             $application_id = Crypt::decryptString($request->application_id);
             $beneficiary_id = Crypt::decryptString($request->beneficiary_id);
@@ -117,7 +120,8 @@ class CasteModificationController extends Controller
 
     public function updateCaste(Request $request)
     {
-        if (Auth::user()->can('update caste')) {
+        if (WorkFlowPermissionHelper::canUpdateCaste()) {
+        // if (Auth::user()->can('update caste')) {
             if (!Auth::check()) {
                 return redirect()->route('login')->with('error', 'Please login first!');
             }
@@ -226,7 +230,8 @@ class CasteModificationController extends Controller
     /** -------------------- VERIFIER / APPROVER ACCESS -------------------- **/
     public function list()
     {
-        if (Auth::user()->can('view caste modification list')) {
+        if (WorkFlowPermissionHelper::canCasteModification()) {
+        // if (Auth::user()->can('view caste modification list')) {
             $header = 'Caste Modification Information List';
             return view('CasteModificationView.caste_modification_list', compact('header'));
         }
@@ -236,7 +241,8 @@ class CasteModificationController extends Controller
 
     public function viewAppDetails(Request $request)
     {
-        if (Auth::user()->can('view beneficiary details')) {
+        if (WorkFlowPermissionHelper::canBeneficiaryDetails()) {
+        // if (Auth::user()->can('view beneficiary details')) {
             $applicant_id = $request->application_id;
             $application_id = Crypt::decrypt($applicant_id);
 

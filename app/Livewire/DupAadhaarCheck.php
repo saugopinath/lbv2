@@ -1,9 +1,13 @@
 <?php
+
 namespace App\Livewire;
+
 use Livewire\Component;
 use App\Models\BeneficiaryAadhaar;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Auth;
 use App\Helpers\AadhaarHelper;
+
 class DupAadhaarCheck extends Component
 {
     public $aadhaar;
@@ -24,6 +28,14 @@ class DupAadhaarCheck extends Component
             $this->dispatch('hideLoader');
             return ['status' => 'duplicate', 'message' => $this->error];
         }
+
+        $user = Auth::user();
+        if (!$user->can('Normal Entry Allow') && !$user->can('Duare Sarkar Entry Allow')) {
+            $this->error = "Not authorized to create entry.";
+            $this->dispatch('hideLoader');
+            return ['status' => 'unauthorized', 'message' => $this->error];
+        }
+
         $this->dispatch('aadhaarChecked', [
             'encoded' => $encoded_aadhar,
             'hash' => $aadhaar_hash,

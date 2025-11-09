@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\CheckAuthHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use Illuminate\Http\Request;
 
 class LBController extends Controller
@@ -24,7 +25,8 @@ class LBController extends Controller
     /** LB Form Submit Page */
     public function index()
     {
-        if (Auth::user()->can('submit lb form')) {
+         if (WorkFlowPermissionHelper::canEntry()) {
+        // if (Auth::user()->can('submit lb form')) {
             return view('lbform.lbform');
         }
 
@@ -35,7 +37,8 @@ class LBController extends Controller
     /**  Draft List Page */
     public function draftlist()
     {
-        if (Auth::user()->can('view draft list')) {
+        if (WorkFlowPermissionHelper::canDraftList()) {
+        // if (Auth::user()->can('view draft list')) {
             $button_show = 1;
             return view('lbform.draftlist', compact('button_show'));
         }
@@ -47,7 +50,8 @@ class LBController extends Controller
     /** Draft Edit Page */
     public function draftedit($id)
     {
-        if (Auth::user()->can('edit draft')) {
+        if (WorkFlowPermissionHelper::canEditDraft()) {
+        // if (Auth::user()->can('edit draft')) {
             $id = Crypt::decryptString($id);
             return view('lbform.draftedit', compact('id'));
         }

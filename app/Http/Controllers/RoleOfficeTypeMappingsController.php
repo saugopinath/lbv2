@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\CheckAuthHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use Illuminate\Http\Request;
 
 class RoleOfficeTypeMappingsController extends Controller
@@ -21,7 +22,8 @@ class RoleOfficeTypeMappingsController extends Controller
     }
     public function index()
     {
-        if (Auth::user()->can('manage role mappings')) {
+        if (WorkFlowPermissionHelper::canRoleMapping()) {
+        // if (Auth::user()->can('manage role mappings')) {
             return view('roleofficeTypemappings.index');
         }
         $header = 'Oops! You do not have permission to manage role mappings.';

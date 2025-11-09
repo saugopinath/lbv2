@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\CheckAuthHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use Illuminate\Http\Request;
 
 class PermissionController extends Controller
@@ -20,7 +21,8 @@ class PermissionController extends Controller
     }
      public function index()
     {
-        if (Auth::user()->can('view permission')) {
+        if (WorkFlowPermissionHelper::canViewPermission()) {
+        // if (Auth::user()->can('view permission')) {
             return view('permissions.permission_index');
         }
 

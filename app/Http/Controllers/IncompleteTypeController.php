@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\CheckAuthHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use Illuminate\Support\Facades\Route;
 
 class IncompleteTypeController extends Controller
@@ -34,11 +35,13 @@ class IncompleteTypeController extends Controller
     {
         $user = Auth::user();
 
-        if ($stage === 'verifier' && $user->can('view verifier incomplete')) {
+        if ($stage === 'verifier' && WorkFlowPermissionHelper::canVerifierIncomplet()) {
+        // if ($stage === 'verifier' && $user->can('view verifier incomplete')) {
             return view('incomplete_types.index', ['stage' => 'verifier']);
         }
 
-        if ($stage === 'approver' && $user->can('view approver incomplete')) {
+        if ($stage === 'verifier' && WorkFlowPermissionHelper::canApproverIncomplet()) {
+        // if ($stage === 'approver' && $user->can('view approver incomplete')) {
             return view('incomplete_types.index', ['stage' => 'approver']);
         }
 
@@ -47,7 +50,8 @@ class IncompleteTypeController extends Controller
     }
     public function fullUpdate(Request $request, $id)
     {
-        if (Auth::user()->can('update incomplete')) {
+        if (WorkFlowPermissionHelper::canUpdateIncomplet()) {
+        // if (Auth::user()->can('update incomplete')) {
             $realId = Crypt::decrypt($id);
 
             // Wrap everything in try-catch
@@ -268,7 +272,8 @@ class IncompleteTypeController extends Controller
     }
     public function revertVerify(Request $request, $id)
     {
-        if (Auth::user()->can('revert incomplete')) {
+        if (WorkFlowPermissionHelper::canRevertIncomplet()) {
+        // if (Auth::user()->can('revert incomplete')) {
             $realId = Crypt::decrypt($id);
 
             try {
