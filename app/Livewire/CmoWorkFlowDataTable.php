@@ -46,6 +46,10 @@ class CmoWorkFlowDataTable extends DataTableComponent
             $this->process_type = Codemaster::getIdByCode(3301);
         } elseif ($user->hasRole('Operator')) {
             $this->process_type = Codemaster::getIdByCode(3304);
+        } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+            $this->process_type = Codemaster::getIdByCode(3302);
+        } elseif ($user->hasAnyRole(['HOD'])) {
+            $this->process_type = Codemaster::getIdByCode(3303);
         }
 
         $select_lgd = session('lgd_session');
@@ -172,7 +176,7 @@ class CmoWorkFlowDataTable extends DataTableComponent
                     $user = auth()->user();
                     if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
                         $routeName = 'cmo-grievance-find';
-                    } elseif ($user->hasRole('Operator')) {
+                    } else {
                         $routeName = 'lbform';
                     }
                     $link = route($routeName) . '?id=' . Crypt::encryptString($row->grievance_id);

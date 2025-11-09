@@ -59,6 +59,12 @@ class RedressedStatusSeeder extends Seeder
                 "short_name" => "marked_and_approved_and_send_to_cmo",
                 "parent_short_code" => "redressed_status",
                 "code" => "3305",
+            ),
+            array(
+                "name" => "Grivance List with No BLock/Municipality LGD",
+                "short_name" => "grivance_list_with_no_block/municipality_lgd",
+                "parent_short_code" => "redressed_status",
+                "code" => "3306",
             )
         );
         foreach ($codemasterChilds as $codemasterChild_item) {
