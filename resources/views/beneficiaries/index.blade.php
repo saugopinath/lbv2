@@ -2,7 +2,8 @@
     <div class="flex-1 p-2 col-end-5 overflow-auto">
         <div class="bg-white dark:bg-gray-800 shadow-md rounded-2xl p-4">
 
-            @can('view reports')
+            {{--  @can('view reports')  --}}
+            @if(\App\Helpers\WorkFlowPermissionHelper::canViewReport())
                 <form method="GET" action="{{ route('report.show') }}">
                     <x-form.select name="report_type" label="Report Type" required>
                         <option value="">-- Select Report Type --</option>
@@ -36,7 +37,8 @@
                         Please contact your administrator to get access to report viewing.
                     </p>
                 </div>
-            @endcan
+            {{--  @endcan  --}}
+            @endif
 
         </div>
     </div>

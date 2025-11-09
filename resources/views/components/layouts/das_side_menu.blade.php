@@ -40,7 +40,8 @@
             null
         @endif
     }">
-            @canany(['submit lb form', 'view draft list', 'view lb applications'])
+            {{-- @canany(['submit lb form', 'view draft list', 'view lb applications']) --}}
+            @if (\App\Helpers\WorkFlowPermissionHelper::canAnyLbMenu())
                 <div>
                     <button @click="activeMenu === 'LBFrom' ? activeMenu = null : activeMenu = 'LBFrom'"
                         class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -64,7 +65,8 @@
                     <!-- Sub-menu -->
                     <div id="list_menu" x-show="activeMenu === 'LBFrom'" x-collapse x-transition class="pl-4">
                         <ul>
-                            @can('submit lb form')
+                            {{-- @can('submit lb form') --}}
+                            @if (\App\Helpers\WorkFlowPermissionHelper::canEntry())
                                 <li>
                                     <a href="{{ route('lbform') }}"
                                         class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white @if(request()->routeIs('lbform')) bg-slate-700 text-white @endif">
@@ -80,9 +82,11 @@
                                         <span x-show="sidebar" class="truncate">Lakshmir Bhandar Form</span>
                                     </a>
                                 </li>
-                            @endcan
+                                {{-- @endcan --}}
+                            @endif
 
-                            @can('view draft list')
+                            {{-- @can('view draft list') --}}
+                            @if (\App\Helpers\WorkFlowPermissionHelper::canDraftList())
                                 <li>
                                     <a href="{{ route('draftlist') }}"
                                         class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white @if(request()->routeIs('draftlist')) bg-slate-700 text-white @endif">
@@ -98,9 +102,11 @@
                                         <span x-show="sidebar" class="truncate">Draft Applications</span>
                                     </a>
                                 </li>
-                            @endcan
+                                {{-- @endcan --}}
+                            @endif
 
-                            @can('view lb applications')
+                            {{-- @can('view lb applications') --}}
+                            @if (\App\Helpers\WorkFlowPermissionHelper::canViewLbApplications())
                                 <li>
                                     <a href="{{ route('lb-application-list') }}"
                                         class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white @if(request()->routeIs('lb-application-list')) bg-slate-700 text-white @endif">
@@ -116,15 +122,18 @@
                                         <span x-show="sidebar" class="truncate">Workflow</span>
                                     </a>
                                 </li>
-                            @endcan
+                                {{-- @endcan --}}
+                            @endif
                         </ul>
                     </div>
                 </div>
-            @endcanany
+                {{-- @endcanany --}}
+            @endif
         </div>
 
         <!-- Menu Item: Beneficiary List -->
-        @can('view beneficiaries')
+        {{-- @can('view beneficiaries') --}}
+        @if (\App\Helpers\WorkFlowPermissionHelper::canViewBeneficiaries())
             <div>
                 <a href="{{ route('beneficiaries_selection.index') }}"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -139,10 +148,12 @@
                     <span x-show="sidebar" class="mr-2 truncate">Beneficiary List</span>
                 </a>
             </div>
-        @endcan
+            {{-- @endcan --}}
+        @endif
 
         <!-- Update Bank Details -->
-        @can('update bank details')
+        {{-- @can('update bank details') --}}
+        @if (\App\Helpers\WorkFlowPermissionHelper::canUpdateBankDetails())
             <div>
                 <a href="{{ route('bankUpdate') }}"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -157,10 +168,12 @@
                     <span x-show="sidebar" class="mr-2 truncate">Update Bank Details</span>
                 </a>
             </div>
-        @endcan
+            {{-- @endcan --}}
+        @endif
 
         {{-- Incomplete Menu --}}
-        @canany(['view verifier incomplete', 'view approver incomplete'])
+        @if (\App\Helpers\WorkFlowPermissionHelper::canIncomplete())
+            {{-- @canany(['view verifier incomplete', 'view approver incomplete']) --}}
             <div>
                 <button @click="activeMenu === 'Incomplete' ? activeMenu = null : activeMenu = 'Incomplete'"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -181,11 +194,12 @@
                 <div id="list_menu" x-show="activeMenu === 'Incomplete'" x-collapse x-transition class="pl-4">
                     <ul>
                         {{-- Verifier Permission --}}
-                        @can('view verifier incomplete')
+                        {{-- @can('view verifier incomplete') --}}
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canVerifierIncomplet())
                             <li>
                                 <a href="{{ route('incomplete.types', 'verifier') }}"
                                     class="flex item-center px-2 py-1 text-left rounder hover:bg-slate-700 hover:text-white
-                                                                                                {{ $stage === 'verifier' ? 'bg-slate-700 text-white' : 'text-slate-200' }}">
+                                                                                                                                                                                {{ $stage === 'verifier' ? 'bg-slate-700 text-white' : 'text-slate-200' }}">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path opacity="0.3"
@@ -195,14 +209,16 @@
                                     <span x-show="sidebar" class="truncate">Verifier Incomplete</span>
                                 </a>
                             </li>
-                        @endcan
+                            {{-- @endcan --}}
+                        @endif
 
                         {{-- Approver Permission --}}
-                        @can('view approver incomplete')
+                        {{-- @can('view approver incomplete') --}}
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canApproverIncomplet())
                             <li>
                                 <a href="{{ route('incomplete.types', 'approver') }}"
                                     class="flex item-center px-2 py-1 text-left rounder hover:bg-slate-700 hover:text-white
-                                                                                                {{ $stage === 'approver' ? 'bg-slate-700 text-white' : 'text-slate-200' }}">
+                                                                                                                                                                                {{ $stage === 'approver' ? 'bg-slate-700 text-white' : 'text-slate-200' }}">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path opacity="0.3"
@@ -212,14 +228,17 @@
                                     <span x-show="sidebar" class="truncate">Approver Incomplete</span>
                                 </a>
                             </li>
-                        @endcan
+                            {{-- @endcan --}}
+                        @endif
                     </ul>
                 </div>
             </div>
-        @endcanany
+            {{-- @endcanany --}}
+        @endif
 
         {{-- Duty Management Menu --}}
-        @canany(['manage role mappings', 'view offices', 'view users'])
+        @if (\App\Helpers\WorkFlowPermissionHelper::canDutyManagement())
+            {{-- @canany(['manage role mappings', 'view offices', 'view users']) --}}
             <div>
                 <button @click="activeMenu === 'DutyManagement' ? activeMenu = null : activeMenu = 'DutyManagement'"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -241,7 +260,8 @@
                 <div id="list_menu" x-show="activeMenu === 'DutyManagement'" x-collapse x-transition class="pl-4">
                     <ul>
                         {{-- Role Office Type Mapping --}}
-                        @can('manage role mappings')
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canRoleMapping())
+                            {{-- @can('manage role mappings') --}}
                             <li>
                                 <a href="{{ route('role-office-master-mappings.index') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white">
@@ -254,10 +274,12 @@
                                     <span x-show="sidebar" class="truncate">Role Office Type Mapping</span>
                                 </a>
                             </li>
-                        @endcan
+                            {{-- @endcan --}}
+                        @endif
 
                         {{-- Office Masters --}}
-                        @can('view offices')
+                        {{-- @can('view offices') --}}
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canViewOffices())
                             <li>
                                 <a href="{{ route('officemasters.index') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white">
@@ -270,10 +292,12 @@
                                     <span x-show="sidebar" class="truncate">Office Masters</span>
                                 </a>
                             </li>
-                        @endcan
+                            {{-- @endcan --}}
+                        @endif
 
                         {{-- Users --}}
-                        @can('view users')
+                        {{-- @can('view users') --}}
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canViewUser())
                             <li>
                                 <a href="{{ route('user-managements.index') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white">
@@ -286,11 +310,13 @@
                                     <span x-show="sidebar" class="truncate">Users</span>
                                 </a>
                             </li>
-                        @endcan
+                            {{-- @endcan --}}
+                        @endif
                     </ul>
                 </div>
             </div>
-        @endcanany
+            {{-- @endcanany --}}
+        @endif
 
         <div x-data="{
         activeMenu:
@@ -300,7 +326,8 @@
                 null
             @endif
     }">
-            @canany(['modify caste', 'view caste modification list'])
+            {{-- @canany(['modify caste', 'view caste modification list']) --}}
+            @if (\App\Helpers\WorkFlowPermissionHelper::canCaste())
                 <div>
                     <button @click="activeMenu === 'CasteManagement' ? activeMenu = null : activeMenu = 'CasteManagement'"
                         class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -320,7 +347,8 @@
                     <!-- Sub-menu -->
                     <div id="list_menu" x-show="activeMenu === 'CasteManagement'" x-collapse x-transition class="pl-4">
                         <ul>
-                            @can('modify caste')
+                            {{-- @can('modify caste') --}}
+                            @if (\App\Helpers\WorkFlowPermissionHelper::canModifyCaste())
                                 <li>
                                     <a href="{{ route('Caste-modification-info') }}"
                                         class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white @if(request()->routeIs('Caste-modification-info')) bg-slate-700 text-white @endif">
@@ -336,9 +364,11 @@
                                         <span x-show="sidebar" class="truncate">Change Caste</span>
                                     </a>
                                 </li>
-                            @endcan
+                                {{-- @endcan --}}
+                            @endif
 
-                            @can('view caste modification list')
+                            {{-- @can('view caste modification list') --}}
+                            @if (\App\Helpers\WorkFlowPermissionHelper::canCasteModification())
                                 <li>
                                     <a href="{{ route('caste-modification-list') }}"
                                         class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white @if(request()->routeIs('caste-modification-list')) bg-slate-700 text-white @endif">
@@ -354,14 +384,17 @@
                                         <span x-show="sidebar" class="truncate">Report List</span>
                                     </a>
                                 </li>
-                            @endcan
+                                {{-- @endcan --}}
+                            @endif
                         </ul>
                     </div>
                 </div>
-            @endcanany
+                {{-- @endcanany --}}
+            @endif
         </div>
 
-        @canany(['view permission', 'view user permission'])
+        {{-- @canany(['view permission', 'view user permission']) --}}
+        @if (\App\Helpers\WorkFlowPermissionHelper::canUserPermission())
             <div>
                 <button @click="activeMenu === 'CreatePermission' ? activeMenu = null : activeMenu = 'CreatePermission'"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -385,7 +418,8 @@
 
                 <div id="list_menu" x-show="activeMenu === 'CreatePermission'" x-collapse x-transition class="pl-4">
                     <ul>
-                        @can('view permission')
+                        {{-- @can('view permission') --}}
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canViewPermission())
                             <li>
                                 <a href="{{ route('permission') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
@@ -400,8 +434,10 @@
                                     </svg><span x-show="sidebar" class="truncate" svg="truncate">Create
                                         Permission</span></a>
                             </li>
-                        @endcan
-                        @can('view user permission')
+                            {{-- @endcan --}}
+                        @endif
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canViewUserPermisson())
+                            {{-- @can('view user permission') --}}
                             <li>
                                 <a href="{{ route('user-permission') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
@@ -416,11 +452,13 @@
                                     </svg><span x-show="sidebar" class="truncate" svg="truncate">Assign
                                         Permission</span></a>
                             </li>
-                        @endcan
+                            {{-- @endcan --}}
+                        @endif
                     </ul>
                 </div>
             </div>
-        @endcanany
+            {{-- @endcanany --}}
+        @endif
 
         <!-- Menu Item: Reports -->
         <!-- <div>

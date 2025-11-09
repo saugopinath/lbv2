@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Codemaster;
 use App\Helpers\ChechDupHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use App\Models\BeneficiaryBank;
 use App\Models\AcceptRejectInfo;
 use Illuminate\Support\Facades\DB;
@@ -67,10 +68,14 @@ class IncompletTypePage extends Component
 
     public function approve()
     {
-        if (!Auth::user()->can('approve application')) {
+        // if (!Auth::user()->can('approve application')) {
+        //     session()->flash('error', 'Oops! You do not have permission to approve applications.');
+        //     return redirect()->route('dashboard');
+
+        // }
+        if (!WorkFlowPermissionHelper::canApproveApplication()) {
             session()->flash('error', 'Oops! You do not have permission to approve applications.');
             return redirect()->route('dashboard');
-
         }
 
         try {
@@ -375,7 +380,11 @@ class IncompletTypePage extends Component
     public function revert()
     {
 
-        if (!Auth::user()->can('revert application')) {
+        // if (!Auth::user()->can('revert application')) {
+        //     session()->flash('error', 'Oops! You do not have permission to revert applications.');
+        //     return redirect()->route('dashboard');
+        // }
+        if (!WorkFlowPermissionHelper::canRevertApplication()) {
             session()->flash('error', 'Oops! You do not have permission to revert applications.');
             return redirect()->route('dashboard');
         }

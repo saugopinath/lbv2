@@ -7,6 +7,7 @@ use App\Models\BeneficiaryAadhaar;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\AadhaarHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 
 class DupAadhaarCheck extends Component
 {
@@ -29,8 +30,14 @@ class DupAadhaarCheck extends Component
             return ['status' => 'duplicate', 'message' => $this->error];
         }
 
-        $user = Auth::user();
-        if (!$user->can('Normal Entry Allow') && !$user->can('Duare Sarkar Entry Allow')) {
+        // $user = Auth::user();
+        // if (!$user->can('Normal Entry Allow') && !$user->can('Duare Sarkar Entry Allow')) {
+        //     $this->error = "Not authorized to create entry.";
+        //     $this->dispatch('hideLoader');
+        //     return ['status' => 'unauthorized', 'message' => $this->error];
+        // }
+
+        if (!WorkFlowPermissionHelper::canCreateEntry()) {
             $this->error = "Not authorized to create entry.";
             $this->dispatch('hideLoader');
             return ['status' => 'unauthorized', 'message' => $this->error];

@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Helpers\WorkFlowPermissionHelper;
 use Livewire\Component;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Carbon;
@@ -91,19 +92,20 @@ class PersonalDetails extends Component
             $this->hash = $aadhaarData['hash'];
         }
 
-        $user = Auth::user();
+        // $user = Auth::user();
 
-        $entryTypes = collect();
+        // $entryTypes = collect();
 
-        if ($user->can('Normal Entry Allow')) {
-            $normal = Codemaster::where('short_name', 'entry_type_normal')->get();
-            $entryTypes = $entryTypes->merge($normal);
-        }
+        // if ($user->can('Normal Entry Allow')) {
+        //     $normal = Codemaster::where('short_name', 'entry_type_normal')->get();
+        //     $entryTypes = $entryTypes->merge($normal);
+        // }
 
-        if ($user->can('Duare Sarkar Entry Allow')) {
-            $duare = Codemaster::where('short_name', 'entry_type_duare_sarkar')->get();
-            $entryTypes = $entryTypes->merge($duare);
-        }
+        // if ($user->can('Duare Sarkar Entry Allow')) {
+        //     $duare = Codemaster::where('short_name', 'entry_type_duare_sarkar')->get();
+        //     $entryTypes = $entryTypes->merge($duare);
+        // }
+        $entryTypes = WorkFlowPermissionHelper::getAllowedEntryTypes();
 
         if ($entryTypes->isNotEmpty()) {
             $this->hideAppTypeSection = true;

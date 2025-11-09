@@ -5,12 +5,14 @@
             <h2 class="text-xl font-semibold text-gray-700">
                 OfficeMasters
             </h2>
-            @can('create offices')
+            {{--  @can('create offices')  --}}
+             @if(\App\Helpers\WorkFlowPermissionHelper::canCreateOffices())
                 <a href="{{ route('office-masters.create') }}"
                     class="bg-blue-500 text-white px-4 py-2 rounded-2xl shadow-md hover:bg-blue-600 whitespace-nowrap cursor-pointer">
                     New OfficeMaster
                 </a>
-            @endcan
+            {{--  @endcan  --}}
+            @endif
         </div>
     </div>
     <div class="bg-white shadow-xl rounded-2xl ">
