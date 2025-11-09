@@ -54,38 +54,38 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // User Management
     Route::get('/user-managements', [UsersController::class, 'index'])
-        ->middleware('permission.redirect:view users')
+        ->middleware('permission.redirect:canViewUser')
         ->name('user-managements.index');
 
     Route::get('/users/create', UsersCreate::class)
-        ->middleware('permission.redirect:create users')
+        ->middleware('permission.redirect:canCreateUsers')
         ->name('users.create');
 
     // Role & Office Mappings
     Route::get('/role-office-master-mappings', [RoleOfficeTypeMappingsController::class, 'index'])
-        ->middleware('permission.redirect:manage role mappings')
+        ->middleware('permission.redirect:canRoleMapping')
         ->name('role-office-master-mappings.index');
 
     Route::get('/role-office-type-mappings/create', Create::class)
-        ->middleware('permission.redirect:create role mappings')
+        ->middleware('permission.redirect:canRoleMappings')
         ->name('role-office-type-mappings.create');
 
     // Office Masters
     Route::get('/officemasters', [OfficeMastersController::class, 'index'])
-        ->middleware('permission.redirect:view offices')
+        ->middleware('permission.redirect:canViewOffices')
         ->name('officemasters.index');
 
     Route::get('/office-masters/create', OfficeMasterCreate::class)
-        ->middleware('permission.redirect:create offices')
+        ->middleware('permission.redirect:canCreateOffices')
         ->name('office-masters.create');
 
     // Permissions Management
     Route::get('/permission', [PermissionController::class, 'index'])
-        ->middleware('permission.redirect:view permission')
+        ->middleware('permission.redirect:canViewPermission')
         ->name('permission');
 
     Route::get('/user-permission', [UserPermissionController::class, 'index'])
-        ->middleware('permission.redirect:view user permission')
+        ->middleware('permission.redirect:canViewUserPermisson')
         ->name('user-permission');
 
     Route::get('/assign-users-permissions', AssignPermissionsPage::class)
@@ -98,19 +98,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // LB & Workflow
     Route::get('lbform', [LBController::class, 'index'])
-        ->middleware('permission.redirect:submit lb form')
+        ->middleware('permission.redirect:canEntry')
         ->name('lbform');
 
     Route::get('draftlist', [LBController::class, 'draftlist'])
-        ->middleware('permission.redirect:view draft list')
+        ->middleware('permission.redirect:canDraftList')
         ->name('draftlist');
 
     Route::get('draftedit/{id}', [LBController::class, 'draftedit'])
-        ->middleware('permission.redirect:edit draft')
+        ->middleware('permission.redirect:canEditDraft')
         ->name('draftedit');
 
     Route::get('lb-application-list', [WorkFlowController::class, 'index'])
-        ->middleware('permission.redirect:view lb applications')
+        ->middleware('permission.redirect:canViewLbApplications')
         ->name('lb-application-list');
 
     Route::get('/application/{id}', DraftApplicationView::class)
@@ -124,7 +124,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('incomplet-type.view');
 
     Route::post('/incomplete/update/{id}', [IncompleteTypeController::class, 'fullUpdate'])
-        ->middleware('permission.redirect:update incomplete')
+        ->middleware('permission.redirect:canUpdateIncomplet')
         ->name('incomplete-full-deatils-update');
 
     Route::post('/incomplete/revert/{id}', [IncompleteTypeController::class, 'revertVerify'])
@@ -132,11 +132,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('incomplete-revert-update');
 
     Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])
-        ->middleware('permission.redirect:view beneficiaries')
+        ->middleware('permission.redirect:canViewBeneficiaries')
         ->name('beneficiaries_selection.index');
 
     Route::get('/report', [BeneficiaryListController::class, 'show'])
-        ->middleware('permission.redirect:view reports')
+        ->middleware('permission.redirect:canViewReport')
         ->name('report.show');
 
     Route::get('/approved-lists', [BeneficiaryApprovedListController::class, 'index'])
@@ -149,39 +149,39 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Caste & Bank Update
     Route::get('/Caste-modification-info', [CasteModificationController::class, 'index'])
-        ->middleware('permission.redirect:modify caste')
+        ->middleware('permission.redirect:canModifyCaste')
         ->name('Caste-modification-info');
 
     Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])
-        ->middleware('permission.redirect:edit caste')
+        ->middleware('permission.redirect:canEditCaste')
         ->name('caste-modification.edit');
 
     Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
-        ->middleware('permission.redirect:update caste')
+        ->middleware('permission.redirect:canUpdateCaste')
         ->name('beneficiary.updateCaste');
 
     Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])
-        ->middleware('permission.redirect:view caste modification list')
+        ->middleware('permission.redirect:canCasteModification')
         ->name('caste-modification-list');
 
     Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
-        ->middleware('permission.redirect:view beneficiary details')
+        ->middleware('permission.redirect:canBeneficiaryDetails')
         ->name('view-beneficiary-details');
 
     Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])
-        ->middleware('permission.redirect:update bank details')
+        ->middleware('permission.redirect:canUpdateBankDetails')
         ->name('bankUpdate');
 
     Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])
-        ->middleware('permission.redirect:search bank update')
+        ->middleware('permission.redirect:canSearchBankUpdate')
         ->name('bank-update.search-beneficiary');
 
     Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])
-        ->middleware('permission.redirect:update mobile')
+        ->middleware('permission.redirect:canUpdateMobile')
         ->name('update-mobile');
 
     Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
-        ->middleware('permission.redirect:update bank')
+        ->middleware('permission.redirect:canUpdateBank')
         ->name('update-bank');
 
     // Design Pages (Dev Only – Remove in Prod)
