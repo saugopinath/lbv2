@@ -120,23 +120,27 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         //     'exportSelected' => 'Export',
         // ];
 
-        if (WorkFlowPermissionHelper::canBulkActionsNormalEntryVerificationAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryVerificationAllow() &&
-            CheckAuthHelper::isCommmonVerifier()) {
+        if ((WorkFlowPermissionHelper::canBulkActionsNormalEntryVerificationAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryVerificationAllow()) &&
+            CheckAuthHelper::isCommmonVerifier()
+        ) {
             $actions['bulkverify'] = 'Verify';
         }
 
-        if (WorkFlowPermissionHelper::canBulkActionsNormalEntryApproverAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryApproverAllow() &&
-            CheckAuthHelper::isCommonApprover()) {
+        if ((WorkFlowPermissionHelper::canBulkActionsNormalEntryApproverAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryApproverAllow()) &&
+            CheckAuthHelper::isCommonApprover()
+        ) {
             $actions['bulkapprove'] = 'Approve';
         }
 
-        if (WorkFlowPermissionHelper::canBulkActionsNormalEntryRejectAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryRejectAllow() &&
-            CheckAuthHelper::isCommonWorkFlow2ndStep()) {
+        if ((WorkFlowPermissionHelper::canBulkActionsNormalEntryRejectAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryRejectAllow()) &&
+            CheckAuthHelper::isCommonWorkFlow2ndStep()
+        ) {
             $actions['bulkreject'] = 'Reject';
         }
 
-        if (WorkFlowPermissionHelper::canBulkActionsNormalEntryRevertAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryRevertAllow() &&
-            CheckAuthHelper::isCommonWorkFlow2ndStep()) {
+        if ((WorkFlowPermissionHelper::canBulkActionsNormalEntryRevertAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryRevertAllow()) &&
+            CheckAuthHelper::isCommonWorkFlow2ndStep()
+        ) {
             $actions['bulkrevert'] = 'Revert';
         }
 
