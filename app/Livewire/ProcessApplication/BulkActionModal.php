@@ -2,6 +2,8 @@
 
 namespace App\Livewire\ProcessApplication;
 
+use App\Helpers\CheckAuthHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use App\Models\FaultyBeneficiaryPersonal;
 use Livewire\Component;
 use App\Models\Codemaster;
@@ -51,30 +53,38 @@ class BulkActionModal extends Component
 
         if ($this->entryType == Codemaster::getIdByCode(41)) {
             // 🔹 Normal Entry Permissions
-            if ($user->can('Normal Entry Verification Allow')) {
+            if (WorkFlowPermissionHelper::canNormalEntryVerificationAllow()) {
+            // if ($user->can('Normal Entry Verification Allow')) {
                 $this->availableActions['V'] = 'Verify';
             }
-            if ($user->can('Normal Entry Approver Allow')) {
+            if (WorkFlowPermissionHelper::canNormalEntryApproverAllow()) {
+            // if ($user->can('Normal Entry Approver Allow')) {
                 $this->availableActions['A'] = 'Approve';
             }
-            if ($user->can('Normal Entry Reject Allow')) {
+            if (WorkFlowPermissionHelper::canNormalEntryRejectAllow()) {
+            // if ($user->can('Normal Entry Reject Allow')) {
                 $this->availableActions['R'] = 'Reject';
             }
-            if ($user->can('Normal Entry Revert Allow')) {
+            // if ($user->can('Normal Entry Revert Allow')) {
+            if (WorkFlowPermissionHelper::canNormalEntryRevertAllow()) {
                 $this->availableActions['T'] = 'Revert';
             }
         } elseif ($this->entryType == Codemaster::getIdByCode(42)) {
             // 🔹 Duare Sarkar Permissions
-            if ($user->can('Duare Sarkar Entry Verification Allow')) {
+            // if ($user->can('Duare Sarkar Entry Verification Allow')) {
+                if (WorkFlowPermissionHelper::canDuareSarkarEntryVerificationAllow()) {
                 $this->availableActions['V'] = 'Verify';
             }
-            if ($user->can('Duare Sarkar Entry Approver Allow')) {
+            if (WorkFlowPermissionHelper::canDuareSarkarEntryApproverAllow()) {
+            // if ($user->can('Duare Sarkar Entry Approver Allow')) {
                 $this->availableActions['A'] = 'Approve';
             }
-            if ($user->can('Duare Sarkar Entry Reject Allow')) {
+            if (WorkFlowPermissionHelper::canDuareSarkarEntryRejectAllow()) {
+            // if ($user->can('Duare Sarkar Entry Reject Allow')) {
                 $this->availableActions['R'] = 'Reject';
             }
-            if ($user->can('Duare Sarkar Entry Revert Allow')) {
+            // if ($user->can('Duare Sarkar Entry Revert Allow')) {
+            if (WorkFlowPermissionHelper::canDuareSarkarEntryRevertAllow()) {
                 $this->availableActions['T'] = 'Revert';
             }
         }
@@ -198,11 +208,13 @@ class BulkActionModal extends Component
             }
         } elseif ($this->bulkActionType === 'T') {
 
-            $user = auth()->user();
-            if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+            // $user = auth()->user();
+            if (CheckAuthHelper::isCommonApprover()) {
+            // if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
                 $next_level_role_id = Codemaster::getIdByCode(22);
             }
-            if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+            if (CheckAuthHelper::isCommmonVerifier()) {
+            // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
                 $next_level_role_id = Codemaster::getIdByCode(21);
             }
             foreach ($ids as $id) {

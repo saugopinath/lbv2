@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Helpers\CheckAuthHelper;
 use App\Models\Ward;
 use App\Models\Block;
 use App\Models\District;
@@ -187,14 +188,16 @@ class IncompletTypeTable extends DataTableComponent
                 }
             });
         // dd($query->get());
-        $user = auth()->user();
+        // $user = auth()->user();
 
         $stage = $this->stage ?? null;
 
         if (!$stage) {
-            if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+            // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+            if (CheckAuthHelper::isCommmonVerifier()) {
                 $stage = 'verifier';
-            } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+                // } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+            } elseif (CheckAuthHelper::isCommonApprover()) {
                 $stage = 'approver';
             }
         }

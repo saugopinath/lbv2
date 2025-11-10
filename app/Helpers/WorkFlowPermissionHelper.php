@@ -187,4 +187,68 @@ class WorkFlowPermissionHelper
         return Auth::user()->can('view user permission')
             || Auth::user()->can('view permission');
     }
+    public static function canNormalEntryVerificationAllow(): bool
+    {
+        return Auth::user()->can('Normal Entry Verification Allow');
+    }
+    public static function canNormalEntryApproverAllow(): bool
+    {
+        return Auth::user()->can('Normal Entry Approver Allow');
+    }
+    public static function canNormalEntryRejectAllow(): bool
+    {
+        return Auth::user()->can('Normal Entry Reject Allow');
+    }
+    public static function canNormalEntryRevertAllow(): bool
+    {
+        return Auth::user()->can('Normal Entry Revert Allow');
+    }
+    public static function canDuareSarkarEntryVerificationAllow(): bool
+    {
+        return Auth::user()->can('Duare Sarkar Entry Verification Allow');
+    }
+    public static function canDuareSarkarEntryApproverAllow(): bool
+    {
+        return Auth::user()->can('Duare Sarkar Entry Approver Allow');
+    }
+    public static function canDuareSarkarEntryRejectAllow(): bool
+    {
+        return Auth::user()->can('Duare Sarkar Entry Reject Allow');
+    }
+    public static function canDuareSarkarEntryRevertAllow(): bool
+    {
+        return Auth::user()->can('Duare Sarkar Entry Revert Allow');
+    }
+     public static function canBulkActionsNormalEntryVerificationAllow(): bool
+    {
+        return Auth::user()->can('Bulk Actions Normal Entry Verification Allow');
+    }
+     public static function canBulkActionsNormalEntryApproverAllow(): bool
+    {
+        return Auth::user()->can('Bulk Actions Normal Entry Approver Allow');
+    }
+     public static function canBulkActionsNormalEntryRejectAllow(): bool
+    {
+        return Auth::user()->can('Bulk Actions Normal Entry Reject Allow');
+    }
+     public static function canBulkActionsNormalEntryRevertAllow(): bool
+    {
+        return Auth::user()->can('Bulk Actions Normal Entry Revert Allow');
+    }
+     public static function canBulkActionsDuareSarkarEntryVerificationAllow(): bool
+    {
+        return Auth::user()->can('Bulk Actions Duare Sarkar Entry Verification Allow');
+    }
+     public static function canBulkActionsDuareSarkarEntryApproverAllow(): bool
+    {
+        return Auth::user()->can('Bulk Actions Duare Sarkar Entry Approver Allow');
+    }
+     public static function canBulkActionsDuareSarkarEntryRejectAllow(): bool
+    {
+        return Auth::user()->can('Bulk Actions Duare Sarkar Entry Reject Allow');
+    }
+     public static function canBulkActionsDuareSarkarEntryRevertAllow(): bool
+    {
+        return Auth::user()->can('Bulk Actions Duare Sarkar Entry Revert Allow');
+    }
 }

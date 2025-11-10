@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Incomplete;
 
+use App\Helpers\CheckAuthHelper;
 use Livewire\Component;
 use App\Models\Ifsccodemaster;
 use App\Models\ApplicantIncompletDeatil;
@@ -104,16 +105,27 @@ class DupBank extends Component
 
     public function render()
     {
-        $user = auth()->user();
+        // $user = auth()->user();
 
         $stage = $this->stage ?? null;
 
 
+        // if (!$stage) {
+        //     if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+        //         $stage = 'verifier';
+
+        //     } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+        //         $stage = 'approver';
+        //     }
+
+        // }
         if (!$stage) {
-            if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+             if (CheckAuthHelper::isCommmonVerifier()) {
+            // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
                 $stage = 'verifier';
 
-            } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+            // } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+            } elseif (CheckAuthHelper::isCommonApprover()) {
                 $stage = 'approver';
             }
 

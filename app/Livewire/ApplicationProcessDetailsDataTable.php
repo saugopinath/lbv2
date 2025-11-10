@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Models\BeneficiaryCommonList;
 use App\Helpers\EncryptionArray;
 use App\Exports\BeneficiariesExport;
+use App\Helpers\CheckAuthHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use App\Models\BeneficiaryPersonal;
 use App\Models\FaultyBeneficiaryPersonal;
 use Maatwebsite\Excel\Facades\Excel;
@@ -114,22 +116,34 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     }
     public function bulkActions(): array
     {
-        $user = auth()->user();
-        $actions = [
-            'exportSelected' => 'Export',
-        ];
-        if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
-            $actions['bulkapprove'] = 'Approve';
-        }
-        if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+        // $actions = [
+        //     'exportSelected' => 'Export',
+        // ];
+
+        if (WorkFlowPermissionHelper::canBulkActionsNormalEntryVerificationAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryVerificationAllow() &&
+            CheckAuthHelper::isCommmonVerifier()) {
             $actions['bulkverify'] = 'Verify';
         }
-        if ($user->hasAnyRole(['Approver', 'Delegated Approver', 'Verifier', 'Delegated Verifier'])) {
+
+        if (WorkFlowPermissionHelper::canBulkActionsNormalEntryApproverAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryApproverAllow() &&
+            CheckAuthHelper::isCommonApprover()) {
+            $actions['bulkapprove'] = 'Approve';
+        }
+
+        if (WorkFlowPermissionHelper::canBulkActionsNormalEntryRejectAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryRejectAllow() &&
+            CheckAuthHelper::isCommonWorkFlow2ndStep()) {
             $actions['bulkreject'] = 'Reject';
+        }
+
+        if (WorkFlowPermissionHelper::canBulkActionsNormalEntryRevertAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryRevertAllow() &&
+            CheckAuthHelper::isCommonWorkFlow2ndStep()) {
             $actions['bulkrevert'] = 'Revert';
         }
+
         return $actions;
     }
+
+
     public function updatedSearch($value): void
     {
         $this->setSearch($value);
@@ -212,20 +226,23 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 $this->sub_div ? (int) $this->sub_div : null
             );
         }
-        $user = auth()->user();
+        // $user = auth()->user();
         $next_level_role_id = null;
 
-        if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+        if (CheckAuthHelper::isCommonApprover()) {
+            // if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
             $next_level_role_id = Codemaster::getIdByCode(23);
         }
-        if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+        if (CheckAuthHelper::isCommmonVerifier()) {
+            // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
             $next_level_role_id = Codemaster::getIdByCode(22);
         }
-        if ($user->hasRole('Operator')) {
+        if (CheckAuthHelper::isOperator()) {
+            // if ($user->hasRole('Operator')) {
             $next_level_role_id = Codemaster::getIdByCode(21);
         }
 
-          $sourceableClass = DraftBeneficiaryPersonal::class;
+        $sourceableClass = DraftBeneficiaryPersonal::class;
 
         if ($next_level_role_id) {
             $query->whereHasMorph(
@@ -347,8 +364,8 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $select_lgd = session('lgd_session');
         $user_id = Crypt::decryptString($select_lgd['role_id']);
         if ($this->revertrejectAction === 'revert') {
-            $user = auth()->user();
-          /*  if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+            // $user = auth()->user();
+            /*  if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
                 $next_level_role_id = Codemaster::getIdByCode(22);
             }
             if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {

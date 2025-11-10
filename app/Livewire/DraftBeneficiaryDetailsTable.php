@@ -209,10 +209,16 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
             $query = EncryptionArray::applyLocationFilters(
                 $query,
-                $this->district_id ? (int) $this->district_id : null,
+                // $this->district_id ? (int) $this->district_id : null,
+                // $this->rural_urban ? (int) $this->rural_urban : null,
+                // $this->blockurban ? (int) $this->blockurban : null,
+                // $this->gp_ward ? (int) $this->gp_ward : null
+
+                  $this->district_id ? (int) $this->district_id : null,
                 $this->rural_urban ? (int) $this->rural_urban : null,
                 $this->blockurban ? (int) $this->blockurban : null,
-                $this->gp_ward ? (int) $this->gp_ward : null
+                $this->gp_ward ? (int) $this->gp_ward : null,
+                $this->sub_div ? (int) $this->sub_div : null
             );
         }
 

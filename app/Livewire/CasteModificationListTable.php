@@ -8,6 +8,7 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Database\Eloquent\Builder;
 use App\Exports\BeneficiariesExport;
+use App\Helpers\CheckAuthHelper;
 use Illuminate\Support\Facades\Crypt;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
@@ -220,7 +221,7 @@ class CasteModificationListTable extends DataTableComponent
             //         ),
             Column::make("Actions")
                 ->label(function ($row) {
-                    if (auth()->user()?->hasAnyRole(['Verifier', 'Approver'])) {
+                    if (CheckAuthHelper::isCommonWorkFlow2ndStep()) {
                         return view('coulmn_button.view', [
                             'link' => route('view-beneficiary-details', [
                                 'application_id' => Crypt::encrypt($row->application_id)
@@ -229,7 +230,7 @@ class CasteModificationListTable extends DataTableComponent
                         ])->render();
                     }
 
-                    if (auth()->user()?->hasRole('Operator')) {
+                    if (CheckAuthHelper::isOperator()) {
                         return view('coulmn_button.actions', [
                             'link' => route('caste-modification.edit', [
                                 'application_id' => Crypt::encryptstring($row->application_id),
