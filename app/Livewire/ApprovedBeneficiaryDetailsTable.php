@@ -75,8 +75,8 @@ class ApprovedBeneficiaryDetailsTable extends DataTableComponent
         // ->setFiltersEnabled();
         //  $this->setPaginationDropdownVisibilityDisabled();
 
-        //      $this->setBulkActionsMenuItemAttributes([
-        //     'class' => 'bg-blue-200 text-gray-700 px-3 py-1 rounded hover:bg-blue-300', // default style
+        // $this->setBulkActionsMenuItemAttributes([
+        //  'class' => 'bg-blue-200 text-gray-700 px-3 py-1 rounded hover:bg-blue-300', // default style
         // ]);
         //  $this->setBulkActionsEnabled();
         // $this->setSelectAllDisabled();

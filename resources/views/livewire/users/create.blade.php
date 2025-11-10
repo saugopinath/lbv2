@@ -74,6 +74,7 @@
                             <option value="{{ $office->id }}">{{ $office->name }}</option>
                         @endforeach
                     </x-form.select>
+                    
                 </div>
             </fieldset>
             <div class="flex items-center mt-6 gap-3">

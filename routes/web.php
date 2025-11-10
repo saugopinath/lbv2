@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CMOGrievanceController;
 use App\Http\Controllers\OfficeMastersController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\BaseUserManagementController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\BeneficiaryListController;
 use App\Http\Controllers\UserDutyManagementController;
@@ -120,7 +121,8 @@ Route::get('/application/{id}', DraftApplicationView::class)->name('draft-applic
 
 Route::get('/permission', [PermissionController::class, 'index'])->name('permission');
 Route::get('/user-permission', [UserPermissionController::class, 'index'])->name('user-permission');
-
+//baseuser-management
+Route::get('/base-user-management', [BaseUserManagementController::class, 'index'])->name('base-user-management');
 
 Route::get('/assign-users-permissions', AssignPermissionsPage::class)
     ->name('assign-users-permissions');
