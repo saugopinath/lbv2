@@ -51,7 +51,6 @@ class CmoWorkFlowDataTable extends DataTableComponent
         } elseif ($user->hasAnyRole(['HOD'])) {
             $this->process_type = Codemaster::getIdByCode(3303);
         }
-
         $select_lgd = session('lgd_session');
 
         if (!empty($select_lgd['district_id'])) {

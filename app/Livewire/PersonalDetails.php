@@ -211,6 +211,7 @@ class PersonalDetails extends Component
                     $grievance_id = Crypt::decryptString($this->grievance_id);
                     $CmoSmData = CmoSmData::find($grievance_id);
                     $CmoSmData->lb_application_id = $draftbenPar->application_id;
+                    $CmoSmData->is_mark = 1;
                     $CmoSmData->save();
                 }
                 $this->dispatch('perDet', [

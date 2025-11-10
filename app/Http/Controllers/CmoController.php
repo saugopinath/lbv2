@@ -127,9 +127,6 @@ class CmoController extends Controller
         $CmoSmData->atr_type = $atr_type['id'];
         $CmoSmData->remarks = $request->remarks;
         switch ($action_type) {
-            case 'map_applicant':
-                echo "map_applicant";
-                break;
             case 'send_another_block':
                 $CmoSmData->lb_dist_code = $request->district_id;
                 if ($request->rural_urban == 1) {
@@ -176,6 +173,7 @@ class CmoController extends Controller
         $CmoSmData->redressed_status = Codemaster::getIdByCode(3302);
         $CmoSmData->atr_type = $request->atr_type;
         $CmoSmData->remarks = $request->remarks;
+        $CmoSmData->is_mark = 1;
         $CmoSmData->save();
         session()->flash('success', 'The Grievance Is Mapped Successfully');
         return redirect()->route('cmo-grievance-workflow');
@@ -215,24 +213,33 @@ class CmoController extends Controller
                         ]
                     ]
                 ];
-                
+
                 $data = $this->cmoAuthenticationService->submitNewATR($data);
                 $cmo_data = json_decode($data->getContent(), true);
-                dd($cmo_data);
-                $CmoSmData->redressed_status = Codemaster::getIdByCode(3305);
+                $message = $cmo_data['message'];
+                $status = $cmo_data['status'];
+                if ($status == 200 && $message == 'Grievance status updated successfully') {
+                    $CmoSmData->redressed_status = Codemaster::getIdByCode(3305);
+                    $CmoSmData->is_processed = 3;
+                    $CmoSmData->response_back_by = Auth::id();
+                    $CmoSmData->response_back_date = date('Y-m-d H:i:s');
+                }
                 $msg = 'The Grievance Is Pushed Successfully';
                 break;
             case 'approve':
                 $CmoSmData = CmoSmData::find($grievance_id);
+                $CmoSmData->is_processed = 2;
                 $CmoSmData->redressed_status = Codemaster::getIdByCode(3303);
                 $msg = 'The Grievance Is Approved Successfully';
                 break;
             case 'revert':
                 $CmoSmData = CmoSmData::find($grievance_id);
+                $CmoSmData->is_processed = 0;
                 $CmoSmData->redressed_status = Codemaster::getIdByCode(3301);
                 $msg = 'The Grievance Is Reverted Successfully';
                 break;
         }
+        // dd($CmoSmData);
         $CmoSmData->save();
         session()->flash('success', $msg);
         return redirect()->route('cmo-grievance-workflow');
