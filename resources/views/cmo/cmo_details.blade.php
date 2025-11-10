@@ -59,6 +59,7 @@
                 </div>
             </div>
         </x-accordion-section>
+        @if($isaddvisible)
         <x-accordion-section title="ATR Tagging" sectionId="atr_tagging" color="indigo-500">
             <form action="{{ route('cmo-grievance-action') . '?id=' . Crypt::encryptString($record->grievance_id) }}" method="POST">
                 @csrf
@@ -129,11 +130,40 @@
                 <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
                     <livewire:cmo-details-data-table
                         :initial-mobile="$record->pri_cont_no"
-                        :grievance-id="Crypt::encryptString($record->grievance_id)"
-                        />
+                        :grievance-id="Crypt::encryptString($record->grievance_id)" />
 
                 </div>
             </x-accordion-section>
         </div>
+        @endif
+        <form action="{{ route('cmo-add-actions') . '?id=' . Crypt::encryptString($record->grievance_id) }}" method="POST">
+            @csrf
+            @if($isaddbutton == 1)
+            <div class="flex justify-end gap-2">
+                <x-button.danger
+                    type="submit"
+                    name="action_type"
+                    value="approve"
+                    class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
+                    Approve
+                </x-button.danger>
+                <x-button.danger
+                    type="submit"
+                    name="action_type"
+                    value="revert"
+                    class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
+                    Revert
+                </x-button.danger>
+            </div>
+            @elseif($isaddbutton == 2)
+            <x-button.danger
+                    type="submit"
+                    name="action_type"
+                    value="pushtocmo"
+                    class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
+                    Push to CMO
+                </x-button.danger>
+            @endif
+        </form>
     </div>
 </x-layouts.app>

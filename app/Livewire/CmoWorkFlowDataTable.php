@@ -174,16 +174,15 @@ class CmoWorkFlowDataTable extends DataTableComponent
             $columns[] = Column::make("Action")
                 ->label(function ($row) {
                     $user = auth()->user();
-                    if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+                    if ($user->hasAnyRole(['Verifier', 'Delegated Verifier', 'Approver', 'Delegated Approver','HOD'])) {
                         $routeName = 'cmo-grievance-find';
-                    } else {
+                    } elseif ($user->hasAnyRole(['Operator'])) {
                         $routeName = 'lbform';
                     }
                     $link = route($routeName) . '?id=' . Crypt::encryptString($row->grievance_id);
                     return view('coulmn_button.actions', [
                         'link' => $link,
                         'tooltip' => 'Find',
-                        'method' => 'POST', 
                     ])->render();
                 })
                 ->html()

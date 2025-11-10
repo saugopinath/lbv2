@@ -142,4 +142,5 @@ Route::controller(CmoController::class)->group(function () {
     Route::post('/cmo-grievance-action', 'cmodetailsaction')->name('cmo-grievance-action');
     Route::post('/cmo-grievance-search', 'cmogrievancesearch')->name('cmo-grievance-search');
     Route::post('/map-applicant', 'mapapplicant')->name('map-applicant');
+    Route::post('/cmo-add-actions', 'addactions')->name('cmo-add-actions');
 });
