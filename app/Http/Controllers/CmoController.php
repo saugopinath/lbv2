@@ -184,18 +184,51 @@ class CmoController extends Controller
     public function addactions(Request $request)
     {
         $grievance_id = Crypt::decryptString($request->id);
-        $CmoSmData = CmoSmData::find($grievance_id);
         $action_type = $request->action_type;
         switch ($action_type) {
             case 'pushtocmo':
+                $CmoSmData = CmoSmData::where('grievance_id', $grievance_id)
+                    ->where('is_processed', 2)
+                    ->first();
+                $comment = $CmoSmData->remarks ?? '';
+                $comment = preg_replace('/\s+/', ' ', preg_replace('/[^a-zA-Z0-9 ]/', '', str_replace(["\t", "\n", "\r"], ' ', $comment)));
+                $comment = trim($comment);
+                $data = [
+                    "data" => [
+                        [
+                            "position_id" => 1,
+                            "grievance_status" => "GM014",
+                            "grievance_id" => null,
+                            "comment" => $comment,
+                            "bulk_grivance_id" => [$CmoSmData->grievance_id],
+                            "assign_comment" => null,
+                            "action_proposed" => null,
+                            "urgency_flag" => null,
+                            "addl_doc_id" => [],
+                            "atn_id" => (int) $CmoSmData->atr_type,
+                            "atn_reason_master_id" => null,
+                            "action_taken_note" => $CmoSmData->atr_desc,
+                            "contact_date" => null,
+                            "tentative_date" => null,
+                            "atr_doc_id" => [],
+                            "action" => "TA"
+                        ]
+                    ]
+                ];
+                
+                $data = $this->cmoAuthenticationService->submitNewATR($data);
+                $cmo_data = json_decode($data->getContent(), true);
+                dd($cmo_data);
                 $CmoSmData->redressed_status = Codemaster::getIdByCode(3305);
                 $msg = 'The Grievance Is Pushed Successfully';
                 break;
             case 'approve':
+                $CmoSmData = CmoSmData::find($grievance_id);
                 $CmoSmData->redressed_status = Codemaster::getIdByCode(3303);
                 $msg = 'The Grievance Is Approved Successfully';
                 break;
             case 'revert':
+                $CmoSmData = CmoSmData::find($grievance_id);
                 $CmoSmData->redressed_status = Codemaster::getIdByCode(3301);
                 $msg = 'The Grievance Is Reverted Successfully';
                 break;

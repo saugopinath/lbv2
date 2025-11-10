@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CmoAuthenticationInterface;
 use App\Models\CmoResponseJson;
+
 class CmoAuthenticationService implements CmoAuthenticationInterface
 {
     protected $baseurl;
@@ -122,7 +123,7 @@ class CmoAuthenticationService implements CmoAuthenticationInterface
                 $insert = $CmoResponseJson->save();
                 if ($insert) {
                     DB::commit();
-                    return response()->json(['status' => 200,'inserted_id' => $CmoResponseJson->id]);
+                    return response()->json(['status' => 200, 'inserted_id' => $CmoResponseJson->id]);
                 } else {
                     DB::rollback();
                     return response()->json(['status' => 400]);
@@ -139,6 +140,61 @@ class CmoAuthenticationService implements CmoAuthenticationInterface
         } catch (\GuzzleHttp\Exception\RequestException $e) {
             return response()->json([
                 'status' => 500,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+    public function submitNewATR($data)
+    {
+        $otp_return_status = $this->generateOTP();
+        $token = $this->authiticated();
+        if (!empty($token)) {
+            $tokenParts = explode('.', $token);
+            $tokenPayload = base64_decode($tokenParts[1]);
+            $payloadData = json_decode($tokenPayload);
+        }
+        if (isset($payloadData->exp)) {
+            $tokenExpirationTime = $payloadData->exp;
+            $currentTime = time();
+            if ($tokenExpirationTime <= $currentTime) {
+                $token = $this->authiticated();
+            }
+        }
+        $base_url = $this->baseurl . 'cmosvc/shared/';
+        $client = new \GuzzleHttp\Client([
+            'base_uri' => $base_url,
+            'timeout'  => 30,
+        ]);
+
+        $headers = [
+            'Content-Type'  => 'application/json',
+            'Authorization' => $token,
+        ];
+
+        try {
+            $response = $client->post('wcdpushgrievatr/', [
+                'headers' => $headers,
+                'json'    => $data
+            ]);
+
+            $body = json_decode($response->getBody());
+
+            if (isset($body->Data->Message)) {
+                return response()->json([
+                    'status'    => 200,
+                    'message'   => $body->Data->Message,
+                    'exception' => $body->Exception ?? null
+                ]);
+            } else {
+                return response()->json([
+                    'status'    => 500,
+                    'message'   => 'No Message found in response',
+                    'exception' => null
+                ]);
+            }
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            return response()->json([
+                'status'  => 500,
                 'message' => $e->getMessage()
             ]);
         }
