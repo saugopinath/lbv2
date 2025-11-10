@@ -34,7 +34,6 @@ class CmoWorkFlowDataTable extends DataTableComponent
     public $process_type;
 
     protected $listeners = ['processTypeChanged' => 'updateProcessType'];
-
     public function updateProcessType($type)
     {
         $this->process_type = $type;
@@ -51,6 +50,7 @@ class CmoWorkFlowDataTable extends DataTableComponent
         } elseif ($user->hasAnyRole(['HOD'])) {
             $this->process_type = Codemaster::getIdByCode(3303);
         }
+
         $select_lgd = session('lgd_session');
 
         if (!empty($select_lgd['district_id'])) {
@@ -65,10 +65,21 @@ class CmoWorkFlowDataTable extends DataTableComponent
             $this->filter_condition['lb_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
-
+    public function bulkActions(): array
+    {
+        if ($this->builder()->count() == 0) {
+            return [];
+        }
+        $user = auth()->user();
+        $actions = [];
+        if ($user->hasAnyRole(['HOD']) && $this->process_type == Codemaster::getIdByCode(3303)) {
+            $actions['bulkpush'] = 'Push To CMO';
+        }
+        return $actions;
+    }
     public function configure(): void
     {
-        $this->setPrimaryKey('sourceable_id')
+        $this->setPrimaryKey('grievance_id')
             ->setPaginationEnabled()
             ->setPerPageAccepted([5, 10])
             ->setPerPage($this->perPage)
@@ -173,7 +184,7 @@ class CmoWorkFlowDataTable extends DataTableComponent
             $columns[] = Column::make("Action")
                 ->label(function ($row) {
                     $user = auth()->user();
-                    if ($user->hasAnyRole(['Verifier', 'Delegated Verifier', 'Approver', 'Delegated Approver','HOD'])) {
+                    if ($user->hasAnyRole(['Verifier', 'Delegated Verifier', 'Approver', 'Delegated Approver', 'HOD'])) {
                         $routeName = 'cmo-grievance-find';
                     } elseif ($user->hasAnyRole(['Operator'])) {
                         $routeName = 'lbform';
@@ -201,6 +212,57 @@ class CmoWorkFlowDataTable extends DataTableComponent
             }
         }
         return $query;
+    }
+    public function bulkpush()
+    {
+        $ids = $this->getSelected();
+        foreach ($ids as $grievance_id) {
+            $CmoSmData = CmoSmData::where('grievance_id', $grievance_id)
+                ->where('is_processed', 2)
+                ->first();
+            $comment = $CmoSmData->remarks ?? '';
+            $comment = preg_replace('/\s+/', ' ', preg_replace('/[^a-zA-Z0-9 ]/', '', str_replace(["\t", "\n", "\r"], ' ', $comment)));
+            $comment = trim($comment);
+            $data = [
+                "data" => [
+                    [
+                        "position_id" => 1,
+                        "grievance_status" => "GM014",
+                        "grievance_id" => null,
+                        "comment" => $comment,
+                        "bulk_grivance_id" => [$CmoSmData->grievance_id],
+                        "assign_comment" => null,
+                        "action_proposed" => null,
+                        "urgency_flag" => null,
+                        "addl_doc_id" => [],
+                        "atn_id" => (int) $CmoSmData->atr_type,
+                        "atn_reason_master_id" => null,
+                        "action_taken_note" => $CmoSmData->atr_desc,
+                        "contact_date" => null,
+                        "tentative_date" => null,
+                        "atr_doc_id" => [],
+                        "action" => "TA"
+                    ]
+                ]
+            ];
+            $cmoAuthenticationService = app(\App\Interfaces\CmoAuthenticationInterface::class);
+            $data = $cmoAuthenticationService->submitNewATR($data);
+            $cmo_data = json_decode($data->getContent(), true);
+            $message = $cmo_data['message'];
+            $status = $cmo_data['status'];
+            if ($status == 200 && $message == 'Grievance status updated successfully') {
+                $CmoSmData->redressed_status = Codemaster::getIdByCode(3305);
+                $CmoSmData->is_processed = 3;
+                $CmoSmData->response_back_by = Auth::id();
+                $CmoSmData->response_back_date = date('Y-m-d H:i:s');
+                $CmoSmData->save();
+            }
+        }
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'All Grievance Are Pushed Successfully'
+        ]);
+        $this->clearSelected();
     }
 
 
