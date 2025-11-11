@@ -36,19 +36,24 @@ class CmoWorkFlowDataTable extends DataTableComponent
     protected $listeners = ['processTypeChanged' => 'updateProcessType'];
     public function updateProcessType($type)
     {
-        $this->process_type = $type;
+        $user = auth()->user();
+        if ($type == Codemaster::getIdByCode(3302) && ($user->hasAnyRole(['Approver', 'Delegated Approver']))) {
+            $this->process_type = [Codemaster::getIdByCode(3302), Codemaster::getIdByCode(3304)];
+        } else {
+            $this->process_type = [$type];
+        }
     }
     public function mount(): void
     {
         $user = auth()->user();
         if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
-            $this->process_type = Codemaster::getIdByCode(3301);
+            $this->process_type = [Codemaster::getIdByCode(3301)];
         } elseif ($user->hasRole('Operator')) {
-            $this->process_type = Codemaster::getIdByCode(3304);
+            $this->process_type = [Codemaster::getIdByCode(3304)];
         } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
-            $this->process_type = Codemaster::getIdByCode(3302);
+            $this->process_type = [Codemaster::getIdByCode(3302), Codemaster::getIdByCode(3304)];
         } elseif ($user->hasAnyRole(['HOD'])) {
-            $this->process_type = Codemaster::getIdByCode(3303);
+            $this->process_type = [Codemaster::getIdByCode(3303)];
         }
 
         $select_lgd = session('lgd_session');
@@ -182,42 +187,44 @@ class CmoWorkFlowDataTable extends DataTableComponent
             //     })
             //     ->html(),
             Column::make("Action")
-            ->label(function ($row) {
-                $user = auth()->user();
-                $processType = $this->process_type;
-                $canEdit = false;
-                if (
-                    ($user->hasAnyRole(['Verifier', 'Delegated Verifier']) && $processType == Codemaster::getIdByCode(3301)) ||
-                    ($user->hasAnyRole(['Approver', 'Delegated Approver']) && $processType == Codemaster::getIdByCode(3302)) ||
-                    ($user->hasRole('HOD') && $processType == Codemaster::getIdByCode(3303)) ||
-                    ($user->hasRole('Operator') && $processType == Codemaster::getIdByCode(3304))
-                ) {
-                    $canEdit = true;
-                }
-                if (!$canEdit) {
-                    return 'N/A';
-                }
-                if ($user->hasAnyRole(['Verifier', 'Delegated Verifier', 'Approver', 'Delegated Approver', 'HOD'])) {
-                    $routeName = 'cmo-grievance-find';
-                } elseif ($user->hasAnyRole(['Operator'])) {
-                    $routeName = 'lbform';
-                } else {
-                    return '';
-                }
-                $link = route($routeName) . '?id=' . Crypt::encryptString($row->grievance_id);
-                return view('coulmn_button.actions', [
-                    'link' => $link,
-                    'tooltip' => 'Edit',
-                ])->render();
-            })
-            ->html(),
+                ->label(function ($row) {
+                    $user = auth()->user();
+                    $processType = $this->process_type;
+                    $canEdit = false;
+                    if (
+                        ($user->hasAnyRole(['Verifier', 'Delegated Verifier']) && in_array(Codemaster::getIdByCode(3301), $processType)) ||
+                        ($user->hasAnyRole(['Approver', 'Delegated Approver']) &&
+                            (in_array(Codemaster::getIdByCode(3302), $processType) || in_array(Codemaster::getIdByCode(3304), $processType))
+                        ) ||
+                        ($user->hasRole('HOD') && in_array(Codemaster::getIdByCode(3303), $processType)) ||
+                        ($user->hasRole('Operator') && in_array(Codemaster::getIdByCode(3304), $processType))
+                    ) {
+                        $canEdit = true;
+                    }
+                    if (!$canEdit) {
+                        return 'N/A';
+                    }
+                    if ($user->hasAnyRole(['Verifier', 'Delegated Verifier', 'Approver', 'Delegated Approver', 'HOD'])) {
+                        $routeName = 'cmo-grievance-find';
+                    } elseif ($user->hasAnyRole(['Operator'])) {
+                        $routeName = 'lbform';
+                    } else {
+                        return '';
+                    }
+                    $link = route($routeName) . '?id=' . Crypt::encryptString($row->grievance_id);
+                    return view('coulmn_button.actions', [
+                        'link' => $link,
+                        'tooltip' => 'Edit',
+                    ])->render();
+                })
+                ->html(),
         ];
     }
     public function builder(): Builder
     {
         $query = CmoSmData::query();
         if (!empty($this->process_type)) {
-            $query->where('redressed_status', $this->process_type);
+            $query->wherein('redressed_status', $this->process_type);
         }
         if (!empty($this->filter_condition)) {
             foreach ($this->filter_condition as $column => $value) {
