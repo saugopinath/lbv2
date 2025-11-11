@@ -89,4 +89,33 @@ class BeneficiaryContact extends Model implements Auditable
         // Use <br> for line breaks in HTML
         return !empty($parts) ? implode('<br>', $parts) : 'N/A';
     }
+
+    public function blockmuni(): array
+    {
+        $block = optional($this->block)->name;
+        $panchayat = optional($this->panchayat)->name;
+        $municipality = optional($this->municipality)->name;
+        $ward = optional($this->ward)->name;
+        $blockname = '';
+        $gpname = '';
+        if ($this->rural_urban_id == 2) {
+            if ($block) {
+                $blockname = strtoupper($block);
+            }
+            if ($panchayat) {
+                $gpname = strtoupper($panchayat);
+            }
+        } else {
+            if ($municipality) {
+                $blockname = strtoupper($municipality);
+            }
+            if ($ward) {
+                $gpname = strtoupper($ward);
+            }
+        }
+        return [
+            'block' => $blockname,
+            'gp' => $gpname
+        ];
+    }
 }

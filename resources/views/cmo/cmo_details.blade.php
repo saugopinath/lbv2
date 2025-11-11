@@ -136,6 +136,20 @@
             </x-accordion-section>
         </div>
         @endif
+        @if($isaddvisible == 0)
+        <x-accordion-section title="ATR Type Details" sectionId="atr-type-details" color="pink-500">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                    <p class="text-xs text-gray-500">ATR Type :</p>
+                    <p class="font-semibold text-gray-800">{{$atr->atr_desc}}</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                    <p class="text-xs text-gray-500">Remarks :</p>
+                    <p class="font-semibold text-gray-800">{{$record->remarks}}</p>
+                </div>
+            </div>
+        </x-accordion-section>
+        @endif
         <form action="{{ route('cmo-add-actions') . '?id=' . Crypt::encryptString($record->grievance_id) }}" method="POST">
             @csrf
             @if($isaddbutton == 1)
@@ -157,12 +171,12 @@
             </div>
             @elseif($isaddbutton == 2)
             <x-button.danger
-                    type="submit"
-                    name="action_type"
-                    value="pushtocmo"
-                    class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
-                    Push to CMO
-                </x-button.danger>
+                type="submit"
+                name="action_type"
+                value="pushtocmo"
+                class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
+                Push to CMO
+            </x-button.danger>
             @endif
         </form>
     </div>

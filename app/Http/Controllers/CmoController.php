@@ -14,6 +14,7 @@ use App\Models\Codemaster;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\CmoAtrMaster;
 use Illuminate\Support\Facades\Auth;
+use App\Models\BeneficiaryCommonList;
 
 class CmoController extends Controller
 {
@@ -102,19 +103,23 @@ class CmoController extends Controller
         $record = CmoSmData::find($grievance_id);
         $header = 'Find CMO Grievance Beneficiary';
         $atrs = CmoAtrMaster::all();
-        // dd($atrs);
+        $atr = CmoAtrMaster::find($record->atr_type);
+        if ($atr->can_find_applicant) {
+            $data = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact', 'sourceable.bank')->find($record->lb_application_id);
+            // dd($data);
+            // dd($data->sourceable->contact->blockmuni());
+        }
+        $isaddvisible = 0;
         $user = auth()->user();
         if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
             $isaddvisible = 1;
             $isaddbutton = 0;
         } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
-            $isaddvisible = 0;
             $isaddbutton = 1;
         } elseif ($user->hasAnyRole(['HOD'])) {
-            $isaddvisible = 0;
             $isaddbutton = 2;
         }
-        return view('cmo.cmo_details', compact('header', 'record', 'atrs', 'isaddvisible', 'isaddbutton'));
+        return view('cmo.cmo_details', compact('header', 'record', 'atrs', 'isaddvisible', 'isaddbutton', 'atr'));
     }
 
     public function cmodetailsaction(Request $request)
