@@ -161,11 +161,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('beneficiary.updateCaste');
 
     Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])
-        ->middleware('permission.redirect:canCasteModification')
+        // ->middleware('permission.redirect:canCasteModification')
         ->name('caste-modification-list');
 
     Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
-        ->middleware('permission.redirect:canBeneficiaryDetails')
+        // ->middleware('permission.redirect:canBeneficiaryDetails')
         ->name('view-beneficiary-details');
 
     Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])

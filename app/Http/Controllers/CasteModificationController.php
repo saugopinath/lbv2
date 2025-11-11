@@ -230,18 +230,18 @@ class CasteModificationController extends Controller
     /** -------------------- VERIFIER / APPROVER ACCESS -------------------- **/
     public function list()
     {
-        if (WorkFlowPermissionHelper::canCasteModification()) {
+        // if (WorkFlowPermissionHelper::canCasteModification()) {
         // if (Auth::user()->can('view caste modification list')) {
             $header = 'Caste Modification Information List';
             return view('CasteModificationView.caste_modification_list', compact('header'));
-        }
-        $header = 'Oops! You do not have permission to view caste modification list.';
-        return view('CommonRestictedpage.index', compact('header'));
+        // }
+        // $header = 'Oops! You do not have permission to view caste modification list.';
+        // return view('CommonRestictedpage.index', compact('header'));
     }
 
     public function viewAppDetails(Request $request)
     {
-        if (WorkFlowPermissionHelper::canBeneficiaryDetails()) {
+        // if (WorkFlowPermissionHelper::canBeneficiaryDetails()) {
         // if (Auth::user()->can('view beneficiary details')) {
             $applicant_id = $request->application_id;
             $application_id = Crypt::decrypt($applicant_id);
@@ -268,9 +268,9 @@ class CasteModificationController extends Controller
                 'newCasteNumber',
                 'reportType'
             ));
-        }
+        // }
 
-        $header = 'Oops! You do not have permission to view beneficiary details.';
-        return view('CommonRestictedpage.index', compact('header'));
+        // $header = 'Oops! You do not have permission to view beneficiary details.';
+        // return view('CommonRestictedpage.index', compact('header'));
     }
 }

@@ -94,13 +94,24 @@ class CasteModificationListTable extends DataTableComponent
         }
 
         // Show actions based on status and role
-        $this->showActions();
+        // $this->showActions();
+    }
+    private function getStatusMessage($status): string
+    {
+        return match ($status) {
+            'APL' => 'Verified but Pending for Approval',
+            'VPL' => 'Pending for Verification',
+            'AL'  => 'Application Already Approved',
+            'RL'  => 'Application Already Rejected',
+            'VL'  => 'Application Already Verified',
+            default => 'No Action Required',
+        };
     }
 
-    protected function showActions(): void
-    {
-        $this->action_visible = ($this->applicantStatus === 'PL' && auth()->user()?->hasAnyRole(['Verifier', 'Approver'])) ? 1 : 0;
-    }
+    // protected function showActions(): void
+    // {
+    //     $this->action_visible = ($this->applicantStatus === 'PL' && auth()->user()?->hasAnyRole(['Verifier', 'Approver'])) ? 1 : 0;
+    // }
 
     // public function mount($applicantStatus = ''): void
     // {
@@ -221,7 +232,7 @@ class CasteModificationListTable extends DataTableComponent
             //         ),
             Column::make("Actions")
                 ->label(function ($row) {
-                    if (CheckAuthHelper::isCommonWorkFlow2ndStep()) {
+                    if (CheckAuthHelper::isCommonWorkFlow2ndStep() && $this->applicantStatus == 'PL') {
                         return view('coulmn_button.view', [
                             'link' => route('view-beneficiary-details', [
                                 'application_id' => Crypt::encrypt($row->application_id)
@@ -230,7 +241,7 @@ class CasteModificationListTable extends DataTableComponent
                         ])->render();
                     }
 
-                    if (CheckAuthHelper::isOperator()) {
+                    if (CheckAuthHelper::isOperator() && $this->applicantStatus == 'RL') {
                         return view('coulmn_button.actions', [
                             'link' => route('caste-modification.edit', [
                                 'application_id' => Crypt::encryptstring($row->application_id),
@@ -240,7 +251,19 @@ class CasteModificationListTable extends DataTableComponent
                         ])->render();
                     }
 
-                    return '';
+                    $message = $this->getStatusMessage($this->applicantStatus);
+                    $colorClass = match ($this->applicantStatus) {
+                        'APL' => 'bg-blue-100 text-blue-700 border-blue-300',
+                        'VPL' => 'bg-yellow-100 text-yellow-700 border-yellow-300',
+                        'AL'  => 'bg-green-100 text-green-700 border-green-300',
+                        'RL'  => 'bg-red-100 text-red-700 border-red-300',
+                        'VL'  => 'bg-emerald-100 text-emerald-700 border-emerald-300',
+                        default => 'bg-gray-100 text-gray-700 border-gray-300',
+                    };
+
+                    return "<span class='px-2 py-1 text-xs font-semibold border rounded-md {$colorClass}'>
+                    {$message}
+                </span>";
                 })
                 ->html(),
 
