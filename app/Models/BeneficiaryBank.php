@@ -8,7 +8,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 class BeneficiaryBank extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
-     protected $guarded = [
+    protected $guarded = [
         'id',
     ];
     // protected $primaryKey = 'beneficiary_id';
@@ -19,7 +19,7 @@ class BeneficiaryBank extends Model implements Auditable
         return $this->belongsTo(IfscCodeMaster::class, 'ifsc', 'code');
     }
 
-     public function ifscbranch()
+    public function ifscbranch()
     {
         return $this->belongsTo(IfscCodeMaster::class, 'ifsc', 'code');
     }
@@ -36,5 +36,19 @@ class BeneficiaryBank extends Model implements Auditable
     public function ifscMaster()
     {
         return $this->belongsTo(Ifsccodemaster::class, 'ifsc', 'code');
+    }
+
+    public function bankname()
+    {
+        $ifsc = $this->ifscbranch;
+        $accno = $this->bank_account_number;
+        if ($ifsc && $ifsc->bank) {
+            return [
+                'bank_name'   => $ifsc->bank->name,
+                'branch_name' => $ifsc->branch,
+                'ifsc_code'   => $ifsc->code,
+                'accno' => $accno,
+            ];
+        }
     }
 }

@@ -106,9 +106,23 @@ class CmoController extends Controller
         $atr = CmoAtrMaster::find($record->atr_type);
         if ($atr->can_find_applicant) {
             $data = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact', 'sourceable.bank')->find($record->lb_application_id);
-            // dd($data);
-            // dd($data->sourceable->contact->blockmuni());
+            $add = $data->sourceable->contact->blockmuni();
+            $bank = $data->sourceable->bank->bankname();
+            $applicant_details = [
+                'applicationId' => $data->sourceable->application_id,
+                'name' => $data->sourceable->full_name,
+                'dob' => $data->sourceable->dob,
+                'mobileNo' => $data->sourceable->mobile_no,
+                'fatherName' => $data->sourceable->relationships->first()->getFullNameByCode(131),
+                'blockMuni' => $add['block'],
+                'gpWard' => $add['gp'],
+                'bankName' => $bank['bank_name'],
+                'branchName' => $bank['branch_name'],
+                'ifscCode' => $bank['ifsc_code'],
+                'accNo' => $bank['accno'],
+            ];
         }
+        // dd($applicant_details);
         $isaddvisible = 0;
         $user = auth()->user();
         if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
@@ -119,7 +133,7 @@ class CmoController extends Controller
         } elseif ($user->hasAnyRole(['HOD'])) {
             $isaddbutton = 2;
         }
-        return view('cmo.cmo_details', compact('header', 'record', 'atrs', 'isaddvisible', 'isaddbutton', 'atr'));
+        return view('cmo.cmo_details', compact('header', 'record', 'atrs', 'isaddvisible', 'isaddbutton', 'atr', 'applicant_details'));
     }
 
     public function cmodetailsaction(Request $request)

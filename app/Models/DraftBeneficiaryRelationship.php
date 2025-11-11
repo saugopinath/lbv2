@@ -14,4 +14,10 @@ class DraftBeneficiaryRelationship extends Model implements Auditable
     {
         return $this->belongsTo(DraftBeneficiaryPersonal::class, 'application_id');
     }
+    public static function getFullNameByCode($code)
+    {
+        $relationId = CodeMaster::getIdByCode($code);
+        $relationship = self::where('relation_type_id', $relationId)->first();
+        return $relationship ? $relationship->full_name : null;
+    }
 }

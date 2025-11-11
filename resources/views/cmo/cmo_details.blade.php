@@ -150,6 +150,56 @@
             </div>
         </x-accordion-section>
         @endif
+        @if($applicant_details)
+        <x-accordion-section title="Applicant Details" sectionId="applicant-details" color="pink-500">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                    <p class="text-xs text-gray-500">Application Id :</p>
+                    <p class="font-semibold text-gray-800">{{$applicant_details['applicationId']}}</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                    <p class="text-xs text-gray-500">Name :</p>
+                    <p class="font-semibold text-gray-800">{{$applicant_details['name']}}</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                    <p class="text-xs text-gray-500">Mobile Number :</p>
+                    <p class="font-semibold text-gray-800">{{$applicant_details['mobileNo']}}</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                    <p class="text-xs text-gray-500">Date of Birth :</p>
+                    <p class="font-semibold text-gray-800">{{$applicant_details['dob']}}</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                    <p class="text-xs text-gray-500">Father's Name :</p>
+                    <p class="font-semibold text-gray-800">{{$applicant_details['fatherName']}}</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                    <p class="text-xs text-gray-500">Block/Municipality/Corp :</p>
+                    <p class="font-semibold text-gray-800">{{$applicant_details['blockMuni']}}</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                    <p class="text-xs text-gray-500">GP/Ward No :</p>
+                    <p class="font-semibold text-gray-800">{{$applicant_details['gpWard']}}</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                    <p class="text-xs text-gray-500">Bank Name :</p>
+                    <p class="font-semibold text-gray-800">{{$applicant_details['bankName']}}</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                    <p class="text-xs text-gray-500">Bank Branch Name :</p>
+                    <p class="font-semibold text-gray-800">{{$applicant_details['branchName']}}</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                    <p class="text-xs text-gray-500">Bank Account No :</p>
+                    <p class="font-semibold text-gray-800">{{$applicant_details['accNo']}}</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+                    <p class="text-xs text-gray-500">IFS Code :</p>
+                    <p class="font-semibold text-gray-800">{{$applicant_details['ifscCode']}}</p>
+                </div>
+            </div>
+        </x-accordion-section>
+        @endif
         <form action="{{ route('cmo-add-actions') . '?id=' . Crypt::encryptString($record->grievance_id) }}" method="POST">
             @csrf
             @if($isaddbutton == 1)
