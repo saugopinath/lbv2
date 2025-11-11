@@ -128,7 +128,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('incomplete-full-deatils-update');
 
     Route::post('/incomplete/revert/{id}', [IncompleteTypeController::class, 'revertVerify'])
-        ->middleware('permission.redirect:revert incomplete')
+        ->middleware('permission.redirect:canRevertIncomplet')
         ->name('incomplete-revert-update');
 
     Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])
@@ -140,11 +140,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('report.show');
 
     Route::get('/approved-lists', [BeneficiaryApprovedListController::class, 'index'])
-        ->middleware('permission.redirect:view approved list')
+        ->middleware('permission.redirect:canViewApprovedList')
         ->name('approved-lists');
 
     Route::get('/approved-lists-BA-Wise', [BeneficiaryApprovedListController::class, 'beneficiaryContactwiseList'])
-        ->middleware('permission.redirect:view approved ba wise')
+        ->middleware('permission.redirect:canApprovedWise')
         ->name('approved-lists-BA-Wise');
 
     // Caste & Bank Update

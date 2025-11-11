@@ -61,6 +61,10 @@ class WorkFlowPermissionHelper
     {
         return Auth::user()->can('Normal Entry Allow');
     }
+    public static function canEntryAllow(): bool
+    {
+        return Auth::user()->can('Entry Allow');
+    }
     public static function canDuareSarkarEntryAllow(): bool
     {
         return Auth::user()->can('Duare Sarkar Entry Allow');
@@ -157,9 +161,45 @@ class WorkFlowPermissionHelper
     {
         return Auth::user()->can('view lb applications');
     }
+    public static function canViewApplication(): bool
+    {
+        return Auth::user()->can('view application');
+    }
+    public static function canViewApprovedList(): bool
+    {
+        return Auth::user()->can('view approved list');
+    }
+    public static function canViewIncompleteList(): bool
+    {
+        return Auth::user()->can('view incomplete applications');
+    }
     public static function canCreateOffices(): bool
     {
         return Auth::user()->can('create offices');
+    }
+    public static function canApprovedWise(): bool
+    {
+        return Auth::user()->can('view approved ba wise');
+    }
+    public static function canWorkflowPermission(): bool
+    {
+        return Auth::user()->can('Workflow Permission');
+    }
+    public static function canVerificationAllow(): bool
+    {
+        return Auth::user()->can('Verification Allow');
+    }
+    public static function canApproverAllow(): bool
+    {
+        return Auth::user()->can('Approver Allow');
+    }
+    public static function canRejectAllow(): bool
+    {
+        return Auth::user()->can('Reject Allow');
+    }
+    public static function canRevertAllow(): bool
+    {
+        return Auth::user()->can('Revert Allow');
     }
     public static function canAnyLbMenu(): bool
     {
