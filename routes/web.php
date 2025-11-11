@@ -26,6 +26,7 @@ use App\Livewire\ProcessApplication\DraftApplicationView;
 use App\Http\Controllers\MasterParameterSettingController;
 use App\Http\Controllers\RoleOfficeTypeMappingsController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
+use App\Http\Controllers\RolePermisssionManagementController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 
 // Guest Routes
@@ -54,42 +55,45 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // User Management
     Route::get('/user-managements', [UsersController::class, 'index'])
-        ->middleware('permission.redirect:view users')
+        // ->middleware('permission.redirect:view users')
         ->name('user-managements.index');
 
     Route::get('/users/create', UsersCreate::class)
-        ->middleware('permission.redirect:create users')
+        // ->middleware('permission.redirect:create users')
         ->name('users.create');
 
     // Role & Office Mappings
     Route::get('/role-office-master-mappings', [RoleOfficeTypeMappingsController::class, 'index'])
-        ->middleware('permission.redirect:manage role mappings')
+        // ->middleware('permission.redirect:manage role mappings')
         ->name('role-office-master-mappings.index');
 
     Route::get('/role-office-type-mappings/create', Create::class)
-        ->middleware('permission.redirect:create role mappings')
+        // ->middleware('permission.redirect:create role mappings')
         ->name('role-office-type-mappings.create');
 
     // Office Masters
     Route::get('/officemasters', [OfficeMastersController::class, 'index'])
-        ->middleware('permission.redirect:view offices')
+        // ->middleware('permission.redirect:view offices')
         ->name('officemasters.index');
 
     Route::get('/office-masters/create', OfficeMasterCreate::class)
-        ->middleware('permission.redirect:create offices')
+        // ->middleware('permission.redirect:create offices')
         ->name('office-masters.create');
 
     // Permissions Management
     Route::get('/permission', [PermissionController::class, 'index'])
-        ->middleware('permission.redirect:view permission')
+        // ->middleware('permission.redirect:view permission')
         ->name('permission');
 
     Route::get('/user-permission', [UserPermissionController::class, 'index'])
-        ->middleware('permission.redirect:view user permission')
+        // ->middleware('permission.redirect:view user permission')
         ->name('user-permission');
 
     Route::get('/assign-users-permissions', AssignPermissionsPage::class)
         ->name('assign-users-permissions');
+
+    Route::get('/role-permission-management', [RolePermisssionManagementController::class, 'index'])
+        ->name('role-permission-management');
 
     // Duty Management
     Route::get('/userDutymanagement', [UserDutyManagementController::class, 'index'])

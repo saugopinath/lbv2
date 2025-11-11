@@ -2,43 +2,24 @@
 
 namespace App\Livewire;
 
-use App\Models\Codemaster;
-use App\Models\District;
-use App\Models\OfficeMaster;
+// use App\Models\Permission;
 use App\Models\Role;
-use App\Models\RoleOfficeTypeMapping;
-use App\Models\User;
+use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
-class UserPermissionDetailsTable extends DataTableComponent
+class RolePermissionManagementDetailsTable extends DataTableComponent
 {
-    public ?int $perPage = 5;
-    public $role, $selectedMappingLevel, $selectedState, $selectedDistrict, $office;
 
-    protected $listeners = ['refreshUserTable' => '$refresh',  'userFilter' => 'userFilter'];
-
-    public function userFilter($filters)
-    {
-        $this->role = $filters['role'] ?? null;
-        $this->selectedMappingLevel = $filters['mapping_level'] ?? null;
-        $this->selectedState = $filters['state'] ?? null;
-        $this->selectedDistrict = $filters['district'] ?? null;
-        $this->office = $filters['office'] ?? null;
-
-        // Add any derived logic here if needed
-    }
+    protected $listeners = ['refreshDatatable' => '$refresh'];
+    public int $rowNumberOffset = 0;
 
     public function configure(): void
     {
         $this->setPrimaryKey('id');
-        $this->setPerPageAccepted([5, 10]);
-        $this->setPerPage($this->perPage);
-        $this->setBulkActionsEnabled();
-        $this->setHideBulkActionsWhenEmptyEnabled();
+        $this->rowNumberOffset = ($this->getPage() - 1) * $this->getPerPage();
 
         $this->setTableWrapperAttributes([
             'class' => 'overflow-x-auto overflow-y-auto max-h-[500px] border rounded-lg shadow-sm',
@@ -49,7 +30,7 @@ class UserPermissionDetailsTable extends DataTableComponent
         ]);
 
         $this->setTheadAttributes([
-            'class' => 'bg-violet-800 text-sm uppercase py-3 px-4 text-white',
+            'class' => 'bg-violet-800 text-xs uppercase py-3 px-4 text-white',
         ]);
         $this->setThAttributes(function ($column) {
             return [
@@ -68,34 +49,10 @@ class UserPermissionDetailsTable extends DataTableComponent
         ]);
         $this->setLoadingPlaceholderEnabled();
     }
-
-    public function bulkActions(): array
-    {
-        return [
-            'assign_bulk_permissions' => 'Assign Permission',
-        ];
-    }
     public function builder(): Builder
     {
-        $query = User::query()
-            ->whereHas('RoleSchemeOfficeMappings.office', function ($q) {
-                $q->where('is_active', 1);
-
-                if (!empty($this->role)) {
-                    $q->where('role_id', $this->role);
-                }
-
-                if (!empty($this->office)) {
-                    $q->where('office_id', $this->office);
-                }
-                if (!empty($this->selectedDistrict)) {
-                    $q->where('district_id', $this->selectedDistrict);
-                }
-                if (!empty($this->selectedMappingLevel)) {
-                    $q->where('office_type_id', $this->selectedMappingLevel);
-                }
-            })
-            ->with(['mappedRoles', 'mappedPermissions']);
+        $query = Role::query()
+            ->with('mappedPermissions');
 
         return $query;
     }
@@ -103,15 +60,14 @@ class UserPermissionDetailsTable extends DataTableComponent
     public function columns(): array
     {
         return [
+            Column::make("No.")
+                ->label(function ($value, $row) {
+                    static $i = 0; // counter per page
+                    $i++;
+                    return ($this->getPage() - 1) * $this->getPerPage() + $i;
+                }),
             Column::make("ID", "id")->hideIf(true),
-
-            Column::make("User Name", "name")->searchable(),
-
-            Column::make("Mobile No", "mobile_no")->searchable(),
-
-            Column::make("Role")
-                ->label(fn($row) => $row->mappedRoles->map(fn($role) => "<span class='px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs'>{$role->name}</span>")->implode(' '))
-                ->html(),
+            Column::make("Name", "name")->searchable(),
             Column::make("Assigned Permissions")
                 ->label(function ($row) {
                     $colors = [
@@ -148,27 +104,39 @@ class UserPermissionDetailsTable extends DataTableComponent
                         x-text='open ? \"Show less\" : \"Show more\"'></button>" : "") . "</div>";
                 })
                 ->html(),
-
-            Column::make("Actions")
+            Column::make("Update Permissions")
                 ->label(
                     fn($row) =>
                     view('coulmn_button.actions', [
-                        'wireClick' => " \$dispatch('UpdatePermission', { userId: {$row->id} })",
+                        'wireClick' => " \$dispatch('UpdateRolePermission', { roleId: {$row->id} })",
                         'tooltip'   => 'Update Permissions',
                     ])->render()
                 )
                 ->html(),
+            Column::make('Actions')
+                ->label(fn($row) => view('coulmn_button.ConfirmDeleteButton', [
+                    'itemId' => $row->id,
+                    'action' => 'delete',
+                    'title' => 'Delete Role',
+                    'message' => "This is $row->name , are you want to delete this role?",
+                    'tooltip' => 'Delete Role',
+                    
+                ])->render())
+                ->html(),
         ];
     }
-    public function assign_bulk_permissions()
+
+    public function delete($id)
     {
-        // dd($this->getSelected());
-        $this->dispatch('open-bulk-assign-permission-modal',  users: $this->getSelected());
-    }
-    #[On('assign-success')]
-    public function assignsuccessfully()
-    {
-        $this->clearSelected();
-        $this->dispatch('refreshUserTable');
+
+        $role = Role::find($id);
+        // dd($role);
+        if ($role) {
+            $role->delete();
+            $this->dispatch('toastr', [
+                        'type' => 'warning',
+                        'message' => 'Role Deleted successfully!']);
+            $this->dispatch('refreshDatatable');
+        }
     }
 }

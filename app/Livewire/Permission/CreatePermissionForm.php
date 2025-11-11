@@ -85,7 +85,10 @@ class CreatePermissionForm extends Component
         $this->dispatch('close-modal');
         $this->dispatch('hideLoader');
         // $this->dispatch('notify', 'Permission created successfully!', 'success');
-        $this->dispatch('notify', message: 'Permission created successfully!');
+        $this->dispatch('toastr', [
+                        'type' => 'success',
+                        'message' => 'Permission created successfully!']);
+
         $this->dispatch('refreshDatatable');
     }
     public function cancel()
