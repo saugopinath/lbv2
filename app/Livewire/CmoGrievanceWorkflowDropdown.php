@@ -28,15 +28,15 @@ class CmoGrievanceWorkflowDropdown extends Component
         // Step 3: Role-based configuration
         if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
             $code = 3301;
-            $id = 142;
+            $id = Codemaster::getIdByCode(3301);
             $removeCodes = [3306]; // Verifier removes this
         } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
             $code = 3302;
-            $id = 143;
+            $id = Codemaster::getIdByCode(3302);
             $removeShortNames = ['marked_but_approval_pending']; // Approver removes this
         } elseif ($user->hasAnyRole(['HOD'])) {
             $code = 3303;
-            $id = 144;
+            $id = Codemaster::getIdByCode(3303);
             $removeCodes = [3306, 3304, 3302]; // HOD removes all these
             $removeShortNames = ['marked_and_approved_but_yet_not_send_to_cmo'];
         }
@@ -47,7 +47,7 @@ class CmoGrievanceWorkflowDropdown extends Component
                 $item->id = $id;
                 $item->name = 'PENDING';
                 $item->short_name = 'pending';
-                $item->parent_id = 141;
+                $item->parent_id = Codemaster::getIdByCode(330);
                 $item->is_active = 1;
                 $item->code = $code;
                 $item->rank = null;
