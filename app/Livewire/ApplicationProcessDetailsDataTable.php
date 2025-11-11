@@ -116,30 +116,34 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     }
     public function bulkActions(): array
     {
-        // $actions = [
-        //     'exportSelected' => 'Export',
-        // ];
+        $actions = [
+            'exportSelected' => 'Export',
+        ];
 
-        if ((WorkFlowPermissionHelper::canBulkActionsNormalEntryVerificationAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryVerificationAllow()) &&
-            CheckAuthHelper::isCommmonVerifier()
+        // Bulk Verify
+        if ((WorkFlowPermissionHelper::canBulkActionAllow(1, 'verification', true) ||
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true)) && CheckAuthHelper::isCommmonVerifier()
         ) {
             $actions['bulkverify'] = 'Verify';
         }
 
-        if ((WorkFlowPermissionHelper::canBulkActionsNormalEntryApproverAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryApproverAllow()) &&
-            CheckAuthHelper::isCommonApprover()
+        // Bulk Approve
+        if ((WorkFlowPermissionHelper::canBulkActionAllow(1, 'approver', true) ||
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'approver', true)) && CheckAuthHelper::isCommonApprover()
         ) {
             $actions['bulkapprove'] = 'Approve';
         }
 
-        if ((WorkFlowPermissionHelper::canBulkActionsNormalEntryRejectAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryRejectAllow()) &&
-            CheckAuthHelper::isCommonWorkFlow2ndStep()
+        // Bulk Reject
+        if ((WorkFlowPermissionHelper::canBulkActionAllow(1, 'reject', true) ||
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'reject', true)) && CheckAuthHelper::isCommonWorkFlow2ndStep()
         ) {
             $actions['bulkreject'] = 'Reject';
         }
 
-        if ((WorkFlowPermissionHelper::canBulkActionsNormalEntryRevertAllow() || WorkFlowPermissionHelper::canBulkActionsDuareSarkarEntryRevertAllow()) &&
-            CheckAuthHelper::isCommonWorkFlow2ndStep()
+        // Bulk Revert
+        if ((WorkFlowPermissionHelper::canBulkActionAllow(1, 'revert', true) ||
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'revert', true)) && CheckAuthHelper::isCommonWorkFlow2ndStep()
         ) {
             $actions['bulkrevert'] = 'Revert';
         }

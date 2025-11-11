@@ -46,67 +46,33 @@ class BulkActionModal extends Component
         // dd($this->selectedRows);
         $this->applicationId = $this->selectedRows['selectedIds']['application_id'];
         $this->entryType = $this->selectedRows['selectedIds']['entry_type'];
-        $user = Auth::user();
-        // dump($user);
-
-        $this->availableActions = [];
 
         if ($this->entryType == Codemaster::getIdByCode(41)) {
-            // 🔹 Normal Entry Permissions
-            if (WorkFlowPermissionHelper::canNormalEntryVerificationAllow()) {
-            // if ($user->can('Normal Entry Verification Allow')) {
-                $this->availableActions['V'] = 'Verify';
-            }
-            if (WorkFlowPermissionHelper::canNormalEntryApproverAllow()) {
-            // if ($user->can('Normal Entry Approver Allow')) {
-                $this->availableActions['A'] = 'Approve';
-            }
-            if (WorkFlowPermissionHelper::canNormalEntryRejectAllow()) {
-            // if ($user->can('Normal Entry Reject Allow')) {
-                $this->availableActions['R'] = 'Reject';
-            }
-            // if ($user->can('Normal Entry Revert Allow')) {
-            if (WorkFlowPermissionHelper::canNormalEntryRevertAllow()) {
-                $this->availableActions['T'] = 'Revert';
-            }
+            $entryType = 1;
         } elseif ($this->entryType == Codemaster::getIdByCode(42)) {
-            // 🔹 Duare Sarkar Permissions
-            // if ($user->can('Duare Sarkar Entry Verification Allow')) {
-                if (WorkFlowPermissionHelper::canDuareSarkarEntryVerificationAllow()) {
+            $entryType = 2;
+        } else {
+            $entryType = null;
+        }
+
+        if ($entryType) {
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'verification') && CheckAuthHelper::isCommmonVerifier()) {
                 $this->availableActions['V'] = 'Verify';
             }
-            if (WorkFlowPermissionHelper::canDuareSarkarEntryApproverAllow()) {
-            // if ($user->can('Duare Sarkar Entry Approver Allow')) {
+
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'approver') &&CheckAuthHelper::isCommonApprover()) {
                 $this->availableActions['A'] = 'Approve';
             }
-            if (WorkFlowPermissionHelper::canDuareSarkarEntryRejectAllow()) {
-            // if ($user->can('Duare Sarkar Entry Reject Allow')) {
+
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'reject') && CheckAuthHelper::isCommonWorkFlow2ndStep()) {
                 $this->availableActions['R'] = 'Reject';
             }
-            // if ($user->can('Duare Sarkar Entry Revert Allow')) {
-            if (WorkFlowPermissionHelper::canDuareSarkarEntryRevertAllow()) {
+
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'revert') && CheckAuthHelper::isCommonWorkFlow2ndStep()) {
                 $this->availableActions['T'] = 'Revert';
             }
         }
-
-        // if ($user->hasRole(['Verifier', 'Delegated Verifier'])) {
-
-        //     $this->availableActions = [
-        //         'V' => 'Verify',
-        //         'R' => 'Reject',
-        //         'T' => 'Revert',
-        //     ];
-        // } elseif ($user->hasRole(['Approver', 'Delegated Approver'])) {
-
-        //     $this->availableActions = [
-        //         'A' => 'Approve',
-        //         'R' => 'Reject',
-        //         'T' => 'Revert',
-        //     ];
-        // }
-
-
-        $this->bulkActionModal = true; //render again
+        $this->bulkActionModal = true;
     }
 
     public function updatedBulkActionType($value)
@@ -210,11 +176,11 @@ class BulkActionModal extends Component
 
             // $user = auth()->user();
             if (CheckAuthHelper::isCommonApprover()) {
-            // if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+                // if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
                 $next_level_role_id = Codemaster::getIdByCode(22);
             }
             if (CheckAuthHelper::isCommmonVerifier()) {
-            // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+                // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
                 $next_level_role_id = Codemaster::getIdByCode(21);
             }
             foreach ($ids as $id) {
@@ -290,8 +256,6 @@ class BulkActionModal extends Component
         // $this->dispatch('toaster-success', $successMessage);
         // $this->dispatch('actionPerformedAndRedirect');
     }
-
-
 
     public function render()
     {
