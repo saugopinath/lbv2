@@ -181,21 +181,36 @@ class CmoWorkFlowDataTable extends DataTableComponent
             //         ])->render();
             //     })
             //     ->html(),
-            $columns[] = Column::make("Action")
-                ->label(function ($row) {
-                    $user = auth()->user();
-                    if ($user->hasAnyRole(['Verifier', 'Delegated Verifier', 'Approver', 'Delegated Approver', 'HOD'])) {
-                        $routeName = 'cmo-grievance-find';
-                    } elseif ($user->hasAnyRole(['Operator'])) {
-                        $routeName = 'lbform';
-                    }
-                    $link = route($routeName) . '?id=' . Crypt::encryptString($row->grievance_id);
-                    return view('coulmn_button.actions', [
-                        'link' => $link,
-                        'tooltip' => 'Find',
-                    ])->render();
-                })
-                ->html()
+            Column::make("Action")
+            ->label(function ($row) {
+                $user = auth()->user();
+                $processType = $this->process_type;
+                $canEdit = false;
+                if (
+                    ($user->hasAnyRole(['Verifier', 'Delegated Verifier']) && $processType == Codemaster::getIdByCode(3301)) ||
+                    ($user->hasAnyRole(['Approver', 'Delegated Approver']) && $processType == Codemaster::getIdByCode(3302)) ||
+                    ($user->hasRole('HOD') && $processType == Codemaster::getIdByCode(3303)) ||
+                    ($user->hasRole('Operator') && $processType == Codemaster::getIdByCode(3304))
+                ) {
+                    $canEdit = true;
+                }
+                if (!$canEdit) {
+                    return 'N/A';
+                }
+                if ($user->hasAnyRole(['Verifier', 'Delegated Verifier', 'Approver', 'Delegated Approver', 'HOD'])) {
+                    $routeName = 'cmo-grievance-find';
+                } elseif ($user->hasAnyRole(['Operator'])) {
+                    $routeName = 'lbform';
+                } else {
+                    return '';
+                }
+                $link = route($routeName) . '?id=' . Crypt::encryptString($row->grievance_id);
+                return view('coulmn_button.actions', [
+                    'link' => $link,
+                    'tooltip' => 'Edit',
+                ])->render();
+            })
+            ->html(),
         ];
     }
     public function builder(): Builder

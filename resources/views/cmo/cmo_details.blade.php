@@ -136,7 +136,7 @@
             </x-accordion-section>
         </div>
         @endif
-        @if($isaddvisible == 0)
+        @if($isaddvisible == 0 && $atr)
         <x-accordion-section title="ATR Type Details" sectionId="atr-type-details" color="pink-500">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
@@ -150,7 +150,7 @@
             </div>
         </x-accordion-section>
         @endif
-        @if($isaddbutton)
+        @if($isaddbutton && $applicant_details)
         <x-accordion-section title="Applicant Details" sectionId="applicant-details" color="pink-500">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">

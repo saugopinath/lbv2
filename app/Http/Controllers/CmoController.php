@@ -104,7 +104,8 @@ class CmoController extends Controller
         $header = 'Find CMO Grievance Beneficiary';
         $atrs = CmoAtrMaster::all();
         $atr = CmoAtrMaster::find($record->atr_type);
-        if ($atr->can_find_applicant) {
+        $applicant_details = '';
+        if ($atr) {
             $data = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact', 'sourceable.bank')->find($record->lb_application_id);
             $add = $data->sourceable->contact->blockmuni();
             $bank = $data->sourceable->bank->bankname();
