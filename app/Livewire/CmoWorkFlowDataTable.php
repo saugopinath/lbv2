@@ -77,7 +77,7 @@ class CmoWorkFlowDataTable extends DataTableComponent
         }
         $user = auth()->user();
         $actions = [];
-        if ($user->hasAnyRole(['HOD']) && $this->process_type == Codemaster::getIdByCode(3303)) {
+        if ($user->hasAnyRole(['HOD']) && $this->process_type == [Codemaster::getIdByCode(3303)]) {
             $actions['bulkpush'] = 'Push To CMO';
         }
         return $actions;
