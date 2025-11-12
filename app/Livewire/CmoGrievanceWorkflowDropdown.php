@@ -4,13 +4,14 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Codemaster;
+use App\Models\District;
 
 class CmoGrievanceWorkflowDropdown extends Component
 {
-    public $process_type, $types;
+    public $process_type, $types, $districts, $district;
     public function submit()
     {
-        $this->dispatch('processTypeChanged', $this->process_type);
+        $this->dispatch('processTypeChanged', ['process_type' => $this->process_type, 'district' => $this->district]);
     }
     public function render()
     {
@@ -35,6 +36,7 @@ class CmoGrievanceWorkflowDropdown extends Component
             $id = Codemaster::getIdByCode(3302);
             $removeShortNames = ['marked_but_approval_pending']; // Approver removes this
         } elseif ($user->hasAnyRole(['HOD'])) {
+            $this->districts = District::all();
             $code = 3303;
             $id = Codemaster::getIdByCode(3303);
             $removeCodes = [3306, 3304, 3302]; // HOD removes all these

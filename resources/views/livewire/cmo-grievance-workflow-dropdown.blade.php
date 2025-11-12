@@ -6,6 +6,14 @@
             <option value="{{ $type->id }}">{{ $type->name }}</option>
             @endforeach
         </x-form.select>
+        @if($districts)
+         <x-form.select name="district" label="Districts" wire:model="district">
+            <option value="">--Choose--</option>
+            @foreach ($districts as $district)
+            <option value="{{ $district->lgd_code }}">{{ $district->name }}</option>
+            @endforeach
+        </x-form.select>
+        @endif
         <div class="flex justify-end mt-4">
             <div class="flex justify-end">
                 <x-button.primary type="submit" class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">

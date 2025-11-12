@@ -26,7 +26,7 @@ class CmoWorkFlowDataTable extends DataTableComponent
     public string $login_type = '';
     public string $search = '';
 
-    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id, $revertrejectAction, $revertrejectCauses, $sub_div;
+    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id, $revertrejectAction, $revertrejectCauses, $sub_div, $district;
     // protected $listeners = ['filtersApplied'];
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
@@ -36,11 +36,13 @@ class CmoWorkFlowDataTable extends DataTableComponent
     protected $listeners = ['processTypeChanged' => 'updateProcessType'];
     public function updateProcessType($type)
     {
+        $this->district = $type['district'];
+        $process_type = $type['process_type'];
         $user = auth()->user();
-        if ($type == Codemaster::getIdByCode(3302) && ($user->hasAnyRole(['Approver', 'Delegated Approver']))) {
+        if ($process_type == Codemaster::getIdByCode(3302) && ($user->hasAnyRole(['Approver', 'Delegated Approver']))) {
             $this->process_type = [Codemaster::getIdByCode(3302), Codemaster::getIdByCode(3304)];
         } else {
-            $this->process_type = [$type];
+            $this->process_type = [$process_type];
         }
     }
     public function mount(): void
@@ -232,6 +234,9 @@ class CmoWorkFlowDataTable extends DataTableComponent
                     $query->where($column, $value);
                 }
             }
+        }
+        if($this->district){
+            $query->where('lb_dist_code', $this->district);
         }
         return $query;
     }
