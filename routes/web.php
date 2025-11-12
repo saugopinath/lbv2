@@ -26,6 +26,7 @@ use App\Livewire\ProcessApplication\DraftApplicationView;
 use App\Http\Controllers\MasterParameterSettingController;
 use App\Http\Controllers\RoleOfficeTypeMappingsController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
+use App\Http\Controllers\CmoController;
 use App\Http\Controllers\RolePermisssionManagementController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 
@@ -193,4 +194,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
     Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
     Route::get('/custom_application/{id}', ApplicationView::class)->name('custom_application.view');
+});
+Route::controller(CmoController::class)->group(function () {
+    Route::any('/pullnewcmo', 'pullnewcmo')->name('pullnewcmo');
+    Route::any('/populatelbportal', 'populatelbportal')->name('populatelbportal');
+    Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')->name('cmo-grievance-workflow');
+    // Route::any('/cmo-grievance-find/{id}', 'cmogrievancefind')->name('cmo-grievance-find');
+    Route::any('/cmo-grievance-find', 'cmogrievancefind')->name('cmo-grievance-find');
+    Route::post('/cmo-grievance-action', 'cmodetailsaction')->name('cmo-grievance-action');
+    Route::post('/cmo-grievance-search', 'cmogrievancesearch')->name('cmo-grievance-search');
+    Route::post('/map-applicant', 'mapapplicant')->name('map-applicant');
+    Route::post('/cmo-add-actions', 'addactions')->name('cmo-add-actions');
 });

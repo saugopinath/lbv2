@@ -94,6 +94,11 @@ class BeneficiaryPersonal extends Model implements Auditable
     // {
     //     return $this->hasMany(BeneficiaryRelationship::class, 'application_id');
     // }
+    
+    public function getStatusText()
+    {
+        return 'Approved';
+    }
 
     protected static function booted()
     {

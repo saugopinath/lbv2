@@ -11,8 +11,15 @@ use App\Helpers\WorkFlowPermissionHelper;
 
 class DupAadhaarCheck extends Component
 {
-    public $aadhaar;
+    public $aadhaar, $grievanceId;
     public $error = null;
+    public function mount()
+    {
+        if (request()->has('id')) {
+            $this->grievanceId = request()->query('id');
+        }
+    }
+
     public function checkDuplicate()
     {
         $this->error = null;
@@ -46,6 +53,7 @@ class DupAadhaarCheck extends Component
         $this->dispatch('aadhaarChecked', [
             'encoded' => $encoded_aadhar,
             'hash' => $aadhaar_hash,
+            'grievance_id' => $this->grievanceId,
         ]);
         $this->dispatch('hideLoader');
         return ['status' => 'success', 'message' => '✅ Aadhaar is valid and not duplicate.'];

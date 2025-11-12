@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use App\Traits\WithLiveValidation;
 use Illuminate\Support\Facades\DB;
+use App\Models\CmoSmData;
 
 class PersonalDetails extends Component
 {
@@ -23,8 +24,7 @@ class PersonalDetails extends Component
     public $app_type, $app_date, $reg_no, $ds_date, $application_id;
     public $name, $mobile, $email, $dob, $age, $mar_statu;
     public $ffname, $mfname, $sfname;
-    public $caste, $cas_cer_no, $encoded, $hash;
-    public bool $hideAppTypeSection = false;
+    public $caste, $cas_cer_no, $encoded, $hash, $grievance_id;
     public function updatedDob($value)
     {
         try {
@@ -90,6 +90,7 @@ class PersonalDetails extends Component
         if ($aadhaarData) {
             $this->encoded = $aadhaarData['encoded'];
             $this->hash = $aadhaarData['hash'];
+            $this->grievance_id = $aadhaarData['grievance_id'];
         }
 
         // $user = Auth::user();
@@ -231,7 +232,13 @@ class PersonalDetails extends Component
                     ];
                 }
                 $draftbenPar->relationships()->createMany($relations);
-
+                if ($this->grievance_id) {
+                    $grievance_id = Crypt::decryptString($this->grievance_id);
+                    $CmoSmData = CmoSmData::find($grievance_id);
+                    $CmoSmData->lb_application_id = $draftbenPar->application_id;
+                    $CmoSmData->is_mark = 1;
+                    $CmoSmData->save();
+                }
                 $this->dispatch('perDet', [
                     'application_id' => $draftbenPar->application_id,
                     'message' => "Personal Details saved successfully and the application id is: {$draftbenPar->application_id}"
