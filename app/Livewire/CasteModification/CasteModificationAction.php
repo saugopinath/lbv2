@@ -10,6 +10,7 @@ use App\Models\CasteModificationInfo;
 use App\Models\Codemaster;
 use Illuminate\Support\Facades\Crypt;
 use App\Helpers\CheckAuthHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use Illuminate\Support\Facades\DB;
 
 class CasteModificationAction extends Component
@@ -31,18 +32,43 @@ class CasteModificationAction extends Component
         $this->roleId = CheckAuthHelper::getRoleId();
 
         // Define heading & actions dynamically
+        // if (CheckAuthHelper::isVerifier()) {
+        //     $this->heading = "Process the Application : $this->applicationId";
+        //     $this->availableActions = [
+        //         '2202' => 'Verify',
+        //         '2204' => 'Revert',
+        //     ];
+        // } elseif (CheckAuthHelper::isApprover()) {
+        //     $this->heading = "Process the Application : $this->applicationId";
+        //     $this->availableActions = [
+        //         '2203' => 'Approve',
+        //         '2204' => 'Revert',
+        //     ];
+        // }
+
+
         if (CheckAuthHelper::isVerifier()) {
+
             $this->heading = "Process the Application : $this->applicationId";
-            $this->availableActions = [
-                '2202' => 'Verify',
-                '2204' => 'Revert',
-            ];
+
+            if (WorkFlowPermissionHelper::canVerifyCastApplication()) {
+                $this->availableActions['2202'] = 'Verify';
+            }
+
+            if (WorkFlowPermissionHelper::canRevertCastApplication()) {
+                $this->availableActions['2204'] = 'Revert';
+            }
         } elseif (CheckAuthHelper::isApprover()) {
+
             $this->heading = "Process the Application : $this->applicationId";
-            $this->availableActions = [
-                '2203' => 'Approve',
-                '2204' => 'Revert',
-            ];
+
+            if (WorkFlowPermissionHelper::canApproveCastApplication()) {
+                $this->availableActions['2203'] = 'Approve';
+            }
+
+            if (WorkFlowPermissionHelper::canRevertCastApplication()) {
+                $this->availableActions['2204'] = 'Revert';
+            }
         }
     }
 
@@ -55,7 +81,7 @@ class CasteModificationAction extends Component
     public function closeModal()
     {
         $this->reset('action');
-        // $this->resetErrorBag(); 
+        // $this->resetErrorBag();
         $this->resetValidation();
         $this->showModal = false;
     }

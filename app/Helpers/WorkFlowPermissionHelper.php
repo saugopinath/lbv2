@@ -265,4 +265,30 @@ class WorkFlowPermissionHelper
 
         return $user->can($permission);
     }
+
+    public static function canVerifyCastApplication(): bool
+    {
+        return Auth::user()->can('VerifyCasteApplication');
+    }
+    public static function canApproveCastApplication(): bool
+    {
+        return Auth::user()->can('ApproveCasteApplication');
+    }
+
+    public static function canViewCastApplication(): bool
+    {
+        return Auth::user()->can('ViewCastApplication');
+    }
+    public static function canTakeActionForCaste(): bool
+    {
+        return Auth::user()->can('TakeActionForCaste');
+    }
+    public static function canRevertCastApplication(): bool
+    {
+        return Auth::user()->can('RevertCasteApplication');
+    }
+    public static function canEditRevertApplication(): bool
+    {
+        return Auth::user()->can('EditRevertApplication');
+    }
 }
