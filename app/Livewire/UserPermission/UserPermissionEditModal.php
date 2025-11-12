@@ -41,8 +41,10 @@ class UserPermissionEditModal extends Component
         }
         $user->syncPermissions(Permission::whereIn('id', $this->selectedPermissions)->get());
         $this->close();
+        $this->dispatch('toastr', [
+                        'type' => 'success',
+                        'message' => 'Permissions Assign successfully!']);
         $this->dispatch('refreshUserTable');
-        $this->dispatch('notify', ['message' => 'Permissions updated successfully!']);
     }
     public function close()
     {

@@ -22,7 +22,7 @@ class BulkUserPermissionModal extends Component
 
    public function open($users)
 {
-    $this->reset(['selectedPermissions', 'selectedUserIds', 'duplicateMessages']);
+    $this->reset(['selectedPermissions', 'selectedUserIds']);
     $this->selectedUserIds = $users;
     $this->isOpen = true;
 }
@@ -30,7 +30,7 @@ class BulkUserPermissionModal extends Component
 
     public function close()
     {
-        $this->reset(['selectedPermissions', 'selectedUserIds', 'duplicateMessages']);
+        $this->reset(['selectedPermissions', 'selectedUserIds']);
         $this->isOpen = false;
         $this->dispatch('assign-success'); 
     }
@@ -42,29 +42,54 @@ class BulkUserPermissionModal extends Component
             return;
         }
         $users = User::whereIn('id', $this->selectedUserIds)->get();
-        $duplicateMessages = [];
+        // $duplicateMessages = [];
         // foreach ($users as $user) {
         //     $user->syncPermissions(Permission::whereIn('id', $this->selectedPermissions)->get());
         // } 
+        // foreach ($users as $user) {
+        //     foreach ($this->selectedPermissions as $permissionId) {
+        //         $permission = Permission::find($permissionId);
+
+        //         if ($user->hasPermissionTo($permission->name)) {
+        //             $duplicateMessages[] = "{$user->name} already has {$permission->name}";
+        //         }
+        //     }
+        // }
+        // if (!empty($duplicateMessages)) {
+        //     $this->duplicateMessages = $duplicateMessages;
+        //     return;
+        // }
+         $permissions = Permission::whereIn('id', $this->selectedPermissions)->get();
+        foreach ($users as $user) {
+            
+            $user->givePermissionTo($permissions);
+        } 
+        $this->close();
+        $this->dispatch('toastr', [
+                        'type' => 'success',
+                        'message' => 'Permissions Assigned successfully!']);
+    }
+    public function remove()
+    {
+         if (empty($this->selectedUserIds)) {
+            $this->addError('selectedUserIds', 'Please select at least one user.');
+            return;
+        }
+        $users = User::whereIn('id', $this->selectedUserIds)->get();
         foreach ($users as $user) {
             foreach ($this->selectedPermissions as $permissionId) {
                 $permission = Permission::find($permissionId);
 
                 if ($user->hasPermissionTo($permission->name)) {
-                    $duplicateMessages[] = "{$user->name} already has {$permission->name}";
+                    $user->revokePermissionTo($permission->name);
                 }
             }
-        }
-        if (!empty($duplicateMessages)) {
-            $this->duplicateMessages = $duplicateMessages;
-            return;
-        }
-        foreach ($users as $user) {
-            $user->syncPermissions(Permission::whereIn('id', $this->selectedPermissions)->get());
         } 
+       
         $this->close();
-        $this->dispatch('assign-success'); 
-        session()->flash('success', 'Permissions updated for selected users successfully.');
+       $this->dispatch('toastr', [
+                        'type' => 'success',
+                        'message' => 'Permissions Removed successfully!']);
     }
     public function render()
     {

@@ -59,7 +59,6 @@ class CreatePermissionForm extends Component
     {
         $this->dispatch('showLoader');
         $this->validate();
-
         if ($this->is_parent == '0') {
             $this->parent_id = null;
         }
@@ -91,7 +90,6 @@ class CreatePermissionForm extends Component
                 'max_score'     => $this->max_score,
             ]);
         }
-
         $this->reset(['name', 'is_parent', 'parent_id', 'has_score', 'min_score', 'max_score']);
         $this->dispatch('close-modal');
         $this->dispatch('hideLoader');
@@ -99,7 +97,6 @@ class CreatePermissionForm extends Component
         $this->dispatch('toastr', [
                         'type' => 'success',
                         'message' => 'Permission created successfully!']);
-
         $this->dispatch('refreshDatatable');
     }
     public function cancel()

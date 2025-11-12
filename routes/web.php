@@ -26,6 +26,7 @@ use App\Livewire\ProcessApplication\DraftApplicationView;
 use App\Http\Controllers\MasterParameterSettingController;
 use App\Http\Controllers\RoleOfficeTypeMappingsController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
+use App\Http\Controllers\RolePermisssionManagementController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 
 // Guest Routes
@@ -90,6 +91,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/assign-users-permissions', AssignPermissionsPage::class)
         ->name('assign-users-permissions');
+
+    Route::get('/role-permission-management', [RolePermisssionManagementController::class, 'index'])
+        ->name('role-permission-management');
 
     // Duty Management
     Route::get('/userDutymanagement', [UserDutyManagementController::class, 'index'])

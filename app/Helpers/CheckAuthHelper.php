@@ -108,7 +108,7 @@ class CheckAuthHelper
 
     public static function isCommonWorkFlow4thStep(): bool
     {
-        return self::isCommonOperator() || self::isCommmonVerifier() || self::isCommonApprover() || self::isCommonDDO();
+        return self::isCommonOperator() || self::isCommmonVerifier() || self::isCommonApprover() || self::isCommonDDO() || self::isSuperAdmin();
     }
     public static function isCommonPrivilegedUser(): bool
     {

@@ -139,6 +139,11 @@ class Create extends Component
             $role = Role::find($this->role);
             if ($role) {
                 $user->assignRole($role);
+                $permissions = $role->permissions;
+                // dd($permissions);
+                if ($permissions->isNotEmpty()) {
+                    $user->givePermissionTo($permissions);
+                }
             }
 
             $mapping = new UserRoleSchemeOfficeMapping();
