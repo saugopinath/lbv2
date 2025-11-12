@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\BeneficiaryCommonList;
 use App\Helpers\EncryptionArray;
 use App\Exports\BeneficiariesExport;
+use App\Helpers\CheckAuthHelper;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,7 +41,7 @@ class CmoWorkFlowDataTable extends DataTableComponent
         $process_type = $type['process_type'];
         $user = auth()->user();
         if ($process_type) {
-            if ($process_type == Codemaster::getIdByCode(3302) && ($user->hasAnyRole(['Approver', 'Delegated Approver']))) {
+            if ($process_type == Codemaster::getIdByCode(3302) && (CheckAuthHelper::isCommonApprover())) {
                 $this->process_type = [Codemaster::getIdByCode(3302), Codemaster::getIdByCode(3304)];
             } else {
                 $this->process_type = [$process_type];
@@ -50,13 +51,13 @@ class CmoWorkFlowDataTable extends DataTableComponent
     public function mount(): void
     {
         $user = auth()->user();
-        if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+        if (CheckAuthHelper::isCommmonVerifier()) {
             $this->process_type = [Codemaster::getIdByCode(3301)];
-        } elseif ($user->hasRole('Operator')) {
+        } elseif (CheckAuthHelper::isCommonOperator()) {
             $this->process_type = [Codemaster::getIdByCode(3304)];
-        } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+        } elseif (CheckAuthHelper::isCommonApprover()) {
             $this->process_type = [Codemaster::getIdByCode(3302), Codemaster::getIdByCode(3304)];
-        } elseif ($user->hasAnyRole(['HOD'])) {
+        } elseif (CheckAuthHelper::isCommonHOD()) {
             $this->process_type = [Codemaster::getIdByCode(3303)];
         }
 
@@ -81,7 +82,7 @@ class CmoWorkFlowDataTable extends DataTableComponent
         }
         $user = auth()->user();
         $actions = [];
-        if ($user->hasAnyRole(['HOD']) && $this->process_type == [Codemaster::getIdByCode(3303)]) {
+        if (CheckAuthHelper::isCommonHOD() && $this->process_type == [Codemaster::getIdByCode(3303)]) {
             $actions['bulkpush'] = 'Push To CMO';
         }
         return $actions;
@@ -196,21 +197,21 @@ class CmoWorkFlowDataTable extends DataTableComponent
                     $processType = $this->process_type;
                     $canEdit = false;
                     if (
-                        ($user->hasAnyRole(['Verifier', 'Delegated Verifier']) && in_array(Codemaster::getIdByCode(3301), $processType)) ||
-                        ($user->hasAnyRole(['Approver', 'Delegated Approver']) &&
+                        (CheckAuthHelper::isCommmonVerifier() && in_array(Codemaster::getIdByCode(3301), $processType)) ||
+                        (CheckAuthHelper::isCommonApprover() &&
                             (in_array(Codemaster::getIdByCode(3302), $processType) || in_array(Codemaster::getIdByCode(3304), $processType))
                         ) ||
-                        ($user->hasRole('HOD') && in_array(Codemaster::getIdByCode(3303), $processType)) ||
-                        ($user->hasRole('Operator') && in_array(Codemaster::getIdByCode(3304), $processType))
+                        (CheckAuthHelper::isCommonHOD() && in_array(Codemaster::getIdByCode(3303), $processType)) ||
+                        (CheckAuthHelper::isCommonOperator() && in_array(Codemaster::getIdByCode(3304), $processType))
                     ) {
                         $canEdit = true;
                     }
                     if (!$canEdit) {
                         return 'N/A';
                     }
-                    if ($user->hasAnyRole(['Verifier', 'Delegated Verifier', 'Approver', 'Delegated Approver', 'HOD'])) {
+                    if (CheckAuthHelper::isCommonFindUser()) {
                         $routeName = 'cmo-grievance-find';
-                    } elseif ($user->hasAnyRole(['Operator'])) {
+                    } elseif (CheckAuthHelper::isCommonOperator()) {
                         $routeName = 'lbform';
                     } else {
                         return '';

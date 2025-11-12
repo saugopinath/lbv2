@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Helpers\CheckAuthHelper;
 use Livewire\Component;
 use App\Models\Codemaster;
 use App\Models\District;
@@ -27,15 +28,15 @@ class CmoGrievanceWorkflowDropdown extends Component
         $removeShortNames = [];
 
         // Step 3: Role-based configuration
-        if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+        if (CheckAuthHelper::isCommmonVerifier()) {
             $code = 3301;
             $id = Codemaster::getIdByCode(3301);
             $removeCodes = [3306]; // Verifier removes this
-        } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+        } elseif (CheckAuthHelper::isCommonApprover()) {
             $code = 3302;
             $id = Codemaster::getIdByCode(3302);
             $removeShortNames = ['marked_but_approval_pending']; // Approver removes this
-        } elseif ($user->hasAnyRole(['HOD'])) {
+        } elseif (CheckAuthHelper::isCommonHOD()) {
             $this->districts = District::all();
             $code = 3303;
             $id = Codemaster::getIdByCode(3303);

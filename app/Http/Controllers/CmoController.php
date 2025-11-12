@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\CheckAuthHelper;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
@@ -84,7 +85,7 @@ class CmoController extends Controller
     {
         $header = 'Sarasori Mukhyamantri (CMO Grievance) List';
         $user = auth()->user();
-        if ($user->hasRole('Operator')) {
+        if (CheckAuthHelper::isCommonOperator()) {
             $workflow_dropdown_show = 0;
         } else {
             $workflow_dropdown_show = 1;
@@ -126,12 +127,12 @@ class CmoController extends Controller
         // dd($applicant_details);
         $isaddvisible = 0;
         $user = auth()->user();
-        if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+        if (CheckAuthHelper::isCommmonVerifier()) {
             $isaddvisible = 1;
             $isaddbutton = 0;
-        } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+        } elseif (CheckAuthHelper::isCommonApprover()) {
             $isaddbutton = 1;
-        } elseif ($user->hasAnyRole(['HOD'])) {
+        } elseif (CheckAuthHelper::isCommonHOD()) {
             $isaddbutton = 2;
         }
         return view('cmo.cmo_details', compact('header', 'record', 'atrs', 'isaddvisible', 'isaddbutton', 'atr', 'applicant_details'));
