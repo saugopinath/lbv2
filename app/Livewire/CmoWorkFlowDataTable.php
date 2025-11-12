@@ -39,10 +39,12 @@ class CmoWorkFlowDataTable extends DataTableComponent
         $this->district = $type['district'];
         $process_type = $type['process_type'];
         $user = auth()->user();
-        if ($process_type == Codemaster::getIdByCode(3302) && ($user->hasAnyRole(['Approver', 'Delegated Approver']))) {
-            $this->process_type = [Codemaster::getIdByCode(3302), Codemaster::getIdByCode(3304)];
-        } else {
-            $this->process_type = [$process_type];
+        if ($process_type) {
+            if ($process_type == Codemaster::getIdByCode(3302) && ($user->hasAnyRole(['Approver', 'Delegated Approver']))) {
+                $this->process_type = [Codemaster::getIdByCode(3302), Codemaster::getIdByCode(3304)];
+            } else {
+                $this->process_type = [$process_type];
+            }
         }
     }
     public function mount(): void
@@ -235,7 +237,7 @@ class CmoWorkFlowDataTable extends DataTableComponent
                 }
             }
         }
-        if($this->district){
+        if ($this->district) {
             $query->where('lb_dist_code', $this->district);
         }
         return $query;
