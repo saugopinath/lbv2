@@ -68,6 +68,17 @@ class CreatePermissionForm extends Component
         //             'is_parent'  => $this->is_parent,
         //             'parent_id'  => $this->parent_id,
         //         ]);
+        $existingPermission = Permission::where('name', $this->name)
+            // ->where('parent_id', $this->parent_id)
+            ->first();
+        if ($existingPermission) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'A permission with this name and parent already exists.',
+            ]);
+            $this->dispatch('hideLoader');
+            return;
+        }
         $permission = Permission::create([
             'name'       => $this->name,
             'guard_name' => 'web',
@@ -85,7 +96,10 @@ class CreatePermissionForm extends Component
         $this->dispatch('close-modal');
         $this->dispatch('hideLoader');
         // $this->dispatch('notify', 'Permission created successfully!', 'success');
-        $this->dispatch('notify', message: 'Permission created successfully!');
+        $this->dispatch('toastr', [
+                        'type' => 'success',
+                        'message' => 'Permission created successfully!']);
+
         $this->dispatch('refreshDatatable');
     }
     public function cancel()
