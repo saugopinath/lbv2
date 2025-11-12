@@ -459,6 +459,7 @@
             </div>
             {{-- @endcanany --}}
         @endif
+        @if ($user->hasAnyRole(['Super Admin']))
         <div>
             <a href="{{ route('pullnewcmo') }}"
                 class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -474,6 +475,7 @@
                 <span x-show="sidebar" class="mr-2 truncate">CMO Data Fetch</span>
             </a>
         </div>
+        @endif
         @if ($user->hasAnyRole(['Verifier', 'Delegated Verifier', 'Approver', 'Delegated Approver', 'Operator', 'HOD']))
             <div>
                 <button
