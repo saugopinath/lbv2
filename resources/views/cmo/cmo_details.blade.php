@@ -10,6 +10,7 @@
             atr: { id: '', can_find_applicant: '', atr_code: '' },
              remarks: '',
         atr_type: '',
+        errorMessage: '',
             toggleSection(section) {
                 if (this.openSection === section) {
                     this.openSection = 'grievance-details';
@@ -18,6 +19,11 @@
                 }
             },
             openSearchSection() {
+            if (!this.remarks || this.remarks.trim() === '') {
+        this.errorMessage = 'Remarks field is required.';
+            return;
+    }
+            this.errorMessage = '';
              Livewire.dispatch('updateGrievanceData', { 
                 remarks: this.remarks, 
                 atr_type: this.atr_type 
@@ -92,6 +98,9 @@
                     </template>
                     <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
                         <x-form.input id="remarks" name="remarks" label="Remarks" required type="text" x-model="remarks" />
+                        <template x-if="errorMessage">
+                            <p class="text-red-500 text-xs mt-2" x-text="errorMessage"></p>
+                        </template>
                     </div>
                     <template x-if="atr.can_find_applicant == 1 && atr.atr_code != '002'">
                         <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
@@ -100,6 +109,7 @@
                             </x-button.primary>
                         </div>
                     </template>
+
                     <template x-if="atr.can_find_applicant == null">
                         <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
                             <x-button.danger type="submit" name="action_type" value="grievance_redressed">

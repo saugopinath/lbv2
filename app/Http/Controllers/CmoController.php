@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Crypt;
 use App\Models\CmoAtrMaster;
 use Illuminate\Support\Facades\Auth;
 use App\Models\BeneficiaryCommonList;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class CmoController extends Controller
 {
@@ -30,16 +32,39 @@ class CmoController extends Controller
     {
         $inserted_id = $request->query('inserted_id');
         if ($request->isMethod('post')) {
-            $from_date = $request->from_date;
-            $to_date = $request->to_date;
-            $data = $this->cmoAuthenticationService->pullNewCmo($from_date, $to_date);
-            $response = json_decode($data->getContent(), true);
-            if (isset($response['inserted_id']) && $response['status'] == 200) {
-                $inserted_id = $response['inserted_id'];
-                session()->flash('success', 'Data pulled successfully!');
-                return redirect()->route('pullnewcmo', ['inserted_id' => $inserted_id]);
-            } else {
-                session()->flash('error', 'Failed to pull data.');
+            $rules = [
+                'from_date' => 'required|date',
+                'to_date'   => 'required|date|after_or_equal:from_date',
+            ];
+            $messages = [
+                'from_date.*' => 'Please select a valid start date.',
+                'to_date.*'   => 'Please select a valid end date and end date cannot be before of the start date.',
+            ];
+            $validator = Validator::make($request->all(), $rules, $messages);
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+            DB::beginTransaction();
+            try {
+                $from_date = $request->from_date;
+                $to_date   = $request->to_date;
+                $data = $this->cmoAuthenticationService->pullNewCmo($from_date, $to_date);
+                $response = json_decode($data->getContent(), true);
+                if (isset($response['inserted_id']) && $response['status'] == 200) {
+                    $inserted_id = $response['inserted_id'];
+                    DB::commit();
+                    session()->flash('success', 'Data pulled successfully!');
+                    return redirect()->route('pullnewcmo', ['inserted_id' => $inserted_id])->withInput();
+                } else {
+                    DB::rollBack();
+                    session()->flash('error', 'Failed to pull data.');
+                }
+            } catch (\Exception $e) {
+                DB::rollBack();
+                session()->flash('error', 'An error occurred: ' . $e->getMessage());
+                return redirect()->back()->withInput();
             }
         }
         $header = 'CMO Data Fetching';
@@ -50,35 +75,41 @@ class CmoController extends Controller
     {
         $id = $request->query('inserted_id');
         $record = CmoResponseJson::find($id);
-        $records = json_decode($record->received_data, true);
-        $collection = new Collection($records);
-        $datas = $collection->map(function ($datas) {
-            if (isset($datas['lgd_mun'])) {
-                $datas['lgd_muni'] = $datas['lgd_mun'];
-            }
-            unset($datas['doc_updated'], $datas['migration_id'], $datas['lgd_mun']);
-            return $datas;
-        });
-        if (!empty($datas)) {
-            foreach ($datas as $data) {
-                $cmoData = new CmoSmData();
-                $cmoData->fill($data);
-                // dd($data['lgd_muni']);
-                $cmoData->lb_dist_code = $data['lgd_dist'];
-                // $cmoData->lb_local_body_code = $data['lgd_block'] ?? $data['lgd_muni'];
-                // dd($data['lgd_muni']);
-                if (isset($data['lgd_muni'])) {
-                    $cmoData->lb_local_body_code = Municipality::where('lgd_code', $data['lgd_muni'])->first()->subdivision_id;
-                } else {
-                    $cmoData->lb_local_body_code = $data['lgd_block'];
+        DB::beginTransaction();
+        try {
+            $records = json_decode($record->received_data, true);
+            $collection = new Collection($records);
+            $datas = $collection->map(function ($datas) {
+                if (isset($datas['lgd_mun'])) {
+                    $datas['lgd_muni'] = $datas['lgd_mun'];
                 }
-                $cmoData->lb_gp_ward_code = $data['ward_id'] ?? $data['gp_id'];
-                $cmoData->redressed_status = Codemaster::getIdByCode(3301);
-                $cmoData->save();
+                unset($datas['doc_updated'], $datas['migration_id'], $datas['lgd_mun']);
+                return $datas;
+            });
+            if (!empty($datas)) {
+                foreach ($datas as $data) {
+                    $cmoData = new CmoSmData();
+                    $cmoData->fill($data);
+                    $cmoData->lb_dist_code = $data['lgd_dist'];
+                    if (isset($data['lgd_muni'])) {
+                        $cmoData->lb_local_body_code = Municipality::where('lgd_code', $data['lgd_muni'])->first()->subdivision_id;
+                    } else {
+                        $cmoData->lb_local_body_code = $data['lgd_block'];
+                    }
+                    $cmoData->lb_gp_ward_code = $data['ward_id'] ?? $data['gp_id'];
+                    $cmoData->redressed_status = Codemaster::getIdByCode(3301);
+                    $cmoData->save();
+                }
+                $record->is_fetched = 1;
+                $record->save();
             }
-            $record->is_fetched = 1;
-            $record->save();
+            DB::commit();
+            session()->flash('success', 'Data populated lbportal successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', 'Failed to populate lbportal: ' . $e->getMessage());
         }
+        return redirect()->route('pullnewcmo');
     }
 
     public function cmogrievanceworkflow()
@@ -92,11 +123,6 @@ class CmoController extends Controller
         }
         return view('cmo.cmogrievanceworkflow', compact('header', 'workflow_dropdown_show'));
     }
-
-    //    public function cmogrievancefind($id)
-    //    {
-    //     dd(Crypt::decryptString($id));
-    //    }
 
     public function cmogrievancefind(Request $request)
     {
@@ -124,7 +150,6 @@ class CmoController extends Controller
                 'accNo' => $bank['accno'],
             ];
         }
-        // dd($applicant_details);
         $isaddvisible = 0;
         $user = auth()->user();
         if (CheckAuthHelper::isCommmonVerifier()) {
@@ -140,129 +165,204 @@ class CmoController extends Controller
 
     public function cmodetailsaction(Request $request)
     {
-        $atr_type = json_decode($request->atr_type, true);
-        $action_type = $request->action_type;
-        $grievance_id = Crypt::decryptString($request->id);
-        $CmoSmData = CmoSmData::find($grievance_id);
-        $old_data = $CmoSmData->toArray();
-        $CmoSmData->atr_type = $atr_type['id'];
-        $CmoSmData->remarks = $request->remarks;
-        switch ($action_type) {
-            case 'send_another_block':
-                $CmoSmData->lb_dist_code = $request->district_id;
-                if ($request->rural_urban == 1) {
-                    $CmoSmData->lb_local_body_code = Municipality::where('lgd_code', $request->blockurban)->first()->subdivision_id;
-                } else {
-                    $CmoSmData->lb_local_body_code = $request->blockurban;
-                }
-                $CmoSmData->old_data = $old_data;
-                break;
-            case 'grievance_redressed':
-                $CmoSmData->is_redressed = 1;
-                $CmoSmData->redressed_status = Codemaster::getIdByCode(3302);
-                $CmoSmData->redressed_by = Auth::id();
-                $CmoSmData->redressed_date = now()->toDateString();
-                break;
+        $rules = [
+            'atr_type'     => 'required',
+            'action_type'  => 'required|in:send_another_block,grievance_redressed',
+            'id'           => 'required',
+            'remarks'      => 'required|string|max:255',
+        ];
+        $messages = [
+            'atr_type.*'     => 'ATR Type is required.',
+            'remarks.*'           => 'Remarks is required and cannot exceed 255 characters.',
+        ];
+        if ($request->action_type === 'send_another_block') {
+            $rules['district_id'] = 'required|integer';
+            $rules['rural_urban'] = 'required|in:1,2';
+            $rules['blockurban']  = 'required|integer';
+            $messages['district_id.*'] = 'Please select a district.';
+            $messages['rural_urban.*'] = 'Please select rural or urban.';
+            $messages['blockurban.*']  = 'Please select block or municipality.';
         }
-        // dd($CmoSmData);
-        $CmoSmData->save();
+        $validator = Validator::make($request->all(), $rules, $messages);
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+        DB::beginTransaction();
+        try {
+            $atr_type = json_decode($request->atr_type, true);
+            $action_type = $request->action_type;
+            $grievance_id = Crypt::decryptString($request->id);
+            $CmoSmData = CmoSmData::find($grievance_id);
+            $old_data = $CmoSmData->toArray();
+            $CmoSmData->atr_type = $atr_type['id'];
+            $CmoSmData->remarks = $request->remarks;
+            switch ($action_type) {
+                case 'send_another_block':
+                    $CmoSmData->lb_dist_code = $request->district_id;
+                    if ($request->rural_urban == 1) {
+                        $municipality = Municipality::where('lgd_code', $request->blockurban)->first();
+                        $CmoSmData->lb_local_body_code = $municipality->subdivision_id;
+                    } else {
+                        $CmoSmData->lb_local_body_code = $request->blockurban;
+                    }
+                    $CmoSmData->old_data = $old_data;
+                    $msg = 'The grievance has been sent to the corresponding block/subdivision successfully!';
+                    break;
+                case 'grievance_redressed':
+                    $CmoSmData->is_redressed = 1;
+                    $CmoSmData->redressed_status = Codemaster::getIdByCode(3302);
+                    $CmoSmData->redressed_by = Auth::id();
+                    $CmoSmData->redressed_date = now()->toDateString();
+                    $msg = 'The grievance has been redressed successfully!';
+                    break;
+            }
+            $CmoSmData->save();
+            DB::commit();
+            session()->flash('success', $msg);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', 'Action failed: ' . $e->getMessage());
+            return redirect()->back()->withInput();
+        }
+        return redirect()->route('cmo-grievance-workflow');
     }
 
     public function cmogrievancesearch(Request $request)
     {
-        // dd($request->all());
-        $action_type = $request->action_type;
-        if ($action_type == 'send_to_operator') {
-            $grievance_id = Crypt::decryptString($request->id);
-            $CmoSmData = CmoSmData::find($grievance_id);
-            $CmoSmData->send_to_op = 1;
-            $CmoSmData->send_to_op_by = Auth::id();
-            $CmoSmData->send_to_op_date = now()->toDateString();
-            $CmoSmData->redressed_status = Codemaster::getIdByCode(3304);
-            $CmoSmData->save();
-            session()->flash('success', 'The Grievance Is Sent To Operator For New Entry');
-            return redirect()->route('cmo-grievance-workflow');
+        $validatedData = $request->validate([
+            'action_type' => 'required|string|in:send_to_operator',
+            'id' => 'required|string',
+        ]);
+        DB::beginTransaction();
+        try {
+            $action_type = $validatedData['action_type'];
+            if ($action_type === 'send_to_operator') {
+                $grievance_id = Crypt::decryptString($validatedData['id']);
+                $CmoSmData = CmoSmData::find($grievance_id);
+                $CmoSmData->send_to_op = 1;
+                $CmoSmData->send_to_op_by = Auth::id();
+                $CmoSmData->send_to_op_date = now()->toDateString();
+                $CmoSmData->redressed_status = Codemaster::getIdByCode(3304);
+                $CmoSmData->save();
+                DB::commit();
+                session()->flash('success', 'The grievance has been sent to the operator for new entry.');
+                return redirect()->route('cmo-grievance-workflow');
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', 'Action failed: ' . $e->getMessage());
+            return redirect()->back()->withInput();
         }
     }
 
     public function mapapplicant(Request $request)
     {
-        $id = Crypt::decryptString($request->id);
-        $grievance_id = Crypt::decryptString($request->grievance_id);
-        $CmoSmData = CmoSmData::find($grievance_id);
-        $CmoSmData->lb_application_id = $id;
-        $CmoSmData->redressed_status = Codemaster::getIdByCode(3302);
-        $CmoSmData->atr_type = $request->atr_type;
-        $CmoSmData->remarks = $request->remarks;
-        $CmoSmData->is_mark = 1;
-        $CmoSmData->save();
-        session()->flash('success', 'The Grievance Is Mapped Successfully');
-        return redirect()->route('cmo-grievance-workflow');
+        $validatedData = $request->validate([
+            'id' => 'required|string',
+            'grievance_id' => 'required|string',
+            'atr_type' => 'required|integer',
+            'remarks' => 'string|max:255',
+        ]);
+        DB::beginTransaction();
+        try {
+            $id = Crypt::decryptString($validatedData['id']);
+            $grievance_id = Crypt::decryptString($validatedData['grievance_id']);
+            $CmoSmData = CmoSmData::find($grievance_id);
+            $CmoSmData->lb_application_id = $id;
+            $CmoSmData->redressed_status = Codemaster::getIdByCode(3302);
+            $CmoSmData->atr_type = $validatedData['atr_type'];
+            $CmoSmData->remarks = $validatedData['remarks'];
+            $CmoSmData->is_mark = 1;
+            $CmoSmData->save();
+            DB::commit();
+            session()->flash('success', 'The grievance has been mapped successfully.');
+            return redirect()->route('cmo-grievance-workflow');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', 'Action failed: ' . $e->getMessage());
+            return redirect()->back()->withInput();
+        }
     }
 
     public function addactions(Request $request)
     {
-        $grievance_id = Crypt::decryptString($request->id);
-        $action_type = $request->action_type;
-        switch ($action_type) {
-            case 'pushtocmo':
-                $CmoSmData = CmoSmData::where('grievance_id', $grievance_id)
-                    ->where('is_processed', 2)
-                    ->first();
-                $comment = $CmoSmData->remarks ?? '';
-                $comment = preg_replace('/\s+/', ' ', preg_replace('/[^a-zA-Z0-9 ]/', '', str_replace(["\t", "\n", "\r"], ' ', $comment)));
-                $comment = trim($comment);
-                $data = [
-                    "data" => [
-                        [
-                            "position_id" => 1,
-                            "grievance_status" => "GM014",
-                            "grievance_id" => null,
-                            "comment" => $comment,
-                            "bulk_grivance_id" => [$CmoSmData->grievance_id],
-                            "assign_comment" => null,
-                            "action_proposed" => null,
-                            "urgency_flag" => null,
-                            "addl_doc_id" => [],
-                            "atn_id" => (int) $CmoSmData->atr_type,
-                            "atn_reason_master_id" => null,
-                            "action_taken_note" => $CmoSmData->atr_desc,
-                            "contact_date" => null,
-                            "tentative_date" => null,
-                            "atr_doc_id" => [],
-                            "action" => "TA"
+        $validatedData = $request->validate([
+            'id' => 'required|string',
+            'action_type' => 'required|in:pushtocmo,approve,revert',
+        ]);
+        DB::beginTransaction();
+        try {
+            $grievance_id = Crypt::decryptString($validatedData['id']);
+            $action_type = $validatedData['action_type'];
+            $msg = '';
+            switch ($action_type) {
+                case 'pushtocmo':
+                    $CmoSmData = CmoSmData::where('grievance_id', $grievance_id)
+                        ->where('is_processed', 2)
+                        ->first();
+                    $comment = $CmoSmData->remarks ?? '';
+                    $comment = preg_replace('/\s+/', ' ', preg_replace('/[^a-zA-Z0-9 ]/', '', str_replace(["\t", "\n", "\r"], ' ', $comment)));
+                    $comment = trim($comment);
+                    $payload = [
+                        "data" => [
+                            [
+                                "position_id" => 1,
+                                "grievance_status" => "GM014",
+                                "grievance_id" => null,
+                                "comment" => $comment,
+                                "bulk_grivance_id" => [$CmoSmData->grievance_id],
+                                "assign_comment" => null,
+                                "action_proposed" => null,
+                                "urgency_flag" => null,
+                                "addl_doc_id" => [],
+                                "atn_id" => (int) $CmoSmData->atr_type,
+                                "atn_reason_master_id" => null,
+                                "action_taken_note" => $CmoSmData->atr_desc,
+                                "contact_date" => null,
+                                "tentative_date" => null,
+                                "atr_doc_id" => [],
+                                "action" => "TA"
+                            ]
                         ]
-                    ]
-                ];
-
-                $data = $this->cmoAuthenticationService->submitNewATR($data);
-                $cmo_data = json_decode($data->getContent(), true);
-                $message = $cmo_data['message'];
-                $status = $cmo_data['status'];
-                if ($status == 200 && $message == 'Grievance status updated successfully') {
-                    $CmoSmData->redressed_status = Codemaster::getIdByCode(3305);
-                    $CmoSmData->is_processed = 3;
-                    $CmoSmData->response_back_by = Auth::id();
-                    $CmoSmData->response_back_date = date('Y-m-d H:i:s');
-                }
-                $msg = 'The Grievance Is Pushed Successfully';
-                break;
-            case 'approve':
-                $CmoSmData = CmoSmData::find($grievance_id);
-                $CmoSmData->is_processed = 2;
-                $CmoSmData->redressed_status = Codemaster::getIdByCode(3303);
-                $msg = 'The Grievance Is Approved Successfully';
-                break;
-            case 'revert':
-                $CmoSmData = CmoSmData::find($grievance_id);
-                $CmoSmData->is_processed = 0;
-                $CmoSmData->redressed_status = Codemaster::getIdByCode(3301);
-                $msg = 'The Grievance Is Reverted Successfully';
-                break;
+                    ];
+                    $response = $this->cmoAuthenticationService->submitNewATR($payload);
+                    $cmoResponse = json_decode($response->getContent(), true);
+                    if (
+                        isset($cmoResponse['status'], $cmoResponse['message']) &&
+                        $cmoResponse['status'] == 200 &&
+                        $cmoResponse['message'] == 'Grievance status updated successfully'
+                    ) {
+                        $CmoSmData->redressed_status = Codemaster::getIdByCode(3305);
+                        $CmoSmData->is_processed = 3;
+                        $CmoSmData->response_back_by = Auth::id();
+                        $CmoSmData->response_back_date = now();
+                    } else {
+                        throw new \Exception('Failed to update grievance status in CMO.');
+                    }
+                    $msg = 'The Grievance is pushed successfully.';
+                    break;
+                case 'approve':
+                    $CmoSmData = CmoSmData::find($grievance_id);
+                    $CmoSmData->is_processed = 2;
+                    $CmoSmData->redressed_status = Codemaster::getIdByCode(3303);
+                    $msg = 'The Grievance is approved successfully.';
+                    break;
+                case 'revert':
+                    $CmoSmData = CmoSmData::find($grievance_id);
+                    $CmoSmData->is_processed = 0;
+                    $CmoSmData->redressed_status = Codemaster::getIdByCode(3301);
+                    $msg = 'The Grievance is reverted successfully.';
+                    break;
+            }
+            $CmoSmData->save();
+            DB::commit();
+            session()->flash('success', $msg);
+            return redirect()->route('cmo-grievance-workflow');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Something went wrong: ' . $e->getMessage()]);
         }
-        // dd($CmoSmData);
-        $CmoSmData->save();
-        session()->flash('success', $msg);
-        return redirect()->route('cmo-grievance-workflow');
     }
 }
