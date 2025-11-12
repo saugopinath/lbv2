@@ -24,7 +24,7 @@ class PersonalDetails extends Component
     public $app_type, $app_date, $reg_no, $ds_date, $application_id;
     public $name, $mobile, $email, $dob, $age, $mar_statu;
     public $ffname, $mfname, $sfname;
-    public $caste, $cas_cer_no, $encoded, $hash, $grievance_id;
+    public $caste, $cas_cer_no, $encoded, $hash, $grievance_id, $hideAppTypeSection;
     public function updatedDob($value)
     {
         try {
