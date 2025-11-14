@@ -1,4 +1,5 @@
 @props([
+     'link' => null,
     'wireClick' => null,
     'tooltip' => null,
     'icon' => null,

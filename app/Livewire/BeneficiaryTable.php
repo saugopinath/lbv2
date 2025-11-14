@@ -6,10 +6,11 @@ use \Carbon\Carbon;
 use App\Models\Codemaster;
 use App\Models\BenRejectDetail;
 use App\Helpers\EncryptionArray;
+use App\Models\BenRejectDetails;
 use App\Models\BeneficiaryPersonal;
 use App\Exports\BeneficiariesExport;
-use App\Models\BeneficiaryCommonList;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\BeneficiaryCommonList;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\DraftBeneficiaryPersonal;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,7 +24,7 @@ class BeneficiaryTable extends DataTableComponent
     public string $reportType;
     public string $search = '';
 
-    public $district_id, $rural_urban, $blockurban, $gp_ward,$sub_div;
+    public $district_id, $rural_urban, $blockurban, $gp_ward, $sub_div;
     protected $listeners = ['filtersApplied'];
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
@@ -116,6 +117,36 @@ class BeneficiaryTable extends DataTableComponent
     }
     public function columns(): array
     {
+        if ($this->reportType == '4') {
+            $columns = [
+                Column::make("Application ID", "application_id")
+                    ->label(fn($row) => $row->application_id ?? 'N/A'),
+
+                Column::make("Applicant Name")
+                    ->label(function ($row) {
+                        return $row->personal_details[0]['full_name'] ?? 'N/A';
+                    }),
+
+                Column::make("Father's Name")
+                    ->label(function ($row) {
+                        return collect($row->relationship_details)
+                            ->firstWhere('relation_type_id', $this->relationFather)['full_name'] ?? 'N/A';
+                    }),
+
+                Column::make("Age")
+                    ->label(function ($row) {
+                        $dob = $row->personal_details[0]['dob'] ?? null;
+                        return $dob ? Carbon::parse($dob)->age : 'N/A';
+                    }),
+
+                Column::make("Mobile No.")
+                    ->label(function ($row) {
+                        return $row->personal_details[0]['mobile_no'] ?? 'N/A';
+                    }),
+            ];
+
+            return $columns;
+        }
         $columns = [
             Column::make("Application ID", "application_id")
                 ->label(fn($row) => $row->sourceable->application_id ?? 'N/A'),
@@ -187,6 +218,7 @@ class BeneficiaryTable extends DataTableComponent
         $roleVerified  = Codemaster::getIdByCode(23);
         $roleApproved  = Codemaster::getIdByCode(0);
         $roleReverted  = Codemaster::getIdByCode(21);
+        $Reverted  = Codemaster::getIdByCode(22);
 
         $next_level_role_id = null;
         $sourceableClass = null;
@@ -197,22 +229,35 @@ class BeneficiaryTable extends DataTableComponent
         } elseif ($this->reportType == "3") {
             $sourceableClass = BeneficiaryPersonal::class;
             $next_level_role_id = $roleApproved;
-        } elseif (in_array($this->reportType, ["1", "5"])) {
+        } elseif ($this->reportType == "1") {
             $sourceableClass = DraftBeneficiaryPersonal::class;
             $next_level_role_id = $roleReverted;
-        }
-        //  elseif ($this->reportType == "4") {
-        //     $query = BenRejectDetail::query();
+        } elseif ($this->reportType == "5") {
+            $sourceableClass = DraftBeneficiaryPersonal::class;
+            $extraConditions = ['is_final_submit' => true];
+             $next_level_role_id = $Reverted;
+            $query = BeneficiaryCommonList::whereHasMorph('sourceable', $sourceableClass, function ($q) use ($next_level_role_id, $extraConditions) {
+                if (!empty($extraConditions)) {
+                    foreach ($extraConditions as $field => $value) {
+                        $q->where($field, $value);
+                    }
+                }
+                $q->where('next_level_role_id', $next_level_role_id);
+            });
+        } elseif ($this->reportType == "4") {
+            $query = BenRejectDetails::query();
+            // dd($query->get());
 
-        //     return EncryptionArray::applyLocationFilter(
-        //         $query,
-        //         $this->reportType,
-        //         $this->district_id ? (int) $this->district_id : null,
-        //         $this->rural_urban ? (int) $this->rural_urban : null,
-        //         $this->blockurban ? (int) $this->blockurban : null,
-        //         $this->gp_ward ? (int) $this->gp_ward : null
-        //     );
-        // }
+            return EncryptionArray::applyLocationFilter(
+                $query,
+                $this->reportType,
+                $this->district_id ? (int) $this->district_id : null,
+                $this->rural_urban ? (int) $this->rural_urban : null,
+                $this->blockurban ? (int) $this->blockurban : null,
+                $this->gp_ward ? (int) $this->gp_ward : null,
+                $this->sub_div ? (int) $this->sub_div : null
+            );
+        }
         $query = BeneficiaryCommonList::with('sourceable.contact', 'sourceable.relationships')
             ->whereHasMorph(
                 'sourceable',

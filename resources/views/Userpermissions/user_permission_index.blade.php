@@ -3,7 +3,7 @@
 
         <div class="flex justify-between items-center ">
             <h1 class="text-xl font-bold">Assigned User's Permissions Details</h1>
-            <!-- <x-button.primary href="{{ route('assign-users-permissions') }}">Assign New Permission</x-button.primary> -->
+             {{--  <x-button.primary href="{{ route('assign-users-permissions') }}">Assign New Permission</x-button.primary>  --}}
 
         </div>
     </div>
@@ -12,6 +12,6 @@
         <livewire:user-permission-details-table />
         <livewire:user-permission.user-permission-edit-modal />
         <livewire:user-permission.bulk-user-permission-modal />
-        
+
     </div>
 </x-layouts.app>

@@ -36,7 +36,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
                 $user_id = $mapping->user_id;
                 $office = OfficeMaster::find($mapping->office_id);
                 $dist = $office->district_id;
-                $nextLevelRoleId = Codemaster::where('code', 23)->value('id');
+                $nextLevelRoleId = Codemaster::where('code', 0)->value('id');
                 $casteId = Codemaster::where('code', 171)->value('id');
                 $block_id = Block::where('district_id', $dist)->where('lgd_code', 2979)->value('id');
                 $panchayat_id = Panchayat::where('block_id', $block_id)->first()->value('id');

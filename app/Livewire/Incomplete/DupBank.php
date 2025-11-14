@@ -104,6 +104,21 @@ class DupBank extends Component
 
     public function render()
     {
-        return view('livewire.incomplete.dup-bank');
+        $user = auth()->user();
+
+        $stage = $this->stage ?? null;
+
+
+        if (!$stage) {
+            if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+                $stage = 'verifier';
+
+            } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+                $stage = 'approver';
+            }
+
+        }
+        // dd( $stage);
+        return view('livewire.incomplete.dup-bank', compact('stage'));
     }
 }

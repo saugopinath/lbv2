@@ -348,12 +348,13 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $user_id = Crypt::decryptString($select_lgd['role_id']);
         if ($this->revertrejectAction === 'revert') {
             $user = auth()->user();
-            if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+          /*  if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
                 $next_level_role_id = Codemaster::getIdByCode(22);
             }
             if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
                 $next_level_role_id = Codemaster::getIdByCode(21);
-            }
+            } */
+            $next_level_role_id = Codemaster::getIdByCode(21);
             foreach ($ids as $id) {
                 DB::beginTransaction();
                 try {

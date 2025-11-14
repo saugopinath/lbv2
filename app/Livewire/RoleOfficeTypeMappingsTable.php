@@ -59,14 +59,16 @@ class RoleOfficeTypeMappingsTable extends DataTableComponent
     {
         return RoleOfficeTypeMapping::with(['officeType', 'role']);
     }
+
     public function deleteUser($userId)
     {
         DB::transaction(function () use ($userId) {
             RoleOfficeTypeMapping::where('id', $userId)->delete();
         });
 
-        Session::flash('success', 'User deleted successfully.');
+        $this->dispatch('notify', message: 'RoleOfficeTypeMappings deleted successfully!', type: 'success');
     }
+
     public function render(): \Illuminate\View\View
     {
         return view('livewire.role-office-type-mappings-table', [

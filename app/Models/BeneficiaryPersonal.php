@@ -36,7 +36,25 @@ class BeneficiaryPersonal extends Model implements Auditable
 
     public function bank()
     {
-        return $this->hasOne(BeneficiaryBank::class, 'beneficiary_id', 'beneficiary_id');
+        return $this->hasOne(BeneficiaryBank::class, 'application_id', 'application_id');
+    }
+
+    public function faultyBeneficiaryPersonal()
+    {
+        return $this->hasOne(FaultyBeneficiaryPersonal::class, 'application_id', 'application_id');
+    }
+    public function faultyBeneficiaryBank()
+    {
+        return $this->hasOne(FaultyBeneficiaryBank::class, 'application_id', 'application_id');
+    }
+
+    public function failedPaymentDetails()
+    {
+        return $this->hasOne(FailedPaymentDetails::class, 'ben_id', 'beneficiary_id');
+    }
+    public function benPaymentDetails()
+    {
+        return $this->hasOne(BenPaymentDetails::class, 'ben_id', 'beneficiary_id');
     }
 
     public function casteName()
@@ -80,14 +98,13 @@ class BeneficiaryPersonal extends Model implements Auditable
     protected static function booted()
     {
         static::created(function ($beneficiary) {
-             $commonList = BeneficiaryCommonList::find($beneficiary->application_id);
+            $commonList = BeneficiaryCommonList::find($beneficiary->application_id);
             // dd( get_class($beneficiary));
             if ($commonList) {
                 $commonList->update([
-                'sourceable_type' => get_class($beneficiary),
-            ]);
+                    'sourceable_type' => get_class($beneficiary),
+                ]);
             }
         });
     }
-    
 }
