@@ -101,6 +101,10 @@ class SelfDeclaration extends Component
         }
         $this->dispatch('selfDec');
         $this->dispatch('hideLoader');
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'Application submitted successfully!'
+        ]);
     }
 
     public function render()

@@ -29,6 +29,7 @@ use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Http\Controllers\CmoController;
 use App\Http\Controllers\RolePermisssionManagementController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
+use App\Http\Controllers\MisReportController;
 
 // Guest Routes
 Route::get('/', fn() => view('welcome'));
@@ -188,6 +189,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
         ->middleware('permission.redirect:canUpdateBank')
         ->name('update-bank');
+
+    Route::get('/mis-report', [MisReportController::class, 'index'])->name('mis.index');
+    // Route::post('/mis-report-data', [MisReportController::class, 'getData'])->name('mis.data');
 
     // Design Pages (Dev Only – Remove in Prod)
     Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');

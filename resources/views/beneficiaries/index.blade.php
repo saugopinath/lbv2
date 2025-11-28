@@ -12,6 +12,7 @@
                         <option value="3">Approved List</option>
                         <option value="4">Rejected List</option>
                         <option value="5">Reverted List</option>
+                        <option value="6">Submitted List</option>
                     </x-form.select>
 
                     <div class="flex justify-end mt-4">

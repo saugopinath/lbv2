@@ -41,7 +41,7 @@ class BeneficiaryListController extends Controller
     {
         // Backend validation
         $validated = $request->validate([
-            'report_type' => 'required|in:1,2,3,4,5',
+            'report_type' => 'required|in:1,2,3,4,5,6',
         ], [
             'report_type.required' => 'Please select a report type before proceeding.',
             'report_type.in' => 'Invalid report type selected.',

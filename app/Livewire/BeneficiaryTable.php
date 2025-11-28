@@ -197,11 +197,13 @@ class BeneficiaryTable extends DataTableComponent
                         'tooltip' => 'View Application',
                     ])->render();
                 }
-                if (($this->reportType == '1')) {
+                elseif (($this->reportType == '1')|| ($this->reportType == '6')) {
                     return view('coulmn_button.actions', [
                         'link' => route('draftedit', Crypt::encryptString($row->sourceable->application_id)),
                         'tooltip' => 'Edit Application',
                     ])->render();
+                }else{
+                    return 'N/A';
                 }
             })
             ->html();
@@ -215,27 +217,30 @@ class BeneficiaryTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $roleVerified  = Codemaster::getIdByCode(23);
-        $roleApproved  = Codemaster::getIdByCode(0);
-        $roleReverted  = Codemaster::getIdByCode(21);
-        $Reverted  = Codemaster::getIdByCode(22);
+        $entryVerified  = Codemaster::getIdByCode(23);
+        $entryApproved  = Codemaster::getIdByCode(0);
+        $entryPartial = Codemaster::getIdByCode(21);
+        $entryFinal  = Codemaster::getIdByCode(22);
 
         $next_level_role_id = null;
         $sourceableClass = null;
 
         if ($this->reportType == "2") {
             $sourceableClass = DraftBeneficiaryPersonal::class;
-            $next_level_role_id = $roleVerified;
+            $next_level_role_id = $entryVerified;
+        } elseif ($this->reportType == "6") {
+            $sourceableClass = DraftBeneficiaryPersonal::class;
+            $next_level_role_id = $entryFinal;
         } elseif ($this->reportType == "3") {
             $sourceableClass = BeneficiaryPersonal::class;
-            $next_level_role_id = $roleApproved;
+            $next_level_role_id = $entryApproved;
         } elseif ($this->reportType == "1") {
             $sourceableClass = DraftBeneficiaryPersonal::class;
-            $next_level_role_id = $roleReverted;
+            $next_level_role_id = $entryPartial;
         } elseif ($this->reportType == "5") {
             $sourceableClass = DraftBeneficiaryPersonal::class;
             $extraConditions = ['is_final_submit' => true];
-             $next_level_role_id = $Reverted;
+             $next_level_role_id = $entryPartial;
             $query = BeneficiaryCommonList::whereHasMorph('sourceable', $sourceableClass, function ($q) use ($next_level_role_id, $extraConditions) {
                 if (!empty($extraConditions)) {
                     foreach ($extraConditions as $field => $value) {

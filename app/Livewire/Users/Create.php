@@ -98,45 +98,35 @@ class Create extends Component
     {
         $this->validate();
 
-        $c_time = now()->format('Y-m-d H:i:s');
-        $password_expires_at = now()
-            ->addDays(intval(Config::get('app.password_expire_day')))
+        // $c_time = Carbon::now()->format('Y-m-d H:i:s');
+        // $password_expires_at = Carbon::now()
+        //     ->addDays(intval(Config::get('app.password_expire_day')))
+        //     ->format('Y/m/d H:i:s');
+        $c_time = Carbon::now()->format('Y/m/d H:i:s');
+
+        $password_expires_at = Carbon::now()
+            ->addDays((int) Config::get('app.password_expire_day'))
             ->format('Y/m/d H:i:s');
 
         try {
             DB::beginTransaction();
 
-            $existingMapping = UserRoleSchemeOfficeMapping::where('role_id', $this->role)->first();
+            $user = User::create([
+                'name' => $this->name,
+                'mobile_no' => $this->mobile,
+                'email' => $this->email,
+                'password' => Hash::make($this->password),
+                'password_set_time' => $c_time,
+                'password_expires_at' => $password_expires_at,
+            ]);
 
-            $isBase = false;
-            $existingUser = null;
-
-            if ($existingMapping) {
-                $existingUser = User::where('id', $existingMapping->user_id)
-                    ->where('is_base', true)
-                    ->first();
-
-                if ($existingUser) {
-                    $isBase = false;
-                }
-            }
-
-            $user = new User();
-            $user->name = $this->name;
-            $user->mobile_no = $this->mobile;
-            $user->email = $this->email;
-            $user->password = Hash::make($this->password);
-            $user->password_set_time = $c_time;
-            $user->password_expires_at = $password_expires_at;
-            $user->is_base = $isBase;
-            $user->save();
-
-            $personal = new UserPersonal();
-            $personal->user_id = $user->id;
-            $personal->name = $user->name;
-            $personal->save();
+            UserPersonal::create([
+                'user_id' => $user->id,
+                'name' => $user->name,
+            ]);
 
             $role = Role::find($this->role);
+
             if ($role) {
                 $user->assignRole($role);
                 $permissions = $role->permissions;
@@ -146,23 +136,12 @@ class Create extends Component
                 }
             }
 
-            $mapping = new UserRoleSchemeOfficeMapping();
-            $mapping->user_id = $user->id;
-            $mapping->scheme_id = $this->selectscheme;
-            $mapping->role_id = $this->role;
-            $mapping->office_id = $this->office;
-            $mapping->save();
-
-            if ($existingUser && $existingUser->is_base) {
-                $basePermissions = ModelHasPermission::where('model_type', 'App\Models\User')
-                    ->where('model_id', $existingMapping->user_id)
-                    ->pluck('permission_id');
-
-                if ($basePermissions->isNotEmpty()) {
-                    $permissions = Permission::whereIn('id', $basePermissions)->get();
-                    $user->syncPermissions($permissions);
-                }
-            }
+            UserRoleSchemeOfficeMapping::create([
+                'user_id' => $user->id,
+                'scheme_id' => $this->selectscheme,
+                'role_id' => $this->role,
+                'office_id' => $this->office,
+            ]);
 
             DB::commit();
 
@@ -170,10 +149,10 @@ class Create extends Component
             return redirect()->route('user-managements.index');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
         }
     }
-
     public function render()
     {
         return view('livewire.users.create');

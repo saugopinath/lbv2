@@ -10,12 +10,12 @@ class UserObserver
     /**
      * Handle the User "created" event.
      */
-    // public function created(User $user): void
-    // {
-    //     //dd('inside created observer');
-    //     //
-    //      dispatch(new IndexUserElasticSearchJob($user));
-    // }
+    public function created(User $user): void
+    {
+        // dd('inside created observer');
+        //
+         dispatch(new IndexUserElasticSearchJob($user));
+    }
 
     /**
      * Handle the User "updated" event.
