@@ -7,21 +7,31 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use App\Models\User;
 use App\Models\UserRoleSchemeOfficeMapping;
+
 class ApproverPermissionSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
-       public function run(): void
+    public function run(): void
     {
         $permissions = [
-            'submit lb form',
-            'view draft list',
-            'edit draft',
+            'view permission',
+            'viewlb applications',
+            'Normal Entry Approver Allow',
+            'Normal Entry Reject Allow',
+            'Normal Entry Revert Allow',
             'view beneficiaries',
             'view reports',
-            'Normal Entry Permission',
-            'Normal Entry Allow'
+            'update bank details',
+            'search bank update',
+            'update mobile',
+            'update bank details',
+            'view approver incomplete',
+            'view users',
+            'create users',
+            'view caste modification list'
+
         ];
 
         // 1) find role
