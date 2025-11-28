@@ -4,7 +4,8 @@
             <div class="bg-white rounded-lg shadow-xl w-full sm:w-3/4 md:w-1/2 lg:w-2/5 max-h-[90vh] flex flex-col">
                 {{-- Header --}}
                 <div class="px-6 py-4 border-b">
-                    <h2 class="text-lg font-semibold">Edit Permissions of User: {{ $userName }}</h2>
+                    <h2 class="text-lg font-semibold">Edit Permissions Of {{ $roleId }}</h2>
+                    <h2 class="text-lg font-semibold">Role Name : {{ $roleName }}</h2>
                 </div>
 
                 {{-- Body (scrollable) --}}
@@ -20,13 +21,14 @@
                         </div>
                     </form>
                 </div>
+
                 {{-- Footer --}}
                 <div class="px-6 py-4 border-t flex justify-end space-x-2">
                     <button type="button" wire:click="close"
                         class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
                         Cancel
                     </button>
-                    <button wire:click="updateUserPermission"
+                    <button wire:click="updateRolePermission"
                         class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                         Update
                     </button>

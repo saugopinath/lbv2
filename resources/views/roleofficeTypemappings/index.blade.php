@@ -5,7 +5,7 @@
             <h2 class="text-xl font-semibold text-gray-700">
                 Role Office Type Mappings
             </h2>
-            @can('ccreate role mappings')
+            @can('create role mappings')
                 <a href="{{ route('role-office-type-mappings.create') }}"
                     class="bg-blue-500 text-white px-4 py-2 rounded-2xl shadow-md hover:bg-blue-600 whitespace-nowrap cursor-pointer">
                     New role office type mapping

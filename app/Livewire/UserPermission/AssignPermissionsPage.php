@@ -30,13 +30,13 @@ class AssignPermissionsPage extends Component
             $user = User::find($userId);
             if ($user) {
                 $user->syncPermissions(Permission::whereIn('id', $this->permissions)->get());
-
             }
         }
-
         $this->users = [];
         $this->permissions = [];
-        $this->dispatch('notify', ['message' => 'Permissions assigned successfully!']);
+        $this->dispatch('toastr', [
+                        'type' => 'success',
+                        'message' => 'Permissions created successfully!']);
     }
 
     public function render()
