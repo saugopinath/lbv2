@@ -10,24 +10,6 @@ use App\Models\UserRoleSchemeOfficeMapping;
 
 class OperatorPermissionSeeder extends Seeder
 {
-    // public function run(): void
-    // {
-    //     $permissions = [
-    //         'RolePermissionManagement',
-    //         'UserManagement',
-    //         'DutyAssignManagement',
-    //         'OfficeManagement',
-    //     ];
-    //     $role = Role::findByName('Super Admin');
-    //     foreach ($permissions as $perm) {
-    //         Permission::firstOrCreate(['name' => $perm]);
-    //     }
-    //     $admins = UserRoleSchemeOfficeMapping::where('role_id', $role->id)->with('user')->get()->pluck('user_id');
-
-    //     foreach ($admins as $admin) {
-    //         $admin->givePermissionTo($permissions);
-    //     }
-    // }
     public function run(): void
     {
         $permissions = [
@@ -44,7 +26,7 @@ class OperatorPermissionSeeder extends Seeder
         try {
             $role = Role::findByName('Operator');
         } catch (\Exception $e) {
-            $this->command->error('Role "Super Admin" not found. Seeder aborted.');
+            $this->command->error('Role "operator" not found. Seeder aborted.');
             return;
         }
 
@@ -56,18 +38,15 @@ class OperatorPermissionSeeder extends Seeder
                 ['guard_name' => 'web']
             );
         }
-
         // Get user_ids from mapping table for that role
         $adminUserIds = UserRoleSchemeOfficeMapping::where('role_id', $role->id)
             ->pluck('user_id')
             ->unique()
             ->values();
-
         if ($adminUserIds->isEmpty()) {
-            $this->command->info('No users found in UserRoleSchemeOfficeMapping for role "Super Admin".');
+            $this->command->info('No users found in UserRoleSchemeOfficeMapping for role "Operator".');
             return;
         }
-
         // 4) Loop users and assign permissions, printing a message for each assign (or skip)
         foreach ($adminUserIds as $userId) {
             $user = User::find($userId);
@@ -75,20 +54,17 @@ class OperatorPermissionSeeder extends Seeder
                 $this->command->warn("User id={$userId} not found (skipping).");
                 continue;
             }
-
             foreach ($permissionModels as $permission) {
                 // check if user already has this permission
                 if ($user->hasPermissionTo($permission->name)) {
                     $this->command->info("User id={$user->id} already has permission '{$permission->name}' (id={$permission->id}).");
                     continue;
                 }
-
                 // assign and print message
                 $user->givePermissionTo($permission->name);
                 $this->command->info("Assigned permission '{$permission->name}' (id={$permission->id}) to user id={$user->id}.");
             }
         }
-
         $this->command->info('GivePermissionToOperatorSeeder finished.');
     }
 }
