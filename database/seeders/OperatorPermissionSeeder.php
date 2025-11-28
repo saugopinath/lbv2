@@ -8,7 +8,7 @@ use Spatie\Permission\Models\Permission;
 use App\Models\User;
 use App\Models\UserRoleSchemeOfficeMapping;
 
-class GivePermissionToAdminSeeder extends Seeder
+class OperatorPermissionSeeder extends Seeder
 {
     // public function run(): void
     // {
@@ -31,21 +31,24 @@ class GivePermissionToAdminSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            'RolePermissionManagement',
-            'UserManagement',
-            'DutyAssignManagement',
-            'OfficeManagement',
+            'submit lb form',
+            'view draft list',
+            'edit draft',
+            'view beneficiaries',
+            'view reports',
+            'Normal Entry Permission',
+            'Normal Entry Allow'
         ];
 
         // 1) find role
         try {
-            $role = Role::findByName('Super Admin');
+            $role = Role::findByName('Operator');
         } catch (\Exception $e) {
             $this->command->error('Role "Super Admin" not found. Seeder aborted.');
             return;
         }
 
-        // 2) Ensure permission records exist and collect Permission models
+        // Ensure permission records exist and collect Permission models
         $permissionModels = [];
         foreach ($permissions as $permName) {
             $permissionModels[] = Permission::firstOrCreate(
@@ -54,7 +57,7 @@ class GivePermissionToAdminSeeder extends Seeder
             );
         }
 
-        // 3) Get user_ids from mapping table for that role
+        // Get user_ids from mapping table for that role
         $adminUserIds = UserRoleSchemeOfficeMapping::where('role_id', $role->id)
             ->pluck('user_id')
             ->unique()
@@ -86,8 +89,6 @@ class GivePermissionToAdminSeeder extends Seeder
             }
         }
 
-        $this->command->info('GivePermissionToAdminSeeder finished.');
+        $this->command->info('GivePermissionToOperatorSeeder finished.');
     }
 }
-
-
