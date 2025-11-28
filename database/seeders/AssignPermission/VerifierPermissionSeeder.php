@@ -1,16 +1,18 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\AssignPermission;
 
 use App\Models\Role;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use App\Models\User;
 use App\Models\UserRoleSchemeOfficeMapping;
-
-class OperatorPermissionSeeder extends Seeder
+class VerifierPermissionSeeder extends Seeder
 {
-    public function run(): void
+    /**
+     * Run the database seeds.
+     */
+        public function run(): void
     {
         $permissions = [
             'submit lb form',
@@ -24,9 +26,9 @@ class OperatorPermissionSeeder extends Seeder
 
         // 1) find role
         try {
-            $role = Role::findByName('Operator');
+            $role = Role::findByName('Verifier');
         } catch (\Exception $e) {
-            $this->command->error('Role "operator" not found. Seeder aborted.');
+            $this->command->error('Role "Verifier" not found. Seeder aborted.');
             return;
         }
 
@@ -44,7 +46,7 @@ class OperatorPermissionSeeder extends Seeder
             ->unique()
             ->values();
         if ($adminUserIds->isEmpty()) {
-            $this->command->info('No users found in UserRoleSchemeOfficeMapping for role "Operator".');
+            $this->command->info('No users found in UserRoleSchemeOfficeMapping for role "Verifier".');
             return;
         }
         // 4) Loop users and assign permissions, printing a message for each assign (or skip)
@@ -65,6 +67,6 @@ class OperatorPermissionSeeder extends Seeder
                 $this->command->info("Assigned permission '{$permission->name}' (id={$permission->id}) to user id={$user->id}.");
             }
         }
-        $this->command->info('GivePermissionToOperatorSeeder finished.');
+        $this->command->info('Give Permission To Verifier finished.');
     }
 }
