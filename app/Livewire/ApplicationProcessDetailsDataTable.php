@@ -265,6 +265,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         if (!empty($this->filter_condition)) {
             $query->where($this->filter_condition);
         }
+        // dd($query->toSql(), $query->getBindings());
         $this->dispatch('hideLoader');
         return $query;
     }

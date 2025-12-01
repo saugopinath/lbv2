@@ -95,6 +95,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('assign-users-permissions');
 
     Route::get('/role-permission-management', [RolePermisssionManagementController::class, 'index'])
+      ->middleware('permission.redirect:canRolePermissionManagement')
         ->name('role-permission-management');
 
     // Duty Management

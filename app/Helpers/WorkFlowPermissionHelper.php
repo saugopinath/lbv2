@@ -291,4 +291,8 @@ class WorkFlowPermissionHelper
     {
         return Auth::user()->can('EditRevertApplication');
     }
+     public static function canRolePermissionManagement(): bool
+    {
+        return Auth::user()->can('RolePermissionManagement');
+    }
 }

@@ -9,6 +9,7 @@ use App\Helpers\EncryptionArray;
 use App\Models\BenRejectDetails;
 use App\Models\BeneficiaryPersonal;
 use App\Exports\BeneficiariesExport;
+use App\Helpers\CheckAuthHelper;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\BeneficiaryCommonList;
 use Illuminate\Support\Facades\Crypt;
@@ -187,7 +188,7 @@ class BeneficiaryTable extends DataTableComponent
 
         $columns[] = Column::make("Actions")
             ->label(function ($row) {
-                if (($this->reportType == '3') || ($this->reportType == '2') || ($this->reportType == '5')) {
+                if (($this->reportType == '3') || ($this->reportType == '2')) {
                     return view('coulmn_button.view', [
                         'link' => route('custom_application.view', [
                             // 'application_id' => Crypt::encrypt($row->application_id),
@@ -197,7 +198,7 @@ class BeneficiaryTable extends DataTableComponent
                         'tooltip' => 'View Application',
                     ])->render();
                 }
-                elseif (($this->reportType == '1')|| ($this->reportType == '6')) {
+                elseif ((($this->reportType == '1') || ($this->reportType == '6') || ($this->reportType == '5')) &&(CheckAuthHelper::isCommonOperator())) {
                     return view('coulmn_button.actions', [
                         'link' => route('draftedit', Crypt::encryptString($row->sourceable->application_id)),
                         'tooltip' => 'Edit Application',
@@ -276,58 +277,6 @@ class BeneficiaryTable extends DataTableComponent
         if (!empty($this->filter_condition)) {
             $query->where($this->filter_condition);
         }
-
-        // if (!empty($this->filter_condition['district_id'])) {
-        //     $districtId = $this->filter_condition['district_id'];
-
-        //     $query->whereHasMorph(
-        //         'sourceable',
-        //         $sourceableClass,
-        //         function ($q) use ($districtId) {
-        //             $q->whereHas('contact', function ($contactQuery) use ($districtId) {
-        //                 $contactQuery->where('district_id', $districtId);
-        //             });
-        //         }
-        //     );
-        // }
-
-        // if (!empty($this->filter_condition['block_id'])) {
-        //     $blockId = $this->filter_condition['block_id'];
-
-        //     $query->whereHasMorph(
-        //         'sourceable',
-        //         $sourceableClass,
-        //         function ($q) use ($blockId) {
-        //             $q->whereHas('contact', function ($contactQuery) use ($blockId) {
-        //                 $contactQuery->where('block_id', $blockId);
-        //             });
-        //         }
-        //     );
-        // }
-
-        // if (!empty($this->filter_condition['subdivision_id'])) {
-        //     $subdivisionId = $this->filter_condition['subdivision_id'];
-
-        //     $query->whereHasMorph(
-        //         'sourceable',
-        //         $sourceableClass,
-        //         function ($q) use ($subdivisionId) {
-        //             $q->whereHas('contact.municipality', function ($municipalityQuery) use ($subdivisionId) {
-        //                 $municipalityQuery->where('subdivision_id', $subdivisionId);
-        //             });
-        //         }
-        //     );
-        // }
-
-        // dd($this->gp_ward);
-        // $query = EncryptionArray::applyLocationFilter(
-        //     $query,
-        //     $this->reportType,
-        //     $this->district_id ? (int) $this->district_id : null,
-        //     $this->rural_urban ? (int) $this->rural_urban : null,
-        //     $this->blockurban ? (int) $this->blockurban : null,
-        //     $this->gp_ward ? (int) $this->gp_ward : null
-        // );
 
 
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {

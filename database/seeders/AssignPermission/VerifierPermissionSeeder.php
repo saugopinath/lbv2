@@ -15,13 +15,14 @@ class VerifierPermissionSeeder extends Seeder
         public function run(): void
     {
         $permissions = [
-            'Normal Entry Verification Allow', 
-            'Normal Entry Reject Allow', 
+            'Normal Entry Verification Allow',
+            'Normal Entry Reject Allow',
             'Normal Entry Revert Allow',
-            'view beneficiaries', 
+            'view beneficiaries',
             'view reports',
             'view verifier incomplete',
-            'view caste modification list'
+            'view caste modification list',
+            'view lb applications'
 
         ];
 
