@@ -8,7 +8,7 @@
     <div class="bg-white shadow-xl rounded-2xl ">
 
          <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
-            <livewire:mis-report-table-table />
+           <livewire:mis-report-table />
         </div>
     </div>
 </x-layouts.app>

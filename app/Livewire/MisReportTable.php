@@ -2,21 +2,19 @@
 
 namespace App\Livewire;
 
-use \Carbon\Carbon;
+use Carbon\Carbon;
 use App\Models\Codemaster;
-use App\Models\BenRejectDetail;
 use App\Helpers\EncryptionArray;
 use App\Models\BenRejectDetails;
 use App\Models\BeneficiaryPersonal;
-use App\Exports\BeneficiariesExport;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Models\BeneficiaryCommonList;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\DraftBeneficiaryPersonal;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\Views\Column;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\BeneficiariesExport;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Filters\TextFilter;
+use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class MisReportTable extends DataTableComponent
 {
@@ -28,8 +26,8 @@ class MisReportTable extends DataTableComponent
     public $district_id, $rural_urban, $blockurban, $gp_ward;
     protected $listeners = ['filtersApplied'];
 
-    public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
     public array $filter_condition = [];
+
     public function mount(): void
     {
         $select_lgd = session('lgd_session');
@@ -46,6 +44,7 @@ class MisReportTable extends DataTableComponent
             $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
+
     public function filtersApplied($filters)
     {
         $this->district_id = $filters['district_id'];
@@ -53,15 +52,15 @@ class MisReportTable extends DataTableComponent
         $this->blockurban = $filters['blockurban'];
         $this->gp_ward = $filters['gp_ward'];
     }
+
     public function configure(): void
     {
         $this->setPrimaryKey('sourceable_id')
             ->setPaginationEnabled()
-            ->setPerPageAccepted([5,10])
+            ->setPerPageAccepted([5, 10])
             ->setPerPage($this->perPage)
             ->setPerPageVisibilityEnabled()
-            ->setSearchDisabled()
-            ->setSearchLive()
+            ->setSearchdisabled()
             ->setBulkActionsEnabled();
 
         $this->setHideBulkActionsWhenEmptyEnabled();
@@ -69,7 +68,6 @@ class MisReportTable extends DataTableComponent
         $this->setConfigurableAreas([
             'toolbar-left-start' => 'livewire.export_excel_buttons',
         ]);
-
 
         $this->setTableWrapperAttributes([
             'class' => 'overflow-x-auto overflow-y-auto max-h-[500px] border rounded-lg shadow-sm',
@@ -104,55 +102,78 @@ class MisReportTable extends DataTableComponent
         $this->setSearch($value);
         $this->resetPage();
     }
+
     public function updatedPerPage($value): void
     {
-        $this->perPage = (int)$value;
-        $this->setPerPage((int)$value);
+        $this->perPage = (int) $value;
+        $this->setPerPage((int) $value);
         $this->resetPage();
     }
 
     public function columns(): array
     {
+        $counts = $this->getCount();
+
         return [
-            Column::make("Application ID", "application_id")
-                ->label(fn($row) => $row->sourceable->application_id ?? 'N/A')
-                ->sortable()
-                ->searchable(function ($query, $searchTerm) {
-                    $query->whereHas('sourceable', function ($q) use ($searchTerm) {
-                        $q->where('application_id', 'ILIKE', "%{$searchTerm}%");
-                    });
-                }),
+            Column::make('Total Verified')
+                ->label(
+                    fn() => '<span class="font-semibold text-green-700">'
+                        . $counts['total_verified'] .
+                        '</span>'
+                )
+                ->html(),
 
-
-            Column::make("Beneficiary ID", "beneficiary_id")
-                ->label(fn($row) => $row->sourceable->beneficiary_id ?? 'N/A'),
-
-            Column::make("Applicant Name", "full_name")
-                ->label(fn($row) => $row->sourceable->full_name ?? 'N/A'),
-
-            Column::make("Mobile No", "mobile_no")
-                ->label(fn($row) => $row->sourceable->mobile_no ?? 'N/A'),
-
-            Column::make("Bank AC No", "bank_account_number")
-                ->label(fn($row) => $row->sourceable->bank->bank_account_number ?? 'N/A'),
-
-            Column::make("IFSC", "ifsc")
-                ->label(fn($row) => $row->sourceable->bank->ifsc ?? 'N/A'),
-
-            Column::make("Branch", "branch")
-                ->label(fn($row) => $row->sourceable->bank->ifscMaster->branch ?? 'N/A'),
-
-            Column::make("Bank Name", "bank_name")
-                ->label(fn($row) => $row->sourceable->bank->ifscMaster->bankmaster->name ?? 'N/A'),
-
-            Column::make("Type")
-                ->label(fn($row) => class_basename($row->sourceable_type)),
+            Column::make('Total Approved')
+                ->label(
+                    fn() => '<span class="font-semibold text-blue-700">'
+                        . $counts['total_approved'] .
+                        '</span>'
+                )
+                ->html(),
         ];
     }
+
+    public function getCount()
+    {
+        $entryVerified = Codemaster::getIdByCode(23);
+        $entryApproved = Codemaster::getIdByCode(0);
+
+        $filter = $this->filter_condition;
+
+        // Total Verified (DraftBeneficiaryPersonal)
+        $total_verified = BeneficiaryCommonList::whereHasMorph(
+            'sourceable',
+            DraftBeneficiaryPersonal::class,
+            fn($q) => $q->where('next_level_role_id', $entryVerified)
+        )
+            ->when(!empty($filter), fn($q) => $q->where($filter))
+            ->count();
+
+        // Total Approved (BeneficiaryPersonal)
+        $total_approved = BeneficiaryCommonList::whereHasMorph(
+            'sourceable',
+            BeneficiaryPersonal::class,
+            fn($q) => $q->where('next_level_role_id', $entryApproved)
+        )
+            ->when(!empty($filter), fn($q) => $q->where($filter))
+            ->count();
+
+        return [
+            'total_verified' => $total_verified,
+            'total_approved' => $total_approved,
+        ];
+    }
+
+
+    /** MAIN QUERY */
     public function builder(): Builder
     {
 
-        $query = BeneficiaryCommonList::with('sourceable.contact', 'sourceable.bank');
+        $query = BeneficiaryCommonList::with([
+            'sourceable',
+            'sourceable.contact',
+            'sourceable.relationships'
+        ]);
 
         return $query;
     }
