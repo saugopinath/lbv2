@@ -8,26 +8,23 @@ use Spatie\Permission\Models\Permission;
 use App\Models\User;
 use App\Models\UserRoleSchemeOfficeMapping;
 
-class OperatorPermissionSeeder extends Seeder
+class HODPermissionSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
         $permissions = [
-            'submit lb form',
-            'view draft list',
-            'edit draft',
-            'view beneficiaries',
-            'view reports',
-            'Normal Entry Permission',
-            'Normal Entry Allow',
-            'cmo_workflow'
+            'cmo_workflow',
+            'cmo_workflow_mis'
         ];
 
         // 1) find role
         try {
-            $role = Role::findByName('Operator');
+            $role = Role::findByName('HOD');
         } catch (\Exception $e) {
-            $this->command->error('Role "operator" not found. Seeder aborted.');
+            $this->command->error('Role "HOD" not found. Seeder aborted.');
             return;
         }
 
@@ -45,7 +42,7 @@ class OperatorPermissionSeeder extends Seeder
             ->unique()
             ->values();
         if ($adminUserIds->isEmpty()) {
-            $this->command->info('No users found in UserRoleSchemeOfficeMapping for role "Operator".');
+            $this->command->info('No users found in UserRoleSchemeOfficeMapping for role "HOD".');
             return;
         }
         // 4) Loop users and assign permissions, printing a message for each assign (or skip)
@@ -66,6 +63,6 @@ class OperatorPermissionSeeder extends Seeder
                 $this->command->info("Assigned permission '{$permission->name}' (id={$permission->id}) to user id={$user->id}.");
             }
         }
-        $this->command->info('GivePermissionToOperatorSeeder finished.');
+        $this->command->info('Give Permission To HOD  finished.');
     }
 }

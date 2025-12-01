@@ -25,8 +25,7 @@ class GivePermissionToAdminSeeder extends Seeder
             'create users',
             'view user permission',
             'view permission',
-
-            
+            'cmo_data_fetch'
         ];
         // 1) find role
         try {
@@ -80,5 +79,3 @@ class GivePermissionToAdminSeeder extends Seeder
         $this->command->info('GivePermissionToAdminSeeder finished.');
     }
 }
-
-

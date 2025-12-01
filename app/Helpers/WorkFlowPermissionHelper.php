@@ -291,4 +291,16 @@ class WorkFlowPermissionHelper
     {
         return Auth::user()->can('EditRevertApplication');
     }
+    public static function canCMOWorkflow(): bool
+    {
+        return Auth::user()->can('cmo_workflow');
+    }
+    public static function canCMOWorkflowmis(): bool
+    {
+        return Auth::user()->can('cmo_workflow_mis');
+    }
+    public static function canCMODatafetch(): bool
+    {
+        return Auth::user()->can('cmo_data_fetch');
+    }
 }

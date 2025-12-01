@@ -30,8 +30,9 @@ class ApproverPermissionSeeder extends Seeder
             'view approver incomplete',
             'view users',
             'create users',
-            'view caste modification list'
-
+            'view caste modification list',
+            'cmo_workflow',
+            'cmo_workflow_mis'
         ];
 
         // 1) find role
