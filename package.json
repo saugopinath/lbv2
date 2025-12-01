@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.11",
+        "sweetalert2": "^11.26.3",
         "toastr": "^2.1.4"
     }
 }
