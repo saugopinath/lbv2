@@ -351,7 +351,7 @@
                                                 d="M21.446 7.06899C20.6342 5.0083 18.9917 3.36577 16.931 2.55397C15.3895 1.94668 14 3.34315 14 5V9C14 9.55229 14.4477 10 15 10H19C20.6569 10 22.0533 8.61054 21.446 7.06899Z"
                                                 fill="currentColor"></path>
                                         </svg>
-                                        <span x-show="sidebar" class="truncate">Report List</span>
+                                        <span x-show="sidebar" class="truncate">Caste Report List</span>
                                     </a>
                                 </li>
                             @endcan
@@ -361,7 +361,7 @@
             @endcanany
         </div>
 
-        <!-- @canany(['view permission', 'view user permission']) -->
+        @canany(['view permission', 'view user permission'])
             <div>
                 <button @click="activeMenu === 'CreatePermission' ? activeMenu = null : activeMenu = 'CreatePermission'"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -382,10 +382,9 @@
                     </svg>
                 </button>
                 <!-- Sub-menu -->
-
                 <div id="list_menu" x-show="activeMenu === 'CreatePermission'" x-collapse x-transition class="pl-4">
                     <ul>
-                        <!-- @can('view permission') -->
+                        @can('view permission')
                             <li>
                                 <a href="{{ route('permission') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
@@ -400,8 +399,8 @@
                                     </svg><span x-show="sidebar" class="truncate" svg="truncate">Create
                                         Permission</span></a>
                             </li>
-                        <!-- @endcan -->
-                        <!-- @can('view user permission') -->
+                        @endcan
+                        @can('view user permission')
                             <li>
                                 <a href="{{ route('user-permission') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
@@ -413,11 +412,12 @@
                                         <path
                                             d="M21.446 7.06899C20.6342 5.0083 18.9917 3.36577 16.931 2.55397C15.3895 1.94668 14 3.34315 14 5V9C14 9.55229 14.4477 10 15 10H19C20.6569 10 22.0533 8.61054 21.446 7.06899Z"
                                             fill="currentColor"></path>
-                                    </svg><span x-show="sidebar" class="truncate" svg="truncate">Assign
-                                        Permission</span></a>
+                                    </svg><span x-show="sidebar" class="truncate" svg="truncate">Assign Permission</span>
+                                </a>
                             </li>
-                        <!-- @endcan -->
-                        <li>
+                        @endcan
+                        @can('RolePermissionManagement')
+                            <li>
                                 <a href="{{ route('role-permission-management') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -428,12 +428,14 @@
                                         <path
                                             d="M21.446 7.06899C20.6342 5.0083 18.9917 3.36577 16.931 2.55397C15.3895 1.94668 14 3.34315 14 5V9C14 9.55229 14.4477 10 15 10H19C20.6569 10 22.0533 8.61054 21.446 7.06899Z"
                                             fill="currentColor"></path>
-                                    </svg><span x-show="sidebar" class="truncate" svg="truncate">Role Permission Management</span></a>
+                                    </svg><span x-show="sidebar" class="truncate" svg="truncate">Role Permission Management</span>
+                                </a>
                             </li>
+                        @endcan
                     </ul>
                 </div>
             </div>
-        <!-- @endcanany -->
+        @endcanany
 
         <!-- Menu Item: Reports -->
         <!-- <div>
