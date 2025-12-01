@@ -22,7 +22,8 @@ class VerifierPermissionSeeder extends Seeder
             'view reports',
             'view verifier incomplete',
             'view caste modification list',
-            'cmo_workflow'
+            'cmo_workflow',
+            'cmogrievancefind'
         ];
 
         // 1) find role

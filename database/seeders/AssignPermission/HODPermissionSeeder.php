@@ -17,7 +17,8 @@ class HODPermissionSeeder extends Seeder
     {
         $permissions = [
             'cmo_workflow',
-            'cmo_workflow_mis'
+            'cmo_workflow_mis',
+            'cmogrievancefind'
         ];
 
         // 1) find role

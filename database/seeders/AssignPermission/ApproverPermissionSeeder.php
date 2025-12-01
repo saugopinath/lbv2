@@ -32,7 +32,8 @@ class ApproverPermissionSeeder extends Seeder
             'create users',
             'view caste modification list',
             'cmo_workflow',
-            'cmo_workflow_mis'
+            'cmo_workflow_mis',
+            'cmogrievancefind'
         ];
 
         // 1) find role

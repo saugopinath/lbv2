@@ -303,4 +303,8 @@ class WorkFlowPermissionHelper
     {
         return Auth::user()->can('cmo_data_fetch');
     }
+     public static function canCMOGrievanceFind(): bool
+    {
+        return Auth::user()->can('cmogrievancefind');
+    }
 }

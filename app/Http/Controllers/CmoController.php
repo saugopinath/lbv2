@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CheckAuthHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
@@ -136,6 +137,7 @@ class CmoController extends Controller
 
     public function cmogrievancefind(Request $request)
     {
+        if (WorkFlowPermissionHelper::canCMOGrievanceFind()) {
         $grievance_id = Crypt::decryptString($request->id);
         $record = CmoSmData::find($grievance_id);
         $header = 'Find CMO Grievance Beneficiary';
@@ -171,6 +173,9 @@ class CmoController extends Controller
             $isaddbutton = 2;
         }
         return view('cmo.cmo_details', compact('header', 'record', 'atrs', 'isaddvisible', 'isaddbutton', 'atr', 'applicant_details'));
+        }
+        $header = 'Oops! You do not have permission to update mobile.';
+        return view('CommonRestictedpage.index', compact('header'));
     }
 
     public function cmodetailsaction(Request $request)
