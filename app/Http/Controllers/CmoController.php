@@ -22,10 +22,20 @@ use Illuminate\Support\Facades\Validator;
 class CmoController extends Controller
 {
     protected $cmoAuthenticationService;
+      protected $isAuthorized = false;
 
     public function __construct(CmoAuthenticationInterface $cmoAuthenticationService)
     {
         $this->cmoAuthenticationService = $cmoAuthenticationService;
+        // dd('ok');
+         if (CheckAuthHelper::isCommonCMOController()) {
+            // dd('ok1');
+            $this->isAuthorized = true;
+        } else {
+            redirect()->route('dashboard')
+                ->with('error', 'Oops! You are not authorized to perform this action.')
+                ->send();
+        }
     }
 
     public function pullnewcmo(Request $request)
