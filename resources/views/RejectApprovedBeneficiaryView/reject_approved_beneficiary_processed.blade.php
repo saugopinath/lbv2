@@ -39,21 +39,21 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <x-form.select name="reject_reason" id="reject_reason" label="Reject Reason" required>
-                    <option value="">Select</option>
+                    <option value="">--Select Reason--</option>
                     @foreach ($rejectRevertCause as $cause)
                     <option value="{{ $cause['id'] }}">{{ $cause['name'] }}</option>
                     @endforeach
                 </x-form.select>
-                <x-form.input type="textarea" wire:model.defer="remark" placeholder="Enter remark" id="remark"
+                <x-form.input type="textarea" name="remark" placeholder="Enter remark" id="remark"
                     name="remark"
                     label="Remark" required />
 
-                <x-form.select name="doctype" id="doctype" required>
-                    <option value="">Select</option>
+                <x-form.select name="doctype" id="doctype" label="Document Type" required>
+                    <option value="">--Select Document--</option>
                     @foreach ($doctypes as $doctype)
                     <option value="{{ $doctype['id'] }}">{{ $doctype['name'] }}</option>
                     @endforeach
-                </x-form.select> 
+                </x-form.select>
 
 
             </div>

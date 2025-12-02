@@ -18,6 +18,8 @@ class CasteModificationAction extends Component
     public $applicationId;
     public $roleId;
     public $action;
+    public $remark;
+
     public $showModal = false;
     public $availableActions = [];
     public $heading = '';
@@ -88,7 +90,7 @@ class CasteModificationAction extends Component
 
     public function submit()
     {
-
+// dd($this->remark);
         $this->validate();
 
         $casteModification = CasteModificationInfo::where('application_id', $this->applicationId)
@@ -134,7 +136,13 @@ class CasteModificationAction extends Component
             $acceptReject->model_name             = class_basename(static::class) . '@' . __FUNCTION__;
             $acceptReject->op_type                = $opTypeMapping[$this->action];
             $acceptReject->revert_reason_cause_id = null;
-            $acceptReject->revert_reason_remarks  = null;
+
+            if ($this->action == '2204') {
+                $acceptReject->revert_reason_remarks = $this->remark;
+            } else {
+                $acceptReject->revert_reason_remarks = null;
+            }
+
             $acceptReject->parent_id              = $previousId;
             $acceptSaved = $acceptReject->save();
             // dump($acceptSaved);

@@ -73,7 +73,7 @@ class CasteModificationController extends Controller
 
     public function editview(Request $request)
     {
-        if (WorkFlowPermissionHelper::canEditCaste()) {
+        // if (WorkFlowPermissionHelper::canEditCaste()) {
         // if (Auth::user()->can('edit caste')) {
             $header = 'Caste Modification Details';
             $application_id = Crypt::decryptString($request->application_id);
@@ -112,15 +112,15 @@ class CasteModificationController extends Controller
                 'oldData',
                 'reportType'
             ));
-        }
+        // }
 
-        $header = 'Oops! You do not have permission to edit caste.';
-        return view('CommonRestictedpage.index', compact('header'));
+        // $header = 'Oops! You do not have permission to edit caste.';
+        // return view('CommonRestictedpage.index', compact('header'));
     }
 
     public function updateCaste(Request $request)
     {
-        if (WorkFlowPermissionHelper::canUpdateCaste()) {
+        // if (WorkFlowPermissionHelper::canUpdateCaste()) {
         // if (Auth::user()->can('update caste')) {
             if (!Auth::check()) {
                 return redirect()->route('login')->with('error', 'Please login first!');
@@ -221,10 +221,10 @@ class CasteModificationController extends Controller
                 DB::rollBack();
                 return back()->with('error', 'Something went wrong: ' . $e->getMessage());
             }
-        }
+        // }
 
-        $header = 'Oops! You do not have permission to update caste.';
-        return view('CommonRestictedpage.index', compact('header'));
+        // $header = 'Oops! You do not have permission to update caste.';
+        // return view('CommonRestictedpage.index', compact('header'));
     }
 
     /** -------------------- VERIFIER / APPROVER ACCESS -------------------- **/
@@ -241,7 +241,7 @@ class CasteModificationController extends Controller
 
     public function viewAppDetails(Request $request)
     {
-        if (WorkFlowPermissionHelper::canBeneficiaryDetails()) {
+        // if (WorkFlowPermissionHelper::canBeneficiaryDetails()) {
         // if (Auth::user()->can('view beneficiary details')) {
             $applicant_id = $request->application_id;
             $application_id = Crypt::decrypt($applicant_id);
@@ -268,9 +268,9 @@ class CasteModificationController extends Controller
                 'newCasteNumber',
                 'reportType'
             ));
-        }
+        // }
 
-        $header = 'Oops! You do not have permission to view beneficiary details.';
-        return view('CommonRestictedpage.index', compact('header'));
+        // $header = 'Oops! You do not have permission to view beneficiary details.';
+        // return view('CommonRestictedpage.index', compact('header'));
     }
 }
