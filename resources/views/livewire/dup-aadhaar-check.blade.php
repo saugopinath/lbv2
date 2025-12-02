@@ -3,7 +3,7 @@
         errorMessage: '',
         successMessage: '',
         disableCheckBtn: false,
-
+        findDupdicateBtn: false,
         async validateAndSubmit() {
             this.errorMessage = '';
             this.successMessage = '';
@@ -40,8 +40,15 @@
                 this.successMessage = result.message;
                 this.disableCheckBtn = true;
             }
-
-        }
+            if(result.status === 'duplicate') {
+                this.findDupdicateBtn = true;
+            }
+        },
+        async FindDuplicate() {
+        let val = this.aadhaar.replace(/\s+/g, '');
+ $wire.aadhaar = val;
+            let result = await $wire.FindDuplicate();
+            }
     }" x-init="$watch('aadhaar', value => { disableCheckBtn = false; })"
     class="grid gap-6 md:grid-cols-3 mb-6 p-4 border-b border-gray-200 dark:border-gray-700">
 
@@ -65,7 +72,11 @@
     <template x-if="errorMessage">
         <div class="mt-8 text-red-600 text-sm" x-text="errorMessage"></div>
     </template>
-
+    <template x-if="findDupdicateBtn">
+        <x-button.gradient-button type="button" @click="FindDuplicate()">
+            <span>Find Duplicate</span>
+        </x-button.gradient-button>
+    </template>
     <!-- Success -->
     <template x-if="successMessage">
         <div class="mt-8 text-green-600 text-sm" x-text="successMessage"></div>
@@ -74,5 +85,5 @@
 
 <!-- Include Verhoeff JS only on this page -->
 @push('scripts')
-    <script src="{{ asset('js/adhar-verhoeff.js') }}"></script>
+<script src="{{ asset('js/adhar-verhoeff.js') }}"></script>
 @endpush

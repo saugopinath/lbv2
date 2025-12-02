@@ -58,6 +58,13 @@ class DupAadhaarCheck extends Component
         $this->dispatch('hideLoader');
         return ['status' => 'success', 'message' => '✅ Aadhaar is valid and not duplicate.'];
     }
+
+    public function FindDuplicate()
+    {
+        $this->aadhaar = trim($this->aadhaar);
+        dd( $this->aadhaar);
+    }
+
     public function render()
     {
         return view('livewire.dup-aadhaar-check');
