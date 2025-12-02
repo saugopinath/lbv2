@@ -65,10 +65,12 @@ class DupAadhaarCheck extends Component
     }
     public function DsMark()
     {
-        // Session::put('dup_aadhaar', Crypt::encrypt(trim($this->aadhaar)));
+        Session::put('dup_aadhaar', Crypt::encrypt(trim($this->aadhaar)));
         // Session::put('dup_bank', '123456');
         // dd(Session::get('dup_aadhaar'), Session::get('dup_bank'));
-        dd('DsMark');
+        return [
+            'status' => true
+        ];
     }
     public function render()
     {

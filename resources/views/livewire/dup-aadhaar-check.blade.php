@@ -2,9 +2,10 @@
         aadhaar: '',
         errorMessage: '',
         successMessage: '',
-        disableCheckBtn: '',
-        findDupdicateBtn: '',
-        dsMark: '',
+        disableCheckBtn: false,
+        findDupdicateBtn: false,
+        dsMark: false,
+        dsData: false,
         async validateAndSubmit() {
             this.errorMessage = '';
             this.successMessage = '';
@@ -41,14 +42,16 @@
             let val = this.aadhaar.replace(/\s+/g, '');
             $wire.aadhaar = val;
             let result = await $wire.DsMark();
+            this.dsData = result.status;
         }
     }"
     x-init="$watch('aadhaar', value => { 
-        disableCheckBtn = false;
         errorMessage = '';
         successMessage = '';
+        disableCheckBtn = false;
         findDupdicateBtn = false;
         dsMark = false;
+        dsData = false;
         Livewire.dispatch('aadhaarCheckedReset');
     })"
     class="grid gap-6 md:grid-cols-3 mb-6 p-4 border-b border-gray-200 dark:border-gray-700">
@@ -77,7 +80,9 @@
             <span>Ds Mark</span>
         </x-button.gradient-button>
     </template>
-    <!-- Success -->
+    <div x-show="dsData" x-transition class="mt-8 text-green-600 text-sm">
+        HI
+    </div>
     <template x-if="successMessage">
         <div class="mt-8 text-green-600 text-sm" x-text="successMessage"></div>
     </template>
