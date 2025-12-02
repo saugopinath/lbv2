@@ -31,7 +31,12 @@ class ApproverPermissionSeeder extends Seeder
             'view users',
             'create users',
             'view caste modification list',
-            'view lb applications'
+            'view lb applications',
+            'view beneficiary details',
+            'TakeActionForCaste',
+            'ApproveCasteApplication',
+            'RevertCasteApplication',
+            'RejectApprovedBeneficiary',
 
         ];
 

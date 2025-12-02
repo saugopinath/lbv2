@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RejectApprovedBeneficiaryController;
 use App\Livewire\ApplicationView;
 use App\Livewire\IncompletTypePage;
 use Illuminate\Support\Facades\Route;
@@ -211,3 +212,10 @@ Route::controller(CmoController::class)->group(function () {
     Route::post('/map-applicant', 'mapapplicant')->name('map-applicant');
     Route::post('/cmo-add-actions', 'addactions')->name('cmo-add-actions');
 });
+//reject approved beneficiary
+Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
+    Route::get('/reject-approved-beneficiary',  'index')->name('reject-approved-beneficiary');
+    Route::get('/reject-approved-beneficiary/de-activate', 'editview')->name('reject-approved-beneficiary.de-activate');
+    Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->name('beneficiary.deActivebeneficiary');
+});
+

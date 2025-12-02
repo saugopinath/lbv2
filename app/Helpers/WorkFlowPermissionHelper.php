@@ -295,4 +295,8 @@ class WorkFlowPermissionHelper
     {
         return Auth::user()->can('RolePermissionManagement');
     }
+    public static function canRejectApprovedBeneficiary(): bool
+    {
+        return Auth::user()->can('RejectApprovedBeneficiary');
+    }
 }
