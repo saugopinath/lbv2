@@ -56,11 +56,18 @@ class DupAadhaarCheck extends Component
             'message' => "✅ Aadhaar is valid and not duplicate."
         ];
     }
-    public function FindDuplicate()
-    {
-        Session::put('dup_aadhaar', Crypt::encrypt(trim($this->aadhaar)));
+    public function FindDuplicate() {
+        // Session::put('dup_aadhaar', Crypt::encrypt(trim($this->aadhaar)));
         // Session::put('dup_bank', '123456');
-        // dd(Session::get('dup_aadhaar'),Session::get('dup_bank'));
+        // dd(Session::get('dup_aadhaar'), Session::get('dup_bank'));
+        dd('FindDuplicate');
+    }
+    public function DsMark()
+    {
+        // Session::put('dup_aadhaar', Crypt::encrypt(trim($this->aadhaar)));
+        // Session::put('dup_bank', '123456');
+        // dd(Session::get('dup_aadhaar'), Session::get('dup_bank'));
+        dd('DsMark');
     }
     public function render()
     {

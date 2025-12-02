@@ -36,6 +36,11 @@
             let val = this.aadhaar.replace(/\s+/g, '');
             $wire.aadhaar = val;
             let result = await $wire.FindDuplicate();
+        },
+        async DsMark() {
+            let val = this.aadhaar.replace(/\s+/g, '');
+            $wire.aadhaar = val;
+            let result = await $wire.DsMark();
         }
     }"
     x-init="$watch('aadhaar', value => { 
@@ -43,7 +48,7 @@
         errorMessage = '';
         successMessage = '';
         findDupdicateBtn = false;
-        dsMark = '';
+        dsMark = false;
         Livewire.dispatch('aadhaarCheckedReset');
     })"
     class="grid gap-6 md:grid-cols-3 mb-6 p-4 border-b border-gray-200 dark:border-gray-700">
@@ -68,7 +73,7 @@
         </x-button.gradient-button>
     </template>
     <template x-if="dsMark">
-        <x-button.gradient-button type="button">
+        <x-button.gradient-button type="button" @click="DsMark()">
             <span>Ds Mark</span>
         </x-button.gradient-button>
     </template>
