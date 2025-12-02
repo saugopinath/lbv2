@@ -216,86 +216,195 @@ class BeneficiaryTable extends DataTableComponent
         return $columns;
     }
 
-    public function builder(): Builder
-    {
-        $entryVerified  = Codemaster::getIdByCode(23);
-        $entryApproved  = Codemaster::getIdByCode(0);
-        $entryPartial = Codemaster::getIdByCode(21);
-        $entryFinal  = Codemaster::getIdByCode(22);
+    // public function builder(): Builder
+    // {
+    //     $entryVerified  = Codemaster::getIdByCode(23);
+    //     $entryApproved  = Codemaster::getIdByCode(0);
+    //     $entryPartial = Codemaster::getIdByCode(21);
+    //     $entryFinal  = Codemaster::getIdByCode(22);
 
-        $next_level_role_id = null;
-        $sourceableClass = null;
+    //     $next_level_role_id = null;
+    //     $sourceableClass = null;
 
-        if ($this->reportType == "2") {
-            $sourceableClass = DraftBeneficiaryPersonal::class;
-            $next_level_role_id = $entryVerified;
-        } elseif ($this->reportType == "6") {
-            $sourceableClass = DraftBeneficiaryPersonal::class;
-            $next_level_role_id = $entryFinal;
-        } elseif ($this->reportType == "3") {
-            $sourceableClass = BeneficiaryPersonal::class;
-            $next_level_role_id = $entryApproved;
-        } elseif ($this->reportType == "1") {
-            $sourceableClass = DraftBeneficiaryPersonal::class;
-            $next_level_role_id = $entryPartial;
-        } elseif ($this->reportType == "5") {
-            $sourceableClass = DraftBeneficiaryPersonal::class;
-            $extraConditions = ['is_final_submit' => true];
-             $next_level_role_id = $entryPartial;
-            $query = BeneficiaryCommonList::whereHasMorph('sourceable', $sourceableClass, function ($q) use ($next_level_role_id, $extraConditions) {
-                if (!empty($extraConditions)) {
-                    foreach ($extraConditions as $field => $value) {
-                        $q->where($field, $value);
-                    }
-                }
-                $q->where('next_level_role_id', $next_level_role_id);
-            });
-        } elseif ($this->reportType == "4") {
-            $query = BenRejectDetails::query();
-            // dd($query->get());
+    //     if ($this->reportType == "2") {
+    //         $sourceableClass = DraftBeneficiaryPersonal::class;
+    //         $next_level_role_id = $entryVerified;
+    //     } elseif ($this->reportType == "6") {
+    //         $sourceableClass = DraftBeneficiaryPersonal::class;
+    //         $next_level_role_id = $entryFinal;
+    //     } elseif ($this->reportType == "3") {
+    //         $sourceableClass = BeneficiaryPersonal::class;
+    //         $next_level_role_id = $entryApproved;
+    //     } elseif ($this->reportType == "1") {
+    //         $sourceableClass = DraftBeneficiaryPersonal::class;
+    //         $next_level_role_id = $entryPartial;
+    //     } elseif ($this->reportType == "5") {
+    //         $sourceableClass = DraftBeneficiaryPersonal::class;
+    //         $extraConditions = ['is_final_submit' => true];
+    //          $next_level_role_id = $entryPartial;
+    //         $query = BeneficiaryCommonList::whereHasMorph('sourceable', $sourceableClass, function ($q) use ($next_level_role_id, $extraConditions) {
+    //             if (!empty($extraConditions)) {
+    //                 foreach ($extraConditions as $field => $value) {
+    //                     $q->where($field, $value);
+    //                 }
+    //             }
+    //             $q->where('next_level_role_id', $next_level_role_id);
+    //         });
+    //     } elseif ($this->reportType == "4") {
+    //         $query = BenRejectDetails::query();
+    //         // dd($query->get());
 
-            return EncryptionArray::applyLocationFilter(
-                $query,
-                $this->reportType,
-                $this->district_id ? (int) $this->district_id : null,
-                $this->rural_urban ? (int) $this->rural_urban : null,
-                $this->blockurban ? (int) $this->blockurban : null,
-                $this->gp_ward ? (int) $this->gp_ward : null,
-                $this->sub_div ? (int) $this->sub_div : null
-            );
-        }
-        $query = BeneficiaryCommonList::with('sourceable.contact', 'sourceable.relationships')
-            ->whereHasMorph(
-                'sourceable',
-                $sourceableClass,
-                function ($q) use ($next_level_role_id) {
-                    $q->where('next_level_role_id', $next_level_role_id);
-                }
-            );
+    //         return EncryptionArray::applyLocationFilter(
+    //             $query,
+    //             $this->reportType,
+    //             $this->district_id ? (int) $this->district_id : null,
+    //             $this->rural_urban ? (int) $this->rural_urban : null,
+    //             $this->blockurban ? (int) $this->blockurban : null,
+    //             $this->gp_ward ? (int) $this->gp_ward : null,
+    //             $this->sub_div ? (int) $this->sub_div : null
+    //         );
+    //     }
+    //     $query = BeneficiaryCommonList::with('sourceable.contact', 'sourceable.relationships')
+    //         ->whereHasMorph(
+    //             'sourceable',
+    //             $sourceableClass,
+    //             function ($q) use ($next_level_role_id) {
+    //                 $q->where('next_level_role_id', $next_level_role_id);
+    //             }
+    //         );
 
-        // dd($query->get());
-        if (!empty($this->filter_condition)) {
-            $query->where($this->filter_condition);
-        }
+    //     // dd($query->get());
+    //     if (!empty($this->filter_condition)) {
+    //         $query->where($this->filter_condition);
+    //     }
 
 
-        if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
-            // dd($this->gp_ward);
-            $query = EncryptionArray::applyLocationFilter(
-                $query,
-                $this->reportType,
-                $this->district_id ? (int) $this->district_id : null,
-                $this->rural_urban ? (int) $this->rural_urban : null,
-                $this->blockurban ? (int) $this->blockurban : null,
-                $this->gp_ward ? (int) $this->gp_ward : null,
-                $this->sub_div ? (int) $this->sub_div : null
-            );
-        }
+    //     if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
+    //         // dd($this->gp_ward);
+    //         $query = EncryptionArray::applyLocationFilter(
+    //             $query,
+    //             $this->reportType,
+    //             $this->district_id ? (int) $this->district_id : null,
+    //             $this->rural_urban ? (int) $this->rural_urban : null,
+    //             $this->blockurban ? (int) $this->blockurban : null,
+    //             $this->gp_ward ? (int) $this->gp_ward : null,
+    //             $this->sub_div ? (int) $this->sub_div : null
+    //         );
+    //     }
 
-        $this->dispatch('hideLoader');
-        return $query;
+    //     $this->dispatch('hideLoader');
+    //     return $query;
+    // }
+
+public function builder(): Builder
+{
+    $entryVerified  = Codemaster::getIdByCode(23);
+    $entryApproved  = Codemaster::getIdByCode(0);
+    $entryPartial   = Codemaster::getIdByCode(21);
+    $entryFinal     = Codemaster::getIdByCode(22);
+
+    $next_level_role_id = null;
+    $sourceableClass = null;
+    $extraConditions = []; // FIXED: default
+
+    /**
+     * --- REPORT TYPE CONDITIONS ---
+     */
+    if ($this->reportType == "2") {
+        $sourceableClass = DraftBeneficiaryPersonal::class;
+        $next_level_role_id = $entryVerified;
+
+    } elseif ($this->reportType == "6") {
+        $sourceableClass = DraftBeneficiaryPersonal::class;
+        $next_level_role_id = $entryFinal;
+
+    } elseif ($this->reportType == "3") {
+        $sourceableClass = BeneficiaryPersonal::class;
+        $next_level_role_id = $entryApproved;
+
+    } elseif ($this->reportType == "1") {
+        // ✔ FIXED: PARTIAL ENTRY CONDITION WILL NOW WORK
+        $sourceableClass = DraftBeneficiaryPersonal::class;
+        $extraConditions = ['is_final_submit' => false];
+        $next_level_role_id = $entryPartial;
+
+    } elseif ($this->reportType == "5") {
+        $sourceableClass = DraftBeneficiaryPersonal::class;
+        $extraConditions = ['is_final_submit' => true];
+        $next_level_role_id = $entryPartial;
+
+        $query = BeneficiaryCommonList::whereHasMorph('sourceable', $sourceableClass, function ($q) use ($next_level_role_id, $extraConditions) {
+            foreach ($extraConditions as $field => $value) {
+                $q->where($field, $value);
+            }
+            $q->where('next_level_role_id', $next_level_role_id);
+        });
+
+        return EncryptionArray::applyLocationFilter(
+            $query,
+            $this->reportType,
+            $this->district_id ?: null,
+            $this->rural_urban ?: null,
+            $this->blockurban ?: null,
+            $this->gp_ward ?: null,
+            $this->sub_div ?: null
+        );
     }
 
+    elseif ($this->reportType == "4") {
+
+        $query = BenRejectDetails::query();
+
+        return EncryptionArray::applyLocationFilter(
+            $query,
+            $this->reportType,
+            $this->district_id ?: null,
+            $this->rural_urban ?: null,
+            $this->blockurban ?: null,
+            $this->gp_ward ?: null,
+            $this->sub_div ?: null
+        );
+    }
+
+    /**
+     * --- COMMON QUERY FOR ALL OTHER REPORT TYPES ---
+     */
+    $query = BeneficiaryCommonList::with('sourceable.contact', 'sourceable.relationships')
+        ->whereHasMorph('sourceable', $sourceableClass, function ($q) use ($next_level_role_id, $extraConditions) {
+
+            // ✔ FIXED: extra conditions applied for reportType = 1
+            foreach ($extraConditions as $field => $value) {
+                $q->where($field, $value);
+            }
+
+            $q->where('next_level_role_id', $next_level_role_id);
+        });
+
+    /**
+     * --- FILTER CONDITIONS ---
+     */
+    if (!empty($this->filter_condition)) {
+        $query->where($this->filter_condition);
+    }
+
+    /**
+     * --- LOCATION FILTER ---
+     */
+    if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
+        $query = EncryptionArray::applyLocationFilter(
+            $query,
+            $this->reportType,
+            $this->district_id ?: null,
+            $this->rural_urban ?: null,
+            $this->blockurban ?: null,
+            $this->gp_ward ?: null,
+            $this->sub_div ?: null
+        );
+    }
+
+    $this->dispatch('hideLoader');
+    return $query;
+}
 
     public function filters(): array
     {
