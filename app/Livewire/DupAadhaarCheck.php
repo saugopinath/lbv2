@@ -20,6 +20,13 @@ class DupAadhaarCheck extends Component
     }
     public function checkDuplicate()
     {
+        if (!WorkFlowPermissionHelper::canCreateEntry()) {
+            $this->dispatch('hideLoader');
+            return [
+                'status' => 'unauthorized',
+                'message' => "Not authorized to create entry."
+            ];
+        }
         $this->aadhaar = trim($this->aadhaar);
         if (!AadhaarHelper::validate($this->aadhaar)) {
             $this->dispatch('hideLoader');
@@ -38,13 +45,6 @@ class DupAadhaarCheck extends Component
                 'ds_entry' => WorkFlowPermissionHelper::canDuareSarkarEntryAllow()
             ];
         }
-        if (!WorkFlowPermissionHelper::canCreateEntry()) {
-            $this->dispatch('hideLoader');
-            return [
-                'status' => 'unauthorized',
-                'message' => "Not authorized to create entry."
-            ];
-        }
         $this->dispatch('aadhaarChecked', [
             'encoded' => $encoded_aadhar,
             'hash' => $aadhaar_hash,
@@ -56,7 +56,8 @@ class DupAadhaarCheck extends Component
             'message' => "✅ Aadhaar is valid and not duplicate."
         ];
     }
-    public function FindDuplicate() {
+    public function FindDuplicate()
+    {
         // Session::put('dup_aadhaar', Crypt::encrypt(trim($this->aadhaar)));
         // Session::put('dup_bank', '123456');
         // dd(Session::get('dup_aadhaar'), Session::get('dup_bank'));
