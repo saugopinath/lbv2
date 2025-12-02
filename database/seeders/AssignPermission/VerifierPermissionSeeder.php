@@ -21,7 +21,11 @@ class VerifierPermissionSeeder extends Seeder
             'view beneficiaries', 
             'view reports',
             'view verifier incomplete',
-            'view caste modification list'
+            'view caste modification list',
+            'view beneficiary details',
+            'TakeActionForCaste',
+            'VerifyCasteApplication',
+            'RevertCasteApplication'
 
         ];
 
