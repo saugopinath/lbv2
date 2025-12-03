@@ -86,6 +86,7 @@
     </div>
     <div x-show="dsData" x-transition x-cloak>
         <livewire:duplicate-applicant-data-table />
+        <livewire:duplicate-applicant-d-s-mark-modal />
     </div>
 </div>
 @push('scripts')
