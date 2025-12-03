@@ -27,6 +27,7 @@ use App\Http\Controllers\MasterParameterSettingController;
 use App\Http\Controllers\RoleOfficeTypeMappingsController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Http\Controllers\RolePermisssionManagementController;
+use App\Http\Controllers\ElasticSearchController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 
 // Guest Routes
@@ -194,4 +195,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
     Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
     Route::get('/custom_application/{id}', ApplicationView::class)->name('custom_application.view');
+    Route::get('/getelsticsearchIndex', [ElasticSearchController::class, 'index'])->name('getelsticsearchIndex');
 });
