@@ -68,9 +68,11 @@ class DupAadhaarCheck extends Component
         Session::put('dup_aadhaar', md5(trim($this->aadhaar)));
         // Session::put('dup_bank', '123456');
         // dd(Session::get('dup_aadhaar'), Session::get('dup_bank'));
-        return [
-            'status' => true
-        ];
+        if (Session::get('dup_aadhaar')) {
+            return [
+                'status' => true
+            ];
+        }
     }
     public function render()
     {

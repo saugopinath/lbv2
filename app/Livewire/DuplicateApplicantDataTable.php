@@ -132,5 +132,6 @@ class DuplicateApplicantDataTable extends DataTableComponent
         $query = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact');
         $query->where($key, $value);
         return $query;
+        Session::forget('dup_aadhaar');
     }
 }
