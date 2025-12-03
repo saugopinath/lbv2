@@ -345,7 +345,7 @@ class ApplicationMisReportLgd extends Component
                 return ['group' => 'cd_block_muni_id', 'filters' => $merged];
             }
 
-            return ['group' => 'block_id', 'filters' => $merged];
+            return ['group' => 'block_and_subdivision', 'filters' => $merged];
         }
 
         // fallback -> district
