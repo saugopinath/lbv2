@@ -26,7 +26,7 @@
                     </div>
                     <div>
                         <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
-                            Incomplete MIS Report Summary
+                            Incomplete MIS Report
                         </h2>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
                             Showing data for all districts

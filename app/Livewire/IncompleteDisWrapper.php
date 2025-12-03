@@ -25,6 +25,7 @@ class IncompleteDisWrapper extends Component
      */
     public function updateGeoFilters(array $data)
     {
+        // dd($data);
         $this->filters = array_merge($this->filters, $data);
         $this->dispatch('doSearch', $this->filters);   // auto update table
     }
