@@ -8,6 +8,19 @@ class MisReportController extends Controller
 {
     public function index()
     {
-        return view('misreport.report_index');
+        $reportTypes = [
+            [
+                'id'    => 1,
+                'name'  => 'Incomplete Details Mis Report',
+                'route' => route('incomplete.details.mis.report'),
+            ],
+        ];
+
+        return view('misreport.report_index', compact('reportTypes'));
+    }
+
+    public function incompleteDetails()
+    {
+        return view('incomplet.incompleteDetails');
     }
 }

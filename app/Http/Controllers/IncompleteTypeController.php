@@ -31,16 +31,17 @@ class IncompleteTypeController extends Controller
                 ->send();
         }
     }
-    public function index($stage = 'verifier')
+    public function index($stage)
     {
-        $user = Auth::user();
-
+        // dd($stage);
         if ($stage === 'verifier' && WorkFlowPermissionHelper::canVerifierIncomplet()) {
+            // dd('ok1');
         // if ($stage === 'verifier' && $user->can('view verifier incomplete')) {
             return view('incomplete_types.index', ['stage' => 'verifier']);
         }
 
-        if ($stage === 'verifier' && WorkFlowPermissionHelper::canApproverIncomplet()) {
+        if ($stage === 'approver' && WorkFlowPermissionHelper::canApproverIncomplet()) {
+            // dd('ok');
         // if ($stage === 'approver' && $user->can('view approver incomplete')) {
             return view('incomplete_types.index', ['stage' => 'approver']);
         }
@@ -50,7 +51,7 @@ class IncompleteTypeController extends Controller
     }
     public function fullUpdate(Request $request, $id)
     {
-        if (WorkFlowPermissionHelper::canUpdateIncomplet()) {
+        // if (WorkFlowPermissionHelper::canUpdateIncomplet()) {
         // if (Auth::user()->can('update incomplete')) {
             $realId = Crypt::decrypt($id);
 
@@ -266,13 +267,13 @@ class IncompleteTypeController extends Controller
             } catch (\Exception $e) {
                 return back()->with('error', 'Unexpected error: ' . $e->getMessage())->withInput();
             }
-        }
-        $header = 'Oops! You do not have permission to update incomplete.';
-        return view('CommonRestictedpage.index', compact('header'));
+        // }
+        // $header = 'Oops! You do not have permission to update incomplete.';
+        // return view('CommonRestictedpage.index', compact('header'));
     }
     public function revertVerify(Request $request, $id)
     {
-        if (WorkFlowPermissionHelper::canRevertIncomplet()) {
+        // if (WorkFlowPermissionHelper::canRevertIncomplet()) {
         // if (Auth::user()->can('revert incomplete')) {
             $realId = Crypt::decrypt($id);
 
@@ -494,9 +495,9 @@ class IncompleteTypeController extends Controller
                 session()->flash('error', 'Something went wrong while reverting. Please try again.');
                 return back()->withInput();
             }
-        }
-        $header = 'Oops! You do not have permission to revert incomplete.';
-        return view('CommonRestictedpage.index', compact('header'));
+        // }
+        // $header = 'Oops! You do not have permission to revert incomplete.';
+        // return view('CommonRestictedpage.index', compact('header'));
     }
     public function checkduplicate(Request $request, $id)
     {

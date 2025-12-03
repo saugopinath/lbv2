@@ -95,21 +95,21 @@
             @elseif ($stage === 'approver')
                 <div class="flex justify-center w-full space-x-4">
                     {{-- @can('approve application') --}}
-                    @if (\App\Helpers\WorkFlowPermissionHelper::canApproveApplication())
+                    {{--  @if (\App\Helpers\WorkFlowPermissionHelper::canApproveApplication())  --}}
                         <x-button.primary type="submit"
                             x-on:click="if(confirm('Are you sure you want to approve this request?')) { $wire.approve() }">
                             Approve
                         </x-button.primary>
                         {{-- @endcan --}}
-                    @endif
+                    {{--  @endif  --}}
                     <!-- Revert Button -->
                     {{-- @can('revert application') --}}
-                    @if (\App\Helpers\WorkFlowPermissionHelper::canRevertApplication())
+                    {{--  @if (\App\Helpers\WorkFlowPermissionHelper::canRevertApplication())  --}}
                         <x-button.danger x-on:click="$dispatch('open-revert-modal')">
                             Revert
                         </x-button.danger>
                         {{-- @endcan --}}
-                    @endif
+                    {{--  @endif  --}}
                     <!-- Revert Modal -->
                     <div x-data="{ open: false }" x-on:open-revert-modal.window="open = true" x-show="open"
                         class="fixed inset-0 flex items-center justify-center text-gray-800 bg-black/60 z-50"

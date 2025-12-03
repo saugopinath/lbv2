@@ -31,6 +31,7 @@ use App\Http\Controllers\CmoController;
 use App\Http\Controllers\RolePermisssionManagementController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
+use Illuminate\Http\Request;
 
 // Guest Routes
 Route::get('/', fn() => view('welcome'));
@@ -96,7 +97,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('assign-users-permissions');
 
     Route::get('/role-permission-management', [RolePermisssionManagementController::class, 'index'])
-      ->middleware('permission.redirect:canRolePermissionManagement')
+        ->middleware('permission.redirect:canRolePermissionManagement')
         ->name('role-permission-management');
 
     // Duty Management
@@ -132,11 +133,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('incomplet-type.view');
 
     Route::post('/incomplete/update/{id}', [IncompleteTypeController::class, 'fullUpdate'])
-        ->middleware('permission.redirect:canUpdateIncomplet')
+        // ->middleware('permission.redirect:canUpdateIncomplet')
         ->name('incomplete-full-deatils-update');
 
     Route::post('/incomplete/revert/{id}', [IncompleteTypeController::class, 'revertVerify'])
-        ->middleware('permission.redirect:canRevertIncomplet')
+        // ->middleware('permission.redirect:canRevertIncomplet')
         ->name('incomplete-revert-update');
 
     Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])
@@ -194,6 +195,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/mis-report', [MisReportController::class, 'index'])->name('mis.index');
     // Route::post('/mis-report-data', [MisReportController::class, 'getData'])->name('mis.data');
+  Route::get('/incomplete-details-mis-report', [MisReportController::class, 'incompleteDetails'])
+    ->name('incomplete.details.mis.report');
 
     // Design Pages (Dev Only – Remove in Prod)
     Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
@@ -219,3 +222,11 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
     Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->name('beneficiary.deActivebeneficiary');
 });
 
+Route::post('/mis/report/redirect', function (Request $request) {
+    // basic validation to ensure a value was submitted
+    $request->validate([
+        'mis_route' => 'required|url',
+    ]);
+
+    return redirect()->to($request->mis_route);
+})->name('mis.report.redirect');
