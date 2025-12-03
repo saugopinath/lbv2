@@ -8,14 +8,23 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Crypt;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\IncompleteExport;
+use App\Models\Block;
+use App\Models\Municipality;
+use App\Models\Panchayat;
+use App\Models\Subdivision;
 
 class IncompleteMisReportTable extends Component
 {
-    public array $filter_condition = [];
     public $incomplete_type = null;
+    public ?string $filterCode = null;
+    public $district_id, $rural_urban, $blockurban, $gp_ward, $selectedSubdivision;
+
     protected $listeners = [
-        'filterIncompleteType' => 'applyIncompleteFilter'
+        'doSearch' => 'updateFilters',
     ];
+
+    public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
+    public array $filter_condition = [];
 
     public function mount(): void
     {
@@ -33,18 +42,16 @@ class IncompleteMisReportTable extends Component
             $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
-
-    public function applyIncompleteFilter($value)
+    public function updateFilters($filters)
     {
-        $this->incomplete_type = $value;
-
-        if ($value) {
-            $this->filter_condition['incomplete_type'] = $value;
-        } else {
-            unset($this->filter_condition['incomplete_type']);
-        }
-
-        $this->dispatch('$refresh');
+        // dd($filters);
+        $this->district_id = $filters['district_id'] ?? null;
+        $this->rural_urban = $filters['rural_urban'] ?? null;
+        $this->selectedSubdivision = $filters['subdivision_id'] ?? null;
+        $this->blockurban = $filters['blockurban'] ?? null;
+        $this->gp_ward = $filters['gp_ward'] ?? null;
+        $this->filterCode = $filters['incomplete_type'] ?? null;
+        // dd($this->filterCode);
     }
 
     public function getVerifierPendingProperty()
@@ -52,9 +59,9 @@ class IncompleteMisReportTable extends Component
         return ApplicantIncompletDeatil::query()
             ->whereNull('next_level_request_id')
             ->when(
-                isset($this->filter_condition['incomplete_type']),
+                isset($this->filterCode),
                 fn($q) =>
-                $q->where('incomplet_type', $this->filter_condition['incomplete_type'])
+                $q->where('incomplet_type',  $this->filterCode)
             )
             ->whereHas('beneficiaryCommonList', function ($q) {
                 foreach ($this->filter_condition as $col => $val) {
@@ -74,9 +81,9 @@ class IncompleteMisReportTable extends Component
         return ApplicantIncompletDeatil::query()
             ->where('next_level_request_id', 1)
             ->when(
-                isset($this->filter_condition['incomplete_type']),
+                isset($this->filterCode),
                 fn($q) =>
-                $q->where('incomplet_type', $this->filter_condition['incomplete_type'])
+                $q->where('incomplet_type',  $this->filterCode)
             )
             ->whereHas('beneficiaryCommonList', function ($q) {
                 foreach ($this->filter_condition as $col => $val) {
@@ -95,9 +102,9 @@ class IncompleteMisReportTable extends Component
         return ApplicantIncompletDeatil::query()
             ->where('next_level_request_id', 2)
             ->when(
-                isset($this->filter_condition['incomplete_type']),
+                isset($this->filterCode),
                 fn($q) =>
-                $q->where('incomplet_type', $this->filter_condition['incomplete_type'])
+                $q->where('incomplet_type',  $this->filterCode)
             )
             ->whereHas('beneficiaryCommonList', function ($q) {
                 foreach ($this->filter_condition as $col => $val) {
@@ -114,10 +121,11 @@ class IncompleteMisReportTable extends Component
 
     public function exportDistrictExcel($districtName, $type)
     {
-        dd('ok');        
+        dd('ok');
     }
     public function render()
     {
+        $this->dispatch('hideLoader');
         $districts = District::select('id', 'name')->orderBy('name')->get();
 
         $rows = $districts->map(function ($district) {
@@ -143,6 +151,8 @@ class IncompleteMisReportTable extends Component
                 'active'   => false
             ];
         });
+       
+
         $totals = [
             'pending'  => $rows->sum('pending'),
             'verifier' => $rows->sum('verifier'),
