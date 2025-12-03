@@ -119,19 +119,28 @@ class DuplicateApplicantDataTable extends DataTableComponent
     // }
     public function builder(): Builder
     {
-        // session()->flush();
-        // Session::forget('dup_aadhaar');
-        $value = '';
-        $key = '';
-        if (Session::get('dup_aadhaar')) {
-            $value = Session::get('dup_aadhaar');
-            $key = 'encoded_aadhar';
-        }
-        // dd($key, $value);
-        // Session::forget('dup_aadhaar');
         $query = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact');
-        $query->where($key, $value);
+        $filters = [
+            'dup_aadhaar' => 'encoded_aadhar',
+            'dup_bank'    => 'bank_account_number',
+            'dup_mobile'  => 'mobile_no',
+            'dup_name'    => 'full_name',
+        ];
+        $sessionUsed = false;
+        foreach ($filters as $sessionKey => $column) {
+            if (Session::has($sessionKey)) {
+                $value = Session::get($sessionKey);
+                if (!empty($value)) {
+                    $query->where($column, $value);
+                    $sessionUsed = true;
+                }
+            }
+        }
+        if ($sessionUsed) {
+            foreach (array_keys($filters) as $key) {
+                Session::forget($key);
+            }
+        }
         return $query;
-        Session::forget('dup_aadhaar');
     }
 }
