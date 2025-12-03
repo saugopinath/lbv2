@@ -27,6 +27,7 @@ use App\Livewire\ProcessApplication\DraftApplicationView;
 use App\Http\Controllers\MasterParameterSettingController;
 use App\Http\Controllers\RoleOfficeTypeMappingsController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
+use App\Http\Controllers\BeneficiaryCountController;
 use App\Http\Controllers\CmoController;
 use App\Http\Controllers\RolePermisssionManagementController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
@@ -230,3 +231,11 @@ Route::post('/mis/report/redirect', function (Request $request) {
 
     return redirect()->to($request->mis_route);
 })->name('mis.report.redirect');
+
+//Beneficiary count
+Route::controller(BeneficiaryCountController::class)->group(function () {
+    Route::get('/beneficiary-reportlist',  'index')->name('beneficiary-reportlist');
+    
+});
+
+

@@ -10,6 +10,7 @@ class BenRejectDetails extends Model implements Auditable
     // protected $guarded = [
     //     'id',
     // ];
+    protected $primaryKey = 'application_id';
     use \OwenIt\Auditing\Auditable;
     protected $fillable = [
         'application_id',
