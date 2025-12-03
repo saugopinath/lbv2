@@ -25,10 +25,13 @@ class IndexUserElasticSearchJob
     /**
      * Execute the job.
      */
-    public function handle(): void
-    {
-
-        $elasticsearchService=new ElasticsearchService();
-        $elasticsearchService->populateIndex('users', $this->user->toArray());
-    }
+     public function handle(): void
+     {
+         $indexName='users';
+         $elasticsearchService=new ElasticsearchService();
+         if(!$elasticsearchService->verifyIndex($indexName)){
+           $elasticsearchService->createIndex($indexName);
+         }
+         $elasticsearchService->populateIndex('users', $this->user->toArray());
+     }
 }
