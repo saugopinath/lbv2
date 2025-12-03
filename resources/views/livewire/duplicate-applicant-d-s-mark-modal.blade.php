@@ -7,7 +7,7 @@
     @hide-modal.window="open = false"
     @keydown.escape.window="open = false"
     wire:ignore.self
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 bg-opacity-50"
 >
     <div 
         class="bg-white rounded-lg p-6 w-1/2 shadow-xl transform transition-all"
