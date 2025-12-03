@@ -13,30 +13,14 @@ use Illuminate\Support\Facades\Session;
 class DuplicateApplicantDataTable extends DataTableComponent
 {
     public ?int $perPage = 5;
-    public array $filter_condition = [];
-    public function mount(): void
-    {
-        $select_lgd = session('lgd_session');
-        if (!empty($select_lgd['district_id'])) {
-            $this->filter_condition['lb_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
-        }
-        if (!empty($select_lgd['block_id'])) {
-            $this->filter_condition['lb_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
-        }
-        if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['lb_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
-        }
-    }
+    public function mount(): void {}
     public function configure(): void
     {
         $this->setPrimaryKey('sourceable_id')
             ->setPaginationEnabled()
             ->setPerPageAccepted([5, 10])
             ->setPerPage($this->perPage)
-            ->setPerPageVisibilityEnabled()
-            ->setSearchEnabled()
-            ->setSearchLive()
-            // ->setBulkActionsEnabled()
+            ->setSearchDisabled()
             ->setColumnSelectDisabled()
         ;
 
@@ -68,11 +52,7 @@ class DuplicateApplicantDataTable extends DataTableComponent
         ]);
     }
 
-    public function updatedSearch($value): void
-    {
-        $this->setSearch($value);
-        $this->resetPage();
-    }
+
 
     public function updatedPerPage($value): void
     {
