@@ -9,6 +9,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use App\Models\Codemaster;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
+use Livewire\Attributes\On;
 
 class DuplicateApplicantDataTable extends DataTableComponent
 {
@@ -109,7 +110,13 @@ class DuplicateApplicantDataTable extends DataTableComponent
                 ->html(),
         ];
     }
-
+    // #[On('dsMark')]
+    // public function dsMark($id = null)
+    // {
+    //     // dd($id);
+    //     $benData = BeneficiaryCommonList::find($id);
+    //     dd($benData);
+    // }
     public function builder(): Builder
     {
         // session()->flush();
