@@ -20,10 +20,7 @@ class DuplicateApplicantDSMarkModal extends Component
         $this->pdate = DsPhase::where('is_current', true)->value('base_dob');
         // $this->ds_date = $this->cdate;
     }
-    public function mount()
-    {
-        
-    }
+    public function mount() {}
     public function rules()
     {
         $rules = [
@@ -41,7 +38,12 @@ class DuplicateApplicantDSMarkModal extends Component
     }
     public function saveDsMark()
     {
+        $validated = $this->validate($this->rules());
         $this->dispatch('hide-modal');
+    }
+    public function resetForm()
+    {
+        $this->reset(['reg_no', 'ds_date']);
     }
     public function render()
     {
