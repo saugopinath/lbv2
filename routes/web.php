@@ -27,6 +27,7 @@ use App\Livewire\ProcessApplication\DraftApplicationView;
 use App\Http\Controllers\MasterParameterSettingController;
 use App\Http\Controllers\RoleOfficeTypeMappingsController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
+use App\Http\Controllers\BeneficiaryCountController;
 use App\Http\Controllers\CmoController;
 use App\Http\Controllers\RolePermisssionManagementController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
@@ -217,4 +218,12 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
     Route::get('/reject-approved-beneficiary/de-activate', 'editview')->name('reject-approved-beneficiary.de-activate');
     Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->name('beneficiary.deActivebeneficiary');
 });
+
+
+//Beneficiary count
+Route::controller(BeneficiaryCountController::class)->group(function () {
+    Route::get('/beneficiary-reportlist',  'index')->name('beneficiary-reportlist');
+    
+});
+
 
