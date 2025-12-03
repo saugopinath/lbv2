@@ -14,6 +14,10 @@ class DuplicateApplicantDSMarkModal extends Component
         $this->applicantId = $id;
         $this->dispatch('show-modal');
     }
+    public function saveDsMark()
+    {
+        $this->dispatch('hide-modal');
+    }
     public function render()
     {
         return view('livewire.duplicate-applicant-d-s-mark-modal');
