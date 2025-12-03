@@ -234,7 +234,7 @@ Route::post('/mis/report/redirect', function (Request $request) {
 
 //Beneficiary count
 Route::controller(BeneficiaryCountController::class)->group(function () {
-    Route::get('/beneficiary-reportlist',  'index')->name('beneficiary-reportlist');
+    Route::get('/beneficiary-reportlist',  'misReport')->name('beneficiary-reportlist');
     
 });
 

@@ -59,6 +59,10 @@ class DraftBeneficiaryContact extends Model implements Auditable
     {
         return $this->belongsTo(Subdivision::class, 'sub_division_id', 'id');
     }
+     public function personal()
+    {
+        return $this->belongsTo(DraftBeneficiaryPersonal::class, 'application_id', 'application_id');
+    }
 
     public function getFullAddress(): string
     {
@@ -132,7 +136,6 @@ class DraftBeneficiaryContact extends Model implements Auditable
     {
         static::created(function ($contact) {
             $personal = $contact->personal;
-
             if ($personal && $personal->lists) {
                 $personal->lists()->update([
                     'cd_district_id'=> $contact->district_id,
@@ -145,7 +148,6 @@ class DraftBeneficiaryContact extends Model implements Auditable
 
         static::updated(function ($contact) {
             $personal = $contact->personal;
-
             if ($personal && $personal->lists) {
                 $personal->lists()->update([
                     'cd_district_id'=> $contact->district_id,

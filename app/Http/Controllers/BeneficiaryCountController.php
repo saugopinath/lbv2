@@ -138,4 +138,11 @@ class BeneficiaryCountController extends Controller
             'totals'    => $totals,
         ]);
     }
+    public function misReport(Request $request)
+    {
+        $header='Beneficiary Count  wise Mis Report';
+         return view('BeneficiaryCount.beneficiary_count_report', [
+            'header'    => $header, 
+        ]);
+    }
 }
