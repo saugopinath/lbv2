@@ -84,7 +84,7 @@
             </x-button.gradient-button>
         </template>
     </div>
-    <div x-show="dsData" x-transition>
+    <div x-show="dsData" x-transition x-cloak>
         <livewire:duplicate-applicant-data-table />
     </div>
 </div>

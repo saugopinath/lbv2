@@ -9,6 +9,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use App\Models\Codemaster;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
+
 class DuplicateApplicantDataTable extends DataTableComponent
 {
     public ?int $perPage = 5;
@@ -131,8 +132,18 @@ class DuplicateApplicantDataTable extends DataTableComponent
 
     public function builder(): Builder
     {
+        // session()->flush();
+        // Session::forget('dup_aadhaar');
+        $value = '';
+        $key = '';
+        if (Session::get('dup_aadhaar')) {
+            $value = Session::get('dup_aadhaar');
+            $key = 'encoded_aadhar';
+        }
+        // dd($key, $value);
+        // Session::forget('dup_aadhaar');
         $query = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact');
-        $query->where('encoded_aadhar', 'bc177a7a9c7df69c248647b4dfc6fd84');
+        $query->where($key, $value);
         return $query;
     }
 }
