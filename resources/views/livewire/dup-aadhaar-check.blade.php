@@ -29,6 +29,7 @@
                 this.disableCheckBtn = true;
             }
             if(result.status === 'duplicate') {
+                this.disableCheckBtn = true;
                 this.findDupdicateBtn = true;
                 this.dsMark = result.ds_entry;
             }
