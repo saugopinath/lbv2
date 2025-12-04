@@ -9,6 +9,7 @@ use App\Models\DsPhase;
 use App\Models\BeneficiaryCommonList;
 use App\Models\DsMapRecord;
 use App\Models\Codemaster;
+
 class DuplicateApplicantDSMarkModal extends Component
 {
     public $applicantId, $open;
@@ -54,12 +55,13 @@ class DuplicateApplicantDSMarkModal extends Component
         $DsMapRecord->application_id = $this->applicantId;
         $DsMapRecord->new_ds_phase = $this->cdsphase;
         $DsMapRecord->new_ds_date = $validated['ds_date'];
-        $DsMapRecord->new_ds_registration_no =$validated['reg_no'];
+        $DsMapRecord->new_ds_registration_no = $validated['reg_no'];
         $DsMapRecord->old_ds_phase = $olddsphase;
         $DsMapRecord->old_ds_date = $olddsdate;
         $DsMapRecord->old_ds_registration_no = $olddsres;
         $DsMapRecord->save();
         $this->dispatch('hide-modal');
+        $this->dispatch('refreshDatatable');
     }
     public function resetForm()
     {

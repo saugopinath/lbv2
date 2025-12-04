@@ -10,6 +10,7 @@ use App\Models\Codemaster;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\On;
+use App\Models\DsPhase;
 
 class DuplicateApplicantDataTable extends DataTableComponent
 {
@@ -61,7 +62,11 @@ class DuplicateApplicantDataTable extends DataTableComponent
         $this->setPerPage((int)$value);
         $this->resetPage();
     }
-
+    // #[On('dsMarked')]
+    // public function dsMarked()
+    // {
+    //     $this->dispatch('refreshDatatable');
+    // }
     public function columns(): array
     {
         return [
@@ -101,14 +106,14 @@ class DuplicateApplicantDataTable extends DataTableComponent
 
             $columns[] = Column::make("Actions")
                 ->label(function ($row) {
-                    if ($row->sourceable->entry_type == Codemaster::getIdByCode(41) || $row->sourceable->ds_phase !=) {
+                    if ($row->sourceable->entry_type == Codemaster::getIdByCode(41) || $row->sourceable->ds_phase != DsPhase::where('is_current', true)->value('phase_code')) {
                         $id = $row->sourceable->application_id;
                         return view('coulmn_button.actions', [
                             'wireClick' => "\$dispatch('opendsMarkModal', { id: '$id' })",
                             'tooltip' => 'Ds Mark'
                         ])->render();
                     } else {
-                        return 'N/A';
+                        return 'Already Marked';
                     }
                 })
                 ->html(),

@@ -3,7 +3,7 @@
         errorMessage: '',
         successMessage: '',
         disableCheckBtn: false,
-        findDupdicateBtn: false,
+        <!-- findDupdicateBtn: false, -->
         dsMark: false,
         dsData: false,
         async validateAndSubmit() {
@@ -30,7 +30,7 @@
             }
             if(result.status === 'duplicate') {
                 this.disableCheckBtn = true;
-                this.findDupdicateBtn = true;
+                <!-- this.findDupdicateBtn = true; -->
                 this.dsMark = result.ds_entry;
             }
         },
@@ -50,7 +50,7 @@
         errorMessage = '';
         successMessage = '';
         disableCheckBtn = false;
-        findDupdicateBtn = false;
+        <!-- findDupdicateBtn = false; -->
         dsMark = false;
         dsData = false;
         Livewire.dispatch('aadhaarCheckedReset');
@@ -74,11 +74,11 @@
         <template x-if="errorMessage">
             <div class="mt-8 text-red-600 text-sm" x-text="errorMessage"></div>
         </template>
-        <template x-if="findDupdicateBtn">
+        <!-- <template x-if="findDupdicateBtn">
             <x-button.gradient-button type="button" @click="FindDuplicate()">
                 <span>Find Duplicate</span>
             </x-button.gradient-button>
-        </template>
+        </template> -->
         <template x-if="dsMark">
             <x-button.gradient-button type="button" @click="DsMark()">
                 <span>Ds Mark</span>
