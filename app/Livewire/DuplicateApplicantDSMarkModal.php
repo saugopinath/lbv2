@@ -6,11 +6,12 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use Illuminate\Support\Carbon;
 use App\Models\DsPhase;
-
+use App\Models\BeneficiaryCommonList;
+use App\Models\DsMapRecord;
 class DuplicateApplicantDSMarkModal extends Component
 {
     public $applicantId, $open;
-    public $cdate, $pdate, $reg_no, $ds_date;
+    public $cdate, $pdate, $reg_no, $ds_date, $cdsphase;
     #[On('opendsMarkModal')]
     public function openModal($id = null)
     {
@@ -18,7 +19,7 @@ class DuplicateApplicantDSMarkModal extends Component
         $this->dispatch('show-modal');
         $this->cdate = Carbon::now()->format('Y-m-d');
         $this->pdate = DsPhase::where('is_current', true)->value('base_dob');
-        // $this->ds_date = $this->cdate;
+        $this->cdsphase = DsPhase::where('is_current', true)->value('phase_code');
     }
     public function mount() {}
     public function rules()
@@ -39,6 +40,23 @@ class DuplicateApplicantDSMarkModal extends Component
     public function saveDsMark()
     {
         $validated = $this->validate($this->rules());
+        $targatedModel = BeneficiaryCommonList::find($this->applicantId)->sourceable;
+        $olddesres = $targatedModel->ds_date;
+        $olddesdate = $targatedModel->ds_registration_no;
+        $olddsphase = $targatedModel->ds_phase;
+        $targatedModel->ds_date = $validated['ds_date'];
+        $targatedModel->ds_registration_no = $validated['reg_no'];
+        $targatedModel->ds_phase = $this->cdsphase;
+        $targatedModel->save();
+        $DsMapRecord = new DsMapRecord;
+        $DsMapRecord->application_id = $this->applicantId;
+        $DsMapRecord->new_ds_phase = $this->cdsphase;
+        $DsMapRecord->new_ds_date = $validated['ds_date'];
+        $DsMapRecord->new_ds_registration_no =$validated['reg_no'];
+        $DsMapRecord->old_ds_phase = $olddsphase;
+        $DsMapRecord->old_ds_date = $olddesdate;
+        $DsMapRecord->old_ds_registration_no = $olddesres;
+        $DsMapRecord->save();
         $this->dispatch('hide-modal');
     }
     public function resetForm()
