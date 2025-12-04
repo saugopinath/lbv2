@@ -207,6 +207,8 @@ class EnclosureList extends Component
             // dd($is_upload);
         }
 
+        $docId = $this->currentDocId;
+
         $this->singleDocument = null;
         $this->currentDocId = null;
         $this->currentDocMaxSize = '';
@@ -232,7 +234,7 @@ class EnclosureList extends Component
             }
         }
 
-        $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.');
+        $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.', docId:$docId);
         $this->dispatch('$refresh');
     }
 
