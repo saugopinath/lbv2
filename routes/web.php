@@ -112,7 +112,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission.redirect:canDraftList')
         ->name('draftlist');
 
-    Route::get('draftedit/{id}', [LBController::class, 'draftedit'])
+    Route::get('draftedit', [LBController::class, 'draftedit'])
         ->middleware('permission.redirect:canEditDraft')
         ->name('draftedit');
 

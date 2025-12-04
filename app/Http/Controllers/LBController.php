@@ -48,11 +48,11 @@ class LBController extends Controller
     }
 
     /** Draft Edit Page */
-    public function draftedit($id)
+    public function draftedit(Request $request)
     {
         if (WorkFlowPermissionHelper::canEditDraft()) {
         // if (Auth::user()->can('edit draft')) {
-            $id = Crypt::decryptString($id);
+            $id = Crypt::decryptString($request->app_id);
             return view('lbform.draftedit', compact('id'));
         }
 
