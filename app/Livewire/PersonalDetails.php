@@ -130,7 +130,6 @@ class PersonalDetails extends Component
             $app_det = DraftBeneficiaryPersonal::with('relationships')->where('application_id', $application_id)->first();
             $this->app_type = $app_det->entry_type;
             $this->app_date = $app_det->created_at->format('Y-m-d');
-            // dd($this->app_date);
             if ($this->app_type == Codemaster::getIdByCode(42)) {
                 $this->ds_date = Carbon::parse($app_det->ds_date)->format('Y-m-d');
                 $this->reg_no = $app_det->ds_registration_no;
