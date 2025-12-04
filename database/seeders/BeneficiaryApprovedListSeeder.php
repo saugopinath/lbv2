@@ -29,7 +29,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
         try {
 
 
-            for ($i = 0; $i < 10; $i++) {
+            for ($i = 0; $i < 200; $i++) {
                 // Create a BeneficiaryPersonal
                 $office = OfficeMaster::where('district_id', 318)->where('block_id', 2979)->first();
                 $mapping = UserRoleSchemeOfficeMapping::where('office_id', $office->id)->where('role_id', 8)->first();
@@ -121,6 +121,11 @@ class BeneficiaryApprovedListSeeder extends Seeder
                 'municipality_id' => $beneficiary->municipality_id,
                 'ward_id'         => $beneficiary->ward_id,
                 'panchayat_id'    => $beneficiary->panchayat_id,
+                'next_level_role_id'    => $nextLevelRoleId,
+                'cd_district_id'    =>  $beneficiary->district_id,
+                'cd_rural_urban_id'    => 2,
+                'cd_block_muni_id'    =>  $beneficiary->block_id,
+                'cd_gp_ward_id'    => $beneficiary->ward_id,
             ]);
 
                 $beneficiary_contact = BeneficiaryContact::create([

@@ -3,7 +3,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                MIS Report 
+                MIS Report
             </h1>
         </div>
     </div>
@@ -29,14 +29,14 @@
                             Incomplete MIS Report
                         </h2>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
-                            Showing data for all districts
+                            Showing data for all {{ $groupLabel }}
                         </p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2">
                     <span
                         class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
-                        {{ count($rows) }} Districts
+                        {{ count($rows) }} {{ $groupLabel }}
                     </span>
                 </div>
             </div>
@@ -77,7 +77,10 @@
                                         <div
                                             class="flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center {{ $row->active ? 'bg-gradient-to-br from-blue-500 to-blue-600' : 'bg-gradient-to-br from-gray-400 to-gray-500' }}">
                                             <span class="text-white font-bold text-sm">
-                                                {{ substr($row->district, 0, 1) }}
+                                                {{--  {{ substr( $row->label , 0, 1) }}  --}}
+                                                {{ substr($row->label, 0, 1) }}
+
+
                                             </span>
                                         </div>
                                         @if($row->active)
@@ -89,7 +92,8 @@
                                     <div class="min-w-0">
                                         <div
                                             class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[180px]">
-                                            {{ $row->district }}
+                                            {{--  {{  $row->label  }}  --}}
+                                             {{ $row->label }}
                                         </div>
                                         <div
                                             class="text-xs {{ $row->active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400' }} flex items-center space-x-1 mt-0.5">
@@ -125,7 +129,7 @@
                                         Pending
                                     </div>
                                     @if($row->pending > 0)
-                                        <button wire:click="exportDistrictExcel('{{ $row->district }}','pending')"
+                                        <button wire:click="exportDistrictExcel('{{  $row->label  }}','pending')"
                                             class="mt-2 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200"
                                             title="Export Pending Data">
                                             <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none"
@@ -151,7 +155,7 @@
                                         Verified
                                     </div>
                                     @if($row->verifier > 0)
-                                        <button wire:click="exportDistrictExcel('{{ $row->district }}','verifier')"
+                                        <button wire:click="exportDistrictExcel('{{  $row->label  }}','verifier')"
                                             class="mt-2 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors duration-200"
                                             title="Export Verifier Data">
                                             <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none"
@@ -177,7 +181,7 @@
                                         Approved
                                     </div>
                                     @if($row->approve > 0)
-                                        <button wire:click="exportDistrictExcel('{{ $row->district }}','approve')"
+                                        <button wire:click="exportDistrictExcel('{{  $row->label  }}','approve')"
                                             class="mt-2 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors duration-200"
                                             title="Export Approved Data">
                                             <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none"

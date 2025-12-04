@@ -2,22 +2,32 @@
 
 namespace App\Livewire;
 
+use App\Helpers\CheckAuthHelper;
 use App\Models\ApplicantIncompletDeatil;
 use App\Models\District;
 use Livewire\Component;
 use Illuminate\Support\Facades\Crypt;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\IncompleteExport;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Block;
+use App\Models\Municipality;
+use App\Models\Panchayat;
+use App\Models\Subdivision;
 
 class IncompleteMisReportTable extends Component
 {
     public array $filter_condition = [];
     public $incomplete_type = null;
+
+    // protected $listeners = [
+    //     'filterIncompleteType' => 'applyIncompleteFilter'
+    // ];
+
+    public $district_id, $rural_urban, $blockurban, $gp_ward, $selectedSubdivision;
+
+    // protected $listeners = ['doSearch' => 'doSearch'];
     protected $listeners = [
-        'filterIncompleteType' => 'applyIncompleteFilter'
+        'doSearch' => 'updateFilters',
     ];
-      public $district_id, $rural_urban, $blockurban, $gp_ward, $sub_div;
-    //  protected $listeners = ['filtersApplied'];
 
     public function mount(): void
     {
@@ -36,127 +46,206 @@ class IncompleteMisReportTable extends Component
         }
     }
 
-    public function applyIncompleteFilter($value)
-    {
-        $this->incomplete_type = $value;
-
-        if ($value) {
-            $this->filter_condition['incomplete_type'] = $value;
-        } else {
-            unset($this->filter_condition['incomplete_type']);
-        }
-
-        $this->dispatch('$refresh');
-    }
-    // public function filtersApplied($filters)
+    // public function applyIncompleteFilter($value)
     // {
-    //     // dd($filters['gp_ward']);
-    //     $this->district_id = $filters['district_id'];
-    //     // dd($this->district_id );
-    //     $this->rural_urban = $filters['rural_urban'] ?? null;
-    //     $this->blockurban = $filters['blockurban'];
-    //     $this->gp_ward = $filters['gp_ward'];
-    //     $this->sub_div = $filters['subdivision_id'];
-    //     // dd($this->gp_ward );
+    //     $this->incomplete_type = $value;
+
+    //     if ($value) {
+    //         $this->filter_condition['incomplete_type'] = $value;
+    //     } else {
+    //         unset($this->filter_condition['incomplete_type']);
+    //     }
+
+    //     $this->dispatch('$refresh');
     // }
 
-    public function getVerifierPendingProperty()
+    public function updateFilters($filters)
+    {
+        // dd($filters);
+        $this->district_id = $filters['district_id'] ?? null;
+        $this->rural_urban = $filters['rural_urban'] ?? null;
+        $this->selectedSubdivision = $filters['subdivision_id'] ?? null;
+        $this->blockurban = $filters['blockurban'] ?? null;
+        $this->gp_ward = $filters['gp_ward'] ?? null;
+        $this->incomplete_type = $filters['incomplete_type'] ?? null;
+    }
+
+    /* ===========================================================
+     * Count Helper — PURE ORM, NO RAW SQL
+     * =========================================================== */
+    public function getCountByCondition(array $conditions)
     {
         return ApplicantIncompletDeatil::query()
-            ->whereNull('next_level_request_id')
-            ->when(
-                isset($this->filter_condition['incomplete_type']),
-                fn($q) =>
-                $q->where('incomplet_type', $this->filter_condition['incomplete_type'])
-            )
-            ->whereHas('beneficiaryCommonList', function ($q) {
+            ->whereHas('beneficiaryCommonList', function ($q) use ($conditions) {
+
+                // Apply user filters
                 foreach ($this->filter_condition as $col => $val) {
-                    if ($col !== 'incomplete_type') {
-                        $q->where($col, $val);
+                    $q->where($col, $val);
+                }
+
+                // Apply component conditionsz
+                foreach ($conditions as $key => $value) {
+
+                    if ($key === 'status') {
+                        // convert human status → next_level_request_id
+                        $map = [
+                            'pending'  => null,
+                            'verifier' => 1,
+                            'approver' => 2,
+                        ];
+                        $q->where('next_level_request_id', $map[$value]);
+                    } else {
+                        $q->where($key, $value);
                     }
                 }
             })
-            ->select('application_id')
-            ->groupBy('application_id')
-            ->get()
-            ->count();
+            ->distinct('application_id')  // ORM safe
+            ->count('application_id');     // ORM safe
+    }
+
+    /* ===========================================================
+     * Computed Properties — No select(), No groupBy()
+     * =========================================================== */
+    public function getVerifierPendingProperty()
+    {
+        return $this->getCountByCondition(['status' => 'pending']);
     }
 
     public function getVerifierProperty()
     {
-        return ApplicantIncompletDeatil::query()
-            ->where('next_level_request_id', 1)
-            ->when(
-                isset($this->filter_condition['incomplete_type']),
-                fn($q) =>
-                $q->where('incomplet_type', $this->filter_condition['incomplete_type'])
-            )
-            ->whereHas('beneficiaryCommonList', function ($q) {
-                foreach ($this->filter_condition as $col => $val) {
-                    if ($col !== 'incomplete_type') {
-                        $q->where($col, $val);
-                    }
-                }
-            })
-            ->select('application_id')
-            ->groupBy('application_id')
-            ->get()
-            ->count();
+        return $this->getCountByCondition(['status' => 'verifier']);
     }
+
     public function getApproverProperty()
     {
-        return ApplicantIncompletDeatil::query()
-            ->where('next_level_request_id', 2)
-            ->when(
-                isset($this->filter_condition['incomplete_type']),
-                fn($q) =>
-                $q->where('incomplet_type', $this->filter_condition['incomplete_type'])
-            )
-            ->whereHas('beneficiaryCommonList', function ($q) {
-                foreach ($this->filter_condition as $col => $val) {
-                    if ($col !== 'incomplete_type') {
-                        $q->where($col, $val);
-                    }
-                }
-            })
-            ->select('application_id')
-            ->groupBy('application_id')
-            ->get()
-            ->count();
+        return $this->getCountByCondition(['status' => 'approver']);
     }
 
-    public function exportDistrictExcel($districtName, $type)
-    {
-        dd('ok');
-        
-    }
+    /* ===========================================================
+     * Render
+     * =========================================================== */
     public function render()
     {
-        $districts = District::select('id', 'name')->orderBy('name')->get();
+        $this->dispatch('hideLoader');
+        $user = Auth::user();
+        $rows = collect();
+        $groupLabel = '';
 
-        $rows = $districts->map(function ($district) {
+        /* ===============================
+     * ADMIN → DISTRICT WISE
+     * =============================== */
+        // if ($user->hasRole('Admin')) {
+        if (CheckAuthHelper::isSuperAdmin()) {
+            //   $districts = District::select('id', 'name')->orderBy('name')->get();
+            //           dd($districts);
+            $groupLabel = 'Districts';
 
-            if (
-                isset($this->filter_condition['district_id']) &&
-                $district->id == $this->filter_condition['district_id']
-            ) {
-                return (object)[
-                    'district' => $district->name,
-                    'pending'  => $this->verifierPending,
-                    'verifier' => $this->verifier,
-                    'approve'  => $this->approver,
-                    'active'   => true
-                ];
+            foreach (District::orderBy('name')->get() as $d) {
+
+                $isActive = ($this->filter_condition['district_id'] ?? null) == $d->id;
+
+                $rows->push((object)[
+                    'label'    => $d->name,
+                    'pending'  => $isActive ? $this->verifierPending : 0,
+                    'verifier' => $isActive ? $this->verifier : 0,
+                    'approve'  => $isActive ? $this->approver : 0,
+                    'active'   => $isActive
+                ]);
+            }
+        }
+
+        /* ===============================
+     * VERIFIER → Panchayat / Municipality
+     * =============================== */
+        //  elseif ($user->hasRole('Verifier')) {
+        elseif (CheckAuthHelper::isCommmonVerifier()) {
+
+            if (!empty($this->filter_condition['block_id'])) {
+                $items = Panchayat::where('block_id', $this->filter_condition['block_id'])->get();
+                $groupLabel = 'Panchayats';
+                $key = 'panchayat_id';
+            } else {
+                $items = Municipality::where('subdivision_id', $this->filter_condition['sub_division_id'] ?? 0)->get();
+                $groupLabel = 'Municipalities';
+                $key = 'municipality_id';
             }
 
-            return (object)[
-                'district' => $district->name,
-                'pending'  => 0,
-                'verifier' => 0,
-                'approve'  => 0,
-                'active'   => false
-            ];
-        });
+            foreach ($items as $i) {
+                $rows->push((object)[
+                    'label'    => $i->name,
+                    'pending'  => $this->getCountByCondition([$key => $i->id, 'status' => 'pending']),
+                    'verifier' => $this->getCountByCondition([$key => $i->id, 'status' => 'verifier']),
+                    'approve'  => $this->getCountByCondition([$key => $i->id, 'status' => 'approver']),
+                    'active'   => true
+                ]);
+            }
+        }
+
+        /* ===============================
+     * APPROVER → BLOCK + MUNICIPALITY WISE
+     * =============================== */
+        // elseif ($user->hasRole('Approver')) {
+        elseif (CheckAuthHelper::isCommonApprover()) {
+            $groupLabel = 'Blocks / Municipalities';
+            $district_id = $this->filter_condition['district_id'] ?? 0;
+
+            /** 1️⃣ BLOCKS */
+            $blocks = Block::where('district_id', $district_id)->get();
+
+            foreach ($blocks as $b) {
+                $rows->push((object)[
+                    'type'     => 'Block',
+                    'label'    => $b->name,
+                    'pending'  => $this->getCountByCondition(['block_id' => $b->id, 'status' => 'pending']),
+                    'verifier' => $this->getCountByCondition(['block_id' => $b->id, 'status' => 'verifier']),
+                    'approve'  => $this->getCountByCondition(['block_id' => $b->id, 'status' => 'approver']),
+                    'active'   => true
+                ]);
+            }
+
+            /** 2️⃣ MUNICIPALITIES */
+            $subdivisionIds = Subdivision::where('district_id', $district_id)->pluck('id');
+
+            $municipalities = Municipality::whereIn('subdivision_id', $subdivisionIds)->get();
+
+            foreach ($municipalities as $m) {
+                $rows->push((object)[
+                    'type'     => 'Municipality',
+                    'label'    => $m->name,
+                    'pending'  => $this->getCountByCondition(['municipality_id' => $m->id, 'status' => 'pending']),
+                    'verifier' => $this->getCountByCondition(['municipality_id' => $m->id, 'status' => 'verifier']),
+                    'approve'  => $this->getCountByCondition(['municipality_id' => $m->id, 'status' => 'approver']),
+                    'active'   => true
+                ]);
+            }
+        }
+
+        /* ===============================
+ * OPERATOR → ONLY PANCHAYATS OF THEIR BLOCK
+ * =============================== */
+        //  elseif ($user->hasRole('Operator')) {
+        elseif (CheckAuthHelper::isCommonOperator()) {
+            $groupLabel = 'Panchayats';
+
+            $block_id = $this->filter_condition['block_id'] ?? 0;
+
+            /** Fetch Panchayats under this block */
+            $panchayats = Panchayat::where('block_id', $block_id)->get();
+
+            foreach ($panchayats as $p) {
+                $rows->push((object)[
+                    'label'    => $p->name,
+                    'pending'  => $this->getCountByCondition(['panchayat_id' => $p->id, 'status' => 'pending']),
+                    'verifier' => $this->getCountByCondition(['panchayat_id' => $p->id, 'status' => 'verifier']),
+                    'approve'  => $this->getCountByCondition(['panchayat_id' => $p->id, 'status' => 'approver']),
+                    'active'   => true
+                ]);
+            }
+        }
+
+        /* ===============================
+     * TOTALS
+     * =============================== */
         $totals = [
             'pending'  => $rows->sum('pending'),
             'verifier' => $rows->sum('verifier'),
@@ -164,11 +253,10 @@ class IncompleteMisReportTable extends Component
             'grand'    => $rows->sum('pending') + $rows->sum('verifier') + $rows->sum('approve'),
         ];
 
-
-
         return view('livewire.incomplete-mis-report-table', [
-            'rows' => $rows,
-            'totals' => $totals
+            'rows'       => $rows,
+            'totals'     => $totals,
+            'groupLabel' => $groupLabel
         ]);
     }
 }

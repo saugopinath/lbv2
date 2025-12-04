@@ -32,7 +32,7 @@ class FilterLgdMaster extends Component
         $this->button_show = $button_show;
 
         $login_type =  Crypt::decryptString($select_lgd['office_type_id']);
-
+// dd( $login_type);
         if (!empty($select_lgd['district_id'])) {
             $this->filter_condition['district_id'] = Crypt::decryptString($select_lgd['district_id']);
         }
@@ -157,13 +157,13 @@ class FilterLgdMaster extends Component
             $this->visible['subdivision_dropdown'] = 0;
         }
 
-        // $this->dispatch('filtersApplied', [
-        //     'district_id' => $this->selectedDistrict,
-        //     'rural_urban' => $this->selectedRuralurban,
-        //     'subdivision_id' => null,
-        //     'blockurban' => null,
-        //     'gp_ward' => null,
-        // ]);
+        $this->dispatch('filtersApplied', [
+            'district_id' => $this->selectedDistrict,
+            'rural_urban' => $this->selectedRuralurban,
+            'subdivision_id' => null,
+            'blockurban' => null,
+            'gp_ward' => null,
+        ]);
     }
 
     public function updatedSelectedSubdivision()
@@ -175,13 +175,13 @@ class FilterLgdMaster extends Component
         $this->wards = [];
         $this->loadMunicipalities();
 
-        // $this->dispatch('filtersApplied', [
-        //     'district_id' => $this->selectedDistrict,
-        //     'rural_urban' => $this->selectedRuralurban,
-        //     'subdivision_id' => $this->selectedSubdivision,
-        //     'blockurban' => null,
-        //     'gp_ward' => null,
-        // ]);
+        $this->dispatch('filtersApplied', [
+            'district_id' => $this->selectedDistrict,
+            'rural_urban' => $this->selectedRuralurban,
+            'subdivision_id' => $this->selectedSubdivision,
+            'blockurban' => null,
+            'gp_ward' => null,
+        ]);
     }
 
     public function updatedSelectedBlockurban()
@@ -191,13 +191,13 @@ class FilterLgdMaster extends Component
         $this->wards = [];
         $this->loadGpOrWard();
 
-        // $this->dispatch('filtersApplied', [
-        //     'district_id' => $this->selectedDistrict,
-        //     'rural_urban' => $this->selectedRuralurban,
-        //     'subdivision_id' => $this->selectedSubdivision,
-        //     'blockurban' => $this->selectedBlockurban,
-        //     'gp_ward' => null,
-        // ]);
+        $this->dispatch('filtersApplied', [
+            'district_id' => $this->selectedDistrict,
+            'rural_urban' => $this->selectedRuralurban,
+            'subdivision_id' => $this->selectedSubdivision,
+            'blockurban' => $this->selectedBlockurban,
+            'gp_ward' => null,
+        ]);
     }
     public function resetFilters()
     {
