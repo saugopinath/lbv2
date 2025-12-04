@@ -101,11 +101,15 @@ class DuplicateApplicantDataTable extends DataTableComponent
 
             $columns[] = Column::make("Actions")
                 ->label(function ($row) {
-                    $id = $row->sourceable->application_id;
-                    return view('coulmn_button.actions', [
-                        'wireClick' => "\$dispatch('opendsMarkModal', { id: '$id' })",
-                        'tooltip' => 'Ds Mark'
-                    ])->render();
+                    if ($row->sourceable->entry_type == Codemaster::getIdByCode(41) || $row->sourceable->ds_phase !=) {
+                        $id = $row->sourceable->application_id;
+                        return view('coulmn_button.actions', [
+                            'wireClick' => "\$dispatch('opendsMarkModal', { id: '$id' })",
+                            'tooltip' => 'Ds Mark'
+                        ])->render();
+                    } else {
+                        return 'N/A';
+                    }
                 })
                 ->html(),
         ];
