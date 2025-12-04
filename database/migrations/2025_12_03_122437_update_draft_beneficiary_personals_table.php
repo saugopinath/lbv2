@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('lb_scheme.draft_beneficiary_personals', function (Blueprint $table) {
-            $table->date('ds_phase')->nullable();
+            $table->integer('ds_phase')->nullable();
         });
     }
 

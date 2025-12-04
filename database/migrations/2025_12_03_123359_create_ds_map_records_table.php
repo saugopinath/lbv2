@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('ds_map_records', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('application_id');
-            $table->date('new_ds_phase')->nullable();
+            $table->integer('new_ds_phase')->nullable();
             $table->date('new_ds_date')->nullable();
-            $table->date('new_ds_registration_no')->nullable();
-            $table->date('old_ds_phase')->nullable();
+            $table->string('new_ds_registration_no')->nullable();
+            $table->integer('old_ds_phase')->nullable();
             $table->date('old_ds_date')->nullable();
-            $table->date('old_ds_registration_no')->nullable();
+            $table->string('old_ds_registration_no')->nullable();
             $table->timestamps();
         });
     }

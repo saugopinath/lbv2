@@ -8,6 +8,7 @@ use Illuminate\Support\Carbon;
 use App\Models\DsPhase;
 use App\Models\BeneficiaryCommonList;
 use App\Models\DsMapRecord;
+use App\Models\Codemaster;
 class DuplicateApplicantDSMarkModal extends Component
 {
     public $applicantId, $open;
@@ -41,12 +42,13 @@ class DuplicateApplicantDSMarkModal extends Component
     {
         $validated = $this->validate($this->rules());
         $targatedModel = BeneficiaryCommonList::find($this->applicantId)->sourceable;
-        $olddesres = $targatedModel->ds_date;
-        $olddesdate = $targatedModel->ds_registration_no;
+        $olddsres = $targatedModel->ds_registration_no;
+        $olddsdate = $targatedModel->ds_date;
         $olddsphase = $targatedModel->ds_phase;
         $targatedModel->ds_date = $validated['ds_date'];
         $targatedModel->ds_registration_no = $validated['reg_no'];
         $targatedModel->ds_phase = $this->cdsphase;
+        $targatedModel->entry_type = Codemaster::getIdByCode(42);
         $targatedModel->save();
         $DsMapRecord = new DsMapRecord;
         $DsMapRecord->application_id = $this->applicantId;
@@ -54,8 +56,8 @@ class DuplicateApplicantDSMarkModal extends Component
         $DsMapRecord->new_ds_date = $validated['ds_date'];
         $DsMapRecord->new_ds_registration_no =$validated['reg_no'];
         $DsMapRecord->old_ds_phase = $olddsphase;
-        $DsMapRecord->old_ds_date = $olddesdate;
-        $DsMapRecord->old_ds_registration_no = $olddesres;
+        $DsMapRecord->old_ds_date = $olddsdate;
+        $DsMapRecord->old_ds_registration_no = $olddsres;
         $DsMapRecord->save();
         $this->dispatch('hide-modal');
     }
