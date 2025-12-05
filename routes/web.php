@@ -216,5 +216,5 @@ Route::controller(CmoController::class)->group(function () {
 });
 
 Route::controller(JaiBanglaController::class)->group(function () {
-    Route::any('/jaibangla', 'jaibangla')->name('jaibangla');
+    Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
 });

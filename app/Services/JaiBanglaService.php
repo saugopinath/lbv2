@@ -37,4 +37,23 @@ class JaiBanglaService implements JaiBanglaInterface
             return 'Error: ' . $e->getMessage();
         }
     }
+    public function backfromjb()
+    {
+        if ($this->athentication()) {
+            try {
+                $client = new Client();
+                $url = $this->baseurl . 'backfromjb';
+                $response = $client->post($url, [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $this->athentication(),
+                        'Accept'        => 'application/json',
+                    ]
+                ]);
+                $body = json_decode($response->getBody());
+                dd($body);
+            } catch (\Exception $e) {
+                return 'Error: ' . $e->getMessage();
+            }
+        }
+    }
 }

@@ -11,9 +11,8 @@ class JaiBanglaController extends Controller
     {
         $this->jaiBanglaService = $jaiBanglaService;
     }
-    public function jaibangla()
+    public function backfromjb()
     {
-        $data = $this->jaiBanglaService->athentication();
-        dd($data);
+        $data = $this->jaiBanglaService->backfromjb();
     }
 }
