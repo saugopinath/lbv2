@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Interfaces\JnmpAuthenticationInterface;
 use App\Models\JnmpData;
 use GuzzleHttp\Client;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class JnmpAuthenticationService implements JnmpAuthenticationInterface
@@ -15,7 +16,7 @@ class JnmpAuthenticationService implements JnmpAuthenticationInterface
     public function __construct()
     {
         if (app()->environment(['local', 'staging'])) {
-            $this->baseurl = 'http://laravel.test/api/';
+            $this->baseurl = 'http://laravel.test/';
         } else {
             $this->baseurl = 'http://172.25.152.26:8084/';
         }
@@ -27,35 +28,38 @@ class JnmpAuthenticationService implements JnmpAuthenticationInterface
     }
 
 
-    public function getJnmpData($request)
+    public function getJnmpData($data)
     {
+       
         set_time_limit(0);
 
         try {
 
-            $from_date  = $request['from_date'];
-            $to_date    = $request['to_date'];
-            $index      = $request['index'];
-            $page_size  = $request['page_size'];
-
+            $from_date  = $data['from_date'];
+            $to_date    = $data['to_date'];
+            $index      = $data['index'];
+            $page_size  = $data['page_size'];
+          
             $auth_token = base64_encode($this->username . ':' . $this->password);
 
-            $post_url = $this->baseurl . 'api/WbDeath?FromDate=' . $from_date .
-                '&ToDate=' . $to_date .
-                '&PageIndex=' . $index .
-                '&PageSize=' . $page_size;
+          
+            $post_url = $this->baseurl . 'api/WbDeath'
+                . '?FromDate=' . $from_date
+                . '&ToDate=' . $to_date
+                . '&PageIndex=' . $index
+                . '&PageSize=' . $page_size;
 
+          
             $client = new \GuzzleHttp\Client(['timeout' => 30]);
 
             $apiResponse = $client->get($post_url, [
                 'headers' => [
                     'Authorization' => 'Basic ' . $auth_token,
-                    'Content-Type'  => 'application/json'
+                    'Accept'        => 'application/json'
                 ]
             ]);
 
             $decoded = json_decode($apiResponse->getBody());
-
             if (!isset($decoded->data) || !is_array($decoded->data)) {
                 return response()->json([
                     'status'  => 300,
@@ -63,54 +67,62 @@ class JnmpAuthenticationService implements JnmpAuthenticationInterface
                 ]);
             }
 
-            $data      = $decoded->data;
-            $totalRec  = $decoded->TotalRec ?? count($data);
-
-            $record_insert = 0;
+            $data     = $decoded->data;
+            $totalRec = $decoded->TotalRec ?? count($data);
 
             DB::beginTransaction();
 
+            $bulkData = [];
+            $currentTime = now();
+         
             foreach ($data as $item) {
+              
+                $bulkData[] = [
+                    'slno'                          => $item->slno,
+                    'applicationid'                 => $item->applicationid,
+                    'reportingdate'                 => $item->reportingdate,
+                    'dateofdeath'                   => $item->dateofdeath,
+                    'genderdesc'                    => $item->genderdesc,
+                    'deceased_agetypedesc'          => $item->deceased_agetypedesc,
+                    'deceased_age'                  => $item->deceased_age,
+                    'deceased_firstname'            => $item->deceased_firstname,
+                    'deceased_middlename'           => $item->deceased_middlename,
+                    'deceased_lastname'             => $item->deceased_lastname,
+                    'deceasedfullname'              => $item->deceasedfullname,
+                    'deceased_idprooftyp'           => $item->deceased_idprooftyp,
+                    'deceased_idprooftypname'       => $item->deceased_idprooftypname,
+                    'deceasedkhadyosathicategoryid' => $item->deceasedkhadyosathicategoryid,
+                    'deceasedkhadyosathicatdesc'    => $item->deceasedkhadyosathicatdesc,
+                    'deceased_idproofnumber'        => $item->deceased_idproofnumber,
+                    'present_districtname'          => $item->present_districtname,
+                    'present_isblockorulbdesc'      => $item->present_isblockorulbdesc,
+                    'present_blockmunicipalitydesc' => $item->present_blockmunicipalitydesc,
+                    'present_pin'                   => $item->present_pin,
+                    'present_grampanchayatdesc'     => $item->present_grampanchayatdesc,
+                    'present_villagetowndesc'       => $item->present_villagetowndesc,
+                    'certificateno'                 => $item->certificateno,
 
-                $JnmpDataModel = new JnmpData;
+                    'fetching_time'                 => $currentTime,
+                    'running_id'                    => $index,
 
-                $JnmpDataModel->slno                        = $item->slno;
-                $JnmpDataModel->applicationid               = $item->ApplicationId;
-                $JnmpDataModel->reportingdate               = $item->ReportingDate;
-                $JnmpDataModel->dateofdeath                 = $item->DateOfDeath;
-                $JnmpDataModel->genderdesc                  = $item->GenderDesc;
-                $JnmpDataModel->deceased_agetypedesc        = $item->Deceased_AgeTypeDesc;
-                $JnmpDataModel->deceased_age                = $item->Deceased_Age;
-                $JnmpDataModel->deceased_firstname          = $item->Deceased_FirstName;
-                $JnmpDataModel->deceased_middlename         = $item->Deceased_MiddleName;
-                $JnmpDataModel->deceased_lastname           = $item->Deceased_LastName;
-                $JnmpDataModel->deceasedfullname            = $item->DeceasedFullName;
-                $JnmpDataModel->deceased_idprooftyp         = $item->Deceased_IdProofTyp;
-                $JnmpDataModel->deceased_idprooftypname     = $item->Deceased_IdProofTypName;
-                $JnmpDataModel->deceasedkhadyosathicategoryid = $item->DeceasedKhadyoSathiCategoryID;
-                $JnmpDataModel->deceasedkhadyosathicatdesc  = $item->DeceasedKhadyoSathiCatDesc;
-                $JnmpDataModel->deceased_idproofnumber      = $item->Deceased_IdProofNumber;
-                $JnmpDataModel->present_districtname        = $item->Present_DistrictName;
-                $JnmpDataModel->present_isblockorulbdesc    = $item->Present_IsBlockOrUlbDesc;
-                $JnmpDataModel->present_blockmunicipalitydesc = $item->Present_BlockMunicipalityDesc;
-                $JnmpDataModel->present_pin                 = $item->Present_Pin;
-                $JnmpDataModel->present_grampanchayatdesc   = $item->Present_GramPanchayatDesc;
-                $JnmpDataModel->present_villagetowndesc     = $item->Present_VillageTownDesc;
-                $JnmpDataModel->certificateno               = $item->CertificateNo;
+                    'from_date'                     => date('Y-m-d', strtotime(str_replace('/', '-', $from_date))),
+                    'to_date'                       => date('Y-m-d', strtotime(str_replace('/', '-', $to_date))),
 
-                $JnmpDataModel->fetching_time = now();
-                $JnmpDataModel->running_id    = $index;
-                $JnmpDataModel->from_date     = date('Y-m-d', strtotime(str_replace('/', '-', $from_date)));
-                $JnmpDataModel->to_date       = date('Y-m-d', strtotime(str_replace('/', '-', $to_date)));
-
-                $JnmpDataModel->aadhar_hash = (trim($item->Deceased_IdProofTypName) == 'Aadhaar')
-                    ? md5($item->Deceased_IdProofNumber)
-                    : null;
-
-                if ($JnmpDataModel->save()) {
-                    $record_insert++;
-                }
+                    'aadhar_hash'                   => (!empty($item->deceased_idprooftypname) &&
+                        trim($item->deceased_idprooftypname) == 'Aadhaar')
+                        ? md5($item->deceased_idproofnumber)
+                        : null,
+                ];
             }
+           
+            try {
+                JnmpData::insert($bulkData);
+            } catch (\Exception $e) {
+                dd($e->getMessage());
+            }
+
+
+            $record_insert = count($bulkData);
 
             DB::commit();
 
@@ -121,12 +133,14 @@ class JnmpAuthenticationService implements JnmpAuthenticationInterface
                 'total_data' => $totalRec
             ]);
         } catch (\GuzzleHttp\Exception\RequestException $e) {
+
             DB::rollback();
             return response()->json([
                 'status'  => 500,
                 'message' => "API Request Error: " . $e->getMessage()
             ]);
         } catch (\Exception $e) {
+
             DB::rollback();
             return response()->json([
                 'status'  => 500,
@@ -134,83 +148,156 @@ class JnmpAuthenticationService implements JnmpAuthenticationInterface
             ]);
         }
     }
-
-
-    public function detailsCallBack($request)
+    public function detailsCallBack($data)
     {
         set_time_limit(0);
 
         try {
-            $limit = $request->limit;
+            $limit = $data->limit ?? 10;
 
-            $data = JnmpData::where('is_details_callback', 0)->limit($limit)->get();
+            $rows = JnmpData::where('is_details_callback', 0)
+                ->limit($limit)
+                ->get();
 
-            if ($data->isEmpty()) {
+            if ($rows->isEmpty()) {
                 return response()->json([
-                    'status' => 1,
-                    'type' => 'blue',
-                    'icon' => 'fa fa-info',
-                    'title' => 'Info',
-                    'message' => 'No records found.'
+                    'status'  => 1,
+                    'type'    => 'blue',
+                    'icon'    => 'fa fa-info',
+                    'title'   => 'Info',
+                    'message' => 'No records found for callback.'
                 ]);
             }
 
             $jsonArr = [];
-            $updateIds = [];
+            $applicationIds = [];
 
-            foreach ($data as $row) {
-                $jsonArr[]  = ["ApplicationId" => $row->applicationid];
-                $updateIds[] = $row->applicationid;
+            foreach ($rows as $item) {
+                $jsonArr[] = [
+                    "ApplicationId" => $item->applicationid
+                ];
+                $applicationIds[] = $item->applicationid;
             }
 
             $auth_token = base64_encode($this->username . ':' . $this->password);
 
-
-             $client = new \GuzzleHttp\Client(['timeout' => 30]);
-
+            $client = new \GuzzleHttp\Client(['timeout' => 30]);
             $apiUrl = $this->baseurl . 'api/WbDeathDetailsCallBack';
 
-            $apiResponse = $client->post($apiUrl, [
+            // API CALL
+            $response = $client->post($apiUrl, [
                 'headers' => [
                     'Authorization' => 'Basic ' . $auth_token,
-                    'Content-Type' => 'application/json'
+                    'Content-Type'  => 'application/json'
                 ],
                 'json' => $jsonArr
             ]);
 
-            $decoded = json_decode($apiResponse->getBody());
+            $decoded = json_decode($response->getBody());
 
-            $ResponseDesc     = $decoded->ResponseDesc ?? '';
-            $HttpStatusCode   = $decoded->HttpStatusCode ?? 500;
-            $ResponseType     = $decoded->ResponseType ?? '';
+            $ResponseDesc   = $decoded->ResponseDesc   ?? 'No message returned.';
+            $StatusCode     = $decoded->HttpStatusCode ?? 500;
+            $ResponseType   = $decoded->ResponseType   ?? 'Unknown';
 
-            if ($HttpStatusCode == 200) {
+            if ($StatusCode == 200) {
 
-                $updateValues = [
-                    'details_callback_at' => now(),
-                    'is_details_callback' => 1
-                ];
-
-                JnmpData::where('is_details_callback', 0)->whereIn('applicationid', $updateIds)->update($updateValues);
+                JnmpData::whereIn('applicationid', $applicationIds)
+                    ->update([
+                        'details_callback_at' => now(),
+                        'is_details_callback' => 1
+                    ]);
 
                 return response()->json([
+                    'status'  => 1,
+                    'type'    => 'green',
+                    'icon'    => 'fa fa-check',
+                    'title'   => 'Success',
                     'ResponseType' => $ResponseType,
-                    'status' => 1,
-                    'type' => 'green',
-                    'icon' => 'fa fa-check',
-                    'title' => 'Success',
                     'message' => $ResponseDesc
                 ]);
             }
 
             return response()->json([
-                'status' => 400,
-                'message' => 'API Error: ' . $ResponseDesc
+                'status'  => 400,
+                'type'    => 'red',
+                'icon'    => 'fa fa-times',
+                'title'   => 'API Error',
+                'message' => $ResponseDesc
+            ]);
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            return response()->json([
+                'status'  => 500,
+                'type'    => 'red',
+                'icon'    => 'fa fa-warning',
+                'title'   => 'Request Exception',
+                'message' => $e->getMessage()
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'status' => 400,
+                'status'  => 500,
+                'type'    => 'red',
+                'icon'    => 'fa fa-warning',
+                'title'   => 'System Error',
                 'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function submitJnmpData($data)
+    {
+        try {
+
+            $from_date = $data['from_date'] ?? null;
+            $to_date   = $data['to_date'] ?? null;
+            $index     = $data['index'] ?? 1;
+            $page_size = $data['page_size'] ?? 50;
+
+            $auth_token = base64_encode($this->username . ':' . $this->password);
+
+            $endpoint = 'api/WbDeath?FromDate=' . $from_date .
+                '&ToDate=' . $to_date .
+                '&PageIndex=' . $index .
+                '&PageSize=' . $page_size;
+
+            $client = new \GuzzleHttp\Client([
+                'base_uri' => $this->baseurl,
+                'timeout'  => 30,
+            ]);
+
+            $response = $client->get($endpoint, [
+                'headers' => [
+                    'Authorization' => 'Basic ' . $auth_token,
+                    'Content-Type'  => 'application/json'
+                ]
+            ]);
+
+            $decoded = json_decode($response->getBody());
+
+            if (!isset($decoded->data)) {
+                return response()->json([
+                    'status'  => 300,
+                    'message' => 'Invalid response from server.'
+                ]);
+            }
+
+            return response()->json([
+                'status'        => 200,
+                'message'       => "JNMP Data Fetch Successful",
+                'records_found' => count($decoded->data),
+                'total_records' => $decoded->TotalRec ?? count($decoded->data),
+                'data'          => $decoded->data
+            ]);
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+
+            return response()->json([
+                'status'  => 500,
+                'message' => "API Request Error: " . $e->getMessage()
+            ]);
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status'  => 500,
+                'message' => "System Error: " . $e->getMessage()
             ]);
         }
     }

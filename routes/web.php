@@ -29,6 +29,7 @@ use App\Http\Controllers\RoleOfficeTypeMappingsController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Http\Controllers\BeneficiaryCountController;
 use App\Http\Controllers\CmoController;
+use App\Http\Controllers\JnpmController;
 use App\Http\Controllers\RolePermisssionManagementController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
@@ -235,7 +236,18 @@ Route::post('/mis/report/redirect', function (Request $request) {
 //Beneficiary count
 Route::controller(BeneficiaryCountController::class)->group(function () {
     Route::get('/beneficiary-reportlist',  'misReport')->name('beneficiary-reportlist');
-    
 });
+
+Route::controller(JnpmController::class)->group(function () {
+
+    Route::any('/jnmp/pull', 'pullJnmpData')->name('jnmp.pull');
+
+    Route::post('/jnmp/details-callback', 'detailsCallback')->name('jnmp.details-callback');
+
+    Route::post('/jnmp/submit', 'submitJnmpData')->name('jnmp.submit');
+
+});
+
+
 
 
