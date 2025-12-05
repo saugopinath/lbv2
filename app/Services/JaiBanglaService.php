@@ -50,10 +50,55 @@ class JaiBanglaService implements JaiBanglaInterface
                     ]
                 ]);
                 $body = json_decode($response->getBody());
-                dd($body);
+                dd($body->message);
             } catch (\Exception $e) {
                 return 'Error: ' . $e->getMessage();
             }
+        } else {
+            dd('Token is invalid');
+        }
+    }
+    public function logoutfromjb()
+    {
+        if ($this->athentication()) {
+            try {
+                $client = new Client();
+                $url = $this->baseurl . 'logout';
+                $response = $client->post($url, [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $this->athentication(),
+                        'Accept'        => 'application/json',
+                    ]
+                ]);
+                $body = json_decode($response->getBody());
+                dd($body->message);
+            } catch (\Exception $e) {
+                return 'Error: ' . $e->getMessage();
+            }
+        } else {
+            dd('Token is invalid');
+        }
+    }
+
+    public function refreshtokenforjb()
+    {
+        if ($this->athentication()) {
+            try {
+                $client = new Client();
+                $url = $this->baseurl . 'refresh';
+                $response = $client->post($url, [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $this->athentication(),
+                        'Accept'        => 'application/json',
+                    ]
+                ]);
+                $body = json_decode($response->getBody());
+                dd($body->token);
+            } catch (\Exception $e) {
+                return 'Error: ' . $e->getMessage();
+            }
+        } else {
+            dd('Token is invalid');
         }
     }
 }

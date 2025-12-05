@@ -15,4 +15,12 @@ class JaiBanglaController extends Controller
     {
         $data = $this->jaiBanglaService->backfromjb();
     }
+    public function logoutfromjb()
+    {
+        $data = $this->jaiBanglaService->logoutfromjb();
+    }
+    public function refreshtokenforjb()
+    {
+        $data = $this->jaiBanglaService->refreshtokenforjb();
+    }
 }
