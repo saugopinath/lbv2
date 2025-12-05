@@ -4,7 +4,7 @@ namespace App\Services;
 
 use GuzzleHttp\Client;
 use App\Interfaces\JaiBanglaInterface;
-
+use Illuminate\Support\Facades\Hash;
 class JaiBanglaService implements JaiBanglaInterface
 {
     protected $baseurl;
@@ -23,8 +23,8 @@ class JaiBanglaService implements JaiBanglaInterface
             $url = $this->baseurl . 'jaibanglaapi/auth/login';
             $response = $client->post($url, [
                 'json' => [
-                    'email' => 'test@gmail.com',
-                    'password' => 'test',
+                    'email' => 'test@example.com',
+                    'password' => Hash::make('password'),
                 ]
             ]);
             $body = json_decode($response->getBody());
