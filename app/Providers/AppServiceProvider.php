@@ -19,6 +19,9 @@ use App\Services\ElasticsearchService;
 use App\Interfaces\CmoAuthenticationInterface;
 use App\Services\CmoAuthenticationService;
 
+use App\Interfaces\JaiBanglaInterface;
+use App\Services\JaiBanglaService;
+
 use App\Models\User;
 use App\Observers\UserObserver;
 use App\Models\AcceptRejectInfo;
@@ -29,6 +32,7 @@ use App\Models\BenRejectDetails;
 use App\Observers\BenRejectDetailsObserver;
 use App\Models\BeneficiaryPersonal;
 use App\Observers\BeneficiaryPersonalObserver;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -37,7 +41,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(AuthenticationInterface::class, AuthenticationService::class);
-       
+
         $this->app->bind(SendSmsInterface::class, SendSmsService::class);
 
         $this->app->bind(UserInterface::class, UserService::class);
@@ -45,7 +49,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ElasticsearchInterface::class, ElasticsearchService::class);
 
         $this->app->bind(CmoAuthenticationInterface::class, CmoAuthenticationService::class);
-       
+
+        $this->app->bind(JaiBanglaInterface::class, JaiBanglaService::class);
     }
 
     /**
@@ -53,11 +58,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-         User::observe(UserObserver::class);
-         AcceptRejectInfo::observe(AcceptRejectInfoObserver::class);
-         BenRejectDetails::observe(BenRejectDetailsObserver::class);
-         DraftBeneficiaryPersonal::observe(DraftBeneficiaryPersonalObserver::class);
-         BeneficiaryPersonal::observe(BeneficiaryPersonalObserver::class);
-         
+        User::observe(UserObserver::class);
+        AcceptRejectInfo::observe(AcceptRejectInfoObserver::class);
+        BenRejectDetails::observe(BenRejectDetailsObserver::class);
+        DraftBeneficiaryPersonal::observe(DraftBeneficiaryPersonalObserver::class);
+        BeneficiaryPersonal::observe(BeneficiaryPersonalObserver::class);
     }
 }

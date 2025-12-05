@@ -31,7 +31,7 @@ use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\ElasticSearchController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
-
+use App\Http\Controllers\JaiBanglaController;
 // Guest Routes
 Route::get('/', fn() => view('welcome'));
 Route::get('refresh-captcha', [App\Http\Controllers\CaptchaController::class, 'refreshCaptcha'])
@@ -213,4 +213,8 @@ Route::controller(CmoController::class)->group(function () {
     Route::post('/cmo-grievance-search', 'cmogrievancesearch')->name('cmo-grievance-search');
     Route::post('/map-applicant', 'mapapplicant')->name('map-applicant');
     Route::post('/cmo-add-actions', 'addactions')->name('cmo-add-actions');
+});
+
+Route::controller(JaiBanglaController::class)->group(function () {
+    Route::any('/jaibangla', 'jaibangla')->name('jaibangla');
 });
