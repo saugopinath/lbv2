@@ -48,7 +48,7 @@ return new class extends Migration
             $table->timestampTz('marking_application_at')->nullable();
             $table->smallInteger('migrated_to_payment')->nullable();
 
-            $table->foreign('applicationid', 'applicationid_fk')->references('sourceable_id')->on('lb_scheme.beneficiary_common_lists')->onDelete('cascade');
+            // $table->foreign('applicationid', 'applicationid_fk')->references('sourceable_id')->on('lb_scheme.beneficiary_common_lists')->onDelete('cascade');
         });
     }
 

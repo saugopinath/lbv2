@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Interfaces\JNMPAuthenticationInterface;
 use App\Models\BeneficiaryPersonal;
+use App\Models\Codemaster;
 use App\Models\FaultyBeneficiaryPersonal;
 use App\Models\JnmpData;
+use App\Models\LbMapping;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -117,9 +119,107 @@ class JnpmController extends Controller
         }
     }
 
-    public function totalJnmp(Request $request)
+    public function getJnmpStats()
     {
+         $nextleveljnmp = Codemaster::getIdByCode(2300);
+        // JNMP DATA COUNTS
+        $totalJnmp = JnmpData::count() ?? 0;
 
-       
+        $remainingJnmp = JnmpData::where('is_details_callback', 0)->count() ?? 0;
+        $updatedJnmp = JnmpData::where('is_details_callback', 1)->count() ?? 0;
+
+        // PERSONAL DETAILS COUNTS
+        $jnmp_mark = BeneficiaryPersonal::where('jnmp_marked', 1)->count() ?? 0;
+
+        $cur_jnmp_mark_as_death = BeneficiaryPersonal::where('next_level_role_id', $nextleveljnmp)->count() ?? 0;
+
+        $re_activate = BeneficiaryPersonal::where('jnmp_marked', 1)
+            ->where('next_level_role_id', 144)
+            ->count() ?? 0;
+
+        return response()->json([
+            'status' => 1,
+            'totalJnmp' => $totalJnmp,
+            'remainingJnmp' => $remainingJnmp,
+            'updatedJnmp' => $updatedJnmp,
+
+            'data1' => $jnmp_mark,
+            'data2' => $cur_jnmp_mark_as_death,
+            'data3' => $re_activate,
+        ]);
+    }
+   
+    public function markAsDeathProcess()
+    {
+        DB::beginTransaction();
+
+        try {
+            $nextleveljnmp = Codemaster::getIdByCode(2300);
+
+            // INITIALIZE ARRAY ONLY ONCE
+            $mappingData = [];
+            $markNormal = 0;
+
+            // STEP 1: JNMP Aadhaar Matched
+            $jnmpAadhaarMatched = JnmpData::whereNull('lb_application_id')
+                ->where('deceased_idprooftypname', 'Aadhaar')
+                ->whereHas('aadhaar')
+                ->get();
+
+            foreach ($jnmpAadhaarMatched as $item) {
+
+                // Update JNMP Data
+                $item->lb_application_id = $item->aadhaar->application_id;
+                $item->marking_application_at = now();
+                $item->save();
+
+                // ADD MAPPING DATA (CORRECT)
+                $mappingData[] = [
+                    'lb_id'           => $item->aadhaar->application_id,
+                    'jnm_id'          => $item->applicationid,    
+                    'aadhar_hash'     => $item->aadhar_hash,
+                    'payment_suspend' => 1,
+                    'created_at'      => now(),
+                    'updated_at'      => now(),
+                ];
+            }
+
+            // STEP 2: Update BeneficiaryPersonal
+            $beneficiaries = BeneficiaryPersonal::where('next_level_role_id', 144)
+                ->whereNull('jnmp_marked')
+                ->whereHas('jnmp', function ($q) {
+                    $q->where('migrated_to_jb', 0);
+                })
+                ->with('jnmp')
+                ->get();
+
+            foreach ($beneficiaries as $ben) {
+
+                if ($ben->jnmp) {
+
+                    $ben->update([
+                        'next_level_role_id' => $nextleveljnmp,
+                        'jnmp_marked'        => 1
+                    ]);
+
+                    $markNormal++;
+                }
+            }
+
+            // STEP 3: INSERT MAPPING DATA
+            if (!empty($mappingData)) {
+                LbMapping::insert($mappingData);
+            }
+
+            DB::commit();
+
+            session()->flash('success', "Marking Completed Successfully. Total Marked: $markNormal");
+            return redirect()->back();
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+            session()->flash('error', 'Unexpected Error: ' . $e->getMessage());
+            return redirect()->back();
+        }
     }
 }

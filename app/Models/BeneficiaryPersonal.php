@@ -18,6 +18,10 @@ class BeneficiaryPersonal extends Model implements Auditable
         return $this->hasMany(BeneficiaryRelationship::class, 'beneficiary_id', 'beneficiary_id');
     }
 
+    public function jnmp()
+    {
+        return $this->hasOne(JnmpData::class, 'lb_application_id', 'application_id');
+    }
 
     public function contacts()
     {
@@ -94,7 +98,7 @@ class BeneficiaryPersonal extends Model implements Auditable
     // {
     //     return $this->hasMany(BeneficiaryRelationship::class, 'application_id');
     // }
-    
+
     public function getStatusText()
     {
         return 'Approved';
@@ -108,7 +112,7 @@ class BeneficiaryPersonal extends Model implements Auditable
             if ($commonList) {
                 $commonList->update([
                     'sourceable_type' => get_class($beneficiary),
-                    'next_level_role_id'=> $beneficiary->next_level_role_id,
+                    'next_level_role_id' => $beneficiary->next_level_role_id,
                 ]);
             }
         });

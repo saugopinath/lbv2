@@ -1,0 +1,75 @@
+<div class="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-4 mb-6">
+        <h1 class="text-2xl font-bold text-center text-indigo-800 dark:text-white tracking-wide">
+            {{ $header }}
+        </h1>
+    </div>
+
+    <div x-data="{ open: true }" class="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-6 space-y-6">
+
+        <!-- Title -->
+        <div class="flex justify-between items-center border-b pb-3">
+            <h2 class="text-xl font-semibold text-indigo-700 dark:text-indigo-300">
+                Importing data from Jonmo Mrityu Tothyo portal (Next data fetch is scheduled for: )
+            </h2>
+
+            <button @click="open = !open" class="text-sm px-3 py-1 rounded-full bg-indigo-100 dark:bg-gray-700 
+                   text-indigo-700 dark:text-indigo-300 hover:bg-indigo-200">
+                <span x-show="open">Hide</span>
+                <span x-show="!open">Show</span>
+            </button>
+        </div>
+
+        <!-- Form -->
+        <form x-show="open" x-transition action="{{ route('jnmp.pull') }}" method="POST" class="space-y-6">
+            @csrf
+
+            <!-- All 4 fields in one row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- From Date -->
+                <div>
+                    <label for="from_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        From Date <span class="text-red-500">*</span>
+                    </label>
+                    <input type="date" id="from_date" name="from_date" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
+                              focus:ring-2 focus:ring-indigo-500 focus:border-transparent 
+                              dark:bg-gray-700 dark:text-white">
+                </div>
+
+                <!-- To Date -->
+                <div>
+                    <label for="to_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        To Date <span class="text-red-500">*</span>
+                    </label>
+                    <input type="date" id="to_date" name="to_date" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
+                              focus:ring-2 focus:ring-indigo-500 focus:border-transparent 
+                              dark:bg-gray-700 dark:text-white">
+                </div>
+
+                <!-- Index -->
+                  <div class="grid gap-6 md:grid-cols-2 mb-2 pl-4 pr-4">
+                <div>
+                    <x-form.input id="page_size" name="page_size" label="Page Size" required x-on:input="
+        $el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10);
+        ;
+    " />
+                </div>
+
+                <!-- Page Size -->
+                <div>
+                    <div>
+                    <x-form.input id="index" name="index" label="Index" required x-on:input="
+        $el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10);
+        ;
+    " />
+                </div>
+            </div>
+
+            <div class="pt-4 flex justify-center">
+                <x-button.primary class="px-10">
+                    Import Data
+                </x-button.primary>
+            </div>
+
+        </form>
+
+    </div>

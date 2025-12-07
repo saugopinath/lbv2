@@ -16,7 +16,7 @@ return new class extends Migration
             $table->integer('lb_id')->nullable();
             $table->integer('jnm_id')->nullable();
             $table->string('aadhar_hash')->nullable()->unique();
-            $table->smallInteger('payment_suspend ')->nullable();
+            $table->smallInteger('payment_suspend')->nullable();
 
             $table->foreign('aadhar_hash', 'aadhar_hash_fk')->references('aadhar_hash')->on('lb_scheme.beneficiary_aadhaars')->onDelete('cascade');
             $table->timestamps();

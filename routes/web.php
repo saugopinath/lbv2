@@ -197,8 +197,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/mis-report', [MisReportController::class, 'index'])->name('mis.index');
     // Route::post('/mis-report-data', [MisReportController::class, 'getData'])->name('mis.data');
-  Route::get('/incomplete-details-mis-report', [MisReportController::class, 'incompleteDetails'])
-    ->name('incomplete.details.mis.report');
+    Route::get('/incomplete-details-mis-report', [MisReportController::class, 'incompleteDetails'])
+        ->name('incomplete.details.mis.report');
 
     // Design Pages (Dev Only – Remove in Prod)
     Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
@@ -246,8 +246,6 @@ Route::controller(JnpmController::class)->group(function () {
 
     Route::post('/jnmp/submit', 'submitJnmpData')->name('jnmp.submit');
 
+    Route::get('/jnmp-stats',  'getJnmpStats');
+    Route::post('/jnmp/mark-as-death',  'markAsDeathProcess')->name('jnmp.mark-as-death');
 });
-
-
-
-

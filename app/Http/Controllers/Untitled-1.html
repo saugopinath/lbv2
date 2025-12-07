@@ -1,0 +1,343 @@
+<x-layouts.app>
+
+    <div class="bg-gradient-to-r from-indigo-50 to-white dark:from-gray-800 dark:to-gray-900 shadow-xl rounded-xl p-6 mb-8">
+        <h1 class="text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 tracking-wide">
+            {{ $header }}
+        </h1>
+        <p class="text-center text-gray-600 dark:text-gray-400 mt-2 text-sm">
+            Jonmo Mrityu Tothyo Portal Data Management Dashboard
+        </p>
+    </div>
+
+    <!-- Import Section -->
+    <div x-data="{ open: true }" class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 mb-8 border border-indigo-100 dark:border-gray-700">
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-indigo-100 dark:bg-indigo-900 rounded-lg">
+                    <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-white">
+                        Import Data from JnM Portal
+                    </h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Next data fetch: <span class="font-medium text-indigo-600 dark:text-indigo-400">{{ $nextSchedule ?? 'Not scheduled' }}</span>
+                    </p>
+                </div>
+            </div>
+
+            <button @click="open = !open" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200
+                   bg-indigo-50 dark:bg-gray-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-gray-600">
+                <span x-show="open" class="font-medium">Hide Section</span>
+                <span x-show="!open" class="font-medium">Show Section</span>
+                <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': !open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+        </div>
+
+        <form x-show="open" x-transition action="{{ route('jnmp.pull') }}" method="POST" class="space-y-6">
+            @csrf
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        From Date <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="date" name="from_date" required
+                               class="w-full px-4 py-3 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg
+                                      bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                        <div class="absolute left-3 top-3 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        To Date <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="date" name="to_date" required
+                               class="w-full px-4 py-3 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg
+                                      bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                        <div class="absolute left-3 top-3 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Index <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <x-form.input id="index" name="index" required
+                                      class="pl-10 !py-3"
+                                      x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10);" />
+                        <div class="absolute left-3 top-3 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Page Size <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <x-form.input id="page_size" name="page_size" label="" required
+                                      class="pl-10 !py-3"
+                                      x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10);" />
+                        <div class="absolute left-3 top-3 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex justify-center">
+                    <x-button.primary class="px-12 py-3 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+                        <svg class="w-5 h-5 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                        Import Data
+                    </x-button.primary>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- Callback Section -->
+    <div x-data="{ open: true }" class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 mb-8 border border-green-100 dark:border-gray-700">
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-white">
+                        Callback Data to JnM Portal
+                    </h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Send processed data back to the portal
+                    </p>
+                </div>
+            </div>
+
+            <button @click="open = !open" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200
+                   bg-green-50 dark:bg-gray-700 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-gray-600">
+                <span x-show="open" class="font-medium">Hide Section</span>
+                <span x-show="!open" class="font-medium">Show Section</span>
+                <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': !open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+        </div>
+
+        <div x-data="{
+                totalJnmp: 0,
+                remainingJnmp: 0,
+                updatedJnmp: 0,
+                loadData() {
+                    fetch('/jnmp-stats')
+                        .then(r => r.json())
+                        .then(d => {
+                            this.totalJnmp = d.totalJnmp ?? 0;
+                            this.remainingJnmp = d.remainingJnmp ?? 0;
+                            this.updatedJnmp = d.updatedJnmp ?? 0;
+                        });
+                }
+            }" x-init="loadData()" class="mb-8">
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gradient-to-br from-indigo-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-xl p-5 border border-indigo-100 dark:border-gray-700">
+                    <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-indigo-100 dark:bg-indigo-900 mb-3">
+                        <svg class="h-6 w-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-900 dark:text-white" x-text="totalJnmp.toLocaleString()"></div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Total Data Captured</div>
+                </div>
+
+                <div class="bg-gradient-to-br from-green-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-xl p-5 border border-green-100 dark:border-gray-700">
+                    <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-green-100 dark:bg-green-900 mb-3">
+                        <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-900 dark:text-white" x-text="updatedJnmp.toLocaleString()"></div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Callback Completed</div>
+                </div>
+
+                <div class="bg-gradient-to-br from-orange-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-xl p-5 border border-orange-100 dark:border-gray-700">
+                    <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-orange-100 dark:bg-orange-900 mb-3">
+                        <svg class="h-6 w-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-900 dark:text-white" x-text="remainingJnmp.toLocaleString()"></div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Callback Pending</div>
+                </div>
+            </div>
+        </div>
+
+        <form x-show="open" action="{{ route('jnmp.details-callback') }}" method="POST" class="space-y-6">
+            @csrf
+            <div class="flex flex-col md:flex-row md:items-end gap-4">
+                <div class="flex-1">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            Processing Limit <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <x-form.input id="limit" name="limit" label="" required
+                                          class="pl-10 !py-3"
+                                          placeholder="Enter number of records to process"
+                                          x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10);" />
+                            <div class="absolute left-3 top-3 text-gray-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <x-button.primary class="px-10 py-3 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+                        <svg class="w-5 h-5 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                        </svg>
+                        Process Callback
+                    </x-button.primary>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+    <!-- Death Marking Section -->
+    <div x-data="{ open: true }" class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 border border-red-100 dark:border-gray-700">
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
+                    <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.698-.833-2.464 0L4.198 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-white">
+                        Mark Death Cases
+                    </h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Update beneficiary status in Lakshmir Bhandar Portal
+                    </p>
+                </div>
+            </div>
+
+            <button @click="open = !open" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200
+                   bg-red-50 dark:bg-gray-700 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-gray-600">
+                <span x-show="open" class="font-medium">Hide Section</span>
+                <span x-show="!open" class="font-medium">Show Section</span>
+                <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': !open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+        </div>
+
+        <div x-data="{
+                data1: 0,
+                data2: 0,
+                data3: 0,
+                loadData() {
+                    fetch('/jnmp-stats')
+                        .then(r => r.json())
+                        .then(d => {
+                            this.data1 = d.data1 ?? 0;
+                            this.data2 = d.data2 ?? 0;
+                            this.data3 = d.data3 ?? 0;
+                        });
+                }
+            }" x-init="loadData()" class="mb-8">
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-gray-100 dark:bg-gray-700 mb-3">
+                        <svg class="h-6 w-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-900 dark:text-white" x-text="data1.toLocaleString()"></div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Total Death Cases</div>
+                </div>
+
+                <div class="bg-gradient-to-br from-red-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-xl p-5 border border-red-100 dark:border-gray-700">
+                    <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-red-100 dark:bg-red-900 mb-3">
+                        <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-900 dark:text-white" x-text="data2.toLocaleString()"></div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Current Month</div>
+                </div>
+
+                <div class="bg-gradient-to-br from-blue-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-xl p-5 border border-blue-100 dark:border-gray-700">
+                    <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-blue-100 dark:bg-blue-900 mb-3">
+                        <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-900 dark:text-white" x-text="data3.toLocaleString()"></div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Reactivated Cases</div>
+                </div>
+            </div>
+        </div>
+
+        <form x-show="open" action="{{ route('jnmp.details-callback') }}" method="POST" class="space-y-6">
+            @csrf
+            <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            This action will update death status of beneficiaries in Lakshmir Bhandar portal.
+                            <span class="font-medium text-red-600 dark:text-red-400">Please verify data before proceeding.</span>
+                        </p>
+                    </div>
+                    <div>
+                        <x-button.danger class="px-10 py-3 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+                            <svg class="w-5 h-5 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Update Death Status
+                        </x-button.danger>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+</x-layouts.app>
