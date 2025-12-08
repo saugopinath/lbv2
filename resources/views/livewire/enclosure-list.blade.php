@@ -4,6 +4,7 @@
         showUploadModal: @entangle('showUploadModal'),
             currentDocId: @entangle('currentDocId'),
             {{--  currentDocId: null,  --}}
+            errorMessage: '',
         currentDocName: '',
             currentFilePreview: null,
             currentFileName: '',

@@ -372,8 +372,8 @@ class ApplicationMisReportLgd extends Component
                 // If municipality selected (we stored municipality_id in filters), use Ward table
                 // dd('ok');
                 // dump($this->filter_condition);
-                dd($filters);
-                dd($filters['block_id']);
+                // dd($filters);
+                // dd($filters['block_id']);
                 if (!empty($filters['municipality_id'])) {
                     $q = Ward::query();
                     // municipality_id is internal PK
