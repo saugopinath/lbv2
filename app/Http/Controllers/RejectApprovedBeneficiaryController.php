@@ -103,12 +103,10 @@ class RejectApprovedBeneficiaryController extends Controller
             'application_id' => 'required|string',
             'reject_reason'  => 'required|integer|exists:codemasters,id',
             'remark'         => 'required|string',
-            'doctype'     => 'required|integer|exists:codemasters,id', // enable if needed
         ], [
             'application_id.required' => 'Invalid application.',
             'reject_reason.required'  => 'Please select a reason.',
             'remark.required'         => 'Please enter a remark.',
-            'doctype.required'         => 'Please enter a document type.',
         ]);
         try {
             $applicationId = Crypt::decryptString($request->application_id);
