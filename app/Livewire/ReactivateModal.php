@@ -31,6 +31,7 @@ class ReactivateModal extends Component
 
     public function mount()
     {
+        // dd($this->applicantId);
         $this->reactive_reason = Codemaster::where('parent_id', Codemaster::getIdByCode(211))->get();
     }
 
@@ -198,6 +199,9 @@ class ReactivateModal extends Component
 
     public function render()
     {
-        return view('livewire.reactivate-modal');
+        // dd($this->applicantId);
+        return view('livewire.reactivate-modal', [
+            'application_id' => $this->applicantId
+        ]);
     }
 }

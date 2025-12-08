@@ -1,14 +1,6 @@
-<div
-    x-data="{ open: false }"
-    x-show="open"
-    x-cloak
-    x-init="$watch('open', v => { if (!v) $wire.resetForm(); })"
-    x-on:show-modal.window="open = true"
-    x-on:hide-modal.window="open = false"
-    @keydown.escape.window="open = false"
-    wire:ignore.self
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
->
+<div x-data="{ open: false }" x-show="open" x-cloak x-init="$watch('open', v => { if (!v) $wire.resetForm(); })"
+    x-on:show-modal.window="open = true" x-on:hide-modal.window="open = false" @keydown.escape.window="open = false"
+    wire:ignore.self class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
     <form x-on:submit.prevent="$wire.saveDsMark()">
         <div class="bg-white rounded-xl p-8 w-[90%] md:w-[60%] shadow-2xl max-h-[90vh] overflow-y-auto">
 
@@ -18,8 +10,7 @@
                     Beneficiary Details
                 </h2>
 
-                <button @click="open = false"
-                        class="text-gray-500 hover:text-red-500 text-3xl leading-none">
+                <button @click="open = false" class="text-gray-500 hover:text-red-500 text-3xl leading-none">
                     &times;
                 </button>
             </div>
@@ -69,13 +60,8 @@
 
             <!-- REASON -->
             <div class="mb-4">
-                <x-form.select
-                    name="revert_reason_cause_id"
-                    id="revert_reason_cause_id"
-                    label="Reactivation Reason"
-                    wire:model.live="revert_reason_cause_id"
-                    required
-                >
+                <x-form.select name="revert_reason_cause_id" id="revert_reason_cause_id" label="Reactivation Reason"
+                    wire:model.live="revert_reason_cause_id" required>
                     <option value="">-- Select Reason --</option>
                     @foreach ($reactive_reason as $reason)
                         <option value="{{ $reason->id }}">{{ $reason->name }}</option>
@@ -85,16 +71,13 @@
 
             <!-- REMARKS -->
             <div class="mb-4">
-                <x-form.textarea
-                    id="revert_reason_remarks"
-                    name="revert_reason_remarks"
-                    label="Remarks"
-                    wire:model="revert_reason_remarks"
-                    required
-                />
+                <x-form.textarea id="revert_reason_remarks" name="revert_reason_remarks" label="Remarks"
+                    wire:model="revert_reason_remarks" required />
             </div>
-            
-   <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[111]" :is_page="1" enclosureSource="5" />
+
+            <div class="mb-4">
+                <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="[170]"/>
+            </div>
 
             <!-- BUTTON CENTERED -->
             <div class="mt-6 flex justify-center">
