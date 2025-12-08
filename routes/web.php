@@ -29,6 +29,7 @@ use App\Http\Controllers\RoleOfficeTypeMappingsController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Http\Controllers\CmoController;
 use App\Http\Controllers\RolePermisssionManagementController;
+use App\Http\Controllers\ElasticSearchController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
 
@@ -199,6 +200,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
     Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
     Route::get('/custom_application/{id}', ApplicationView::class)->name('custom_application.view');
+    Route::get('/getelsticsearchIndex', [ElasticSearchController::class, 'index'])->name('getelsticsearchIndex');
 });
 Route::controller(CmoController::class)->group(function () {
     Route::any('/pullnewcmo', 'pullnewcmo')->name('pullnewcmo');
