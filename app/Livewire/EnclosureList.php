@@ -52,6 +52,7 @@ class EnclosureList extends Component
                 }
             }
         } else {
+            // dd($this->doc_type_id_array_list);
             if (!empty($this->doc_type_id_array_list)) {
 
                 if ($this->enclosureSource == 5) {
@@ -59,7 +60,8 @@ class EnclosureList extends Component
                         ->whereIn('document_type', $this->doc_type_id_array_list)
                         ->get();
                     // dd($app);
-                } else {
+                }
+                else {
                     $app = BeneficiaryEnclosure::where('application_id', $application_id)
                         ->whereIn('document_type', $this->doc_type_id_array_list)
                         ->get();
@@ -207,6 +209,8 @@ class EnclosureList extends Component
             // dd($is_upload);
         }
 
+        $docId = $this->currentDocId;
+
         $this->singleDocument = null;
         $this->currentDocId = null;
         $this->currentDocMaxSize = '';
@@ -232,7 +236,7 @@ class EnclosureList extends Component
             }
         }
 
-        $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.');
+        $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.', docId:$docId);
         $this->dispatch('$refresh');
     }
 

@@ -48,13 +48,7 @@
                     name="remark"
                     label="Remark" required />
 
-                <x-form.select name="doctype" id="doctype" required>
-                    <option value="">Select</option>
-                    @foreach ($doctypes as $doctype)
-                    <option value="{{ $doctype['id'] }}">{{ $doctype['name'] }}</option>
-                    @endforeach
-                </x-form.select> 
-
+                <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="[162]"/>
 
             </div>
             <div class="flex justify-center">

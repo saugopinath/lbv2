@@ -4,10 +4,12 @@
         showUploadModal: @entangle('showUploadModal'),
             currentDocId: @entangle('currentDocId'),
             {{--  currentDocId: null,  --}}
+            errorMessage: '',
         currentDocName: '',
             currentFilePreview: null,
             currentFileName: '',
             currentFileMime: '',
+            errorMessage:'',
     
             handleFileChange(event) {
                 const file = event.target.files[0];
@@ -83,8 +85,10 @@
     
     }" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         @foreach ($doc_lists as $doc)
+        <div wire:key="doc_{{ $doc->doc_type_id }}">
             <x-document-card :docName="$doc->codemaster->name" :isRequired="$doc->is_required" :docTypeId="$doc->doc_type_id" :existingDoc="$existingDocuments[$doc->doc_type_id] ?? null" :xIsDuplicate="$is_page == 1 ? 1 : 0"
                 :showErrors="$showErrors ?? false" />
+        </div>
         @endforeach
 
         <x-upload-modal :currentDocExtensions="$currentDocExtensions" :currentDocMaxSize="$currentDocMaxSize" />

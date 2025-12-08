@@ -8,8 +8,10 @@
     'singleDocument' => null,
 ])
 
-<div x-data="{ modalOpen: false, modalSrc: '', modalDocName: '', successMessage: '', }"
-    x-on:enclosure-saved.window="successMessage = $event.detail.message; setTimeout(() => successMessage = '', 3000);"
+<div x-data="{ modalOpen: false, modalSrc: '', modalDocName: '', successMessage: '', docId:'' }"
+    x-on:enclosure-saved.window="
+    successMessage = $event.detail.message; 
+    docId = $event.detail.docId; "
     class="relative">
 
     <!-- Single card -->
@@ -88,7 +90,7 @@
         @if ($isRequired && empty($existingDoc) && !$singleDocument && $showErrors)
             <p class="text-red-500 text-sm mt-2">{{ $docName }} document is required.</p>
         @endif
-        <template x-if="successMessage">
+        <template x-if="docId == {{ $docTypeId }} && successMessage">
             <div class="mt-2 p-2 rounded bg-green-100 text-green-700 text-sm">
                 <span x-text="successMessage"></span>
             </div>
