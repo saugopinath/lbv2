@@ -93,7 +93,8 @@
                     required
                 />
             </div>
-   {{--  <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[111]" :is_page="1" enclosureSource="5" />  --}}
+            
+   <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[111]" :is_page="1" enclosureSource="5" />
 
             <!-- BUTTON CENTERED -->
             <div class="mt-6 flex justify-center">
