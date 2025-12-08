@@ -58,6 +58,14 @@
                 </div>
             </div>
 
+            <div class="mb-4">
+                <h3 class="font-semibold mb-2">Upload Document</h3>
+
+                <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="[170]" />
+            </div>
+
+
+
             <!-- REASON -->
             <div class="mb-4">
                 <x-form.select name="revert_reason_cause_id" id="revert_reason_cause_id" label="Reactivation Reason"
@@ -75,9 +83,6 @@
                     wire:model="revert_reason_remarks" required />
             </div>
 
-            <div class="mb-4">
-                <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="[170]"/>
-            </div>
 
             <!-- BUTTON CENTERED -->
             <div class="mt-6 flex justify-center">
