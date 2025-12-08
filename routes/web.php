@@ -160,11 +160,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('Caste-modification-info');
 
     Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])
-        ->middleware('permission.redirect:canEditCaste')
+        // ->middleware('permission.redirect:canEditCaste')
         ->name('caste-modification.edit');
 
     Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
-        ->middleware('permission.redirect:canUpdateCaste')
+        // ->middleware('permission.redirect:canUpdateCaste')
         ->name('beneficiary.updateCaste');
 
     Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])
@@ -172,7 +172,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('caste-modification-list');
 
     Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
-        ->middleware('permission.redirect:canBeneficiaryDetails')
+        // ->middleware('permission.redirect:canBeneficiaryDetails')
         ->name('view-beneficiary-details');
 
     Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])

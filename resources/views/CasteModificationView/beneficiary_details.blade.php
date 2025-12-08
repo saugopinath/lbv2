@@ -89,9 +89,9 @@
             </div>
         </div>
         <div class="rounded-xl p-4 mt-4">
-            @if(\App\Helpers\WorkFlowPermissionHelper::canTakeActionForCaste())
+            {{--  @if(\App\Helpers\WorkFlowPermissionHelper::canTakeActionForCaste())  --}}
             <livewire:caste-modification.caste-modification-action :applicationId="$application_id" />
-            @endif
+            {{--  @endif  --}}
         </div>
 
     </div>

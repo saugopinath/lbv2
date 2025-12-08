@@ -19,7 +19,8 @@ class OperatorPermissionSeeder extends Seeder
             'view beneficiaries',
             'view reports',
             'Normal Entry Permission',
-            'Normal Entry Allow'
+            'Normal Entry Allow',
+            'modify caste'
         ];
 
         // 1) find role

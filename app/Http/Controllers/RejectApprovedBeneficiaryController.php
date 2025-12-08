@@ -45,7 +45,7 @@ class RejectApprovedBeneficiaryController extends Controller
     }
     public function deActiveBeneficiary(Request $request)
     {
-        // // dd('ok');
+        // dd('ok');
         // // dd($request->all());
         // if (!Auth::check()) {
         //     dd('not login');
@@ -103,11 +103,12 @@ class RejectApprovedBeneficiaryController extends Controller
             'application_id' => 'required|string',
             'reject_reason'  => 'required|integer|exists:codemasters,id',
             'remark'         => 'required|string',
-            // 'doctype'     => 'nullable|integer|exists:codemasters,id', // enable if needed
+            'doctype'     => 'required|integer|exists:codemasters,id', // enable if needed
         ], [
             'application_id.required' => 'Invalid application.',
             'reject_reason.required'  => 'Please select a reason.',
             'remark.required'         => 'Please enter a remark.',
+            'doctype.required'         => 'Please enter a document type.',
         ]);
         try {
             $applicationId = Crypt::decryptString($request->application_id);
@@ -144,10 +145,12 @@ class RejectApprovedBeneficiaryController extends Controller
             // dump($updatepersonal);
             // dd($logdetailsSaved);
 
-            if ($logdetailsSaved && $updatepersonal ) {
+            if ($logdetailsSaved && $updatepersonal) {
                 // $beneficiary->sourceable->update();
                 DB::commit();
-                 return redirect()->route('reject-approved-beneficiary')->with('success', 'Beneficiary De-Activated Successfully!');
+
+                session()->flash('success', "Beneficiary De-Activated Successfully!");
+                return redirect()->route('reject-approved-beneficiary')->with('success', 'Beneficiary De-Activated Successfully!');
             } else {
                 DB::rollBack();
                 return redirect()->route('reject-approved-beneficiary')->with('error', 'Something went wrong!');
