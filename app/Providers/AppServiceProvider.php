@@ -19,8 +19,8 @@ use App\Services\ElasticsearchService;
 use App\Interfaces\CmoAuthenticationInterface;
 use App\Services\CmoAuthenticationService;
 
-use App\Interfaces\JaiBanglaInterface;
-use App\Services\JaiBanglaService;
+// use App\Interfaces\JaiBanglaInterface;
+// use App\Services\JaiBanglaService;
 
 use App\Models\User;
 use App\Observers\UserObserver;
@@ -50,7 +50,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(CmoAuthenticationInterface::class, CmoAuthenticationService::class);
 
-        $this->app->bind(JaiBanglaInterface::class, JaiBanglaService::class);
+        // $this->app->bind(JaiBanglaInterface::class, JaiBanglaService::class);
     }
 
     /**

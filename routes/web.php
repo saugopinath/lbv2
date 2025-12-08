@@ -215,8 +215,8 @@ Route::controller(CmoController::class)->group(function () {
     Route::post('/cmo-add-actions', 'addactions')->name('cmo-add-actions');
 });
 
-Route::controller(JaiBanglaController::class)->group(function () {
+/*Route::controller(JaiBanglaController::class)->group(function () {
     Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
     Route::any('/logoutfromjb', 'logoutfromjb')->name('logoutfromjb');
     Route::any('/refreshtokenforjb', 'refreshtokenforjb')->name('refreshtokenforjb');
-});
+});*/
