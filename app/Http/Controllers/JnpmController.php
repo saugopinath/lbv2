@@ -222,4 +222,10 @@ class JnpmController extends Controller
             return redirect()->back();
         }
     }
+
+    public function index()
+    {
+         $button_show = 1;
+        return view('jnmp.index',compact('button_show'));
+    }
 }

@@ -15,18 +15,22 @@ return new class extends Migration
 
             // Add marked_data (smallint)
             $table->smallInteger('marked_data')
-                  ->nullable()
-                  ->after('next_level_role_id');
+                ->nullable()
+                ->after('next_level_role_id');
 
             // Add jnmp_marked (smallint)
             $table->smallInteger('jnmp_marked')
-                  ->nullable()
-                  ->after('marked_data');
+                ->nullable()
+                ->after('marked_data');
 
             // Add jnmp_remarks (varchar)
             $table->string('jnmp_remarks')
-                  ->nullable()
-                  ->after('jnmp_marked');
+                ->nullable()
+                ->after('jnmp_marked');
+
+            $table->string('reactive_reason')
+                ->nullable()
+                ->after('jnmp_marked');
         });
     }
 

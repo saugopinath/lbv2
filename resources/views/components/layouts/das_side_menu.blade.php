@@ -606,7 +606,7 @@
         @endif
          @if ($user->hasAnyRole(['Approver', 'Delegated Approver']))
             <div>
-                <a href="{{ route('jnmp.pull') }}"
+                <a href="{{ route('jnmp-data') }}"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
                     <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
@@ -617,7 +617,7 @@
                             d="M9.44666 15.397C9.11389 15.1504 8.64418 15.2202 8.39752 15.5529C8.15086 15.8857 8.22067 16.3554 8.55343 16.6021C9.52585 17.3229 10.7151 17.7496 12 17.7496C13.285 17.7496 14.4742 17.3229 15.4467 16.6021C15.7794 16.3554 15.8492 15.8857 15.6026 15.5529C15.3559 15.2202 14.8862 15.1504 14.5534 15.397C13.8251 15.9369 12.9459 16.2496 12 16.2496C11.0541 16.2496 10.175 15.9369 9.44666 15.397Z"
                             fill="currentColor" />
                     </svg>
-                    <span x-show="sidebar" class="mr-2 truncate">Import Janma-Mrityu Data</span>
+                    <span x-show="sidebar" class="mr-2 truncate">Re-activate Death Incident</span>
                 </a>
             </div>
         @endif

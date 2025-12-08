@@ -23,6 +23,11 @@ class BeneficiaryPersonal extends Model implements Auditable
         return $this->hasOne(JnmpData::class, 'lb_application_id', 'application_id');
     }
 
+    public function mapping()
+    {
+        return $this->hasOne(LbMapping::class, 'lb_id', 'application_id');
+    }
+
     public function contacts()
     {
         return $this->hasOne(BeneficiaryContact::class, 'application_id', 'application_id');

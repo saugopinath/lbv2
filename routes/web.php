@@ -248,4 +248,5 @@ Route::controller(JnpmController::class)->group(function () {
 
     Route::get('/jnmp-stats',  'getJnmpStats');
     Route::post('/jnmp/mark-as-death',  'markAsDeathProcess')->name('jnmp.mark-as-death');
+    Route::get('jnmp-data', 'index')->name('jnmp-data');
 });
