@@ -11,6 +11,7 @@ use App\Models\Codemaster;
 use Illuminate\Support\Facades\Crypt;
 use App\Helpers\CheckAuthHelper;
 use App\Helpers\WorkFlowPermissionHelper;
+use App\Models\BeneficiaryTemEnclosure;
 use Illuminate\Support\Facades\DB;
 
 class CasteModificationAction extends Component
@@ -23,7 +24,7 @@ class CasteModificationAction extends Component
     public $showModal = false;
     public $availableActions = [];
     public $heading = '';
-
+    public $doc_type;
     protected $rules = [
         'action' => 'required|string',
     ];
@@ -32,6 +33,7 @@ class CasteModificationAction extends Component
     {
         $this->applicationId = $applicationId;
         $this->roleId = CheckAuthHelper::getRoleId();
+        $this->doc_type = Codemaster::getIdByCode(162); // Caste Certificate Document Type
 
         // Define heading & actions dynamically
         // if (CheckAuthHelper::isVerifier()) {
@@ -90,7 +92,7 @@ class CasteModificationAction extends Component
 
     public function submit()
     {
-// dd($this->remark);
+        // dd($this->remark);
         $this->validate();
 
         $casteModification = CasteModificationInfo::where('application_id', $this->applicationId)
@@ -121,21 +123,25 @@ class CasteModificationAction extends Component
         try {
             DB::beginTransaction();
 
+            $casteSaved = false;
+            $acceptSaved = false;
+            $beneficiarySaved = true;
+            $casteUpdated = true;
+
             $casteModification->next_level_requested_id = $mapping[$this->action];
-            $casteModification->updated_by              = Auth::id();
-            // $casteModification->is_active              = false;
-            $casteSaved = $casteModification->save();
-            // dump($casteSaved);
+            $casteModification->updated_by = Auth::id();
+            $casteSaved = $casteModification->save(); // boolean
 
             $acceptReject = new AcceptRejectInfo();
-            $acceptReject->application_id         = $this->applicationId;
-            $acceptReject->beneficiary_id         = $casteModification->beneficiary_id;
-            $acceptReject->ip_address             = request()->ip();
-            $acceptReject->user_id                = Auth::id();
-            $acceptReject->browser                = request()->header('User-Agent');
-            $acceptReject->model_name             = class_basename(static::class) . '@' . __FUNCTION__;
-            $acceptReject->op_type                = $opTypeMapping[$this->action];
+            $acceptReject->application_id = $this->applicationId;
+            $acceptReject->beneficiary_id = $casteModification->beneficiary_id;
+            $acceptReject->ip_address = request()->ip();
+            $acceptReject->user_id = Auth::id();
+            $acceptReject->browser = request()->header('User-Agent');
+            $acceptReject->model_name = class_basename(static::class) . '@' . __FUNCTION__;
+            $acceptReject->op_type = $opTypeMapping[$this->action];
             $acceptReject->revert_reason_cause_id = null;
+            $acceptReject->parent_id = $previousId;
 
             if ($this->action == '2204') {
                 $acceptReject->revert_reason_remarks = $this->remark;
@@ -143,48 +149,68 @@ class CasteModificationAction extends Component
                 $acceptReject->revert_reason_remarks = null;
             }
 
-            $acceptReject->parent_id              = $previousId;
-            $acceptSaved = $acceptReject->save();
-            // dump($acceptSaved);
-            $beneficiarySaved = true;
-            $casteUpdated = true;
+            $acceptSaved = $acceptReject->save(); 
 
             if ($this->action == '2203') {
-                // Update Beneficiary
+                // Update BeneficiaryPersonal
                 $beneficiary = BeneficiaryPersonal::where('application_id', $this->applicationId)->first();
+
                 if ($beneficiary) {
-                    $beneficiary->caste = $casteModification->new_data['caste'];
-                    $beneficiary->caste_certificate_no = $casteModification->new_data['caste_certificate_no'];
+                    $beneficiary->caste = $casteModification->new_data['caste'] ?? $beneficiary->caste;
+                    $beneficiary->caste_certificate_no = $casteModification->new_data['caste_certificate_no'] ?? $beneficiary->caste_certificate_no;
                     $beneficiarySaved = $beneficiary->save();
+
+                    // Move enclosure only when temp data  exists
+                    $temp = BeneficiaryTemEnclosure::where('application_id', $this->applicationId)->first();
+                    if ($temp) {
+                        // dd($temp);
+                        // dd($this->applicationId);
+                        $beneficiary->enclosers()->updateOrCreate(
+                            ['application_id' => $this->applicationId],
+                            [
+                                'attched_document'   => $temp->attched_document,
+                                'document_type'      => $temp->document_type,
+                                'document_extension' => $temp->document_extension,
+                                'document_mime_type' => $temp->document_mime_type,
+                                'ip_address'         => request()->ip(),
+                                'created_by'         => Auth::id(),
+                                'updated_at'         => now(),
+                            ]
+                        );
+                        $temp->delete();
+                    }
+                    // else {
+                    // }
+                    // Update CasteModification  after applying changes
+                    $casteModification->is_active = false;
+                    $casteModification->updated_by = Auth::id();
+                    $casteUpdated = $casteModification->save();
                 } else {
                     $beneficiarySaved = false;
                 }
-
-                // Update CasteModification
-                $casteModification->is_active = false;
-                $casteModification->updated_by = Auth::id();
-                $casteUpdated = $casteModification->save();
             }
-            // dd($beneficiarySaved);
-
-            // dump($casteSaved);
-            // dump($acceptSaved);
-            // dd($beneficiarySaved);
-            // dd($casteUpdated);
-            // dd($casteSaved && $acceptSaved && $beneficiarySaved);
-            if ($casteSaved && $acceptSaved && $beneficiarySaved) {
+            // If action is approve  then require casteUpdated too, otherwise it's not required.
+            $allOkay = $casteSaved && $acceptSaved && $beneficiarySaved;
+            if ($this->action == '2203') {
+                $allOkay = $allOkay && $casteUpdated;
+            }
+            // dd();
+            // dump($allOkay);
+            // dump($casteSaved, $acceptSaved, $beneficiarySaved, $casteUpdated, $allOkay);
+            if ($allOkay) {
                 DB::commit();
-                session()->flash('success', "Application Processed successfully!");
+                session()->flash('success', "Application processed successfully!");
                 return redirect()->route('caste-modification-list');
             } else {
                 DB::rollBack();
                 session()->flash('error', 'Transaction failed. Some records were not saved.');
-                return;
+               return redirect()->route('caste-modification-list');
             }
         } catch (\Exception $e) {
             DB::rollBack();
+            // Consider logging the exception: \Log::error($e);
             session()->flash('error', 'Something went wrong: ' . $e->getMessage());
-            return;
+            return redirect()->route('caste-modification-list');
         }
     }
 

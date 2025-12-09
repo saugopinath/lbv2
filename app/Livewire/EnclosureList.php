@@ -218,6 +218,7 @@ class EnclosureList extends Component
         $this->showUploadModal = false;
         if ($this->application_id) {
             if ($this->enclosureSource === '5') {
+                // dd( 'here');
                 $docs = BeneficiaryTemEnclosure::where('application_id', $this->application_id)
                     ->whereIn('document_type', $this->doc_type_id_array_list)
                     ->get();

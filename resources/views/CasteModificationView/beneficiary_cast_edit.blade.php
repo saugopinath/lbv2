@@ -75,7 +75,6 @@
             return this.selectedCaste == 17 || this.selectedCaste == 18;
         }
     }" class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-6">
-
         <h2 class="text-lg font-semibold text-indigo-800 dark:text-white mb-4">
             {{ $isReverted ? 'Update Reverted Caste Information' : 'Update Caste Information' }}
         </h2>
