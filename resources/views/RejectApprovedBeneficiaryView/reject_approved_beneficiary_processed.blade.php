@@ -46,9 +46,10 @@
                 </x-form.select>
                 <x-form.input type="textarea" name="remark" placeholder="Enter remark" id="remark"
                     name="remark"
-                    label="Remark" required />
+                    label="Remark" value="{{ old('remark') }}" required />
 
                 <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="[162]"/>
+
 
             </div>
             <div class="flex justify-center">
