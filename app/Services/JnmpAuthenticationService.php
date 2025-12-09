@@ -30,7 +30,6 @@ class JnmpAuthenticationService implements JnmpAuthenticationInterface
 
     public function getJnmpData($data)
     {
-       
         set_time_limit(0);
 
         try {
@@ -39,17 +38,17 @@ class JnmpAuthenticationService implements JnmpAuthenticationInterface
             $to_date    = $data['to_date'];
             $index      = $data['index'];
             $page_size  = $data['page_size'];
-          
+
             $auth_token = base64_encode($this->username . ':' . $this->password);
 
-          
+
             $post_url = $this->baseurl . 'api/WbDeath'
                 . '?FromDate=' . $from_date
                 . '&ToDate=' . $to_date
                 . '&PageIndex=' . $index
                 . '&PageSize=' . $page_size;
 
-          
+
             $client = new \GuzzleHttp\Client(['timeout' => 30]);
 
             $apiResponse = $client->get($post_url, [
@@ -74,9 +73,9 @@ class JnmpAuthenticationService implements JnmpAuthenticationInterface
 
             $bulkData = [];
             $currentTime = now();
-         
+
             foreach ($data as $item) {
-              
+
                 $bulkData[] = [
                     'slno'                          => $item->slno,
                     'applicationid'                 => $item->applicationid,
@@ -114,7 +113,7 @@ class JnmpAuthenticationService implements JnmpAuthenticationInterface
                         : null,
                 ];
             }
-           
+
             try {
                 JnmpData::insert($bulkData);
             } catch (\Exception $e) {
@@ -239,65 +238,6 @@ class JnmpAuthenticationService implements JnmpAuthenticationInterface
                 'icon'    => 'fa fa-warning',
                 'title'   => 'System Error',
                 'message' => $e->getMessage()
-            ]);
-        }
-    }
-
-    public function submitJnmpData($data)
-    {
-        try {
-
-            $from_date = $data['from_date'] ?? null;
-            $to_date   = $data['to_date'] ?? null;
-            $index     = $data['index'] ?? 1;
-            $page_size = $data['page_size'] ?? 50;
-
-            $auth_token = base64_encode($this->username . ':' . $this->password);
-
-            $endpoint = 'api/WbDeath?FromDate=' . $from_date .
-                '&ToDate=' . $to_date .
-                '&PageIndex=' . $index .
-                '&PageSize=' . $page_size;
-
-            $client = new \GuzzleHttp\Client([
-                'base_uri' => $this->baseurl,
-                'timeout'  => 30,
-            ]);
-
-            $response = $client->get($endpoint, [
-                'headers' => [
-                    'Authorization' => 'Basic ' . $auth_token,
-                    'Content-Type'  => 'application/json'
-                ]
-            ]);
-
-            $decoded = json_decode($response->getBody());
-
-            if (!isset($decoded->data)) {
-                return response()->json([
-                    'status'  => 300,
-                    'message' => 'Invalid response from server.'
-                ]);
-            }
-
-            return response()->json([
-                'status'        => 200,
-                'message'       => "JNMP Data Fetch Successful",
-                'records_found' => count($decoded->data),
-                'total_records' => $decoded->TotalRec ?? count($decoded->data),
-                'data'          => $decoded->data
-            ]);
-        } catch (\GuzzleHttp\Exception\RequestException $e) {
-
-            return response()->json([
-                'status'  => 500,
-                'message' => "API Request Error: " . $e->getMessage()
-            ]);
-        } catch (\Exception $e) {
-
-            return response()->json([
-                'status'  => 500,
-                'message' => "System Error: " . $e->getMessage()
             ]);
         }
     }

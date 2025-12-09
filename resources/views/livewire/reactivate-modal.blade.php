@@ -61,8 +61,6 @@
             <div class="mb-4">
                 <h3 class="font-semibold mb-2">Upload Document</h3>
 
-                {{-- <livewire:enclosure-list :application_id="$applicantId" :doc_type_id_array_list="[169]" /> --}}
-
                 <livewire:enclosure-list :application_id="$applicantId" :doc_type_id_array_list="[169]"
                     wire:key="enclosure-{{ $applicantId }}" />
 

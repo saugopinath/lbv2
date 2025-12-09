@@ -8,6 +8,7 @@ use App\Models\BeneficiaryCommonList;
 use App\Models\BeneficiaryEnclosure;
 use App\Models\Codemaster;
 use App\Models\UpdateBenDetails;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ReactivateModal extends Component
@@ -240,11 +241,11 @@ class ReactivateModal extends Component
                 'update_code' => 17,
                 'remarks' => $this->revert_reason_remarks,
                 'reactive_reason' => $this->revert_reason_cause_id,
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
 
                 'next_level_role_id' => $personal->next_level_role_id,
                 'dist_code'          => $personal->district_id,
-
+                'local_body_code' =>  $personal->block_id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

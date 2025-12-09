@@ -5,10 +5,6 @@ namespace App\Livewire;
 use App\Models\BeneficiaryCommonList;
 use App\Helpers\EncryptionArray;
 use App\Exports\BeneficiariesExport;
-use App\Helpers\CheckAuthHelper;
-use App\Helpers\WorkFlowPermissionHelper;
-use App\Models\BeneficiaryPersonal;
-use App\Models\FaultyBeneficiaryPersonal;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,21 +13,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Actions\Action;
 use Rappasoft\LaravelLivewireTables\Views\Filters\TextFilter;
 use App\Models\Codemaster;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\HtmlString;
-use App\Models\DraftBeneficiaryPersonal;
-use App\Models\AcceptRejectInfo;
-use App\Models\BeneficiaryAadhaar;
 use Livewire\Attributes\On;
-use Illuminate\Support\Facades\Log;
-use App\Models\BenRejectDetails;
-use App\Models\DraftBeneficiaryBank;
-use App\Models\DraftBeneficiaryContact;
-use App\Models\DraftBeneficiaryDeclaration;
-use App\Models\DraftBeneficiaryRelationship;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class JnmpDetailsDataTable extends DataTableComponent
 {
@@ -172,16 +154,6 @@ class JnmpDetailsDataTable extends DataTableComponent
             Column::make("Mobile No", "mobile_no")
                 ->label(fn($row) => $row->sourceable->mobile_no ?? 'N/A'),
 
-            // Column::make("Action")
-            //     ->label(function ($row) {
-            //         return new HtmlString(
-            //             '<button onclick="\openReactivateModal(' . ($row->sourceable->application_id ?? 0) . ')"
-            //             class="px-3 py-1 bg-blue-600 text-white rounded-md text-xs">
-            //             Activate as Alive
-            //         </button>'
-            //         );
-            //     }),
-
             $columns[] = Column::make("Actions")
                 ->label(function ($row) {
 
@@ -262,15 +234,6 @@ class JnmpDetailsDataTable extends DataTableComponent
 
         return $query;
     }
-
-    //     #[On('openReactivateModal')]
-    //     public function openReactivateModal($id)
-    //     {
-    //         // dd($id);
-    //         $this->selectedApplicationId = $id;
-    // // dd($this->selectedApplicationId);
-    //         $this->dispatch('showReactivateModal');
-    //     }
 
     #[On('openReactivateModal')]
     public function openReactivateModal($id)

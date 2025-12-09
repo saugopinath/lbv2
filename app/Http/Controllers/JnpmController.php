@@ -33,7 +33,7 @@ class JnpmController extends Controller
                 'from_date' => 'required|date',
                 'to_date'   => 'required|date|after_or_equal:from_date',
                 'index'     => 'required|integer|min:1',
-                'page_size' => 'required|integer|min:1|max:500'
+                'page_size' => 'required|integer|min:1'
             ];
 
             $messages = [
@@ -67,10 +67,14 @@ class JnpmController extends Controller
 
                     DB::commit();
 
+                    // session()->flash('success', $data['message']);
+                    // return redirect()
+                    //     ->route('jnmp.pull', ['inserted' => $data['inserted']])
+                    //     ->withInput();
                     session()->flash('success', $data['message']);
-                    return redirect()
-                        ->route('jnmp.pull', ['inserted' => $data['inserted']])
-                        ->withInput();
+                    session()->forget(['index', 'page_size']); 
+
+                    return redirect()->route('jnmp.pull', ['inserted' => $data['inserted']]);
                 }
 
                 DB::rollBack();
@@ -121,7 +125,8 @@ class JnpmController extends Controller
 
     public function getJnmpStats()
     {
-         $nextleveljnmp = Codemaster::getIdByCode(2300);
+        $nextleveljnmp = Codemaster::getIdByCode(2300);
+        $nextlevelapprove = Codemaster::getIdByCode(0);
         // JNMP DATA COUNTS
         $totalJnmp = JnmpData::count() ?? 0;
 
@@ -134,7 +139,7 @@ class JnpmController extends Controller
         $cur_jnmp_mark_as_death = BeneficiaryPersonal::where('next_level_role_id', $nextleveljnmp)->count() ?? 0;
 
         $re_activate = BeneficiaryPersonal::where('jnmp_marked', 1)
-            ->where('next_level_role_id', 144)
+            ->where('next_level_role_id', $nextlevelapprove)
             ->count() ?? 0;
 
         return response()->json([
@@ -148,13 +153,14 @@ class JnpmController extends Controller
             'data3' => $re_activate,
         ]);
     }
-   
+
     public function markAsDeathProcess()
     {
         DB::beginTransaction();
 
         try {
             $nextleveljnmp = Codemaster::getIdByCode(2300);
+            $nextlevelapprove = Codemaster::getIdByCode(0);
 
             // INITIALIZE ARRAY ONLY ONCE
             $mappingData = [];
@@ -176,7 +182,7 @@ class JnpmController extends Controller
                 // ADD MAPPING DATA (CORRECT)
                 $mappingData[] = [
                     'lb_id'           => $item->aadhaar->application_id,
-                    'jnm_id'          => $item->applicationid,    
+                    'jnm_id'          => $item->applicationid,
                     'aadhar_hash'     => $item->aadhar_hash,
                     'payment_suspend' => 1,
                     'created_at'      => now(),
@@ -185,7 +191,7 @@ class JnpmController extends Controller
             }
 
             // STEP 2: Update BeneficiaryPersonal
-            $beneficiaries = BeneficiaryPersonal::where('next_level_role_id', 144)
+            $beneficiaries = BeneficiaryPersonal::where('next_level_role_id', $nextlevelapprove)
                 ->whereNull('jnmp_marked')
                 ->whereHas('jnmp', function ($q) {
                     $q->where('migrated_to_jb', 0);
@@ -225,7 +231,7 @@ class JnpmController extends Controller
 
     public function index()
     {
-         $button_show = 1;
-        return view('jnmp.index',compact('button_show'));
+        $button_show = 1;
+        return view('jnmp.index', compact('button_show'));
     }
 }
