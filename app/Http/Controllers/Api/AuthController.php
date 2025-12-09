@@ -8,7 +8,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\Validator;
 use App\Models\BackFromJb;
-
+use App\Models\Codemaster;
 class AuthController extends Controller
 {
     public function login(Request $request)
@@ -85,7 +85,7 @@ class AuthController extends Controller
             $backFromJb = new BackFromJb();
             $backFromJb->application_id = $validated['lb_application_id'];
             $backFromJb->jb_poposed_dob = $validated['jb_poposed_dob'];
-            $backFromJb->next_level_role_id = 20;
+            $backFromJb->next_level_role_id = Codemaster::getIdByCode(4401);
             $backFromJb->save();
             return response()->json([
                 'is_sendtolb' => true,
