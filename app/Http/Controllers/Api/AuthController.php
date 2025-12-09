@@ -16,16 +16,13 @@ class AuthController extends Controller
             'email'    => 'required|email',
             'password' => 'required',
         ]);
-
         if ($validator->fails()) {
             return response()->json([
                 'is_success' => false,
                 'errors' => $validator->errors(),
             ], 422);
         }
-
         $credentials = $request->only('email', 'password');
-
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json([
@@ -39,19 +36,16 @@ class AuthController extends Controller
                 'is_success' => false,
             ], 500);
         }
-
         return response()->json([
             'token' => $token,
             'is_success' => true,
         ], 200);
     }
 
-
     public function logout()
     {
         try {
             JWTAuth::invalidate(JWTAuth::getToken());
-
             return response()->json([
                 'message' => 'Logged out successfully',
                 'is_logout' => true,
@@ -64,21 +58,17 @@ class AuthController extends Controller
         }
     }
 
-
     public function refresh()
     {
         try {
             $token = JWTAuth::getToken();
-
             if (!$token) {
                 return response()->json([
                     'error' => 'Token not provided',
                     'is_refresh' => false,
                 ], 401);
             }
-
             $newToken = JWTAuth::refresh($token);
-
             return response()->json([
                 'token' => $newToken,
                 'is_refresh' => true,
@@ -91,23 +81,20 @@ class AuthController extends Controller
         }
     }
 
-
-    public function sendtolb()
+    public function sendtolb(Request $request)
     {
         try {
             $token = JWTAuth::getToken();
-
             if (!$token) {
                 return response()->json([
                     'is_sendtolb' => false,
                     'message' => 'Token not provided'
                 ], 401);
             }
-
-            JWTAuth::parseToken()->authenticate();
-
+            $receivedData = $request->all();
+            // dd($receivedData);
             return response()->json([
-                'is_sendtolb' => true,
+                'is_sendtolb' => $receivedData,
             ], 200);
         } catch (JWTException $e) {
             return response()->json([
