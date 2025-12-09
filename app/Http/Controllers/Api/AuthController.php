@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\Validator;
+use App\Models\BackFromJb;
 
 class AuthController extends Controller
 {
@@ -92,9 +93,13 @@ class AuthController extends Controller
                 ], 401);
             }
             $receivedData = $request->all();
-            // dd($receivedData);
+            $backFromJb = new BackFromJb();
+            $backFromJb->application_id = $receivedData['lb_application_id'];
+            $backFromJb->jb_poposed_dob = $receivedData['jb_poposed_dob'];
+            $backFromJb->next_level_role_id = 20;
+            $backFromJb->save();
             return response()->json([
-                'is_sendtolb' => $receivedData,
+                'is_sendtolb' => true,
             ], 200);
         } catch (JWTException $e) {
             return response()->json([
