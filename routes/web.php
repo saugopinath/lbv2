@@ -13,6 +13,7 @@ use App\Livewire\RoleOfficeTypeMappings\Create;
 use App\Http\Controllers\CMOGrievanceController;
 use App\Http\Controllers\OfficeMastersController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\BackFromJBController;
 use App\Http\Controllers\IncompleteTypeController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\BeneficiaryListController;
@@ -220,3 +221,7 @@ Route::controller(CmoController::class)->group(function () {
     Route::any('/logoutfromjb', 'logoutfromjb')->name('logoutfromjb');
     Route::any('/refreshtokenforjb', 'refreshtokenforjb')->name('refreshtokenforjb');
 });*/
+
+Route::controller(BackFromJBController::class)->group(function () {
+    Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
+});

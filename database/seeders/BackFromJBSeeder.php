@@ -31,20 +31,20 @@ class BackFromJBSeeder extends Seeder
         $codemasterChilds = array(
 
             array(
-                "name" => "Back From JB Verification Pending",
-                "short_name" => "back_from_jb_verification_pending",
+                "name" => "Pending",
+                "short_name" => "pending",
                 "parent_short_code" => "back_from_jb",
                 "code" => "4401",
             ),
             array(
-                "name" => "Back From JB Verified",
-                "short_name" => "back_from_jb_verified",
+                "name" => "Verified but Approval Pending",
+                "short_name" => "verified_but_approval_pending",
                 "parent_short_code" => "back_from_jb",
                 "code" => "4402",
             ),
             array(
-                "name" => "Back From JB Approved",
-                "short_name" => "back_from_jb_approved",
+                "name" => "Verified and Approved",
+                "short_name" => "verified_and_approved",
                 "parent_short_code" => "back_from_jb",
                 "code" => "4403",
             )
