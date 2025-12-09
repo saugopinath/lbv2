@@ -66,6 +66,7 @@ class BenRejectDetails extends Model implements Auditable
                 $commonList->update([
                 'sourceable_type' => get_class($benrej),
                 'is_reject'       => true,
+                'next_level_role_id'=> $benrej->next_level_role_id,
             ]);
             }
         });
