@@ -11,7 +11,8 @@
 
         <div class="flex justify-between items-center border-b pb-3 mb-4">
             <h2 class="text-xl font-semibold text-indigo-700 dark:text-indigo-300">
-                Importing data from Jonmo Mrityu Tothyo portal (Next data fetch is scheduled for: )
+                Importing data from Jonmo Mrityu Tothyo portal (Next data fetch is scheduled for: {{ $lastFetch }})
+
             </h2>
 
             <button @click="open = !open" class="text-sm px-3 py-1 rounded-full bg-indigo-100 dark:bg-gray-700

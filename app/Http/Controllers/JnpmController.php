@@ -8,6 +8,7 @@ use App\Models\Codemaster;
 use App\Models\FaultyBeneficiaryPersonal;
 use App\Models\JnmpData;
 use App\Models\LbMapping;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -71,7 +72,7 @@ class JnpmController extends Controller
                     session()->forget(['index', 'page_size']);
 
                     return redirect()->route('jnmp.pull', ['inserted' => $data['inserted']]);
-                }                
+                }
 
                 DB::rollBack();
                 session()->flash('error', 'Failed to import JNMP data.');
@@ -83,9 +84,33 @@ class JnpmController extends Controller
                 return redirect()->back()->withInput();
             }
         }
+        //just add lastfetching date
+        $lastFetchRaw = JnmpData::max('fetching_time');
 
-        $header = 'Importing data from Jonmo Mrityu Tothyo portal';
-        return view('jnmp.list', compact('header', 'inserted'));
+        if ($lastFetchRaw) {
+            $maxDate = Carbon::parse($lastFetchRaw);
+
+            if ($maxDate->isToday()) {
+                $prevDate = JnmpData::whereDate('fetching_time', '<', $maxDate->toDateString())
+                    ->orderBy('fetching_time', 'desc')
+                    ->value('fetching_time');
+            } else {
+                $prevDate = $lastFetchRaw;
+            }
+
+            $lastFetch = $prevDate
+                ? Carbon::parse($prevDate)->format('d/m/Y')
+                : 'N/A';
+        } else {
+            $lastFetch = 'N/A';
+        }
+
+        return view('jnmp.list', [
+            'header' => 'Importing data from Jonmo Mrityu Tothyo portal',
+            'lastFetch' => $lastFetch,   
+        ]);
+        // $header = 'Importing data from Jonmo Mrityu Tothyo portal';
+        // return view('jnmp.list', compact('header', 'inserted'));
     }
 
     public function detailsCallback(Request $request)
