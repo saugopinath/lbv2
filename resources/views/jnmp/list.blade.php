@@ -20,8 +20,63 @@
                 <span x-show="!open">Show</span>
             </button>
         </div>
+        <form x-data="jnmpImport()" @submit.prevent="submitForm" class="space-y-6">
 
-        <form x-show="open" x-transition action="{{ route('jnmp.pull') }}" method="POST" class="space-y-6">
+            @csrf
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                    <label class="block mb-1">From Date *</label>
+                    <input type="date" name="from_date" x-model="form.from_date" required class="w-full border rounded">
+                </div>
+
+                <div>
+                    <label class="block mb-1">To Date *</label>
+                    <input type="date" name="to_date" x-model="form.to_date" required class="w-full border rounded">
+                </div>
+
+                <div>
+                    <x-form.input id="index" name="index" label="Index" required x-model="form.index"
+                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
+                </div>
+
+                <div>
+                    <x-form.input id="page_size" name="page_size" label="Page Size" required x-model="form.page_size"
+                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
+                </div>
+            </div>
+
+            <div class="pt-4 flex justify-center">
+                <x-button.primary class="px-10" type="submit">Import</x-button.primary>
+            </div>
+
+            <!-- ALERT POPUP -->
+            <div x-show="showAlert" class="fixed inset-0 flex items-center justify-center bg-black/40" x-transition>
+
+                <div class="bg-white rounded-lg shadow-xl p-6 w-96 text-center">
+                    <h2 class="text-xl font-bold text-green-600" x-text="alert.title"></h2>
+
+                    <p class="mt-2 text-gray-700">
+                        Total <span x-text="alert.inserted"></span> out of
+                        <span x-text="alert.total"></span> imported successfully.
+                    </p>
+
+                    <div class="mt-4 flex justify-center gap-4">
+                        <button @click="finalSubmit" class="bg-blue-600 text-white px-4 py-2 rounded">
+                            SEND RESPONSE
+                        </button>
+
+                        <button @click="showAlert = false" class="bg-gray-300 px-4 py-2 rounded">
+                            CANCEL
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+
+
+        {{-- <form x-show="open" x-transition action="{{ route('jnmp.pull') }}" method="POST" class="space-y-6">
             @csrf
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -58,7 +113,7 @@
                 <x-button.primary class="px-10" type="submit">Import Data</x-button.primary>
             </div>
 
-        </form>
+        </form> --}}
 
     </div>
 
@@ -190,5 +245,50 @@
             </div>
         </form>
     </div>
+    <script>
+        function jnmpImport() {
+            return {
+                showAlert: false,
+
+                form: {
+                    from_date: "",
+                    to_date: "",
+                    index: "",
+                    page_size: ""
+                },
+
+                alert: {
+                    title: "",
+                    inserted: 0,
+                    total: 0
+                },
+
+                async submitForm() {
+                    let fd = new FormData();
+                    fd.append('_token', '{{ csrf_token() }}');
+                    fd.append('from_date', this.form.from_date);
+                    fd.append('to_date', this.form.to_date);
+                    fd.append('index', this.form.index);
+                    fd.append('page_size', this.form.page_size);
+
+                    let res = await fetch("{{ route('jnmp.pull') }}", {
+                        method: "POST",
+                        body: fd
+                    });
+
+                    let data = await res.json();
+
+                    if (data.status === 200) {
+                        this.alert = data;
+                        this.showAlert = true;
+                    }
+                },
+
+                finalSubmit() {
+                    window.location.reload();
+                }
+            }
+        }
+    </script>
 
 </x-layouts.app>

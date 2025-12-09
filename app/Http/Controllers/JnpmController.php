@@ -63,18 +63,27 @@ class JnpmController extends Controller
                 $data = $response->getData(true);
 
 
+                // if (($data['status'] ?? 500) == 200) {
+
+                //     DB::commit();
+
+                //     session()->flash('success', $data['message']);
+                //     session()->forget(['index', 'page_size']);
+
+                //     return redirect()->route('jnmp.pull', ['inserted' => $data['inserted']]);
+                // }
+
                 if (($data['status'] ?? 500) == 200) {
 
                     DB::commit();
 
-                    // session()->flash('success', $data['message']);
-                    // return redirect()
-                    //     ->route('jnmp.pull', ['inserted' => $data['inserted']])
-                    //     ->withInput();
-                    session()->flash('success', $data['message']);
-                    session()->forget(['index', 'page_size']); 
-
-                    return redirect()->route('jnmp.pull', ['inserted' => $data['inserted']]);
+                    return response()->json([
+                        'status' => 200,
+                        'title' => 'Success',
+                        'message' => $data['message'],
+                        'inserted' => $data['inserted'],
+                        'total' => $data['total_data'],
+                    ]);
                 }
 
                 DB::rollBack();

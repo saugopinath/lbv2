@@ -217,7 +217,7 @@ class JnmpDetailsDataTable extends DataTableComponent
         //     });
         // }
 
-         if (!empty($this->filter_condition)) {
+        if (!empty($this->filter_condition)) {
             $query->where($this->filter_condition);
         }
 
@@ -242,5 +242,30 @@ class JnmpDetailsDataTable extends DataTableComponent
 
         // Send ID to modal component
         $this->dispatch('showReactivateModal', id: $id);
+    }
+
+    public function exportExcel()
+    {
+        $data = $this->builder()
+            ->get()
+            ->map(function ($row) {
+
+                $father = $row->sourceable->relationships
+                    ->where('relation_type_id', Codemaster::getIdByCode(131))
+                    ->first();
+
+                return [
+                    'application_id' => $row->sourceable->application_id ?? 'N/A',
+                    'full_name'      => $row->sourceable->full_name ?? 'N/A',
+                    'father_name'    => $father->full_name ?? 'N/A',
+                    'dob' => $row->sourceable->dob
+                        ? \Carbon\Carbon::parse($row->sourceable->dob)->format('d-m-Y')
+                        : 'N/A',
+
+                    'mobile_no'      => $row->sourceable->mobile_no ?? 'N/A',
+                ];
+            });
+
+        return Excel::download(new BeneficiariesExport($data), 'jnmp_beneficiaries_all.xlsx');
     }
 }
