@@ -62,21 +62,14 @@ class AuthController extends Controller
     public function refresh()
     {
         try {
-            $token = JWTAuth::getToken();
-            if (!$token) {
-                return response()->json([
-                    'error' => 'Token not provided',
-                    'is_refresh' => false,
-                ], 401);
-            }
-            $newToken = JWTAuth::refresh($token);
+            $newToken = JWTAuth::refresh(JWTAuth::getToken());
             return response()->json([
-                'token' => $newToken,
+                'token'      => $newToken,
                 'is_refresh' => true,
             ], 200);
         } catch (JWTException $e) {
             return response()->json([
-                'error' => 'Token refresh failed',
+                'error'      => 'Token refresh failed',
                 'is_refresh' => false,
             ], 401);
         }
@@ -84,28 +77,25 @@ class AuthController extends Controller
 
     public function sendtolb(Request $request)
     {
+        $validated = $request->validate([
+            'lb_application_id' => 'required|numeric',
+            'jb_poposed_dob'    => 'required|date',
+        ]);
         try {
-            $token = JWTAuth::getToken();
-            if (!$token) {
-                return response()->json([
-                    'is_sendtolb' => false,
-                    'message' => 'Token not provided'
-                ], 401);
-            }
-            $receivedData = $request->all();
             $backFromJb = new BackFromJb();
-            $backFromJb->application_id = $receivedData['lb_application_id'];
-            $backFromJb->jb_poposed_dob = $receivedData['jb_poposed_dob'];
+            $backFromJb->application_id = $validated['lb_application_id'];
+            $backFromJb->jb_poposed_dob = $validated['jb_poposed_dob'];
             $backFromJb->next_level_role_id = 20;
             $backFromJb->save();
             return response()->json([
                 'is_sendtolb' => true,
+                'message' => 'Data saved successfully',
             ], 200);
-        } catch (JWTException $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'is_sendtolb' => false,
-                'message' => 'Invalid or expired token',
-            ], 401);
+                'message' => 'Something went wrong',
+            ], 500);
         }
     }
 }
