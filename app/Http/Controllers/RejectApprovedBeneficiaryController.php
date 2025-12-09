@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Helpers\CheckAuthHelper;
 use App\Models\AcceptRejectInfo;
 use App\Models\BeneficiaryCommonList;
+use App\Models\BeneficiaryEnclosure;
 use App\Models\Codemaster;
 use App\Models\SchemeAttachedDocMappings;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -14,6 +16,11 @@ use Illuminate\Support\Facades\DB;
 
 class RejectApprovedBeneficiaryController extends Controller
 {
+    protected $doctype;
+    public function __construct()
+    {
+        $this->doctype = [Codemaster::getIdByCode(1635)];
+    }
     public function index()
     {
         // $user = auth()->user();
@@ -41,51 +48,10 @@ class RejectApprovedBeneficiaryController extends Controller
         // $doctypes=SchemeAttachedDocMappings::with('codemaster')->get();
         $doctypes = Codemaster::where('code', 16)->first()->children()->get();
         // dd($doctypes);
-        return view('RejectApprovedBeneficiaryView.reject_approved_beneficiary_processed', compact('application_id', 'header', 'reportType', 'rejectRevertCause', 'doctypes'));
+        return view('RejectApprovedBeneficiaryView.reject_approved_beneficiary_processed', compact('application_id', 'beneficiary_id', 'header', 'reportType', 'rejectRevertCause', 'doctypes'));
     }
     public function deActiveBeneficiary(Request $request)
     {
-        // dd('ok');
-        // // dd($request->all());
-        // if (!Auth::check()) {
-        //     dd('not login');
-        //     return redirect()->route('login')->with('error', 'Please login first!');
-        // } else if (!CheckAuthHelper::isCommonApprover()) {
-        //     dd('not approver');
-        //     return redirect()->route('login')->with('error', 'You are not authorized to perform this action!');
-        // } else {
-        //     $userId = Auth::user()->id;
-        //     $next_level_role_id = Codemaster::getIdByCode(-1);
-        //     // dd($next_level_role_id);
-        //     // dd('login and approver');
-        //     $request->validate([
-        //         'application_id' => 'required|string',
-        //         'reject_reason' => 'required|integer|exists:codemasters,id',
-        //         'remark' => 'required',
-        //         // 'doctype' => 'required|integer|exists:codemasters,id',
-
-        //     ], [
-        //         // application_id
-        //         'application_id.required' => 'Invalid application.',
-        //         // reject_reason
-        //         'reject_reason.required' => 'Please select a caste.',
-        //         // remark
-        //         'remark.required' => 'Please enter a remark.',
-        //         // doctype
-        //         // 'doctype.required' => 'Please select a document type.',
-
-        //     ]);
-        //     $application_id = Crypt::decryptString($request->application_id);
-        //     // dd($application_id);
-
-
-        //     $beneficiary = BeneficiaryCommonList::where('sourceable_id', $application_id)->with('sourceable')->firstOrFail();
-        //     // dd($beneficiary);
-        //     if (!$beneficiary) {
-        //         return back()->with('error', 'Beneficiary not found!');
-        //     }
-        //     DB::beginTransaction();
-        //     try{
         if (!Auth::check()) {
             return redirect()->route('login')->with('error', 'Please login first!');
         }
@@ -96,29 +62,64 @@ class RejectApprovedBeneficiaryController extends Controller
 
         $userId = Auth::id();
         $nextLevelRoleId = Codemaster::getIdByCode(-1);
+        $applicationId = Crypt::decryptString($request->application_id);
+        $doctype = $this->doctype;
 
-        // Validate request — make sure these names match your form inputs.
-        // If your select is named 'cause' in the form, change 'reject_reason' to 'cause'
-        $request->validate([
+        // Create validator instance
+        $validator = Validator::make($request->all(), [
             'application_id' => 'required|string',
+            'beneficiary_id' => 'required|string',
             'reject_reason'  => 'required|integer|exists:codemasters,id',
             'remark'         => 'required|string',
         ], [
             'application_id.required' => 'Invalid application.',
+            'beneficiary_id.required' => 'Invalid beneficiary.',
             'reject_reason.required'  => 'Please select a reason.',
             'remark.required'         => 'Please enter a remark.',
         ]);
+        $uploadedDocsCount = BeneficiaryEnclosure::where('application_id', $applicationId)
+            ->whereIn('document_type', [$doctype])
+            ->count();
+
+        $validator->after(function ($validator) use ($uploadedDocsCount) {
+            if ($uploadedDocsCount < 1) {
+                $validator->errors()->add('document', 'Please upload the required document.');
+            }
+        });
+        // If validation fails -> go back to the same page with errors and old input
+        if ($validator->fails()) {
+            // dd('validation fails');
+            // dd($validator->errors());
+            return back()
+                ->withErrors($validator)   // pass the validator (MessageBag)
+                ->withInput();
+        }
+
+        // Get validated data
+        $validatedData = $validator->validated();
+
+        // Decrypt application id and beneficiary id
         try {
-            $applicationId = Crypt::decryptString($request->application_id);
+            $applicationId = Crypt::decryptString($validatedData['application_id']);
         } catch (\Exception $e) {
             return back()->with('error', 'Invalid application id.');
         }
+
+        try {
+            $beneficiaryIdFromForm = Crypt::decryptString($validatedData['beneficiary_id']);
+        } catch (\Exception $e) {
+            // not strictly necessary if you don't use this decrypt, but good to validate
+            $beneficiaryIdFromForm = null;
+        }
+
         $beneficiary = BeneficiaryCommonList::where('sourceable_id', $applicationId)
             ->with('sourceable')
             ->first();
+
         if (!$beneficiary || !$beneficiary->sourceable) {
             return back()->with('error', 'Beneficiary not found!');
         }
+
         DB::beginTransaction();
         try {
             $logdetails = new AcceptRejectInfo;
@@ -129,25 +130,18 @@ class RejectApprovedBeneficiaryController extends Controller
             $logdetails->browser                = request()->header('User-Agent');
             $logdetails->model_name             = request()->path();
             $logdetails->op_type                = Codemaster::getIdByCode(-1);
-            $logdetails->revert_reason_cause_id = $request->reject_reason;
-            $logdetails->revert_reason_remarks  = $request->remark;
+            $logdetails->revert_reason_cause_id = $validatedData['reject_reason'];
+            $logdetails->revert_reason_remarks  = $validatedData['remark'];
             $logdetails->parent_id              = null;
-            // dd($logdetails);
+
             $logdetailsSaved = $logdetails->save();
 
-            $updatepersonal = $beneficiary->sourceable->update(
-                [
-                    'next_level_role_id' => $nextLevelRoleId,
-                ]
-            );
-            // dump($updatepersonal);
-            // dd($logdetailsSaved);
+            $updatepersonal = $beneficiary->sourceable->update([
+                'next_level_role_id' => $nextLevelRoleId,
+            ]);
 
             if ($logdetailsSaved && $updatepersonal) {
-                // $beneficiary->sourceable->update();
                 DB::commit();
-
-                session()->flash('success', "Beneficiary De-Activated Successfully!");
                 return redirect()->route('reject-approved-beneficiary')->with('success', 'Beneficiary De-Activated Successfully!');
             } else {
                 DB::rollBack();
@@ -155,6 +149,9 @@ class RejectApprovedBeneficiaryController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollBack();
+            // Log the exception for debugging (optional)
+
+
             return back()->with('error', 'Something went wrong!');
         }
     }
