@@ -252,7 +252,6 @@ Route::controller(JnpmController::class)->group(function () {
     Route::get('jnmp-data', 'index')->middleware('permission.redirect:canReActivateDeathIncident')->name('jnmp-data');
 
         // JNMP List at HOD
-    Route::get('jnmp-marked-data', 'jnmpMarkedDataAtHOD')->name('jnmp-marked-data');
-    Route::any('jnmpMarkedData', 'jnmpMarkedData')->name('jnmpMarkedData');
-    // Route::post('generateJnmpDataHodExcel', 'generateJnmpDataHodExcel')->name('generateJnmpDataHodExcel');
+    Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')->name('jnmp-marked-data');
+    // Route::any('jnmpMarkedData', 'jnmpMarkedData')->name('jnmpMarkedData');
 });

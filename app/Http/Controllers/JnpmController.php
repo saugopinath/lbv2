@@ -276,9 +276,10 @@ class JnpmController extends Controller
     public function jnmpMarkedDataAtHOD(Request $request)
     {
         if (CheckAuthHelper::isCommonHOD()) {
-            
+
             $districts = District::all();
-            $district = $request->query('district');
+            // $district = $request->query('district');
+             $district = $request->district ?? null;
 
             return view('jnmp.linelisting_at_hod', compact('districts', 'district'));
         } else {
@@ -288,13 +289,13 @@ class JnpmController extends Controller
         }
     }
 
-    public function jnmpMarkedData(Request $request)
-    {
-        $district = $request->district ?? null;
+    // public function jnmpMarkedData(Request $request)
+    // {
+    //     $district = $request->district ?? null;
 
-        return view('jnmp.linelisting_at_hod', [
-            'district' => $district,
-            'districts' => District::all(),
-        ]);
-    }
+    //     return view('jnmp.linelisting_at_hod', [
+    //         'district' => $district,
+    //         'districts' => District::all(),
+    //     ]);
+    // }
 }
