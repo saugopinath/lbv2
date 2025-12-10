@@ -30,14 +30,6 @@
 
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
 
-                        {{-- @if ($districts)
-                        <x-form.select name="district" label="Districts">
-                            <option value="">--Choose District--</option>
-                            @foreach ($districts as $dist)
-                            <option value="{{ $dist->lgd_code }}">{{ $dist->name }}</option>
-                            @endforeach
-                        </x-form.select>
-                        @endif --}}
                         @if ($districts)
                             <x-form.select name="district" label="Districts" required>
                                 <option value="">--Choose District--</option>
