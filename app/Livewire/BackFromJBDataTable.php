@@ -101,15 +101,12 @@ class BackFromJBDataTable extends DataTableComponent
     }
     public function updateFilters($filters)
     {
-        // dd($filters);
         $this->district_id = $filters['district_id'];
         $this->rural_urban = $filters['rural_urban'] ?? null;
         $this->blockurban = $filters['blockurban'];
         $this->gp_ward = $filters['gp_ward'];
         $this->sub_div = $filters['subdivision_id'];
-        if($filters['application_type']){
-            $this->next_level_role_id = $filters['application_type'];
-        }
+        $this->next_level_role_id = $filters['application_type'];
     }
 
     public function columns(): array
