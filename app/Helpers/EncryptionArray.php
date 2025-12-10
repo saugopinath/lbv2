@@ -77,7 +77,7 @@ class EncryptionArray
                 $query->where('district_id', $district_id);
             }
 
-             if ($sub_div) {
+            if ($sub_div) {
                 $query->where('subdivision_id', $sub_div);
             }
 
@@ -410,6 +410,50 @@ class EncryptionArray
 
     //     return $query;
     // }
+
+    public static function applyBackFromJB(
+    Builder $query,
+    ?int $district_id,
+    ?int $rural_urban,
+    ?int $blockurban,
+    ?int $gp_ward,
+    ?int $sub_div
+): Builder {
+
+    $blockField  = $rural_urban == 2 ? 'block_id'      : 'municipality_id';
+    $gpWardField = $rural_urban == 2 ? 'panchayat_id'  : 'ward_id';
+
+    // DISTRICT
+    if ($district_id) {
+        $query->whereHas('beneficiary.sourceable.contact', function ($q) use ($district_id) {
+            $q->where('district_id', $district_id);
+        });
+    }
+
+    // BLOCK / MUNICIPALITY
+    if ($blockurban) {
+        $query->whereHas('beneficiary.sourceable.contact', function ($q) use ($blockField, $blockurban) {
+            $q->where($blockField, $blockurban);
+        });
+    }
+
+    // SUBDIVISION
+    if ($sub_div) {
+        $query->whereHas('beneficiary.sourceable.contact.municipality', function ($q) use ($sub_div) {
+            $q->where('subdivision_id', $sub_div);
+        });
+    }
+
+    // GP / WARD
+    if ($gp_ward) {
+        $query->whereHas('beneficiary.sourceable.contact', function ($q) use ($gpWardField, $gp_ward) {
+            $q->where($gpWardField, $gp_ward);
+        });
+    }
+
+    return $query;
+}
+
 
 
 }

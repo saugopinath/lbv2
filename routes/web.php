@@ -224,4 +224,5 @@ Route::controller(CmoController::class)->group(function () {
 
 Route::controller(BackFromJBController::class)->group(function () {
     Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
+    Route::any('/#', 'action')->name('#');
 });

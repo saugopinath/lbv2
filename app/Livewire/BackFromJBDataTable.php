@@ -11,6 +11,8 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use App\Models\Codemaster;
 use App\Models\BackFromJb;
+use App\Helpers\CheckAuthHelper;
+use App\Helpers\EncryptionArray;
 
 class BackFromJBDataTable extends DataTableComponent
 {
@@ -18,6 +20,7 @@ class BackFromJBDataTable extends DataTableComponent
     protected $listeners = [
         'doSearch' => 'updateFilters',
     ];
+    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id, $revertrejectAction, $revertrejectCauses, $sub_div;
     public array $filter_condition = [];
     public function mount(): void
     {
@@ -72,10 +75,10 @@ class BackFromJBDataTable extends DataTableComponent
         ]);
     }
 
-    public function updateFilters($filters)
-    {
-        $this->resetPage();
-    }
+    // public function updateFilters($filters)
+    // {
+    //     $this->resetPage();
+    // }
     public function updatedSearch($value): void
     {
         $this->setSearch($value);
@@ -87,9 +90,14 @@ class BackFromJBDataTable extends DataTableComponent
         $this->setPerPage((int)$value);
         $this->resetPage();
     }
-    public function filters(): array
+    public function updateFilters($filters)
     {
-        return [];
+        // dd($filters);
+        $this->district_id = $filters['district_id'];
+        $this->rural_urban = $filters['rural_urban'] ?? null;
+        $this->blockurban = $filters['blockurban'];
+        $this->gp_ward = $filters['gp_ward'];
+        $this->sub_div = $filters['subdivision_id'];
     }
 
     public function columns(): array
@@ -115,21 +123,72 @@ class BackFromJBDataTable extends DataTableComponent
                 ->label(fn($row) => $row->beneficiary->sourceable->contact->getFullAddress() ?? 'N/A')
                 ->html(),
 
-            Column::make("Status", "Status")
-                ->label(fn($row) => $row->beneficiary->sourceable->getStatusText()
-                    ?? 'N/A'),
-
-
+            Column::make("Action")
+                ->label(function ($row) {
+                    $canEdit = false;
+                    if (
+                        (CheckAuthHelper::isCommmonVerifier() && (Codemaster::getIdByCode(4401))) ||
+                        (CheckAuthHelper::isCommonApprover() && (Codemaster::getIdByCode(4402)))
+                    ) {
+                        $canEdit = true;
+                    }
+                    if (!$canEdit) {
+                        return 'Approved';
+                    }
+                    $link = route('#') . '?id=' . Crypt::encryptString($row->beneficiary->sourceable->application_id);
+                    return view('coulmn_button.actions1', [
+                        'link' => $link,
+                        'tooltip' => 'Edit',
+                    ])->render();
+                })
+                ->html(),
         ];
     }
 
+    // public function builder(): Builder
+    // {
+    //     // $val = BackFromJb::with('beneficiary.sourceable')->get();
+    //     // dd($val);
+    //     $query = BackFromJb::with('beneficiary.sourceable.contact');
+    //     if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->sub_div) {
+    //         $query = EncryptionArray::applyLocationFilters(
+    //             $query,
+    //             $this->district_id ? (int) $this->district_id : null,
+    //             $this->rural_urban ? (int) $this->rural_urban : null,
+    //             $this->blockurban ? (int) $this->blockurban : null,
+    //             $this->gp_ward ? (int) $this->gp_ward : null,
+    //             $this->sub_div ? (int) $this->sub_div : null
+    //         );
+    //     }
+
+    //     return $query;
+    // }
     public function builder(): Builder
-    {
-        // $val = BackFromJb::with('beneficiary.sourceable')->get();
-        // dd($val);
-        return BackFromJb::query()
-            ->with([
-                'beneficiary.sourceable.contact'
-            ]);
+{
+    $query = BackFromJb::with('beneficiary.sourceable.contact');
+
+    // FILTERS
+    if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->sub_div) {
+        $query = EncryptionArray::applyBackFromJB(
+            $query,
+            $this->district_id,
+            $this->rural_urban,
+            $this->blockurban,
+            $this->gp_ward,
+            $this->sub_div
+        );
     }
+
+    // SEARCH
+    // if (!empty($this->search)) {
+    //     $query->whereHas('beneficiary.sourceable.contact', function ($q) {
+    //         $q->where('mobile_no', 'like', "%{$this->search}%")
+    //           ->orWhere('name', 'like', "%{$this->search}%")
+    //           ->orWhere('address', 'like', "%{$this->search}%");
+    //     });
+    // }
+
+    return $query;
+}
+
 }
