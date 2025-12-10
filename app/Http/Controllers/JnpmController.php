@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\CheckAuthHelper;
 use App\Helpers\WorkFlowPermissionHelper;
+use App\Models\District;
 
 class JnpmController extends Controller
 {
@@ -269,5 +270,31 @@ class JnpmController extends Controller
         }
         $header = 'Oops! You do not have permission to view users.';
         return view('CommonRestictedpage.index', compact('header'));
+    }
+
+    // HOD
+    public function jnmpMarkedDataAtHOD(Request $request)
+    {
+        if (CheckAuthHelper::isCommonHOD()) {
+            
+            $districts = District::all();
+            $district = $request->query('district');
+
+            return view('jnmp.linelisting_at_hod', compact('districts', 'district'));
+        } else {
+            redirect()->route('dashboard')
+                ->with('error', 'Oops! You are not authorized to perform this action.')
+                ->send();
+        }
+    }
+
+    public function jnmpMarkedData(Request $request)
+    {
+        $district = $request->district ?? null;
+
+        return view('jnmp.linelisting_at_hod', [
+            'district' => $district,
+            'districts' => District::all(),
+        ]);
     }
 }

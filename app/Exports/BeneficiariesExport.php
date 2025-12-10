@@ -30,10 +30,12 @@ class BeneficiariesExport implements FromCollection, WithHeadings
     {
         return [
             'Application ID',
+            'Beneficiary ID',
             'Applicant Name',
             "Father's Name",
             'Date of Birth',
             'Mobile No',
+            'Address'
         ];
     }
 }

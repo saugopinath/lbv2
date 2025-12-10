@@ -151,6 +151,10 @@ class JnmpDetailsDataTable extends DataTableComponent
                     )->full_name ?? 'N/A';
                 }),
 
+            Column::make("Address", "Address")
+                ->label(fn($row) => $row->sourceable->contact->getFullAddress() ?? 'N/A')
+                ->html(),
+
             Column::make("Mobile No", "mobile_no")
                 ->label(fn($row) => $row->sourceable->mobile_no ?? 'N/A'),
 
@@ -171,13 +175,7 @@ class JnmpDetailsDataTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $query = BeneficiaryCommonList::query()
-            // ->with([
-            //     'sourceable',
-            //     'sourceable.contact',
-            //     'sourceable.relationships',
-            //     'sourceable.mapping'
-            // ]);
+        $query = BeneficiaryCommonList::query()           
             ->with([
                 'sourceable' => function ($q) {
                     $q->with(['contact', 'relationships', 'mapping']);
@@ -193,34 +191,6 @@ class JnmpDetailsDataTable extends DataTableComponent
         $query->whereHas('sourceable.mapping', function ($q) {
             $q->where('payment_suspend', 1);
         });
-
-        // District Filter
-        // if (!empty($this->district_id)) {
-        //     $query->whereHas('personal', function ($q) {
-        //         $q->where('created_by_dist_code', $this->district_id);
-        //     });
-        // }
-
-        // // Block / ULB Filter
-        // if (!empty($this->blockurban)) {
-        //     $query->whereHas('personal', function ($q) {
-        //         $q->where('created_by_local_body_code', $this->blockurban);
-        //     });
-        // }
-
-        // // GP/Ward
-        // if (!empty($this->gp_ward)) {
-        //     $query->whereHas('contact', function ($q) {
-        //         $q->where('gp_ward_code', $this->gp_ward);
-        //     });
-        // }
-
-        // // Subdivision
-        // if (!empty($this->sub_div)) {
-        //     $query->whereHas('personal', function ($q) {
-        //         $q->where('created_by_subdivision_code', $this->sub_div);
-        //     });
-        // }
 
         if (!empty($this->filter_condition)) {
             $query->where($this->filter_condition);

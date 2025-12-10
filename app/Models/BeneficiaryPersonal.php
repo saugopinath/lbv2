@@ -70,6 +70,10 @@ class BeneficiaryPersonal extends Model implements Auditable
     {
         return $this->belongsTo(CodeMaster::class, 'caste', 'id');
     }
+    public function district()
+    {
+        return $this->belongsTo(District::class, 'created_by_dist_code', 'district_code');
+    }
 
     public function enclosers()
     {

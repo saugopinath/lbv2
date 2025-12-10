@@ -253,6 +253,6 @@ Route::controller(JnpmController::class)->group(function () {
 
         // JNMP List at HOD
     Route::get('jnmp-marked-data', 'jnmpMarkedDataAtHOD')->name('jnmp-marked-data');
-    Route::post('jnmpMarkedData', 'jnmpMarkedData')->name('jnmpMarkedData');
+    Route::any('jnmpMarkedData', 'jnmpMarkedData')->name('jnmpMarkedData');
     // Route::post('generateJnmpDataHodExcel', 'generateJnmpDataHodExcel')->name('generateJnmpDataHodExcel');
 });
