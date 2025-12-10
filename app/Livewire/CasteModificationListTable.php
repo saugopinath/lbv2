@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\BeneficiaryPersonal;
 use App\Models\CasteModificationInfo;
 use App\Models\Codemaster;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -172,12 +173,13 @@ class CasteModificationListTable extends DataTableComponent
             ->with([
                 'beneficiaryCommonList.sourceable',
                 'beneficiaryCommonList.sourceable.contact',
-                // 'beneficiaryCommonList.sourceable.relationships',
+                'beneficiaryCommonList.sourceable.relationships',
             ])
             ->whereHas('beneficiaryCommonList', function ($q) {
                 foreach ($this->filter_condition as $col => $val) {
                     $q->where($col, $val);
                 }
+                $q->where('sourceable_type', BeneficiaryPersonal::class);
             });
         if (!empty($this->casteId)) {
             $query->where('caste_request_type', $this->casteId);
@@ -209,13 +211,123 @@ class CasteModificationListTable extends DataTableComponent
         }
         return $query;
     }
+
+
+
+    // public function builder(): Builder
+    // {
+    //     // minimal select on main model (keep primary key 'id')
+    //     $query = CasteModificationInfo::query()
+    //         ->select([
+    //             'id',
+    //             'application_id',
+    //             'beneficiary_id',
+    //             'caste_request_type',
+    //             'next_level_requested_id',
+    //         ])
+    //         ->with([
+    //             // ensure primary key(s) used for relation matching are selected
+    //             'beneficiaryCommonList' => function ($q) {
+    //                 $q->select([
+    //                     // primary key of beneficiary_common_lists is sourceable_id
+    //                     'sourceable_id',
+    //                     'sourceable_type',
+    //                     // include columns you filter by or display (example: district_id)
+    //                     // 'district_id',
+    //                 ]);
+    //             },
+
+    //             // the polymorphic target (BeneficiaryPersonal) must include its PK (application_id)
+    //             'beneficiaryCommonList.sourceable' => function ($q) {
+    //                 $q->select([
+    //                     'application_id', // PK (important!)
+    //                     'full_name',
+    //                     'beneficiary_id',
+    //                     'mobile_no',
+    //                 ]);
+    //             },
+
+    //             // constrain relationships to father (relation_type_id = 79) and ensure application_id present
+    //             'beneficiaryCommonList.sourceable.relationships' => function ($q) {
+    //                 $q->select([
+    //                     'id',
+    //                     'application_id',
+    //                     'full_name',
+    //                     'relation_type_id',
+    //                 ])->where('relation_type_id', 79);
+    //             },
+
+    //             'beneficiaryCommonList.sourceable.contact' => function ($q) {
+    //                 $q->select([
+    //                     'id',
+    //                     'application_id',
+
+    //                 ]);
+    //             },
+    //         ]);
+
+    //     // Only apply whereHas if filter_condition is present and is non-empty array
+    //     if (!empty($this->filter_condition) && is_array($this->filter_condition)) {
+    //         $query->whereHas('beneficiaryCommonList', function ($q) {
+    //             foreach ($this->filter_condition as $col => $val) {
+    //                 // Use exact column names from beneficiary_common_lists here
+    //                 $q->where($col, $val);
+    //             }
+    //         });
+    //     }
+
+    //     // caste filter
+    //     if (!empty($this->casteId)) {
+    //         $query->where('caste_request_type', $this->casteId);
+    //     }
+
+    //     // applicantStatus -> compute nextLevelRequestId (only add where if > 0)
+    //     if (!empty($this->applicantStatus)) {
+    //         // existing logic to set $this->nextLevelRequestId and $this->action_visible
+    //         if ($this->applicantStatus == 'PL') {
+    //             if (in_array($this->roleId, [4, 5])) {
+    //                 $this->nextLevelRequestId = Codemaster::getIdByCode(2202);
+    //                 $this->action_visible = 1;
+    //             } elseif (in_array($this->roleId, [6, 7])) {
+    //                 $this->nextLevelRequestId = Codemaster::getIdByCode(2201);
+    //                 $this->action_visible = 1;
+    //             }
+    //         } elseif ($this->applicantStatus == 'APL') {
+    //             $this->nextLevelRequestId = Codemaster::getIdByCode(2202);
+    //         } elseif ($this->applicantStatus == 'VPL') {
+    //             $this->nextLevelRequestId = Codemaster::getIdByCode(2201);
+    //         } elseif ($this->applicantStatus == 'VL') {
+    //             $this->nextLevelRequestId = Codemaster::getIdByCode(2202);
+    //         } elseif ($this->applicantStatus == 'AL') {
+    //             $this->nextLevelRequestId = Codemaster::getIdByCode(2203);
+    //         } elseif ($this->applicantStatus == 'RL') {
+    //             $this->nextLevelRequestId = Codemaster::getIdByCode(2204);
+    //         } else {
+    //             $this->nextLevelRequestId = 0;
+    //         }
+
+    //         if (!empty($this->nextLevelRequestId)) {
+    //             $query->where('next_level_requested_id', $this->nextLevelRequestId);
+    //         }
+    //     }
+
+    //     // DEBUG (optional) - uncomment to log SQL and bindings
+    //     // \Log::debug('Caste list SQL', ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
+    //     // \Log::debug('Filter cond', $this->filter_condition, ['nextLevel' => $this->nextLevelRequestId ?? null]);
+
+    //     return $query;
+    // }
+
+
     public function columns(): array
     {
         return [
             Column::make("ID", "id"),
-            Column::make("Application Id", "application_id"),
-            Column::make("Name")
+            Column::make("Application Id", "application_id")
+                ->searchable(),
+            Column::make('Name')
                 ->label(fn($row) => $row->beneficiaryCommonList?->sourceable?->full_name ?? 'N/A'),
+               
             Column::make("Father's Name")
                 ->label(fn($row) => $row->beneficiaryCommonList?->sourceable?->relationships
                     ->where('relation_type_id', 79)->first()?->full_name ?? 'N/A'),

@@ -215,8 +215,9 @@ Route::controller(CmoController::class)->group(function () {
 });
 //reject approved beneficiary
 Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
-    Route::get('/reject-approved-beneficiary',  'index')->name('reject-approved-beneficiary');
-    Route::get('/reject-approved-beneficiary/de-activate', 'editview')->name('reject-approved-beneficiary.de-activate');
-    Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->name('beneficiary.deActivebeneficiary');
+    Route::get('/reject-approved-beneficiary',  'index')
+        ->middleware('permission.redirect:canRejectApprovedBeneficiary')
+        ->name('reject-approved-beneficiary');
+    Route::get('/reject-approved-beneficiary/de-activate', 'editview')->middleware('permission.redirect:canViewDetailsToReject')->name('reject-approved-beneficiary.de-activate');
+    Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->middleware('permission.redirect:canRejectBeneficiary')->name('beneficiary.deActivebeneficiary');
 });
-

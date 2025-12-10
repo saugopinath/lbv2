@@ -36,18 +36,19 @@ class ApproverPermissionSeeder extends Seeder
             'ApproveCasteApplication',
             'RevertCasteApplication',
             'RejectApprovedBeneficiary',
+            'Filter Applicant To Reject',
+            'View Details To Reject',
+            'Reject Beneficiary',
+
+
 
         ];
-
-        // 1) find role
         try {
             $role = Role::findByName('Approver');
         } catch (\Exception $e) {
             $this->command->error('Role "Approver" not found. Seeder aborted.');
             return;
         }
-
-        // Ensure permission records exist and collect Permission models
         $permissionModels = [];
         foreach ($permissions as $permName) {
             $permissionModels[] = Permission::firstOrCreate(
@@ -55,7 +56,6 @@ class ApproverPermissionSeeder extends Seeder
                 ['guard_name' => 'web']
             );
         }
-        // Get user_ids from mapping table for that role
         $adminUserIds = UserRoleSchemeOfficeMapping::where('role_id', $role->id)
             ->pluck('user_id')
             ->unique()
@@ -64,7 +64,6 @@ class ApproverPermissionSeeder extends Seeder
             $this->command->info('No users found in UserRoleSchemeOfficeMapping for role "Approver".');
             return;
         }
-        // 4) Loop users and assign permissions, printing a message for each assign (or skip)
         foreach ($adminUserIds as $userId) {
             $user = User::find($userId);
             if (! $user) {
@@ -72,12 +71,11 @@ class ApproverPermissionSeeder extends Seeder
                 continue;
             }
             foreach ($permissionModels as $permission) {
-                // check if user already has this permission
+
                 if ($user->hasPermissionTo($permission->name)) {
                     $this->command->info("User id={$user->id} already has permission '{$permission->name}' (id={$permission->id}).");
                     continue;
                 }
-                // assign and print message
                 $user->givePermissionTo($permission->name);
                 $this->command->info("Assigned permission '{$permission->name}' (id={$permission->id}) to user id={$user->id}.");
             }
