@@ -74,6 +74,7 @@ class BackFromJBWorkflowDropdown extends Component
             'subdivision_id'  => null,
             'blockurban'      => null,
             'gp_ward'         => null,
+            'application_type' => null,
         ];
         $this->application_type = null;
         $this->dispatch('resetChildFilters');

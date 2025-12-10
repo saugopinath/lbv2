@@ -15,7 +15,7 @@ class BackFromJBController extends Controller
         return view('backfromjb.list', compact('header'));
     }
 
-    public function action(Request $request)
+    public function backfromjbactions(Request $request)
     {
         $applicant_details['applicationId'] = Crypt::decryptString($request->id);
         $record = BackFromJb::with([

@@ -24,6 +24,12 @@ class BackFromJBDataTable extends DataTableComponent
     public array $filter_condition = [];
     public function mount(): void
     {
+        if (CheckAuthHelper::isCommmonVerifier()) {
+            $this->next_level_role_id = Codemaster::getIdByCode(4401);
+        } elseif (CheckAuthHelper::isCommonApprover()) {
+            $this->next_level_role_id = Codemaster::getIdByCode(4402);
+        }
+
         $select_lgd = session('lgd_session');
 
         if (!empty($select_lgd['district_id'])) {
@@ -101,6 +107,9 @@ class BackFromJBDataTable extends DataTableComponent
         $this->blockurban = $filters['blockurban'];
         $this->gp_ward = $filters['gp_ward'];
         $this->sub_div = $filters['subdivision_id'];
+        if($filters['application_type']){
+            $this->next_level_role_id = $filters['application_type'];
+        }
     }
 
     public function columns(): array
@@ -143,7 +152,7 @@ class BackFromJBDataTable extends DataTableComponent
                     if (!$canEdit) {
                         return 'Approved';
                     }
-                    $link = route('verify-approve') . '?id=' . Crypt::encryptString($row->beneficiary->sourceable->application_id);
+                    $link = route('backfromjbactions') . '?id=' . Crypt::encryptString($row->beneficiary->sourceable->application_id);
                     return view('coulmn_button.actions', [
                         'link' => $link,
                         'tooltip' => 'Edit',
@@ -162,6 +171,9 @@ class BackFromJBDataTable extends DataTableComponent
                 $q->where($col, $val);
             }
         });
+        if (!empty($this->next_level_role_id)) {
+            $query->where('next_level_role_id', $this->next_level_role_id);
+        }
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->sub_div) {
             $query = EncryptionArray::applyBackFromJB(
                 $query,
