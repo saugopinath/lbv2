@@ -234,15 +234,14 @@ class ReactivateModal extends Component
             UpdateBenDetails::create([
                 'beneficiary_id' => $personal->beneficiary_id,
                 'application_id' => $this->applicantId,
-
                 'old_data' => json_encode(['payment_suspended' => 1]),
                 'new_data' => json_encode(['payment_suspended' => null]),
-
                 'update_code' => 17,
                 'remarks' => $this->revert_reason_remarks,
                 'reactive_reason' => $this->revert_reason_cause_id,
                 'user_id' => Auth::id(),
-
+                'action_ip_address' => request()->ip(),
+                'action_type' => class_basename(request()->route()->getAction()['controller']),
                 'next_level_role_id' => $personal->next_level_role_id,
                 'dist_code'          => $personal->district_id,
                 'local_body_code' =>  $personal->block_id,
