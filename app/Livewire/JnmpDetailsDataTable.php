@@ -172,11 +172,16 @@ class JnmpDetailsDataTable extends DataTableComponent
     public function builder(): Builder
     {
         $query = BeneficiaryCommonList::query()
+            // ->with([
+            //     'sourceable',
+            //     'sourceable.contact',
+            //     'sourceable.relationships',
+            //     'sourceable.mapping'
+            // ]);
             ->with([
-                'sourceable',
-                'sourceable.contact',
-                'sourceable.relationships',
-                'sourceable.mapping'
+                'sourceable' => function ($q) {
+                    $q->with(['contact', 'relationships', 'mapping']);
+                }
             ]);
 
         // JNMP Marked = 1

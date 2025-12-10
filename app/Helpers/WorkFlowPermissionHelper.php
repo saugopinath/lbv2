@@ -279,6 +279,18 @@ class WorkFlowPermissionHelper
     {
         return Auth::user()->can('ViewCastApplication');
     }
+    public static function canImportJanmaMrityuData(): bool
+    {
+        return Auth::user()->can('import-janma-mrityu-data');
+    }
+    public static function canReActivateDeathIncident(): bool
+    {
+        return Auth::user()->can('re-activate-death-incident');
+    }
+    public static function canJanmyaMrityuBeneficiaryList(): bool
+    {
+        return Auth::user()->can('janmya-mrityu-beneficiary-list');
+    }
     public static function canTakeActionForCaste(): bool
     {
         return Auth::user()->can('TakeActionForCaste');

@@ -240,7 +240,7 @@ Route::controller(BeneficiaryCountController::class)->group(function () {
 
 Route::controller(JnpmController::class)->group(function () {
 
-    Route::any('/jnmp/pull', 'pullJnmpData')->name('jnmp.pull');
+    Route::any('/jnmp/pull', 'pullJnmpData')->middleware('permission.redirect:canImportJanmaMrityuData')->name('jnmp.pull');
 
     Route::post('/jnmp/details-callback', 'detailsCallback')->name('jnmp.details-callback');
 
@@ -248,5 +248,11 @@ Route::controller(JnpmController::class)->group(function () {
 
     Route::get('/jnmp-stats',  'getJnmpStats');
     Route::post('/jnmp/mark-as-death',  'markAsDeathProcess')->name('jnmp.mark-as-death');
-    Route::get('jnmp-data', 'index')->name('jnmp-data');
+
+    Route::get('jnmp-data', 'index')->middleware('permission.redirect:canReActivateDeathIncident')->name('jnmp-data');
+
+        // JNMP List at HOD
+    Route::get('jnmp-marked-data', 'jnmpMarkedDataAtHOD')->name('jnmp-marked-data');
+    Route::post('jnmpMarkedData', 'jnmpMarkedData')->name('jnmpMarkedData');
+    // Route::post('generateJnmpDataHodExcel', 'generateJnmpDataHodExcel')->name('generateJnmpDataHodExcel');
 });

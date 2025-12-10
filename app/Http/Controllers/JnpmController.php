@@ -12,103 +12,114 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\CheckAuthHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 
 class JnpmController extends Controller
 {
     protected $JnmpAuthenticationService;
-
+    protected $isAuthorized = false;
     public function __construct(JnmpAuthenticationInterface $JnmpAuthenticationService)
     {
-        //   dd($jnmpService);
+        if (CheckAuthHelper::isCommonJNMP()) {
+            $this->isAuthorized = true;
+        } else {
+            redirect()->route('dashboard')
+                ->with('error', 'Oops! You are not authorized to perform this action.')
+                ->send();
+        }
         $this->JnmpAuthenticationService = $JnmpAuthenticationService;
     }
 
     public function pullJnmpData(Request $request)
     {
-        // dd('ok');
-        $inserted = null;
+        if (WorkFlowPermissionHelper::canImportJanmaMrityuData()) {
+            $inserted = null;
 
-        if ($request->isMethod('post')) {
+            if ($request->isMethod('post')) {
 
-            $rules = [
-                'from_date' => 'required|date',
-                'to_date'   => 'required|date|after_or_equal:from_date',
-                'index'     => 'required|integer|min:1',
-                'page_size' => 'required|integer|min:1'
-            ];
-
-            $messages = [
-                'from_date.*' => 'Please select a valid start date.',
-                'to_date.*'   => 'Please select a valid end date.',
-            ];
-
-            $validator = Validator::make($request->all(), $rules, $messages);
-
-            if ($validator->fails()) {
-                return redirect()->back()->withErrors($validator)->withInput();
-            }
-
-            DB::beginTransaction();
-
-            try {
-
-                $payload = [
-                    'from_date' => $request->from_date,
-                    'to_date'   => $request->to_date,
-                    'index'     => $request->index,
-                    'page_size' => $request->page_size
+                $rules = [
+                    'from_date' => 'required|date',
+                    'to_date'   => 'required|date|after_or_equal:from_date',
+                    'index'     => 'required|integer|min:1',
+                    'page_size' => 'required|integer|min:1'
                 ];
 
-                $response = $this->JnmpAuthenticationService->getJnmpData($payload);
+                $messages = [
+                    'from_date.*' => 'Please select a valid start date.',
+                    'to_date.*'   => 'Please select a valid end date.',
+                ];
 
-                $data = $response->getData(true);
+                $validator = Validator::make($request->all(), $rules, $messages);
 
-
-                if (($data['status'] ?? 500) == 200) {
-
-                    DB::commit();
-
-                    session()->flash('success', $data['message']);
-                    session()->forget(['index', 'page_size']);
-
-                    return redirect()->route('jnmp.pull', ['inserted' => $data['inserted']]);
+                if ($validator->fails()) {
+                    return redirect()->back()->withErrors($validator)->withInput();
                 }
 
-                DB::rollBack();
-                session()->flash('error', 'Failed to import JNMP data.');
-                return redirect()->back();
-            } catch (\Exception $e) {
+                DB::beginTransaction();
 
-                DB::rollBack();
-                session()->flash('error', 'Error: ' . $e->getMessage());
-                return redirect()->back()->withInput();
+                try {
+
+                    $payload = [
+                        'from_date' => $request->from_date,
+                        'to_date'   => $request->to_date,
+                        'index'     => $request->index,
+                        'page_size' => $request->page_size
+                    ];
+
+                    $response = $this->JnmpAuthenticationService->getJnmpData($payload);
+
+                    $data = $response->getData(true);
+
+
+                    if (($data['status'] ?? 500) == 200) {
+
+                        DB::commit();
+
+                        session()->flash('success', $data['message']);
+                        session()->forget(['index', 'page_size']);
+
+                        return redirect()->route('jnmp.pull', ['inserted' => $data['inserted']]);
+                    }
+
+                    DB::rollBack();
+                    session()->flash('error', 'Failed to import JNMP data.');
+                    return redirect()->back();
+                } catch (\Exception $e) {
+
+                    DB::rollBack();
+                    session()->flash('error', 'Error: ' . $e->getMessage());
+                    return redirect()->back()->withInput();
+                }
             }
-        }
-        //just add lastfetching date
-        $lastFetchRaw = JnmpData::max('fetching_time');
+            //just add lastfetching date
+            $lastFetchRaw = JnmpData::max('fetching_time');
 
-        if ($lastFetchRaw) {
-            $maxDate = Carbon::parse($lastFetchRaw);
+            if ($lastFetchRaw) {
+                $maxDate = Carbon::parse($lastFetchRaw);
 
-            if ($maxDate->isToday()) {
-                $prevDate = JnmpData::whereDate('fetching_time', '<', $maxDate->toDateString())
-                    ->orderBy('fetching_time', 'desc')
-                    ->value('fetching_time');
+                if ($maxDate->isToday()) {
+                    $prevDate = JnmpData::whereDate('fetching_time', '<', $maxDate->toDateString())
+                        ->orderBy('fetching_time', 'desc')
+                        ->value('fetching_time');
+                } else {
+                    $prevDate = $lastFetchRaw;
+                }
+
+                $lastFetch = $prevDate
+                    ? Carbon::parse($prevDate)->format('d/m/Y')
+                    : 'N/A';
             } else {
-                $prevDate = $lastFetchRaw;
+                $lastFetch = 'N/A';
             }
 
-            $lastFetch = $prevDate
-                ? Carbon::parse($prevDate)->format('d/m/Y')
-                : 'N/A';
-        } else {
-            $lastFetch = 'N/A';
+            return view('jnmp.list', [
+                'header' => 'Importing data from Jonmo Mrityu Tothyo portal',
+                'lastFetch' => $lastFetch,
+            ]);
         }
-
-        return view('jnmp.list', [
-            'header' => 'Importing data from Jonmo Mrityu Tothyo portal',
-            'lastFetch' => $lastFetch,   
-        ]);
+        $header = 'Oops! You do not have permission to view users.';
+        return view('CommonRestictedpage.index', compact('header'));
         // $header = 'Importing data from Jonmo Mrityu Tothyo portal';
         // return view('jnmp.list', compact('header', 'inserted'));
     }
@@ -252,7 +263,11 @@ class JnpmController extends Controller
 
     public function index()
     {
-        $button_show = 1;
-        return view('jnmp.index', compact('button_show'));
+        if (WorkFlowPermissionHelper::canImportJanmaMrityuData()) {
+            $button_show = 1;
+            return view('jnmp.index', compact('button_show'));
+        }
+        $header = 'Oops! You do not have permission to view users.';
+        return view('CommonRestictedpage.index', compact('header'));
     }
 }
