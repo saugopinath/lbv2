@@ -69,7 +69,10 @@
             </div>
 
             <div class="flex justify-center">
-                <x-button.loading-button type="submit" text="Submit" x-data x-on:click="Livewire.dispatch('showLoader');" />
+                <x-button.loading-spiner-button
+                    type="submit"
+                    text="Submit"
+                    lockPage="true" />
             </div>
         </form>
     </div>

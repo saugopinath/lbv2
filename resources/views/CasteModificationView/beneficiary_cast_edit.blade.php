@@ -116,7 +116,10 @@
 
             <!-- Submit Button -->
             <div class="flex justify-end">
-                <x-button.loading-button type="submit" text="Submit" />
+                <x-button.loading-spiner-button
+                    type="submit"
+                    text="Submit"
+                    lockPage="true" />
             </div>
         </form>
     </div>
