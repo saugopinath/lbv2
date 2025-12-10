@@ -172,7 +172,7 @@ class CasteModificationListTable extends DataTableComponent
             ->with([
                 'beneficiaryCommonList.sourceable',
                 'beneficiaryCommonList.sourceable.contact',
-                'beneficiaryCommonList.sourceable.relationships',
+                // 'beneficiaryCommonList.sourceable.relationships',
             ])
             ->whereHas('beneficiaryCommonList', function ($q) {
                 foreach ($this->filter_condition as $col => $val) {

@@ -46,7 +46,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <x-form.select name="reject_reason" id="reject_reason" label="Reject Reason" required>
+                    <x-form.selected name="reject_reason" id="reject_reason" label="Reject Reason" required>
                         <option value="">--Select Reason--</option>
                         @foreach ($rejectRevertCause as $cause)
                         <option value="{{ $cause['id'] }}"
@@ -54,7 +54,7 @@
                             {{ $cause['name'] }}
                         </option>
                         @endforeach
-                    </x-form.select>
+                    </x-form.selected>
 
                 </div>
 

@@ -125,146 +125,135 @@ class CasteModificationController extends Controller
 
     public function updateCaste(Request $request)
     {
-        // if (WorkFlowPermissionHelper::canUpdateCaste()) {
-        // if (Auth::user()->can('update caste')) {
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Please login first!');
-        }
-        $application_id = Crypt::decryptString($request->application_id);
-        $userId = Auth::id();
-         $uploadedDocsCount = BeneficiaryTemEnclosure::where('application_id', $application_id)
-        ->whereIn('document_type', [$this->doctype])
-        ->count();
-        $validator = Validator::make($request->all(), [
-            'application_id' => 'required|string',
-            'caste' => 'required|integer',
-            'cast_no' => ['nullable', 'string', Rule::requiredIf(fn() => in_array($request->input('caste'), ['17', '18', 17, 18]))],
-        ], [
-            'application_id.required' => 'Invalid application.',
-            'caste.required' => 'Please select a caste.',
-            'cast_no.required_if' => 'Caste certificate number is required.',
-        ]);
-     
-        $validator->after(function ($validator) use ($request, $uploadedDocsCount) {
-            $caste = $request->input('caste');
-            if (in_array($caste, ['17', '18', 17, 18]) && $uploadedDocsCount < 1) {
-                $validator->errors()->add('document', 'Please upload the required document for the selected caste.');
+        if (WorkFlowPermissionHelper::canUpdateCaste()) {
+            // if (Auth::user()->can('update caste')) {
+            if (!Auth::check()) {
+                return redirect()->route('login')->with('error', 'Please login first!');
             }
-        });
+            $userId = Auth::id();
+            $application_id = Crypt::decryptString($request->application_id);
 
-        // $validator->after(function ($validator) use ($uploadedDocsCount) {
-        //     if ($uploadedDocsCount < 1) {
-        //         $validator->errors()->add('document', 'Please upload the required document.');
-        //     }
-        // });
-        // If validation fails -> go back to the same page with errors and old input
-        if ($validator->fails()) {
-            // dd('validation fails');
-            // dd($validator->errors());
-            return back()
-                ->withErrors($validator)   // pass the validator (MessageBag)
-                ->withInput();
-        }
+            $rules = [
+                'application_id' => 'required|string',
+                'caste' => 'required|integer|exists:codemasters,id',
+                'cast_no' => ['nullable', 'string', 'required_if:caste,17,18'],
+            ];
+
+            $messages = [
+                'application_id.required' => 'Invalid application.',
+                'caste.required' => 'Please select a caste.',
+                'cast_no.required_if' => 'Caste certificate number is required.',
+            ];
+            if ($application_id !== null) {
+                $uploadedDocsCount = BeneficiaryTemEnclosure::where('application_id', $application_id)
+                    ->whereIn('document_type', $this->doctype) 
+                    ->count();
+
+                $casteValue = $request->input('caste');
+                if (in_array($casteValue, ['17', '18', 17, 18], true) && $uploadedDocsCount < 1) {
+                    $rules['document_upload'] = 'required';
+                    $messages['document_upload.required'] = 'Please upload the required document.';
+                }
+            }
+            $request->validate($rules, $messages);
+
+            // $request->validate([
+            //     'application_id' => 'required|string',
+            //     'caste' => 'required|integer|exists:codemasters,id',
+            //     'cast_no' => ['nullable', 'string', 'required_if:caste,17,18'],
+            // ], [
+            //     'application_id.required' => 'Invalid application.',
+            //     'caste.required' => 'Please select a caste.',
+            //     'cast_no.required_if' => 'Caste certificate number is required.',
+            // ]);
 
 
+            $beneficiary = BeneficiaryCommonList::where('sourceable_id', $application_id)->with('sourceable')->firstOrFail();
 
-        // $request->validate([
-        //     'application_id' => 'required|string',
-        //     'caste' => 'required|integer|exists:codemasters,id',
-        //     'cast_no' => ['nullable', 'string', 'required_if:caste,17,18'],
-        // ], [
-        //     'application_id.required' => 'Invalid application.',
-        //     'caste.required' => 'Please select a caste.',
-        //     'cast_no.required_if' => 'Caste certificate number is required.',
-        // ]);
+            $oldData = [
+                'caste' => $beneficiary->sourceable->caste,
+                'caste_certificate_no' => $beneficiary->sourceable->caste_certificate_no,
+            ];
 
+            $newData = [
+                'caste' => $request->caste,
+                'caste_certificate_no' => $request->cast_no,
+            ];
 
-        $beneficiary = BeneficiaryCommonList::where('sourceable_id', $application_id)->with('sourceable')->firstOrFail();
+            $previousId = AcceptRejectInfo::where('application_id', $application_id)
+                ->orderByDesc('id')
+                ->value('id');
 
-        $oldData = [
-            'caste' => $beneficiary->sourceable->caste,
-            'caste_certificate_no' => $beneficiary->sourceable->caste_certificate_no,
-        ];
+            $existingModification = CasteModificationInfo::where('application_id', $beneficiary->sourceable_id)
+                ->where('next_level_requested_id', Codemaster::getIdByCode(2204))
+                ->first();
 
-        $newData = [
-            'caste' => $request->caste,
-            'caste_certificate_no' => $request->cast_no,
-        ];
+            DB::beginTransaction();
+            try {
+                if ($existingModification) {
+                    $acceptReject = new AcceptRejectInfo();
+                    $acceptReject->application_id = $application_id;
+                    $acceptReject->beneficiary_id = $existingModification->beneficiary_id;
+                    $acceptReject->ip_address = request()->ip();
+                    $acceptReject->user_id = Auth::id();
+                    $acceptReject->browser = request()->header('User-Agent');
+                    $acceptReject->model_name = request()->path();
+                    $acceptReject->op_type = Codemaster::getIdByCode(2106);
+                    $acceptReject->revert_reason_cause_id = null;
+                    $acceptReject->revert_reason_remarks = null;
+                    $acceptReject->parent_id = $previousId;
+                    $acceptSaved = $acceptReject->save();
 
-        $previousId = AcceptRejectInfo::where('application_id', $application_id)
-            ->orderByDesc('id')
-            ->value('id');
+                    $existingModification->new_data = $newData;
+                    $existingModification->caste_request_type = $request->caste;
+                    $existingModification->next_level_requested_id = Codemaster::getIdByCode(2201);
+                    $existingModification->updated_by = $userId;
+                    $existingModification->request_id = $acceptReject->id;
+                    $updatedModification = $existingModification->save();
 
-        $existingModification = CasteModificationInfo::where('application_id', $beneficiary->sourceable_id)
-            ->where('next_level_requested_id', Codemaster::getIdByCode(2204))
-            ->first();
+                    if ($acceptSaved && $updatedModification) {
+                        DB::commit();
+                        return redirect()->route('Caste-modification-info')
+                            ->with('success', 'Caste re-apply request sent successfully!');
+                    }
 
-        DB::beginTransaction();
-        try {
-            if ($existingModification) {
-                $acceptReject = new AcceptRejectInfo();
-                $acceptReject->application_id = $application_id;
-                $acceptReject->beneficiary_id = $existingModification->beneficiary_id;
-                $acceptReject->ip_address = request()->ip();
-                $acceptReject->user_id = Auth::id();
-                $acceptReject->browser = request()->header('User-Agent');
-                $acceptReject->model_name = request()->path();
-                $acceptReject->op_type = Codemaster::getIdByCode(2106);
-                $acceptReject->revert_reason_cause_id = null;
-                $acceptReject->revert_reason_remarks = null;
-                $acceptReject->parent_id = $previousId;
-                $acceptSaved = $acceptReject->save();
+                    DB::rollBack();
+                    return back()->with('error', 'Something went wrong.');
+                } else {
+                    $logdetails = new AcceptRejectInfo;
+                    $logdetails->application_id = $beneficiary->sourceable_id;
+                    $logdetails->beneficiary_id = $beneficiary->beneficiary_id;
+                    $logdetails->ip_address = request()->ip();
+                    $logdetails->user_id = $userId;
+                    $logdetails->browser = request()->header('User-Agent');
+                    $logdetails->model_name = request()->path();
+                    $logdetails->op_type = Codemaster::getIdByCode(2106);
+                    $logdetails->save();
 
-                $existingModification->new_data = $newData;
-                $existingModification->caste_request_type = $request->caste;
-                $existingModification->next_level_requested_id = Codemaster::getIdByCode(2201);
-                $existingModification->updated_by = $userId;
-                $existingModification->request_id = $acceptReject->id;
-                $updatedModification = $existingModification->save();
+                    $modified_caste = new CasteModificationInfo;
+                    $modified_caste->application_id = $beneficiary->sourceable_id;
+                    $modified_caste->beneficiary_id = $beneficiary->beneficiary_id;
+                    $modified_caste->old_data = $oldData;
+                    $modified_caste->new_data = $newData;
+                    $modified_caste->caste_request_type = $request->caste;
+                    $modified_caste->next_level_requested_id = Codemaster::getIdByCode(2201);
+                    $modified_caste->request_id = $logdetails->id;
+                    $modified_caste->created_by = $userId;
+                    $modified_caste->updated_by = $userId;
+                    $modified_caste->save();
 
-                if ($acceptSaved && $updatedModification) {
                     DB::commit();
                     return redirect()->route('Caste-modification-info')
-                        ->with('success', 'Caste re-apply request sent successfully!');
+                        ->with('success', 'Caste updated request processed successfully!');
                 }
-
+            } catch (\Exception $e) {
                 DB::rollBack();
-                return back()->with('error', 'Something went wrong.');
-            } else {
-                $logdetails = new AcceptRejectInfo;
-                $logdetails->application_id = $beneficiary->sourceable_id;
-                $logdetails->beneficiary_id = $beneficiary->beneficiary_id;
-                $logdetails->ip_address = request()->ip();
-                $logdetails->user_id = $userId;
-                $logdetails->browser = request()->header('User-Agent');
-                $logdetails->model_name = request()->path();
-                $logdetails->op_type = Codemaster::getIdByCode(2106);
-                $logdetails->save();
-
-                $modified_caste = new CasteModificationInfo;
-                $modified_caste->application_id = $beneficiary->sourceable_id;
-                $modified_caste->beneficiary_id = $beneficiary->beneficiary_id;
-                $modified_caste->old_data = $oldData;
-                $modified_caste->new_data = $newData;
-                $modified_caste->caste_request_type = $request->caste;
-                $modified_caste->next_level_requested_id = Codemaster::getIdByCode(2201);
-                $modified_caste->request_id = $logdetails->id;
-                $modified_caste->created_by = $userId;
-                $modified_caste->updated_by = $userId;
-                $modified_caste->save();
-
-                DB::commit();
-                return redirect()->route('Caste-modification-info')
-                    ->with('success', 'Caste updated request processed successfully!');
+                return back()->with('error', 'Something went wrong: ' . $e->getMessage());
             }
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
-        // }
 
-        // $header = 'Oops! You do not have permission to update caste.';
-        // return view('CommonRestictedpage.index', compact('header'));
+        $header = 'Oops! You do not have permission to update caste.';
+        return view('CommonRestictedpage.index', compact('header'));
     }
 
     /** -------------------- VERIFIER / APPROVER ACCESS -------------------- **/

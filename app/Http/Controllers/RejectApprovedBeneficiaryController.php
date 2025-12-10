@@ -86,19 +86,17 @@ class RejectApprovedBeneficiaryController extends Controller
                 $validator->errors()->add('document', 'Please upload the required document.');
             }
         });
-        // If validation fails -> go back to the same page with errors and old input
         if ($validator->fails()) {
             // dd('validation fails');
             // dd($validator->errors());
             return back()
-                ->withErrors($validator)   // pass the validator (MessageBag)
+                ->withErrors($validator)
                 ->withInput();
         }
 
         // Get validated data
         $validatedData = $validator->validated();
 
-        // Decrypt application id and beneficiary id
         try {
             $applicationId = Crypt::decryptString($validatedData['application_id']);
         } catch (\Exception $e) {
@@ -108,7 +106,6 @@ class RejectApprovedBeneficiaryController extends Controller
         try {
             $beneficiaryIdFromForm = Crypt::decryptString($validatedData['beneficiary_id']);
         } catch (\Exception $e) {
-            // not strictly necessary if you don't use this decrypt, but good to validate
             $beneficiaryIdFromForm = null;
         }
 
