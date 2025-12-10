@@ -25,14 +25,17 @@ class BackFromJBDataTable extends DataTableComponent
     public function mount(): void
     {
         $select_lgd = session('lgd_session');
+
         if (!empty($select_lgd['district_id'])) {
-            $this->filter_condition['lb_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
+            $this->filter_condition['district_id'] = Crypt::decryptString($select_lgd['district_id']);
         }
+
         if (!empty($select_lgd['block_id'])) {
-            $this->filter_condition['lb_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
+            $this->filter_condition['block_id'] = Crypt::decryptString($select_lgd['block_id']);
         }
+
         if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['lb_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
+            $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
 
@@ -145,50 +148,25 @@ class BackFromJBDataTable extends DataTableComponent
         ];
     }
 
-    // public function builder(): Builder
-    // {
-    //     // $val = BackFromJb::with('beneficiary.sourceable')->get();
-    //     // dd($val);
-    //     $query = BackFromJb::with('beneficiary.sourceable.contact');
-    //     if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->sub_div) {
-    //         $query = EncryptionArray::applyLocationFilters(
-    //             $query,
-    //             $this->district_id ? (int) $this->district_id : null,
-    //             $this->rural_urban ? (int) $this->rural_urban : null,
-    //             $this->blockurban ? (int) $this->blockurban : null,
-    //             $this->gp_ward ? (int) $this->gp_ward : null,
-    //             $this->sub_div ? (int) $this->sub_div : null
-    //         );
-    //     }
-
-    //     return $query;
-    // }
     public function builder(): Builder
-{
-    $query = BackFromJb::with('beneficiary.sourceable.contact');
-
-    // FILTERS
-    if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->sub_div) {
-        $query = EncryptionArray::applyBackFromJB(
-            $query,
-            $this->district_id,
-            $this->rural_urban,
-            $this->blockurban,
-            $this->gp_ward,
-            $this->sub_div
-        );
+    {
+        $query = BackFromJb::with([
+            'beneficiary.sourceable.contact'
+        ])->whereHas('beneficiary', function ($q) {
+            foreach ($this->filter_condition as $col => $val) {
+                $q->where($col, $val);
+            }
+        });
+        if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->sub_div) {
+            $query = EncryptionArray::applyBackFromJB(
+                $query,
+                $this->district_id,
+                $this->rural_urban,
+                $this->blockurban,
+                $this->gp_ward,
+                $this->sub_div
+            );
+        }
+        return $query;
     }
-
-    // SEARCH
-    // if (!empty($this->search)) {
-    //     $query->whereHas('beneficiary.sourceable.contact', function ($q) {
-    //         $q->where('mobile_no', 'like', "%{$this->search}%")
-    //           ->orWhere('name', 'like', "%{$this->search}%")
-    //           ->orWhere('address', 'like', "%{$this->search}%");
-    //     });
-    // }
-
-    return $query;
-}
-
 }
