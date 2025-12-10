@@ -8,7 +8,18 @@ use App\Helpers\CheckAuthHelper;
 
 class BackFromJBWorkflowDropdown extends Component
 {
-    public $types;
+    public $types, $application_type;
+    public array $filters = [
+        'district_id'     => null,
+        'rural_urban'     => null,
+        'subdivision_id'  => null,
+        'blockurban'      => null,
+        'gp_ward'         => null,
+        'application_type' => null,
+    ];
+    protected $listeners = [
+        'filtersApplied'       => 'updateGeoFilters',
+    ];
     public function render()
     {
         $codemasters = Codemaster::where('parent_short_code', 'back_from_jb')->get();
@@ -19,8 +30,7 @@ class BackFromJBWorkflowDropdown extends Component
         if (CheckAuthHelper::isCommmonVerifier()) {
             $code = 4401;
             $id = Codemaster::getIdByCode(4401);
-        }
-        elseif (CheckAuthHelper::isCommonApprover()) {
+        } elseif (CheckAuthHelper::isCommonApprover()) {
             $removeShortNames = ['pending'];
         }
         $updatedCollection = $codemasters->map(function ($item) use ($code, $id) {
@@ -42,5 +52,32 @@ class BackFromJBWorkflowDropdown extends Component
         });
         $this->types = $filtered->values();
         return view('livewire.back-from-j-b-workflow-dropdown');
+    }
+
+    public function updateGeoFilters(array $data)
+    {
+        $this->filters = array_merge($this->filters, $data);
+    }
+    public function updatedApplicationType($code)
+    {
+        $this->filters['application_type'] = $code;
+    }
+    public function search()
+    {
+        dd($this->filters);
+        $this->dispatch('doSearch', $this->filters);
+    }
+    public function resetAll()
+    {
+        $this->filters = [
+            'district_id'     => null,
+            'rural_urban'     => null,
+            'subdivision_id'  => null,
+            'blockurban'      => null,
+            'gp_ward'         => null,
+        ];
+        $this->application_type = null;
+        $this->dispatch('resetChildFilters');
+        $this->dispatch('doSearch', $this->filters);
     }
 }
