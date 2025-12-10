@@ -107,16 +107,21 @@ class BackFromJBDataTable extends DataTableComponent
     {
         return [
             Column::make("Application ID", "application_id")
-                ->label(fn($row) => $row->beneficiary->sourceable->application_id ?? 'N/A')
+                ->label(fn($row) => $row->beneficiary->sourceable_id ?? 'N/A')
                 ->sortable()
                 ->searchable(function ($query, $searchTerm) {
-                    $query->whereHas('sourceable', function ($q) use ($searchTerm) {
-                        $q->where('application_id', 'ILIKE', "%{$searchTerm}%");
+                    $query->whereHas('beneficiary', function ($q) use ($searchTerm) {
+                        $q->where('sourceable_id', 'ILIKE', "%{$searchTerm}%");
                     });
                 }),
 
             Column::make("Applicant Name", "full_name")
-                ->label(fn($row) => $row->beneficiary->sourceable->full_name ?? 'N/A'),
+                ->label(fn($row) => $row->beneficiary->sourceable->full_name ?? 'N/A')
+                ->searchable(function ($query, $searchTerm) {
+                    $query->whereHas('beneficiary.sourceable', function ($q) use ($searchTerm) {
+                        $q->where('full_name', 'ILIKE', "%{$searchTerm}%");
+                    });
+                }),
 
             Column::make("Mobile No", "Mobile No")
                 ->label(fn($row) => $row->beneficiary->sourceable->mobile_no
@@ -138,8 +143,8 @@ class BackFromJBDataTable extends DataTableComponent
                     if (!$canEdit) {
                         return 'Approved';
                     }
-                    $link = route('#') . '?id=' . Crypt::encryptString($row->beneficiary->sourceable->application_id);
-                    return view('coulmn_button.actions1', [
+                    $link = route('verify-approve') . '?id=' . Crypt::encryptString($row->beneficiary->sourceable->application_id);
+                    return view('coulmn_button.actions', [
                         'link' => $link,
                         'tooltip' => 'Edit',
                     ])->render();
