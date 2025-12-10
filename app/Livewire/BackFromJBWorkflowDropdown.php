@@ -64,7 +64,6 @@ class BackFromJBWorkflowDropdown extends Component
     }
     public function search()
     {
-        dd($this->filters);
         $this->dispatch('doSearch', $this->filters);
     }
     public function resetAll()
