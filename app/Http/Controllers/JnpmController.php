@@ -31,7 +31,6 @@ class JnpmController extends Controller
         }
         $this->JnmpAuthenticationService = $JnmpAuthenticationService;
     }
-
     public function pullJnmpData(Request $request)
     {
         if (WorkFlowPermissionHelper::canImportJanmaMrityuData()) {
@@ -124,7 +123,6 @@ class JnpmController extends Controller
         // $header = 'Importing data from Jonmo Mrityu Tothyo portal';
         // return view('jnmp.list', compact('header', 'inserted'));
     }
-
     public function detailsCallback(Request $request)
     {
         // dd($request->all());
@@ -155,7 +153,6 @@ class JnpmController extends Controller
             return redirect()->back();
         }
     }
-
     public function getJnmpStats()
     {
         $nextleveljnmp = Codemaster::getIdByCode(2300);
@@ -186,7 +183,6 @@ class JnpmController extends Controller
             'data3' => $re_activate,
         ]);
     }
-
     public function markAsDeathProcess()
     {
         DB::beginTransaction();
@@ -261,7 +257,6 @@ class JnpmController extends Controller
             return redirect()->back();
         }
     }
-
     public function index()
     {
         if (WorkFlowPermissionHelper::canImportJanmaMrityuData()) {
@@ -271,31 +266,23 @@ class JnpmController extends Controller
         $header = 'Oops! You do not have permission to view users.';
         return view('CommonRestictedpage.index', compact('header'));
     }
-
-    // HOD
     public function jnmpMarkedDataAtHOD(Request $request)
     {
-        if (CheckAuthHelper::isCommonHOD()) {
+        if (WorkFlowPermissionHelper::canJanmyaMrityuBeneficiaryList()) {
+            if (CheckAuthHelper::isCommonHOD()) {
 
-            $districts = District::all();
-            // $district = $request->query('district');
-             $district = $request->district ?? null;
+                $districts = District::all();
 
-            return view('jnmp.linelisting_at_hod', compact('districts', 'district'));
-        } else {
-            redirect()->route('dashboard')
-                ->with('error', 'Oops! You are not authorized to perform this action.')
-                ->send();
+                $district = $request->district ?? null;
+
+                return view('jnmp.linelisting_at_hod', compact('districts', 'district'));
+            } else {
+                redirect()->route('dashboard')
+                    ->with('error', 'Oops! You are not authorized to perform this action.')
+                    ->send();
+            }
         }
+        $header = 'Oops! You do not have permission to view users.';
+        return view('CommonRestictedpage.index', compact('header'));
     }
-
-    // public function jnmpMarkedData(Request $request)
-    // {
-    //     $district = $request->district ?? null;
-
-    //     return view('jnmp.linelisting_at_hod', [
-    //         'district' => $district,
-    //         'districts' => District::all(),
-    //     ]);
-    // }
 }

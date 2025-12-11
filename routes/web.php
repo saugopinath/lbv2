@@ -244,14 +244,11 @@ Route::controller(JnpmController::class)->group(function () {
 
     Route::post('/jnmp/details-callback', 'detailsCallback')->name('jnmp.details-callback');
 
-    Route::post('/jnmp/submit', 'submitJnmpData')->name('jnmp.submit');
-
     Route::get('/jnmp-stats',  'getJnmpStats');
     Route::post('/jnmp/mark-as-death',  'markAsDeathProcess')->name('jnmp.mark-as-death');
 
     Route::get('jnmp-data', 'index')->middleware('permission.redirect:canReActivateDeathIncident')->name('jnmp-data');
 
-        // JNMP List at HOD
-    Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')->name('jnmp-marked-data');
-    // Route::any('jnmpMarkedData', 'jnmpMarkedData')->name('jnmpMarkedData');
+    // JNMP List at HOD
+    Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')->name('jnmp-marked-data');
 });
