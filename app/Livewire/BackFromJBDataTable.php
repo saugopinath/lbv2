@@ -20,14 +20,16 @@ class BackFromJBDataTable extends DataTableComponent
     protected $listeners = [
         'doSearch' => 'updateFilters',
     ];
-    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id, $revertrejectAction, $revertrejectCauses, $sub_div;
+    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id, $revertrejectAction, $revertrejectCauses, $sub_div, $is_filtered_reset;
     public array $filter_condition = [];
     public function mount(): void
     {
-        // if (CheckAuthHelper::isCommmonVerifier()) {
-        //     $this->next_level_role_id = Codemaster::getIdByCode(4401);
-        // } elseif (CheckAuthHelper::isCommonApprover()) {
-        //     $this->next_level_role_id = Codemaster::getIdByCode(4402);
+        // if ($this->is_filtered_reset) {
+        if (CheckAuthHelper::isCommmonVerifier()) {
+            $this->next_level_role_id = Codemaster::getIdByCode(4401);
+        } elseif (CheckAuthHelper::isCommonApprover()) {
+            $this->next_level_role_id = Codemaster::getIdByCode(4402);
+        }
         // }
 
         $select_lgd = session('lgd_session');
@@ -107,6 +109,13 @@ class BackFromJBDataTable extends DataTableComponent
         $this->gp_ward = $filters['gp_ward'];
         $this->sub_div = $filters['subdivision_id'];
         $this->next_level_role_id = $filters['application_type'];
+        if ($this->next_level_role_id == null) {
+            if (CheckAuthHelper::isCommmonVerifier()) {
+                $this->next_level_role_id = Codemaster::getIdByCode(4401);
+            } elseif (CheckAuthHelper::isCommonApprover()) {
+                $this->next_level_role_id = Codemaster::getIdByCode(4402);
+            }
+        }
     }
 
     public function columns(): array
