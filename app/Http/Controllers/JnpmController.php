@@ -38,33 +38,44 @@ class JnpmController extends Controller
 
             if ($request->isMethod('post')) {
 
+                $from = \Carbon\Carbon::createFromFormat('d/m/Y', $request->from_date);
+                $to   = \Carbon\Carbon::createFromFormat('d/m/Y', $request->to_date);
+
+                $validateData = [
+                    'from_date' => $from->format('Y-m-d'),
+                    'to_date'   => $to->format('Y-m-d'),
+                ];
+
                 $rules = [
                     'from_date' => 'required|date',
                     'to_date'   => 'required|date|after_or_equal:from_date',
-                    'index'     => 'required|integer|min:1',
-                    'page_size' => 'required|integer|min:1'
                 ];
 
                 $messages = [
-                    'from_date.*' => 'Please select a valid start date.',
-                    'to_date.*'   => 'Please select a valid end date.',
+                    'from_date.required' => 'Please select a valid start date.',
+                    'to_date.required'   => 'Please select a valid end date.',
                 ];
 
-                $validator = Validator::make($request->all(), $rules, $messages);
+                $validator = Validator::make($validateData, $rules, $messages);
 
                 if ($validator->fails()) {
-                    return redirect()->back()->withErrors($validator)->withInput();
+                    return back()
+                        ->withErrors($validator)
+                        ->withInput();
                 }
 
                 DB::beginTransaction();
 
                 try {
 
+                    $index = 1;
+                    $page_size = 1000;
+
                     $payload = [
                         'from_date' => $request->from_date,
                         'to_date'   => $request->to_date,
-                        'index'     => $request->index,
-                        'page_size' => $request->page_size
+                        'index'     => $index,
+                        'page_size' => $request->page_size ?? $page_size
                     ];
 
                     $response = $this->JnmpAuthenticationService->getJnmpData($payload);
@@ -114,29 +125,19 @@ class JnpmController extends Controller
             }
 
             return view('jnmp.list', [
-                'header' => 'Importing data from Jonmo Mrityu Tothyo portal',
+                'header' => 'Importing data from Janma-Mrityu Thathya Portal',
                 'lastFetch' => $lastFetch,
             ]);
         }
         $header = 'Oops! You do not have permission to view users.';
         return view('CommonRestictedpage.index', compact('header'));
-        // $header = 'Importing data from Jonmo Mrityu Tothyo portal';
-        // return view('jnmp.list', compact('header', 'inserted'));
     }
     public function detailsCallback(Request $request)
     {
-        // dd($request->all());
-        $request->validate([
-            'limit' => 'required|integer|min:1|max:500'
-        ], [
-            'limit.required' => 'Please enter a limit value.',
-            'limit.integer'  => 'Limit must be a number.',
-        ]);
-
         try {
 
             $response = $this->JnmpAuthenticationService->detailsCallBack($request);
-            // dd($response);
+           
             $data = $response->getData(true);
 
             // If callback successful
@@ -259,7 +260,7 @@ class JnpmController extends Controller
     }
     public function index()
     {
-        if (WorkFlowPermissionHelper::canImportJanmaMrityuData()) {
+        if (WorkFlowPermissionHelper::canReActivateDeathIncident()) {
             $button_show = 1;
             return view('jnmp.index', compact('button_show'));
         }

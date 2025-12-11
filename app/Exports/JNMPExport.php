@@ -6,7 +6,7 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class BeneficiariesExport implements FromCollection, WithHeadings
+class JNMPExport implements FromCollection, WithHeadings
 {
     protected Collection $data;
 
@@ -30,10 +30,12 @@ class BeneficiariesExport implements FromCollection, WithHeadings
     {
         return [
             'Application ID',
+            'Beneficiary ID',
             'Applicant Name',
             "Father's Name",
             'Date of Birth',
             'Mobile No',
+            'Address'
         ];
     }
 }

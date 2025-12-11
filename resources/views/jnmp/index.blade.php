@@ -1,8 +1,8 @@
 <x-layouts.app>
     <!-- Header Section -->
     <div class="mb-6">
-        <div class="flex items-center justify-between">
-            <div>
+        <div class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-md">
+            <div class="p-3">
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
                     Reactivate Death Incident
                 </h1>
