@@ -5,7 +5,7 @@ namespace App\Livewire;
 use App\Models\BeneficiaryCommonList;
 use App\Models\Codemaster;
 use Illuminate\Database\Eloquent\Builder;
-use App\Exports\BeneficiariesExport;
+use App\Exports\JNMPExport;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Maatwebsite\Excel\Facades\Excel;
@@ -179,6 +179,6 @@ class JnmpBeneficiaryListingDetailsDataTable extends DataTableComponent
             ];
         });
 
-        return Excel::download(new BeneficiariesExport($exportData), 'jnmp_beneficiaries_all.xlsx');
+        return Excel::download(new JNMPExport($exportData), 'jnmp_beneficiaries_all.xlsx');
     }
 }

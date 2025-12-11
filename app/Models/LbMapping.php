@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
-class LbMapping extends Model
+use OwenIt\Auditing\Contracts\Auditable;
+class LbMapping extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $table = 'jnmp.lb_mapping';
 
     protected $fillable = [

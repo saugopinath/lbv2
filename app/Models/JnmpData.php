@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class JnmpData extends Model
+class JnmpData extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $table = 'jnmp.jnmp_data';
     public $timestamps = false;
     protected $guarded = [];

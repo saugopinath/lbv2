@@ -11,8 +11,7 @@
 
         <div class="flex justify-between items-center border-b pb-3 mb-4">
             <h2 class="text-xl font-semibold text-indigo-700 dark:text-indigo-300">
-                Importing data from Jonmo Mrityu Tothyo portal (Next data fetch is scheduled for: {{ $lastFetch }})
-
+                Importing data from Janma-Mrityu Thathya portal (Next data fetch is scheduled for: {{ $lastFetch }})
             </h2>
 
             <button @click="open = !open" class="text-sm px-3 py-1 rounded-full bg-indigo-100 dark:bg-gray-700
@@ -22,7 +21,10 @@
             </button>
         </div>
 
-        <form x-show="open" x-transition action="{{ route('jnmp.pull') }}" method="POST" class="space-y-6">
+        <form x-data x-init="
+    flatpickr($refs.fromDate, { dateFormat: 'd/m/Y' });
+    flatpickr($refs.toDate, { dateFormat: 'd/m/Y' });
+" x-show="open" x-transition action="{{ route('jnmp.pull') }}" method="POST" class="space-y-6">
             @csrf
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -42,33 +44,53 @@
                     <input type="date" name="to_date" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
                                   dark:bg-gray-700 dark:text-white">
                 </div> --}}
-                <div>
+                {{-- <div>
                     <x-form.input type="date" name="from_date" label="From Date" required />
                 </div>
                 <div>
                     <x-form.input type="date" name="to_date" label="To Date" required />
-                </div>
+                </div> --}}
 
-                <div>
+                {{-- <div>
                     <x-form.input id="index" name="index" label="Index" required
                         x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10);" />
+                </div> --}}
+                <div>
+                    <x-form.input type="text" name="from_date" label="From Date" required x-ref="fromDate"
+                        placeholder="dd/mm/yyyy" />
                 </div>
 
+                <div x-data x-init="
+    flatpickr($refs.toDate, {
+        dateFormat: 'd/m/Y',
+        maxDate: 'today',
+        disableMobile: true
+    });
+">
+                    <x-form.input type="text" name="to_date" label="To Date" required x-ref="toDate"
+                        placeholder="dd/mm/yyyy" />
+                </div>
                 <div>
-                    <x-form.input id="page_size" name="page_size" label="Page Size (No. of records) :" required
+                    <x-form.input id="page_size" name="page_size" label="Page Size (No. of records) :"
                         x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10);" />
                 </div>
+                <div class="mt-6 p-1.5">
 
-            </div>
-
-            <div class="pt-4 flex justify-center">
-                {{-- <x-button.primary class="px-10" type="submit">Import</x-button.primary> --}}
-
-                <x-button.loading-button type="submit" text="Import" x-data x-on:click.prevent="
+                    <x-button.loading-button type="submit" text="Import" x-data x-on:click.prevent="
                     Livewire.dispatch('showLoader');
                     $el.form.submit();
                 " />
+                </div>
             </div>
+
+            {{-- <div class="pt-4 flex justify-center"> --}}
+                {{-- <x-button.primary class="px-10" type="submit">Import</x-button.primary> --}}
+
+                {{-- <x-button.loading-button type="submit" text="Import" x-data x-on:click.prevent="
+                    Livewire.dispatch('showLoader');
+                    $el.form.submit();
+                " />
+            </div> --}}
 
         </form>
 
@@ -129,14 +151,17 @@
             <div class="grid grid-cols-2 gap-4 items-start">
                 <div>
                     <div class="relative">
-                        <x-form.input id="limit" name="limit" label="Enter Limit:" required
+                        <x-form.input id="limit" name="limit" label="Enter Limit:"
                             x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10);" />
                         <!-- Error message positioned absolutely to prevent layout shift -->
                     </div>
                 </div>
 
                 <div class="mt-6 p-1.5">
-                    <x-button.loading-button type="submit" text="Send" class="h-full" />
+                    <x-button.loading-button type="submit" text="Send" class="h-full" x-data x-on:click.prevent="
+                    Livewire.dispatch('showLoader');
+                    $el.form.submit();
+                " />
                 </div>
             </div>
 

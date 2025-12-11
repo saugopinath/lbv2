@@ -2,14 +2,15 @@
 
 namespace App\Livewire;
 
+use App\Models\AcceptRejectInfo;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Models\BeneficiaryCommonList;
 use App\Models\BeneficiaryEnclosure;
 use App\Models\Codemaster;
-use App\Models\UpdateBenDetails;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 class ReactivateModal extends Component
 {
@@ -145,22 +146,36 @@ class ReactivateModal extends Component
             $personal->save();
 
             // 3. Log
-            UpdateBenDetails::create([
+            // UpdateBenDetails::create([
+            //     'beneficiary_id' => $personal->beneficiary_id,
+            //     'application_id' => $this->applicantId,
+            //     'old_data' => json_encode(['payment_suspended' => 1]),
+            //     'new_data' => json_encode(['payment_suspended' => null]),
+            //     'update_code' => 17,
+            //     'remarks' => $this->revert_reason_remarks,
+            //     'reactive_reason' => $this->revert_reason_cause_id,
+            //     'user_id' => Auth::id(),
+            //     'action_ip_address' => request()->ip(),
+            //     'action_type' => class_basename(request()->route()->getAction()['controller']),
+            //     'next_level_role_id' => $personal->next_level_role_id,
+            //     'dist_code'          => $personal->district_id,
+            //     'local_body_code' =>  $personal->block_id,
+            //     'created_at' => now(),
+            //     'updated_at' => now(),
+            // ]);
+
+            // 3. Log
+            AcceptRejectInfo::create([
                 'beneficiary_id' => $personal->beneficiary_id,
                 'application_id' => $this->applicantId,
-                'old_data' => json_encode(['payment_suspended' => 1]),
-                'new_data' => json_encode(['payment_suspended' => null]),
-                'update_code' => 17,
-                'remarks' => $this->revert_reason_remarks,
-                'reactive_reason' => $this->revert_reason_cause_id,
-                'user_id' => Auth::id(),
-                'action_ip_address' => request()->ip(),
-                'action_type' => class_basename(request()->route()->getAction()['controller']),
-                'next_level_role_id' => $personal->next_level_role_id,
-                'dist_code'          => $personal->district_id,
-                'local_body_code' =>  $personal->block_id,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'ip_address'             => request()->ip(),
+                'user_id'                => Auth::id(),
+                'browser'                => request()->header('User-Agent'),
+                'model_name'             => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
+                'op_type'                => $personal->next_level_role_id,
+                'revert_reason_cause_id' => $this->revert_reason_cause_id,
+                'revert_reason_remarks'  => $this->revert_reason_remarks,
+                'parent_id'              => null,
             ]);
 
             DB::commit();
