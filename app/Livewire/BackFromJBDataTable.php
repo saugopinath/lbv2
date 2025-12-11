@@ -148,16 +148,22 @@ class BackFromJBDataTable extends DataTableComponent
 
             Column::make("Action")
                 ->label(function ($row) {
-                    $next_level_role_id = $this->next_level_role_id;
+                    $next_level_role_id = $row->next_level_role_id;
+                    $msg = '';
+                    if ($next_level_role_id == Codemaster::getIdByCode(4402)) {
+                        $msg = 'VERIFIED BUT APPROVAL PENDING';
+                    } elseif ($next_level_role_id == Codemaster::getIdByCode(4403)) {
+                        $msg = 'VERIFIED AND APPROVED';
+                    }
                     $canEdit = false;
                     if (
-                        (CheckAuthHelper::isCommmonVerifier() && $next_level_role_id == (Codemaster::getIdByCode(4401))) ||
-                        (CheckAuthHelper::isCommonApprover() && $next_level_role_id == (Codemaster::getIdByCode(4402)))
+                        (CheckAuthHelper::isCommmonVerifier() && $next_level_role_id == Codemaster::getIdByCode(4401)) ||
+                        (CheckAuthHelper::isCommonApprover() && $next_level_role_id == Codemaster::getIdByCode(4402))
                     ) {
                         $canEdit = true;
                     }
                     if (!$canEdit) {
-                        return 'N/A';
+                        return $msg;
                     }
                     $link = route('backfromjbactions') . '?id=' . Crypt::encryptString($row->beneficiary->sourceable->application_id);
                     return view('coulmn_button.actions', [
