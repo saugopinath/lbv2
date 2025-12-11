@@ -5,7 +5,7 @@
 ])
 <x-form.field>
     @if ($attributes->has('required'))
-    <div class="flex items-center gap-1 mt-4">
+    <div class="flex items-center gap-1">
         <x-form.label name="{{ $name }}" label="{{ $label }}" />
         <span class="text-red-700 font-bold">*</span>
     </div>

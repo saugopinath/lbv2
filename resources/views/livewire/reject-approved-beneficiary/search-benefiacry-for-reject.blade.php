@@ -5,7 +5,6 @@
     <h2 class="text-xl font-bold mb-4">Search Beneficiary</h2>
 
     <div class="grid grid-cols-2 gap-4 mb-4">
-        <!-- Select search type -->
         <div>
             <x-form.select
                 name="searchType" id="searchType" label="Search Applicant By" wire:model.live="searchType" placeholder="--Select Search Type--" required>
