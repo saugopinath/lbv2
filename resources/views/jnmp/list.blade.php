@@ -29,32 +29,6 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-                {{-- <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        From Date <span class="text-red-500">*</span>
-                    </label>
-                    <input type="date" name="from_date" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
-                                  dark:bg-gray-700 dark:text-white">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        To Date <span class="text-red-500">*</span>
-                    </label>
-                    <input type="date" name="to_date" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
-                                  dark:bg-gray-700 dark:text-white">
-                </div> --}}
-                {{-- <div>
-                    <x-form.input type="date" name="from_date" label="From Date" required />
-                </div>
-                <div>
-                    <x-form.input type="date" name="to_date" label="To Date" required />
-                </div> --}}
-
-                {{-- <div>
-                    <x-form.input id="index" name="index" label="Index" required
-                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10);" />
-                </div> --}}
                 <div>
                     <x-form.input type="text" name="from_date" label="From Date" required x-ref="fromDate"
                         placeholder="dd/mm/yyyy" />
@@ -82,15 +56,6 @@
                 " />
                 </div>
             </div>
-
-            {{-- <div class="pt-4 flex justify-center"> --}}
-                {{-- <x-button.primary class="px-10" type="submit">Import</x-button.primary> --}}
-
-                {{-- <x-button.loading-button type="submit" text="Import" x-data x-on:click.prevent="
-                    Livewire.dispatch('showLoader');
-                    $el.form.submit();
-                " />
-            </div> --}}
 
         </form>
 
@@ -221,9 +186,6 @@
         <form x-show="open" action="{{ route('jnmp.mark-as-death') }}" method="POST">
             @csrf
             <div class="pt-4">
-                {{-- <x-button.danger class="px-10" type="submit">
-                    Mark as Death to Lakshmir Bhandar Portal
-                </x-button.danger> --}}
 
                 <x-button.loading-button type="submit" text="Mark as Death to Lakshmir Bhandar Portal" x-data
                     x-on:click.prevent="
