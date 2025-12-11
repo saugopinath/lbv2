@@ -49,9 +49,10 @@
                                 </td>
                                 <td class="px-4 py-2 text-center text-sm text-gray-700">{{ $row['mobile_no'] }}</td>
                                 <td class="px-4 py-2 text-center text-sm text-gray-700">
-                                    <div><span class="font-semibold">District:</span> {{ $row['district'] }}</div>
+                                    {{--  <div><span class="font-semibold">District:</span> {{ $row['district'] }}</div>
                                     <div><span class="font-semibold">Block:</span> {{ $row['block'] }}</div>
-                                    <div><span class="font-semibold">GP:</span> {{ $row['panchayat'] }}</div>
+                                    <div><span class="font-semibold">GP:</span> {{ $row['panchayat'] }}</div>  --}}
+                                    <div><span class="font-semibold">{{ strip_tags($row['address'])}}</div>
                                 </td>
 
                                 <td class="px-4 py-2 text-center text-sm text-gray-700">
