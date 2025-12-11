@@ -22,6 +22,8 @@ use App\Interfaces\JNMPAuthenticationInterface;
 use App\Services\JNMPAuthenticationService;
 use App\Models\User;
 use App\Observers\UserObserver;
+use App\Models\AcceptRejectInfo;
+use App\Observers\AcceptRejectInfoObserver;
 use App\Models\DraftBeneficiaryPersonal;
 use App\Observers\DraftBeneficiaryPersonalObserver;
 use App\Models\BenRejectDetails;
@@ -57,9 +59,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        User::observe(UserObserver::class);
-        BenRejectDetails::observe(BenRejectDetailsObserver::class);
-        DraftBeneficiaryPersonal::observe(DraftBeneficiaryPersonalObserver::class);
-        BeneficiaryPersonal::observe(BeneficiaryPersonalObserver::class);
+         User::observe(UserObserver::class);
+         AcceptRejectInfo::observe(AcceptRejectInfoObserver::class);
+         BenRejectDetails::observe(BenRejectDetailsObserver::class);
+         DraftBeneficiaryPersonal::observe(DraftBeneficiaryPersonalObserver::class);
+         BeneficiaryPersonal::observe(BeneficiaryPersonalObserver::class);
+
     }
 }
