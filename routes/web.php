@@ -141,6 +141,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/incomplete/revert/{id}', [IncompleteTypeController::class, 'revertVerify'])
         // ->middleware('permission.redirect:canRevertIncomplet')
         ->name('incomplete-revert-update');
+         Route::get('/incomplete-details-mis-report', [IncompleteTypeController::class, 'incompleteDetails'])
+        ->name('incomplete.details.mis.report');
 
     Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])
         ->middleware('permission.redirect:canViewBeneficiaries')
@@ -196,9 +198,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('update-bank');
 
     Route::get('/mis-report', [MisReportController::class, 'index'])->name('mis.index');
-    // Route::post('/mis-report-data', [MisReportController::class, 'getData'])->name('mis.data');
-    Route::get('/incomplete-details-mis-report', [MisReportController::class, 'incompleteDetails'])
-        ->name('incomplete.details.mis.report');
 
     // Design Pages (Dev Only – Remove in Prod)
     Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');

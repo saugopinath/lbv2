@@ -18,9 +18,4 @@ class MisReportController extends Controller
 
         return view('misreport.report_index', compact('reportTypes'));
     }
-
-    public function incompleteDetails()
-    {
-        return view('incomplet.incompleteDetails');
-    }
 }
