@@ -15,8 +15,10 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('application_id');
             $table->date('jb_poposed_dob');
+            $table->date('new_dob')->nullable();
             $table->smallInteger('next_level_role_id');
             $table->foreign('next_level_role_id','next_level_role_id_fk')->references('id')->on('codemasters');
+            $table->foreign('application_id','application_id_fk')->references('sourceable_id')->on('lb_scheme.beneficiary_common_lists');
             $table->timestamps();
         });
     }

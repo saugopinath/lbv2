@@ -24,11 +24,11 @@ class BackFromJBDataTable extends DataTableComponent
     public array $filter_condition = [];
     public function mount(): void
     {
-        if (CheckAuthHelper::isCommmonVerifier()) {
-            $this->next_level_role_id = Codemaster::getIdByCode(4401);
-        } elseif (CheckAuthHelper::isCommonApprover()) {
-            $this->next_level_role_id = Codemaster::getIdByCode(4402);
-        }
+        // if (CheckAuthHelper::isCommmonVerifier()) {
+        //     $this->next_level_role_id = Codemaster::getIdByCode(4401);
+        // } elseif (CheckAuthHelper::isCommonApprover()) {
+        //     $this->next_level_role_id = Codemaster::getIdByCode(4402);
+        // }
 
         $select_lgd = session('lgd_session');
 
@@ -139,16 +139,16 @@ class BackFromJBDataTable extends DataTableComponent
 
             Column::make("Action")
                 ->label(function ($row) {
-                    $canEdit = false;
-                    if (
-                        (CheckAuthHelper::isCommmonVerifier() && (Codemaster::getIdByCode(4401))) ||
-                        (CheckAuthHelper::isCommonApprover() && (Codemaster::getIdByCode(4402)))
-                    ) {
-                        $canEdit = true;
-                    }
-                    if (!$canEdit) {
-                        return 'Approved';
-                    }
+                    // $canEdit = false;
+                    // if (
+                    //     (CheckAuthHelper::isCommmonVerifier() && (Codemaster::getIdByCode(4401))) ||
+                    //     (CheckAuthHelper::isCommonApprover() && (Codemaster::getIdByCode(4402)))
+                    // ) {
+                    //     $canEdit = true;
+                    // }
+                    // if (!$canEdit) {
+                    //     return 'Approved';
+                    // }
                     $link = route('backfromjbactions') . '?id=' . Crypt::encryptString($row->beneficiary->sourceable->application_id);
                     return view('coulmn_button.actions', [
                         'link' => $link,
