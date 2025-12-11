@@ -65,7 +65,7 @@
                     </li>
                     <li>
                            <div class="mt-2">
-                            <span class="font-medium text-gray-600 dark:text-gray-300">Uploaded Documents:</span>
+                            <span class="font-medium text-gray-600 dark:text-gray-300"> previous Uploaded Documents:</span>
                         </div>
                         <div class="mt-2">
                         <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="[104]" :is_page="1" />
@@ -95,7 +95,7 @@
                     </li>
                     <li>
                         <div class="mt-2">
-                            <span class="font-medium text-gray-600 dark:text-gray-300">Uploaded Documents:</span>
+                            <span class="font-medium text-gray-600 dark:text-gray-300">New Uploaded Documents:</span>
                         </div>
                         <div class="mt-2">
                             <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="[104]" enclosureSource="5" :is_page="1" />

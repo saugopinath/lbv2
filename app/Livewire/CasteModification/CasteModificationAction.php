@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Helpers\CheckAuthHelper;
 use App\Helpers\WorkFlowPermissionHelper;
 use App\Models\BeneficiaryTemEnclosure;
+use App\Models\CriticalChangeMaster;
 use Illuminate\Support\Facades\DB;
 
 class CasteModificationAction extends Component
@@ -28,7 +29,7 @@ class CasteModificationAction extends Component
     protected $rules = [
         'action' => 'required|string',
     ];
-
+    
     public function mount($applicationId)
     {
         $this->applicationId = $applicationId;
@@ -85,15 +86,44 @@ class CasteModificationAction extends Component
     public function closeModal()
     {
         $this->reset('action');
-        // $this->resetErrorBag();
         $this->resetValidation();
         $this->showModal = false;
+    }
+    public function getValidationRules(): array
+    {
+        $rules = [
+            'action' => 'required|string|in:2202,2203,2204',
+        ];
+
+        // If action is 2204 (Revert), remark is required
+        if ($this->action === '2204') {
+            $rules['remark'] = 'required|string|min:3|max:500';
+        } else {
+            $rules['remark'] = 'nullable|string|max:500';
+        }
+
+        return $rules;
+    }
+
+
+    public function getValidationMessages(): array
+    {
+        return [
+            'action.required' => 'Action is required.',
+            'action.in' => 'Invalid action selected.',
+            'remark.required' => 'Remark is required when reverting.',
+            'remark.min' => 'Remark must be at least 10 characters.',
+            'remark.max' => 'Remark cannot exceed 500 characters.',
+        ];
     }
 
     public function submit()
     {
         // dd($this->remark);
-        $this->validate();
+       $this->validate(
+            $this->getValidationRules(),
+            $this->getValidationMessages()
+        );
 
         $casteModification = CasteModificationInfo::where('application_id', $this->applicationId)
             ->latest()
@@ -120,6 +150,8 @@ class CasteModificationAction extends Component
         $previousId = AcceptRejectInfo::where('application_id', $this->applicationId)
             ->orderByDesc('id')
             ->value('id');
+        $criticalChangeId = CriticalChangeMaster::getIdByCode(1);
+
         try {
             DB::beginTransaction();
 
@@ -142,14 +174,22 @@ class CasteModificationAction extends Component
             $acceptReject->op_type = $opTypeMapping[$this->action];
             $acceptReject->revert_reason_cause_id = null;
             $acceptReject->parent_id = $previousId;
-
+            if ($this->action == '2203') {
+                $acceptReject->critical_changes = $criticalChangeId;
+                $acceptReject->old_value = json_encode($casteModification->old_data);
+                $acceptReject->new_value = json_encode($casteModification->new_data);
+            } else {
+                $acceptReject->critical_changes = 0;
+                $acceptReject->old_value = null;
+                $acceptReject->new_value = null;
+            }
             if ($this->action == '2204') {
                 $acceptReject->revert_reason_remarks = $this->remark;
             } else {
                 $acceptReject->revert_reason_remarks = null;
             }
 
-            $acceptSaved = $acceptReject->save(); 
+            $acceptSaved = $acceptReject->save();
 
             if ($this->action == '2203') {
                 // Update BeneficiaryPersonal
@@ -161,7 +201,9 @@ class CasteModificationAction extends Component
                     $beneficiarySaved = $beneficiary->save();
 
                     // Move enclosure only when temp data  exists
-                    $temp = BeneficiaryTemEnclosure::where('application_id', $this->applicationId)->first();
+                    $temp = BeneficiaryTemEnclosure::where('application_id', $this->applicationId)->where('document_type', $this->doc_type)->first();;
+                    // 
+                    // dd( $temp->toSql() , $temp->getBindings());
                     if ($temp) {
                         // dd($temp);
                         // dd($this->applicationId);
@@ -178,9 +220,13 @@ class CasteModificationAction extends Component
                             ]
                         );
                         $temp->delete();
+                    } else {
+                        $deleteprevious = $beneficiary->enclosers()->where('application_id', $this->applicationId)->where('document_type', $this->doc_type)->first();
+                        // dd($deleteprevious);
+                        if ($deleteprevious) {
+                            $deleteprevious->delete();
+                        }
                     }
-                    // else {
-                    // }
                     // Update CasteModification  after applying changes
                     $casteModification->is_active = false;
                     $casteModification->updated_by = Auth::id();
@@ -204,7 +250,7 @@ class CasteModificationAction extends Component
             } else {
                 DB::rollBack();
                 session()->flash('error', 'Transaction failed. Some records were not saved.');
-               return redirect()->route('caste-modification-list');
+                return redirect()->route('caste-modification-list');
             }
         } catch (\Exception $e) {
             DB::rollBack();

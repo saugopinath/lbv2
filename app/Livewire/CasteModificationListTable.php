@@ -103,7 +103,7 @@ class CasteModificationListTable extends DataTableComponent
             'APL' => 'Verified but Pending for Approval',
             'VPL' => 'Pending for Verification',
             'AL'  => 'Application Already Approved',
-            'RL'  => 'Application Already Rejected',
+            'RL'  => 'Application Already Reverted',
             'VL'  => 'Application Already Verified',
             default => 'No Action Required',
         };
@@ -166,6 +166,7 @@ class CasteModificationListTable extends DataTableComponent
         $this->resetPage();
     }
 
+    // select all value through orm 
 
     public function builder(): Builder
     {
@@ -209,10 +210,14 @@ class CasteModificationListTable extends DataTableComponent
             }
             $query->where('next_level_requested_id', $this->nextLevelRequestId);
         }
+        // $query1= $query;
+        // dd($query->get());
+        // dd(['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
         return $query;
     }
 
 
+    // select particular column value using orm 
 
     // public function builder(): Builder
     // {
@@ -273,6 +278,7 @@ class CasteModificationListTable extends DataTableComponent
     //                 // Use exact column names from beneficiary_common_lists here
     //                 $q->where($col, $val);
     //             }
+    //              $q->where('sourceable_type', BeneficiaryPersonal::class);
     //         });
     //     }
 
@@ -310,13 +316,78 @@ class CasteModificationListTable extends DataTableComponent
     //             $query->where('next_level_requested_id', $this->nextLevelRequestId);
     //         }
     //     }
-
-    //     // DEBUG (optional) - uncomment to log SQL and bindings
-    //     // \Log::debug('Caste list SQL', ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
-    //     // \Log::debug('Filter cond', $this->filter_condition, ['nextLevel' => $this->nextLevelRequestId ?? null]);
+    //     // dd( ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
+    //     // dd($query->get());
 
     //     return $query;
     // }
+
+    // Using joins to optimize query and select specific columns
+    // public function builder(): Builder
+    // {
+    //     $query = CasteModificationInfo::query()
+    //         ->select([
+    //             'caste_modification_infos.id',
+    //             'caste_modification_infos.application_id',
+    //             'caste_modification_infos.beneficiary_id',
+    //             'caste_modification_infos.caste_request_type',
+    //             'caste_modification_infos.next_level_requested_id',
+    //             'bp.full_name as applicant_full_name',
+    //             'bp.mobile_no as applicant_mobile_no',
+    //             'br.full_name as father_full_name',
+    //         ])
+    //         ->leftJoin('lb_scheme.beneficiary_common_lists as bcl', function ($join) {
+    //             $join->on('bcl.sourceable_id', '=', 'caste_modification_infos.application_id')
+    //                 ->where('bcl.sourceable_type', '=', BeneficiaryPersonal::class);
+    //         })
+    //         ->leftJoin('lb_scheme.beneficiary_personals as bp', 'bp.application_id', '=', 'bcl.sourceable_id')
+    //         ->leftJoin('lb_scheme.beneficiary_relationships as rel', function ($join) {
+    //             $join->on('rel.application_id', '=', 'bp.application_id')
+    //                 ->where('rel.relation_type_id', 79);
+    //         })
+    //         // ->leftJoin('relationships as rfirst', function($join){
+
+
+    //         // })
+    //         ->with([
+    //             'beneficiaryCommonList' => function ($q) {
+    //                 $q->select(['sourceable_id', 'sourceable_type', 'id']);
+    //             },
+    //             'beneficiaryCommonList.sourceable' => function ($q) {
+    //                 $q->select(['application_id', 'full_name', 'beneficiary_id', 'mobile_no']);
+    //             },
+    //             'beneficiaryCommonList.sourceable.relationships' => function ($q) {
+    //                 $q->select(['id', 'application_id', 'full_name', 'relation_type_id'])
+    //                     ->where('relation_type_id', 79);
+    //             },
+    //             'beneficiaryCommonList.sourceable.contact' => function ($q) {
+    //                 $q->select(['id', 'application_id']);
+    //             },
+    //         ]);
+
+    //     // filters from your original code (kept)
+    //     if (!empty($this->filter_condition) && is_array($this->filter_condition)) {
+    //         $query->whereHas('beneficiaryCommonList', function ($q) {
+    //             foreach ($this->filter_condition as $col => $val) {
+    //                 $q->where($col, $val);
+    //             }
+               
+    //         });
+    //     }
+
+    //     if (!empty($this->casteId)) {
+    //         $query->where('caste_request_type', $this->casteId);
+    //     }
+    //     if (!empty($this->applicantStatus)) {
+
+    //         if (!empty($this->nextLevelRequestId)) {
+    //             $query->where('next_level_requested_id', $this->nextLevelRequestId);
+    //         }
+    //     }
+    //     // dd(['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
+    //     return $query;
+    // }
+
 
 
     public function columns(): array
@@ -327,7 +398,7 @@ class CasteModificationListTable extends DataTableComponent
                 ->searchable(),
             Column::make('Name')
                 ->label(fn($row) => $row->beneficiaryCommonList?->sourceable?->full_name ?? 'N/A'),
-               
+
             Column::make("Father's Name")
                 ->label(fn($row) => $row->beneficiaryCommonList?->sourceable?->relationships
                     ->where('relation_type_id', 79)->first()?->full_name ?? 'N/A'),
