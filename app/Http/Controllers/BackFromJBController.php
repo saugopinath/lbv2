@@ -28,12 +28,21 @@ class BackFromJBController extends Controller
     public function backfromjbactions(Request $request)
     {
         if ($request->isMethod('post')) {
-            $validator = Validator::make($request->all(), [
-                'action' => 'required|in:verify_and_forward_to_approver,approve',
-            ]);
-            $validator->sometimes('new_dob', "required|date|after_or_equal:{$this->minDOB}|before_or_equal:{$this->maxDOB}", function ($input) {
-                return $input->action === 'verify_and_forward_to_approver';
-            });
+            $messages = [
+                'new_dob.*' => "Date of birth must be between {$this->minDOB} and {$this->maxDOB}.",
+            ];
+            $validator = Validator::make(
+                $request->all(),
+                [
+                    'action' => 'required|in:verify_and_forward_to_approver,approve',
+                ],
+                $messages
+            );
+            $validator->sometimes(
+                'new_dob',
+                "required|date|after_or_equal:{$this->minDOB}|before_or_equal:{$this->maxDOB}",
+                fn($input) => $input->action === 'verify_and_forward_to_approver'
+            );
             $validator->validate();
             DB::beginTransaction();
             try {
