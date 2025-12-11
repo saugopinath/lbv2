@@ -9,6 +9,8 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\Validator;
 use App\Models\BackFromJb;
 use App\Models\Codemaster;
+use Illuminate\Support\Facades\DB;
+
 class AuthController extends Controller
 {
     public function login(Request $request)
@@ -81,17 +83,20 @@ class AuthController extends Controller
             'lb_application_id' => 'required|numeric',
             'jb_poposed_dob'    => 'required|date',
         ]);
+        DB::beginTransaction();
         try {
             $backFromJb = new BackFromJb();
             $backFromJb->application_id = $validated['lb_application_id'];
             $backFromJb->jb_poposed_dob = $validated['jb_poposed_dob'];
             $backFromJb->next_level_role_id = Codemaster::getIdByCode(4401);
             $backFromJb->save();
+            DB::commit();
             return response()->json([
                 'is_sendtolb' => true,
                 'message' => 'Data saved successfully',
             ], 200);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'is_sendtolb' => false,
                 'message' => 'Something went wrong',

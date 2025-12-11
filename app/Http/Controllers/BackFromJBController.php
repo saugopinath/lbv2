@@ -66,7 +66,6 @@ class BackFromJBController extends Controller
         }
         $applicant_details['applicationId'] = Crypt::decryptString($request->id);
         $record = BackFromJb::with([
-            'beneficiary.sourceable',
             'beneficiary.sourceable.relationships'
         ])->find($applicant_details['applicationId']);
         $applicant_details['jb_poposed_dob_show'] = Carbon::parse($record->jb_poposed_dob)->format('d-m-Y');
