@@ -8,9 +8,17 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Crypt;
 use App\Helpers\CheckAuthHelper;
 use App\Models\Codemaster;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class BackFromJBController extends Controller
 {
+    protected $minDOB, $maxDOB;
+    public function __construct()
+    {
+        $this->minDOB = now()->subYears(60)->format('Y-m-d');
+        $this->maxDOB = now()->subYears(25)->format('Y-m-d');
+    }
     public function backfromjb()
     {
         $header = 'Back from JB';
@@ -20,21 +28,41 @@ class BackFromJBController extends Controller
     public function backfromjbactions(Request $request)
     {
         if ($request->isMethod('post')) {
-            $app_id =  Crypt::decryptString($request->id);
-            $new_dob   = $request->new_dob;
-            $action = $request->action;
-            $record = BackFromJb::with([
-                'beneficiary.sourceable'
-            ])->find($app_id);
-            if ($action == 'verify_and_forward_to_approver') {
-                $record->new_dob = $new_dob;
-                $record->next_level_role_id = Codemaster::getIdByCode(4402);
-            } elseif ($action == 'approve') {
-                $record->next_level_role_id = Codemaster::getIdByCode(4403);
-                $record->beneficiary->sourceable->dob = $record->new_dob;
-                $record->beneficiary->sourceable->save();
+            $validator = Validator::make($request->all(), [
+                'action' => 'required|in:verify_and_forward_to_approver,approve',
+            ]);
+            $validator->sometimes('new_dob', "required|date|after_or_equal:{$this->minDOB}|before_or_equal:{$this->maxDOB}", function ($input) {
+                return $input->action === 'verify_and_forward_to_approver';
+            });
+            $validator->validate();
+            DB::beginTransaction();
+            try {
+                $app_id = Crypt::decryptString($request->id);
+                $new_dob = $request->new_dob;
+                $action = $request->action;
+                $record = BackFromJb::with([
+                    'beneficiary.sourceable'
+                ])->find($app_id);
+                $msg = '';
+                if ($action == 'verify_and_forward_to_approver') {
+                    $record->new_dob = $new_dob;
+                    $record->next_level_role_id = Codemaster::getIdByCode(4402);
+                    $msg = 'The request successfully verified!';
+                } elseif ($action == 'approve') {
+                    $record->next_level_role_id = Codemaster::getIdByCode(4403);
+                    $msg = 'The request successfully approved!';
+                    $record->beneficiary->sourceable->dob = $record->new_dob;
+                    $record->beneficiary->sourceable->save();
+                }
+                $record->save();
+                DB::commit();
+                session()->flash('success', $msg);
+                return redirect()->route('backfromjb');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                session()->flash('error', 'Something went wrong! Please try again.');
+                return redirect()->back();
             }
-            $record->save();
         }
         $applicant_details['applicationId'] = Crypt::decryptString($request->id);
         $record = BackFromJb::with([
@@ -44,8 +72,8 @@ class BackFromJBController extends Controller
         $applicant_details['jb_poposed_dob_show'] = Carbon::parse($record->jb_poposed_dob)->format('d-m-Y');
         $applicant_details['new_dob'] = Carbon::parse($record->new_dob)->format('d-m-Y');
         $applicant_details['jb_poposed_dob'] = $record->jb_poposed_dob;
-        $applicant_details['minDOB'] = now()->subYears(60)->format('Y-m-d');
-        $applicant_details['maxDOB'] = now()->subYears(25)->format('Y-m-d');
+        $applicant_details['minDOB'] = $this->minDOB;
+        $applicant_details['maxDOB'] = $this->maxDOB;
         $applicant_details['dob'] = Carbon::parse($record->beneficiary->sourceable->dob)->format('d-m-Y');
         $applicant_details['email'] =  $record->beneficiary->sourceable->email;
         $applicant_details['name'] = $record->beneficiary->beneficiary_name;
