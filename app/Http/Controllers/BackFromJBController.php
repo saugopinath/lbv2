@@ -27,11 +27,11 @@ class BackFromJBController extends Controller
                 'beneficiary.sourceable'
             ])->find($app_id);
             if ($action == 'verify_and_forward_to_approver') {
-                $record->jb_poposed_dob = $new_dob;
+                $record->new_dob = $new_dob;
                 $record->next_level_role_id = Codemaster::getIdByCode(4402);
             } elseif ($action == 'approve') {
                 $record->next_level_role_id = Codemaster::getIdByCode(4403);
-                $record->beneficiary->sourceable->dob = $record->jb_poposed_dob;
+                $record->beneficiary->sourceable->dob = $record->new_dob;
                 $record->beneficiary->sourceable->save();
             }
             $record->save();
@@ -42,6 +42,7 @@ class BackFromJBController extends Controller
             'beneficiary.sourceable.relationships'
         ])->find($applicant_details['applicationId']);
         $applicant_details['jb_poposed_dob_show'] = Carbon::parse($record->jb_poposed_dob)->format('d-m-Y');
+        $applicant_details['new_dob'] = Carbon::parse($record->new_dob)->format('d-m-Y');
         $applicant_details['jb_poposed_dob'] = $record->jb_poposed_dob;
         $applicant_details['minDOB'] = now()->subYears(60)->format('Y-m-d');
         $applicant_details['maxDOB'] = now()->subYears(25)->format('Y-m-d');

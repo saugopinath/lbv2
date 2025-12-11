@@ -71,7 +71,7 @@
                 <div class="grid gap-6 md:grid-cols-2 mb-2 pl-4 pr-4">
                     <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
                         <p class="text-xs text-gray-500">New Date of Birth <span class="text-red-700 font-bold">*</span></p>
-                        <p class="font-semibold text-gray-800">{{$applicant_details['jb_poposed_dob_show']}}</p>
+                        <p class="font-semibold text-gray-800">{{$applicant_details['new_dob']}}</p>
                     </div>
                 </div>
             </div>
