@@ -30,6 +30,7 @@ use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Http\Controllers\CmoController;
 use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\ElasticSearchController;
+use App\Http\Controllers\MarkedUpdateBeneficiary;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
 
@@ -221,3 +222,10 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
     Route::get('/reject-approved-beneficiary/de-activate', 'editview')->middleware('permission.redirect:canViewDetailsToReject')->name('reject-approved-beneficiary.de-activate');
     Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->middleware('permission.redirect:canRejectBeneficiary')->name('beneficiary.deActivebeneficiary');
 });
+
+Route::controller(MarkedUpdateBeneficiary::class)->group(function () {
+    Route::get('/marked-beneficiary',  'index')
+        ->name('marked-beneficiary');
+   
+});
+
