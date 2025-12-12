@@ -20,7 +20,10 @@ class OperatorPermissionSeeder extends Seeder
             'view reports',
             'Normal Entry Permission',
             'Normal Entry Allow',
-            'cmo_workflow'
+            'modify caste',
+            'edit caste',
+            'update caste',
+            'view caste modification list'
         ];
 
         // 1) find role

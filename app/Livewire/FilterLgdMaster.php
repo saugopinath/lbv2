@@ -32,7 +32,7 @@ class FilterLgdMaster extends Component
         $this->button_show = $button_show;
 
         $login_type =  Crypt::decryptString($select_lgd['office_type_id']);
-
+// dd( $login_type);
         if (!empty($select_lgd['district_id'])) {
             $this->filter_condition['district_id'] = Crypt::decryptString($select_lgd['district_id']);
         }

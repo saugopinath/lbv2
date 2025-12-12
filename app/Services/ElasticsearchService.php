@@ -62,14 +62,13 @@ class ElasticsearchService
      }
      public function verifyIndex($indexName)
      {
-        $indexParams['index']  = $indexName;   
+        $indexParams['index']  = $indexName;
         if($this->client->indices()->exists($indexParams)){
             return true;
         }
         else{
              return false;
         }
-         
      }
 
     /**

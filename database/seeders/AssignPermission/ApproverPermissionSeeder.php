@@ -31,8 +31,13 @@ class ApproverPermissionSeeder extends Seeder
             'view users',
             'create users',
             'view caste modification list',
-            'cmo_workflow',
-            'cmo_workflow_mis'           
+            'view lb applications',
+            'view beneficiary details',
+            'TakeActionForCaste',
+            'ApproveCasteApplication',
+            'RevertCasteApplication',
+            'RejectApprovedBeneficiary',
+
         ];
 
         // 1) find role

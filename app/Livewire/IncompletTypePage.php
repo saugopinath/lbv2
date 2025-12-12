@@ -73,10 +73,10 @@ class IncompletTypePage extends Component
         //     return redirect()->route('dashboard');
 
         // }
-        if (!WorkFlowPermissionHelper::canApproveApplication()) {
-            session()->flash('error', 'Oops! You do not have permission to approve applications.');
-            return redirect()->route('dashboard');
-        }
+        // if (!WorkFlowPermissionHelper::canApproveApplication()) {
+        //     session()->flash('error', 'Oops! You do not have permission to approve applications.');
+        //     return redirect()->route('dashboard');
+        // }
 
         try {
             DB::beginTransaction();
@@ -384,10 +384,10 @@ class IncompletTypePage extends Component
         //     session()->flash('error', 'Oops! You do not have permission to revert applications.');
         //     return redirect()->route('dashboard');
         // }
-        if (!WorkFlowPermissionHelper::canRevertApplication()) {
-            session()->flash('error', 'Oops! You do not have permission to revert applications.');
-            return redirect()->route('dashboard');
-        }
+        // if (!WorkFlowPermissionHelper::canRevertApplication()) {
+        //     session()->flash('error', 'Oops! You do not have permission to revert applications.');
+        //     return redirect()->route('dashboard');
+        // }
         DB::beginTransaction();
 
         try {

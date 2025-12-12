@@ -30,11 +30,13 @@ use App\Http\Controllers\RoleOfficeTypeMappingsController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Http\Controllers\BeneficiaryCountController;
 use App\Http\Controllers\CmoController;
+use App\Http\Controllers\JnpmController;
 use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\ElasticSearchController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
-use App\Http\Controllers\JaiBanglaController;
+use Illuminate\Http\Request;
+
 // Guest Routes
 Route::get('/', fn() => view('welcome'));
 Route::get('refresh-captcha', [App\Http\Controllers\CaptchaController::class, 'refreshCaptcha'])
@@ -99,6 +101,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('assign-users-permissions');
 
     Route::get('/role-permission-management', [RolePermisssionManagementController::class, 'index'])
+        ->middleware('permission.redirect:canRolePermissionManagement')
         ->name('role-permission-management');
 
     // Duty Management
@@ -134,12 +137,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('incomplet-type.view');
 
     Route::post('/incomplete/update/{id}', [IncompleteTypeController::class, 'fullUpdate'])
-        ->middleware('permission.redirect:canUpdateIncomplet')
+        // ->middleware('permission.redirect:canUpdateIncomplet')
         ->name('incomplete-full-deatils-update');
 
     Route::post('/incomplete/revert/{id}', [IncompleteTypeController::class, 'revertVerify'])
-        ->middleware('permission.redirect:canRevertIncomplet')
+        // ->middleware('permission.redirect:canRevertIncomplet')
         ->name('incomplete-revert-update');
+    Route::get('/incomplete-details-mis-report', [IncompleteTypeController::class, 'incompleteDetails'])
+        ->name('incomplete.details.mis.report');
 
     Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])
         ->middleware('permission.redirect:canViewBeneficiaries')
@@ -195,7 +200,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('update-bank');
 
     Route::get('/mis-report', [MisReportController::class, 'index'])->name('mis.index');
-    // Route::post('/mis-report-data', [MisReportController::class, 'getData'])->name('mis.data');
 
     // Design Pages (Dev Only – Remove in Prod)
     Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
@@ -235,11 +239,31 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
     Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->name('beneficiary.deActivebeneficiary');
 });
 
+Route::post('/mis/report/redirect', function (Request $request) {
+    $request->validate([
+        'mis_route' => 'required|url',
+    ]);
+    return redirect()->to($request->mis_route);
+})->name('mis.report.redirect');
 
 //Beneficiary count
 Route::controller(BeneficiaryCountController::class)->group(function () {
+    Route::get('/beneficiary-reportlist',  'misReport')->name('beneficiary-reportlist');
     Route::any('/beneficiary-reportlist',  'ApplicationMisReport')->name('beneficiary-reportlist');
     Route::any('/reports-export',  'exportExcel')->name('reports-export');
 });
 
+Route::controller(JnpmController::class)->group(function () {
 
+    Route::any('/jnmp/pull', 'pullJnmpData')->middleware('permission.redirect:canImportJanmaMrityuData')->name('jnmp.pull');
+
+    Route::post('/jnmp/details-callback', 'detailsCallback')->name('jnmp.details-callback');
+
+    Route::get('/jnmp-stats',  'getJnmpStats');
+    Route::post('/jnmp/mark-as-death',  'markAsDeathProcess')->name('jnmp.mark-as-death');
+
+    Route::get('jnmp-data', 'index')->middleware('permission.redirect:canReActivateDeathIncident')->name('jnmp-data');
+
+    // JNMP List at HOD
+    Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')->name('jnmp-marked-data');
+});

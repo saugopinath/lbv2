@@ -28,7 +28,7 @@ class PermissionRedirectMiddleware
                     ->with('error', 'You do not have permission to access this page.');
             }
         } else {
-            // Helper এ method না থাকলে fallback Laravel permission check            
+            // Helper এ method না থাকলে fallback Laravel permission check
             if (!Auth::check() || !Auth::user()->can($permission)) {
                 return redirect()
                     ->route('dashboard')
