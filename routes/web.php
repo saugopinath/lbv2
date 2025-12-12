@@ -235,6 +235,8 @@ Route::post('/mis/report/redirect', function (Request $request) {
 //Beneficiary count
 Route::controller(BeneficiaryCountController::class)->group(function () {
     Route::get('/beneficiary-reportlist',  'misReport')->name('beneficiary-reportlist');
+    Route::any('/beneficiary-reportlist',  'ApplicationMisReport')->name('beneficiary-reportlist');
+    Route::any('/reports-export',  'exportExcel')->name('reports-export');
 });
 
 Route::controller(JnpmController::class)->group(function () {
