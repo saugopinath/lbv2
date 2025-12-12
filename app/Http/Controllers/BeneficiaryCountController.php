@@ -176,7 +176,7 @@ class BeneficiaryCountController extends Controller
         $verifiedRoleId = Codemaster::getIdByCode(23);
         $approvedRoleId = Codemaster::getIdByCode(0);
         $rejectedRoleId = Codemaster::getIdByCode(-1);
-        $revertRoleId = Codemaster::getIdByCode(20);
+        $revertRoleId = Codemaster::getIdByCode( 21);
 
         // Log::debug('Role IDs', [
         //     'pending' => $pendingRoleId,
@@ -306,7 +306,7 @@ class BeneficiaryCountController extends Controller
                 $locationCounts[$key]['verified'] = $this->countByRoleId((clone $query), $verifiedRoleId);
                 $locationCounts[$key]['approved'] = $this->countByRoleId((clone $query), $approvedRoleId);
                 $locationCounts[$key]['rejected'] = $this->countByRoleIdwithflag((clone $query), $rejectedRoleId);
-                $locationCounts[$key]['reverted'] = $this->countByRoleId((clone $query), $revertRoleId);
+                $locationCounts[$key]['reverted'] = $this->countByRoleIdreverted((clone $query), $revertRoleId);
 
                 // Log::debug("Block {$blockId} status counts", $locationCounts[$key]);
             }
@@ -452,9 +452,6 @@ class BeneficiaryCountController extends Controller
         ]);
     }
 
-    /**
-     * Build base query with all filters applied
-     */
     private function getColumnsByMode(?string $mode,): array
     {
         // Default location label
