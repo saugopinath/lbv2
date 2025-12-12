@@ -125,7 +125,7 @@ class CasteModificationAction extends Component
             $this->getValidationMessages()
         );
 
-        $casteModification = CasteModificationInfo::where('application_id', $this->applicationId)
+        $casteModification = CasteModificationInfo::where('application_id', $this->applicationId)->where('is_active', true)
             ->latest()
             ->first();
 
