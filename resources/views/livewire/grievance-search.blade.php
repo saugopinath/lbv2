@@ -3,6 +3,7 @@
         x-data="{
             selectedOption: @entangle('selectedOption'),
             inputValue: @entangle('inputValue'),
+            validationRules: @js($validationRules),
             resetIfChanged(old) {
                 if (this.selectedOption !== old) this.inputValue = '';
             }
@@ -36,11 +37,38 @@
                 <span class="text-red-600">*</span>
             </label>
 
+            <!-- <input
+                type="text"
+                x-model="inputValue"
+                :placeholder="selectedOption ? 'Enter ' + selectedOption : 'Enter value'"
+                class="mt-2 block w-full p-2 border rounded"> -->
             <input
                 type="text"
                 x-model="inputValue"
                 :placeholder="selectedOption ? 'Enter ' + selectedOption : 'Enter value'"
-                class="mt-2 block w-full p-2 border rounded">
+                x-on:input="
+        let key = document.querySelector('input[x-model=\'selectedOption\']:checked')?.getAttribute('name');
+        let rule = validationRules[key];
+
+        if (rule === 'numeric') {
+            $el.value = $el.value.replace(/[^0-9]/g, '');
+        }
+            if (key === 'mobile_number') {
+            $el.value = $el.value.slice(0, 10);
+        }
+
+        if (key === 'aadhaar_number') {
+            $el.value = $el.value.slice(0, 12);
+        }
+        if (rule === 'string') {
+            $el.value = $el.value.replace(/[^A-Za-z\s]/g, '');
+        }
+
+        inputValue = $el.value;
+    "
+                class="mt-2 block w-full p-2 border rounded" />
+
+
         </div>
 
         <div class="flex justify-end gap-2">
@@ -53,17 +81,6 @@
                 $wire.dispatch('searchTriggered', [payload])">
                 GO
             </button>
-
-            <form action="{{ route('cmo-grievance-search') . '?id=' . $grievanceId }}" method="POST">
-                @csrf
-                <x-button.danger
-                    type="submit"
-                    name="action_type"
-                    value="send_to_operator"
-                    class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
-                    Send To Operator For New Entry
-                </x-button.danger>
-            </form>
         </div>
     </div>
 </div>

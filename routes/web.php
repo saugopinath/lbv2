@@ -14,6 +14,7 @@ use App\Livewire\RoleOfficeTypeMappings\Create;
 use App\Http\Controllers\CMOGrievanceController;
 use App\Http\Controllers\OfficeMastersController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\BackFromJBController;
 use App\Http\Controllers\IncompleteTypeController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\BeneficiaryListController;
@@ -34,8 +35,7 @@ use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\ElasticSearchController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
-use Illuminate\Http\Request;
-
+use App\Http\Controllers\JaiBanglaController;
 // Guest Routes
 Route::get('/', fn() => view('welcome'));
 Route::get('refresh-captcha', [App\Http\Controllers\CaptchaController::class, 'refreshCaptcha'])
@@ -117,7 +117,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission.redirect:canDraftList')
         ->name('draftlist');
 
-    Route::get('draftedit/{id}', [LBController::class, 'draftedit'])
+    Route::get('draftedit', [LBController::class, 'draftedit'])
         ->middleware('permission.redirect:canEditDraft')
         ->name('draftedit');
 
@@ -208,9 +208,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/getelsticsearchIndex', [ElasticSearchController::class, 'index'])->name('getelsticsearchIndex');
 });
 Route::controller(CmoController::class)->group(function () {
-    Route::any('/pullnewcmo', 'pullnewcmo')->name('pullnewcmo');
-    Route::any('/populatelbportal', 'populatelbportal')->name('populatelbportal');
-    Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')->name('cmo-grievance-workflow');
+    Route::any('/pullnewcmo', 'pullnewcmo')->middleware('permission.redirect:canCMODatafetch')->name('pullnewcmo');
+    Route::any('/populatelbportal', 'populatelbportal')->middleware('permission.redirect:canCMODatafetch')->name('populatelbportal');
+    Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')
+      ->middleware('permission.redirect:canCMOWorkflow')
+      ->name('cmo-grievance-workflow');
     // Route::any('/cmo-grievance-find/{id}', 'cmogrievancefind')->name('cmo-grievance-find');
     Route::any('/cmo-grievance-find', 'cmogrievancefind')->name('cmo-grievance-find');
     Route::post('/cmo-grievance-action', 'cmodetailsaction')->name('cmo-grievance-action');
@@ -218,38 +220,14 @@ Route::controller(CmoController::class)->group(function () {
     Route::post('/map-applicant', 'mapapplicant')->name('map-applicant');
     Route::post('/cmo-add-actions', 'addactions')->name('cmo-add-actions');
 });
-//reject approved beneficiary
-Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
-    Route::get('/reject-approved-beneficiary',  'index')->name('reject-approved-beneficiary');
-    Route::get('/reject-approved-beneficiary/de-activate', 'editview')->name('reject-approved-beneficiary.de-activate');
-    Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->name('beneficiary.deActivebeneficiary');
-});
 
-Route::post('/mis/report/redirect', function (Request $request) {
-    $request->validate([
-        'mis_route' => 'required|url',
-    ]);
-    return redirect()->to($request->mis_route);
-})->name('mis.report.redirect');
+/*Route::controller(JaiBanglaController::class)->group(function () {
+    Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
+    Route::any('/logoutfromjb', 'logoutfromjb')->name('logoutfromjb');
+    Route::any('/refreshtokenforjb', 'refreshtokenforjb')->name('refreshtokenforjb');
+});*/
 
-//Beneficiary count
-Route::controller(BeneficiaryCountController::class)->group(function () {
-    // Route::get('/beneficiary-reportlist',  'misReport')->name('beneficiary-reportlist');
-    Route::any('/beneficiary-reportlist',  'ApplicationMisReport')->name('beneficiary-reportlist');
-    Route::any('/reports-export',  'exportExcel')->name('reports-export');
-});
-
-Route::controller(JnpmController::class)->group(function () {
-
-    Route::any('/jnmp/pull', 'pullJnmpData')->middleware('permission.redirect:canImportJanmaMrityuData')->name('jnmp.pull');
-
-    Route::post('/jnmp/details-callback', 'detailsCallback')->name('jnmp.details-callback');
-
-    Route::get('/jnmp-stats',  'getJnmpStats');
-    Route::post('/jnmp/mark-as-death',  'markAsDeathProcess')->name('jnmp.mark-as-death');
-
-    Route::get('jnmp-data', 'index')->middleware('permission.redirect:canReActivateDeathIncident')->name('jnmp-data');
-
-    // JNMP List at HOD
-    Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')->name('jnmp-marked-data');
+Route::controller(BackFromJBController::class)->group(function () {
+    Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
+    Route::any('/backfromjbactions', 'backfromjbactions')->name('backfromjbactions');
 });

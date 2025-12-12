@@ -130,13 +130,13 @@ class FilterLgdMaster extends Component
         $this->urbanbodys = [];
         $this->subdivisions = [];
 
-        // $this->dispatch('filtersApplied', [
-        //     'district_id' => $this->selectedDistrict,
-        //     'rural_urban' => null,
-        //     'subdivision_id' => null,
-        //     'blockurban' => null,
-        //     'gp_ward' => null,
-        // ]);
+        $this->dispatch('filtersApplied', [
+            'district_id' => $this->selectedDistrict,
+            'rural_urban' => null,
+            'subdivision_id' => null,
+            'blockurban' => null,
+            'gp_ward' => null,
+        ]);
     }
 
     public function updatedSelectedRuralurban()

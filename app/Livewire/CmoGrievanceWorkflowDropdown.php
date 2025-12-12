@@ -16,7 +16,7 @@ class CmoGrievanceWorkflowDropdown extends Component
     }
     public function render()
     {
-        $user = auth()->user();
+        
 
         // Step 1: Get all codemasters with parent_short_code = 'redressed_status'
         $codemasters = Codemaster::where('parent_short_code', 'redressed_status')->get();

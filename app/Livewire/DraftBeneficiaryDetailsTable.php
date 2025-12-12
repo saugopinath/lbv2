@@ -196,7 +196,7 @@ class DraftBeneficiaryDetailsTable extends DataTableComponent
             $columns[] = Column::make("Actions")
                 ->label(function ($row) {
                     return view('coulmn_button.actions', [
-                        'link' => route('draftedit', Crypt::encryptString($row->sourceable->application_id)),
+                        'link' => route('draftedit'). '?app_id=' . Crypt::encryptString($row->sourceable->application_id),
                         'tooltip' => 'Edit Application',
                     ])->render();
                 })

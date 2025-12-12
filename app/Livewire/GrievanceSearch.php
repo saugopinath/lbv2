@@ -19,7 +19,13 @@ class GrievanceSearch extends Component
         'aadhaar_number'      => 'Aadhaar Number',
         'bank_account_number' => 'Bank Account Number',
     ];
-
+    public $validationRules = [
+        'application_id'      => 'numeric',
+        'mobile_number'       => 'numeric',
+        'aadhaar_number'      => 'numeric',
+        'bank_account_number' => 'numeric',
+        'beneficiary_name'    => 'string',
+    ];
     // #[On('searchTriggered')]
     // public function handleSearchTriggered($selectedOption, $inputValue)
     // {
@@ -56,6 +62,7 @@ class GrievanceSearch extends Component
     {
         return view('livewire.grievance-search', [
             'searchOptions' => $this->searchOptions,
+            'validationRules' => $this->validationRules,
         ]);
     }
 }

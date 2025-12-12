@@ -104,7 +104,7 @@
             <button @click="modalOpen=false"
                 class="absolute right-2 top-2 text-gray-500 hover:text-red-500 text-xl">&times;</button>
             <h2 class="text-lg font-semibold mb-3" x-text="modalDocName"></h2>
-            <iframe :src="modalSrc" class="w-full h-[70vh]" frameborder="0"></iframe>
+            <img :src="modalSrc" class="w-full h-[70vh]" frameborder="0">
         </div>
     </div>
 </div>

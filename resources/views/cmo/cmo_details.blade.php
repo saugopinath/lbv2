@@ -136,7 +136,16 @@
                 sectionId="search-details"
                 color="indigo-500">
                 <livewire:grievance-search :mobile-number="$record->pri_cont_no" :grievance-id="Crypt::encryptString($record->grievance_id)" />
-
+                <form action="{{ route('cmo-grievance-search') . '?id=' . Crypt::encryptString($record->grievance_id) }}" method="POST">
+                    @csrf
+                    <x-button.danger
+                        type="submit"
+                        name="action_type"
+                        value="send_to_operator"
+                        class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
+                        Send To Operator For New Entry
+                    </x-button.danger>
+                </form>
                 <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
                     <livewire:cmo-details-data-table
                         :initial-mobile="$record->pri_cont_no"
