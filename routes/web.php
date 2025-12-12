@@ -142,7 +142,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/incomplete/revert/{id}', [IncompleteTypeController::class, 'revertVerify'])
         // ->middleware('permission.redirect:canRevertIncomplet')
         ->name('incomplete-revert-update');
-         Route::get('/incomplete-details-mis-report', [IncompleteTypeController::class, 'incompleteDetails'])
+    Route::get('/incomplete-details-mis-report', [IncompleteTypeController::class, 'incompleteDetails'])
         ->name('incomplete.details.mis.report');
 
     Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])
@@ -226,11 +226,9 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
 });
 
 Route::post('/mis/report/redirect', function (Request $request) {
-    // basic validation to ensure a value was submitted
     $request->validate([
         'mis_route' => 'required|url',
     ]);
-
     return redirect()->to($request->mis_route);
 })->name('mis.report.redirect');
 
