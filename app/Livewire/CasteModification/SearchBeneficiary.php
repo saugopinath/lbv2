@@ -5,6 +5,7 @@ namespace App\Livewire\CasteModification;
 use App\Models\BeneficiaryAadhaar;
 use App\Models\BeneficiaryCommonList;
 use App\Models\CasteModificationInfo;
+use App\Models\Codemaster;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Component;
 
@@ -17,6 +18,9 @@ class SearchBeneficiary extends Component
     public $items = [];
     public $currentLabel = 'Select Search Type';
     public $filter_condition = [];
+    public $verified_code = null;
+    public $aproved_code = null;
+    public $revert_code = null;
 
     public $searchOptions = [
         1 => 'Application ID',
@@ -45,6 +49,9 @@ class SearchBeneficiary extends Component
         if (!empty($select_lgd['subdivision_id'])) {
             $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
+        $this->verified_code = Codemaster::getIdByCode(2202);
+        $this->aproved_code = Codemaster::getIdByCode(2203);
+        $this->revert_code = Codemaster::getIdByCode(2204);
     }
 
     public function updatedSearchType($value)
@@ -99,26 +106,25 @@ class SearchBeneficiary extends Component
         // dd('ok');
         $this->validate();
         $column = $this->searchTypeMap[$this->searchType];
-        if($column == 'encoded_aadhar'){
+        if ($column == 'encoded_aadhar') {
             $this->searchBy = md5($this->searchValue);
-        }
-        else{
+        } else {
             $this->searchBy = $this->searchValue;
         }
         $application_id = BeneficiaryCommonList::where($column, $this->searchBy)->first();
         // dd($application_id->sourceable_id);
         $existingRecord = null;
-        if($application_id){
-            $existingRecord = CasteModificationInfo::where('application_id',  $application_id->sourceable_id)->where('is_active',true)->first();
+        if ($application_id) {
+            $existingRecord = CasteModificationInfo::where('application_id',  $application_id->sourceable_id)->where('is_active', true)->first();
         }
         // dd($existingRecord);
         if ($existingRecord) {
             // dd($existingRecord);
-            if ($existingRecord->next_level_requested_id == 154) {
+            if ($existingRecord->next_level_requested_id == $this->verified_code) {
                 $message = "Request already Verified by the Verifier.";
-            } elseif ($existingRecord->next_level_requested_id == 155) {
+            } elseif ($existingRecord->next_level_requested_id == $this->aproved_code) {
                 $message = "Request already Approved By the Approver.";
-            } elseif ($existingRecord->next_level_requested_id == 156) {
+            } elseif ($existingRecord->next_level_requested_id == $this->revert_code) {
                 $message = "Request is reverted.";
             } else {
                 $message = "Caste modification already requested.";
