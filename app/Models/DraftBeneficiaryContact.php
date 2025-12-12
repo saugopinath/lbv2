@@ -59,6 +59,10 @@ class DraftBeneficiaryContact extends Model implements Auditable
     {
         return $this->belongsTo(Subdivision::class, 'sub_division_id', 'id');
     }
+     public function personal()
+    {
+        return $this->belongsTo(DraftBeneficiaryPersonal::class, 'application_id', 'application_id');
+    }
 
     public function getFullAddress(): string
     {
@@ -127,5 +131,31 @@ class DraftBeneficiaryContact extends Model implements Auditable
             'block' => $blockname,
             'gp' => $gpname
         ];
+    }
+    protected static function booted()
+    {
+        static::created(function ($contact) {
+            $personal = $contact->personal;
+            if ($personal && $personal->lists) {
+                $personal->lists()->update([
+                    'cd_district_id'=> $contact->district_id,
+                    'cd_rural_urban_id'=>$contact->rural_urban_id,
+                    'cd_block_muni_id'=> $contact->block_id ?? $contact->municipality_id,
+                    'cd_gp_ward_id'=>$contact->panchayat_id ?? $contact->ward_id,
+                ]);
+            }
+        });
+
+        static::updated(function ($contact) {
+            $personal = $contact->personal;
+            if ($personal && $personal->lists) {
+                $personal->lists()->update([
+                    'cd_district_id'=> $contact->district_id,
+                    'cd_rural_urban_id'=>$contact->rural_urban_id,
+                    'cd_block_muni_id'=> $contact->block_id ?? $contact->municipality_id,
+                    'cd_gp_ward_id'=>$contact->panchayat_id ?? $contact->ward_id,
+                ]);
+            }
+        });
     }
 }

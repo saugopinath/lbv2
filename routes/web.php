@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RejectApprovedBeneficiaryController;
 use App\Livewire\ApplicationView;
 use App\Livewire\IncompletTypePage;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,7 @@ use App\Livewire\ProcessApplication\DraftApplicationView;
 use App\Http\Controllers\MasterParameterSettingController;
 use App\Http\Controllers\RoleOfficeTypeMappingsController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
+use App\Http\Controllers\BeneficiaryCountController;
 use App\Http\Controllers\CmoController;
 use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\ElasticSearchController;
@@ -226,3 +228,18 @@ Route::controller(BackFromJBController::class)->group(function () {
     Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
     Route::any('/backfromjbactions', 'backfromjbactions')->name('backfromjbactions');
 });
+//reject approved beneficiary
+Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
+    Route::get('/reject-approved-beneficiary',  'index')->name('reject-approved-beneficiary');
+    Route::get('/reject-approved-beneficiary/de-activate', 'editview')->name('reject-approved-beneficiary.de-activate');
+    Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->name('beneficiary.deActivebeneficiary');
+});
+
+
+//Beneficiary count
+Route::controller(BeneficiaryCountController::class)->group(function () {
+    Route::any('/beneficiary-reportlist',  'ApplicationMisReport')->name('beneficiary-reportlist');
+    Route::any('/reports-export',  'exportExcel')->name('reports-export');
+});
+
+

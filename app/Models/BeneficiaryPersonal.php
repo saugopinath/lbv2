@@ -108,6 +108,7 @@ class BeneficiaryPersonal extends Model implements Auditable
             if ($commonList) {
                 $commonList->update([
                     'sourceable_type' => get_class($beneficiary),
+                    'next_level_role_id'=> $beneficiary->next_level_role_id,
                 ]);
             }
         });

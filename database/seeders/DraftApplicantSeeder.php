@@ -2,155 +2,201 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\Ward;
-use App\Models\Block;
-use App\Models\District;
-use App\Models\Panchayat;
-use App\Models\Codemaster;
-use App\Models\Subdivision;
-use Faker\Factory as Faker;
-use App\Models\Municipality;
-use App\Models\Ifsccodemaster;
-use App\Models\UniqueAppBenId;
-use Illuminate\Database\Seeder;
 use App\Models\BeneficiaryAadhaar;
-use App\Models\DraftBeneficiaryBank;
-use Illuminate\Support\Facades\Crypt;
-use App\Models\DraftBeneficiaryContact;
+use App\Models\Ifsccodemaster;
+use Illuminate\Database\Seeder;
 use App\Models\DraftBeneficiaryPersonal;
-use App\Models\DraftBeneficiaryDeclaration;
+use App\Models\DraftBeneficiaryBank;
+use App\Models\DraftBeneficiaryContact;
 use App\Models\DraftBeneficiaryRelationship;
+use App\Models\BeneficiaryEnclosure;
+use App\Models\OfficeMaster;
+use App\Models\Panchayat;
+use App\Models\UniqueAppBenId;
+use App\Models\UserRoleSchemeOfficeMapping;
+use App\Models\Block;
+use App\Models\Codemaster;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 
 class DraftApplicantSeeder extends Seeder
 {
     public function run(): void
     {
-        $faker = Faker::create();
+        try {
 
-        $userId = User::where('name', 'Admin')->value('id') ?? 1;
+            for ($i = 0; $i < 200; $i++) {
 
-        $districtIds    = District::pluck('id')->toArray();
-        $blockIds       = Block::pluck('id')->toArray();
-        $subdivisionIds = Subdivision::pluck('id')->toArray();
-        $municipalityIds= Municipality::pluck('id')->toArray();
-        $wardIds        = Ward::pluck('id')->toArray();
-        $panchayatIds   = Panchayat::pluck('id')->toArray();
+                /** --------------------------
+                 * Load Office + User
+                 * -------------------------- */
+                $office = OfficeMaster::where('district_id', 318)
+                    ->where('block_id', 2979)->first();
 
-        // Common Master IDs
-        $entryTypeId        = Codemaster::where('code', 41)->value('id');
-        $nextLevelRoleId    = Codemaster::where('code', 22)->value('id');
-        $ifsc               = Ifsccodemaster::where('bankmaster_id', 36)->value('code');
-        $fatherRelationTypeId = Codemaster::where('code', 131)->value('id');
-        $motherRelationTypeId = Codemaster::where('code', 132)->value('id');
+                $mapping = UserRoleSchemeOfficeMapping::where('office_id', $office->id)
+                    ->where('role_id', 8)->first();
 
-        for ($i = 1; $i <= 20; $i++) {
+                $user_id = $mapping->user_id;
 
-            $casteId         = Codemaster::where('parent_id', 1)->inRandomOrder()->value('id');
-            $maritalStatusId = Codemaster::where('parent_id', 3)->inRandomOrder()->value('id');
+                $office = OfficeMaster::find($mapping->office_id);
+                $dist   = $office->district_id;
 
-            $aadharNumber = str_pad(rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+                /** --------------------------
+                 * STATIC MASTER VALUES
+                 * -------------------------- */
+                $nextLevelRoleId      = Codemaster::where('code', 22)->value('id');
+                $casteId              = Codemaster::where('code', 171)->value('id');
+                $fatherRelationTypeId = Codemaster::where('code', 131)->value('id');
+                $motherRelationTypeId = Codemaster::where('code', 132)->value('id');
 
-            // Random pick properly
-            $districtId    = $faker->randomElement($districtIds);
-            $blockId       = $faker->randomElement($blockIds);
-            $subdivisionId = !empty($subdivisionIds) ? $faker->randomElement($subdivisionIds) : null;
-            $municipalityId= !empty($municipalityIds) ? $faker->randomElement($municipalityIds) : null;
-            $wardId        = !empty($wardIds) ? $faker->randomElement($wardIds) : null;
-            $panchayatId   = !empty($panchayatIds) ? $faker->randomElement($panchayatIds) : null;
+                $block_id     = Block::where('district_id', $dist)
+                    ->where('lgd_code', 2979)->value('id');
 
-            // Unique Application ID generate
-           $uniqueAppBenId = UniqueAppBenId::create([]);
+                $panchayat_id = Panchayat::where('block_id', $block_id)->value('id');
 
-            // Personal
-            DraftBeneficiaryPersonal::create([
-                'application_id'       => $uniqueAppBenId->application_id,
-                'district_id'          => $districtId,
-                'block_id'             => $blockId,
-                'sub_division_id'      => $subdivisionId,
-                'municipality_id'      => $municipalityId,
-                'ward_id'              => $wardId,
-                'panchayat_id'         => $panchayatId,
-                'full_name'            => 'Test Beneficiary ' . $i,
-                'dob'                  => '2000-01-01',
-                'mobile_no'            => '99999999' . str_pad($i, 2, '0', STR_PAD_LEFT),
-                'caste'                => $casteId,
-                'next_level_role_id'   => $nextLevelRoleId,
-                'caste_certificate_no' => null,
-                'marital_status'       => $maritalStatusId,
-                'entry_type'           => $entryTypeId,
-                'is_final_submit'      => false,
-                'is_faulty'            => false,
-                'ds_date'              => null,
-                'ds_registration_no'   => null,
-                'created_by'           => $userId,
-            ]);
+                $aadhar_number  = rand(100000000000, 999999999999);
+                $encoded_aadhar = Crypt::encryptString((string) $aadhar_number);
 
-            // Contact
-            DraftBeneficiaryContact::create([
-                'application_id'    => $uniqueAppBenId->application_id,
-                'district_id'       => $districtId,
-                'rural_urban_id'    => 2,
-                'block_id'          => $blockId,
-                'municipality_id'   => $municipalityId,
-                'ward_id'           => $wardId,
-                'panchayat_id'      => $panchayatId,
-                'police_station'    => 'Test PS ' . $i,
-                'village_town_city' => 'Village ' . $i,
-                'house_premise_no'  => 'House No ' . $i,
-                'post_office'       => 'Post Office ' . $i,
-                'pincode'           => '700157',
-                'residency_period'  => rand(1, 10),
-                'created_by'        => $userId,
-            ]);
 
-            // Bank
-            DraftBeneficiaryBank::create([
-                'application_id'     => $uniqueAppBenId->application_id,
-                'created_by'         => $userId,
-                'ifsc'               => $ifsc,
-                'bank_account_number'=> '1234000' . str_pad($i, 4, '0', STR_PAD_LEFT),
-            ]);
+                /** --------------------------
+                 * BEGIN TRANSACTION
+                 * -------------------------- */
+                DB::beginTransaction();
 
-            // Declaration
-            DraftBeneficiaryDeclaration::create([
-                'application_id'          => $uniqueAppBenId->application_id,
-                'created_by'              => $userId,
-                'is_resident'             => true,
-                'earn_monthly_remuneration'=> true,
-                'info_genuine_decl'       => true,
-                'av_status'               => true,
-            ]);
+                /** --------------------------
+                 * Unique Application ID
+                 * -------------------------- */
+                $uniqueAppBenId = UniqueAppBenId::create([]);
+                $beneficiary_id_obj = UniqueAppBenId::where('application_id', $uniqueAppBenId->application_id)->first();
+                // $beneficiary_id = $unique->beneficiary_id;
 
-            // Aadhaar
-            BeneficiaryAadhaar::create([
-                'application_id'   => $uniqueAppBenId->application_id,
-                'beneficiary_id'   => null,
-                'created_by'       => $userId,
-                'encode_key'       => null,
-                'encoded_aadhar'   => Crypt::encryptString($aadharNumber),
-                'aadhar_hash'      => md5($aadharNumber),
-            ]);
 
-            // Relationships
-            DraftBeneficiaryRelationship::insert([
-                [
+
+                /** --------------------------
+                 * Aadhaar Save
+                 * -------------------------- */
+                $beneficiary_aadhar = BeneficiaryAadhaar::create([
                     'application_id'   => $uniqueAppBenId->application_id,
-                    'created_by'       => $userId,
-                    'full_name'        => 'Father Name ' . $i,
-                    'relation_type_id' => $fatherRelationTypeId,
-                    'created_at'       => now(),
-                    'updated_at'       => now(),
-                ],
-                [
-                    'application_id'   => $uniqueAppBenId->application_id,
-                    'created_by'       => $userId,
-                    'full_name'        => 'Mother Name ' . $i,
-                    'relation_type_id' => $motherRelationTypeId,
-                    'created_at'       => now(),
-                    'updated_at'       => now(),
-                ]
-            ]);
+                    'beneficiary_id'   => $uniqueAppBenId->beneficiary_id,
+                    'created_by'     => $user_id,
+                    'encode_key'     => null,
+                    'encoded_aadhar' => $encoded_aadhar,
+                    'aadhar_hash'    => md5($aadhar_number),
+                ]);
+
+                /** --------------------------
+                 * PERSONAL
+                 * -------------------------- */
+                $beneficiary = DraftBeneficiaryPersonal::create([
+                    'application_id' => $uniqueAppBenId->application_id,
+                    'beneficiary_id' => $beneficiary_id_obj->beneficiary_id,
+                    'district_id'         => $office->district_id,
+                    'block_id'            => $office->block_id,
+                    'sub_division_id'     => $office->sub_division_id,
+                    'municipality_id'     => $office->municipality_id,
+                    'ward_id'             => $office->ward_id,
+                    'panchayat_id'        => $office->panchayat_id,
+                    'full_name'           => 'Test User ' . ($i + 1),
+                    'dob'                 => '2000-01-01',
+                    'mobile_no'           => '9999999999',
+                    'caste'               => $casteId,
+                    'next_level_role_id'  => $nextLevelRoleId,
+                    'marital_status'      => 1,
+                    'entry_type'          => 1,
+                    'is_final_submit'     => true,
+                    'is_faulty'           => false,
+                    'created_by'          => $user_id,
+                ]);
+
+                /** ------------------------------------
+                 * FIXED Relationship (PostgreSQL SAFE)
+                 * ------------------------------------ */
+                DraftBeneficiaryRelationship::insert([
+                    [
+                        'application_id' => $uniqueAppBenId->application_id,
+                        // 'beneficiary_id' => $beneficiary_id_obj->beneficiary_id,
+                        'created_by'       => $user_id,
+                        'full_name'        => 'Father Name ' . $i,
+                        'relation_type_id' => $fatherRelationTypeId,
+                        'created_at'       => now(),
+                        'updated_at'       => now(),
+                    ],
+                    [
+                        'application_id' => $uniqueAppBenId->application_id,
+                        // 'beneficiary_id' => $beneficiary_id_obj->beneficiary_id,
+                        'created_by'       => $user_id,
+                        'full_name'        => 'Mother Name ' . $i,
+                        'relation_type_id' => $motherRelationTypeId,
+                        'created_at'       => now(),
+                        'updated_at'       => now(),
+                    ]
+                ]);
+
+
+                /** --------------------------
+                 * CONTACT
+                 * -------------------------- */
+                $beneficiary_contact = DraftBeneficiaryContact::create([
+                    'application_id' => $beneficiary->application_id,
+                    'district_id'        => $dist,
+                    'rural_urban_id'     => 2,
+                    'block_id'           => $block_id,
+                    'panchayat_id'       => $panchayat_id,
+                    'police_station'     => 'Test PS ' . $i,
+                    'village_town_city'  => 'Village ' . $i,
+                    'house_premise_no'   => 'House No ' . $i,
+                    'post_office'        => 'Post Office ' . $i,
+                    'pincode'            => '700000',
+                    'residency_period'   => rand(1, 10),
+                    'created_by'         => $user_id,
+                ]);
+
+
+                /** --------------------------
+                 * BANK
+                 * -------------------------- */
+                $beneficiary_bank = DraftBeneficiaryBank::create([
+                    // 'beneficiary_id' => $beneficiary->beneficiary_id,
+                    'application_id' => $beneficiary->application_id,
+                    'created_by'           => $user_id,
+                    'ifsc'                 => Ifsccodemaster::where('id', 6712)->value('code'),
+                    'bank_account_number'  => 'ACC' . str_pad($i, 4, '0', STR_PAD_LEFT),
+                ]);
+
+                /** --------------------------
+                 * DOCUMENTS
+                 * -------------------------- */
+                $docs = [
+                    ['type' => 104],
+                    ['type' => 101],
+                    ['type' => 108],
+                ];
+
+                foreach ($docs as $doc) {
+
+                    BeneficiaryEnclosure::create([
+                         'beneficiary_id'     => $beneficiary->beneficiary_id,
+                        'application_id'     => $beneficiary->application_id,
+                        'attched_document'   => 'sample-base64',
+                        'ip_address'         => '127.0.0.1',
+                        'document_extension' => 'jpg',
+                        'document_mime_type' => 'image/jpeg',
+                        'document_type'      => $doc['type'],
+                        'created_by'         => $user_id,
+                    ]);
+                }
+
+
+                /** --------------------------
+                 * FINAL COMMIT
+                 * -------------------------- */
+                DB::commit();
+                $this->command->info("Draft Beneficiary inserted successfully" . $i);
+            }
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+            throw $e;
         }
     }
 }

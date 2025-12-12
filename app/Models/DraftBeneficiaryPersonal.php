@@ -93,6 +93,7 @@ class DraftBeneficiaryPersonal extends Model implements Auditable
                 'encoded_aadhar'    => $draftbenPar->aadhaar->aadhar_hash,
                 'mobile_no' => $draftbenPar->mobile_no,
                 'beneficiary_name' => $draftbenPar->full_name,
+                'next_level_role_id'=> $draftbenPar->next_level_role_id,
             ]);
         });
         static::updated(function ($draftbenPar) {
@@ -100,6 +101,7 @@ class DraftBeneficiaryPersonal extends Model implements Auditable
                 $draftbenPar->lists->update([
                     'mobile_no' => $draftbenPar->mobile_no,
                     'beneficiary_name' => $draftbenPar->full_name,
+                    'next_level_role_id'=> $draftbenPar->next_level_role_id,
                 ]);
             }
         });

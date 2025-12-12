@@ -29,7 +29,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
         try {
 
 
-            for ($i = 0; $i < 200; $i++) {
+            for ($i = 0; $i < 10; $i++) {
                 // Create a BeneficiaryPersonal
                 $office = OfficeMaster::where('district_id', 318)->where('block_id', 2979)->first();
                 $mapping = UserRoleSchemeOfficeMapping::where('office_id', $office->id)->where('role_id', 8)->first();
@@ -147,7 +147,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
                     'application_id' => $beneficiary->application_id,
                     'created_by' => $user_id,
                     'ifsc' => Ifsccodemaster::where('id', 6712)->value('code'),
-                    'bank_account_number' => 'ACC' . str_pad($i, 4, '0', STR_PAD_LEFT) . ($i + 2),
+                    'bank_account_number' => 'BCC' . str_pad($i, 4, '0', STR_PAD_LEFT) . ($i + 2),
                 ]);
                 $docs = [
                     ['name' => 'aadhar_card_enc', 'type' => 104],
