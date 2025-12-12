@@ -186,6 +186,7 @@ class CasteModificationController extends Controller
 
             $existingModification = CasteModificationInfo::where('application_id', $beneficiary->sourceable_id)
                 ->where('next_level_requested_id', Codemaster::getIdByCode(2204))
+                ->where('is_active', true)
                 ->first();
 
             DB::beginTransaction();
@@ -275,7 +276,7 @@ class CasteModificationController extends Controller
         $applicant_id = $request->application_id;
         $application_id = Crypt::decrypt($applicant_id);
 
-        $application = CasteModificationInfo::where('application_id', $application_id)->firstOrFail();
+        $application = CasteModificationInfo::where('application_id', $application_id)->where('is_active', true)->firstOrFail();
         $oldData = $application->old_data;
         $newData = $application->new_data;
 

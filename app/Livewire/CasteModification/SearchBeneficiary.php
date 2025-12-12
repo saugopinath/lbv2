@@ -109,16 +109,16 @@ class SearchBeneficiary extends Component
         // dd($application_id->sourceable_id);
         $existingRecord = null;
         if($application_id){
-            $existingRecord = CasteModificationInfo::where('application_id',  $application_id->sourceable_id)->first();
+            $existingRecord = CasteModificationInfo::where('application_id',  $application_id->sourceable_id)->where('is_active',true)->first();
         }
         // dd($existingRecord);
         if ($existingRecord) {
             // dd($existingRecord);
-            if ($existingRecord->next_level_requested_id == 148) {
+            if ($existingRecord->next_level_requested_id == 154) {
                 $message = "Request already Verified by the Verifier.";
-            } elseif ($existingRecord->next_level_requested_id == 149) {
+            } elseif ($existingRecord->next_level_requested_id == 155) {
                 $message = "Request already Approved By the Approver.";
-            } elseif ($existingRecord->next_level_requested_id == 150) {
+            } elseif ($existingRecord->next_level_requested_id == 156) {
                 $message = "Request is reverted.";
             } else {
                 $message = "Caste modification already requested.";
