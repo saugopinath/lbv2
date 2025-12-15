@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\BskController;
 use App\Http\Controllers\RejectApprovedBeneficiaryController;
 use App\Livewire\ApplicationView;
 use App\Livewire\IncompletTypePage;
@@ -231,3 +232,7 @@ Route::controller(BackFromJBController::class)->group(function () {
     Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
     Route::any('/backfromjbactions', 'backfromjbactions')->name('backfromjbactions');
 });
+
+Route::any('/formEntryOption', [BskController::class, 'formEntryOption'])
+    ->name('formEntryOption');
+    Route::any('/bskUserSessionCreate', [BskController::class, 'bskUserSessionCreate']);

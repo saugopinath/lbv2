@@ -33,12 +33,26 @@ Route::middleware('jwt')->group(function () {
 //         'data'  => $request->all()
 //     ]);
 // });
-Route::post('/login', [BskController::class, 'login']);
+// Route::post('/login', [BskController::class, 'login']);
+// routes/web.php
+Route::post('/bsk-login', [BskController::class, 'login']);
+
 Route::post('/auth/bsk-data-entry', [BskController::class, 'bskEntryAuthCheck']);
 
-Route::any('/bskUserSessionCreate', [BskController::class, 'bskUserSessionCreate']);
+// Route::any('/bskUserSessionCreate', [BskController::class, 'bskUserSessionCreate']);
 
 Route::get('bsk-entry-done', function(){ return view('BSKLBFrom/acknowledgement_page'); })->name('bsk-entry-done');
 
-Route::get('/formEntryOption', [BskController::class, 'formEntryOption']);
+// Route::any('/formEntryOption', [BskController::class, 'formEntryOption'])
+//     ->name('formEntryOption');
+
+// Route::any('/formEntryOption', function () {
+//     return view('lb_bsk.entryOption');
+// })->name('formEntryOption');
+
+
+    //   Route::get('lbform', [BskController::class, 'index'])
+    //     ->name('lbform');
+
+
 Route::post('/logout', [BskController::class, 'logout']);

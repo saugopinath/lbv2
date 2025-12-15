@@ -44,6 +44,15 @@ return [
             'driver' => 'jwt',
             'provider' => 'users',
         ],
+        'bsk' => [
+            'driver' => 'jwt',
+            'provider' => 'bsk_users',
+        ],
+        'bsk_session' => [            
+            'driver' => 'session',
+            'provider' => 'bsk_users',
+        ],
+
     ],
 
     /*
@@ -73,6 +82,11 @@ return [
         //     'driver' => 'database',
         //     'table' => 'users',
         // ],
+
+        'bsk_users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\BSKUserDutyMapping::class,
+        ],
     ],
 
     /*

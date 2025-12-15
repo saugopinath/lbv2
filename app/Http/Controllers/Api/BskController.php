@@ -14,44 +14,45 @@ use App\Models\BSKUserDutyMapping;
 use App\Models\Codemaster;
 use App\Models\District;
 use App\Models\Subdivision;
+use App\Models\User;
 use App\Services\BSKJwtService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class BskController extends Controller
 {
+
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email'    => 'required|email',
-            'password' => 'required',
+            'email'     => 'required|email',
+            'mobile_no' => 'required',
         ]);
+
         if ($validator->fails()) {
             return response()->json([
                 'is_success' => false,
                 'errors' => $validator->errors(),
             ], 422);
         }
-        $credentials = $request->only('email', 'password');
-        try {
-            if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json([
-                    'error' => 'Invalid credentials',
-                    'is_success' => false,
-                ], 401);
-            }
-        } catch (JWTException $e) {
+
+        $credentials = $request->only('email', 'mobile_no');
+
+        if (!$token = Auth::guard('bsk')->attempt($credentials)) {
             return response()->json([
-                'error' => 'Could not create token',
+                'error' => 'Invalid credentials',
                 'is_success' => false,
-            ], 500);
+            ], 401);
         }
+
         return response()->json([
             'token' => $token,
+            'user'  => Auth::guard('bsk')->user(),
             'is_success' => true,
-        ], 200);
+        ]);
     }
 
     public function logout()
@@ -187,9 +188,9 @@ class BskController extends Controller
             // dd($sessionPayload);
             $encryptedTicket = encrypt($sessionPayload);
 
-return redirect()->to(
-    url('/api/bskUserSessionCreate') . '?id=' . urlencode($encryptedTicket)
-);
+            return redirect()->to(
+                url('/bskUserSessionCreate') . '?id=' . urlencode($encryptedTicket)
+            );
 
             // $encryptedTicket = base64_encode(encrypt($sessionPayload));
 
@@ -197,9 +198,9 @@ return redirect()->to(
             // return redirect()->route('bsk.session.create', [
             //     'id' => $encryptedTicket
             // ]);
-// return redirect()->to(
-//     url('/bskUserSessionCreate') . '?id=' . urlencode($encryptedTicket)
-// );
+            // return redirect()->to(
+            //     url('/bskUserSessionCreate') . '?id=' . urlencode($encryptedTicket)
+            // );
 
             // return redirect('bskUserSessionCreate?id=' . $encryptedTicket);
 
@@ -213,65 +214,61 @@ return redirect()->to(
 
     public function bskUserSessionCreate(Request $request)
     {
-        //  dd($request->query('id'));
-
-    // $sessionData = decrypt($request->query('id'));
-    // dd($sessionData);
-
-        // dd('ok');
         try {
             if (!$request->filled('id')) {
-                return redirect('api/bsk-entry-done')
+                return redirect('bsk-entry-done')
                     ->with(['error' => 'Invalid Session Token', 'status' => 0]);
             }
 
-            // Decode & decrypt session payload
-            $sessionData = decrypt(base64_decode($request->id));
+            $sessionData = (array) decrypt($request->input('id'));
 
             if (!isset($sessionData['ticketNo'])) {
-                return redirect('api/bsk-entry-done')
+                return redirect('bsk-entry-done')
                     ->with(['error' => 'Invalid Session Data', 'status' => 0]);
             }
 
-            // ORM lookup (NO RAW DB)
-            $duty = BSKUserDutyMapping::with('user')
-                ->where('ticket_no', $sessionData['ticketNo'])
-                ->first();
-
-            if (!$duty || !$duty->user) {
-                return redirect('api/bsk-entry-done')
+            $duty = BSKUserDutyMapping::where('ticket_no', $sessionData['ticketNo'])->first();
+            // dd($duty);
+            if (!$duty) {
+                return redirect('bsk-entry-done')
                     ->with(['error' => 'User not found', 'status' => 0]);
             }
+            // dd(Auth::guard('bsk'));
+            // Auth::guard('bsk_session')->login($duty);
 
-            // Auth Login (Laravel 11)
-            Auth::login($duty->user);
-
-            // Store session for Livewire
-            session([
-                'bskrole' => [
-                    'user_id'         => $duty->agent_id,
-                    'ticket_no'       => $duty->ticket_no,
-                    'district_id'     => $duty->district_id,
-                    'is_rural'        => $duty->is_rural,
-                    'sub_division_id' => $duty->sub_division_id,
-                    'block_id'        => $duty->block_id,
-                ]
+            Session::put('bskrole', [
+                'user_id'         => $duty->id,
+                'ticket_no'       => $duty->ticket_no,
+                'district_id'     => $duty->district_id,
+                'is_rural'        => $duty->is_rural,
+                'sub_division_id' => $duty->sub_division_id,
+                'block_id'        => $duty->block_id,
             ]);
 
+            //             dd(    
+            //     session('bskrole')    
+            // );
+
+            // dd($bskrole);
             return redirect()->route('formEntryOption');
         } catch (\Throwable $e) {
-
-            return redirect('api/bsk-entry-done')->with([
+            return redirect('bsk-entry-done')->with([
                 'error'  => 'Something went wrong',
                 'status' => 0
             ]);
         }
     }
 
-    public function formEntryOption(Request $request)
+
+    public function formEntryOption()
     {
-        return view(
-            'lb_bsk/entryOption'
-        );
+        $bskrole = session('bskrole');
+
+        $userId   = $bskrole['user_id'] ?? null;
+        $ticketNo = $bskrole['ticket_no'] ?? null;
+
+        // dd($userId, $ticketNo);
+
+        return view('lb_bsk.entryOption', compact('userId', 'ticketNo'));
     }
 }

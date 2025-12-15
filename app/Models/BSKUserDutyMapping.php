@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -39,5 +40,9 @@ class BSKUserDutyMapping extends Model implements Auditable
         'password',
         'remember_token',
     ];
-}
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'agent_id', 'id');
+    }
+}
