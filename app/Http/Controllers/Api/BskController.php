@@ -238,16 +238,13 @@ class BskController extends Controller
 
             Session::put('bskrole', [
                 'user_id'         => $duty->id,
+                'mobile_no'         => $duty->mobile_no,
                 'ticket_no'       => $duty->ticket_no,
                 'district_id'     => $duty->district_id,
                 'is_rural'        => $duty->is_rural,
                 'sub_division_id' => $duty->sub_division_id,
                 'block_id'        => $duty->block_id,
             ]);
-
-            //             dd(    
-            //     session('bskrole')    
-            // );
 
             // dd($bskrole);
             return redirect()->route('formEntryOption');
@@ -264,7 +261,7 @@ class BskController extends Controller
     {
         $bskrole = session('bskrole');
 
-        $userId   = $bskrole['user_id'] ?? null;
+        $userId   = $bskrole['mobile_no'] ?? null;
         $ticketNo = $bskrole['ticket_no'] ?? null;
 
         // dd($userId, $ticketNo);
