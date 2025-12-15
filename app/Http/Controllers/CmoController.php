@@ -416,9 +416,13 @@ class CmoController extends Controller
 
     public function cmoMisReport(Request $request)
     {
-        $district_dropdown = false;
+        $isApprover = false;
+        $isHod = false;
+        if (CheckAuthHelper::isCommonApprover()) {
+            $isApprover = true;
+        }
         if (CheckAuthHelper::isCommonHOD()) {
-            $district_dropdown = true;
+            $isHod = true;
         }
         $massage = 'CMO Mis Report';
         $helperData = LgdFilterHelper::getCodesAndInitialCounts($request);
@@ -642,7 +646,8 @@ class CmoController extends Controller
             'data' => $data,
             'name' => $name,
             'ruralUrban' => $request->rural_urban,
-            'district_dropdown' => $district_dropdown,
+            'isApprover' => $isApprover,
+            'isHod' => $isHod,
             'districts' => District::all(),
             'selectedDistrict' => $request->district_id,
             // 'exportUrl' => route('reports-export'),
