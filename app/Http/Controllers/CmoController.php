@@ -416,6 +416,10 @@ class CmoController extends Controller
 
     public function cmoMisReport(Request $request)
     {
+        $district_dropdown = false;
+        if (CheckAuthHelper::isCommonHOD()) {
+            $district_dropdown = true;
+        }
         $massage = 'CMO Mis Report';
         $helperData = LgdFilterHelper::getCodesAndInitialCounts($request);
         $masterLocations = $helperData['master_locations'] ?? [];
@@ -459,6 +463,7 @@ class CmoController extends Controller
             ];
         }
         if (empty($masterLocations)) {
+
             return view('cmo.cmo_count_report', [
                 'header'  => $massage,
                 'helper'  => $helperData,
@@ -469,6 +474,7 @@ class CmoController extends Controller
         }
         $baseQuery = $this->buildBaseQuery($baseFilters);
         if ($mode === 'block_subdivision') {
+            // dd('ok');
             if (empty($blockIds) && empty($subdivisionIds)) {
                 foreach ($masterLocations as $loc) {
                     $k = $loc['location_id'];
@@ -559,13 +565,16 @@ class CmoController extends Controller
                 ];
             }
         } else {
-            
-            if ($col) {
+            if ($col === 'block_id' || $col === 'subdivision_id') {
                 $col = 'lb_local_body_code';
+            }
+            if ($col === 'district_id') {
+                $col = 'lb_dist_code';
             }
             if (empty($col)) {
                 $col = 'lb_dist_code';
             }
+            // dd('ok1');
             $ids = [];
             foreach ($masterLocations as $loc) {
                 if (is_numeric($loc['location_id'])) {
@@ -573,6 +582,7 @@ class CmoController extends Controller
                 }
             }
             if (empty($ids)) {
+
                 return view('cmo.cmo_count_report', [
                     'header'  => $massage,
                     'helper'  => $helperData,
@@ -632,6 +642,9 @@ class CmoController extends Controller
             'data' => $data,
             'name' => $name,
             'ruralUrban' => $request->rural_urban,
+            'district_dropdown' => $district_dropdown,
+            'districts' => District::all(),
+            'selectedDistrict' => $request->district_id,
             // 'exportUrl' => route('reports-export'),
             // 'filename' => 'application-mis-report.xlsx',
         ]);

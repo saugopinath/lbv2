@@ -7,6 +7,17 @@
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-4 space-y-4">
         <form action="{{ route('cmo.mis.report') }}" method="POST" id="lgdForm">
             @csrf
+            @if ($district_dropdown)
+            <x-form.select name="district_id" label="District">
+                <option value="">--All--</option>
+                @foreach ($districts as $district)
+                <option value="{{ $district->id }}"
+                    {{ old('district_id', $selectedDistrict ?? '') == $district->id ? 'selected' : '' }}>
+                    {{ $district->name }}
+                </option>
+                @endforeach
+            </x-form.select>
+            @endif
             <x-form.select name="rural_urban" label="Rural / Urban">
                 <option value="">--All--</option>
                 @foreach (Config::get('constants.rural_urban') as $key => $val)
