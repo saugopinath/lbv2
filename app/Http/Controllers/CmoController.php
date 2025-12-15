@@ -526,6 +526,38 @@ class CmoController extends Controller
                 $locationCounts[$key]['pushtoCMOPending'] = $this->countByRoleId((clone $query), $pushtoCMOPending);
                 $locationCounts[$key]['totalPushed'] = $this->countByRoleIdwithflag((clone $query), $totalPushed);
             }
+            $unmappedQuery = (clone $baseQuery)
+                ->whereNull('lb_local_body_code');
+            $actionPendingUnmapped = $this->countByRoleId(
+                (clone $unmappedQuery),
+                $actionPending
+            );
+            $approvalPendingUnmapped = $this->countByRoleId(
+                (clone $unmappedQuery),
+                $approvalPending
+            );
+            $pushtoCMOPendingUnmapped = $this->countByRoleId(
+                (clone $unmappedQuery),
+                $pushtoCMOPending
+            );
+            $totalPushedUnmapped = $this->countByRoleIdwithflag(
+                (clone $unmappedQuery),
+                $totalPushed
+            );
+            $unmappedTotal =
+                $actionPendingUnmapped +
+                $approvalPendingUnmapped +
+                $pushtoCMOPendingUnmapped +
+                $totalPushedUnmapped;
+            if ($unmappedTotal > 0) {
+                $locationCounts['unmapped'] = [
+                    'location_name'      => 'Unmapped (Block & Sub-Div null)',
+                    'actionPending'      => $actionPendingUnmapped,
+                    'approvalPending'    => $approvalPendingUnmapped,
+                    'pushtoCMOPending'   => $pushtoCMOPendingUnmapped,
+                    'totalPushed'        => $totalPushedUnmapped,
+                ];
+            }
         } else {
             if ($col) {
                 $col = 'lb_local_body_code';
@@ -575,38 +607,6 @@ class CmoController extends Controller
             $counts['approvalPending'] = (int)($counts['approvalPending'] ?? 0);
             $counts['pushtoCMOPending'] = (int)($counts['pushtoCMOPending'] ?? 0);
             $counts['totalPushed'] = (int)($counts['totalPushed'] ?? 0);
-        }
-        $unmappedQuery = (clone $baseQuery)
-            ->whereNull('lb_local_body_code');
-        $actionPendingUnmapped = $this->countByRoleId(
-            (clone $unmappedQuery),
-            $actionPending
-        );
-        $approvalPendingUnmapped = $this->countByRoleId(
-            (clone $unmappedQuery),
-            $approvalPending
-        );
-        $pushtoCMOPendingUnmapped = $this->countByRoleId(
-            (clone $unmappedQuery),
-            $pushtoCMOPending
-        );
-        $totalPushedUnmapped = $this->countByRoleIdwithflag(
-            (clone $unmappedQuery),
-            $totalPushed
-        );
-        $unmappedTotal =
-            $actionPendingUnmapped +
-            $approvalPendingUnmapped +
-            $pushtoCMOPendingUnmapped +
-            $totalPushedUnmapped;
-        if ($unmappedTotal > 0) {
-            $locationCounts['unmapped'] = [
-                'location_name'      => 'Unmapped (Block & Sub-Div null)',
-                'actionPending'      => $actionPendingUnmapped,
-                'approvalPending'    => $approvalPendingUnmapped,
-                'pushtoCMOPending'   => $pushtoCMOPendingUnmapped,
-                'totalPushed'        => $totalPushedUnmapped,
-            ];
         }
         $data = [];
         foreach ($locationCounts as $key => $row) {
