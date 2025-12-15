@@ -559,6 +559,7 @@ class CmoController extends Controller
                 ];
             }
         } else {
+            
             if ($col) {
                 $col = 'lb_local_body_code';
             }
@@ -580,7 +581,7 @@ class CmoController extends Controller
                     'data'    => []
                 ]);
             }
-            foreach ($ids as $locId) {;
+            foreach ($ids as $locId) {
                 $locKey = (string)$locId;
                 if (!isset($locationCounts[$locKey]) && isset($locationCounts[(int)$locId])) {
                     $locKey = (int)$locId;
@@ -630,6 +631,7 @@ class CmoController extends Controller
             'columns' => $columns,
             'data' => $data,
             'name' => $name,
+            'ruralUrban' => $request->rural_urban,
             // 'exportUrl' => route('reports-export'),
             // 'filename' => 'application-mis-report.xlsx',
         ]);
@@ -649,11 +651,11 @@ class CmoController extends Controller
         };
         return [
             ['key' => 'location_name', 'label' => $locationLabel, 'align' => 'left', 'type' => 'text'],
-            ['key' => 'actionPending', 'label' => 'actionPending', 'align' => 'right', 'type' => 'number', 'show_total' => true],
-            ['key' => 'approvalPending', 'label' => 'approvalPending', 'align' => 'right', 'type' => 'number', 'show_total' => true],
-            ['key' => 'pushtoCMOPending', 'label' => 'pushtoCMOPending', 'align' => 'right', 'type' => 'number', 'show_total' => true],
-            ['key' => 'pushtoCMOPending', 'label' => 'pushtoCMOPending', 'align' => 'right', 'type' => 'number', 'show_total' => true],
-            ['key' => 'total', 'label' => 'Total', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+            ['key' => 'total', 'label' => 'Total Grievance', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+            ['key' => 'actionPending', 'label' => 'Total Action Pending', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+            ['key' => 'approvalPending', 'label' => 'Total Approval Pending Among Action taken', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+            ['key' => 'pushtoCMOPending', 'label' => 'Total Approved but Pushed To CMO pending', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+            ['key' => 'pushtoCMOPending', 'label' => 'Total Pushed To CMO', 'align' => 'right', 'type' => 'number', 'show_total' => true],
         ];
     }
     private function buildBaseQuery(array $baseFilters)

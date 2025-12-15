@@ -7,10 +7,13 @@
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-4 space-y-4">
         <form action="{{ route('cmo.mis.report') }}" method="POST" id="lgdForm">
             @csrf
-            <x-form.select name="rural_urban" label="Rural / Urban" wire:model.live="selectedRuralurban">
-                <option value="">--Select--</option>
+            <x-form.select name="rural_urban" label="Rural / Urban">
+                <option value="">--All--</option>
                 @foreach (Config::get('constants.rural_urban') as $key => $val)
-                <option value="{{ $key }}">{{ $val }}</option>
+                <option value="{{ $key }}"
+                    {{ old('rural_urban', $ruralUrban ?? '') == $key ? 'selected' : '' }}>
+                    {{ $val }}
+                </option>
                 @endforeach
             </x-form.select>
             <div class="flex items-center justify-center gap-2 mt-2">
