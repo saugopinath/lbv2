@@ -18,15 +18,8 @@ use App\Services\ElasticsearchService;
 
 use App\Interfaces\CmoAuthenticationInterface;
 use App\Services\CmoAuthenticationService;
-<<<<<<< HEAD
-
-// use App\Interfaces\JaiBanglaInterface;
-// use App\Services\JaiBanglaService;
-
-=======
 use App\Interfaces\JNMPAuthenticationInterface;
 use App\Services\JNMPAuthenticationService;
->>>>>>> 1328cd4677af649027b42dc4d205a3292d482645
 use App\Models\User;
 use App\Observers\UserObserver;
 use App\Models\AcceptRejectInfo;
@@ -55,14 +48,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(CmoAuthenticationInterface::class, CmoAuthenticationService::class);
 
-<<<<<<< HEAD
-        // $this->app->bind(JaiBanglaInterface::class, JaiBanglaService::class);
-=======
         $this->app->bind(
             JNMPAuthenticationInterface::class,
             JNMPAuthenticationService::class
         );
->>>>>>> 1328cd4677af649027b42dc4d205a3292d482645
     }
 
     /**
@@ -70,19 +59,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-<<<<<<< HEAD
-        User::observe(UserObserver::class);
-        AcceptRejectInfo::observe(AcceptRejectInfoObserver::class);
-        BenRejectDetails::observe(BenRejectDetailsObserver::class);
-        DraftBeneficiaryPersonal::observe(DraftBeneficiaryPersonalObserver::class);
-        BeneficiaryPersonal::observe(BeneficiaryPersonalObserver::class);
-=======
          User::observe(UserObserver::class);
          AcceptRejectInfo::observe(AcceptRejectInfoObserver::class);
          BenRejectDetails::observe(BenRejectDetailsObserver::class);
          DraftBeneficiaryPersonal::observe(DraftBeneficiaryPersonalObserver::class);
          BeneficiaryPersonal::observe(BeneficiaryPersonalObserver::class);
 
->>>>>>> 1328cd4677af649027b42dc4d205a3292d482645
     }
 }
