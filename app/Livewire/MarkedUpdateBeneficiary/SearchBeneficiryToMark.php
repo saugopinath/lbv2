@@ -2,12 +2,14 @@
 
 namespace App\Livewire\MarkedUpdateBeneficiary;
 
+use App\Models\BeneficiaryCommonList;
+use App\Models\BeneficiaryModificationAllowed;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Component;
 
 class SearchBeneficiryToMark extends Component
 {
-    
+
     public $searchType = '';
     public $searchValue = '';
     public $searchBy = '';
@@ -97,60 +99,44 @@ class SearchBeneficiryToMark extends Component
         // dd('ok');
         $this->validate();
         $column = $this->searchTypeMap[$this->searchType];
-        if($column == 'encoded_aadhar'){
+        if ($column == 'encoded_aadhar') {
             $this->searchBy = md5($this->searchValue);
-        }
-        else{
+        } else {
             $this->searchBy = $this->searchValue;
         }
         $application_id = BeneficiaryCommonList::where($column, $this->searchBy)->first();
         // dd($application_id->sourceable_id);
         $existingRecord = null;
-        if($application_id){
-            $existingRecord = CasteModificationInfo::where('application_id',  $application_id->sourceable_id)->first();
+        if ($application_id) {
+            $existingRecord = BeneficiaryModificationAllowed::where('application_id',  $application_id->sourceable_id)->where('is_active', true)->first();
         }
         // dd($existingRecord);
         if ($existingRecord) {
             // dd($existingRecord);
-            if ($existingRecord->next_level_requested_id == 148) {
-                $message = "Request already Verified by the Verifier.";
-            } elseif ($existingRecord->next_level_requested_id == 149) {
-                $message = "Request already Approved By the Approver.";
-            } elseif ($existingRecord->next_level_requested_id == 150) {
-                $message = "Request is reverted.";
-            } else {
-                $message = "Caste modification already requested.";
-            }
+            $message = "Beneficiary already Marked for modification.";
             // dd($message);
             session()->flash('xwarning', $message);
             $this->items = [];
             return;
         } else {
-            // if($column == 'encoded_aadhar'){
-            //     // dump('encoded_aadhar');
-            // $this->searchValue =md5($this->searchValue);
-            // // dump($this->searchValue);
-            // }
             $query = BeneficiaryCommonList::query()->with('sourceable');
             $query->where($column, $this->searchBy);
             // dd($query->toSql(), $query->getBindings());
             if (!empty($this->filter_condition)) {
                 $query->where($this->filter_condition);
             }
-
+            // dd($query->toSql(), $query->getBindings());
             $this->results = $query->get();
-
+            // dd($this->results);
             if ($this->results->isEmpty()) {
                 $this->items = [];
                 $message = "No matching beneficiary found.";
                 session()->flash('xerror', $message);
                 return;
             }
-
             $approvedItems = $this->results->filter(function ($item) {
                 return $item->sourceable_type == 'App\Models\BeneficiaryPersonal';
             });
-
             if ($approvedItems->isEmpty()) {
                 $message = "These Beneficiary is not approved Yet.";
                 session()->flash('xwarning', $message);
@@ -163,13 +149,15 @@ class SearchBeneficiryToMark extends Component
                         'beneficiary_id' => $item->sourceable->beneficiary_id ?? '-',
                         'mobile_no'      => $item->sourceable->mobile_no ?? '-',
                         'applicant_name' => $item->sourceable->full_name ?? '-',
-                        'Caste_name'     => $item->sourceable->casteName->name ?? '-',
+                        'address'     => $item->getFullAddress() ?? '-',
+                        'bank_account'   => $item->sourceable->bank->bank_account_number ?? '-',
+                        'ifsc'           => $item->sourceable->bank->ifsc ?? '-',
                     ];
                 })->values();
             }
         }
     }
-    
+
     public function render()
     {
         return view('livewire.marked-update-beneficiary.search-beneficiry-to-mark');

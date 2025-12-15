@@ -18,23 +18,16 @@ return new class extends Migration
             $table->jsonb('allowed_fields')->nullable();
             $table->jsonb('old_data')->nullable();
             $table->jsonb('new_data')->nullable();
-            $table->unsignedBigInteger('request_id')->nullable();
-            $table->boolean('is_active')->default(1);
-            $table->unsignedInteger('created_by');
+            $table->boolean('is_active')->default(true);
+            $table->unsignedInteger('allowed_by');
             $table->unsignedInteger('updated_by');
             $table->timestamps();
             $table->foreign('application_id', 'application_id_fk')->references('sourceable_id')
                 ->on('lb_scheme.beneficiary_common_lists')->onDelete('cascade');
             $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')
                 ->on('lb_scheme.beneficiary_common_lists')->onDelete('cascade');
-            $table->foreign('next_level_requested_id', 'next_level_requested_id_fk')->references('id')
-                ->on('codemasters')->onDelete('cascade');
-            $table->foreign('created_by', 'caste_modification_infos_created_by_fk')->references('id')
+            $table->foreign('allowed_by', 'beneficiary_modification_allowed_by_fk')->references('id')
                 ->on('users')->onDelete('cascade');
-            $table->foreign('request_id', 'request_id_fk')
-                ->references('id')
-                ->on('accept_reject_infos')
-                ->onDelete('cascade');
             $table->index('application_id');
             $table->index('beneficiary_id');
         });

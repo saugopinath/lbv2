@@ -16,11 +16,15 @@ class BeneficiaryContact extends Model implements Auditable
 
     // public $timestamps = false;
 
+    
+    public function father()
+    {
+        return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id', 'application_id');
+    }
     public function block()
     {
         return $this->belongsTo(Block::class, 'block_id');
     }
-
     public function panchayat()
     {
         return $this->belongsTo(Panchayat::class, 'panchayat_id');
@@ -31,10 +35,6 @@ class BeneficiaryContact extends Model implements Auditable
         return $this->belongsTo(Ward::class, 'ward_id');
     }
 
-    public function father()
-    {
-        return $this->hasMany(DraftBeneficiaryRelationship::class, 'application_id', 'application_id');
-    }
 
     public function district()
     {

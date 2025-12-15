@@ -17,76 +17,61 @@ class BeneficiaryCommonList extends Model implements Auditable
         return $this->morphTo();
     }
 
+    public function district()
+    {
+        return $this->belongsTo(District::class, 'cd_district_id', 'id');
+    }
+    public function block()
+    {
+        return $this->belongsTo(Block::class, 'cd_block_muni_id');
+    }
+    public function panchayat()
+    {
+        return $this->belongsTo(Panchayat::class, 'cd_gp_ward_id');
+    }
+    public function ward()
+    {
+        return $this->belongsTo(Ward::class, 'cd_gp_ward_id');
+    }
+    public function municipality()
+    {
+        return $this->belongsTo(Municipality::class, 'cd_block_muni_id', 'id');
+    }
+    public function getFullAddress(): string
+    {
+        $district = optional($this->district)->name;
+        $subdivision = optional($this->municipality?->Subdivision)->name;
+        $block = optional($this->block)->name;
+        $panchayat = optional($this->panchayat)->name;
+        $municipality = optional($this->municipality)->name;
+        $ward = optional($this->ward)->name;
+        $parts = [];
+        if ($district) {
+            $parts[] = "District - " . strtoupper($district);
+        }
+        // Rural
+        if ($this->cd_rural_urban_id == 2) {
+            if ($block) {
+                $parts[] = "Block - " . strtoupper($block);
+            }
+            if ($panchayat) {
+                $parts[] = "GP - " . strtoupper($panchayat);
+            }
+        }
+        // Urban
+        else {
+            if ($subdivision) {
+                $parts[] = "Subdivision - " . strtoupper($subdivision);
+            }
+            if ($municipality) {
+                $parts[] = "Municipality - " . strtoupper($municipality);
+            }
+            if ($ward) {
+                $parts[] = "Ward - " . strtoupper($ward);
+            }
+        }
 
-    //jodi commonlist model thake ei gula bandha kore dibo
-    // public function faultyBeneficiaryPersonal()
-    // {
-    //     return $this->hasOne(FaultyBeneficiaryPersonal::class, 'application_id', 'sourceable_id');
-    // }
-    // public function faultyBeneficiaryBank()
-    // {
-    //     return $this->hasOne(FaultyBeneficiaryBank::class, 'application_id', 'sourceable_id');
-    // }
-    // public function failedPaymentDetails()
-    // {
-    //     return $this->hasOne(FailedPaymentDetails::class, 'ben_id', 'beneficiary_id');
-    // }
-    // public function benPaymentDetails()
-    // {
-    //     return $this->hasOne(BenPaymentDetails::class, 'ben_id', 'beneficiary_id');
-    // }
-    // public function aadhaar()
-    // {
-    //     return $this->hasOne(BeneficiaryAadhaar::class, 'application_id', 'sourceable_id');
-    // }
-
-    // public function bank()
-    // {
-    //     return $this->hasOne(BeneficiaryBank::class, 'application_id', 'sourceable_id');
-    // }
-
-    // public function enclosures()
-    // {
-    //     return $this->hasMany(BeneficiaryTemEnclosure::class, 'application_id', 'sourceable_id');
-    // }
-
-    //  public function enclosuresUpdated()
-    // {
-    //     return $this->hasMany(BeneficiaryEnclosure::class, 'application_id', 'sourceable_id');
-    // }
-
-    // public function beneficiaryPersonal()
-    // {
-    //     return $this->hasOne(BeneficiaryPersonal::class, 'application_id', 'sourceable_id');
-    // }
-
-    // public function beneficiaryBank()
-    // {
-    //     return $this->hasOne(BeneficiaryBank::class, 'application_id', 'sourceable_id');
-    // }
-
-    // public function block()
-    // {
-    //     return $this->belongsTo(Block::class, 'block_id');
-    // }
-
-    // public function panchayat()
-    // {
-    //     return $this->belongsTo(Panchayat::class, 'panchayat_id');
-    // }
-
-    // public function ward()
-    // {
-    //     return $this->belongsTo(Ward::class, 'ward_id');
-    // }
-
-    // public function municipality()
-    // {
-    //     return $this->belongsTo(Municipality::class, 'municipality_id');
-    // }
-
-    // public function subdivision()
-    // {
-    //     return $this->belongsTo(Subdivision::class, 'sub_division_id');
-    // }
+        // Use <br> for line breaks in HTML
+        return !empty($parts) ? implode('<br>', $parts) : 'N/A';
+    }
 }

@@ -131,9 +131,7 @@ class SearchBenefiacryForReject extends Component
                 'beneficiary_id' => $item->sourceable->beneficiary_id ?? '-',
                 'mobile_no'      => $item->sourceable->mobile_no ?? '-',
                 'applicant_name' => $item->sourceable->full_name ?? '-',
-                'district'       => $item->sourceable->contact->district->name ?? '-',
-                'block'          => $item->sourceable->contact->block->name ?? '-',
-                'panchayat'      => $item->sourceable->contact->panchayat->name ?? '-',
+                'address'        => $item->getFullAddress() ?? '-',
                 'bank_account'   => $item->sourceable->bank->bank_account_number ?? '-',
                 'ifsc'           => $item->sourceable->bank->ifsc ?? '-',
             ];

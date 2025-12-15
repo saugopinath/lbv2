@@ -48,12 +48,13 @@ class RejectApprovedBeneficiaryController extends Controller
             $BenDetails = BeneficiaryCommonList::where('sourceable_id', $application_id)->with('sourceable')->firstOrFail();
             $rejectRevertCause = Codemaster::where('code', 12)->first()->children()->get();
             // $doctypes=SchemeAttachedDocMappings::with('codemaster')->get();
-            $doctypes = Codemaster::where('code', 16)->first()->children()->get();
+            $doctypes = $this->doctype;
             // dd($doctypes);
             return view('RejectApprovedBeneficiaryView.reject_approved_beneficiary_processed', compact('application_id', 'beneficiary_id', 'header', 'reportType', 'rejectRevertCause', 'doctypes'));
+        }else{
+            $header = 'Oops! You do not have permission to view users.';
+            return view('CommonRestictedpage.index', compact('header'));
         }
-        $header = 'Oops! You do not have permission to view users.';
-        return view('CommonRestictedpage.index', compact('header'));
     }
     public function deActiveBeneficiary(Request $request)
     {

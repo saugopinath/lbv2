@@ -61,7 +61,7 @@
                 <x-form.input type="textarea" name="remark" id="remark" label="Remark" placeholder="Enter remark" required />
 
                 <div class="md:col-span-2">
-                    <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="[162]" />
+                    <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="$doctypes" />
                     @if($errors->has('document'))
                     <p class="text-red-500 text-xs mt-2">{{ $errors->first('document') }}</p>
                     @endif

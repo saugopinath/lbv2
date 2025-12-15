@@ -31,6 +31,7 @@ use App\Http\Controllers\CmoController;
 use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\ElasticSearchController;
 use App\Http\Controllers\MarkedUpdateBeneficiary;
+use App\Http\Controllers\MarkedUpdateBeneficiaryController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
 
@@ -223,9 +224,16 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
     Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->middleware('permission.redirect:canRejectBeneficiary')->name('beneficiary.deActivebeneficiary');
 });
 
-Route::controller(MarkedUpdateBeneficiary::class)->group(function () {
+Route::controller(MarkedUpdateBeneficiaryController::class)->group(function () {
     Route::get('/marked-beneficiary',  'index')
         ->name('marked-beneficiary');
-   
+    Route::get('/mark-beneficiary', 'editview')
+    ->name('mark-beneficiary');
+    Route::post('/final-marked', 'marked')
+    ->name('final-marked');
+    Route::get('/marked-beneficiary-list', 'list')
+    ->name('marked-beneficiary-list');
+    Route::get('/view-marked-beneficiary-details', 'viewmarkedbeneficiarydetails')
+    ->name('view-marked-beneficiary-details');
 });
 

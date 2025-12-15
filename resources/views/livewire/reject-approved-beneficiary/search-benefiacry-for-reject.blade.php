@@ -50,11 +50,8 @@
                         <td class="px-4 py-2 text-center text-sm text-gray-700">{{ $row['applicant_name'] }}</td>
                         <td class="px-4 py-2 text-center text-sm text-gray-700">{{ $row['mobile_no'] }}</td>
                         <td class="px-4 py-2 text-center text-sm text-gray-700">
-                            <div><span class="font-semibold">District:</span> {{ $row['district'] }}</div>
-                            <div><span class="font-semibold">Block:</span> {{ $row['block'] }}</div>
-                            <div><span class="font-semibold">GP:</span> {{ $row['panchayat'] }}</div>
+                            {!! $row['address'] !!}
                         </td>
-
                         <td class="px-4 py-2 text-center text-sm text-gray-700">
                             <div><span class="font-semibold">A/C No:</span> {{ $row['bank_account'] }}</div>
                             <div><span class="font-semibold">IFSC:</span> {{ $row['ifsc'] }}</div>
