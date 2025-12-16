@@ -119,7 +119,6 @@ class MarkedUpdateBeneficiaryController extends Controller
         $applicant_id   = $request->application_id;
         $application_id = Crypt::decryptString($applicant_id);
         $reportType  = 3;
-
         
         $sectionType = 1;
         $marked = BeneficiaryModificationAllowed::where('application_id', $application_id)->select('allowed_fields')->first();
