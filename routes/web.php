@@ -37,6 +37,8 @@ use App\Http\Controllers\ElasticSearchController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
 use App\Http\Controllers\JaiBanglaController;
+use Illuminate\Http\Request;
+
 // Guest Routes
 Route::get('/', fn() => view('welcome'));
 Route::get('refresh-captcha', [App\Http\Controllers\CaptchaController::class, 'refreshCaptcha'])
@@ -144,7 +146,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // ->middleware('permission.redirect:canRevertIncomplet')
         ->name('incomplete-revert-update');
     Route::get('/incomplete-details-mis-report', [IncompleteTypeController::class, 'incompleteDetails'])
-        ->name('incomplete.details.mis.report');
+        ->name('incomplete-details-mis-report');
 
     Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])
         ->middleware('permission.redirect:canViewBeneficiaries')
@@ -199,7 +201,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission.redirect:canUpdateBank')
         ->name('update-bank');
 
-    Route::get('/mis-report', [MisReportController::class, 'index'])->name('mis.index');
+    Route::get('/mis-report', [MisReportController::class, 'index'])->name('misIndex');
+
+    Route::post('/mis/report/redirect', function (Request $request) {
+        $request->validate([
+            'mis_route' => 'required|url',
+        ]);
+        return redirect()->to($request->mis_route);
+    })->name('mis.report.redirect');
+
+    //Beneficiary count
+    Route::controller(BeneficiaryCountController::class)->group(function () {
+        Route::get('/beneficiary-reportlist',  'misReport')->name('beneficiary-reportlist');
+    });
 
     // Design Pages (Dev Only – Remove in Prod)
     Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
@@ -212,8 +226,8 @@ Route::controller(CmoController::class)->group(function () {
     Route::any('/pullnewcmo', 'pullnewcmo')->middleware('permission.redirect:canCMODatafetch')->name('pullnewcmo');
     Route::any('/populatelbportal', 'populatelbportal')->middleware('permission.redirect:canCMODatafetch')->name('populatelbportal');
     Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')
-      ->middleware('permission.redirect:canCMOWorkflow')
-      ->name('cmo-grievance-workflow');
+        ->middleware('permission.redirect:canCMOWorkflow')
+        ->name('cmo-grievance-workflow');
     // Route::any('/cmo-grievance-find/{id}', 'cmogrievancefind')->name('cmo-grievance-find');
     Route::any('/cmo-grievance-find', 'cmogrievancefind')->name('cmo-grievance-find');
     Route::post('/cmo-grievance-action', 'cmodetailsaction')->name('cmo-grievance-action');
@@ -235,4 +249,4 @@ Route::controller(BackFromJBController::class)->group(function () {
 
 Route::any('/formEntryOption', [BskController::class, 'formEntryOption'])
     ->name('formEntryOption');
-    Route::any('/bskUserSessionCreate', [BskController::class, 'bskUserSessionCreate']);
+Route::any('/bskUserSessionCreate', [BskController::class, 'bskUserSessionCreate']);

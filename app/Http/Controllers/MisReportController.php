@@ -12,7 +12,7 @@ class MisReportController extends Controller
             [
                 'id'    => 1,
                 'name'  => 'Incomplete Details Mis Report',
-                'route' => route('incomplete.details.mis.report'),
+                'route' => route('incomplete-details-mis-report'),
             ],
         ];
 
