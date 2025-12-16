@@ -235,5 +235,7 @@ Route::controller(MarkedUpdateBeneficiaryController::class)->group(function () {
     ->name('marked-beneficiary-list');
     Route::get('/view-marked-beneficiary-details', 'viewmarkedbeneficiarydetails')
     ->name('view-marked-beneficiary-details');
+     Route::post('/marked-beneficiary-details-update', 'updatemarkedbeneficiarydetails')
+    ->name('marked-beneficiary-details-update');
 });
 

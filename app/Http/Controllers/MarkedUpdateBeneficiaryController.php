@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\CheckAuthHelper;
 use App\Models\AcceptRejectInfo;
 use App\Models\BeneficiaryCommonList;
+use App\Models\BeneficiaryContact;
 use App\Models\BeneficiaryModificationAllowed;
 use App\Models\ChangeTypeMaster;
 use App\Models\Codemaster;
@@ -65,7 +66,8 @@ class MarkedUpdateBeneficiaryController extends Controller
             'short_name' => $f->short_name,
         ])->values();
         // dd($allowedFields);
-        $oldValue = $fields->pluck('name', 'short_name');
+        $oldValue = $fields->pluck('name')->values();
+
         // dd($oldValue);
         $beneficiary = BeneficiaryCommonList::where('sourceable_id', $applicationId)->with('sourceable')->firstOrFail();
         $markedField = BeneficiaryModificationAllowed::where('application_id', $applicationId)->where('is_active', true)->first();
@@ -117,35 +119,70 @@ class MarkedUpdateBeneficiaryController extends Controller
         $applicant_id   = $request->application_id;
         $application_id = Crypt::decryptString($applicant_id);
         $reportType  = 3;
+
+        
         $sectionType = 1;
         $marked = BeneficiaryModificationAllowed::where('application_id', $application_id)->select('allowed_fields')->first();
+        $beneficiarycontact = BeneficiaryContact::where('application_id', $application_id)->select('police_station', 'village_town_city', 'house_premise_no', 'post_office', 'pincode', 'district_id', 'rural_urban_id', 'block_id', 'panchayat_id', 'municipality_id', 'ward_id')->first();
+        // dd($beneficiarycontact);
+        $selectedDistrict  = $beneficiarycontact->district_id;
+        $selectedRuralurban = $beneficiarycontact->rural_urban_id;
+        if (($selectedRuralurban) == 2) {
+            // dump('ok1');
+            $selectedBlockurban = $beneficiarycontact->block_id;
+            $selectedGpWard = $beneficiarycontact->panchayat_id;
+            // dd($this->selectedGpWard);
+        } else {
+            // dd('dcd');
+            $selectedBlockurban = $beneficiarycontact->municipality_id;
+            $selectedGpWard = $beneficiarycontact->ward_id;
+        }
+        $policestation = $beneficiarycontact->police_station;
+        $villtowncity = $beneficiarycontact->village_town_city;
+        $housepremiseno = $beneficiarycontact->house_premise_no;
+        $postoffice = $beneficiarycontact->post_office;
+        $pincode = $beneficiarycontact->pincode;
+
         // dd($marked);
-        // $allowedFields = $marked?->allowed_fields ?? [];
+        $allowedFields = $marked?->allowed_fields ?? [];
+        // dd($allowedFields);
+        $allowedFields = $marked?->allowed_fields ?? [];
+        if (!is_array($allowedFields)) {
+            $allowedFields = json_decode($allowedFields, true) ?? [];
+        }
 
-        // if (!is_array($allowedFields)) {
-        //     $allowedFields = json_decode($allowedFields, true) ?? [];
-        // }
+        $flagMap = [
+            0 => 'visible_Name',
+            1 => 'visible_DOB',
+            2 => 'visible_Address',
+            3 => 'visible_Aadhar',
+            4 => 'visible_Mobile',
+        ];
+        foreach ($flagMap as $flagVar) {
+            $$flagVar = 0;
+        }
+        foreach ($allowedFields as $field) {
+            if (!is_array($field) || !isset($field['code'])) {
+                continue;
+            }
 
-        // $visibilityMap = [
-        //     0 => 'is_name_visible',
-        //     1 => 'is_dob_visible',
-        //     2 => 'is_address_visible',
-        //     3 => 'is_bank_visible',
-        //     4 => 'is_mobile_visible',
-        // ];
-        // foreach ($visibilityMap as $varName) {
-        //     $$varName = 0;
-        // }
-        // foreach ($allowedFields as $field) {
-        //     if (!is_array($field) || !isset($field['code'])) {
-        //         continue;
-        //     }
-        //     $code = (int) $field['code'];
-        //     if (isset($visibilityMap[$code])) {
-        //         $$visibilityMap[$code] = 1;
-        //     }
-        //     dd($field); // after loop
-        // }
+            $code = (int) $field['code'];
+
+            if (isset($flagMap[$code])) {
+                ${$flagMap[$code]} = 1;
+            }
+        }
+        // dump([
+        //     'code' => $code,
+        //     'mapped_flag' => $flagMap[$code],
+        // ]);
+        // dd([
+        //     'visible_Name'    => $visible_Name,
+        //     'visible_DOB'     => $visible_DOB,
+        //     'visible_Address' => $visible_Address,
+        //     'visible_Bank'    => $visible_Bank,
+        //     'visible_Mobile'  => $visible_Mobile,
+        // ]);
 
         return view(
             'MarkedUpdateBeneficiary.editview',
@@ -154,8 +191,26 @@ class MarkedUpdateBeneficiaryController extends Controller
                 'application_id',
                 'reportType',
                 'sectionType',
-             
+                'visible_Name',
+                'visible_DOB',
+                'visible_Address',
+                'visible_Aadhar',
+                'visible_Mobile',
+                'selectedDistrict',
+                'selectedRuralurban',
+                'selectedBlockurban',
+                'selectedGpWard',
+                'policestation',
+                'villtowncity',
+                'housepremiseno',
+                'postoffice',
+                'pincode'
             )
         );
+    }
+    public function updatemarkedbeneficiarydetails(Request $request)
+    {
+        dd('ok');
+        return redirect()->route('marked-beneficiary-list')->with('success', 'Beneficiary Details Updated Successfully!');
     }
 }

@@ -70,8 +70,6 @@ class BeneficiaryCommonList extends Model implements Auditable
                 $parts[] = "Ward - " . strtoupper($ward);
             }
         }
-
-        // Use <br> for line breaks in HTML
         return !empty($parts) ? implode('<br>', $parts) : 'N/A';
     }
 }

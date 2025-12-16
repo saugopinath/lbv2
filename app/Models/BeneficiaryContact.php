@@ -35,7 +35,6 @@ class BeneficiaryContact extends Model implements Auditable
         return $this->belongsTo(Ward::class, 'ward_id');
     }
 
-
     public function district()
     {
         return $this->belongsTo(District::class, 'district_id', 'id');
