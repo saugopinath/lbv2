@@ -156,7 +156,7 @@ class BeneficiaryCountController extends Controller
     {
         // Log::debug('=== ApplicationMisReport START ===');
 
-        $massage = 'Wise Beneficiary Mis Report';
+        $massage = 'Beneficiary Mis Report';
 
         $helperData = LgdFilterHelper::getCodesAndInitialCounts($request);
         // dd($helperData);
