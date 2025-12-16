@@ -17,7 +17,7 @@ class MisReportController extends Controller
              [
                 'id'    => 2,
                 'name'  => 'CMO Mis Report',
-                'route' => route('cmo.mis.report'),
+                'route' => route('cmo-mis-report'),
             ],
         ];
 

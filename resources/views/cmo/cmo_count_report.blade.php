@@ -12,7 +12,7 @@
         isApprover: {{ $isApprover ? 'true' : 'false' }}
     }"
         x-init="$watch('district', value => ruralUrban = '')">
-        <form action="{{ route('cmo.mis.report') }}" method="POST">
+        <form action="{{ route('cmo-mis-report') }}" method="POST">
             @csrf
 
             @if ($isHod)
