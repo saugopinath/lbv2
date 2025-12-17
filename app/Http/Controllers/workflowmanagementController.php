@@ -39,10 +39,11 @@ class workflowmanagementController extends Controller
             }
         }
         $schemes = Scheme::whereDoesntHave('workflowSteps')->get();
-        return view('workflowmanagement.index', compact('schemes'));
+        return view('workflowmanagement.createsteps', compact('schemes'));
     }
     public function assignWorkflow()
     {
-        dd('ok');
+        $schemes = Scheme::has('workflowSteps')->get();
+        return view('workflowmanagement.assignworkflows', compact('schemes'));
     }
 }
