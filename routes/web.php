@@ -145,7 +145,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/incomplete/revert/{id}', [IncompleteTypeController::class, 'revertVerify'])
         // ->middleware('permission.redirect:canRevertIncomplet')
         ->name('incomplete-revert-update');
-    Route::get('/incomplete-details-mis-report', [IncompleteTypeController::class, 'incompleteDetails'])
+    Route::any('/incomplete-details-mis-report', [IncompleteTypeController::class, 'incompleteDetails'])
         ->name('incomplete-details-mis-report');
 
     Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])

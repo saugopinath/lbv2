@@ -15,5 +15,14 @@ class BeneficiaryCommonList extends Model implements Auditable
     public function sourceable()
     {
         return $this->morphTo();
-    }    
+    }
+
+     public function applicantIncomplete()
+    {
+        return $this->hasOne(
+            ApplicantIncompletDeatil::class,
+            'application_id',
+            'sourceable_id'    
+        );
+    }
 }
