@@ -35,6 +35,7 @@ use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\ElasticSearchController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
+use App\Http\Controllers\workflowmanagementController;
 use Illuminate\Http\Request;
 
 // Guest Routes
@@ -269,4 +270,9 @@ Route::controller(JnpmController::class)->group(function () {
 
     // JNMP List at HOD
     Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')->name('jnmp-marked-data');
+});
+
+Route::controller(workflowmanagementController::class)->group(function () {
+    Route::any('/create-steps',  'createSteps')->name('create-steps');
+    Route::any('/assign-workflow',  'assignWorkflow')->name('assign-workflow');
 });
