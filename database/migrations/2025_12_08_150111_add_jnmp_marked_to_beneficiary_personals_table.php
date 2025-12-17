@@ -40,7 +40,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('lb_scheme.beneficiary_personals', function (Blueprint $table) {
-            $table->dropColumn(['marked_data', 'jnmp_marked', 'jnmp_remarks']);
+            $table->dropColumn(['marked_data', 'jnmp_marked', 'jnmp_remarks', 'reactive_reason']);
         });
     }
 };

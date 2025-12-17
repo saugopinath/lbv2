@@ -25,7 +25,7 @@ return new class extends Migration
             $table->boolean('is_first')->default(false);
             $table->boolean('is_last')->default(false);
             $table->timestamps();
-            $table->unique('rank');
+            $table->unique(['scheme_id', 'rank']);
         });
     }
 
