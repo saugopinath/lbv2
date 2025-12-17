@@ -12,24 +12,33 @@ class workflowmanagementController extends Controller
     public function createSteps(Request $request)
     {
         if ($request->isMethod('post')) {
-            DB::transaction(function () use ($request) {
-                $schemeId   = $request->scheme;
-                $totalSteps = (int) $request->noofSteps;
-                $parentId = null;
-                for ($i = 1; $i <= $totalSteps; $i++) {
-                    $step = new WorkflowStep();
-                    $step->scheme_id = $schemeId;
-                    $step->rank      = $i;
-                    $step->label     = $request->input('labelName' . $i);
-                    $step->parent_id = $parentId;
-                    $step->is_first  = ($i === 1);
-                    $step->is_last   = ($i === $totalSteps);
-                    $step->save();
-                    $parentId = $step->id;
-                }
-            });
+            $request->validate([
+                'scheme' => 'required|exists:schemes,id',
+                'noofSteps' => 'required|integer|min:1',
+            ]);
+            try {
+                DB::transaction(function () use ($request) {
+                    $schemeId   = $request->scheme;
+                    $totalSteps = (int) $request->noofSteps;
+                    $parentId = null;
+                    for ($i = 1; $i <= $totalSteps; $i++) {
+                        $step = new WorkflowStep();
+                        $step->scheme_id = $schemeId;
+                        $step->rank      = $i;
+                        $step->label     = $request->input('labelName' . $i);
+                        $step->parent_id = $parentId;
+                        $step->is_first  = ($i === 1);
+                        $step->is_last   = ($i === $totalSteps);
+                        $step->save();
+                        $parentId = $step->id;
+                    }
+                });
+                return redirect()->route('create-steps')->with('success', 'Workflow created successfully');
+            } catch (\Exception $e) {
+                return back()->withInput()->with('error', 'Failed to create workflow');
+            }
         }
-        $schemes = Scheme::all();
+        $schemes = Scheme::whereDoesntHave('workflowSteps')->get();
         return view('workflowmanagement.index', compact('schemes'));
     }
     public function assignWorkflow()
