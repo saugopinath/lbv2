@@ -63,6 +63,14 @@
                         <span class="font-medium text-gray-600 dark:text-gray-300">Caste Certificate No:</span>
                         <span class="ml-2 text-gray-900 dark:text-gray-100">{{ $oldCasteNumber ?? 'N/A' }}</span>
                     </li>
+                    <li>
+                           <div class="mt-2">
+                            <span class="font-medium text-gray-600 dark:text-gray-300"> previous Uploaded Documents:</span>
+                        </div>
+                        <div class="mt-2">
+                        <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="[104]" :is_page="1" />
+                        </div>
+                    </li>
                 </ul>
             </div>
 
@@ -85,13 +93,21 @@
                         <span class="font-medium text-gray-600 dark:text-gray-300">Caste Certificate No:</span>
                         <span class="ml-2 text-gray-900 dark:text-gray-100">{{ $newCasteNumber ?? 'N/A' }}</span>
                     </li>
-                </ul>
+                    <li>
+                        <div class="mt-2">
+                            <span class="font-medium text-gray-600 dark:text-gray-300">New Uploaded Documents:</span>
+                        </div>
+                        <div class="mt-2">
+                            <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="[104]" enclosureSource="5" :is_page="1" />
+                        </div>
+                    </li>
             </div>
+            </ul>
         </div>
         <div class="rounded-xl p-4 mt-4">
-            @if(\App\Helpers\WorkFlowPermissionHelper::canTakeActionForCaste())
+            {{-- @if(\App\Helpers\WorkFlowPermissionHelper::canTakeActionForCaste())  --}}
             <livewire:caste-modification.caste-modification-action :applicationId="$application_id" />
-            @endif
+            {{-- @endif  --}}
         </div>
 
     </div>

@@ -58,13 +58,12 @@
                             <div><span class="font-semibold">A/C No:</span> {{ $row['bank_account'] }}</div>
                             <div><span class="font-semibold">IFSC:</span> {{ $row['ifsc'] }}</div>
                         </td>
-                        <td class="px-4 py-2 text-center">
-                            <form action="{{ route('reject-approved-beneficiary.de-activate') }}" method="GET">
+                        <td class="px-4 py-2">
+                            <form action="{{ route('reject-approved-beneficiary.de-activate') }}" method="GET" class="flex justify-center">
                                 <input type="hidden" name="application_id" value="{{ Crypt::encryptString($row['application_id']) }}">
                                 <input type="hidden" name="beneficiary_id" value="{{ Crypt::encryptString($row['beneficiary_id']) }}">
-                                <x-button.loading-button type="submit" text="De-Activate"></x-button.loading-button>
+                                <x-button.loading-spiner-button type="submit" text="De-Activate" lockPage="true" />
                             </form>
-
                         </td>
                     </tr>
                     @endforeach

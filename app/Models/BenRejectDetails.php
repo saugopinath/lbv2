@@ -62,6 +62,8 @@ class BenRejectDetails extends Model implements Auditable
         static::created(function ($benrej) {
             // dd($benrej->application_id);
             $commonList = BeneficiaryCommonList::find($benrej->application_id);
+            $nextLevelRoleId = $benrej->personal_details[0]['next_level_role_id'] ?? null;
+
             // dd( get_class($benrej));
             if ($commonList) {
                 $commonList->update([

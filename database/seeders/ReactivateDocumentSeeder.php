@@ -39,4 +39,3 @@ class ReactivateDocumentSeeder extends Seeder
     }
 }
 
-

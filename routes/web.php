@@ -168,11 +168,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('Caste-modification-info');
 
     Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])
-        ->middleware('permission.redirect:canEditCaste')
+        // ->middleware('permission.redirect:canEditCaste')
         ->name('caste-modification.edit');
 
     Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
-        ->middleware('permission.redirect:canUpdateCaste')
+        // ->middleware('permission.redirect:canUpdateCaste')
         ->name('beneficiary.updateCaste');
 
     Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])
@@ -180,7 +180,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('caste-modification-list');
 
     Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
-        ->middleware('permission.redirect:canBeneficiaryDetails')
+        // ->middleware('permission.redirect:canBeneficiaryDetails')
         ->name('view-beneficiary-details');
 
     Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])
@@ -223,9 +223,11 @@ Route::controller(CmoController::class)->group(function () {
 });
 //reject approved beneficiary
 Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
-    Route::get('/reject-approved-beneficiary',  'index')->name('reject-approved-beneficiary');
-    Route::get('/reject-approved-beneficiary/de-activate', 'editview')->name('reject-approved-beneficiary.de-activate');
-    Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->name('beneficiary.deActivebeneficiary');
+    Route::get('/reject-approved-beneficiary',  'index')
+        ->middleware('permission.redirect:canRejectApprovedBeneficiary')
+        ->name('reject-approved-beneficiary');
+    Route::get('/reject-approved-beneficiary/de-activate', 'editview')->middleware('permission.redirect:canViewDetailsToReject')->name('reject-approved-beneficiary.de-activate');
+    Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->middleware('permission.redirect:canRejectBeneficiary')->name('beneficiary.deActivebeneficiary');
 });
 
 Route::post('/mis/report/redirect', function (Request $request) {
