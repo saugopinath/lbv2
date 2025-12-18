@@ -8,7 +8,7 @@ use App\Models\DraftBeneficiaryContact;
 use App\Models\DraftBeneficiaryBank;
 use App\Models\BeneficiaryEnclosure;
 use App\Models\DraftBeneficiaryDeclaration;
-
+use Livewire\Attributes\On;
 class Entrytab extends Component
 {
     public $currentTab, $application_id, $aadhaarData;
@@ -33,6 +33,11 @@ class Entrytab extends Component
         'selfDec' => 'openModalForApplicant',
         'modalClosed' => 'handleModalClosed'
     ];
+    #[On('aadhaarCheckedReset')]
+    public function resetAadhaarChecked()
+    {
+        $this->disableTabs();
+    }
     public function disableTabs()
     {
         $this->showTabs = false;

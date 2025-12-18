@@ -122,9 +122,17 @@ class CheckAuthHelper
     {
         return self::isCommmonVerifier() || self::isCommonApprover() || self::isCommonHOD();
     }
+     public static function isCommonAppHod(): bool
+    {
+        return  self::isCommonApprover() || self::isCommonHOD();
+    }
     public static function isCommonReportChecker(): bool
     {
         return self::isCommonOperator() || self::isCommmonVerifier() || self::isCommonApprover() || self::isCommonHOD();
+    }
+     public static function isCommonCMOController(): bool
+    {
+        return self::isCommonOperator() || self::isCommmonVerifier() || self::isCommonApprover() || self::isCommonHOD() || self::isSuperAdmin();
     }
     public static function isCommonAllChecker(): bool
     {

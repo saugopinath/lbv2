@@ -14,6 +14,7 @@ use App\Livewire\RoleOfficeTypeMappings\Create;
 use App\Http\Controllers\CMOGrievanceController;
 use App\Http\Controllers\OfficeMastersController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\BackFromJBController;
 use App\Http\Controllers\IncompleteTypeController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\BeneficiaryListController;
@@ -117,7 +118,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission.redirect:canDraftList')
         ->name('draftlist');
 
-    Route::get('draftedit/{id}', [LBController::class, 'draftedit'])
+    Route::get('draftedit', [LBController::class, 'draftedit'])
         ->middleware('permission.redirect:canEditDraft')
         ->name('draftedit');
 
@@ -208,9 +209,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/getelsticsearchIndex', [ElasticSearchController::class, 'index'])->name('getelsticsearchIndex');
 });
 Route::controller(CmoController::class)->group(function () {
-    Route::any('/pullnewcmo', 'pullnewcmo')->name('pullnewcmo');
-    Route::any('/populatelbportal', 'populatelbportal')->name('populatelbportal');
-    Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')->name('cmo-grievance-workflow');
+    Route::any('/pullnewcmo', 'pullnewcmo')->middleware('permission.redirect:canCMODatafetch')->name('pullnewcmo');
+    Route::any('/populatelbportal', 'populatelbportal')->middleware('permission.redirect:canCMODatafetch')->name('populatelbportal');
+    Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')
+      ->middleware('permission.redirect:canCMOWorkflow')
+      ->name('cmo-grievance-workflow');
     // Route::any('/cmo-grievance-find/{id}', 'cmogrievancefind')->name('cmo-grievance-find');
     Route::any('/cmo-grievance-find', 'cmogrievancefind')->name('cmo-grievance-find');
     Route::post('/cmo-grievance-action', 'cmodetailsaction')->name('cmo-grievance-action');

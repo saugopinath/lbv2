@@ -11,8 +11,9 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Models\Permission;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements Auditable
+class User extends Authenticatable implements Auditable, JWTSubject
 {
     use HasFactory, Notifiable, HasRoles;
     use \OwenIt\Auditing\Auditable;
@@ -25,7 +26,14 @@ class User extends Authenticatable implements Auditable
     protected $fillable = [
         'name',
         'email',
-        'password','two_factor_code', 'two_factor_expires_at','flag_sent_otp','password_set_time','password_expires_at','updated_at','mobile_no'
+        'password',
+        'two_factor_code',
+        'two_factor_expires_at',
+        'flag_sent_otp',
+        'password_set_time',
+        'password_expires_at',
+        'updated_at',
+        'mobile_no'
     ];
 
     /**
@@ -56,7 +64,7 @@ class User extends Authenticatable implements Auditable
         return $this->hasMany(UserRoleSchemeOfficeMapping::class);
     }
 
-     public function mappedRoles(): BelongsToMany
+    public function mappedRoles(): BelongsToMany
     {
         return $this->belongsToMany(
             Role::class,
@@ -64,8 +72,8 @@ class User extends Authenticatable implements Auditable
             'user_id',
             'role_id'
         )
-        ->wherePivot('is_active', 1)
-        ->where('roles.id', '!=', 10);
+            ->wherePivot('is_active', 1)
+            ->where('roles.id', '!=', 10);
     }
 
     /**
@@ -82,6 +90,12 @@ class User extends Authenticatable implements Auditable
         );
     }
 
-
-
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
 }

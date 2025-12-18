@@ -11,6 +11,7 @@ class AcceptRejectInfoObserver
      */
     public function created(AcceptRejectInfo $acceptRejectInfo): void
     {
+         //dd('ok');
          dispatch(new IndexAcceptRejectInfoElasticSearchJob($acceptRejectInfo));
     }
 

@@ -200,7 +200,7 @@ class BeneficiaryTable extends DataTableComponent
                 }
                 elseif ((($this->reportType == '1') || ($this->reportType == '6') || ($this->reportType == '5')) &&(CheckAuthHelper::isCommonOperator())) {
                     return view('coulmn_button.actions', [
-                        'link' => route('draftedit', Crypt::encryptString($row->sourceable->application_id)),
+                        'link' => route('draftedit') . '?app_id=' . Crypt::encryptString($row->sourceable->application_id),
                         'tooltip' => 'Edit Application',
                     ])->render();
                 }else{

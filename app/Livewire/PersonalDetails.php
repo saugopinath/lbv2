@@ -129,9 +129,9 @@ class PersonalDetails extends Component
             $this->application_id = $application_id;
             $app_det = DraftBeneficiaryPersonal::with('relationships')->where('application_id', $application_id)->first();
             $this->app_type = $app_det->entry_type;
-            $this->app_date = $app_det->created_at->format('d-m-Y');
+            $this->app_date = $app_det->created_at->format('Y-m-d');
             if ($this->app_type == Codemaster::getIdByCode(42)) {
-                $this->ds_date = Carbon::parse($app_det->ds_date)->format('d-m-Y');
+                $this->ds_date = Carbon::parse($app_det->ds_date)->format('Y-m-d');
                 $this->reg_no = $app_det->ds_registration_no;
             }
             $this->name = $app_det->full_name;
