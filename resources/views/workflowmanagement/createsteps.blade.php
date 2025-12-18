@@ -49,7 +49,7 @@
                     <x-button.primary
                         type="button"
                         class="flex items-center gap-2"
-                        @click="noofSteps ? showLabels = true : alert('Please enter number of steps')">
+                        @click="noofSteps > 0 ? showLabels = true : alert('Please enter number of steps')">
                         Go
                     </x-button.primary>
                 </div>
