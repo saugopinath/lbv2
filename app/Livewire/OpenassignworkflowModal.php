@@ -37,10 +37,14 @@ class OpenassignworkflowModal extends Component
             $step->rank = $this->workflowStep->rank;
             $step->workflow_step_id = $this->workflowStep->id;
             $step->role_id = (int)$id;
-            $step->same_label_role_id = -$this->workflowStep->scheme_id;
-            $step->next_label_role_id = 2;
-            dd($this->workflowStep, $step);
-            // $step->save();
+            if ($this->workflowStep->parent_id === null) {
+                $step->same_label_role_id = - ($this->workflowStep->scheme_id);
+                $step->next_label_role_id = 0;
+            } else {
+                $step->next_label_role_id = $this->workflowStep->parent_id;
+                $step->same_label_role_id = $this->workflowStep->parent->parent_id ?? 0;
+            }
+            $step->save();
         }
     }
 
