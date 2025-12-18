@@ -63,7 +63,7 @@ class assignworkflowDatatable extends DataTableComponent
             Column::make('Action')
                 ->label(function ($row) {
                     return view('coulmn_button.actions', [
-                        'wireClick' => "assignWorkflow({$row->id})",
+                        'wireClick' => "\$dispatch('openassignworkflowModal', { id: '$row->id' })",
                         'tooltip' => 'Assign Workflow',
                     ])->render();
                 })
@@ -80,11 +80,5 @@ class assignworkflowDatatable extends DataTableComponent
                 fn($q) =>
                 $q->where('scheme_id', $this->schemeId)
             );
-    }
-
-    public function assignWorkflow($id)
-    {
-        $workflow = WorkflowStep::find($id);
-        dd($workflow);
     }
 }

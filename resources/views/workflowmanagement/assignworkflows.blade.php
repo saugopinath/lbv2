@@ -25,6 +25,7 @@
             x-cloak
             class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
             <livewire:assignworkflow-datatable />
+            <livewire:openassignworkflow-modal />
         </div>
     </div>
 </x-layouts.app>
