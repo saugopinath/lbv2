@@ -36,7 +36,7 @@ class OpenassignworkflowModal extends Component
     public function save()
     {
         $this->validate([
-            'selectedRoles' => 'required|array|min:1',
+            'selectedRoles' => 'required|array|size:1',
         ]);
         $rank = $this->workflowStep->rank;
         $sameLabelRoleId = 0;

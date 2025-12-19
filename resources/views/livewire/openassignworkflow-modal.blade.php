@@ -11,10 +11,12 @@
                         @foreach($roles as $role)
                         <label class="flex items-center space-x-2">
                             <x-form.checkbox
-                                name="selectedroles"
-                                wire:model="selectedRoles"
-                                value="{{ $role->id }}"
-                                label="{{ $role->name }}" />
+                                name="selectedRoles.{{$loop->index}}"
+                                wire:model.live="selectedRoles"
+                                :value="$role->id"
+                                :label="$role->name"
+                                :disabled="count($selectedRoles) == 1
+            && !in_array($role->id, $selectedRoles)" />
                         </label>
                         @endforeach
                     </div>
