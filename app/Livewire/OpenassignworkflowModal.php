@@ -16,10 +16,14 @@ class OpenassignworkflowModal extends Component
     public function assignWorkflow($id)
     {
         $this->workflowStep = WorkflowStep::with('roles')->find($id);
+
         if ($this->workflowStep) {
             $this->name = $this->workflowStep->label;
             $this->isOpen = true;
-            $this->roles = Role::all();
+            $this->roles = Role::whereDoesntHave('workflowSteps', function ($query) use ($id) {
+                $query->where('workflow_steps.scheme_id', $this->workflowStep->scheme_id);
+                $query->where('workflow_steps.id', '!=', $id);
+            })->get();
             $this->selectedRoles = $this->workflowStep->roles->pluck('id')->map(fn($id) => (string) $id)->toArray();
         }
     }

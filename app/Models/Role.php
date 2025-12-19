@@ -67,4 +67,9 @@ class Role extends SpatieRole implements Auditable
             'permission_id'            // related key on pivot (Permission)
         );
     }
+
+    public function workflowSteps(): BelongsToMany
+    {
+        return $this->belongsToMany(WorkflowStep::class, 'workflowstep_rolemappings', 'role_id', 'workflow_step_id');
+    }
 }
