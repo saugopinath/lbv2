@@ -20,16 +20,15 @@
                         </label>
                         @endforeach
                     </div>
+                    <x-form.error name="selectedRoles" />
                 </div>
                 <div class="px-6 py-4 border-t flex justify-end space-x-2">
-                    <button type="button" wire:click="close"
-                        class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+                    <x-button.danger type="button" wire:click="close">
                         Cancel
-                    </button>
-                    <button type="submit"
-                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    </x-button.danger>
+                    <x-button.primary-with-disable :disabled="count($selectedRoles) == 0" type="submit">
                         Save
-                    </button>
+                    </x-button.primary-with-disable>
                 </div>
             </form>
         </div>

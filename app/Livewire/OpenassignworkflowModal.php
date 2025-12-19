@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Role;
 use App\Models\WorkflowStep;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
@@ -37,10 +38,14 @@ class OpenassignworkflowModal extends Component
     {
         $this->validate([
             'selectedRoles' => 'required|array|size:1',
+        ], [
+            'selectedRoles.*' => 'Please select a role.'
         ]);
+
         $rank = $this->workflowStep->rank;
         $sameLabelRoleId = 0;
         $nextLabelRoleId = 0;
+
         if ($this->workflowStep->parent_id === null) {
             $sameLabelRoleId = - ($this->workflowStep->scheme_id);
             $nextLabelRoleId = 0;
@@ -48,6 +53,7 @@ class OpenassignworkflowModal extends Component
             $nextLabelRoleId = $this->workflowStep->parent_id;
             $sameLabelRoleId = $this->workflowStep->parent->parent_id ?? 0;
         }
+
         $syncData = [];
         foreach ($this->selectedRoles as $roleId) {
             $syncData[$roleId] = [
@@ -56,8 +62,22 @@ class OpenassignworkflowModal extends Component
                 'next_label_role_id' => $nextLabelRoleId,
             ];
         }
-        $this->workflowStep->roles()->sync($syncData);
-        $this->close();
+        DB::beginTransaction();
+        try {
+            $this->workflowStep->roles()->sync($syncData);
+            $this->close();
+            $this->dispatch('toastr', [
+                'type' => 'success',
+                'message' => 'Role assigned successfully.'
+            ]);
+            DB::commit();
+        } catch (\Exception $e) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Failed to assign role.'
+            ]);
+            DB::rollBack();
+        }
     }
 
     public function render()
