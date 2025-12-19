@@ -28,6 +28,8 @@ use App\Http\Controllers\MasterParameterSettingController;
 use App\Http\Controllers\RoleOfficeTypeMappingsController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Http\Controllers\CmoController;
+use App\Http\Controllers\CreateAssignOtherFormFieldController;
+use App\Http\Controllers\DynamicFormController;
 use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\ElasticSearchController;
 use App\Http\Controllers\MarkedUpdateBeneficiary;
@@ -239,3 +241,13 @@ Route::controller(MarkedUpdateBeneficiaryController::class)->group(function () {
     ->name('marked-beneficiary-details-update');
 });
 
+
+Route::controller(CreateAssignOtherFormFieldController::class)->group(function () {
+    Route::get('/create-dynamicformfield',  'createdynamicformfield')
+        ->name('create-dynamicformfield');
+});
+
+Route::get(
+    '/dynamic-form-page',
+    [DynamicFormController::class, 'show']
+)->name('dynamic-form-page');
