@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use App\Models\Role;
 use App\Models\WorkflowStep;
-use App\Models\workflowstepRolemapping;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
@@ -16,14 +15,18 @@ class OpenassignworkflowModal extends Component
     #[On('openassignworkflowModal')]
     public function assignWorkflow($id)
     {
-        $this->workflowStep = WorkflowStep::find($id);
-        $this->name = $this->workflowStep->label;
-        $this->isOpen = true;
-        $this->roles = Role::all();
+        $this->workflowStep = WorkflowStep::with('roles')->find($id);
+        if ($this->workflowStep) {
+            $this->name = $this->workflowStep->label;
+            $this->isOpen = true;
+            $this->roles = Role::all();
+            $this->selectedRoles = $this->workflowStep->roles->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        }
     }
     public function close()
     {
         $this->isOpen = false;
+        $this->reset(['selectedRoles', 'workflowStep']);
     }
 
     public function save()
@@ -31,21 +34,26 @@ class OpenassignworkflowModal extends Component
         $this->validate([
             'selectedRoles' => 'required|array|min:1',
         ]);
-        $ids = $this->selectedRoles;
-        foreach ($ids as $id) {
-            $step = new workflowstepRolemapping();
-            $step->rank = $this->workflowStep->rank;
-            $step->workflow_step_id = $this->workflowStep->id;
-            $step->role_id = (int)$id;
-            if ($this->workflowStep->parent_id === null) {
-                $step->same_label_role_id = - ($this->workflowStep->scheme_id);
-                $step->next_label_role_id = 0;
-            } else {
-                $step->next_label_role_id = $this->workflowStep->parent_id;
-                $step->same_label_role_id = $this->workflowStep->parent->parent_id ?? 0;
-            }
-            $step->save();
+        $rank = $this->workflowStep->rank;
+        $sameLabelRoleId = 0;
+        $nextLabelRoleId = 0;
+        if ($this->workflowStep->parent_id === null) {
+            $sameLabelRoleId = - ($this->workflowStep->scheme_id);
+            $nextLabelRoleId = 0;
+        } else {
+            $nextLabelRoleId = $this->workflowStep->parent_id;
+            $sameLabelRoleId = $this->workflowStep->parent->parent_id ?? 0;
         }
+        $syncData = [];
+        foreach ($this->selectedRoles as $roleId) {
+            $syncData[$roleId] = [
+                'rank' => $rank,
+                'same_label_role_id' => $sameLabelRoleId,
+                'next_label_role_id' => $nextLabelRoleId,
+            ];
+        }
+        $this->workflowStep->roles()->sync($syncData);
+        $this->close();
     }
 
     public function render()

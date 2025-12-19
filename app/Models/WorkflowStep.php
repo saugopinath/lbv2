@@ -20,4 +20,10 @@ class WorkflowStep extends Model
     {
         return $this->hasMany(WorkflowStep::class, 'parent_id');
     }
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'workflowstep_rolemappings', 'workflow_step_id', 'role_id')
+            ->withPivot(['rank', 'same_label_role_id', 'next_label_role_id'])
+            ->withTimestamps();
+    }
 }
