@@ -71,7 +71,6 @@ class ElasticsearchService
         else{
              return false;
         }
-
      }
 
     /**

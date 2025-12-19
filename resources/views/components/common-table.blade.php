@@ -27,7 +27,7 @@
 
           <th class="px-4 py-3 text-left @if($sortable) cursor-pointer select-none @endif"
             @if($sortable)
-            wire:click="$emit('commonTableSort', '{{ $field }}')"
+            wire:click="$dispatch('commonTableSort', '{{ $field }}')"
             @endif>
             <div class="flex items-center gap-2">
               <span>{{ $label }}</span>

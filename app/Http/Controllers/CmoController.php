@@ -19,6 +19,15 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\BeneficiaryCommonList;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Helpers\LgdFilterHelper;
+use App\Models\BeneficiaryPersonal;
+use App\Models\BenRejectDetails;
+use App\Models\District;
+use App\Models\DraftBeneficiaryPersonal;
+use Database\Seeders\BenRejectDetailsSeeder;
+use Illuminate\Support\Facades\Log;
+use App\Exports\ArrayExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CmoController extends Controller
 {
@@ -29,14 +38,14 @@ class CmoController extends Controller
     {
         $this->cmoAuthenticationService = $cmoAuthenticationService;
         // dd('ok');
-        if (CheckAuthHelper::isCommonCMOController()) {
-            // dd('ok1');
-            $this->isAuthorized = true;
-        } else {
-            redirect()->route('dashboard')
-                ->with('error', 'Oops! You are not authorized to perform this action.')
-                ->send();
-        }
+        // if (CheckAuthHelper::isCommonCMOController()) {
+        //     // dd('ok1');
+        //     $this->isAuthorized = true;
+        // } else {
+        //     redirect()->route('dashboard')
+        //         ->with('error', 'Oops! You are not authorized to perform this action.')
+        //         ->send();
+        // }
     }
 
     public function pullnewcmo(Request $request)
@@ -403,5 +412,290 @@ class CmoController extends Controller
         }
         $header = 'Oops! You do not have permission.';
         return view('CommonRestictedpage.index', compact('header'));
+    }
+
+    public function cmoMisReport(Request $request)
+    {
+        $isApprover = false;
+        $isHod = false;
+        if (CheckAuthHelper::isCommonApprover()) {
+            $isApprover = true;
+        }
+        if (CheckAuthHelper::isCommonHOD()) {
+            $isHod = true;
+        }
+        $massage = 'CMO Mis Report';
+        $helperData = LgdFilterHelper::getCodesAndInitialCounts($request);
+        $masterLocations = $helperData['master_locations'] ?? [];
+        $mode = $helperData['mode'] ?? null;
+        $col = $helperData['col'] ?? null;
+        $name = $helperData['name'] ?? null;
+        $blockIds = $helperData['block_ids'] ?? [];
+        $subdivisionIds = $helperData['sub_division_ids'] ?? [];
+        $actionPending = [Codemaster::getIdByCode(3301)];
+        $approvalPending = [Codemaster::getIdByCode(3302), Codemaster::getIdByCode(3304)];
+        $pushtoCMOPending = [Codemaster::getIdByCode(3303)];
+        $totalPushed = [Codemaster::getIdByCode(3305)];
+        $baseFilters = [];
+        if (!empty($helperData['district_code'])) {
+            $baseFilters['lb_dist_code'] = $helperData['district_code'];
+        }
+        if (!empty($helperData['block_code'])) {
+            $baseFilters['lb_local_body_code'] = $helperData['block_code'];
+        }
+        if (!empty($helperData['subdivission_code'])) {
+            $baseFilters['lb_local_body_code'] = $helperData['subdivission_code'];
+        }
+        if (!empty($helperData['rural_urban_code'])) {
+            $baseFilters['address_type'] = $helperData['rural_urban_code'];
+        }
+        if (!empty($helperData['gpWard_code'])) {
+            $baseFilters['cd_gp_ward_id'] = $helperData['gpWard_code'];
+        }
+        $locationCounts = [];
+        $locationNames = [];
+        $columns = $this->getColumnsByMode($mode);
+        foreach ($masterLocations as $loc) {
+            $key = $loc['location_id'];
+            $locationNames[$key] = $loc['location_name'];
+            $locationCounts[$key] = [
+                'location_name' => $loc['location_name'],
+                'actionPending' => 0,
+                'approvalPending' => 0,
+                'pushtoCMOPending' => 0,
+                'totalPushed' => 0,
+            ];
+        }
+        if (empty($masterLocations)) {
+
+            return view('cmo.cmo_count_report', [
+                'header'  => $massage,
+                'helper'  => $helperData,
+                'columns' => $columns,
+                'name' => $name,
+                'data'    => []
+            ]);
+        }
+        $baseQuery = $this->buildBaseQuery($baseFilters);
+        if ($mode === 'block_subdivision') {
+            // dd('ok');
+            if (empty($blockIds) && empty($subdivisionIds)) {
+                foreach ($masterLocations as $loc) {
+                    $k = $loc['location_id'];
+                    if (is_string($k) && str_contains($k, '_')) {
+                        [$pref, $id] = explode('_', $k, 2);
+                        if ($pref === 'block') $blockIds[] = (int)$id;
+                        if ($pref === 'sub') $subdivisionIds[] = (int)$id;
+                    }
+                }
+            }
+            $anyBlocks = !empty($blockIds);
+            $anySubdivs = !empty($subdivisionIds);
+            if (!$anyBlocks && !$anySubdivs) {
+                return view('cmo.cmo_count_report', [
+                    'header'  => $massage,
+                    'helper'  => $helperData,
+                    'columns' => $columns,
+                    'name' => $name,
+                    'data'    => []
+                ]);
+            }
+            foreach ($blockIds as $blockId) {
+                $key = 'block_' . $blockId;
+                if (!isset($locationCounts[$key])) {
+                    $locationCounts[$key] = [
+                        'location_name' => $locationNames[$key] ?? "Block {$blockId}",
+                        'actionPending' => 0,
+                        'approvalPending' => 0,
+                        'pushtoCMOPending' => 0,
+                        'totalPushed' => 0,
+                    ];
+                }
+                $query = (clone $baseQuery)->where('lb_local_body_code', $blockId);
+                $total = $query->count();
+                $locationCounts[$key]['actionPending'] = $this->countByRoleId((clone $query), $actionPending);
+                $locationCounts[$key]['approvalPending'] = $this->countByRoleId((clone $query), $approvalPending);
+                $locationCounts[$key]['pushtoCMOPending'] = $this->countByRoleId((clone $query), $pushtoCMOPending);
+                $locationCounts[$key]['totalPushed'] = $this->countByRoleIdwithflag((clone $query), $totalPushed);
+            }
+            foreach ($subdivisionIds as $subId) {
+                $key = 'sub_' . $subId;
+                if (!isset($locationCounts[$key])) {
+                    $locationCounts[$key] = [
+                        'location_name' => $locationNames[$key] ?? "Subdivision {$subId}",
+                        'actionPending' => 0,
+                        'approvalPending' => 0,
+                        'pushtoCMOPending' => 0,
+                        'totalPushed' => 0,
+                    ];
+                }
+                $query = (clone $baseQuery)->where('lb_local_body_code', $subId);
+                $total = $query->count();
+                $locationCounts[$key]['actionPending'] = $this->countByRoleId((clone $query), $actionPending);
+                $locationCounts[$key]['approvalPending'] = $this->countByRoleId((clone $query), $approvalPending);
+                $locationCounts[$key]['pushtoCMOPending'] = $this->countByRoleId((clone $query), $pushtoCMOPending);
+                $locationCounts[$key]['totalPushed'] = $this->countByRoleIdwithflag((clone $query), $totalPushed);
+            }
+            $unmappedQuery = (clone $baseQuery)
+                ->whereNull('lb_local_body_code');
+            $actionPendingUnmapped = $this->countByRoleId(
+                (clone $unmappedQuery),
+                $actionPending
+            );
+            $approvalPendingUnmapped = $this->countByRoleId(
+                (clone $unmappedQuery),
+                $approvalPending
+            );
+            $pushtoCMOPendingUnmapped = $this->countByRoleId(
+                (clone $unmappedQuery),
+                $pushtoCMOPending
+            );
+            $totalPushedUnmapped = $this->countByRoleIdwithflag(
+                (clone $unmappedQuery),
+                $totalPushed
+            );
+            $unmappedTotal =
+                $actionPendingUnmapped +
+                $approvalPendingUnmapped +
+                $pushtoCMOPendingUnmapped +
+                $totalPushedUnmapped;
+            if ($unmappedTotal > 0) {
+                $locationCounts['unmapped'] = [
+                    'location_name'      => 'Unmapped (Block & Sub-Div null)',
+                    'actionPending'      => $actionPendingUnmapped,
+                    'approvalPending'    => $approvalPendingUnmapped,
+                    'pushtoCMOPending'   => $pushtoCMOPendingUnmapped,
+                    'totalPushed'        => $totalPushedUnmapped,
+                ];
+            }
+        } else {
+            if ($col === 'block_id' || $col === 'subdivision_id') {
+                $col = 'lb_local_body_code';
+            }
+            if ($col === 'district_id') {
+                $col = 'lb_dist_code';
+            }
+            if (empty($col)) {
+                $col = 'lb_dist_code';
+            }
+            // dd('ok1');
+            $ids = [];
+            foreach ($masterLocations as $loc) {
+                if (is_numeric($loc['location_id'])) {
+                    $ids[] = (int)$loc['location_id'];
+                }
+            }
+            if (empty($ids)) {
+
+                return view('cmo.cmo_count_report', [
+                    'header'  => $massage,
+                    'helper'  => $helperData,
+                    'columns' => $columns,
+                    'name' => $name,
+                    'data'    => []
+                ]);
+            }
+            foreach ($ids as $locId) {
+                $locKey = (string)$locId;
+                if (!isset($locationCounts[$locKey]) && isset($locationCounts[(int)$locId])) {
+                    $locKey = (int)$locId;
+                }
+                if (!isset($locationCounts[$locKey])) {
+                    $locationCounts[$locKey] = [
+                        'location_name' => $locationNames[$locKey] ?? $locKey,
+                        'actionPending' => 0,
+                        'approvalPending' => 0,
+                        'pushtoCMOPending' => 0,
+                        'totalPushed' => 0,
+                    ];
+                }
+                $query = (clone $baseQuery)->where($col, $locId);
+                $total = $query->count();
+                $locationCounts[$locKey]['actionPending'] = $this->countByRoleId((clone $query), $actionPending);
+                $locationCounts[$locKey]['approvalPending'] = $this->countByRoleId((clone $query), $approvalPending);
+                $locationCounts[$locKey]['pushtoCMOPending'] = $this->countByRoleId((clone $query), $pushtoCMOPending);
+                $locationCounts[$locKey]['totalPushed'] = $this->countByRoleIdwithflag((clone $query), $totalPushed);
+            }
+        }
+        foreach ($locationCounts as &$counts) {
+            $counts['actionPending'] = (int)($counts['actionPending'] ?? 0);
+            $counts['approvalPending'] = (int)($counts['approvalPending'] ?? 0);
+            $counts['pushtoCMOPending'] = (int)($counts['pushtoCMOPending'] ?? 0);
+            $counts['totalPushed'] = (int)($counts['totalPushed'] ?? 0);
+        }
+        $data = [];
+        foreach ($locationCounts as $key => $row) {
+            $actionPending  = (int)($row['actionPending'] ?? 0);
+            $approvalPending = (int)($row['approvalPending'] ?? 0);
+            $pushtoCMOPending = (int)($row['pushtoCMOPending'] ?? 0);
+            $totalPushed = (int)($row['totalPushed'] ?? 0);
+            $total = $actionPending + $approvalPending + $pushtoCMOPending + $totalPushed;
+            $data[] = [
+                'location_name' => $row['location_name'] ?? $key,
+                'actionPending' => $actionPending,
+                'approvalPending' => $approvalPending,
+                'pushtoCMOPending' => $pushtoCMOPending,
+                'totalPushed' => $totalPushed,
+                'total' => $total,
+            ];
+        }
+        return view('cmo.cmo_count_report', [
+            'header' => $massage,
+            'helper' => $helperData,
+            'columns' => $columns,
+            'data' => $data,
+            'name' => $name,
+            'ruralUrban' => $request->rural_urban,
+            'isApprover' => $isApprover,
+            'isHod' => $isHod,
+            'districts' => District::all(),
+            'selectedDistrict' => $request->district_id,
+            // 'exportUrl' => route('reports-export'),
+            // 'filename' => 'application-mis-report.xlsx',
+        ]);
+    }
+
+    private function getColumnsByMode(?string $mode,): array
+    {
+        $locationLabel = match ($mode) {
+            'block_subdivision' => 'Block / Subdivision',
+            'district' => 'District',
+            'block' => 'Block',
+            'subdivision' => 'Subdivision',
+            'gp_ward' => 'GP / Ward',
+            'municipality' => 'Municipality',
+            'ward' => 'Ward',
+            default => 'Location'
+        };
+        return [
+            ['key' => 'location_name', 'label' => $locationLabel, 'align' => 'left', 'type' => 'text'],
+            ['key' => 'total', 'label' => 'Total Grievance', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+            ['key' => 'actionPending', 'label' => 'Total Action Pending', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+            ['key' => 'approvalPending', 'label' => 'Total Approval Pending Among Action taken', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+            ['key' => 'pushtoCMOPending', 'label' => 'Total Approved but Pushed To CMO pending', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+            ['key' => 'pushtoCMOPending', 'label' => 'Total Pushed To CMO', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+        ];
+    }
+    private function buildBaseQuery(array $baseFilters)
+    {
+        $query = CmoSmData::query();
+        foreach ($baseFilters as $column => $value) {
+            $query->where($column, $value);
+        }
+        return $query;
+    }
+    private function countByRoleId($query, array $roleIds): int
+    {
+        $count = (clone $query)
+            ->whereIn('redressed_status', $roleIds)
+            ->count();
+        return $count;
+    }
+    private function countByRoleIdwithflag($query, array $roleId): int
+    {
+        $count = (clone $query)
+            ->whereIn('redressed_status', $roleId)
+            ->count();
+        return $count;
     }
 }

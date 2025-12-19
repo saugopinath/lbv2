@@ -143,8 +143,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/incomplete/revert/{id}', [IncompleteTypeController::class, 'revertVerify'])
         // ->middleware('permission.redirect:canRevertIncomplet')
         ->name('incomplete-revert-update');
-    Route::get('/incomplete-details-mis-report', [IncompleteTypeController::class, 'incompleteDetails'])
-        ->name('incomplete.details.mis.report');
+
+    // Route::get('/incomplete-details-mis-report', [IncompleteTypeController::class, 'incompleteDetails'])
+    //     ->name('incomplete.details.mis.report');
 
     Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])
         ->middleware('permission.redirect:canViewBeneficiaries')
@@ -212,14 +213,27 @@ Route::controller(CmoController::class)->group(function () {
     Route::any('/pullnewcmo', 'pullnewcmo')->middleware('permission.redirect:canCMODatafetch')->name('pullnewcmo');
     Route::any('/populatelbportal', 'populatelbportal')->middleware('permission.redirect:canCMODatafetch')->name('populatelbportal');
     Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')
-      ->middleware('permission.redirect:canCMOWorkflow')
-      ->name('cmo-grievance-workflow');
+        // ->middleware('permission.redirect:canCMOWorkflow')
+        ->name('cmo-grievance-workflow');
     // Route::any('/cmo-grievance-find/{id}', 'cmogrievancefind')->name('cmo-grievance-find');
     Route::any('/cmo-grievance-find', 'cmogrievancefind')->name('cmo-grievance-find');
     Route::post('/cmo-grievance-action', 'cmodetailsaction')->name('cmo-grievance-action');
     Route::post('/cmo-grievance-search', 'cmogrievancesearch')->name('cmo-grievance-search');
     Route::post('/map-applicant', 'mapapplicant')->name('map-applicant');
     Route::post('/cmo-add-actions', 'addactions')->name('cmo-add-actions');
+    Route::any('/cmo-mis-report',  'cmoMisReport')
+        ->name('cmo-mis-report');
+});
+
+/*Route::controller(JaiBanglaController::class)->group(function () {
+    Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
+    Route::any('/logoutfromjb', 'logoutfromjb')->name('logoutfromjb');
+    Route::any('/refreshtokenforjb', 'refreshtokenforjb')->name('refreshtokenforjb');
+});*/
+
+Route::controller(BackFromJBController::class)->group(function () {
+    Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
+    Route::any('/backfromjbactions', 'backfromjbactions')->name('backfromjbactions');
 });
 //reject approved beneficiary
 Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
@@ -240,6 +254,8 @@ Route::post('/mis/report/redirect', function (Request $request) {
 //Beneficiary count
 Route::controller(BeneficiaryCountController::class)->group(function () {
     Route::get('/beneficiary-reportlist',  'misReport')->name('beneficiary-reportlist');
+    Route::any('/beneficiary-reportlist',  'ApplicationMisReport')->name('beneficiary-reportlist');
+    Route::any('/reports-export',  'exportExcel')->name('reports-export');
 });
 
 Route::controller(JnpmController::class)->group(function () {

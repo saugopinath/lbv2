@@ -11,8 +11,13 @@ class MisReportController extends Controller
         $reportTypes = [
             [
                 'id'    => 1,
-                'name'  => 'Incomplete Details Mis Report',
-                'route' => route('incomplete.details.mis.report'),
+                'name'  => 'Beneficiary Mis Report',
+                'route' => route('beneficiary-reportlist'),
+            ],
+             [
+                'id'    => 2,
+                'name'  => 'CMO Mis Report',
+                'route' => route('cmo-mis-report'),
             ],
         ];
 

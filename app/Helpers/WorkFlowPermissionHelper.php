@@ -309,7 +309,19 @@ class WorkFlowPermissionHelper
     }
     public static function canRejectApprovedBeneficiary(): bool
     {
-        return Auth::user()->can('RejectApprovedBeneficiary');
+        return Auth::user()->can('cmo_workflow');
+    }
+    public static function canCMOWorkflowmis(): bool
+    {
+        return Auth::user()->can('cmo_workflow_mis');
+    }
+    public static function canCMODatafetch(): bool
+    {
+        return Auth::user()->can('cmo_data_fetch');
+    }
+     public static function canCMOGrievanceFind(): bool
+    {
+        return Auth::user()->can('cmogrievancefind');
     }
     public static function canFilterApplicantToReject(): bool
     {
@@ -317,11 +329,11 @@ class WorkFlowPermissionHelper
     }
     public static function canViewDetailsToReject(): bool
     {
-        return Auth::user()->can('View Details To Reject'); 
+        return Auth::user()->can('View Details To Reject');
     }
     public static function canRejectBeneficiary(): bool
     {
-        return Auth::user()->can('Reject Beneficiary'); 
+        return Auth::user()->can('Reject Beneficiary');
     }
 
 
