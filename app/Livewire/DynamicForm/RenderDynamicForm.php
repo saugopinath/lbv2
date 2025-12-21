@@ -13,15 +13,19 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 class RenderDynamicForm extends Component
 {
     public int $schemeId;
-    public int $applicationId;
+    public $mode;
+    public int $application_id;
     public array $fields = [];
     public array $sections = [];
     public array $formData = [];
     use WithFileUploads;
-    public function mount(int $schemeId, int $applicationId)
+    public function mount(int $schemeId, int $application_id, $mode = null)
     {
+        // dump($schemeId);
+        // dd($application_id);
+        $this->mode = $mode;
         $this->schemeId = $schemeId;
-        $this->applicationId = $applicationId;
+        $this->application_id = $application_id;
         $this->fields = FromFieldAttribute::where('scheme_id', $this->schemeId)
             ->where('is_active', true)
             ->orderBy('created_at')
@@ -44,7 +48,7 @@ class RenderDynamicForm extends Component
         }
         // dd($field);
         // dd($field['level_name']);
-        $existing = OtherDetails::where('application_id', $applicationId)->first();
+        $existing = OtherDetails::where('application_id', $application_id)->first();
         if ($existing && is_array($existing->details)) {
             foreach ($existing->details as $key => $value) {
                 $this->formData[$key] = $value;
@@ -79,17 +83,18 @@ class RenderDynamicForm extends Component
         // dd($payload);
         OtherDetails::updateOrCreate(
             [
-                'application_id' => $this->applicationId,
+                'application_id' => $this->application_id,
                 'scheme_id'      => $this->schemeId,
             ],
             [
                 'details' => $payload,
             ]
         );
-       $this->dispatch('toastr', [
+        $this->dispatch('toastr', [
             'type' => 'success',
             'message' => 'Application submitted successfully!'
         ]);
+        $this->dispatch('hideLoader');
     }
     private function buildValidationRules(): array
     {

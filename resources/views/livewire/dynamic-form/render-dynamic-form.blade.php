@@ -1,3 +1,7 @@
+     <form x-on:submit.prevent="
+            Livewire.dispatch('showLoader');
+            $wire.save();
+        ">  
     <div class="bg-white shadow rounded-xl p-2 mb-2">
         @foreach ($fields as $sectionId => $groupFields)
         @php
@@ -185,17 +189,16 @@
 
             </div>
         </div>
-
         @endif
-
         @endforeach
-
-        <div class="flex justify-center mb-4 mt-3">
-            <x-button.loading-button
-                action="save"
-                text="Save Field"
-                class="w-full md:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700" />
-
-        </div>
+        <div class="flex justify-between mt-4 pl-6 pr-6">
+                @if ($mode != '0')
+                <x-button.danger wire:click="$dispatch('goPrevious')">Previous</x-button.danger>
+                @endif
+                <x-button.success type="submit">
+                    {{ $mode == '0' ? 'Save' : 'Preview and Submit' }}
+                </x-button.success>
+            </div>
 
     </div>
+    </form>

@@ -99,12 +99,15 @@ class SelfDeclaration extends Component
             $this->dispatch('hideLoader');
             throw $e;
         }
-        $this->dispatch('selfDec');
-        $this->dispatch('hideLoader');
-        $this->dispatch('toastr', [
-            'type' => 'success',
-            'message' => 'Application submitted successfully!'
+        // $this->dispatch('selfDec');
+         $this->dispatch('selfDec', [
+            'message' => "Self Decleration uploaded successfully for the application id: {$this->application_id}"
         ]);
+        $this->dispatch('hideLoader');
+        // $this->dispatch('toastr', [
+        //     'type' => 'success',
+        //     'message' => 'Application submitted successfully!'
+        // ]);
     }
 
     public function render()
