@@ -109,6 +109,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('userDutymanagement.index');
 
     // LB & Workflow
+    Route::post('/select-scheme', [LBController::class, 'selectScheme'])
+    ->name('select-scheme');
+
     Route::get('lbform', [LBController::class, 'index'])
         ->middleware('permission.redirect:canEntry')
         ->name('lbform');
