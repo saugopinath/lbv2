@@ -2,9 +2,13 @@
 
 namespace App\Livewire\DynamicForm;
 
+use App\Models\AcceptRejectInfo;
+use App\Models\Codemaster;
+use App\Models\DraftBeneficiaryPersonal;
 use App\Models\FromFieldAttribute;
 use App\Models\MasterSection;
 use App\Models\OtherDetails;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -21,6 +25,7 @@ class RenderDynamicForm extends Component
     use WithFileUploads;
     public function mount(int $schemeId, int $application_id, $mode = null)
     {
+        // dd('')
         // dump($schemeId);
         // dd($application_id);
         $this->mode = $mode;
@@ -90,11 +95,32 @@ class RenderDynamicForm extends Component
                 'details' => $payload,
             ]
         );
+        $draftbenPar = DraftBeneficiaryPersonal::find($this->application_id);
+        $draftbenPar->next_level_role_id = Codemaster::getIdByCode(22);
+        $draftbenPar->is_final_submit = 1;
+        $draftbenPar->save();
+
+        $AcceptRejectInfo = new AcceptRejectInfo;
+        $AcceptRejectInfo->application_id = $this->application_id;
+        $AcceptRejectInfo->beneficiary_id = $draftbenPar->beneficiary_id;
+        $AcceptRejectInfo->ip_address = request()->ip();
+        $AcceptRejectInfo->user_id = Auth::id();
+        $AcceptRejectInfo->browser = request()->header('User-Agent');
+        $AcceptRejectInfo->model_name = null;
+        $AcceptRejectInfo->op_type = Codemaster::getIdByCode(22);
+        $AcceptRejectInfo->revert_reason_cause_id = null;
+        $AcceptRejectInfo->revert_reason_remarks = null;
+        $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $this->application_id)
+            ->latest('id')
+            ->value('id') ?? null;
+        $AcceptRejectInfo->save();
+
+        $this->dispatch('selfDec1');
+        $this->dispatch('hideLoader');
         $this->dispatch('toastr', [
             'type' => 'success',
             'message' => 'Application submitted successfully!'
         ]);
-        $this->dispatch('hideLoader');
     }
     private function buildValidationRules(): array
     {

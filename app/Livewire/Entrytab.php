@@ -35,7 +35,7 @@ class Entrytab extends Component
         'goPrevious' => 'previousTab',
         'tabMessage' => 'handleTabMessage',
         'selfDec' => 'enableTab6',
-        // 'selfDec' => 'openModalForApplicant',
+        'selfDec1' => 'openModalForApplicant',
         'modalClosed' => 'handleModalClosed'
     ];
     public function disableTabs()
