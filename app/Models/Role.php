@@ -72,4 +72,9 @@ class Role extends SpatieRole implements Auditable
     {
         return $this->belongsToMany(WorkflowStep::class, 'workflowstep_rolemappings', 'role_id', 'workflow_step_id');
     }
+
+    public function workflowStepRoleMapping()
+    {
+        return $this->hasOne(WorkflowStepRoleMapping::class, 'role_id', 'id');
+    }
 }

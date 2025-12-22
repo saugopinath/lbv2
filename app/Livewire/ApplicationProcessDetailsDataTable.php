@@ -30,6 +30,7 @@ use App\Models\DraftBeneficiaryBank;
 use App\Models\DraftBeneficiaryContact;
 use App\Models\DraftBeneficiaryDeclaration;
 use App\Models\DraftBeneficiaryRelationship;
+use App\Models\WorkflowsteproleMapping;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -45,6 +46,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
     public array $filter_condition = [];
+    public $sameLabelRoleId, $nextLabelRoleId;
     public function mount(): void
     {
         $select_lgd = session('lgd_session');
@@ -59,6 +61,15 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
         if (!empty($select_lgd['subdivision_id'])) {
             $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+        }
+        if ($select_lgd['role_id']) {
+            $roleId = Crypt::decryptString($select_lgd['role_id']);
+            $labelRoles = WorkflowsteproleMapping::getLabelRoleIdsByRole($roleId);
+            if ($labelRoles) {
+                $this->sameLabelRoleId = $labelRoles->same_label_role_id;
+                $this->nextLabelRoleId = $labelRoles->next_label_role_id;
+            }
+            // dd($this->sameLabelRoleId,$this->nextLabelRoleId);
         }
     }
     public function filtersApplied($filters)
@@ -235,9 +246,9 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             );
         }
         // $user = auth()->user();
-        $next_level_role_id = null;
+        $next_level_role_id = $this->sameLabelRoleId;
 
-        if (CheckAuthHelper::isCommonApprover()) {
+        /*if (CheckAuthHelper::isCommonApprover()) {
             // if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
             $next_level_role_id = Codemaster::getIdByCode(23);
         }
@@ -248,7 +259,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         if (CheckAuthHelper::isOperator()) {
             // if ($user->hasRole('Operator')) {
             $next_level_role_id = Codemaster::getIdByCode(21);
-        }
+        }*/
 
         $sourceableClass = DraftBeneficiaryPersonal::class;
 
@@ -280,7 +291,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             DB::beginTransaction();
             try {
                 $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                $DraftBeneficiaryPersonal->next_level_role_id = $approverRoleId;
+                $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
                 $DraftBeneficiaryPersonal->save();
                 $AcceptRejectInfo = new AcceptRejectInfo;
                 $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
@@ -289,7 +300,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 $AcceptRejectInfo->user_id = Auth::id();
                 $AcceptRejectInfo->browser = request()->header('User-Agent');
                 $AcceptRejectInfo->model_name = null;
-                $AcceptRejectInfo->op_type = $approverRoleId;
+                $AcceptRejectInfo->op_type = $this->nextLabelRoleId;
                 $AcceptRejectInfo->revert_reason_cause_id = null;
                 $AcceptRejectInfo->revert_reason_remarks = null;
                 $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
@@ -323,7 +334,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             DB::beginTransaction();
             try {
                 $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(0);
+                $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
                 $DraftBeneficiaryPersonal->save();
                 $AcceptRejectInfo = new AcceptRejectInfo;
                 $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
@@ -332,7 +343,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 $AcceptRejectInfo->user_id = Auth::id();
                 $AcceptRejectInfo->browser = request()->header('User-Agent');
                 $AcceptRejectInfo->model_name = null;
-                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(0);
+                $AcceptRejectInfo->op_type = $this->nextLabelRoleId;
                 $AcceptRejectInfo->revert_reason_cause_id = null;
                 $AcceptRejectInfo->revert_reason_remarks = null;
                 $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
@@ -385,7 +396,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 DB::beginTransaction();
                 try {
                     $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                    $DraftBeneficiaryPersonal->next_level_role_id = $next_level_role_id;
+                    $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
                     $DraftBeneficiaryPersonal->save();
                     $AcceptRejectInfo = new AcceptRejectInfo;
                     $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
@@ -394,7 +405,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     $AcceptRejectInfo->user_id = Auth::id();
                     $AcceptRejectInfo->browser = request()->header('User-Agent');
                     $AcceptRejectInfo->model_name = null;
-                    $AcceptRejectInfo->op_type = $next_level_role_id;
+                    $AcceptRejectInfo->op_type = $this->nextLabelRoleId;
                     $AcceptRejectInfo->revert_reason_cause_id =  $validated['reason'];
                     $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
                     $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
