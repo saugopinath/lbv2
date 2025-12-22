@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class workflowstepRolemapping extends Model
+class WorkflowsteproleMapping extends Model
 {
     //
 }

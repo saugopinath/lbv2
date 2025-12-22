@@ -21,10 +21,23 @@ class OpenassignworkflowModal extends Component
         if ($this->workflowStep) {
             $this->name = $this->workflowStep->label;
             $this->isOpen = true;
-            $this->roles = Role::whereDoesntHave('workflowSteps', function ($query) use ($id) {
-                $query->where('workflow_steps.scheme_id', $this->workflowStep->scheme_id);
-                $query->where('workflow_steps.id', '!=', $id);
-            })->get();
+            // $this->roles = Role::whereDoesntHave('workflowSteps', function ($query) use ($id) {
+            //     $query->where('workflow_steps.scheme_id', $this->workflowStep->scheme_id);
+            //     $query->where('workflow_steps.id', '!=', $id);
+            // })->get();
+
+            $previousStepIds = WorkflowStep::where('scheme_id', $this->workflowStep->scheme_id)
+                ->where('rank', '<', $this->workflowStep->rank) // IMPORTANT
+                ->pluck('id');
+            $previousMaxRank = DB::table('workflowstep_rolemappings')
+                ->whereIn('workflow_step_id', $previousStepIds)
+                ->max('rank');
+            $this->roles = Role::when($previousMaxRank, function ($query) use ($previousMaxRank) {
+                $query->where('rank', '>', $previousMaxRank);
+            })
+                ->orderBy('rank')
+                ->get();
+
             $this->selectedRoles = $this->workflowStep->roles->pluck('id')->map(fn($id) => (string) $id)->toArray();
         }
     }
@@ -38,11 +51,8 @@ class OpenassignworkflowModal extends Component
     {
         $this->validate([
             'selectedRoles' => 'required|array|size:1',
-        ], [
-            'selectedRoles.*' => 'Please select a role.'
         ]);
 
-        $rank = $this->workflowStep->rank;
         $sameLabelRoleId = 0;
         $nextLabelRoleId = 0;
 
@@ -55,30 +65,27 @@ class OpenassignworkflowModal extends Component
         }
 
         $syncData = [];
+
         foreach ($this->selectedRoles as $roleId) {
+            $roleRank = Role::where('id', $roleId)->value('rank'); // ✅ REAL RANK
+
             $syncData[$roleId] = [
-                'rank' => $rank,
+                'rank' => $roleRank,
                 'same_label_role_id' => $sameLabelRoleId,
                 'next_label_role_id' => $nextLabelRoleId,
             ];
         }
-        DB::beginTransaction();
-        try {
-            $this->workflowStep->roles()->sync($syncData);
-            $this->close();
-            $this->dispatch('toastr', [
-                'type' => 'success',
-                'message' => 'Role assigned successfully.'
-            ]);
-            DB::commit();
-        } catch (\Exception $e) {
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => 'Failed to assign role.'
-            ]);
-            DB::rollBack();
-        }
+
+        $this->workflowStep->roles()->sync($syncData);
+
+        $this->close();
+
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'Role assigned successfully.'
+        ]);
     }
+
 
     public function render()
     {
