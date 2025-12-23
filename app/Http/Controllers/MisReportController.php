@@ -19,6 +19,11 @@ class MisReportController extends Controller
                 'name'  => 'CMO Mis Report',
                 'route' => route('cmo-mis-report'),
             ],
+            [
+                'id'    => 3,
+                'name'  => 'Incomplete Details Mis Report',
+                'route' => route('incomplete-details-mis-report'),
+            ],
         ];
 
         return view('misreport.report_index', compact('reportTypes'));

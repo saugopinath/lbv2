@@ -335,6 +335,4 @@ class WorkFlowPermissionHelper
     {
         return Auth::user()->can('Reject Beneficiary');
     }
-
-
 }

@@ -10,12 +10,17 @@ use Illuminate\Support\Facades\Crypt;
 use App\Models\BeneficiaryTemEnclosure;
 use App\Models\ApplicantIncompletDeatil;
 use Illuminate\Support\Facades\Validator;
+use App\Models\DraftBeneficiaryPersonal;
+use App\Models\BeneficiaryCommonList;
 use App\Helpers\AadhaarHelper;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Exports\ArrayExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\CheckAuthHelper;
 use App\Helpers\WorkFlowPermissionHelper;
+use App\Helpers\LgdFilterHelper;
 use Illuminate\Support\Facades\Route;
 
 class IncompleteTypeController extends Controller
@@ -538,8 +543,279 @@ class IncompleteTypeController extends Controller
 
         return true; // No duplicates found
     }
-    public function incompleteDetails()
+    public function incompleteDetails(Request $request)
     {
-        return view('incomplet.incompleteDetails');
+        $massage = 'Incomplete Details Mis Report';
+
+        $helperData = LgdFilterHelper::getCodesAndInitialCounts($request);
+
+        $masterLocations = $helperData['master_locations'] ?? [];
+        $mode = $helperData['mode'] ?? null;
+        $col = $helperData['col'] ?? null;
+        $name = $helperData['name'] ?? null;
+        $blockIds = $helperData['block_ids'] ?? [];
+        $subdivisionIds = $helperData['sub_division_ids'] ?? [];
+
+        // Role IDs
+        $verifiedRoleId = 1;
+        $approvedRoleId = 2;
+        $revertRoleId = -50;
+
+        // Build base filters
+        $baseFilters = [];
+        if (!empty($helperData['district_code'])) {
+            $baseFilters['district_id'] = $helperData['district_code'];
+        }
+        if (!empty($helperData['block_code'])) {
+            $baseFilters['block_id'] = $helperData['block_code'];
+        }
+        if (!empty($helperData['subdivission_code'])) {
+            $baseFilters['sub_division_id'] = $helperData['subdivission_code'];
+        }
+        if (!empty($helperData['rural_urban_code'])) {
+            $baseFilters['cd_rural_urban_id'] = $helperData['rural_urban_code'];
+        }
+        if (!empty($helperData['gpWard_code'])) {
+            $baseFilters['cd_gp_ward_id'] = $helperData['gpWard_code'];
+        }
+
+
+        // Initialize location counts
+        $locationCounts = [];
+        $locationNames = [];
+        $columns = $this->getColumnsByMode($mode);
+
+        foreach ($masterLocations as $loc) {
+            $key = $loc['location_id'];
+            $locationNames[$key] = $loc['location_name'];
+            $locationCounts[$key] = [
+                'location_name' => $loc['location_name'],
+                'pending' => 0,
+                'verified' => 0,
+                'approved' => 0,
+                'reverted' => 0,
+            ];
+        }
+
+
+        if (empty($masterLocations)) {
+
+            return view('incomplet.incompleteDetails', [
+                'header'  => $massage,
+                'helper'  => $helperData,
+                'columns' => $columns,
+                'name' => $name,
+                'data'    => []
+            ]);
+        }
+
+        // Build base query
+        $baseQuery = $this->buildBaseQuery($baseFilters);
+
+        if ($mode === 'block_subdivision') {
+
+            // Extract block/subdivision IDs
+            if (empty($blockIds) && empty($subdivisionIds)) {
+                foreach ($masterLocations as $loc) {
+                    $k = $loc['location_id'];
+                    if (is_string($k) && str_contains($k, '_')) {
+                        [$pref, $id] = explode('_', $k, 2);
+                        if ($pref === 'block') $blockIds[] = (int)$id;
+                        if ($pref === 'sub') $subdivisionIds[] = (int)$id;
+                    }
+                }
+            }
+
+            $anyBlocks = !empty($blockIds);
+            $anySubdivs = !empty($subdivisionIds);
+
+            if (!$anyBlocks && !$anySubdivs) {
+                return view('incomplet.incompleteDetails', [
+                    'header'  => $massage,
+                    'helper'  => $helperData,
+                    'columns' => $columns,
+                    'name' => $name,
+                    'data'    => []
+                ]);
+            }
+
+            foreach ($blockIds as $blockId) {
+                $key = 'block_' . $blockId;
+
+                if (!isset($locationCounts[$key])) {
+                    $locationCounts[$key] = [
+                        'location_name' => $locationNames[$key] ?? "Block {$blockId}",
+                        'pending' => 0,
+                        'verified' => 0,
+                        'approved' => 0,
+                        'reverted' => 0,
+                    ];
+                }
+
+                $query = (clone $baseQuery)->where('block_id', $blockId);
+                $total = $query->count();
+
+                $locationCounts[$key]['pending'] = $this->countByRoleIdPending(clone $query);
+                $locationCounts[$key]['verified'] = $this->countByRoleId((clone $query), $verifiedRoleId);
+                $locationCounts[$key]['approved'] = $this->countByRoleId((clone $query), $approvedRoleId);
+                $locationCounts[$key]['reverted'] = $this->countByRoleId((clone $query), $revertRoleId);
+            }
+
+            // Process subdivisions
+            foreach ($subdivisionIds as $subId) {
+                $key = 'sub_' . $subId;
+
+                if (!isset($locationCounts[$key])) {
+                    $locationCounts[$key] = [
+                        'location_name' => $locationNames[$key] ?? "Subdivision {$subId}",
+                        'pending' => 0,
+                        'verified' => 0,
+                        'approved' => 0,
+                        'rejected' => 0,
+                        'reverted' => 0,
+                    ];
+                }
+
+                $query = (clone $baseQuery)->where('sub_division_id', $subId);
+                $total = $query->count();
+
+                $locationCounts[$key]['pending'] = $this->countByRoleIdPending(clone $query);
+                $locationCounts[$key]['verified'] = $this->countByRoleId((clone $query), $verifiedRoleId);
+                $locationCounts[$key]['approved'] = $this->countByRoleId((clone $query), $approvedRoleId);
+                $locationCounts[$key]['reverted'] = $this->countByRoleId((clone $query), $revertRoleId);
+            }
+        } else {
+
+            // Normal modes
+            if (empty($col)) {
+                $col = 'district_id';
+            }
+            $ids = [];
+            foreach ($masterLocations as $loc) {
+                if (is_numeric($loc['location_id'])) {
+                    $ids[] = (int)$loc['location_id'];
+                }
+            }
+            if (empty($ids)) {
+                return view('incomplet.incompleteDetails', [
+                    'header'  => $massage,
+                    'helper'  => $helperData,
+                    'columns' => $columns,
+                    'name' => $name,
+                    'data'    => []
+                ]);
+            }
+
+            foreach ($ids as $locId) {
+                $locKey = (string)$locId;
+                if (!isset($locationCounts[$locKey]) && isset($locationCounts[(int)$locId])) {
+                    $locKey = (int)$locId;
+                }
+
+                if (!isset($locationCounts[$locKey])) {
+                    $locationCounts[$locKey] = [
+                        'location_name' => $locationNames[$locKey] ?? $locKey,
+                        'pending' => 0,
+                        'verified' => 0,
+                        'approved' => 0,
+                        'reverted' => 0,
+                    ];
+                }
+
+                $query = (clone $baseQuery)->where($col, $locId);
+                $total = $query->count();
+
+                $locationCounts[$locKey]['pending'] = $this->countByRoleIdPending(clone $query);
+                $locationCounts[$locKey]['verified'] = $this->countByRoleId((clone $query), $verifiedRoleId);
+                $locationCounts[$locKey]['approved'] = $this->countByRoleId((clone $query), $approvedRoleId);
+                $locationCounts[$locKey]['reverted'] = $this->countByRoleId((clone $query), $revertRoleId);
+            }
+        }
+
+        // Ensure integers
+        foreach ($locationCounts as &$counts) {
+            $counts['pending'] = (int)($counts['pending'] ?? 0);
+            $counts['verified'] = (int)($counts['verified'] ?? 0);
+            $counts['approved'] = (int)($counts['approved'] ?? 0);
+            $counts['reverted'] = (int)($counts['reverted'] ?? 0);
+        }
+
+        $data = [];
+        foreach ($locationCounts as $key => $row) {
+            $pending  = (int)($row['pending'] ?? 0);
+            $verified = (int)($row['verified'] ?? 0);
+            $approved = (int)($row['approved'] ?? 0);
+            $reverted = (int)($row['reverted'] ?? 0);
+            $total = $pending + $verified + $approved + $reverted;
+
+            $data[] = [
+                'location_name' => $row['location_name'] ?? $key,
+                'pending' => $pending,
+                'verified' => $verified,
+                'approved' => $approved,
+                'reverted' => $reverted,
+                'total' => $total,
+            ];
+        }
+
+        return view('incomplet.incompleteDetails', [
+
+            'header' => $massage,
+            'helper' => $helperData,
+            'columns' => $columns,
+            'data' => $data,
+            'name' => $name,
+
+        ]);
+    }
+    private function getColumnsByMode(?string $mode,): array
+    {
+        // Default location label
+        $locationLabel = match ($mode) {
+            'block_subdivision' => 'Block / Subdivision',
+            'district' => 'District',
+            'block' => 'Block',
+            'subdivision' => 'Subdivision',
+            'gp_ward' => 'GP / Ward',
+            'municipality' => 'Municipality',
+            'ward' => 'Ward',
+            default => 'Location'
+        };
+
+        return [
+            ['key' => 'location_name', 'label' => $locationLabel, 'align' => 'left', 'type' => 'text'],
+            ['key' => 'pending', 'label' => 'Pending verification', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+            ['key' => 'verified', 'label' => 'Verified', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+            ['key' => 'approved', 'label' => 'Approved', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+            // ['key' => 'rejected', 'label' => 'Rejected', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+            ['key' => 'reverted', 'label' => 'Reverted', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+            ['key' => 'total', 'label' => 'Total', 'align' => 'right', 'type' => 'number', 'show_total' => true],
+        ];
+    }
+    private function buildBaseQuery(array $baseFilters)
+    {
+        $query = BeneficiaryCommonList::query();
+
+        foreach ($baseFilters as $column => $value) {
+            $query->where($column, $value);
+        }
+
+        return $query;
+    }
+    private function countByRoleId($query, $roleId): int
+    {
+        return (clone $query)
+            ->whereHas('applicantIncomplete', function ($q) use ($roleId) {
+                $q->where('next_level_request_id', $roleId);
+            })
+            ->count();
+    }
+    private function countByRoleIdPending($query): int
+    {
+        return (clone $query)
+            ->whereHas('applicantIncomplete', function ($q) {
+                $q->whereNull('next_level_request_id');
+            })
+            ->count();
     }
 }
