@@ -158,6 +158,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/approved-lists', [BeneficiaryApprovedListController::class, 'index'])
         ->middleware('permission.redirect:canViewApprovedList')
         ->name('approved-lists');
+    Route::get('/Caste-modification-info', [CasteModificationController::class, 'index'])->name('Caste-modification-info');
+    Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])->middleware(['auth', 'verified'])->name('caste-modification.edit');
+    Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
+        ->name('beneficiary.updateCaste');
+    Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])->name('caste-modification-list');
 
     Route::get('/approved-lists-BA-Wise', [BeneficiaryApprovedListController::class, 'beneficiaryContactwiseList'])
         ->middleware('permission.redirect:canApprovedWise')
@@ -214,6 +219,7 @@ Route::controller(CmoController::class)->group(function () {
     Route::any('/populatelbportal', 'populatelbportal')->middleware('permission.redirect:canCMODatafetch')->name('populatelbportal');
     Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')
         // ->middleware('permission.redirect:canCMOWorkflow')
+        ->middleware('permission.redirect:canCMOWorkflow')
         ->name('cmo-grievance-workflow');
     // Route::any('/cmo-grievance-find/{id}', 'cmogrievancefind')->name('cmo-grievance-find');
     Route::any('/cmo-grievance-find', 'cmogrievancefind')->name('cmo-grievance-find');
