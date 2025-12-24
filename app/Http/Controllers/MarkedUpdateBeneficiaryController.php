@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Helpers\CheckAuthHelper;
 use App\Models\AcceptRejectInfo;
+use App\Models\BeneficiaryAadhaar;
 use App\Models\BeneficiaryCommonList;
 use App\Models\BeneficiaryContact;
 use App\Models\BeneficiaryModificationAllowed;
+use App\Models\BeneficiaryPersonal;
 use App\Models\ChangeTypeMaster;
 use App\Models\Codemaster;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +19,12 @@ use Illuminate\Support\Facades\Crypt;
 
 class MarkedUpdateBeneficiaryController extends Controller
 {
+    protected $currentDate;
+    public function __construct()
+    {
+       $this->currentDate = Carbon::now()->format('d-m-Y');
+            //   dd($this->currentDate);
+    }
     public function index()
     {
         if (CheckAuthHelper::isHOD()) {
@@ -115,14 +124,21 @@ class MarkedUpdateBeneficiaryController extends Controller
     }
     public function viewmarkedbeneficiarydetails(Request $request)
     {
+        $currentDate = $this->currentDate;
         $header = 'Marked Beneficiary Details View';
         $applicant_id   = $request->application_id;
         $application_id = Crypt::decryptString($applicant_id);
         $reportType  = 3;
-        
+
         $sectionType = 1;
         $marked = BeneficiaryModificationAllowed::where('application_id', $application_id)->select('allowed_fields')->first();
+        $beneficiarypersonal = BeneficiaryPersonal::where('application_id', $application_id)->select('full_name', 'dob', 'mobile_no')->first();
+        $beneficiaryname = $beneficiarypersonal->name;
+
         $beneficiarycontact = BeneficiaryContact::where('application_id', $application_id)->select('police_station', 'village_town_city', 'house_premise_no', 'post_office', 'pincode', 'district_id', 'rural_urban_id', 'block_id', 'panchayat_id', 'municipality_id', 'ward_id')->first();
+        $beneficiaryAadharDetails = BeneficiaryAadhaar::where('application_id', $application_id)->select('encoded_aadhar')->first();
+        // dump($beneficiaryAadharDetails);
+        // dd($beneficiarypersonal);
         // dd($beneficiarycontact);
         $selectedDistrict  = $beneficiarycontact->district_id;
         $selectedRuralurban = $beneficiarycontact->rural_urban_id;
@@ -141,7 +157,17 @@ class MarkedUpdateBeneficiaryController extends Controller
         $housepremiseno = $beneficiarycontact->house_premise_no;
         $postoffice = $beneficiarycontact->post_office;
         $pincode = $beneficiarycontact->pincode;
-
+        $beneficiaryname = $beneficiarypersonal->full_name;
+        $beneficiarydob = $beneficiarypersonal->dob;
+        $beneficiarymobile = $beneficiarypersonal->mobile_no;
+        $beneficiaryaadhar = $beneficiaryAadharDetails->encoded_aadhar;
+        if ($beneficiaryaadhar) {
+            $beneficiaryaadhar = Crypt::decryptString($beneficiaryaadhar);
+            // $beneficiaryaadhar = '**** **** ' . substr(Crypt::decryptString($beneficiaryaadhar), -4);
+        } else {
+            $beneficiaryaadhar = '';
+        }
+        // dd($beneficiaryaadhar);
         // dd($marked);
         $allowedFields = $marked?->allowed_fields ?? [];
         // dd($allowedFields);
@@ -203,13 +229,194 @@ class MarkedUpdateBeneficiaryController extends Controller
                 'villtowncity',
                 'housepremiseno',
                 'postoffice',
-                'pincode'
+                'pincode',
+                'beneficiaryname',
+                'beneficiarydob',
+                'beneficiarymobile',
+                'beneficiaryaadhar',
+                'currentDate'
             )
         );
     }
+    // public function updatemarkedbeneficiarydetails(Request $request)
+    // {
+    //     dd('ok');
+    //     return redirect()->route('marked-beneficiary-list')->with('success', 'Beneficiary Details Updated Successfully!');
+    // }
+
     public function updatemarkedbeneficiarydetails(Request $request)
     {
-        dd('ok');
-        return redirect()->route('marked-beneficiary-list')->with('success', 'Beneficiary Details Updated Successfully!');
+
+        // dd($request->all());
+        // $application_id = Crypt::decryptString($request->application_id);
+        // $allowedupdatedfields = BeneficiaryModificationAllowed::where('application_id', $application_id)->first();
+        // dd($allowedupdatedfields);
+
+        $application_id = Crypt::decryptString($request->application_id);
+
+        /* ---------------- RE-FETCH ALLOWED FIELDS ---------------- */
+        $allowedJson = BeneficiaryModificationAllowed::where('application_id', $application_id)
+            ->value('allowed_fields');
+        $allowedFields = is_array($allowedJson)
+            ? $allowedJson
+            : json_decode($allowedJson, true) ?? [];
+        if (isset($allowedFields['allowed_fields'])) {
+            $allowedFields = $allowedFields['allowed_fields'];
+        }
+
+        /* Flag map */
+        $flagMap = [
+            0 => 'visible_Name',
+            1 => 'visible_DOB',
+            2 => 'visible_Address',
+            3 => 'visible_Aadhar',
+            4 => 'visible_Mobile',
+        ];
+
+        /* Initialize flags */
+        $visible_Name = $visible_DOB = $visible_Address = $visible_Aadhar = $visible_Mobile = 0;
+
+        /* Build flags */
+        foreach ($allowedFields as $field) {
+            if (!isset($field['code'])) {
+                continue;
+            }
+            $code = (int) $field['code'];
+            if (isset($flagMap[$code])) {
+                ${$flagMap[$code]} = 1;
+            }
+        }
+        /* DEBUG ONCE */
+        // dd([
+        //     'normalized_allowedFields' => $allowedFields,
+        //     'visible_Name' => $visible_Name,
+        //     'visible_DOB' => $visible_DOB,
+        //     'visible_Address' => $visible_Address,
+        //     'visible_Aadhar' => $visible_Aadhar,
+        //     'visible_Mobile' => $visible_Mobile,
+        // ]);
+        $rules = [];
+        $messages = [];
+        if ($visible_Name == 1) {
+            $rules['name'] = 'required|string|max:150';
+        }
+        if ($visible_DOB == 1) {
+            $rules['dob'] = 'required|date|before:today';
+        }
+        if ($visible_Mobile == 1) {
+            $rules['mobile'] = 'required|digits:10';
+        }
+        if ($visible_Address == 1) {
+
+            $rules['policestation'] = 'required|string|max:100';
+            $rules['villtowncity']  = 'required|string|max:100';
+            $rules['postoffice']    = 'required|string|max:100';
+            $rules['pincode']       = 'required|digits:6';
+
+            $rules['district_id']    = 'required|integer';
+            $rules['rural_urban'] = 'required|in:1,2';
+
+            if ($request->rural_urban_id == 2) {
+                $rules['block_id']     = 'required|integer';
+                $rules['panchayat_id'] = 'required|integer';
+            }
+            if ($request->rural_urban_id == 1) {
+                $rules['municipality_id'] = 'required|integer';
+                $rules['ward_id']         = 'required|integer';
+            }
+        }
+
+        // ---- AADHAAR ----
+        // if ($visible_Aadhar == 1) {
+        //     $rules['aadhaar'] = 'required|digits:12';
+        // }
+        if (!empty($rules)) {
+            // try {
+                $request->validate($rules, $messages);
+            // } catch (\Illuminate\Validation\ValidationException $e) {
+            //     dd([
+            //         'VALIDATION FAILED',
+            //         'errors' => $e->errors(),
+            //         'rules'  => $rules,
+            //         'input'  => $request->all(),
+            //     ]);
+            // }
+        }
+        // dd('sfsf55');
+        // dd($request->validate($rules, $messages));
+        DB::beginTransaction();
+        try {
+
+            /* ---------- PERSONAL ---------- */
+            $personalData = [];
+
+            if ($visible_Name == 1) {
+                $personalData['full_name'] = $request->name;
+            }
+
+            if ($visible_DOB == 1) {
+                $personalData['dob'] = $request->dob;
+            }
+
+            if ($visible_Mobile == 1) {
+                $personalData['mobile_no'] = $request->mobile;
+            }
+
+            if (!empty($personalData)) {
+                BeneficiaryPersonal::updateOrCreate(
+                    ['application_id' => $application_id],
+                    $personalData
+                );
+            }
+            if ($visible_Address == 1) {
+                $contactData = [
+                    'police_station'     => $request->policestation,
+                    'village_town_city' => $request->villtowncity,
+                    'house_premise_no'  => $request->housepremiseno,
+                    'post_office'       => $request->postoffice,
+                    'pincode'           => $request->pincode,
+                    'district_id'       => $request->district_id,
+                    'rural_urban_id'    => $request->rural_urban_id,
+                    'block_id'          => null,
+                    'panchayat_id'      => null,
+                    'municipality_id'   => null,
+                    'ward_id'           => null,
+                ];
+                if ((int) $request->rural_urban_id === 2) {
+                    // Rural
+                    $contactData['block_id']     = $request->block_id;
+                    $contactData['panchayat_id'] = $request->panchayat_id;
+                }
+                if ((int) $request->rural_urban_id === 1) {
+                    // Urban
+                    $contactData['municipality_id'] = $request->municipality_id;
+                    $contactData['ward_id']         = $request->ward_id;
+                }
+                BeneficiaryContact::updateOrCreate(
+                    ['application_id' => $application_id],
+                    $contactData
+                );
+            }
+            // if ($visible_Aadhar == 1) {
+            //     BeneficiaryAadhaar::updateOrCreate(
+            //         ['application_id' => $application_id],
+            //         [
+            //             'encoded_aadhar' => Crypt::encryptString($request->aadhaar),
+            //             'aadhar_hash'    => md5($request->aadhaar),
+            //         ]
+            //     );
+            // }
+
+            DB::commit();
+
+            return redirect()
+                ->route('marked-beneficiary-list')
+                ->with('success', 'Beneficiary Details Updated Successfully');
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return back()->with('error', 'Update failed. Please try again.');
+        }
     }
 }

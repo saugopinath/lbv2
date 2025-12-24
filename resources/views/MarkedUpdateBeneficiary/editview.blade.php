@@ -123,36 +123,49 @@
                 @csrf
                 <div class="beneficiary-form-container">
                     <div class="form-fields-grid mb-2">
+                        <input type="hidden" name="application_id"
+                            value="{{ Crypt::encryptString($application_id) }}">
 
                         {{-- Row 1: Name and DOB --}}
                         @if($visible_Name || $visible_DOB || $visible_Mobile)
                         <div class="mb-6 rounded-lg border border-gray-200 overflow-hidden">
                             <!-- Section Header -->
                             <div class="bg-gradient-to-r from-gray-50 to-white p-2 border-b border-gray-200">
-                                <div class="flex items-center space-x-1">
+                                <div class="flex items-center space-x-3">
                                     <span class="h-6 w-1.5 bg-pink-500 rounded-full"></span>
-                                    <h3 class="text-lg font-semibold text-gray-800 ">Update Personal Details</h3>
+                                    <h3 class="text-lg font-semibold text-gray-800">Update Personal Details</h3>
                                 </div>
                             </div>
 
                             <!-- Section Content -->
                             <div class="p-6 bg-white">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div x-data="ageCalculator('{{ $beneficiarydob }}')" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     @if($visible_Name)
                                     <div class="space-y-2">
-                                        <x-form.input name="name" label="Beneficiary Name" />
+                                        <x-form.input name="name" label="Beneficiary Name" value="{{ $beneficiaryname }}" />
                                     </div>
                                     @endif
-
                                     @if($visible_DOB)
                                     <div class="space-y-2">
-                                        <x-form.input type="date" name="dob" label="Date of Birth" />
+                                        <x-form.input
+                                            type="date"
+                                            name="dob"
+                                            label="Date of Birth"
+                                            value="{{ $beneficiarydob }}"
+                                            x-model="dob"
+                                            @change="calculateAge" />
+                                    </div>
+                                    <div class="space-y-2">
+                                        <x-form.input
+                                            name="age"
+                                            label="Age (as on {{ $currentDate }})" x-model="age"
+                                            disabled required/>
                                     </div>
                                     @endif
 
                                     @if($visible_Mobile)
-                                    <div class="md:col-span-2 space-y-2">
-                                        <x-form.input name="mobile" label="Mobile Number" />
+                                    <div class=" space-y-2">
+                                        <x-form.input name="mobile" label="Mobile Number" value="{{ $beneficiarymobile }}" />
                                     </div>
                                     @endif
                                 </div>
@@ -200,22 +213,7 @@
                             </div>
                         </div>
                         @endif
-                        @if($visible_Aadhar)
-                        <div class="mb-6 rounded-lg border border-gray-200 overflow-hidden">
-                            <!-- Section Header -->
-                            <div class="bg-gradient-to-r from-gray-50 to-white p-2 border-b border-gray-200">
-                                <div class="flex items-center space-x-3">
-                                    <span class="h-6 w-1.5 bg-blue-500 rounded-full"></span>
-                                    <h3 class="text-lg font-semibold text-gray-800">Update Aadhar Information</h3>
-                                </div>
-                            </div>
-                            <!-- Section Content -->
-                            <livewire:dup-aadhaar-check />
 
-                        </div>
-                        @endif
-
-                        <!-- Submit Button -->
                         <div class="mt-8 pt-6 border-t border-gray-200">
                             <x-button.loading-spiner-button
                                 type="submit"
@@ -229,4 +227,40 @@
         </div>
         @endif
     </div>
+    @push('scripts')
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('ageCalculator', (initialDob = null) => ({
+                dob: initialDob,
+                age: '',
+
+                init() {
+                    if (this.dob) {
+                        this.calculateAge();
+                    }
+                },
+
+                calculateAge() {
+                    if (!this.dob) {
+                        this.age = '';
+                        return;
+                    }
+
+                    const birthDate = new Date(this.dob);
+                    const today = new Date();
+
+                    let age = today.getFullYear() - birthDate.getFullYear();
+                    const m = today.getMonth() - birthDate.getMonth();
+
+                    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                    }
+
+                    this.age = age;
+                }
+            }));
+        });
+    </script>
+    @endpush
+
 </x-layouts.app>

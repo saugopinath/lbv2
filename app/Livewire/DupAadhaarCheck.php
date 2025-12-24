@@ -20,7 +20,7 @@ class DupAadhaarCheck extends Component
         }
     }
 
-    public function checkDuplicate()
+    public function checkDuplicate($previousAadhaar = null)
     {
         $this->error = null;
         $this->aadhaar = trim($this->aadhaar);

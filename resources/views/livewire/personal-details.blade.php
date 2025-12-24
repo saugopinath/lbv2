@@ -135,6 +135,7 @@
                 </div>
             </template>
         </div>
+        
         <div class="flex justify-end mt-4 pr-4">
             <x-button.primary type="submit" wire:loading.attr="disabled" wire:target="save" class="flex items-center gap-2">
                 <span wire:loading.remove wire:target="save">

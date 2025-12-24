@@ -1,4 +1,4 @@
-<div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
+<div class="grid gap-6 mt-2 mb-2 md:grid-cols-3 pl-4 pr-4">
     <div>
         @if ($visible['district_dropdown'])
         <x-form.select name="district_id" label="District" wire:model.live="selectedDistrict" required>
