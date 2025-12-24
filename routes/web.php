@@ -272,3 +272,10 @@ Route::controller(JnpmController::class)->group(function () {
     // JNMP List at HOD
     Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')->name('jnmp-marked-data');
 });
+
+
+Route::get('/master-tab', App\Livewire\MasterTabManager::class)->name('master-tab');
+
+Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name('menu-tab');
+
+
