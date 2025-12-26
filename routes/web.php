@@ -254,3 +254,7 @@ Route::get(
     '/dynamic-form-page',
     [DynamicFormController::class, 'show']
 )->name('dynamic-form-page');
+
+Route::get('/master-tab', App\Livewire\MasterTabManager::class)->name('master-tab');
+
+// Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name(name: 'menu-tab');

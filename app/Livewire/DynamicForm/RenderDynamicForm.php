@@ -99,7 +99,6 @@ class RenderDynamicForm extends Component
         $draftbenPar->next_level_role_id = Codemaster::getIdByCode(22);
         $draftbenPar->is_final_submit = 1;
         $draftbenPar->save();
-
         $AcceptRejectInfo = new AcceptRejectInfo;
         $AcceptRejectInfo->application_id = $this->application_id;
         $AcceptRejectInfo->beneficiary_id = $draftbenPar->beneficiary_id;

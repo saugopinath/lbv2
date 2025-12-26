@@ -11,22 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('master_tabs', function (Blueprint $table) {
+        Schema::create('scheme_tab_mappings', function (Blueprint $table) {
             $table->id();
-            $table->string('tab_name', 100);
-            $table->Integer('tab_code')->unique();
-            $table->string('tab_short_name', 50);
-            $table->string('tab_component', 100)->nullable();
-            $table->text('tab_icon')->nullable();
+            $table->Integer('scheme_id');
+            $table->Integer('tab_code');
+            $table->integer('position')->unsigned();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->foreign('tab_code')->references('tab_code')->on('master_tabs')->onDelete('cascade');
+            $table->unique(['scheme_id', 'tab_code']);
+            $table->unique(['scheme_id', 'position']);
         });
     }
+
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('master_tabs');
+        Schema::dropIfExists('scheme_tab_mappings');
     }
 };
