@@ -12,7 +12,7 @@ class MasterTabManager extends Component
 {
     public $selectedSchemeId;
     public $selectedSchemeName;
-
+    public $showPreview = false;
     public $selectedTabs = [];
     public $positions = [];
     public $selectedTabCode = null;
@@ -143,6 +143,17 @@ class MasterTabManager extends Component
             'selectedTabCode',
         ]);
         session()->flash('message', 'Tabs mapped successfully.');
+    }
+
+
+    public function openPreview()
+    {
+        $this->showPreview = true;
+    }
+
+    public function closePreview()
+    {
+        $this->showPreview = false;
     }
 
     public function render()

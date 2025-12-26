@@ -82,7 +82,14 @@
                 @endforeach
             </ul>
 
-            <div class="mt-4 flex justify-end">
+            <div class="mt-4 flex gap-2 justify-end">
+                <x-button.primary
+        wire:click="openPreview"
+        type="button"
+    >
+        Preview
+    </x-button.primary>
+
                 <x-button.primary
                     wire:click="submit"
                     type="button"
@@ -95,7 +102,67 @@
             </div>
         </div>
     @endif
+{{-- PREVIEW MODAL --}}
+@if($showPreview)
+<div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl">
 
+        {{-- Header --}}
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+            <h3 class="text-lg font-semibold text-gray-800">
+                Tab Preview
+            </h3>
+            <button
+                wire:click="closePreview"
+                class="text-gray-400 hover:text-gray-600 text-xl"
+            >
+                ✕
+            </button>
+        </div>
+
+        {{-- TAB NAV (USING YOUR COMPONENT) --}}
+        <div class="px-6 pt-4">
+            <nav class="flex space-x-6 border-b">
+                @foreach($selectedTabs as $index => $tabCode)
+                    @php
+                        $tab = $allTabs->firstWhere('tab_code', $tabCode);
+                    @endphp
+
+                    <x-entrytab-nav-link
+                        :active="$index === 0"
+                        :icon="$tab?->tab_icon"
+                    >
+                        {{ $tab?->tab_name }}
+                    </x-entrytab-nav-link>
+                @endforeach
+            </nav>
+        </div>
+
+        {{-- Dummy Content Area (Preview Only) --}}
+        <div class="px-6 py-10 text-center text-gray-400">
+            Selected tab content preview will appear here
+        </div>
+
+        {{-- Footer --}}
+        <div class="flex justify-end gap-3 px-6 py-4 border-t">
+            <x-button.primary
+                wire:click="closePreview"
+                type="button"
+            >
+                Close
+            </x-button.primary>
+
+            <x-button.primary
+                wire:click="submit"
+                type="button"
+            >
+                Save Mapping
+            </x-button.primary>
+        </div>
+
+    </div>
+</div>
+@endif
     {{-- Success Message --}}
     @if(session()->has('message'))
         <div class="rounded-lg bg-green-50 border border-green-200 p-3 text-green-700 text-sm font-medium">
@@ -105,5 +172,5 @@
 
 </div>
 
-{{-- SortableJS (ONLY ONCE per page) --}}
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+
+
