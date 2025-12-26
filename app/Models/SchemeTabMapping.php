@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SchemeTabMapping extends Model
 {
-    protected $table = 'scheme_tab_mapping';
+    protected $table = 'scheme_tab_mappings';
 
     protected $fillable = [
         'scheme_id',
