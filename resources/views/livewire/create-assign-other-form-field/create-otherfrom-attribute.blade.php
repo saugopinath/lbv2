@@ -89,6 +89,38 @@
 
             @if ($field_type === 'select')
             <div class="">
+                <label class="font-semibold block mb-1">
+                    Is choose from default?
+                </label>
+                <div class="flex gap-6">
+                    <x-form.radio
+                        name="is_choose_default"
+                        value="yes"
+                        label="Yes"
+                        wire:model.live="is_choose_default" />
+
+                    <x-form.radio
+                        name="is_choose_default"
+                        value="no"
+                        label="No"
+                        wire:model.live="is_choose_default" />
+                </div>
+            </div>
+            @if ($is_choose_default === 'yes')
+            <x-form.select
+                name="field_type"
+                label="Field Type"
+                wire:model.live="field_type"
+                required>
+                <option value="">-- Select --</option>
+                @foreach ($fieldTypes as $type)
+                <option value="{{ $type->name }}">
+                    {{ $type->name }}
+                </option>
+                @endforeach
+            </x-form.select>
+            @endif
+            <div class="">
                 <label class="font-semibold block mb-2">
                     Is Multiple Select Allowed?
                 </label>
@@ -138,7 +170,10 @@
         </x-form.select>
         @endif
 
-        @if (in_array($field_type, ['select','checkbox','radio']))
+        @if (
+        in_array($field_type, ['checkbox','radio']) ||
+        ($field_type === 'select' && $is_choose_default === 'no')
+        )
         <!-- Options Section -->
         <div class="md:col-span-2 mt-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

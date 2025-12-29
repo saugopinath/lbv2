@@ -29,14 +29,15 @@ class CreateOtherfromAttribute extends Component
     public $fieldTypes = [];
     public $validationRules = [];
     public array $validationRuleOptions = [];
+    public string $is_choose_default = 'no';
     public function mount()
     {
         $this->schemes = Scheme::all();
         $this->fieldTypes = FromFieldType::all();
         $this->validationRuleOptions = ValidationRule::all()
-            ->map(fn ($rule) => [
-                'value' => $rule->rule,          
-                'label' => $rule->description, 
+            ->map(fn($rule) => [
+                'value' => $rule->rule,
+                'label' => $rule->description,
             ])
             ->toArray();
     }
@@ -56,6 +57,7 @@ class CreateOtherfromAttribute extends Component
     {
         if ($value !== 'select') {
             $this->is_multiple = 'no';
+            $this->is_choose_default = 'no';
         }
     }
 
@@ -70,6 +72,12 @@ class CreateOtherfromAttribute extends Component
         $this->sections = [];
         $this->section_id = null;
     }
+
+    public function updatedIsChooseDefault($value)
+    {
+        $this->is_choose_default = $value;
+    }
+
     protected function rules()
     {
         return [
@@ -82,7 +90,7 @@ class CreateOtherfromAttribute extends Component
             'is_under_section' => 'required|in:yes,no',
             'section_id' => 'required_if:is_under_section,yes',
             'is_multiple' => 'required_if:field_type,select',
-           
+            'is_choose_default' => 'required_if:field_type,select',
         ];
     }
     public function addOption()
@@ -102,7 +110,7 @@ class CreateOtherfromAttribute extends Component
         $this->validate();
         $validationRules = collect($this->validation_rule)
             ->flatten()
-            ->filter(fn ($v) => is_string($v))
+            ->filter(fn($v) => is_string($v))
             ->values()
             ->toArray();
 
@@ -141,7 +149,8 @@ class CreateOtherfromAttribute extends Component
             'option_input',
             'is_under_section',
             'section_id',
-            'is_multiple'
+            'is_multiple',
+            'is_choose_default'
         ]);
 
         session()->flash('success', 'Field created successfully');
