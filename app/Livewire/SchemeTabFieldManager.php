@@ -6,6 +6,8 @@ use Livewire\Component;
 use App\Models\Scheme;
 use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabBasefield;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Contracts\Encryption\DecryptException;
 
 class SchemeTabFieldManager extends Component
 {
@@ -14,14 +16,9 @@ class SchemeTabFieldManager extends Component
 
     public $tabs = [];
 
-    /**
+    /** Tab wise selected fields
      * [
-     *   tab_code => [
-     *      field_id => [
-     *          'name' => field_name,
-     *          'position' => 1
-     *      ]
-     *   ]
+     *   tab_code => [ field_id => field_name ]
      * ]
      */
     public $tabFields = [];
@@ -30,21 +27,35 @@ class SchemeTabFieldManager extends Component
     public $showManageModal = false;
     public $activeTabCode = null;
     public $modalFields = [];
+    public $previewTabName = '';
+
     public $modalSelected = [];
+    public $showFinalPreview = false;
+
 
     /* -------- Preview Modal -------- */
     public $showPreviewModal = false;
 
-    /* -----------------------------
-     | Mount
-     |-----------------------------*/
     public function mount($scheme_id = null)
     {
         if ($scheme_id) {
-            $this->schemeId = (int) $scheme_id;
-            $this->lockScheme = true;
-            $this->loadTabs();
+            try {
+                $this->schemeId = (int) Crypt::decryptString($scheme_id);
+                $this->lockScheme = true;
+                $this->loadTabs();
+            } catch (DecryptException $e) {
+                abort(403, 'Invalid scheme reference');
+            }
         }
+    }
+    public function openFinalPreview()
+    {
+        $this->showFinalPreview = true;
+    }
+
+    public function closeFinalPreview()
+    {
+        $this->showFinalPreview = false;
     }
 
     /* -----------------------------
@@ -74,6 +85,7 @@ class SchemeTabFieldManager extends Component
             ->where('is_active', true)
             ->orderBy('position')
             ->get();
+        // dd($this->tabs );
     }
 
     /* -----------------------------
@@ -85,16 +97,17 @@ class SchemeTabFieldManager extends Component
         $this->showManageModal = true;
 
         $fields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
-            ->whereIn('tab_code', [0, $tabCode])
+            ->whereIn('tab_code', [$tabCode, 0])
             ->where('is_active', true)
-            ->orderBy('field_name')
+            ->orderBy('field_position')
             ->get();
 
-        $this->modalFields = $fields->map(fn ($f) => [
-            'field_id'   => $f->field_id,
-            'field_name' => $f->field_name,
+        $this->modalFields = $fields->map(fn($f) => [
+            'field_id'   => $f->id,
+            'field_name' => $f->level_name,
         ])->toArray();
 
+        // Pre-check already selected fields
         $this->modalSelected = array_keys(
             $this->tabFields[$tabCode] ?? []
         );
@@ -109,22 +122,19 @@ class SchemeTabFieldManager extends Component
     }
 
     /* -----------------------------
-     | Save Selected Fields
+     | Save Fields
      |-----------------------------*/
     public function saveManageFields()
     {
         $this->tabFields[$this->activeTabCode] = [];
 
-        $pos = 1;
         foreach ($this->modalSelected as $fid) {
             $field = collect($this->modalFields)
                 ->firstWhere('field_id', $fid);
 
             if ($field) {
-                $this->tabFields[$this->activeTabCode][$fid] = [
-                    'name' => $field['field_name'],
-                    'position' => $pos++,
-                ];
+                $this->tabFields[$this->activeTabCode][$fid]
+                    = $field['field_name'];
             }
         }
 
@@ -136,38 +146,12 @@ class SchemeTabFieldManager extends Component
      |-----------------------------*/
     public function removeField($tabCode, $fieldId)
     {
+        // dd($tabCode, $fieldId);
         unset($this->tabFields[$tabCode][$fieldId]);
 
         if (empty($this->tabFields[$tabCode])) {
             unset($this->tabFields[$tabCode]);
-        } else {
-            $pos = 1;
-            foreach ($this->tabFields[$tabCode] as $fid => $data) {
-                $this->tabFields[$tabCode][$fid]['position'] = $pos++;
-            }
         }
-    }
-
-    /* -----------------------------
-     | Drag & Drop Reorder
-     |-----------------------------*/
-    public function updateFieldOrder($tabCode, $orderedIds)
-    {
-        if (!isset($this->tabFields[$tabCode])) return;
-
-        $newOrder = [];
-        $pos = 1;
-
-        foreach ($orderedIds as $fid) {
-            if (isset($this->tabFields[$tabCode][$fid])) {
-                $newOrder[$fid] = [
-                    'name' => $this->tabFields[$tabCode][$fid]['name'],
-                    'position' => $pos++,
-                ];
-            }
-        }
-
-        $this->tabFields[$tabCode] = $newOrder;
     }
 
     /* -----------------------------
@@ -176,13 +160,58 @@ class SchemeTabFieldManager extends Component
     public function openPreview($tabCode)
     {
         $this->activeTabCode = $tabCode;
+
+        $tab = collect($this->tabs)
+            ->firstWhere('tab_code', $tabCode);
+
+        $this->previewTabName = $tab?->masterTab?->tab_name ?? 'Preview';
+
         $this->showPreviewModal = true;
     }
+
 
     public function closePreview()
     {
         $this->showPreviewModal = false;
         $this->activeTabCode = null;
+        $this->previewTabName = '';
+    }
+
+
+    public function updateFieldOrder($tabCode, $orderedIds)
+    {
+        if (!isset($this->tabFields[$tabCode])) return;
+
+        $newOrder = [];
+
+        foreach ($orderedIds as $fid) {
+            if (isset($this->tabFields[$tabCode][$fid])) {
+                $newOrder[$fid] = $this->tabFields[$tabCode][$fid];
+            }
+        }
+
+        $this->tabFields[$tabCode] = $newOrder;
+    }
+
+    public function getPreviewFieldsProperty()
+    {
+        if (!$this->activeTabCode) {
+            return collect();
+        }
+
+        $fieldIds = array_keys($this->tabFields[$this->activeTabCode] ?? []);
+
+        if (empty($fieldIds)) {
+            return collect();
+        }
+
+        return SchemeTabBasefield::whereIn('id', $fieldIds)
+            ->whereIn('scheme_id', [0, $this->schemeId])
+            ->whereIn('tab_code', [0, $this->activeTabCode])
+            ->where('is_active', true)
+            ->get()
+            ->sortBy(fn($f) => array_search($f->id, $fieldIds))
+            ->values();
     }
 
     public function render()

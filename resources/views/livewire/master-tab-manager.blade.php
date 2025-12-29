@@ -32,16 +32,16 @@
     {{-- Selected Tabs (Drag & Drop) --}}
     @if(count($selectedTabs))
     <div class="border-t pt-4" x-data x-init="
-                    new Sortable($refs.tabList, {
-                        animation: 150,
-                        handle: '.drag-handle',
-                        onEnd() {
-                            let ordered = Array.from($refs.tabList.children)
-                                .map(el => el.dataset.code);
-                            $wire.updateOrder(ordered);
-                        }
-                    })
-                 ">
+                            new Sortable($refs.tabList, {
+                                animation: 150,
+                                handle: '.drag-handle',
+                                onEnd() {
+                                    let ordered = Array.from($refs.tabList.children)
+                                        .map(el => el.dataset.code);
+                                    $wire.updateOrder(ordered);
+                                }
+                            })
+                         ">
         <h3 class="text-base font-semibold text-gray-800 mb-3">
             Selected Tabs (Drag to reorder)
         </h3>
@@ -75,13 +75,17 @@
         </ul>
 
         <div class="mt-4 flex gap-2 justify-center">
-            @if($mappingSaved)
-            <a href="{{ route('tab-field-manager', ['scheme_id' => $selectedSchemeId]) }}">
+            @if ($mappingSaved)
+            <a href="{{ $selectedSchemeId
+        ? route('tab-field-manager', Crypt::encryptString($selectedSchemeId))
+        : route('tab-field-manager') }}">
                 <x-button.primary class="bg-green-600 hover:bg-green-700">
                     Add Field
                 </x-button.primary>
             </a>
             @endif
+
+
             {{-- Save Mapping --}}
             @unless($mappingSaved)
             <x-button.primary wire:click="submit" class="bg-green-600 hover:bg-green-700">

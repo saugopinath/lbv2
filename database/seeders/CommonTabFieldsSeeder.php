@@ -27,6 +27,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'regex'           => null,
                     'is_multiple'     => false,
                     'is_active'       => true,
+                    'field_position'  => 1,
                 ],
                 [
                     'field_id'        => 'app_date',
@@ -40,6 +41,8 @@ class CommonTabFieldsSeeder extends Seeder
                     'section_id'      => null,
                     'is_multiple'     => false,
                     'is_active'       => true,
+                    'field_position'  => 2,
+
                 ],
                 [
                     'field_id'        => 'reg_no',
@@ -53,6 +56,8 @@ class CommonTabFieldsSeeder extends Seeder
                     'section_id'      => null,
                     'is_multiple'     => false,
                     'is_active'       => true,
+                    'field_position'  => 3,
+
                 ],
                 [
                     'field_id'        => 'ds_date',
@@ -66,6 +71,8 @@ class CommonTabFieldsSeeder extends Seeder
                     'section_id'      => null,
                     'is_multiple'     => false,
                     'is_active'       => true,
+                    'field_position'  => 4,
+
                 ],
                 [
                     'level_name'      => 'Applicant Name',
@@ -79,11 +86,14 @@ class CommonTabFieldsSeeder extends Seeder
                     'section_id'      => null,
                     'is_multiple'     => false,
                     'is_active'       => true,
+                    'field_position'  => 5,
+
                 ],
-                [
-                    'field_id'        => 'mobile_no',
-                    'level_name'      => 'Mobile Number',
-                    'field_name'      => 'mobile_no',
+
+                 [
+                    'field_id'        => 'age',
+                    'level_name'      => 'Age',
+                    'field_name'      => 'age',
                     'field_type'      => 'text',
                     'is_common'       => true,
                     'validation_rule' => 'required|digits:10',
@@ -91,12 +101,16 @@ class CommonTabFieldsSeeder extends Seeder
                     'section_id'      => null,
                     'is_multiple'     => false,
                     'is_active'       => true,
+                    'tab_code'        => 101,
+                    'field_position'  => 6,
+
                 ],
+               
                 [
                     'field_id'        => 'email_id',
                     'level_name'      => 'Email Address',
                     'field_name'      => 'email_id',
-                    'field_type'      => 'email',
+                    'field_type'      => 'text',
                     'options'         => null,
                     'is_common'       => true,
                     'tab_code'        => 101,
@@ -105,6 +119,8 @@ class CommonTabFieldsSeeder extends Seeder
                     'section_id'      => null,
                     'is_multiple'     => false,
                     'is_active'       => true,
+                    'field_position'  => 7,
+
                 ],
                 [
                     'field_id'        => 'dob',
@@ -118,6 +134,8 @@ class CommonTabFieldsSeeder extends Seeder
                     'section_id'      => null,
                     'is_multiple'     => false,
                     'is_active'       => true,
+                    'field_position'  => 8,
+
                 ],
                 [
                     'field_id'        => 'ffname',
@@ -131,6 +149,8 @@ class CommonTabFieldsSeeder extends Seeder
                     'section_id'      => null,
                     'is_multiple'     => false,
                     'is_active'       => true,
+                    'field_position'  => 9,
+
                 ],
                 [
                     'field_id'        => 'mfname',
@@ -144,6 +164,8 @@ class CommonTabFieldsSeeder extends Seeder
                     'section_id'      => null,
                     'is_multiple'     => false,
                     'is_active'       => true,
+                    'field_position'  => 10,
+
                 ],
 
                 [
@@ -165,6 +187,8 @@ class CommonTabFieldsSeeder extends Seeder
                     'section_id'      => null,
                     'is_multiple'     => false,
                     'is_active'       => true,
+                    'field_position'  => 11,
+
                 ],
                 [
                     'field_id'        => 'sfname',
@@ -178,6 +202,8 @@ class CommonTabFieldsSeeder extends Seeder
                     'section_id'      => null,
                     'is_multiple'     => false,
                     'is_active'       => true,
+                    'field_position'  => 12,
+
                 ],
 
                 [
@@ -197,9 +223,9 @@ class CommonTabFieldsSeeder extends Seeder
                     'section_id'      => null,
                     'is_multiple'     => false,
                     'is_active'       => true,
+                    'field_position'  => 13,
+
                 ],
-
-
                 [
                     'field_id'        => 'cas_cer_no',
                     'level_name'      => 'Caste Certificate Number',
@@ -211,6 +237,254 @@ class CommonTabFieldsSeeder extends Seeder
                     'regex'           => '^[A-Za-z0-9\/-]+$',
                     'section_id'      => null,
                     'is_multiple'     => false,
+                    'is_active'       => true,
+                    'field_position'  => 14,
+
+                ],
+                 [
+                    'field_id'        => 'mobile_no',
+                    'level_name'      => 'Mobile Number',
+                    'field_name'      => 'mobile_no',
+                    'field_type'      => 'text',
+                    'is_common'       => true,
+                    'validation_rule' => 'required|digits:10',
+                    'regex'           => '^[6-9][0-9]{9}$',
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'is_active'       => true,
+                    'field_position'  => 1,
+
+                ],
+                // contact Details
+                [
+                    'field_id'        => 'district_id',
+                    'field_name'      => 'district_id',
+                    'level_name'      => 'District',
+                    'field_type'      => 'select',
+                    // 'options'         => [
+                    //     'source' => 'lgd_districts',
+                    //     'label'  => 'name',
+                    //     'value'  => 'id',
+                    //     'visible_key' => 'district_dropdown'
+                    // ],
+                    'is_common'       => true,
+                    'tab_code'        => 102,
+                    'validation_rule' => 'required',
+                    'regex'           => null,
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'field_position'  => 1,
+                    'is_active'       => true,
+                ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | Rural / Urban
+                |--------------------------------------------------------------------------
+                */
+                [
+                    'field_id'        => 'rural_urban',
+                    'field_name'      => 'rural_urban',
+                    'level_name'      => 'Rural/Urbar',
+                    'field_type'      => 'select',
+                    // 'options'         => [
+                    //     'source' => 'config',
+                    //     'key'    => 'constants.rural_urban',
+                    //     'visible_key' => 'rural_urban_dropdown'
+                    // ],
+                    'is_common'       => true,
+                    'tab_code'        => 102,
+                    'validation_rule' => 'required',
+                    'regex'           => null,
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'field_position'  => 2,
+                    'is_active'       => true,
+                ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | Block / Municipality
+                |--------------------------------------------------------------------------
+                */
+                [
+                    'field_id'        => 'blockurban',
+                    'field_name'      => 'blockurban',
+                    'level_name'      => 'Block/Municipality',
+                    'field_type'      => 'select',
+                    // 'options'         => [
+                    //     'depends_on' => ['district_id', 'rural_urban'],
+                    //     'source_map' => [
+                    //         '2' => 'lgd_blocks',
+                    //         '1' => 'lgd_municipalities'
+                    //     ],
+                    //     'label' => 'name',
+                    //     'value' => 'id',
+                    //     'visible_key' => 'block_dropdown'
+                    // ],
+                    'is_common'       => true,
+                    'tab_code'        => 102,
+                    'validation_rule' => 'required',
+                    'regex'           => null,
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'field_position'  => 3,
+                    'is_active'       => true,
+                ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | GP / Ward
+                |--------------------------------------------------------------------------
+                */
+                [
+                    'field_id'        => 'gpWard',
+                    'field_name'      => 'gpWard',
+                    'level_name'      => 'GP / Ward',
+                    'field_type'      => 'select',
+                    // 'options'         => [
+                    //     'depends_on' => ['blockurban', 'rural_urban'],
+                    //     'source_map' => [
+                    //         '2' => 'lgd_gps',
+                    //         '1' => 'lgd_wards'
+                    //     ],
+                    //     'label' => 'name',
+                    //     'value' => 'id',
+                    //     'visible_key' => 'gp_ward_dropdown'
+                    // ],
+                    'is_common'       => true,
+                    'tab_code'        => 102,
+                    'validation_rule' => 'required',
+                    'regex'           => null,
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'field_position'  => 4,
+                    'is_active'       => true,
+                ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | State (Disabled)
+                |--------------------------------------------------------------------------
+                */
+                [
+                    'field_id'        => 'state',
+                    'field_name'      => 'state',
+                    'level_name'      => 'State',
+                    'field_type'      => 'text',
+                    // 'options'         => [
+                    //     'disabled' => true,
+                    //     'default'  => 'West Bengal'
+                    // ],
+                    'is_common'       => true,
+                    'tab_code'        => 102,
+                    'validation_rule' => 'required',
+                    'regex'           => null,
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'field_position'  => 5,
+                    'is_active'       => true,
+                ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | Police Station
+                |--------------------------------------------------------------------------
+                */
+                [
+                    'field_id'        => 'policestation',
+                    'field_name'      => 'policestation',
+                    'level_name'      => 'Police Station',
+                    'field_type'      => 'text',
+                    'is_common'       => true,
+                    'tab_code'        => 102,
+                    'validation_rule' => 'required|string',
+                    'regex'           => '^[A-Za-z\s]+$',
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'field_position'  => 6,
+                    'is_active'       => true,
+                ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | Village / Town / City
+                |--------------------------------------------------------------------------
+                */
+                [
+                    'field_id'        => 'villtowncity',
+                    'field_name'      => 'villtowncity',
+                    'level_name'      => 'Village / Town / City',
+                    'field_type'      => 'text',
+                    'is_common'       => true,
+                    'tab_code'        => 102,
+                    'validation_rule' => 'required|string',
+                    'regex'           => '^[A-Za-z\s]+$',
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'field_position'  => 7,
+                    'is_active'       => true,
+                ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | House / Premise No
+                |--------------------------------------------------------------------------
+                */
+                [
+                    'field_id'        => 'housepremiseno',
+                    'field_name'      => 'housepremiseno',
+                    'level_name'      => 'House / Premise No',
+                    'field_type'      => 'text',
+                    'options'         => null,
+                    'is_common'       => true,
+                    'tab_code'        => 102,
+                    'validation_rule' => 'nullable|string',
+                    'regex'           => null,
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'field_position'  => 8,
+                    'is_active'       => true,
+                ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | Post Office
+                |--------------------------------------------------------------------------
+                */
+                [
+                    'field_id'        => 'postoffice',
+                    'field_name'      => 'postoffice',
+                    'scheme_id'       => 0,
+                    'level_name'      => 'Post Office',
+                    'field_type'      => 'text',
+                    'is_common'       => true,
+                    'tab_code'        => 102,
+                    'validation_rule' => 'required|string',
+                    'regex'           => '^[A-Za-z\s]+$',
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'field_position'  => 9,
+                    'is_active'       => true,
+                ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | Pin Code
+                |--------------------------------------------------------------------------
+                */
+                [
+                    'field_id'        => 'pincode',
+                    'field_name'      => 'pincode',
+                    'level_name'      => 'Pin Code',
+                    'field_type'      => 'text',
+                    'is_common'       => true,
+                    'tab_code'        => 102,
+                    'validation_rule' => 'required|digits:6',
+                    'regex'           => '^[0-9]{6}$',
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'field_position'  => 10,
                     'is_active'       => true,
                 ],
             ];

@@ -83,15 +83,11 @@ class MasterTabManager extends Component
         $this->selectedTabCode = null;
     }
 
-    /* ------------------------------
-     | REMOVE TAB
-     |------------------------------*/
     public function removeTab($tabCode)
     {
         $this->selectedTabs = array_values(
             array_diff($this->selectedTabs, [(int)$tabCode])
         );
-
         $this->recalculatePositions();
         $this->mappingSaved = false;
     }
@@ -139,14 +135,9 @@ class MasterTabManager extends Component
                 );
             }
         });
-
         $this->mappingSaved = true;
         session()->flash('message', 'Tabs mapped successfully.');
     }
-
-    /* ------------------------------
-     | PREVIEW
-     |------------------------------*/
     public function openPreview()
     {
         $this->showPreview = true;
