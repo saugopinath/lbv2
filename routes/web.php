@@ -35,6 +35,7 @@ use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\ElasticSearchController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
+use App\Livewire\SchemeTabFieldManager;
 use Illuminate\Http\Request;
 
 // Guest Routes
@@ -278,4 +279,7 @@ Route::get('/master-tab', App\Livewire\MasterTabManager::class)->name('master-ta
 
 Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name('menu-tab');
 
+// Route::get('/tab-filed-manage', App\Livewire\SchemeTabFieldManager::class)->name('tab-filed-manage');
+Route::get('/tab-field-manager/{scheme_id}', SchemeTabFieldManager::class)
+    ->name('tab-field-manager');
 
