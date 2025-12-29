@@ -6,6 +6,8 @@ use Livewire\Component;
 use App\Models\Scheme;
 use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabBasefield;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Contracts\Encryption\DecryptException;
 
 class SchemeTabFieldManager extends Component
 {
@@ -14,39 +16,47 @@ class SchemeTabFieldManager extends Component
 
     public $tabs = [];
 
-    /* ---------- Modal State ---------- */
+    /** Tab wise selected fields
+     * [
+     *   tab_code => [ field_id => field_name ]
+     * ]
+     */
+    public $tabFields = [];
+
+    /* -------- Manage Modal -------- */
     public $showManageModal = false;
-    public $showPreviewModal = false;
-
     public $activeTabCode = null;
-
     public $modalFields = [];
     public $modalSelected = [];
 
-    /* ---------- Saved Fields ---------- */
-    // [tab_code => [field_id => field_name]]
-    public $tabFields = [];
+    /* -------- Preview Modal -------- */
+    public $showPreviewModal = false;
 
-    /* ---------------- Mount ---------------- */
     public function mount($scheme_id = null)
     {
         if ($scheme_id) {
-            $this->schemeId = (int)$scheme_id;
-            $this->lockScheme = true;
-            $this->loadTabs();
+            try {
+                $this->schemeId = (int) Crypt::decryptString($scheme_id);
+                $this->lockScheme = true;
+                $this->loadTabs();
+            } catch (DecryptException $e) {
+                abort(403, 'Invalid scheme reference');
+            }
         }
     }
 
-    /* ---------------- Scheme Change ---------------- */
+    /* -----------------------------
+     | Scheme Change
+     |-----------------------------*/
     public function updatedSchemeId()
     {
         if ($this->lockScheme) return;
 
-        $this->resetAll();
+        $this->resetState();
         $this->loadTabs();
     }
 
-    private function resetAll()
+    private function resetState()
     {
         $this->tabs = [];
         $this->tabFields = [];
@@ -62,41 +72,55 @@ class SchemeTabFieldManager extends Component
             ->where('is_active', true)
             ->orderBy('position')
             ->get();
+        // dd($this->tabs );
     }
 
-    /* ---------------- Manage Fields Modal ---------------- */
+    /* -----------------------------
+     | Open Manage Modal
+     |-----------------------------*/
     public function openManageModal($tabCode)
     {
-        // dd('ok');
         $this->activeTabCode = $tabCode;
         $this->showManageModal = true;
-// dd($this->showManageModal);
+
         $fields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
             ->where('tab_code', $tabCode)
             ->where('is_active', true)
             ->orderBy('field_name')
             ->get();
 
-        $this->modalFields = $fields->map(fn ($f) => [
-            'field_id' => $f->field_id,
+        $this->modalFields = $fields->map(fn($f) => [
+            'field_id'   => $f->field_id,
             'field_name' => $f->field_name,
         ])->toArray();
 
+        // Pre-check already selected fields
         $this->modalSelected = array_keys(
             $this->tabFields[$tabCode] ?? []
         );
     }
 
+    public function closeManageModal()
+    {
+        $this->showManageModal = false;
+        $this->activeTabCode = null;
+        $this->modalFields = [];
+        $this->modalSelected = [];
+    }
+
+    /* -----------------------------
+     | Save Fields
+     |-----------------------------*/
     public function saveManageFields()
     {
         $this->tabFields[$this->activeTabCode] = [];
 
-        foreach ($this->modalSelected as $fieldId) {
+        foreach ($this->modalSelected as $fid) {
             $field = collect($this->modalFields)
-                ->firstWhere('field_id', $fieldId);
+                ->firstWhere('field_id', $fid);
 
             if ($field) {
-                $this->tabFields[$this->activeTabCode][$fieldId]
+                $this->tabFields[$this->activeTabCode][$fid]
                     = $field['field_name'];
             }
         }
@@ -104,20 +128,22 @@ class SchemeTabFieldManager extends Component
         $this->closeManageModal();
     }
 
-    public function closeManageModal()
-    {
-        $this->showManageModal = false;
-        $this->modalFields = [];
-        $this->modalSelected = [];
-    }
-
-    /* ---------------- Remove Field ---------------- */
+    /* -----------------------------
+     | Remove Field
+     |-----------------------------*/
     public function removeField($tabCode, $fieldId)
     {
+        // dd($tabCode, $fieldId);
         unset($this->tabFields[$tabCode][$fieldId]);
+
+        if (empty($this->tabFields[$tabCode])) {
+            unset($this->tabFields[$tabCode]);
+        }
     }
 
-    /* ---------------- Preview ---------------- */
+    /* -----------------------------
+     | Preview
+     |-----------------------------*/
     public function openPreview($tabCode)
     {
         $this->activeTabCode = $tabCode;
@@ -127,7 +153,24 @@ class SchemeTabFieldManager extends Component
     public function closePreview()
     {
         $this->showPreviewModal = false;
+        $this->activeTabCode = null;
     }
+
+    public function updateFieldOrder($tabCode, $orderedIds)
+    {
+        if (!isset($this->tabFields[$tabCode])) return;
+
+        $newOrder = [];
+
+        foreach ($orderedIds as $fid) {
+            if (isset($this->tabFields[$tabCode][$fid])) {
+                $newOrder[$fid] = $this->tabFields[$tabCode][$fid];
+            }
+        }
+
+        $this->tabFields[$tabCode] = $newOrder;
+    }
+
 
     public function render()
     {

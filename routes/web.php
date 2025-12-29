@@ -280,6 +280,7 @@ Route::get('/master-tab', App\Livewire\MasterTabManager::class)->name('master-ta
 Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name('menu-tab');
 
 // Route::get('/tab-filed-manage', App\Livewire\SchemeTabFieldManager::class)->name('tab-filed-manage');
-Route::get('/tab-field-manager/{scheme_id}', SchemeTabFieldManager::class)
+Route::get('/tab-field-manager/{scheme_id?}', SchemeTabFieldManager::class)
     ->name('tab-field-manager');
+
 

@@ -10,84 +10,101 @@
 
     @if($schemeId)
 
-        {{-- Tabs Table --}}
-        <div class="border rounded-lg overflow-hidden">
-            <table class="min-w-full text-sm">
-                <tbody>
-                    @foreach($tabs as $tab)
-                        <tr class="border-t">
-                            <td class="px-4 py-2">{{ $tab->position }}</td>
-                            <td class="px-4 py-2 font-semibold">
-                                {{ $tab->masterTab->tab_name }}
-                            </td>
-                            <td class="px-4 py-2">
-                                <div class="flex justify-end gap-2">
-                                    <button wire:click="openManageModal({{ $tab->tab_code }})"
-                                        class="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">
-                                        Manage Fields
-                                    </button>
+        {{-- ACCORDION TABS --}}
+        <div class="space-y-4">
+            @foreach($tabs as $tab)
+                <div x-data="{ open:false }" class="border rounded-lg overflow-hidden">
 
-                                    <button wire:click="openPreview({{ $tab->tab_code }})"
-                                        class="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700">
-                                        Preview
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
+                    {{-- Header --}}
+                    <div class="flex justify-between items-center bg-gray-100 px-4 py-3">
+                        <span class="font-semibold">
+                            {{ $tab->position }}. {{ $tab->masterTab->tab_name }}
+                        </span>
 
-                        {{-- Selected Fields Table --}}
-                        @if(isset($tabFields[$tab->tab_code]))
-                            <tr class="bg-gray-50">
-                                <td colspan="3" class="p-4">
-                                    <table class="w-full text-sm border">
-                                        <tbody>
+                        <div class="flex gap-2">
+                            <button wire:click="openManageModal({{ $tab->tab_code }})"
+                                class="px-3 py-1 bg-indigo-600 text-white rounded text-sm">
+                                Manage Fields
+                            </button>
+
+                            <button wire:click="openPreview({{ $tab->tab_code }})"
+                                class="px-3 py-1 bg-gray-600 text-white rounded text-sm">
+                                Preview
+                            </button>
+
+                            <button @click="open=!open" class="text-sm">
+                                ▼
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Body --}}
+                    <div x-show="open" x-collapse class="bg-white">
+                        @if(isset($tabFields[$tab->tab_code]) && count($tabFields[$tab->tab_code]))
+
+                                        <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
+                                new Sortable($el, {
+                                    animation: 150,
+                                    handle: '.drag-handle',
+                                    onEnd() {
+                                        let ordered = Array.from($el.children)
+                                            .map(el => el.dataset.fid);
+                                        $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
+                                    }
+                                })
+                            ">
                                             @foreach($tabFields[$tab->tab_code] as $fid => $fname)
-                                                <tr class="border-t">
-                                                    <td class="px-3 py-2">{{ $fname }}</td>
-                                                    <td class="px-3 py-2 text-right">
-                                                        <button wire:click="removeField({{ $tab->tab_code }}, '{{ $fid }}')"
-                                                            class="text-red-600">
-                                                            ✕
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                        @endif
+                                                <div data-fid="{{ $fid }}" class="flex items-center justify-between bg-gray-50 border rounded p-3">
 
-                    @endforeach
-                </tbody>
-            </table>
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="drag-handle cursor-move text-gray-400">☰</span>
+                                                        <span>{{ $fname }}</span>
+                                                    </div>
+
+                                                    {{-- IMPORTANT FIX --}}
+                                                    <button wire:click.stop="removeField({{ $tab->tab_code }}, '{{ $fid }}')"
+                                                        class="text-red-600 font-bold">
+                                                        ✕
+                                                    </button>
+
+                                                </div>
+                                            @endforeach
+                                        </div>
+                        @else
+                            <div class="p-4 text-gray-400 text-sm">
+                                No fields added
+                            </div>
+                        @endif
+                    </div>
+
+                </div>
+            @endforeach
         </div>
     @endif
 
-
     {{-- MANAGE MODAL --}}
     @if($showManageModal)
-        <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-            <div class="bg-white w-full max-w-lg rounded-xl shadow">
-                <div class="px-6 py-4 border-b flex justify-between">
-                    <h3 class="font-semibold">Manage Fields</h3>
-                    <button wire:click="closeManageModal">✕</button>
+        <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white w-full max-w-3xl rounded-lg shadow-lg overflow-hidden">
+
+                <div class="bg-indigo-100 px-6 py-4 font-semibold">
+                    Manage Fields
                 </div>
 
-                <div class="p-6 max-h-96 overflow-y-auto space-y-2">
+                <div class="p-6 grid grid-cols-2 gap-3 max-h-[70vh] overflow-y-auto">
                     @foreach($modalFields as $field)
-                        <label class="flex gap-3 items-center bg-gray-50 p-2 rounded">
+                        <label class="flex gap-3 items-center bg-gray-50 p-3 rounded">
                             <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}">
-                            <span>{{ $field['field_name'] }}</span>
+                            {{ $field['field_name'] }}
                         </label>
                     @endforeach
                 </div>
 
-                <div class="px-6 py-4 border-t flex justify-end gap-2">
-                    <button wire:click="closeManageModal" class="px-4 py-2 bg-gray-300 rounded">
+                <div class="flex justify-end gap-3 px-6 py-4 border-t">
+                    <button wire:click="closeManageModal" class="px-5 py-2 bg-gray-300 rounded">
                         Cancel
                     </button>
-                    <button wire:click="saveManageFields" class="px-4 py-2 bg-indigo-600 text-white rounded">
+                    <button wire:click="saveManageFields" class="px-5 py-2 bg-indigo-600 text-white rounded">
                         Save
                     </button>
                 </div>
@@ -97,22 +114,28 @@
 
     {{-- PREVIEW MODAL --}}
     @if($showPreviewModal)
-        <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-            <div class="bg-white w-full max-w-md rounded-xl shadow p-6">
-                <h3 class="font-semibold mb-4">Preview</h3>
+        <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white w-full max-w-3xl rounded-lg shadow-lg overflow-hidden">
 
-                <ul class="list-disc ml-6 text-sm">
+                <div class="bg-green-100 px-6 py-4 text-center font-semibold">
+                    Preview
+                </div>
+
+                <div class="p-6 space-y-3 max-h-[80vh] overflow-y-auto">
                     @foreach($tabFields[$activeTabCode] ?? [] as $field)
-                        <li>{{ $field }}</li>
+                        <div class="border rounded p-3">
+                            {{ $field }}
+                        </div>
                     @endforeach
-                </ul>
+                </div>
 
-                <div class="text-right mt-4">
-                    <button wire:click="closePreview" class="px-4 py-2 bg-indigo-600 text-white rounded">
+                <div class="flex justify-end px-6 py-4 border-t">
+                    <button wire:click="closePreview" class="px-6 py-2 bg-indigo-600 text-white rounded">
                         Close
                     </button>
                 </div>
             </div>
         </div>
     @endif
+
 </div>
