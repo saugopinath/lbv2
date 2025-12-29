@@ -105,7 +105,7 @@
 {{-- PREVIEW MODAL --}}
 @if($showPreview)
 <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl">
+    <div class="bg-white rounded-xl shadow-lg w-auto max-w-auto">
 
         {{-- Header --}}
         <div class="flex items-center justify-between px-6 py-4 border-b">
