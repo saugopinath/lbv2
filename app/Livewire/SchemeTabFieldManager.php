@@ -10,35 +10,47 @@ use App\Models\SchemeTabBasefield;
 class SchemeTabFieldManager extends Component
 {
     public $schemeId;
-    public $lockScheme = false; // 🔒 dropdown control
+    public $lockScheme = false;
 
     public $tabs = [];
+
+    /* ---------- Modal State ---------- */
+    public $showManageModal = false;
+    public $showPreviewModal = false;
+
     public $activeTabCode = null;
 
-    public $availableFields = [];
-    public $selectedFields = [];
+    public $modalFields = [];
+    public $modalSelected = [];
 
-    /* -----------------------------
-     | Mount (Route param handle)
-     |-----------------------------*/
+    /* ---------- Saved Fields ---------- */
+    // [tab_code => [field_id => field_name]]
+    public $tabFields = [];
+
+    /* ---------------- Mount ---------------- */
     public function mount($scheme_id = null)
     {
         if ($scheme_id) {
-            $this->schemeId   = (int) $scheme_id;
+            $this->schemeId = (int)$scheme_id;
             $this->lockScheme = true;
             $this->loadTabs();
         }
     }
 
-    /* -----------------------------
-     | Scheme Change
-     |-----------------------------*/
+    /* ---------------- Scheme Change ---------------- */
     public function updatedSchemeId()
     {
         if ($this->lockScheme) return;
 
-        $this->resetTabState();
+        $this->resetAll();
         $this->loadTabs();
+    }
+
+    private function resetAll()
+    {
+        $this->tabs = [];
+        $this->tabFields = [];
+        $this->activeTabCode = null;
     }
 
     private function loadTabs()
@@ -52,65 +64,69 @@ class SchemeTabFieldManager extends Component
             ->get();
     }
 
-    private function resetTabState()
+    /* ---------------- Manage Fields Modal ---------------- */
+    public function openManageModal($tabCode)
     {
-        $this->tabs = [];
-        $this->activeTabCode = null;
-        $this->availableFields = [];
-        $this->selectedFields = [];
-    }
-
-    /* -----------------------------
-     | Tab Select
-     |-----------------------------*/
-    public function selectTab($tabCode)
-    {
+        // dd('ok');
         $this->activeTabCode = $tabCode;
-        $this->selectedFields = [];
-
-        $baseFields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
+        $this->showManageModal = true;
+// dd($this->showManageModal);
+        $fields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
             ->where('tab_code', $tabCode)
             ->where('is_active', true)
             ->orderBy('field_name')
             ->get();
 
-        $this->availableFields = $baseFields->map(fn ($f) => (object)[
-            'field_id'   => $f->field_id,
+        $this->modalFields = $fields->map(fn ($f) => [
+            'field_id' => $f->field_id,
             'field_name' => $f->field_name,
         ])->toArray();
+
+        $this->modalSelected = array_keys(
+            $this->tabFields[$tabCode] ?? []
+        );
     }
 
-    /* -----------------------------
-     | Add Field
-     |-----------------------------*/
-    public function addField($fieldId)
+    public function saveManageFields()
     {
-        $field = collect($this->availableFields)
-            ->firstWhere('field_id', $fieldId);
+        $this->tabFields[$this->activeTabCode] = [];
 
-        if (!$field) return;
+        foreach ($this->modalSelected as $fieldId) {
+            $field = collect($this->modalFields)
+                ->firstWhere('field_id', $fieldId);
 
-        $this->selectedFields[$fieldId] = $field->field_name;
+            if ($field) {
+                $this->tabFields[$this->activeTabCode][$fieldId]
+                    = $field['field_name'];
+            }
+        }
 
-        $this->availableFields = collect($this->availableFields)
-            ->reject(fn ($f) => $f->field_id == $fieldId)
-            ->values()
-            ->toArray();
+        $this->closeManageModal();
     }
 
-    /* -----------------------------
-     | Remove Field
-     |-----------------------------*/
-    public function removeField($fieldId)
+    public function closeManageModal()
     {
-        if (!isset($this->selectedFields[$fieldId])) return;
+        $this->showManageModal = false;
+        $this->modalFields = [];
+        $this->modalSelected = [];
+    }
 
-        $this->availableFields[] = (object)[
-            'field_id'   => $fieldId,
-            'field_name' => $this->selectedFields[$fieldId],
-        ];
+    /* ---------------- Remove Field ---------------- */
+    public function removeField($tabCode, $fieldId)
+    {
+        unset($this->tabFields[$tabCode][$fieldId]);
+    }
 
-        unset($this->selectedFields[$fieldId]);
+    /* ---------------- Preview ---------------- */
+    public function openPreview($tabCode)
+    {
+        $this->activeTabCode = $tabCode;
+        $this->showPreviewModal = true;
+    }
+
+    public function closePreview()
+    {
+        $this->showPreviewModal = false;
     }
 
     public function render()
