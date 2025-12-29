@@ -38,6 +38,7 @@ use App\Http\Controllers\MarkedUpdateBeneficiary;
 use App\Http\Controllers\MarkedUpdateBeneficiaryController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
+use App\Http\Controllers\workflowmanagementController;
 use App\Livewire\SchemeTabFieldManager;
 
 // Guest Routes
@@ -265,6 +266,10 @@ Route::controller(MarkedUpdateBeneficiaryController::class)->group(function () {
     ->name('marked-beneficiary-details-update');
 });
 
+Route::controller(workflowmanagementController::class)->group(function () {
+    Route::any('/create-steps',  'createSteps')->name('create-steps');
+    Route::any('/assign-workflow',  'assignWorkflow')->name('assign-workflow');
+});
 
 Route::controller(CreateAssignOtherFormFieldController::class)->group(function () {
     Route::get('/create-dynamicformfield',  'createdynamicformfield')
