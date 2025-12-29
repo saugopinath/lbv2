@@ -43,17 +43,18 @@
                         @if(isset($tabFields[$tab->tab_code]) && count($tabFields[$tab->tab_code]))
 
                             {{-- FIELD GRID (Drag & Drop) --}}
-                            <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
-                                                                                            new Sortable($el, {
-                                                                                                animation: 150,
-                                                                                                handle: '.drag-handle',
-                                                                                                onEnd() {
-                                                                                                    let ordered = Array.from($el.children)
-                                                                                                        .map(el => el.dataset.fid);
-                                                                                                    $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
-                                                                                                }
-                                                                                            })
-                                                                                        ">
+                            <div class="grid grid-cols-2 gap-3 p-4" x-data
+                                x-init="
+                                    new Sortable($el, {
+                                        animation: 150,
+                                        handle: '.drag-handle',
+                                        onEnd() {
+                                            let ordered = Array.from($el.children)
+                                                .map(el => el.dataset.fid);
+                                            $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
+                                        }
+                                    })
+                                ">
                                 @foreach($tabFields[$tab->tab_code] as $fid => $fname)
                                     <div data-fid="{{ $fid }}"
                                         class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
@@ -136,7 +137,7 @@
 
                 {{-- Header --}}
                 <div class="bg-green-100 px-6 py-4 text-center font-semibold">
-                    Preview
+                    {{ $previewTabName }}
                 </div>
 
                 {{-- Body --}}

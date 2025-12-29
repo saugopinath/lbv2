@@ -27,6 +27,8 @@ class SchemeTabFieldManager extends Component
     public $showManageModal = false;
     public $activeTabCode = null;
     public $modalFields = [];
+    public $previewTabName = '';
+
     public $modalSelected = [];
     public $showFinalPreview = false;
 
@@ -83,7 +85,6 @@ class SchemeTabFieldManager extends Component
             ->where('is_active', true)
             ->orderBy('position')
             ->get();
-        // dd($this->tabs );
     }
 
     /* -----------------------------
@@ -99,7 +100,7 @@ class SchemeTabFieldManager extends Component
             ->where('is_active', true)
             ->orderBy('field_name')
             ->get();
-
+        // dd($fields);
         $this->modalFields = $fields->map(fn($f) => [
             'field_id'   => $f->id,
             'field_name' => $f->level_name,
@@ -144,7 +145,6 @@ class SchemeTabFieldManager extends Component
      |-----------------------------*/
     public function removeField($tabCode, $fieldId)
     {
-        // dd($tabCode, $fieldId);
         unset($this->tabFields[$tabCode][$fieldId]);
 
         if (empty($this->tabFields[$tabCode])) {
@@ -158,14 +158,23 @@ class SchemeTabFieldManager extends Component
     public function openPreview($tabCode)
     {
         $this->activeTabCode = $tabCode;
+
+        $tab = collect($this->tabs)
+            ->firstWhere('tab_code', $tabCode);
+
+        $this->previewTabName = $tab?->masterTab?->tab_name ?? 'Preview';
+
         $this->showPreviewModal = true;
     }
+
 
     public function closePreview()
     {
         $this->showPreviewModal = false;
         $this->activeTabCode = null;
+        $this->previewTabName = '';
     }
+
 
     public function updateFieldOrder($tabCode, $orderedIds)
     {
@@ -201,6 +210,37 @@ class SchemeTabFieldManager extends Component
             ->get()
             ->sortBy(fn($f) => array_search($f->id, $fieldIds))
             ->values();
+    }
+    public function getFinalPreviewDataProperty()
+    {
+        $data = [];
+
+        foreach ($this->tabs as $tab) {
+            $tabCode = $tab->tab_code;
+
+            if (!isset($this->tabFields[$tabCode]) || empty($this->tabFields[$tabCode])) {
+                continue;
+            }
+
+            $fieldIds = array_keys($this->tabFields[$tabCode]);
+
+            $fields = SchemeTabBasefield::whereIn('id', $fieldIds)
+                ->whereIn('scheme_id', [0, $this->schemeId])
+                ->whereIn('tab_code', [0, $tabCode])
+                ->where('is_active', true)
+                ->get()
+                ->sortBy(fn($f) => array_search($f->id, $fieldIds))
+                ->values();
+
+                // dd($fields);
+
+            $data[] = [
+                'tab_name' => $tab->masterTab?->tab_name,
+                'fields'   => $fields,
+            ];
+        }
+
+        return $data;
     }
 
     public function render()
