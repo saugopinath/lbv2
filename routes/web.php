@@ -36,6 +36,7 @@ use App\Http\Controllers\MarkedUpdateBeneficiary;
 use App\Http\Controllers\MarkedUpdateBeneficiaryController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
+use App\Livewire\SchemeTabFieldManager;
 
 // Guest Routes
 Route::get('/', fn() => view('welcome'));
@@ -256,5 +257,8 @@ Route::get(
 )->name('dynamic-form-page');
 
 Route::get('/master-tab', App\Livewire\MasterTabManager::class)->name('master-tab');
+// Route::get('/tab-filed-manage', App\Livewire\SchemeTabFieldManager::class)->name('tab-filed-manage');
+Route::get('/tab-field-manager/{scheme_id}', SchemeTabFieldManager::class)
+    ->name('tab-field-manager');
 
 // Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name(name: 'menu-tab');

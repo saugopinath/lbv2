@@ -1,6 +1,7 @@
 import "./bootstrap";
 // import '../../vendor/masmerise/livewire-toaster/resources/js';
 import toastr from "toastr";
+import Sortable from 'sortablejs';
 import "toastr/build/toastr.min.css";
 
 // Optional default settings
@@ -9,7 +10,7 @@ toastr.options = {
     closeButton: true,
     progressBar: true,
 };
-
+window.Sortable = Sortable;
 window.addEventListener('toastr', event => {
     console.log('Toastr Event Data:', event.detail); // Debug purpose
 

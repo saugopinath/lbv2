@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.11",
+        "sortablejs": "^1.15.6",
         "toastr": "^2.1.4"
     }
 }

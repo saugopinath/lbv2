@@ -17,10 +17,19 @@ class MasterTabManager extends Component
     public $positions = [];
     public $selectedTabCode = null;
 
+    public $showPreview = false;
+
+    // 🔑 Button control
+    public $mappingSaved = false;
+
     protected $rules = [
         'selectedSchemeId' => 'required|exists:schemes,id',
         'selectedTabs'     => 'required|array|min:1',
     ];
+
+    /* ------------------------------
+     | SCHEME CHANGE
+     |------------------------------*/
     public function updatedSelectedSchemeId($value)
     {
         if (blank($value)) {
@@ -29,37 +38,54 @@ class MasterTabManager extends Component
                 'selectedTabs',
                 'positions',
                 'selectedTabCode',
+                'mappingSaved',
             ]);
             return;
         }
+
+        $this->mappingSaved = false;
         $this->selectedTabs = [];
         $this->positions = [];
+
         $scheme = Scheme::find((int) $value);
-        if (!$scheme) {
-            return;
-        }
+        if (!$scheme) return;
+
         $this->selectedSchemeName = $scheme->name;
-        $mappings = SchemeTabMapping::where('scheme_id', (int)$value)
+
+        $mappings = SchemeTabMapping::where('scheme_id', $value)
             ->where('is_active', true)
             ->orderBy('position')
             ->get();
+
+        if ($mappings->count()) {
+            $this->mappingSaved = true;
+        }
+
         foreach ($mappings as $map) {
-            $this->selectedTabs[] = (int)$map->tab_code;
-            $this->positions[$map->tab_code] = (int)$map->position;
+            $this->selectedTabs[] = (int) $map->tab_code;
+            $this->positions[$map->tab_code] = (int) $map->position;
         }
     }
+
+    /* ------------------------------
+     | ADD TAB
+     |------------------------------*/
     public function updatedSelectedTabCode()
     {
-        if (!$this->selectedTabCode) {
-            return;
-        }
-        if (!in_array((int)$this->selectedTabCode, $this->selectedTabs)) {
-            $this->selectedTabs[] = (int)$this->selectedTabCode;
+        if (!$this->selectedTabCode) return;
+
+        if (!in_array($this->selectedTabCode, $this->selectedTabs)) {
+            $this->selectedTabs[] = (int) $this->selectedTabCode;
             $this->recalculatePositions();
         }
+
+        $this->mappingSaved = false;
         $this->selectedTabCode = null;
     }
 
+    /* ------------------------------
+     | REMOVE TAB
+     |------------------------------*/
     public function removeTab($tabCode)
     {
         $this->selectedTabs = array_values(
@@ -67,21 +93,30 @@ class MasterTabManager extends Component
         );
 
         $this->recalculatePositions();
-    }
-    public function updateOrder(array $orderedTabCodes)
-    {
-        $this->selectedTabs = array_map('intval', $orderedTabCodes);
-        $this->recalculatePositions();
+        $this->mappingSaved = false;
     }
 
-    private function recalculatePositions(): void
+    /* ------------------------------
+     | DRAG & DROP
+     |------------------------------*/
+    public function updateOrder(array $ordered)
+    {
+        $this->selectedTabs = array_map('intval', $ordered);
+        $this->recalculatePositions();
+        $this->mappingSaved = false;
+    }
+
+    private function recalculatePositions()
     {
         $this->positions = [];
-        foreach ($this->selectedTabs as $index => $tabCode) {
-            $this->positions[$tabCode] = $index + 1;
+        foreach ($this->selectedTabs as $i => $code) {
+            $this->positions[$code] = $i + 1;
         }
     }
 
+    /* ------------------------------
+     | SAVE
+     |------------------------------*/
     public function submit()
     {
         $this->validate();
@@ -89,9 +124,8 @@ class MasterTabManager extends Component
         DB::transaction(function () {
 
             SchemeTabMapping::where('scheme_id', $this->selectedSchemeId)
-                ->increment('position', 1000, [
-                    'is_active' => false,
-                ]);
+                ->increment('position', 1000, ['is_active' => false]);
+
             foreach ($this->selectedTabs as $tabCode) {
                 SchemeTabMapping::updateOrCreate(
                     [
@@ -105,14 +139,22 @@ class MasterTabManager extends Component
                 );
             }
         });
-        $this->reset([
-            'selectedSchemeId',
-            'selectedSchemeName',
-            'selectedTabs',
-            'positions',
-            'selectedTabCode',
-        ]);
+
+        $this->mappingSaved = true;
         session()->flash('message', 'Tabs mapped successfully.');
+    }
+
+    /* ------------------------------
+     | PREVIEW
+     |------------------------------*/
+    public function openPreview()
+    {
+        $this->showPreview = true;
+    }
+
+    public function closePreview()
+    {
+        $this->showPreview = false;
     }
 
     public function render()
