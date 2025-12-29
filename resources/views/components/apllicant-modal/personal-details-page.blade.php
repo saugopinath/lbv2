@@ -24,7 +24,10 @@
             <p class="font-semibold text-gray-800">{{ $dsdate }}</p>
         </div>
     @endif
-
+    <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
+        <p class="text-xs text-gray-500">Name</p>
+        <p class="font-semibold text-gray-800">{{ $name }}</p>
+    </div>
     <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
         <p class="text-xs text-gray-500">Mobile No.</p>
         <p class="font-semibold text-gray-800">{{ $mobile }}</p>

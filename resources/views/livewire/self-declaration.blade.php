@@ -36,9 +36,19 @@
                 @if ($mode != '0')
                 <x-button.danger wire:click="$dispatch('goPrevious')">Previous</x-button.danger>
                 @endif
+                <!-- <x-button.success type="submit">
+                    {{ $mode == '0' ? 'Save' : 'Preview and Submit' }}
+                </x-button.success> -->
+                @if($isOtherTab == 1)
+                <x-button.primary type="submit">
+                    {{ $mode == '0' ? 'Save' : 'Save & Next' }}
+                </x-button.primary>
+                @endif
+                @if($isOtherTab == 0)
                 <x-button.success type="submit">
                     {{ $mode == '0' ? 'Save' : 'Preview and Submit' }}
                 </x-button.success>
+                @endif
             </div>
     </form>
 </div>

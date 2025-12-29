@@ -15,13 +15,13 @@ class ReactivateDocumentSeeder extends Seeder
     {
         $codemasterChilds = array(
             array(
-                "name" => "Supporting Document For Jnmp",
+                "name" => "Sapporting Document For Jnmp",
                 "short_name" => "sapporting_document_for_jnmp",
                 "parent_short_code" => "ENCDETAILS",
                 "code" => "1634",
             ),
             array(
-                "name" => "Supporting Document For Reject Beneficiary",
+                "name" => "Sapporting Document For Reject Beneficiary",
                 "short_name" => "sapporting_document_for_reject_beneficiary",
                 "parent_short_code" => "ENCDETAILS",
                 "code" => "1635",
@@ -39,4 +39,4 @@ class ReactivateDocumentSeeder extends Seeder
     }
 }
 
-
+    

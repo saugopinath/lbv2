@@ -9,9 +9,14 @@ use App\Models\Codemaster;
 use Illuminate\Http\Request;
 use App\Helpers\CheckAuthHelper;
 use App\Helpers\WorkFlowPermissionHelper;
+use App\Models\BeneficiaryEnclosure;
+use App\Models\BeneficiaryTemEnclosure;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+
 
 class CasteModificationController extends Controller
 {
@@ -42,9 +47,9 @@ class CasteModificationController extends Controller
             if (CheckAuthHelper::isCommonOperator()) {
                 $this->isAuthorized = true;
             } else {
-                  redirect()->route('dashboard')
-                ->with('error', 'Oops! You are not authorized to perform this action.')
-                ->send();
+                redirect()->route('dashboard')
+                    ->with('error', 'Oops! You are not authorized to perform this action.')
+                    ->send();
             }
         }
 
@@ -52,9 +57,9 @@ class CasteModificationController extends Controller
             if (CheckAuthHelper::isCommonWorkFlow2ndStep()) {
                 $this->isAuthorized = true;
             } else {
-                 redirect()->route('dashboard')
-                ->with('error', 'Oops! You are not authorized to perform this action.')
-                ->send();
+                redirect()->route('dashboard')
+                    ->with('error', 'Oops! You are not authorized to perform this action.')
+                    ->send();
             }
         }
     }
@@ -63,7 +68,7 @@ class CasteModificationController extends Controller
     public function index()
     {
         if (WorkFlowPermissionHelper::canModifyCaste()) {
-        // if (Auth::user()->can('modify caste')) {
+            // if (Auth::user()->can('modify caste')) {
             $header = 'Caste Modification Information';
             return view('CasteModificationView.caste_modification_index', compact('header'));
         }
@@ -73,72 +78,96 @@ class CasteModificationController extends Controller
 
     public function editview(Request $request)
     {
-        if (WorkFlowPermissionHelper::canEditCaste()) {
+        // if (WorkFlowPermissionHelper::canEditCaste()) {
         // if (Auth::user()->can('edit caste')) {
-            $header = 'Caste Modification Details';
-            $application_id = Crypt::decryptString($request->application_id);
-            $beneficiary_id = Crypt::decryptString($request->beneficiary_id);
-            $reportType = 3;
-            $doctype = $this->doctype;
+        $header = 'Caste Modification Details';
+        $application_id = Crypt::decryptString($request->application_id);
+        $beneficiary_id = Crypt::decryptString($request->beneficiary_id);
+        $reportType = 3;
+        $doctype = $this->doctype;
 
-            $BenDetails = BeneficiaryCommonList::where('sourceable_id', $application_id)->with('sourceable')->firstOrFail();
+        $BenDetails = BeneficiaryCommonList::where('sourceable_id', $application_id)->with('sourceable')->firstOrFail();
 
-            $allCastes = Codemaster::where('code', $this->casteCodeMaster)
-                ->first()
-                ->children()
-                ->pluck('name', 'id');
+        $allCastes = Codemaster::where('code', $this->casteCodeMaster)
+            ->first()
+            ->children()
+            ->pluck('name', 'id');
 
-            $currentCasteId = $BenDetails->sourceable->caste;
-            $castes = $allCastes->filter(fn($name, $id) => $id != $currentCasteId);
+        $currentCasteId = $BenDetails->sourceable->caste;
+        $castes = $allCastes->filter(fn($name, $id) => $id != $currentCasteId);
 
-            $checkapplication = CasteModificationInfo::where('application_id', $application_id)->first();
+        $checkapplication = CasteModificationInfo::where('application_id', $application_id)->first();
 
-            $isReverted = false;
-            $oldData = [];
+        $isReverted = false;
+        $oldData = [];
 
-            if ($checkapplication) {
-                $isReverted = $checkapplication->next_level_requested_id == Codemaster::getIdByCode(2204);
-                if ($isReverted) {
-                    $oldData = $checkapplication->new_data;
-                }
+        if ($checkapplication) {
+            $isReverted = $checkapplication->next_level_requested_id == Codemaster::getIdByCode(2204);
+            if ($isReverted) {
+                $oldData = $checkapplication->new_data;
             }
-
-            return view('CasteModificationView.beneficiary_cast_edit', compact(
-                'application_id',
-                'header',
-                'castes',
-                'doctype',
-                'isReverted',
-                'oldData',
-                'reportType'
-            ));
         }
 
-        $header = 'Oops! You do not have permission to edit caste.';
-        return view('CommonRestictedpage.index', compact('header'));
+        return view('CasteModificationView.beneficiary_cast_edit', compact(
+            'application_id',
+            'header',
+            'castes',
+            'doctype',
+            'isReverted',
+            'oldData',
+            'reportType'
+        ));
+        // }
+
+        // $header = 'Oops! You do not have permission to edit caste.';
+        // return view('CommonRestictedpage.index', compact('header'));
     }
 
     public function updateCaste(Request $request)
     {
         if (WorkFlowPermissionHelper::canUpdateCaste()) {
-        // if (Auth::user()->can('update caste')) {
+            // if (Auth::user()->can('update caste')) {
             if (!Auth::check()) {
                 return redirect()->route('login')->with('error', 'Please login first!');
             }
-
             $userId = Auth::id();
+            $application_id = Crypt::decryptString($request->application_id);
 
-            $request->validate([
+            $rules = [
                 'application_id' => 'required|string',
                 'caste' => 'required|integer|exists:codemasters,id',
                 'cast_no' => ['nullable', 'string', 'required_if:caste,17,18'],
-            ], [
+            ];
+
+            $messages = [
                 'application_id.required' => 'Invalid application.',
                 'caste.required' => 'Please select a caste.',
                 'cast_no.required_if' => 'Caste certificate number is required.',
-            ]);
+            ];
+            if ($application_id !== null) {
+                $uploadedDocsCount = BeneficiaryTemEnclosure::where('application_id', $application_id)
+                    ->whereIn('document_type', $this->doctype) 
+                    ->count();
 
-            $application_id = Crypt::decryptString($request->application_id);
+                $casteValue = $request->input('caste');
+                if (in_array($casteValue, ['17', '18', 17, 18], true) && $uploadedDocsCount < 1) {
+                    $rules['document_upload'] = 'required';
+                    $messages['document_upload.required'] = 'Please upload the required document.';
+                }
+            }
+            $request->validate($rules, $messages);
+
+            // $request->validate([
+            //     'application_id' => 'required|string',
+            //     'caste' => 'required|integer|exists:codemasters,id',
+            //     'cast_no' => ['nullable', 'string', 'required_if:caste,17,18'],
+            // ], [
+            //     'application_id.required' => 'Invalid application.',
+            //     'caste.required' => 'Please select a caste.',
+            //     'cast_no.required_if' => 'Caste certificate number is required.',
+            // ]);
+
+
             $beneficiary = BeneficiaryCommonList::where('sourceable_id', $application_id)->with('sourceable')->firstOrFail();
 
             $oldData = [
@@ -157,6 +186,7 @@ class CasteModificationController extends Controller
 
             $existingModification = CasteModificationInfo::where('application_id', $beneficiary->sourceable_id)
                 ->where('next_level_requested_id', Codemaster::getIdByCode(2204))
+                ->where('is_active', true)
                 ->first();
 
             DB::beginTransaction();
@@ -231,7 +261,7 @@ class CasteModificationController extends Controller
     public function list()
     {
         if (WorkFlowPermissionHelper::canCasteModification()) {
-        // if (Auth::user()->can('view caste modification list')) {
+            // if (Auth::user()->can('view caste modification list')) {
             $header = 'Caste Modification Information List';
             return view('CasteModificationView.caste_modification_list', compact('header'));
         }
@@ -241,36 +271,36 @@ class CasteModificationController extends Controller
 
     public function viewAppDetails(Request $request)
     {
-        if (WorkFlowPermissionHelper::canBeneficiaryDetails()) {
+        // if (WorkFlowPermissionHelper::canBeneficiaryDetails()) {
         // if (Auth::user()->can('view beneficiary details')) {
-            $applicant_id = $request->application_id;
-            $application_id = Crypt::decrypt($applicant_id);
+        $applicant_id = $request->application_id;
+        $application_id = Crypt::decrypt($applicant_id);
 
-            $application = CasteModificationInfo::where('application_id', $application_id)->firstOrFail();
-            $oldData = $application->old_data;
-            $newData = $application->new_data;
+        $application = CasteModificationInfo::where('application_id', $application_id)->where('is_active', true)->firstOrFail();
+        $oldData = $application->old_data;
+        $newData = $application->new_data;
 
-            $oldCasteName = Codemaster::find($oldData['caste'])->name ?? 'N/A';
-            $newCasteName = Codemaster::find($newData['caste'])->name ?? 'N/A';
-            $oldCasteNumber = $oldData['caste_certificate_no'] ?? 'N/A';
-            $newCasteNumber = $newData['caste_certificate_no'] ?? 'N/A';
-            $reportType = 3;
+        $oldCasteName = Codemaster::find($oldData['caste'])->name ?? 'N/A';
+        $newCasteName = Codemaster::find($newData['caste'])->name ?? 'N/A';
+        $oldCasteNumber = $oldData['caste_certificate_no'] ?? 'N/A';
+        $newCasteNumber = $newData['caste_certificate_no'] ?? 'N/A';
+        $reportType = 3;
 
-            $header = 'Application Details';
+        $header = 'Application Details';
 
-            return view('CasteModificationView.beneficiary_details', compact(
-                'header',
-                'application_id',
-                'application',
-                'oldCasteName',
-                'newCasteName',
-                'oldCasteNumber',
-                'newCasteNumber',
-                'reportType'
-            ));
-        }
+        return view('CasteModificationView.beneficiary_details', compact(
+            'header',
+            'application_id',
+            'application',
+            'oldCasteName',
+            'newCasteName',
+            'oldCasteNumber',
+            'newCasteNumber',
+            'reportType'
+        ));
+        // }
 
-        $header = 'Oops! You do not have permission to view beneficiary details.';
-        return view('CommonRestictedpage.index', compact('header'));
+        // $header = 'Oops! You do not have permission to view beneficiary details.';
+        // return view('CommonRestictedpage.index', compact('header'));
     }
 }

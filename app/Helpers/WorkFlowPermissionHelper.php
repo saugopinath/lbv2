@@ -323,4 +323,18 @@ class WorkFlowPermissionHelper
     {
         return Auth::user()->can('cmogrievancefind');
     }
+    public static function canFilterApplicantToReject(): bool
+    {
+        return Auth::user()->can('Filter Applicant To Reject');
+    }
+    public static function canViewDetailsToReject(): bool
+    {
+        return Auth::user()->can('View Details To Reject'); 
+    }
+    public static function canRejectBeneficiary(): bool
+    {
+        return Auth::user()->can('Reject Beneficiary'); 
+    }
+
+
 }

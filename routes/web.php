@@ -30,13 +30,15 @@ use App\Http\Controllers\RoleOfficeTypeMappingsController;
 use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Http\Controllers\BeneficiaryCountController;
 use App\Http\Controllers\CmoController;
-use App\Http\Controllers\JnpmController;
+use App\Http\Controllers\CreateAssignOtherFormFieldController;
+use App\Http\Controllers\DynamicFormController;
 use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\ElasticSearchController;
+use App\Http\Controllers\MarkedUpdateBeneficiary;
+use App\Http\Controllers\MarkedUpdateBeneficiaryController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
-use App\Http\Controllers\workflowmanagementController;
-use Illuminate\Http\Request;
+use App\Livewire\SchemeTabFieldManager;
 
 // Guest Routes
 Route::get('/', fn() => view('welcome'));
@@ -111,6 +113,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('userDutymanagement.index');
 
     // LB & Workflow
+    Route::post('/select-scheme', [LBController::class, 'selectScheme'])
+    ->name('select-scheme');
+
     Route::get('lbform', [LBController::class, 'index'])
         ->middleware('permission.redirect:canEntry')
         ->name('lbform');
@@ -170,11 +175,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('Caste-modification-info');
 
     Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])
-        ->middleware('permission.redirect:canEditCaste')
+        // ->middleware('permission.redirect:canEditCaste')
         ->name('caste-modification.edit');
 
     Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
-        ->middleware('permission.redirect:canUpdateCaste')
+        // ->middleware('permission.redirect:canUpdateCaste')
         ->name('beneficiary.updateCaste');
 
     Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])
@@ -182,7 +187,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('caste-modification-list');
 
     Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
-        ->middleware('permission.redirect:canBeneficiaryDetails')
+        // ->middleware('permission.redirect:canBeneficiaryDetails')
         ->name('view-beneficiary-details');
 
     Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])
@@ -238,41 +243,42 @@ Route::controller(BackFromJBController::class)->group(function () {
 });
 //reject approved beneficiary
 Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
-    Route::get('/reject-approved-beneficiary',  'index')->name('reject-approved-beneficiary');
-    Route::get('/reject-approved-beneficiary/de-activate', 'editview')->name('reject-approved-beneficiary.de-activate');
-    Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->name('beneficiary.deActivebeneficiary');
+    Route::get('/reject-approved-beneficiary',  'index')
+        ->middleware('permission.redirect:canRejectApprovedBeneficiary')
+        ->name('reject-approved-beneficiary');
+    Route::get('/reject-approved-beneficiary/de-activate', 'editview')->middleware('permission.redirect:canViewDetailsToReject')->name('reject-approved-beneficiary.de-activate');
+    Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->middleware('permission.redirect:canRejectBeneficiary')->name('beneficiary.deActivebeneficiary');
 });
 
-Route::post('/mis/report/redirect', function (Request $request) {
-    $request->validate([
-        'mis_route' => 'required|url',
-    ]);
-    return redirect()->to($request->mis_route);
-})->name('mis.report.redirect');
-
-//Beneficiary count
-Route::controller(BeneficiaryCountController::class)->group(function () {
-    Route::get('/beneficiary-reportlist',  'misReport')->name('beneficiary-reportlist');
-    Route::any('/beneficiary-reportlist',  'ApplicationMisReport')->name('beneficiary-reportlist');
-    Route::any('/reports-export',  'exportExcel')->name('reports-export');
+Route::controller(MarkedUpdateBeneficiaryController::class)->group(function () {
+    Route::get('/marked-beneficiary',  'index')
+        ->name('marked-beneficiary');
+    Route::get('/mark-beneficiary', 'editview')
+    ->name('mark-beneficiary');
+    Route::post('/final-marked', 'marked')
+    ->name('final-marked');
+    Route::get('/marked-beneficiary-list', 'list')
+    ->name('marked-beneficiary-list');
+    Route::get('/view-marked-beneficiary-details', 'viewmarkedbeneficiarydetails')
+    ->name('view-marked-beneficiary-details');
+     Route::post('/marked-beneficiary-details-update', 'updatemarkedbeneficiarydetails')
+    ->name('marked-beneficiary-details-update');
 });
 
-Route::controller(JnpmController::class)->group(function () {
 
-    Route::any('/jnmp/pull', 'pullJnmpData')->middleware('permission.redirect:canImportJanmaMrityuData')->name('jnmp.pull');
-
-    Route::post('/jnmp/details-callback', 'detailsCallback')->name('jnmp.details-callback');
-
-    Route::get('/jnmp-stats',  'getJnmpStats');
-    Route::post('/jnmp/mark-as-death',  'markAsDeathProcess')->name('jnmp.mark-as-death');
-
-    Route::get('jnmp-data', 'index')->middleware('permission.redirect:canReActivateDeathIncident')->name('jnmp-data');
-
-    // JNMP List at HOD
-    Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')->name('jnmp-marked-data');
+Route::controller(CreateAssignOtherFormFieldController::class)->group(function () {
+    Route::get('/create-dynamicformfield',  'createdynamicformfield')
+        ->name('create-dynamicformfield');
 });
 
-Route::controller(workflowmanagementController::class)->group(function () {
-    Route::any('/create-steps',  'createSteps')->name('create-steps');
-    Route::any('/assign-workflow',  'assignWorkflow')->name('assign-workflow');
-});
+Route::get(
+    '/dynamic-form-page',
+    [DynamicFormController::class, 'show']
+)->name('dynamic-form-page');
+
+Route::get('/master-tab', App\Livewire\MasterTabManager::class)->name('master-tab');
+// Route::get('/tab-filed-manage', App\Livewire\SchemeTabFieldManager::class)->name('tab-filed-manage');
+Route::get('/tab-field-manager/{scheme_id}', SchemeTabFieldManager::class)
+    ->name('tab-field-manager');
+
+// Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name(name: 'menu-tab');

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 use Elastic\Elasticsearch\ClientBuilder;
+use Exception;
+use Psr\Http\Client\NetworkExceptionInterface;
 
 class ElasticsearchService
 {

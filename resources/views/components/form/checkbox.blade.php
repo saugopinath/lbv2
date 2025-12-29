@@ -9,6 +9,6 @@
         <x-form.label class="text-sm font-medium text-gray-900 dark:text-gray-300" name="{{ $name }}" label="{{ $label }}" />
     </div>
 
-    <x-form.error name="{{ $name }}" />
+
 
 </x-form.field>

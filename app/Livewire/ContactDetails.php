@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\BeneficiaryPersonal;
 use Illuminate\Support\Facades\Session;
 use Livewire\Component;
 use App\Models\DraftBeneficiaryPersonal;
@@ -14,7 +15,7 @@ class ContactDetails extends Component
 {
     public $mode, $application_id;
     public $stateName, $state, $policestation, $villtowncity, $housepremiseno, $postoffice, $pincode;
-    public $selectedDistrict, $selectedRuralurban, $selectedBlockurban, $selectedGpWard;
+    public $selectedDistrict, $selectedRuralurban, $selectedBlockurban, $selectedGpWard, $type;
     protected $listeners = ['lgdSelectionChanged' => 'receiveLgdSelection'];
     public function receiveLgdSelection($data)
     {
@@ -23,31 +24,59 @@ class ContactDetails extends Component
         $this->selectedBlockurban = $data['selectedBlockurban'];
         $this->selectedGpWard = $data['selectedGpWard'];
     }
-    public function mount($mode = null, $application_id = null)
+    public function mount($mode = null, $application_id = null, $type = null)
     {
         $this->mode = $mode;
+        $this->type = $type;
         $record = State::where('lgd_code', 19)->first();
         $this->state = $record->lgd_code;
         $this->stateName = $record->name;
         if ($application_id != null) {
             $this->application_id = $application_id;
-            $app_det = DraftBeneficiaryPersonal::with('contact')->where('application_id', $application_id)->first();
-            if ($app_det->contact) {
-                $this->policestation = $app_det->contact->police_station;
-                $this->villtowncity = $app_det->contact->village_town_city;
-                if ($app_det->contact->house_premise_no) {
-                    $this->housepremiseno = $app_det->contact->house_premise_no;
+            if ($type == 1) {
+                $app_det = BeneficiaryPersonal::with('contacts')->where('application_id', $application_id)->first();
+                // dd($app_det->contacts);
+                if ($app_det->contacts) {
+                    $this->policestation = $app_det->contacts->police_station;
+                    $this->villtowncity = $app_det->contacts->village_town_city;
+                    if ($app_det->contacts->house_premise_no) {
+                        $this->housepremiseno = $app_det->contact->house_premise_no;
+                    }
+                    $this->postoffice = $app_det->contacts->post_office;
+                    $this->pincode = trim($app_det->contacts->pincode);
+                    $this->selectedDistrict = $app_det->contacts->district_id;
+                    $this->selectedRuralurban = $app_det->contacts->rural_urban_id;
+                    if (($app_det->contacts->rural_urban_id) == 2) {
+                        // dump('ok1');
+                        $this->selectedBlockurban = $app_det->contacts->block_id;
+                        $this->selectedGpWard = $app_det->contacts->panchayat_id;
+                        // dd($this->selectedGpWard);
+                    } else {
+                        // dd('dcd');
+                        $this->selectedBlockurban = $app_det->contacts->municipality_id;
+                        $this->selectedGpWard = $app_det->contacts->ward_id;
+                    }
                 }
-                $this->postoffice = $app_det->contact->post_office;
-                $this->pincode = trim($app_det->contact->pincode);
-                $this->selectedDistrict = $app_det->contact->district_id;
-                $this->selectedRuralurban = $app_det->contact->rural_urban_id;
-                if (($app_det->contact->rural_urban_id) == 2) {
-                    $this->selectedBlockurban = $app_det->contact->block_id;
-                    $this->selectedGpWard = $app_det->contact->panchayat_id;
-                } else {
-                    $this->selectedBlockurban = $app_det->contact->municipality_id;
-                    $this->selectedGpWard = $app_det->contact->ward_id;
+            } else {
+
+                $app_det = DraftBeneficiaryPersonal::with('contact')->where('application_id', $application_id)->first();
+                if ($app_det->contact) {
+                    $this->policestation = $app_det->contact->police_station;
+                    $this->villtowncity = $app_det->contact->village_town_city;
+                    if ($app_det->contact->house_premise_no) {
+                        $this->housepremiseno = $app_det->contact->house_premise_no;
+                    }
+                    $this->postoffice = $app_det->contact->post_office;
+                    $this->pincode = trim($app_det->contact->pincode);
+                    $this->selectedDistrict = $app_det->contact->district_id;
+                    $this->selectedRuralurban = $app_det->contact->rural_urban_id;
+                    if (($app_det->contact->rural_urban_id) == 2) {
+                        $this->selectedBlockurban = $app_det->contact->block_id;
+                        $this->selectedGpWard = $app_det->contact->panchayat_id;
+                    } else {
+                        $this->selectedBlockurban = $app_det->contact->municipality_id;
+                        $this->selectedGpWard = $app_det->contact->ward_id;
+                    }
                 }
             }
         }

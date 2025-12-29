@@ -50,7 +50,7 @@
                         <td class="px-4 py-2 text-center text-sm text-gray-700">{{ $row['mobile_no'] }}</td>
                         <td class="px-4 py-2 text-center text-sm text-gray-700">{{ $row['Caste_name'] }}</td>
                         <td class="px-4 py-2 text-center">
-                            <form action="{{ route('caste-modification.edit') }}" method="GET">
+                            <form action="{{ route('caste-modification.edit') }}" method="GET" class="flex justify-center">
                                 <input type="hidden" name="application_id" value="{{ Crypt::encryptString($row['application_id']) }}">
                                 <input type="hidden" name="beneficiary_id" value="{{ Crypt::encryptString($row['beneficiary_id']) }}">
                                 <x-button.loading-button type="submit" text="change">
