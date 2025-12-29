@@ -94,7 +94,7 @@ class SchemeTabFieldManager extends Component
         $this->activeTabCode = $tabCode;
         $this->showManageModal = true;
 
-         $fields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
+        $fields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
             ->whereIn('tab_code', [$tabCode, 0])
             ->where('is_active', true)
             ->orderBy('field_name')
@@ -109,7 +109,7 @@ class SchemeTabFieldManager extends Component
         $this->modalSelected = array_keys(
             $this->tabFields[$tabCode] ?? []
         );
-    }  
+    }
 
     public function closeManageModal()
     {
@@ -182,6 +182,26 @@ class SchemeTabFieldManager extends Component
         $this->tabFields[$tabCode] = $newOrder;
     }
 
+    public function getPreviewFieldsProperty()
+    {
+        if (!$this->activeTabCode) {
+            return collect();
+        }
+
+        $fieldIds = array_keys($this->tabFields[$this->activeTabCode] ?? []);
+
+        if (empty($fieldIds)) {
+            return collect();
+        }
+
+        return SchemeTabBasefield::whereIn('id', $fieldIds)
+            ->whereIn('scheme_id', [0, $this->schemeId])
+            ->whereIn('tab_code', [0, $this->activeTabCode])
+            ->where('is_active', true)
+            ->get()
+            ->sortBy(fn($f) => array_search($f->id, $fieldIds))
+            ->values();
+    }
 
     public function render()
     {

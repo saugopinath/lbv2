@@ -44,28 +44,29 @@
 
                             {{-- FIELD GRID (Drag & Drop) --}}
                             <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
-                                                        new Sortable($el, {
-                                                            animation: 150,
-                                                            handle: '.drag-handle',
-                                                            onEnd() {
-                                                                let ordered = Array.from($el.children)
-                                                                    .map(el => el.dataset.fid);
-                                                                $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
-                                                            }
-                                                        })
-                                                    ">
-                                @foreach($tabFields[$tab->tab_code] as $fid => $fname)                                   
-                                        <div data-fid="{{ $fid }}" class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
-                                         {{-- SERIAL NUMBER --}}
-                                        
+                                                                                            new Sortable($el, {
+                                                                                                animation: 150,
+                                                                                                handle: '.drag-handle',
+                                                                                                onEnd() {
+                                                                                                    let ordered = Array.from($el.children)
+                                                                                                        .map(el => el.dataset.fid);
+                                                                                                    $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
+                                                                                                }
+                                                                                            })
+                                                                                        ">
+                                @foreach($tabFields[$tab->tab_code] as $fid => $fname)
+                                    <div data-fid="{{ $fid }}"
+                                        class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
+                                        {{-- SERIAL NUMBER --}}
+
                                         <div class="flex items-center gap-2">
                                             <span class="drag-handle cursor-move text-gray-400">☰</span>
                                             <span class="font-semibold text-gray-600">
-                                            {{ $loop->iteration }}.{{ $fname }}
-                                        </span>
-                                           
+                                                {{ $loop->iteration }}.{{ $fname }}
+                                            </span>
+
                                         </div>
-                                       
+
                                         {{-- IMPORTANT FIX --}}
                                         <button wire:click.stop="removeField({{ $tab->tab_code }}, '{{ $fid }}')"
                                             class="text-red-600 font-bold">
@@ -98,7 +99,6 @@
 
     @endif
 
-
     {{-- MANAGE MODAL --}}
     @if($showManageModal)
         <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -130,33 +130,73 @@
         </div>
     @endif
 
-
-    {{-- SINGLE TAB PREVIEW MODAL --}}
     @if($showPreviewModal)
         <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div class="bg-white w-full max-w-3xl rounded-lg shadow-lg overflow-hidden">
 
+                {{-- Header --}}
                 <div class="bg-green-100 px-6 py-4 text-center font-semibold">
                     Preview
                 </div>
 
-                <div class="p-6 space-y-3 max-h-[80vh] overflow-y-auto">
-                    @foreach($tabFields[$activeTabCode] ?? [] as $field)
-                        <div class="border rounded p-3">
-                            {{ $field }}
-                        </div>
-                    @endforeach
+                {{-- Body --}}
+                <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+
+                    <div class="grid gap-2 md:grid-cols-2 pl-4 pr-4">
+                        @foreach($this->previewFields as $index => $field)
+                            {{-- FIELD RENDER --}}
+                            @if($field->field_type === 'text')
+                                <div>
+                                    <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" disabled />
+                                </div>
+
+
+                            @elseif($field->field_type === 'date')
+                                <div>
+
+                                    <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}"
+                                        disabled />
+                                </div>
+
+                            @elseif($field->field_type === 'select')
+                                <div>
+
+                                    <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
+                                        <option value="">-- Select --</option>
+                                        @foreach($field->options ?? [] as $opt)
+                                            <option>{{ $opt }}</option>
+                                        @endforeach
+                                    </x-form.select>
+                                </div>
+
+                            @elseif($field->field_type === 'textarea')
+                                <div>
+
+                                    <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                                </div>
+
+                            @else
+                                <div class="text-red-500 text-sm">
+                                    Unsupported field type: {{ $field->field_type }}
+                                </div>
+                            @endif
+
+
+                        @endforeach
+                    </div>
+
                 </div>
 
+                {{-- Footer --}}
                 <div class="flex justify-end px-6 py-4 border-t">
                     <button wire:click="closePreview" class="px-6 py-2 bg-indigo-600 text-white rounded">
                         Close
                     </button>
                 </div>
+
             </div>
         </div>
     @endif
-
 
     @if($showFinalPreview)
         <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
@@ -186,7 +226,7 @@
                 {{-- TAB CONTENT --}}
                 <div class="px-6 py-8 space-y-6 max-h-[60vh] overflow-y-auto">
 
-                    {{--  @foreach($tabs as $tab)
+                    {{-- @foreach($tabs as $tab)
                     <div class="border rounded-lg p-4">
                         <h4 class="font-semibold mb-3">
                             {{ $tab->masterTab?->tab_name }}
@@ -204,7 +244,7 @@
                         </p>
                         @endif
                     </div>
-                    @endforeach  --}}
+                    @endforeach --}}
 
                 </div>
 
@@ -218,8 +258,6 @@
             </div>
         </div>
     @endif
-
-
 
     {{-- SUCCESS MESSAGE --}}
     @if(session()->has('message'))
