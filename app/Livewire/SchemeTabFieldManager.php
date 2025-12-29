@@ -28,6 +28,8 @@ class SchemeTabFieldManager extends Component
     public $activeTabCode = null;
     public $modalFields = [];
     public $modalSelected = [];
+    public $showFinalPreview = false;
+
 
     /* -------- Preview Modal -------- */
     public $showPreviewModal = false;
@@ -43,6 +45,15 @@ class SchemeTabFieldManager extends Component
                 abort(403, 'Invalid scheme reference');
             }
         }
+    }
+    public function openFinalPreview()
+    {
+        $this->showFinalPreview = true;
+    }
+
+    public function closeFinalPreview()
+    {
+        $this->showFinalPreview = false;
     }
 
     /* -----------------------------
@@ -83,22 +94,22 @@ class SchemeTabFieldManager extends Component
         $this->activeTabCode = $tabCode;
         $this->showManageModal = true;
 
-        $fields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
-            ->where('tab_code', $tabCode)
+         $fields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
+            ->whereIn('tab_code', [$tabCode, 0])
             ->where('is_active', true)
             ->orderBy('field_name')
             ->get();
 
         $this->modalFields = $fields->map(fn($f) => [
-            'field_id'   => $f->field_id,
-            'field_name' => $f->field_name,
+            'field_id'   => $f->id,
+            'field_name' => $f->level_name,
         ])->toArray();
 
         // Pre-check already selected fields
         $this->modalSelected = array_keys(
             $this->tabFields[$tabCode] ?? []
         );
-    }
+    }  
 
     public function closeManageModal()
     {
