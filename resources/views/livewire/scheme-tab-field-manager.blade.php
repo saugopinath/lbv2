@@ -123,7 +123,7 @@
                     class="flex gap-3 items-center p-3 rounded border border-gray-200
                    {{ $field['is_mandatory'] ? 'border-green-300 bg-green-50' : 'bg-gray-50' }}">
                     <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}"
-                        @if($field['is_mandatory']) disabled @endif>
+                        @if($field['is_mandatory'] && $field['tab_code']!=0 ) disabled @endif>
                     <span>{{ $field['field_name'] }} @if($field['is_mandatory'] === 1)
                         <span class="text-red-500 font-bold">*</span>
                         @endif</span>

@@ -115,10 +115,11 @@ class SchemeTabFieldManager extends Component
             'field_id'     => $f->id,
             'field_name'   => $f->level_name,
             'is_mandatory' => $f->is_mendetory,
+            'tab_code' => $f->tab_code,
         ])->toArray();
         // dd($this->modalFields);
         $mandatoryIds = collect($this->modalFields)
-            ->filter(fn($f) => $f['is_mandatory'] == 1)
+            ->filter(fn($f) => $f['is_mandatory'] == 1 &&  $f['tab_code'] != 0 )
             ->pluck('field_id')
             ->toArray();
         // dd($mandatoryIds);
