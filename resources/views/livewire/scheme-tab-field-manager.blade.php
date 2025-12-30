@@ -44,16 +44,16 @@
 
                             {{-- FIELD GRID (Drag & Drop) --}}
                             <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
-                                                            new Sortable($el, {
-                                                                animation: 150,
-                                                                handle: '.drag-handle',
-                                                                onEnd() {
-                                                                    let ordered = Array.from($el.children)
-                                                                        .map(el => el.dataset.fid);
-                                                                    $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
-                                                                }
-                                                            })
-                                                        ">
+                                                                        new Sortable($el, {
+                                                                            animation: 150,
+                                                                            handle: '.drag-handle',
+                                                                            onEnd() {
+                                                                                let ordered = Array.from($el.children)
+                                                                                    .map(el => el.dataset.fid);
+                                                                                $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
+                                                                            }
+                                                                        })
+                                                                    ">
                                 @foreach($tabFields[$tab->tab_code] as $fid => $fname)
                                     <div data-fid="{{ $fid }}"
                                         class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
@@ -101,62 +101,68 @@
 
     {{-- MANAGE MODAL --}}
     @if($showManageModal)
-        <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div class="bg-white w-full max-w-3xl rounded-lg shadow-lg overflow-hidden">
+    <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-3xl rounded-lg shadow-lg overflow-hidden">
 
-                <div class="bg-indigo-100 px-6 py-4 font-semibold">
-                    Manage Fields
-                </div>
+            <div class="bg-indigo-100 px-6 py-4 font-semibold">
+                Manage Fields
+            </div>
 
-                <div class="p-6 grid grid-cols-2 gap-3 max-h-[70vh] overflow-y-auto">
+            <div class="p-6 grid grid-cols-2 gap-3 max-h-[70vh] overflow-y-auto">
 
-                    @foreach($modalFields as $field)
-                        <label class="flex gap-3 items-center bg-gray-50 p-3 rounded">
+                @foreach($modalFields as $field)
+                <label class="flex gap-3 items-center bg-gray-50 p-3 rounded">
 
-                            <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}"
-                                @if($field['is_mandatory'] === 1) checked disabled @endif>
+                    <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}"
+                        @if($field['is_mandatory']===1) checked disabled @endif>
 
-                            <span>
-                                {{ $field['field_name'] }}
-                                @if($field['is_mandatory'] === 1)
-                                    <span class="text-red-500 font-bold">*</span>
-                                @endif
-                            </span>
+                    <span>
+                        {{ $field['field_name'] }}
+                        @if($field['is_mandatory'] === 1)
+                        <span class="text-red-500 font-bold">*</span>
+                        @endif
+                    </span>
 
-                        </label>
-                    @endforeach
+                </label>
+                @endforeach
 
 
-                </div>
+            </div>
 
-                <div class="flex justify-end gap-3 px-6 py-4 border-t">
-                    <button wire:click="closeManageModal" class="px-5 py-2 bg-gray-300 rounded">
-                        Cancel
-                    </button>
+            <div class="flex justify-end gap-3 px-6 py-4 border-t">
+                <button wire:click="closeManageModal" class="px-5 py-2 bg-gray-300 rounded">
+                    Cancel
+                </button>
 
-                    <button wire:click="saveManageFields" class="px-5 py-2 bg-indigo-600 text-white rounded">
-                        Save
-                    </button>
-                </div>
+                <button wire:click="saveManageFields" class="px-5 py-2 bg-indigo-600 text-white rounded">
+                    Save
+                </button>
             </div>
         </div>
+    </div>
     @endif
 
-    @if($showPreviewModal)
+    {{--  @if($showPreviewModal)
         <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div class="bg-white w-full max-w-3xl rounded-lg shadow-lg overflow-hidden">
 
-                {{-- Header --}}
+
                 <div class="bg-green-100 px-6 py-4 text-center font-semibold">
                     {{ $previewTabName }}
                 </div>
 
-                {{-- Body --}}
+                @if($previewTabCode == 102)
+                    <div class="px-6 py-4 border-b bg-gray-50">
+                        <livewire:filter-lgd-master-entry :login_type="'state_office'" />
+                    </div>
+                @endif
+
                 <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
 
                     <div class="grid gap-2 md:grid-cols-2 pl-4 pr-4">
+
                         @foreach($this->previewFields as $index => $field)
-                            {{-- FIELD RENDER --}}
+
                             @if($field->field_type === 'text')
                                 <div>
                                     <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" disabled />
@@ -199,7 +205,7 @@
 
                 </div>
 
-                {{-- Footer --}}
+
                 <div class="flex justify-end px-6 py-4 border-t">
                     <button wire:click="closePreview" class="px-6 py-2 bg-indigo-600 text-white rounded">
                         Close
@@ -208,7 +214,8 @@
 
             </div>
         </div>
-    @endif
+    @endif  --}}
+    
 
     @if($showFinalPreview)
         <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">

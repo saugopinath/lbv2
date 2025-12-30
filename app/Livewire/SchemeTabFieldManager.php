@@ -27,11 +27,10 @@ class SchemeTabFieldManager extends Component
     public $showManageModal = false;
     public $activeTabCode = null;
     public $modalFields = [];
-    public $previewTabName = '';
+    public $previewTabName = '',$previewTabCode;
 
     public $modalSelected = [];
     public $showFinalPreview = false;
-
 
     /* -------- Preview Modal -------- */
     public $showPreviewModal = false;
@@ -170,8 +169,10 @@ class SchemeTabFieldManager extends Component
 
         $tab = collect($this->tabs)
             ->firstWhere('tab_code', $tabCode);
+            // dd( $tab);
 
         $this->previewTabName = $tab?->masterTab?->tab_name ?? 'Preview';
+        $this->previewTabCode = $tab?->masterTab?->tab_code;
 
         $this->showPreviewModal = true;
     }
