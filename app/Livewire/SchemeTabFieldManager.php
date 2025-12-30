@@ -11,30 +11,9 @@ use Illuminate\Contracts\Encryption\DecryptException;
 
 class SchemeTabFieldManager extends Component
 {
-    public $schemeId;
-    public $lockScheme = false;
-
-    public $tabs = [];
-
-    /** Tab wise selected fields
-     * [
-     *   tab_code => [ field_id => field_name ]
-     * ]
-     */
-    public $tabFields = [];
-
-    /* -------- Manage Modal -------- */
-    public $showManageModal = false;
-    public $activeTabCode = null;
-    public $modalFields = [];
-    public $previewTabName = '',$previewTabCode;
-
-    public $modalSelected = [];
-    public $showFinalPreview = false;
-
-
-    /* -------- Preview Modal -------- */
-    public $showPreviewModal = false;
+   public $schemeId, $lockScheme = false, $tabs = [], $tabFields = [], $showManageModal = false,
+       $activeTabCode = null, $modalFields = [], $previewTabName = '', $previewTabCode = null,
+       $modalSelected = [], $showFinalPreview = false, $showPreviewModal = false;
 
     public function mount($scheme_id = null)
     {
@@ -102,49 +81,27 @@ class SchemeTabFieldManager extends Component
             ->orderBy('field_position')
             ->get();
 
-        // $this->modalFields = $fields->map(fn($f) => [
-        //     'field_id'   => $f->id,
-        //     'field_name' => $f->level_name,
-        // ])->toArray();
-
-        // // Pre-check already selected fields
-        // $this->modalSelected = array_keys(
-        //     $this->tabFields[$tabCode] ?? []
-        // );
         $this->modalFields = $fields->map(fn($f) => [
             'field_id'     => $f->id,
             'field_name'   => $f->level_name,
             'is_mandatory' => $f->is_mendetory,
             'tab_code' => $f->tab_code,
         ])->toArray();
-        // dd($this->modalFields);
+
         $mandatoryIds = collect($this->modalFields)
             ->filter(fn($f) => $f['is_mandatory'] == 1 &&  $f['tab_code'] != 0 )
             ->pluck('field_id')
             ->toArray();
-        // dd($mandatoryIds);
+
         $existing = array_keys($this->tabFields[$tabCode] ?? []);
 
-        // merge + unique
         $this->modalSelected = array_values(
             array_unique(array_merge($existing, $mandatoryIds))
         );
 
-
-        // $this->modalFields = $fields->map(fn($f) => [
-        //     'field_id'     => $f->id,
-        //     'field_name'   => $f->level_name,
-        //     'is_mandatory' => ($f->is_mendetory ?? 0),
-        // ])->toArray();
-
-        // $this->modalSelected = collect($this->modalFields)
-        //     ->filter(fn($f) => $f['is_mandatory'] == 1)
-        //     ->pluck('field_id')
-        //     ->toArray();
     }
     public function isFieldMandatory($fieldId)
     {
-        // dd('bhjbc');
         return SchemeTabBasefield::where('id', $fieldId)
             ->where('is_mendetory', 1)
             ->exists();
@@ -165,27 +122,6 @@ class SchemeTabFieldManager extends Component
     {
         $this->tabFields[$this->activeTabCode] = [];
 
-        // foreach ($this->modalSelected as $fid) {
-        //     $field = collect($this->modalFields)
-        //         ->firstWhere('field_id', $fid);
-
-        //     if ($field) {
-        //         $this->tabFields[$this->activeTabCode][$fid]
-        //             = $field['field_name'];
-        //     }
-        // }
-        // $this->tabFields[$this->activeTabCode] = [];
-
-        // foreach ($this->modalFields as $field) {
-
-        //     if (
-        //         $field['is_mendetory'] ||
-        //         in_array($field['field_id'], $this->modalSelected)
-        //     ) {
-        //         $this->tabFields[$this->activeTabCode][$field['field_id']]
-        //             = $field['field_name'];
-        //     }
-        // }
         $this->tabFields[$this->activeTabCode] = [];
 
         foreach ($this->modalSelected as $fid) {
@@ -205,7 +141,6 @@ class SchemeTabFieldManager extends Component
      |-----------------------------*/
     public function removeField($tabCode, $fieldId)
     {
-        // dd($tabCode, $fieldId);
         if ($this->isFieldMandatory($fieldId)) {
             return;
         }
