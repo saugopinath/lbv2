@@ -87,9 +87,6 @@ class SchemeTabFieldManager extends Component
             ->get();
     }
 
-    /* -----------------------------
-     | Open Manage Modal
-     |-----------------------------*/
     public function openManageModal($tabCode)
     {
         $this->activeTabCode = $tabCode;
@@ -100,15 +97,27 @@ class SchemeTabFieldManager extends Component
             ->where('is_active', true)
             ->orderBy('field_name')
             ->get();
-        // dd($fields);
+
         $this->modalFields = $fields->map(fn($f) => [
-            'field_id'   => $f->id,
-            'field_name' => $f->level_name,
+            'field_id'     => $f->id,
+            'field_name'   => $f->level_name,
+            'is_mandatory' => (int) ($f->is_mendetory ?? 0),
         ])->toArray();
 
-        // Pre-check already selected fields
-        $this->modalSelected = array_keys(
+        // 🔹 1. mandatory fields
+        $mandatoryIds = collect($this->modalFields)
+            ->filter(fn($f) => $f['is_mandatory'] === 1)
+            ->pluck('field_id')
+            ->toArray();
+
+        $previousSelected = array_keys(
             $this->tabFields[$tabCode] ?? []
+        );
+
+        $this->modalSelected = array_values(
+            array_unique(
+                array_merge($mandatoryIds, $previousSelected)
+            )
         );
     }
 
@@ -232,7 +241,7 @@ class SchemeTabFieldManager extends Component
                 ->sortBy(fn($f) => array_search($f->id, $fieldIds))
                 ->values();
 
-                // dd($fields);
+            // dd($fields);
 
             $data[] = [
                 'tab_name' => $tab->masterTab?->tab_name,

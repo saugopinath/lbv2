@@ -43,18 +43,17 @@
                         @if(isset($tabFields[$tab->tab_code]) && count($tabFields[$tab->tab_code]))
 
                             {{-- FIELD GRID (Drag & Drop) --}}
-                            <div class="grid grid-cols-2 gap-3 p-4" x-data
-                                x-init="
-                                    new Sortable($el, {
-                                        animation: 150,
-                                        handle: '.drag-handle',
-                                        onEnd() {
-                                            let ordered = Array.from($el.children)
-                                                .map(el => el.dataset.fid);
-                                            $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
-                                        }
-                                    })
-                                ">
+                            <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
+                                                            new Sortable($el, {
+                                                                animation: 150,
+                                                                handle: '.drag-handle',
+                                                                onEnd() {
+                                                                    let ordered = Array.from($el.children)
+                                                                        .map(el => el.dataset.fid);
+                                                                    $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
+                                                                }
+                                                            })
+                                                        ">
                                 @foreach($tabFields[$tab->tab_code] as $fid => $fname)
                                     <div data-fid="{{ $fid }}"
                                         class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
@@ -110,12 +109,24 @@
                 </div>
 
                 <div class="p-6 grid grid-cols-2 gap-3 max-h-[70vh] overflow-y-auto">
+
                     @foreach($modalFields as $field)
                         <label class="flex gap-3 items-center bg-gray-50 p-3 rounded">
-                            <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}">
-                            {{ $field['field_name'] }}
+
+                            <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}"
+                                @if($field['is_mandatory'] === 1) checked disabled @endif>
+
+                            <span>
+                                {{ $field['field_name'] }}
+                                @if($field['is_mandatory'] === 1)
+                                    <span class="text-red-500 font-bold">*</span>
+                                @endif
+                            </span>
+
                         </label>
                     @endforeach
+
+
                 </div>
 
                 <div class="flex justify-end gap-3 px-6 py-4 border-t">

@@ -8,10 +8,11 @@ class SchemeTabBasefield extends Model
 {
     protected $guarded = [];
 
-     protected $casts = [
-        'options'     => 'array',   
+    protected $casts = [
+        'options'     => 'array',
         'is_common'   => 'boolean',
         'is_multiple' => 'boolean',
         'is_active'   => 'boolean',
+        'is_mendetory' => 'integer',
     ];
 }
