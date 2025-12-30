@@ -11,9 +11,12 @@ use Illuminate\Contracts\Encryption\DecryptException;
 
 class SchemeTabFieldManager extends Component
 {
-   public $schemeId, $lockScheme = false, $tabs = [], $tabFields = [], $showManageModal = false,
-       $activeTabCode = null, $modalFields = [], $previewTabName = '', $previewTabCode = null,
-       $modalSelected = [], $showFinalPreview = false, $showPreviewModal = false;
+    public $schemeId, $lockScheme = false, $tabs = [], $tabFields = [], $showManageModal = false,
+        $activeTabCode = null, $modalFields = [], $previewTabName = '', $previewTabCode = null,
+        $modalSelected = [], $showFinalPreview = false, $showPreviewModal = false,
+        $finalActiveTabCode = null;
+    public $finalPreviewFields = [];
+
 
     public function mount($scheme_id = null)
     {
@@ -30,12 +33,49 @@ class SchemeTabFieldManager extends Component
     public function openFinalPreview()
     {
         $this->showFinalPreview = true;
+
+        $firstTab = collect($this->tabs)->first();
+        $this->finalActiveTabCode = $firstTab?->tab_code;
+
+        $this->loadFinalPreviewFields();
     }
+
+    public function setFinalPreviewTab($tabCode)
+    {
+        $this->finalActiveTabCode = $tabCode;
+        $this->loadFinalPreviewFields();
+    }
+
 
     public function closeFinalPreview()
     {
         $this->showFinalPreview = false;
+        $this->finalActiveTabCode = null;
+        $this->finalPreviewFields = collect();
     }
+    private function loadFinalPreviewFields()
+    {
+        if (!$this->finalActiveTabCode) {
+            $this->finalPreviewFields = collect();
+            return;
+        }
+
+        $fieldIds = array_keys($this->tabFields[$this->finalActiveTabCode] ?? []);
+
+        if (empty($fieldIds)) {
+            $this->finalPreviewFields = collect();
+            return;
+        }
+
+        $this->finalPreviewFields = SchemeTabBasefield::whereIn('id', $fieldIds)
+            ->whereIn('scheme_id', [0, $this->schemeId])
+            ->whereIn('tab_code', [0, $this->finalActiveTabCode])
+            ->where('is_active', true)
+            ->get()
+            ->sortBy(fn($f) => array_search($f->id, $fieldIds))
+            ->values();
+    }
+
 
     /* -----------------------------
      | Scheme Change
@@ -89,7 +129,7 @@ class SchemeTabFieldManager extends Component
         ])->toArray();
 
         $mandatoryIds = collect($this->modalFields)
-            ->filter(fn($f) => $f['is_mandatory'] == 1 &&  $f['tab_code'] != 0 )
+            ->filter(fn($f) => $f['is_mandatory'] == 1 &&  $f['tab_code'] != 0)
             ->pluck('field_id')
             ->toArray();
 
@@ -98,7 +138,6 @@ class SchemeTabFieldManager extends Component
         $this->modalSelected = array_values(
             array_unique(array_merge($existing, $mandatoryIds))
         );
-
     }
     public function isFieldMandatory($fieldId)
     {

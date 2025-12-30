@@ -44,16 +44,16 @@
 
                             {{-- FIELD GRID (Drag & Drop) --}}
                             <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
-                                new Sortable($el, {
-                                    animation: 150,
-                                    handle: '.drag-handle',
-                                    onEnd() {
-                                        let ordered = Array.from($el.children)
-                                            .map(el => el.dataset.fid);
-                                        $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
-                                    }
-                                })
-                            ">
+                                                        new Sortable($el, {
+                                                            animation: 150,
+                                                            handle: '.drag-handle',
+                                                            onEnd() {
+                                                                let ordered = Array.from($el.children)
+                                                                    .map(el => el.dataset.fid);
+                                                                $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
+                                                            }
+                                                        })
+                                                    ">
                                 @foreach($tabFields[$tab->tab_code] as $fid => $fname)
                                     <div data-fid="{{ $fid }}"
                                         class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
@@ -67,13 +67,13 @@
 
                                         </div>
                                         <button wire:click.stop="removeField({{ $tab->tab_code }}, '{{ $fid }}')" class="
-                                                    text-red-500 font-bold text-lg
-                                                    @if($this->isFieldMandatory($fid))
-                                                        opacity-50 cursor-not-allowed
-                                                    @else
-                                                        hover:text-red-600
-                                                    @endif
-                                                " @if($this->isFieldMandatory($fid)) disabled @endif>
+                                                                                    text-red-500 font-bold text-lg
+                                                                                    @if($this->isFieldMandatory($fid))
+                                                                                        opacity-50 cursor-not-allowed
+                                                                                    @else
+                                                                                        hover:text-red-600
+                                                                                    @endif
+                                                                                " @if($this->isFieldMandatory($fid)) disabled @endif>
                                             ✕
                                         </button>
 
@@ -116,7 +116,7 @@
                 <div class="p-6 grid grid-cols-2 gap-3 max-h-[70vh] overflow-y-auto">
                     @foreach($modalFields as $field)
                         <label class="flex gap-3 items-center p-3 rounded border border-gray-200
-                           {{ $field['is_mandatory'] ? 'border-green-300 bg-green-50' : 'bg-gray-50' }}">
+                                           {{ $field['is_mandatory'] ? 'border-green-300 bg-green-50' : 'bg-gray-50' }}">
                             <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}"
                                 @if($field['is_mandatory'] && $field['tab_code'] != 0) disabled @endif>
                             <span>{{ $field['field_name'] }} @if($field['is_mandatory'] === 1)
@@ -151,7 +151,8 @@
                 {{-- Body --}}
                 <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
 
-                    @if($previewTabCode == 102 &&
+                    @if(
+                            $previewTabCode == 102 &&
                             (collect($this->previewFields)
                                 ->pluck('field_name')
                                 ->intersect([
@@ -245,9 +246,8 @@
 
     @if($showFinalPreview)
         <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
-            <div class="bg-white rounded-xl shadow-lg w-auto max-w-auto">
+            <div class="bg-white rounded-xl shadow-lg w-auto max-w-auto ">
 
-                {{-- Header --}}
                 <div class="flex items-center justify-between px-6 py-4 border-b">
                     <h3 class="text-lg font-semibold text-gray-800">
                         Final Preview
@@ -257,21 +257,74 @@
                     </button>
                 </div>
 
-                {{-- TAB NAV --}}
-                <div class="px-6 pt-4">
+              <div class="px-6 pt-4">
                     <nav class="flex space-x-6 border-b">
-                        @foreach($tabs as $index => $tab)
-                            <x-entrytab-nav-link :active="$index === 0" :icon="$tab->masterTab?->tab_icon">
-                                {{ $tab->masterTab?->tab_name }}
-                            </x-entrytab-nav-link>
+                        @foreach($tabs as $tab)
+                                <button
+                                    wire:click="setFinalPreviewTab({{ $tab->tab_code }})"
+                                    class="flex items-center gap-2 pb-2 text-sm font-medium border-b-2 transition
+                                    {{ $finalActiveTabCode == $tab->tab_code
+                                        ? 'border-indigo-600 text-indigo-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                                    }}">
+
+                                    <x-entrytab-nav-link :active="$tab === 0" :icon="$tab->masterTab?->tab_icon">
+                                        {{ $tab->masterTab?->tab_name }}
+                                    </x-entrytab-nav-link>
+                             </button>
                         @endforeach
-                    </nav>
+                  </nav>
                 </div>
 
-                {{-- TAB CONTENT --}}
+                {{-- Content --}}
+                <div class="p-6 max-h-[70vh] overflow-y-auto">
+                    @if($finalPreviewFields->isEmpty())
+                        <div class="text-center text-gray-400">
+                            No fields configured for this tab
+                        </div>
+                    @else
+                        <div class="grid md:grid-cols-2 gap-4">
+                            @foreach($finalPreviewFields as $field)
 
+                                @if($field->field_type === 'text')
+                                    <div>
+                                        <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}"
+                                            placeholder="Enter {{ $field->level_name }}" disabled />
+                                    </div>
 
-                {{-- Footer --}}
+                                    {{-- DATE --}}
+                                @elseif($field->field_type === 'date')
+                                    <div>
+                                        <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}"
+                                            disabled />
+                                    </div>
+
+                                    {{-- SELECT --}}
+                                @elseif($field->field_type === 'select')
+                                    <div>
+                                        <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
+                                            <option value="">
+                                                -- Select {{ $field->level_name }} --
+                                            </option>
+                                            @foreach($field->options ?? [] as $opt)
+                                                <option>{{ $opt }}</option>
+                                            @endforeach
+                                        </x-form.select>
+                                    </div>
+
+                                    {{-- TEXTAREA --}}
+                                @elseif($field->field_type === 'textarea')
+                                    <div>
+                                        <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}"
+                                            placeholder="Enter {{ $field->level_name }}" disabled />
+                                    </div>
+                                @endif
+
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+
                 <div class="flex justify-end gap-3 px-6 py-4 border-t">
                     <x-button.primary wire:click="closeFinalPreview" type="button">
                         Close
