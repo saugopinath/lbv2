@@ -174,9 +174,6 @@
                     @endif
                     <div class="grid gap-2 md:grid-cols-2 pl-4 pr-4">
 
-                        {{-- ===============================
-                        NORMAL FIELD RENDERING
-                        =============================== --}}
                         @foreach($this->previewFields as $index => $field)
 
                             {{-- Skip location fields for TAB 102 --}}
