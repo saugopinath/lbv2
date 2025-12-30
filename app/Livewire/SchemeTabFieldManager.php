@@ -11,30 +11,12 @@ use Illuminate\Contracts\Encryption\DecryptException;
 
 class SchemeTabFieldManager extends Component
 {
-    public $schemeId;
-    public $lockScheme = false;
+    public $schemeId, $lockScheme = false, $tabs = [], $tabFields = [], $showManageModal = false,
+        $activeTabCode = null, $modalFields = [], $previewTabName = '', $previewTabCode = null,
+        $modalSelected = [], $showFinalPreview = false, $showPreviewModal = false,
+        $finalActiveTabCode = null;
+    public $finalPreviewFields = [];
 
-    public $tabs = [];
-
-    /** Tab wise selected fields
-     * [
-     *   tab_code => [ field_id => field_name ]
-     * ]
-     */
-    public $tabFields = [];
-
-    /* -------- Manage Modal -------- */
-    public $showManageModal = false;
-    public $activeTabCode = null;
-    public $modalFields = [];
-    public $previewTabName = '';
-
-    public $modalSelected = [];
-    public $showFinalPreview = false;
-
-
-    /* -------- Preview Modal -------- */
-    public $showPreviewModal = false;
 
     public function mount($scheme_id = null)
     {
@@ -51,12 +33,49 @@ class SchemeTabFieldManager extends Component
     public function openFinalPreview()
     {
         $this->showFinalPreview = true;
+
+        $firstTab = collect($this->tabs)->first();
+        $this->finalActiveTabCode = $firstTab?->tab_code;
+
+        $this->loadFinalPreviewFields();
     }
+
+    public function setFinalPreviewTab($tabCode)
+    {
+        $this->finalActiveTabCode = $tabCode;
+        $this->loadFinalPreviewFields();
+    }
+
 
     public function closeFinalPreview()
     {
         $this->showFinalPreview = false;
+        $this->finalActiveTabCode = null;
+        $this->finalPreviewFields = collect();
     }
+    private function loadFinalPreviewFields()
+    {
+        if (!$this->finalActiveTabCode) {
+            $this->finalPreviewFields = collect();
+            return;
+        }
+
+        $fieldIds = array_keys($this->tabFields[$this->finalActiveTabCode] ?? []);
+
+        if (empty($fieldIds)) {
+            $this->finalPreviewFields = collect();
+            return;
+        }
+
+        $this->finalPreviewFields = SchemeTabBasefield::whereIn('id', $fieldIds)
+            ->whereIn('scheme_id', [0, $this->schemeId])
+            ->whereIn('tab_code', [0, $this->finalActiveTabCode])
+            ->where('is_active', true)
+            ->get()
+            ->sortBy(fn($f) => array_search($f->id, $fieldIds))
+            ->values();
+    }
+
 
     /* -----------------------------
      | Scheme Change
@@ -85,7 +104,6 @@ class SchemeTabFieldManager extends Component
             ->where('is_active', true)
             ->orderBy('position')
             ->get();
-        // dd($this->tabs );
     }
 
     /* -----------------------------
@@ -102,51 +120,55 @@ class SchemeTabFieldManager extends Component
             ->orderBy('field_position')
             ->get();
 
-        // $this->modalFields = $fields->map(fn($f) => [
-        //     'field_id'   => $f->id,
-        //     'field_name' => $f->level_name,
-        // ])->toArray();
+        $this->modalFields = $fields
+            ->filter(function ($field) use ($tabCode) {
+                if ($field->tab_code == 0 && $field->is_mendetory == 1) {
+                    if ($this->isGlobalMandatoryUsed($field->id, $tabCode)) {
+                        return false;
+                    }
+                }
+                return true;
+            })
+            ->map(fn($f) => [
+                'field_id'     => $f->id,
+                'field_name'   => $f->level_name,
+                'is_mandatory' => $f->is_mendetory,
+                'tab_code' => $f->tab_code
+            ])
+            ->toArray();
 
-        // // Pre-check already selected fields
-        // $this->modalSelected = array_keys(
-        //     $this->tabFields[$tabCode] ?? []
-        // );
-        $this->modalFields = $fields->map(fn($f) => [
-            'field_id'     => $f->id,
-            'field_name'   => $f->level_name,
-            'is_mandatory' => $f->is_mendetory,
-        ])->toArray();
-        // dd($this->modalFields);
         $mandatoryIds = collect($this->modalFields)
-            ->filter(fn($f) => $f['is_mandatory'] == 1)
+            ->filter(fn($f) => $f['is_mandatory'] == 1 &&  $f['tab_code'] != 0)
             ->pluck('field_id')
             ->toArray();
-        // dd($mandatoryIds);
+
         $existing = array_keys($this->tabFields[$tabCode] ?? []);
 
-        // merge + unique
         $this->modalSelected = array_values(
             array_unique(array_merge($existing, $mandatoryIds))
         );
-
-
-        // $this->modalFields = $fields->map(fn($f) => [
-        //     'field_id'     => $f->id,
-        //     'field_name'   => $f->level_name,
-        //     'is_mandatory' => ($f->is_mendetory ?? 0),
-        // ])->toArray();
-
-        // $this->modalSelected = collect($this->modalFields)
-        //     ->filter(fn($f) => $f['is_mandatory'] == 1)
-        //     ->pluck('field_id')
-        //     ->toArray();
     }
     public function isFieldMandatory($fieldId)
     {
         // dd('bhjbc');
         return SchemeTabBasefield::where('id', $fieldId)
             ->where('is_mendetory', 1)
+            ->where('tab_code', '!=', 0)
             ->exists();
+    }
+    public function isGlobalMandatoryUsed(int $fieldId, int $currentTabCode): bool
+    {
+        foreach ($this->tabFields as $tabCode => $fields) {
+            if ((int)$tabCode === (int)$currentTabCode) {
+                continue;
+            }
+
+            if (array_key_exists($fieldId, $fields)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function closeManageModal()
@@ -164,27 +186,6 @@ class SchemeTabFieldManager extends Component
     {
         $this->tabFields[$this->activeTabCode] = [];
 
-        // foreach ($this->modalSelected as $fid) {
-        //     $field = collect($this->modalFields)
-        //         ->firstWhere('field_id', $fid);
-
-        //     if ($field) {
-        //         $this->tabFields[$this->activeTabCode][$fid]
-        //             = $field['field_name'];
-        //     }
-        // }
-        // $this->tabFields[$this->activeTabCode] = [];
-
-        // foreach ($this->modalFields as $field) {
-
-        //     if (
-        //         $field['is_mendetory'] ||
-        //         in_array($field['field_id'], $this->modalSelected)
-        //     ) {
-        //         $this->tabFields[$this->activeTabCode][$field['field_id']]
-        //             = $field['field_name'];
-        //     }
-        // }
         $this->tabFields[$this->activeTabCode] = [];
 
         foreach ($this->modalSelected as $fid) {
@@ -204,7 +205,6 @@ class SchemeTabFieldManager extends Component
      |-----------------------------*/
     public function removeField($tabCode, $fieldId)
     {
-        // dd($tabCode, $fieldId);
         if ($this->isFieldMandatory($fieldId)) {
             return;
         }
@@ -224,6 +224,7 @@ class SchemeTabFieldManager extends Component
         $tab = collect($this->tabs)
             ->firstWhere('tab_code', $tabCode);
         $this->previewTabName = $tab?->masterTab?->tab_name ?? 'Preview';
+        $this->previewTabCode = $tab?->masterTab?->tab_code ?? 'Preview';
         $this->showPreviewModal = true;
     }
     public function closePreview()
