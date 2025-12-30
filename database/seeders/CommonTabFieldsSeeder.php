@@ -487,6 +487,125 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_position'  => 10,
                     'is_active'       => true,
                 ],
+
+
+                
+
+                /*
+                |--------------------------------------------------------------------------
+                | IFSC Code
+                |--------------------------------------------------------------------------
+                */
+                [
+                    'field_id'        => 'ifscode',
+                    'field_name'      => 'ifscode',
+                    'level_name'      => 'IFSC Code',
+                    'field_type'      => 'text',
+                    // 'options'         => [
+                    //     'uppercase' => true,
+                    //     'maxlength' => 11,
+                    //     'fetch_bank_details' => true
+                    // ],
+                    'is_common'       => true,
+                    'tab_code'        => 103,
+                    'validation_rule' => 'required|size:11',
+                    'regex'           => '^[A-Z]{4}0[A-Z0-9]{6}$',
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'field_position'  => 1,
+                    'is_active'       => true,
+                ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | Bank Name (Auto-filled)
+                |--------------------------------------------------------------------------
+                */
+                [
+                    'field_id'        => 'bankname',
+                    'field_name'      => 'bankname',
+                    'level_name'      => 'Bank Name',
+                    'field_type'      => 'text',
+                    // 'options'         => [
+                    //     'disabled' => true,
+                    //     'depends_on' => 'ifscode'
+                    // ],
+                    'is_common'       => true,
+                    'tab_code'        => 103,
+                    'validation_rule' => 'required|string',
+                    'regex'           => null,
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'field_position'  => 2,
+                    'is_active'       => true,
+                ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | Bank Branch Name (Auto-filled)
+                |--------------------------------------------------------------------------
+                */
+                [
+                    'field_id'        => 'bank_branch_name',
+                    'field_name'      => 'bank_branch_name',
+                    'level_name'      => 'Bank Branch Name',
+                    'field_type'      => 'text',
+                    'is_common'       => true,
+                    'tab_code'        => 103,
+                    'validation_rule' => 'required|string',
+                    'regex'           => null,
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'field_position'  => 3,
+                    'is_active'       => true,
+                ],
+                /*
+                |--------------------------------------------------------------------------
+                | Bank Account Number
+                |--------------------------------------------------------------------------
+                */
+                [
+                    'field_id'        => 'bankaccountnumber',
+                    'field_name'      => 'bankaccountnumber',
+                    'level_name'      => 'Bank Account Number',
+                    'field_type'      => 'text',
+                    // 'options'         => [
+                    //     'numeric' => true,
+                    //     'mask' => true
+                    // ],
+                    'is_common'       => true,
+                    'tab_code'        => 103,
+                    'validation_rule' => 'required|numeric|min:9',
+                    'regex'           => '^[0-9]{9,18}$',
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'field_position'  => 4,
+                    'is_active'       => true,
+                ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | Confirm Bank Account Number
+                |--------------------------------------------------------------------------
+                */
+                [
+                    'field_id'        => 'confirmbankaccountnumber',
+                    'field_name'      => 'confirmbankaccountnumber',
+                    'level_name'      => 'Confirm Bank Account Number',
+                    'field_type'      => 'text',
+                    // 'options'         => [
+                    //     'numeric' => true,
+                    //     'match_with' => 'bankaccountnumber'
+                    // ],
+                    'is_common'       => true,
+                    'tab_code'        => 103,
+                    'validation_rule' => 'required|same:bankaccountnumber',
+                    'regex'           => '^[0-9]{9,18}$',
+                    'section_id'      => null,
+                    'is_multiple'     => false,
+                    'field_position'  => 5,
+                    'is_active'       => true,
+                ],
             ];
 
             foreach ($fields as $field) {

@@ -44,16 +44,16 @@
 
                 {{-- FIELD GRID (Drag & Drop) --}}
                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
-                                                                                                        new Sortable($el, {
-                                                                                                            animation: 150,
-                                                                                                            handle: '.drag-handle',
-                                                                                                            onEnd() {
-                                                                                                                let ordered = Array.from($el.children)
-                                                                                                                    .map(el => el.dataset.fid);
-                                                                                                                $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
-                                                                                                            }
-                                                                                                        })
-                                                                                                    ">
+                    new Sortable($el, {
+                        animation: 150,
+                        handle: '.drag-handle',
+                        onEnd() {
+                            let ordered = Array.from($el.children)
+                                .map(el => el.dataset.fid);
+                            $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
+                        }
+                    })
+                ">
                     @foreach($tabFields[$tab->tab_code] as $fid => $fname)
                     <div data-fid="{{ $fid }}"
                         class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
@@ -66,12 +66,21 @@
                             </span>
 
                         </div>
-
-                        {{-- IMPORTANT FIX --}}
-                        <button wire:click.stop="removeField({{ $tab->tab_code }}, '{{ $fid }}')"
-                            class="text-red-600 font-bold">
+                        <button
+                            wire:click.stop="removeField({{ $tab->tab_code }}, '{{ $fid }}')"
+                                                        class="
+                                    text-red-500 font-bold text-lg
+                                    @if($this->isFieldMandatory($fid))
+                                        opacity-50 cursor-not-allowed
+                                    @else
+                                        hover:text-red-600
+                                    @endif
+                                "
+                            @if($this->isFieldMandatory($fid)) disabled @endif
+                            >
                             ✕
                         </button>
+
 
                     </div>
                     @endforeach
@@ -110,8 +119,11 @@
 
             <div class="p-6 grid grid-cols-2 gap-3 max-h-[70vh] overflow-y-auto">
                 @foreach($modalFields as $field)
-                <label class="flex gap-3 items-center bg-gray-50 p-3 rounded">
-                    <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}">
+                <label
+                    class="flex gap-3 items-center p-3 rounded border border-gray-200
+                   {{ $field['is_mandatory'] ? 'border-red-300 bg-red-50' : 'bg-gray-50' }}">
+                    <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}"
+                        @if($field['is_mandatory']) disabled @endif>
                     {{ $field['field_name'] }}
                 </label>
                 @endforeach
@@ -153,8 +165,7 @@
                     @elseif($field->field_type === 'date')
                     <div>
 
-                        <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}"
-                             />
+                        <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" />
                     </div>
 
                     @elseif($field->field_type === 'select')
