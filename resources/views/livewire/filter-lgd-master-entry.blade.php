@@ -1,3 +1,4 @@
+<div class="{{ $preview ? 'pointer-events-none opacity-90' : '' }}">
 <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
     <div>
         @if ($visible['district_dropdown'])
@@ -52,4 +53,5 @@
         </x-form.select>
         @endif
     </div>
+</div>
 </div>

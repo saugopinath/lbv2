@@ -168,7 +168,7 @@
                         )
                         {{-- LOCATION COMPONENT --}}
                         <div>
-                            <livewire:filter-lgd-master-entry :login_type="'state_office'" />
+                            <livewire:filter-lgd-master-entry :login_type="'state_office'" :preview="true" />
                         </div>
 
                     @endif

@@ -13,6 +13,8 @@ class FilterLgdMasterEntry extends Component
 
     public $selectedDistrict, $selectedRuralurban, $selectedBlockurban, $selectedGpWard;
     public $login_type;
+    public bool $preview = false;
+
 
     public $visible = [
         'district_dropdown' => 0,
