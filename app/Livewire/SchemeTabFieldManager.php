@@ -104,7 +104,6 @@ class SchemeTabFieldManager extends Component
             ->where('is_active', true)
             ->orderBy('position')
             ->get();
-        // dd($this->tabs );
     }
 
     /* -----------------------------
@@ -121,12 +120,22 @@ class SchemeTabFieldManager extends Component
             ->orderBy('field_position')
             ->get();
 
-        $this->modalFields = $fields->map(fn($f) => [
-            'field_id'     => $f->id,
-            'field_name'   => $f->level_name,
-            'is_mandatory' => $f->is_mendetory,
-            'tab_code' => $f->tab_code,
-        ])->toArray();
+        $this->modalFields = $fields
+            ->filter(function ($field) use ($tabCode) {
+                if ($field->tab_code == 0 && $field->is_mendetory == 1) {
+                    if ($this->isGlobalMandatoryUsed($field->id, $tabCode)) {
+                        return false;
+                    }
+                }
+                return true;
+            })
+            ->map(fn($f) => [
+                'field_id'     => $f->id,
+                'field_name'   => $f->level_name,
+                'is_mandatory' => $f->is_mendetory,
+                'tab_code' => $f->tab_code
+            ])
+            ->toArray();
 
         $mandatoryIds = collect($this->modalFields)
             ->filter(fn($f) => $f['is_mandatory'] == 1 &&  $f['tab_code'] != 0)
@@ -143,7 +152,22 @@ class SchemeTabFieldManager extends Component
     {
         return SchemeTabBasefield::where('id', $fieldId)
             ->where('is_mendetory', 1)
+            ->where('tab_code', '!=', 0)
             ->exists();
+    }
+    public function isGlobalMandatoryUsed(int $fieldId, int $currentTabCode): bool
+    {
+        foreach ($this->tabFields as $tabCode => $fields) {
+            if ((int)$tabCode === (int)$currentTabCode) {
+                continue;
+            }
+
+            if (array_key_exists($fieldId, $fields)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function closeManageModal()
