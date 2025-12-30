@@ -2,12 +2,14 @@
 
 namespace App\Livewire\CreateAssignOtherFormField;
 
+
 use Livewire\Component;
 use App\Models\Scheme;
 use App\Models\FromFieldType;
 use App\Models\ValidationRule;
 use App\Models\FromFieldAttribute;
 use App\Models\MasterSection;
+use Illuminate\Support\Facades\Storage;
 
 class CreateOtherfromAttribute extends Component
 {
@@ -30,6 +32,8 @@ class CreateOtherfromAttribute extends Component
     public $validationRules = [];
     public array $validationRuleOptions = [];
     public string $is_choose_default = 'no';
+    public $default_values;
+    public $default_value;
     public function mount()
     {
         $this->schemes = Scheme::all();
@@ -40,6 +44,10 @@ class CreateOtherfromAttribute extends Component
                 'label' => $rule->description,
             ])
             ->toArray();
+        $this->default_values = json_decode(
+            Storage::get('form-options.json'),
+            true
+        );
     }
     public function updatedSchemeId()
     {
@@ -91,6 +99,7 @@ class CreateOtherfromAttribute extends Component
             'section_id' => 'required_if:is_under_section,yes',
             'is_multiple' => 'required_if:field_type,select',
             'is_choose_default' => 'required_if:field_type,select',
+            'default_value' => 'required_if:is_choose_default,yes'
         ];
     }
     public function addOption()

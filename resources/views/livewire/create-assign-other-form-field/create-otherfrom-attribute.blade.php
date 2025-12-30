@@ -108,14 +108,14 @@
             </div>
             @if ($is_choose_default === 'yes')
             <x-form.select
-                name="field_type"
-                label="Field Type"
-                wire:model.live="field_type"
+                name="default_value"
+                label="Default Value"
+                wire:model="default_value"
                 required>
                 <option value="">-- Select --</option>
-                @foreach ($fieldTypes as $type)
-                <option value="{{ $type->name }}">
-                    {{ $type->name }}
+                @foreach ($default_values as $key => $value)
+                <option value="{{ $key }}">
+                    {{ $value }}
                 </option>
                 @endforeach
             </x-form.select>
