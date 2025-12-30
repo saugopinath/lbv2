@@ -31,8 +31,12 @@ use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Http\Controllers\BeneficiaryCountController;
 use App\Http\Controllers\CmoController;
 use App\Http\Controllers\JnpmController;
+use App\Http\Controllers\CreateAssignOtherFormFieldController;
+use App\Http\Controllers\DynamicFormController;
 use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\ElasticSearchController;
+use App\Http\Controllers\MarkedUpdateBeneficiary;
+use App\Http\Controllers\MarkedUpdateBeneficiaryController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
 use App\Livewire\SchemeTabFieldManager;
@@ -112,6 +116,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('userDutymanagement.index');
 
     // LB & Workflow
+    Route::post('/select-scheme', [LBController::class, 'selectScheme'])
+    ->name('select-scheme');
+
     Route::get('lbform', [LBController::class, 'index'])
         ->middleware('permission.redirect:canEntry')
         ->name('lbform');
@@ -284,3 +291,35 @@ Route::get('/tab-field-manager/{scheme_id?}', SchemeTabFieldManager::class)
     ->name('tab-field-manager');
 
 
+Route::controller(MarkedUpdateBeneficiaryController::class)->group(function () {
+    Route::get('/marked-beneficiary',  'index')
+        ->name('marked-beneficiary');
+    Route::get('/mark-beneficiary', 'editview')
+    ->name('mark-beneficiary');
+    Route::post('/final-marked', 'marked')
+    ->name('final-marked');
+    Route::get('/marked-beneficiary-list', 'list')
+    ->name('marked-beneficiary-list');
+    Route::get('/view-marked-beneficiary-details', 'viewmarkedbeneficiarydetails')
+    ->name('view-marked-beneficiary-details');
+     Route::post('/marked-beneficiary-details-update', 'updatemarkedbeneficiarydetails')
+    ->name('marked-beneficiary-details-update');
+});
+
+
+Route::controller(CreateAssignOtherFormFieldController::class)->group(function () {
+    Route::get('/create-dynamicformfield',  'createdynamicformfield')
+        ->name('create-dynamicformfield');
+});
+
+Route::get(
+    '/dynamic-form-page',
+    [DynamicFormController::class, 'show']
+)->name('dynamic-form-page');
+
+Route::get('/master-tab', App\Livewire\MasterTabManager::class)->name('master-tab');
+// Route::get('/tab-filed-manage', App\Livewire\SchemeTabFieldManager::class)->name('tab-filed-manage');
+Route::get('/tab-field-manager/{scheme_id?}', SchemeTabFieldManager::class)
+    ->name('tab-field-manager');
+
+// Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name(name: 'menu-tab');

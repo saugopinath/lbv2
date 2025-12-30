@@ -14,7 +14,7 @@
             }
         }
     }" class="space-y-2">
-        <x-accordion-section title="Personal Detailsss" sectionId="personal-details" color="pink-500">
+        <x-accordion-section title="Personal Details" sectionId="personal-details" color="pink-500">
             <x-apllicant-modal.personal-details :id="$applicationId" mode="page" />
 
 

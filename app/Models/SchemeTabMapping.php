@@ -3,33 +3,24 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SchemeTabMapping extends Model
 {
-    protected $table = 'scheme_tab_mappings';
-
-    protected $fillable = [
-        'scheme_id',
-        'tab_code',
-        'position',
-        'is_finally_submitted',
-        'is_active'
-    ];
-
-    /**
-     * Get the master tab that this mapping belongs to.
-     */
-    public function masterTab(): BelongsTo
+    protected $guarded = [];
+    public function masterTab()
     {
-        return $this->belongsTo(MasterTab::class, 'tab_code', 'tab_code');
+        return $this->belongsTo(
+            MasterTab::class,
+            'tab_code',   // FK in scheme_tab_mappings
+            'tab_code'    // PK in master_tabs
+        );
     }
-
     /**
-     * Get the scheme that owns this mapping.
+     * (Optional but useful)
+     * Relation with Scheme
      */
-    public function scheme(): BelongsTo
+    public function scheme()
     {
-        return $this->belongsTo(Scheme::class);
+        return $this->belongsTo(Scheme::class, 'scheme_id');
     }
 }

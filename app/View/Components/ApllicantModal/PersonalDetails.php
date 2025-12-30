@@ -17,7 +17,7 @@ class PersonalDetails extends Component
      * Create a new component instance.
      */
     public $id, $applicantDet, $decryptedAadhaar, $dsregno, $dsdate, $mobile, $email,
-        $fname, $dob, $age, $ffname, $mfname, $sfname, $caste, $cascerno, $currentDate, $mode;
+        $fname, $dob, $age, $ffname, $mfname, $sfname, $caste, $cascerno, $currentDate, $mode,$name;
 
     public function __construct($id, $reportType = null, $mode = null)
     {
@@ -40,6 +40,7 @@ class PersonalDetails extends Component
         $this->decryptedAadhaar = Crypt::decryptString($applicantDet->aadhaar->encoded_aadhar);
         $this->dsregno = $applicantDet->ds_registration_no;
         $this->dsdate = Carbon::parse($applicantDet->ds_date)->format('d-m-Y');
+        $this->name = $applicantDet->full_name;
         $this->mobile = $applicantDet->mobile_no;
         $this->email = $applicantDet->email;
         $this->fname = $applicantDet->full_name;

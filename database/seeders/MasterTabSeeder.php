@@ -1,12 +1,9 @@
 <?php
 
-
 namespace Database\Seeders;
-
 
 use Illuminate\Database\Seeder;
 use App\Models\MasterTab;
-
 
 class MasterTabSeeder extends Seeder
 {
@@ -70,7 +67,6 @@ class MasterTabSeeder extends Seeder
                 'is_active'      => true,
             ],
         ];
-
 
         foreach ($tabs as $tab) {
             MasterTab::updateOrCreate(

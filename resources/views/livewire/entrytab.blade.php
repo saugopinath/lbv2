@@ -34,8 +34,7 @@
         @livewire(
         $tabs[$currentTab]['component'],
         $currentTab === 'tab1' && empty($application_id)
-        ? ['aadhaarData' => $aadhaarData]
-        : ['application_id' => $application_id],
+        ? ['aadhaarData' => $aadhaarData]: ['application_id' => $application_id, 'schemeId'=> $schemeId,'isOtherTab'=> $isOtherTab],
         key('tab-'.$application_id.'-'.$currentTab)
         )
         @endif

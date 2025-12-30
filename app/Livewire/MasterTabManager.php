@@ -91,7 +91,6 @@ class MasterTabManager extends Component
         $this->selectedTabs = array_values(
             array_diff($this->selectedTabs, [(int)$tabCode])
         );
-
         $this->recalculatePositions();
         $this->mappingSaved = false;
     }

@@ -490,7 +490,6 @@ class CommonTabFieldsSeeder extends Seeder
 
 
 
-
                 /*
                 |--------------------------------------------------------------------------
                 | IFSC Code

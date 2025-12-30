@@ -12,14 +12,16 @@ use App\Models\Codemaster;
 
 class SelfDeclaration extends Component
 {
-    public $mode, $application_id;
+    public $mode, $application_id, $isOtherTab;
     public $resident = false;
     public $no_govt_salary = false;
     public $info_true = false;
     public $aadhaar_consent = false;
 
-    public function mount($mode = null, $application_id = null)
+    public function mount($mode = null, $application_id = null, $isOtherTab = null)
     {
+        // dd($isOtherTab);
+        $this->isOtherTab = $isOtherTab;
         $this->mode = $mode;
         if ($application_id != null) {
             $this->application_id = $application_id;
@@ -54,7 +56,8 @@ class SelfDeclaration extends Component
         $app_det = DraftBeneficiaryDeclaration::where('application_id', $this->application_id)->first();
         DB::beginTransaction();
         try {
-            if ($this->mode === null && empty($app_det)) {
+            if ($this->mode === null && empty($app_det) && $this->isOtherTab == 0) {
+                // dd('ok');
                 $application_id = $this->application_id;
                 $DraftBeneficiaryDeclaration = new DraftBeneficiaryDeclaration;
                 $DraftBeneficiaryDeclaration->application_id = $application_id;
@@ -84,7 +87,28 @@ class SelfDeclaration extends Component
                     ->latest('id')
                     ->value('id') ?? null;
                 $AcceptRejectInfo->save();
+                $this->dispatch('selfDec1');
+                $this->dispatch('hideLoader');
+                $this->dispatch('toastr', [
+                    'type' => 'success',
+                    'message' => 'Application submitted successfully!'
+                ]);
+            } elseif ($this->mode === null && empty($app_det) && $this->isOtherTab == 1) {
+                $application_id = $this->application_id;
+                $DraftBeneficiaryDeclaration = new DraftBeneficiaryDeclaration;
+                $DraftBeneficiaryDeclaration->application_id = $application_id;
+                $DraftBeneficiaryDeclaration->is_resident = $validated['resident'];
+                $DraftBeneficiaryDeclaration->earn_monthly_remuneration = $validated['no_govt_salary'];
+                $DraftBeneficiaryDeclaration->info_genuine_decl = $validated['info_true'];
+                $DraftBeneficiaryDeclaration->av_status = $validated['aadhaar_consent'];
+                $DraftBeneficiaryDeclaration->created_by = Auth::id();
+                $DraftBeneficiaryDeclaration->save();
+                $this->dispatch('selfDec', [
+                    'message' => "Self Decleration uploaded successfully for the application id: {$this->application_id}"
+                ]);
+                $this->dispatch('hideLoader');
             } else {
+                // dd('ok1');
                 $DraftBeneficiaryDeclaration = DraftBeneficiaryDeclaration::find($this->application_id);
                 $DraftBeneficiaryDeclaration->is_resident = $validated['resident'];
                 $DraftBeneficiaryDeclaration->earn_monthly_remuneration = $validated['no_govt_salary'];
@@ -92,6 +116,15 @@ class SelfDeclaration extends Component
                 $DraftBeneficiaryDeclaration->av_status = $validated['aadhaar_consent'];
                 $DraftBeneficiaryDeclaration->created_by = Auth::id();
                 $DraftBeneficiaryDeclaration->save();
+                if ($this->isOtherTab == 1) {
+                    $this->dispatch('selfDec', [
+                        'message' => "Self Decleration uploaded successfully for the application id: {$this->application_id}"
+                    ]);
+                } else {
+                    $this->dispatch('selfDec1');
+                }
+                $this->dispatch('hideLoader');
+                
             }
             DB::commit();
         } catch (\Exception $e) {
@@ -99,12 +132,15 @@ class SelfDeclaration extends Component
             $this->dispatch('hideLoader');
             throw $e;
         }
-        $this->dispatch('selfDec');
-        $this->dispatch('hideLoader');
-        $this->dispatch('toastr', [
-            'type' => 'success',
-            'message' => 'Application submitted successfully!'
-        ]);
+        // $this->dispatch('selfDec');
+        //  $this->dispatch('selfDec', [
+        //     'message' => "Self Decleration uploaded successfully for the application id: {$this->application_id}"
+        // ]);
+        // $this->dispatch('hideLoader');
+        // $this->dispatch('toastr', [
+        //     'type' => 'success',
+        //     'message' => 'Application submitted successfully!'
+        // ]);
     }
 
     public function render()
