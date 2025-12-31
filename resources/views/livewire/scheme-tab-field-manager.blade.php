@@ -101,33 +101,105 @@
     @if($showManageModal)
     <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-3xl rounded-lg shadow-lg overflow-hidden">
-
             <div class="bg-indigo-100 px-6 py-4 font-semibold">
                 Manage Fields
             </div>
+            <div class="p-6 max-h-[70vh] overflow-y-auto">
+                @if($activeTabCode == 104)
+                {{-- DOCUMENT FORM --}}
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <x-form.select name="doc_type_id" label="Document Type" wire:model="selectedDocType">
+                        <option value="">-- Select Document --</option>
+                        @foreach($docTypes as $doc)
+                        <option value="{{ $doc->id }}">{{ $doc->name }}</option>
+                        @endforeach
+                    </x-form.select>
 
-            <div class="p-6 grid grid-cols-2 gap-3 max-h-[70vh] overflow-y-auto">
-                @foreach($modalFields as $field)
-                <label class="flex gap-3 items-center p-3 rounded border border-gray-200
-                       {{ $field['is_mandatory'] ? 'border-green-300 bg-green-50' : 'bg-gray-50' }}">
-                    <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}"
-                        @if($field['is_mandatory'] && $field['tab_code'] !=0) disabled @endif>
-                    <span>{{ $field['field_name'] }} @if($field['is_mandatory'] === 1)
-                        <span class="text-red-500 font-bold">*</span>
-                        @endif</span>
-                </label>
-                @endforeach
+                    <x-form.select name="is_required" label="Is Required" wire:model="isRequired">
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </x-form.select>
+                    <x-form.input name="max_file_size" label="Max File Size" wire:model="maxFileSize" />
+                    <div class="col-span-2">
+                        <label class="font-semibold">Allowed Extensions</label>
+                        <div class="flex gap-3 mt-1">
+                            @foreach(['jpg', 'jpeg', 'png', 'pdf'] as $ext)
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" wire:model="extensionTypes" value="{{ $ext }}">
+                                {{ strtoupper($ext) }}
+                            </label>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                @if($attachedDocuments->count())
+                <div class="border-t pt-4 mt-4">
+                    <h3 class="font-semibold mb-3">
+                        Attached Documents
+                    </h3>
+
+                    <div class="space-y-2">
+                        @foreach($attachedDocuments as $doc)
+                        <div class="flex justify-between items-center bg-gray-50 p-3 rounded border">
+                            <div>
+                                <div class="font-medium">
+                                    {{ $doc->docType->name }}
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    Size: {{ $doc->max_file_size }} |
+                                    Required: {{ $doc->is_required ? 'Yes' : 'No' }} |
+                                    Ext: {{ $doc->extension_type }}
+                                </div>
+                            </div>
+
+                            <button wire:click="removeDocument({{ $doc->id }})" class="text-red-500 font-bold">
+                                ✕
+                            </button>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                @else
+                <div class="grid grid-cols-2 gap-3">
+                    @foreach($modalFields as $field)
+                    <label
+                        class="flex gap-3 items-center p-3 rounded border border-gray-200
+                                                                {{ $field['is_mandatory'] ? 'border-green-300 bg-green-50' : 'bg-gray-50' }}">
+                        <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}"
+                            @if($field['is_mandatory'] && $field['tab_code'] !=0) disabled @endif>
+
+                        <span>
+                            {{ $field['field_name'] }}
+                            @if($field['is_mandatory'])
+                            <span class="text-red-500 font-bold">*</span>
+                            @endif
+                        </span>
+                    </label>
+                    @endforeach
+                </div>
+                @endif
             </div>
 
+            {{-- FOOTER --}}
             <div class="flex justify-end gap-3 px-6 py-4 border-t">
-                <x-button.primary wire:click="closeManageModal" class="px-5 py-2 bg-gray-600 rounded">
+                <x-button.primary wire:click="closeManageModal" class="bg-gray-600">
                     Cancel
                 </x-button.primary>
 
-                <x-button.primary wire:click="saveManageFields" class="px-5 py-2 bg-indigo-600 text-white rounded">
+                @if($activeTabCode == 104)
+                <x-button.primary wire:click="saveDocumentMapping" class="bg-indigo-600">
+                    Add Document
+                </x-button.primary>
+                @else
+                <x-button.primary wire:click="saveManageFields" class="bg-indigo-600">
                     Add
                 </x-button.primary>
+                @endif
             </div>
+
         </div>
     </div>
     @endif
@@ -160,18 +232,18 @@
                     <livewire:filter-lgd-master-entry :login_type="'state_office'" />
                 </div>
                 @endif
-                   
-                 @if($previewTabCode == 104 &&
+
+                @if($previewTabCode == 104 &&
                 collect($this->previewFields)
                 ->pluck('field_id')
                 ->isNotEmpty()
                 )
                 <div>
-                    <livewire:enclosure-list :is_page="1"  />
+                    <livewire:enclosure-list :is_page="1" />
                 </div>
 
                 @endif
-                
+
 
                 <div class="grid gap-2 md:grid-cols-2 pl-4 pr-4">
 
@@ -191,7 +263,7 @@
                     )
                     @continue
                     @endif
-                     @if(
+                    @if(
                     $activeTabCode == 104 &&
                     in_array($field->id, [
                     '107',
