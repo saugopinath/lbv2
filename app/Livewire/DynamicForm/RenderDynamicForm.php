@@ -16,14 +16,14 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class RenderDynamicForm extends Component
 {
-    public int $schemeId;
+    public  $schemeId;
     public $mode;
-    public int $application_id;
+    public  $application_id;
     public array $fields = [];
     public array $sections = [];
     public array $formData = [];
     use WithFileUploads;
-    public function mount(int $schemeId, int $application_id, $mode = null)
+    public function mount( $schemeId = null,  $application_id = null, $mode = null)
     {
         // dd('')
         // dump($schemeId);
@@ -150,6 +150,23 @@ class RenderDynamicForm extends Component
         }
         return $attributes;
     }
+    public function shouldShowField($field)
+{
+    // if not dependent → always show
+    if (empty($field['dependent_on'])) {
+        return true;
+    }
+
+    // parent field label
+    $parentLabel = $field['dependent_on_label']; 
+    // e.g. "caste"
+
+    $parentValue = $this->formData[$parentLabel] ?? null;
+
+    // SC / ST values (based on your JSON keys)
+    return in_array($parentValue, ['1', '2']);
+}
+
     public function render()
     {
         return view('livewire.dynamic-form.render-dynamic-form');
