@@ -11,12 +11,14 @@ class SchemeAttachedDocMappings extends Model
     protected $fillable = [
         'scheme_id',
         'doc_type_id',
+        'tab_code',
         'is_required',
         'max_file_size',
         'extension_type',
+        'position',
     ];
 
- 
+
     protected $casts = [
         'is_required' => 'boolean',
     ];

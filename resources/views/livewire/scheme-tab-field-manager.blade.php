@@ -18,8 +18,8 @@
                         </span>
                         <div class="flex gap-2 items-center">
                             <a href="{{ route('create-dynamicformfield', [
-                            'ref' => encrypt($tab->scheme_id . '|' . $tab->tab_code)
-                            ]) }}">
+                    'ref' => encrypt($tab->scheme_id . '|' . $tab->tab_code)
+                ]) }}">
                                 <x-button.primary class="bg-indigo-400 hover:bg-indigo-500 text-sm">
                                     Add Another Fields
                                 </x-button.primary>
@@ -33,54 +33,113 @@
                                 Preview
                             </x-button.primary>
 
-                            <button @click="open=!open" class="text-sm">
-                                ▼
-                            </button>
+
+                            @if($tab->tab_code == 104)
+                                <button @click="open = !open" class="text-sm">
+                                    ▼
+                                </button>
+                            @else
+                                <button @click="open=!open" class="text-sm">
+                                    ▼
+                                </button>
+                            @endif
+
                         </div>
                     </div>
                     {{-- Body --}}
                     <div x-show="open" x-collapse class="bg-white">
-                        @if(isset($tabFields[$tab->tab_code]) && count($tabFields[$tab->tab_code]))
-                            <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
-                                        new Sortable($el, {
-                                            animation: 150,
-                                            handle: '.drag-handle',
-                                            onEnd() {
-                                                let ordered = Array.from($el.children)
-                                                    .map(el => el.dataset.fid);
-                                                $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
-                                            }
-                                        })
-                                    ">
-                                @foreach($tabFields[$tab->tab_code] as $fid => $fname)
-                                    <div data-fid="{{ $fid }}"
-                                        class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
-                                        {{-- SERIAL NUMBER --}}
-                                        <div class="flex items-center gap-2">
-                                            <span class="drag-handle cursor-move text-gray-400">☰</span>
-                                            <span class="font-semibold text-gray-600">
-                                                {{ $loop->iteration }}.{{ $fname }}
-                                            </span>
-                                        </div>
-                                        <button wire:click.stop="removeField({{ $tab->tab_code }}, '{{ $fid }}')" class="
-                                        text-red-500 font-bold text-lg
-                                        @if($this->isFieldMandatory($fid))
-                                            opacity-50 cursor-not-allowed
-                                        @else
-                                            hover:text-red-600
-                                        @endif
-                                    " @if($this->isFieldMandatory($fid)) disabled @endif>
-                                            ✕
-                                        </button>
+
+                        @if($tab->tab_code == 104)
+
+                            @if(count($attachedDocuments))
+                                    <div class="p-4 space-y-3" x-data x-init="
+                                    new Sortable($el, {
+                                        animation: 150,
+                                        handle: '.drag-handle',
+                                        onEnd() {
+                                            let ordered = Array.from($el.children)
+                                                .map(el => el.dataset.id);
+                                            $wire.updateDocumentOrder(ordered);
+                                        }
+                                    })
+                                 ">
+                                        @foreach($attachedDocuments as $doc)
+                                            <div data-id="{{ $doc->id }}"
+                                                class="flex justify-between items-center bg-gray-50 p-3 rounded border">
+                                                {{-- LEFT --}}
+                                                <div class="flex items-center gap-3">
+                                                    <span class="drag-handle cursor-move text-gray-400 text-lg">☰</span>
+
+                                                    <div>
+                                                        <div class="font-medium">
+                                                        {{ $loop->iteration }}. {{ $doc->docType->name }}
+                                                        </div>
+                                                        <div class="text-sm text-gray-500">
+                                                            Size: {{ $doc->max_file_size }} |
+                                                            Required: {{ $doc->is_required ? 'Yes' : 'No' }} |
+                                                            Ext: {{ $doc->extension_type }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {{-- REMOVE --}}
+                                                <button wire:click="removeDocument({{ $doc->id }})"
+                                                    class="text-red-500 font-bold text-lg hover:text-red-600">
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        @endforeach
                                     </div>
-                                @endforeach
-                            </div>
+                            @else
+                                <div class="p-4 text-gray-400 text-sm text-center">
+                                    No documents attached
+                                </div>
+                            @endif
                         @else
-                            <div class="p-4 text-gray-400 text-sm text-center">
-                                No fields added
-                            </div>
+
+                            @if(isset($tabFields[$tab->tab_code]) && count($tabFields[$tab->tab_code]))
+                                <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
+                                                    new Sortable($el, {
+                                                        animation: 150,
+                                                        handle: '.drag-handle',
+                                                        onEnd() {
+                                                            let ordered = Array.from($el.children)
+                                                                .map(el => el.dataset.fid);
+                                                            $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
+                                                        }
+                                                    })
+                                                ">
+                                    @foreach($tabFields[$tab->tab_code] as $fid => $fname)
+                                        <div data-fid="{{ $fid }}"
+                                            class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
+
+                                            <div class="flex items-center gap-2">
+                                                <span class="drag-handle cursor-move text-gray-400">☰</span>
+                                                <span class="font-semibold text-gray-600">
+                                                    {{ $loop->iteration }}. {{ $fname }}
+                                                </span>
+                                            </div>
+
+                                            <button wire:click.stop="removeField({{ $tab->tab_code }}, '{{ $fid }}')" class="text-red-500 font-bold text-lg
+                                                                        @if($this->isFieldMandatory($fid))
+                                                                            opacity-50 cursor-not-allowed
+                                                                        @else
+                                                                            hover:text-red-600
+                                                                        @endif" @if($this->isFieldMandatory($fid)) disabled @endif>
+                                                ✕
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="p-4 text-gray-400 text-sm text-center">
+                                    No fields added
+                                </div>
+                            @endif
+
                         @endif
                     </div>
+
                 </div>
             @endforeach
         </div>
@@ -172,8 +231,9 @@
                     @else
                         <div class="grid grid-cols-2 gap-3">
                             @foreach($modalFields as $field)
-                                <label class="flex gap-3 items-center p-3 rounded border border-gray-200
-                                        {{ $field['is_mandatory'] ? 'border-green-300 bg-green-50' : 'bg-gray-50' }}">
+                                <label
+                                    class="flex gap-3 items-center p-3 rounded border border-gray-200
+                                                                {{ $field['is_mandatory'] ? 'border-green-300 bg-green-50' : 'bg-gray-50' }}">
                                     <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}"
                                         @if($field['is_mandatory'] && $field['tab_code'] != 0) disabled @endif>
 
@@ -192,12 +252,12 @@
                 {{-- FOOTER --}}
                 <div class="flex justify-end gap-3 px-6 py-4 border-t">
                     <x-button.primary wire:click="closeManageModal" class="bg-gray-600">
-                        Cancel
+                        Close
                     </x-button.primary>
 
                     @if($activeTabCode == 104)
                         <x-button.primary wire:click="saveDocumentMapping" class="bg-indigo-600">
-                            Save Document
+                            Add Document
                         </x-button.primary>
                     @else
                         <x-button.primary wire:click="saveManageFields" class="bg-indigo-600">
@@ -222,7 +282,8 @@
                 {{-- Body --}}
                 <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
 
-                    @if($previewTabCode == 102 &&
+                    @if(
+                            $previewTabCode == 102 &&
                             collect($this->previewFields)
                                 ->pluck('field_name')
                                 ->intersect([
@@ -243,7 +304,8 @@
 
                         @foreach($this->previewFields as $index => $field)
 
-                            @if($activeTabCode == 102 &&
+                            @if(
+                                    $activeTabCode == 102 &&
                                     in_array($field->field_name, [
                                         'district_id',
                                         'rural_urban',
@@ -318,7 +380,7 @@
                     <nav class="flex space-x-6">
                         @foreach($tabs as $tab)
                                     <button wire:click="setFinalPreviewTab({{ $tab->tab_code }})" class="flex items-center gap-2 pb-2 text-sm font-medium border-b-2 transition
-                                            {{ $finalActiveTabCode == $tab->tab_code ? 'border-indigo-600 text-indigo-600'
+                                                                            {{ $finalActiveTabCode == $tab->tab_code ? 'border-indigo-600 text-indigo-600'
                             : 'border-transparent text-gray-500 hover:text-gray-700'}}">
                                         <x-entrytab-nav-link :active="$tab === 0" :icon="$tab->masterTab?->tab_icon">
                                             {{ $tab->masterTab?->tab_name }}

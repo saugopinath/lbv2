@@ -40,6 +40,9 @@ class SchemeTabFieldManager extends Component
                 abort(403, 'Invalid scheme reference');
             }
         }
+        if ($this->schemeId) {
+            $this->loadAttachedDocuments();
+        }
     }
     public function openFinalPreview()
     {
@@ -144,10 +147,18 @@ class SchemeTabFieldManager extends Component
             'extensionTypes'  => 'required|array|min:1',
         ]);
 
+        $lastPosition = SchemeAttachedDocMappings::where('scheme_id', $this->schemeId)
+            ->where('tab_code', $this->activeTabCode)
+            ->max('position');
+
+        $nextPosition = ($lastPosition ?? 0) + 1;
+
         SchemeAttachedDocMappings::updateOrCreate(
             [
                 'scheme_id'   => $this->schemeId,
                 'doc_type_id' => $this->selectedDocType,
+                'tab_code' => $this->activeTabCode,
+                'position'       => $nextPosition,
             ],
             [
                 'is_required'    => $this->isRequired,
@@ -175,13 +186,33 @@ class SchemeTabFieldManager extends Component
 
         $this->loadAttachedDocuments();
     }
+    public function updateDocumentOrder($orderedIds)
+    {
+        foreach ($orderedIds as $index => $id) {
+            SchemeAttachedDocMappings::where('id', $id)
+                ->update(['position' => $index + 1]);
+        }
+
+        $this->loadAttachedDocuments();
+    }
+    public function setActiveTab($tabCode)
+    {
+        $this->activeTabCode = $tabCode;
+
+        if ($tabCode == 104) {
+            $this->loadAttachedDocuments();
+        }
+    }
 
     public function loadAttachedDocuments()
     {
         $this->attachedDocuments = SchemeAttachedDocMappings::with('docType')
             ->where('scheme_id', $this->schemeId)
+            ->where('tab_code', 104)
+            ->orderBy('position')
             ->get();
     }
+
 
     public function openManageModal($tabCode)
     {
@@ -247,7 +278,6 @@ class SchemeTabFieldManager extends Component
     }
     public function isFieldMandatory($fieldId)
     {
-        // dd('bhjbc');
         return SchemeTabBasefield::where('id', $fieldId)
             ->where('is_mendetory', 1)
             ->where('tab_code', '!=', 0)
