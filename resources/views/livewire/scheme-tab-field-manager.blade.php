@@ -52,44 +52,47 @@
                         @if($tab->tab_code == 104)
 
                             @if(count($attachedDocuments))
-                                    <div class="p-4 space-y-3" x-data x-init="
-                                    new Sortable($el, {
-                                        animation: 150,
-                                        handle: '.drag-handle',
-                                        onEnd() {
-                                            let ordered = Array.from($el.children)
-                                                .map(el => el.dataset.id);
-                                            $wire.updateDocumentOrder(ordered);
-                                        }
-                                    })
-                                 ">
-                                        @foreach($attachedDocuments as $doc)
-                                            <div data-id="{{ $doc->id }}"
-                                                class="flex justify-between items-center bg-gray-50 p-3 rounded border">
-                                                {{-- LEFT --}}
-                                                <div class="flex items-center gap-3">
-                                                    <span class="drag-handle cursor-move text-gray-400 text-lg">☰</span>
+                                <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
+                                                            new Sortable($el, {
+                                                                animation: 150,
+                                                                handle: '.drag-handle',
+                                                                onEnd() {
+                                                                    let ordered = Array.from($el.children)
+                                                                        .map(el => el.dataset.id);
+                                                                    $wire.updateDocumentOrder(ordered);
+                                                                }
+                                                            })
+                                                            ">
+                                    @foreach($attachedDocuments as $doc)
+                                        <div data-id="{{ $doc->id }}"
+                                            class="flex justify-between items-center bg-gray-50 p-3 rounded border">
+                                            {{-- LEFT --}}
+                                            <div class="flex items-center gap-3">
+                                                <span class="drag-handle cursor-move text-gray-400 text-lg">☰</span>
 
-                                                    <div>
-                                                        <div class="font-medium">
+                                                <div>
+                                                    <div class="font-medium">
                                                         {{ $loop->iteration }}. {{ $doc->docType->name }}
-                                                        </div>
-                                                        <div class="text-sm text-gray-500">
-                                                            Size: {{ $doc->max_file_size }} |
-                                                            Required: {{ $doc->is_required ? 'Yes' : 'No' }} |
-                                                            Ext: {{ $doc->extension_type }}
-                                                        </div>
+                                                        @if($doc->is_required)
+                                                            <span class="text-red-600 font-bold ml-1">*</span>
+                                                        @endif
+                                                    </div>
+                                                    <div class="text-sm text-gray-500">
+                                                        {{-- Size: {{ $doc->max_file_size }} |
+                                                        Required: {{ $doc->is_required ? 'Yes' : 'No' }} |
+                                                        Ext: {{ $doc->extension_type }} --}}
                                                     </div>
                                                 </div>
-
-                                                {{-- REMOVE --}}
-                                                <button wire:click="removeDocument({{ $doc->id }})"
-                                                    class="text-red-500 font-bold text-lg hover:text-red-600">
-                                                    ✕
-                                                </button>
                                             </div>
-                                        @endforeach
-                                    </div>
+
+                                            {{-- REMOVE --}}
+                                            <button wire:click="removeDocument({{ $doc->id }})"
+                                                class="text-red-500 font-bold text-lg hover:text-red-600">
+                                                ✕
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
                             @else
                                 <div class="p-4 text-gray-400 text-sm text-center">
                                     No documents attached
@@ -121,11 +124,11 @@
                                             </div>
 
                                             <button wire:click.stop="removeField({{ $tab->tab_code }}, '{{ $fid }}')" class="text-red-500 font-bold text-lg
-                                                                        @if($this->isFieldMandatory($fid))
-                                                                            opacity-50 cursor-not-allowed
-                                                                        @else
-                                                                            hover:text-red-600
-                                                                        @endif" @if($this->isFieldMandatory($fid)) disabled @endif>
+                                                                    @if($this->isFieldMandatory($fid))
+                                                                        opacity-50 cursor-not-allowed
+                                                                    @else
+                                                                        hover:text-red-600
+                                                                    @endif" @if($this->isFieldMandatory($fid)) disabled @endif>
                                                 ✕
                                             </button>
                                         </div>
@@ -158,19 +161,23 @@
     @endif
 
     @if($showManageModal)
-        <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div class="bg-white w-full max-w-3xl rounded-lg shadow-lg overflow-hidden">
+        <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
 
-                <div class="bg-indigo-100 px-6 py-4 font-semibold">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-3xl max-h-[90vh]
+                        flex flex-col overflow-hidden">
+
+                {{-- HEADER (fixed) --}}
+                <div class="bg-indigo-100 px-6 py-4 font-semibold shrink-0 border-b">
                     Manage Fields
                 </div>
 
-                <div class="p-6 max-h-[70vh] overflow-y-auto">
+                {{-- BODY (scrollable) --}}
+                <div class="p-6 flex-1 overflow-y-auto">
 
                     @if($activeTabCode == 104)
 
                         {{-- DOCUMENT FORM --}}
-                        <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="grid grid-cols-2 gap-4 mb-6">
 
                             <x-form.select name="doc_type_id" label="Document Type" wire:model="selectedDocType">
                                 <option value="">-- Select Document --</option>
@@ -188,7 +195,7 @@
 
                             <div class="col-span-2">
                                 <label class="font-semibold">Allowed Extensions</label>
-                                <div class="flex gap-3 mt-1">
+                                <div class="flex gap-4 mt-2 flex-wrap">
                                     @foreach(['jpg', 'jpeg', 'png', 'pdf'] as $ext)
                                         <label class="flex items-center gap-2">
                                             <input type="checkbox" wire:model="extensionTypes" value="{{ $ext }}">
@@ -199,15 +206,17 @@
                             </div>
                         </div>
 
+                        {{-- ATTACHED DOCUMENT LIST --}}
                         @if($attachedDocuments->count())
-                            <div class="border-t pt-4 mt-4">
+                            <div class="border-t pt-4">
                                 <h3 class="font-semibold mb-3">
                                     Attached Documents
                                 </h3>
 
                                 <div class="space-y-2">
                                     @foreach($attachedDocuments as $doc)
-                                        <div class="flex justify-between items-center bg-gray-50 p-3 rounded border">
+                                        <div class="flex justify-between items-center
+                                                                            bg-gray-50 p-3 rounded border">
                                             <div>
                                                 <div class="font-medium">
                                                     {{ $doc->docType->name }}
@@ -219,7 +228,8 @@
                                                 </div>
                                             </div>
 
-                                            <button wire:click="removeDocument({{ $doc->id }})" class="text-red-500 font-bold">
+                                            <button wire:click="removeDocument({{ $doc->id }})"
+                                                class="text-red-500 font-bold text-lg hover:text-red-600">
                                                 ✕
                                             </button>
                                         </div>
@@ -229,28 +239,34 @@
                         @endif
 
                     @else
+
+                        {{-- OTHER TABS --}}
                         <div class="grid grid-cols-2 gap-3">
                             @foreach($modalFields as $field)
-                                <label
-                                    class="flex gap-3 items-center p-3 rounded border border-gray-200
-                                                                {{ $field['is_mandatory'] ? 'border-green-300 bg-green-50' : 'bg-gray-50' }}">
-                                    <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}"
-                                        @if($field['is_mandatory'] && $field['tab_code'] != 0) disabled @endif>
+                                    <label class="flex gap-3 items-center p-3 rounded border
+                                                            {{ $field['is_mandatory']
+                                ? 'border-green-300 bg-green-50'
+                                : 'bg-gray-50 border-gray-200' }}">
 
-                                    <span>
-                                        {{ $field['field_name'] }}
-                                        @if($field['is_mandatory'])
-                                            <span class="text-red-500 font-bold">*</span>
-                                        @endif
-                                    </span>
-                                </label>
+                                        <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}"
+                                            @if($field['is_mandatory'] && $field['tab_code'] != 0) disabled @endif>
+
+                                        <span>
+                                            {{ $field['field_name'] }}
+                                            @if($field['is_mandatory'])
+                                                <span class="text-red-500 font-bold">*</span>
+                                            @endif
+                                        </span>
+                                    </label>
                             @endforeach
                         </div>
+
                     @endif
                 </div>
 
-                {{-- FOOTER --}}
-                <div class="flex justify-end gap-3 px-6 py-4 border-t">
+                {{-- FOOTER (fixed) --}}
+                <div class="flex justify-end gap-3 px-6 py-4 border-t shrink-0">
+
                     <x-button.primary wire:click="closeManageModal" class="bg-gray-600">
                         Close
                     </x-button.primary>
@@ -264,11 +280,13 @@
                             Add
                         </x-button.primary>
                     @endif
+
                 </div>
 
             </div>
         </div>
     @endif
+
 
     @if($showPreviewModal)
         <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -281,137 +299,58 @@
 
                 {{-- Body --}}
                 <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                    @if($previewTabCode == 104)
 
-                    @if(
-                            $previewTabCode == 102 &&
-                            collect($this->previewFields)
-                                ->pluck('field_name')
-                                ->intersect([
-                                    'district_id',
-                                    'rural_urban',
-                                    'blockurban',
-                                    'gpWard'
-                                ])
-                                ->isNotEmpty()
-                        )
-                        {{-- LOCATION COMPONENT --}}
-                        <div>
-                            <livewire:filter-lgd-master-entry :login_type="'state_office'" />
-                        </div>
+                        @if($attachedDocuments->count())
+                            <div class="space-y-3">
+                                <livewire:enclosure-list :is_page="1" />
+                        @endif
 
                     @endif
-                    <div class="grid gap-2 md:grid-cols-2 pl-4 pr-4">
-
-                        @foreach($this->previewFields as $index => $field)
-
-                            @if(
-                                    $activeTabCode == 102 &&
-                                    in_array($field->field_name, [
+                        @if($previewTabCode == 102 &&
+                                collect($this->previewFields)
+                                    ->pluck('field_name')
+                                    ->intersect([
                                         'district_id',
                                         'rural_urban',
                                         'blockurban',
                                         'gpWard'
                                     ])
-                                )
-                                @continue
-                            @endif
-                            {{-- TEXT --}}
-                            @if($field->field_type === 'text')
-                                <div>
-                                    <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}"
-                                        placeholder="Enter {{ $field->level_name }}" disabled />
-                                </div>
-                                {{-- DATE --}}
-                            @elseif($field->field_type === 'date')
-                                <div>
-                                    <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}"
-                                        disabled />
-                                </div>
-                                {{-- SELECT --}}
-                            @elseif($field->field_type === 'select')
-                                <div>
-                                    <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
-                                        <option value="">
-                                            -- Select {{ $field->level_name }} --
-                                        </option>
-                                        @foreach($field->options ?? [] as $opt)
-                                            <option>{{ $opt }}</option>
-                                        @endforeach
-                                    </x-form.select>
-                                </div>
-                                {{-- TEXTAREA --}}
-                            @elseif($field->field_type === 'textarea')
-                                <div>
-                                    <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}"
-                                        placeholder="Enter {{ $field->level_name }}" disabled />
-                                </div>
-                                {{-- FALLBACK --}}
-                            @else
-                                <div class="md:col-span-2 text-red-500 text-sm">
-                                    Unsupported field type: {{ $field->field_type }}
-                                </div>
-                            @endif
-                        @endforeach
-                    </div>
-                </div>
-                {{-- Footer --}}
-                <div class="flex justify-end px-6 py-4 border-t">
-                    <x-button.primary wire:click="closePreview" class="px-6 py-2 bg-indigo-600 text-white rounded">
-                        Close
-                    </x-button.primary>
-                </div>
+                                    ->isNotEmpty()
+                            )
+                            {{-- LOCATION COMPONENT --}}
+                            <div>
+                                <livewire:filter-lgd-master-entry :login_type="'state_office'" />
+                            </div>
 
-            </div>
-        </div>
-    @endif
+                        @endif
+                        <div class="grid gap-2 md:grid-cols-2 pl-4 pr-4">
 
-    @if($showFinalPreview)
-        <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
-            <div class="bg-white rounded-xl shadow-lg w-auto max-w-auto max-h-[90vh] flex flex-col overflow-hidden">
-                <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
-                    <h3 class="text-lg font-semibold text-gray-800">
-                        Final Preview
-                    </h3>
-                    <button wire:click="closeFinalPreview" class="text-gray-400 hover:text-gray-600 text-xl">
-                        ✕
-                    </button>
-                </div>
-                <div class="px-6 pt-4 border-b shrink-0">
-                    <nav class="flex space-x-6">
-                        @foreach($tabs as $tab)
-                                    <button wire:click="setFinalPreviewTab({{ $tab->tab_code }})" class="flex items-center gap-2 pb-2 text-sm font-medium border-b-2 transition
-                                                                            {{ $finalActiveTabCode == $tab->tab_code ? 'border-indigo-600 text-indigo-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700'}}">
-                                        <x-entrytab-nav-link :active="$tab === 0" :icon="$tab->masterTab?->tab_icon">
-                                            {{ $tab->masterTab?->tab_name }}
-                                        </x-entrytab-nav-link>
-                                    </button>
-                        @endforeach
-                    </nav>
-                </div>
-                {{-- Content --}}
-                <div class="p-6 max-h-[70vh] overflow-y-auto">
-                    @if($finalPreviewFields->isEmpty())
-                        <div class="text-center text-gray-400">
-                            No fields configured for this tab
-                        </div>
-                    @else
-                        <div class="grid md:grid-cols-2 gap-4">
-                            @foreach($finalPreviewFields as $field)
+                            @foreach($this->previewFields as $index => $field)
 
+                                @if(
+                                        $activeTabCode == 102 &&
+                                        in_array($field->field_name, [
+                                            'district_id',
+                                            'rural_urban',
+                                            'blockurban',
+                                            'gpWard'
+                                        ])
+                                    )
+                                    @continue
+                                @endif
+                                {{-- TEXT --}}
                                 @if($field->field_type === 'text')
                                     <div>
                                         <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}"
                                             placeholder="Enter {{ $field->level_name }}" disabled />
                                     </div>
-
                                     {{-- DATE --}}
                                 @elseif($field->field_type === 'date')
                                     <div>
                                         <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}"
                                             disabled />
                                     </div>
-
                                     {{-- SELECT --}}
                                 @elseif($field->field_type === 'select')
                                     <div>
@@ -430,28 +369,117 @@
                                         <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}"
                                             placeholder="Enter {{ $field->level_name }}" disabled />
                                     </div>
+                                    {{-- FALLBACK --}}
+                                @else
+                                    <div class="md:col-span-2 text-red-500 text-sm">
+                                        Unsupported field type: {{ $field->field_type }}
+                                    </div>
                                 @endif
-
                             @endforeach
                         </div>
-                    @endif
-                </div>
+                    </div>
+                    {{-- Footer --}}
+                    <div class="flex justify-end px-6 py-4 border-t">
+                        <x-button.primary wire:click="closePreview" class="px-6 py-2 bg-indigo-600 text-white rounded">
+                            Close
+                        </x-button.primary>
+                    </div>
 
-                <div class="flex justify-end gap-3 px-6 py-4 border-t">
-                    <x-button.primary wire:click="closeFinalPreview" type="button">
-                        Close
-                    </x-button.primary>
                 </div>
-
             </div>
-        </div>
     @endif
 
-    {{-- SUCCESS MESSAGE --}}
-    @if(session()->has('message'))
-        <div class="rounded-lg bg-green-50 border border-green-200 p-3 text-green-700 font-medium">
-            {{ session('message') }}
-        </div>
-    @endif
+        @if($showFinalPreview)
+            <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
+                <div class="bg-white rounded-xl shadow-lg w-auto max-w-auto max-h-[90vh] flex flex-col overflow-hidden">
+                    <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
+                        <h3 class="text-lg font-semibold text-gray-800">
+                            Final Preview
+                        </h3>
+                        <button wire:click="closeFinalPreview" class="text-gray-400 hover:text-gray-600 text-xl">
+                            ✕
+                        </button>
+                    </div>
+                    <div class="px-6 pt-4 border-b shrink-0">
+                        <nav class="flex space-x-6">
+                            @foreach($tabs as $tab)
+                                            <button wire:click="setFinalPreviewTab({{ $tab->tab_code }})" class="flex items-center gap-2 pb-2 text-sm font-medium border-b-2 transition
+                                                {{ $finalActiveTabCode == $tab->tab_code ? 'border-indigo-600 text-indigo-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700'}}">
+                                                <x-entrytab-nav-link :active="$tab === 0" :icon="$tab->masterTab?->tab_icon">
+                                                    {{ $tab->masterTab?->tab_name }}
+                                                </x-entrytab-nav-link>
+                                            </button>
+                            @endforeach
+                        </nav>
+                    </div>
+                    {{-- Content --}}
+                    <div class="p-6 max-h-[70vh] overflow-y-auto">
+                        @if($finalActiveTabCode == 104)
+                            <livewire:enclosure-list :is_page="1" />
+                        @else
+                            @if($finalPreviewFields->isEmpty())
+                                <div class="text-center text-gray-400">
+                                    No fields configured for this tab
+                                </div>
+                            @else
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    @foreach($finalPreviewFields as $field)
 
-</div>
+                                        @if($field->field_type === 'text')
+                                            <div>
+                                                <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}"
+                                                    placeholder="Enter {{ $field->level_name }}" disabled />
+                                            </div>
+
+                                            {{-- DATE --}}
+                                        @elseif($field->field_type === 'date')
+                                            <div>
+                                                <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}"
+                                                    disabled />
+                                            </div>
+
+                                            {{-- SELECT --}}
+                                        @elseif($field->field_type === 'select')
+                                            <div>
+                                                <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
+                                                    <option value="">
+                                                        -- Select {{ $field->level_name }} --
+                                                    </option>
+                                                    @foreach($field->options ?? [] as $opt)
+                                                        <option>{{ $opt }}</option>
+                                                    @endforeach
+                                                </x-form.select>
+                                            </div>
+                                            {{-- TEXTAREA --}}
+                                        @elseif($field->field_type === 'textarea')
+                                            <div>
+                                                <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}"
+                                                    placeholder="Enter {{ $field->level_name }}" disabled />
+                                            </div>
+                                        @endif
+
+                                    @endforeach
+                                </div>
+                            @endif
+                        @endif
+                    </div>
+
+                    <div class="flex justify-end gap-3 px-6 py-4 border-t">
+                        <x-button.primary wire:click="closeFinalPreview" type="button">
+                            Close
+                        </x-button.primary>
+                    </div>
+
+                </div>
+            </div>
+        @endif
+
+        {{-- SUCCESS MESSAGE --}}
+        @if(session()->has('message'))
+            <div class="rounded-lg bg-green-50 border border-green-200 p-3 text-green-700 font-medium">
+                {{ session('message') }}
+            </div>
+        @endif
+
+    </div>

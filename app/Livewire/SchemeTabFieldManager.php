@@ -375,6 +375,10 @@ class SchemeTabFieldManager extends Component
         $this->previewTabName = $tab?->masterTab?->tab_name ?? 'Preview';
         $this->previewTabCode = $tab?->masterTab?->tab_code ?? 'Preview';
         $this->showPreviewModal = true;
+
+        if ($this->activeTabCode == 104) {
+            $this->loadAttachedDocuments();
+        }
     }
     public function closePreview()
     {
