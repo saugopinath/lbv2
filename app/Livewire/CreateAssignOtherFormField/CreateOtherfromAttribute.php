@@ -38,6 +38,7 @@ class CreateOtherfromAttribute extends Component
     public $isdependent = 'no';
     public $depenentOptions;
     public $depenent_on;
+    public $isdepenentsec = false;
     public function mount()
     {
         $this->schemes = Scheme::all();
@@ -48,6 +49,9 @@ class CreateOtherfromAttribute extends Component
                 'label' => $rule->description,
             ])
             ->toArray();
+        if (FromFieldAttribute::exists()) {
+            $this->isdepenentsec = true;
+        }
     }
     public function updatedSchemeId()
     {
@@ -103,7 +107,7 @@ class CreateOtherfromAttribute extends Component
     public function updatedIsdependent($value)
     {
         $this->isdependent = $value;
-        $this->depenentOptions = FromFieldAttribute::all();
+        $this->depenentOptions = FromFieldAttribute::whereNull('dependent_on')->get();
         $this->depenent_on = null;
     }
     public function updatedDepenentOn($value)
@@ -177,6 +181,7 @@ class CreateOtherfromAttribute extends Component
             'is_multiple' => $this->field_type === 'select'
                 ? ($this->is_multiple === 'yes')
                 : false,
+            'dependent_on' => $this->isdependent === 'yes' ? $this->depenent_on : null,
         ]);
         $this->reset([
             'level_name',
@@ -191,7 +196,9 @@ class CreateOtherfromAttribute extends Component
             'is_multiple',
             'is_choose_default',
             'default_value',
-            'defaultOptions'
+            'defaultOptions',
+            'isdependent',
+            'depenent_on'
         ]);
 
         session()->flash('success', 'Field created successfully');

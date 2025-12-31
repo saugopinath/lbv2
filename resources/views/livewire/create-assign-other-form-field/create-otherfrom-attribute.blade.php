@@ -108,6 +108,7 @@
                 @endforelse
             </x-form.select>
             @endif
+            @if($isdepenentsec)
             <div class="">
                 <label class="font-semibold block mb-1">
                     Is depenent?
@@ -126,6 +127,7 @@
                         wire:model.live="isdependent" />
                 </div>
             </div>
+            @endif
             @if ($isdependent === 'yes')
             <x-form.select
                 name="depenent_on"
