@@ -77,8 +77,9 @@
         <div class="mt-4 flex gap-2 justify-center">
             @if ($mappingSaved)
             <a href="{{ $selectedSchemeId
-        ? route('tab-field-manager', Crypt::encryptString($selectedSchemeId))
-        : route('tab-field-manager') }}">
+                            ? route('tab-field-manager', ['scheme_id' => Crypt::encryptString($selectedSchemeId)])
+                            : route('tab-field-manager')
+                    }}">
                 <x-button.primary class="bg-green-600 hover:bg-green-700">
                     Add Field
                 </x-button.primary>

@@ -9,28 +9,24 @@
     </x-form.select>
 
     @if($schemeId)
-
-    {{-- ACCORDION TABS --}}
     <div class="space-y-4">
         @foreach($tabs as $tab)
         <div x-data="{ open:false }" class="border border-b-cyan-300 rounded-lg overflow-hidden">
-
-            {{-- Header --}}
             <div class="flex justify-between items-center bg-gray-100 px-4 py-3">
                 <span class="font-semibold">
                     {{ $tab->position }}. {{ $tab->masterTab->tab_name }}
                 </span>
-
                 <div class="flex gap-2 items-center">
-                    <x-button.primary wire:click="openManageModal({{ $tab->tab_code }})"
-                        class="bg-indigo-400 hover:bg-indigo-500 text-sm">
-                        Add Another Fields
-                    </x-button.primary>
+                    <a href="{{ route('create-dynamicformfield', [
+                    'ref' => encrypt($tab->scheme_id . '|' . $tab->tab_code)]) }}">
+                        <x-button.primary class="bg-indigo-400 hover:bg-indigo-500 text-sm">
+                            Add Another Fields
+                        </x-button.primary>
+                    </a>
                     <x-button.primary wire:click="openManageModal({{ $tab->tab_code }})"
                         class="bg-green-600 hover:bg-green-700 text-sm">
                         Manage Fields
                     </x-button.primary>
-
                     <x-button.primary wire:click="openPreview({{ $tab->tab_code }})"
                         class="bg-gray-500 hover:bg-gray-600 text-sm">
                         Preview
@@ -41,12 +37,9 @@
                     </button>
                 </div>
             </div>
-
             {{-- Body --}}
             <div x-show="open" x-collapse class="bg-white">
                 @if(isset($tabFields[$tab->tab_code]) && count($tabFields[$tab->tab_code]))
-
-                {{-- FIELD GRID (Drag & Drop) --}}
                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
                                                         new Sortable($el, {
                                                             animation: 150,
@@ -62,26 +55,22 @@
                     <div data-fid="{{ $fid }}"
                         class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
                         {{-- SERIAL NUMBER --}}
-
                         <div class="flex items-center gap-2">
                             <span class="drag-handle cursor-move text-gray-400">☰</span>
                             <span class="font-semibold text-gray-600">
                                 {{ $loop->iteration }}.{{ $fname }}
                             </span>
-
                         </div>
                         <button wire:click.stop="removeField({{ $tab->tab_code }}, '{{ $fid }}')" class="
-                                                                                    text-red-500 font-bold text-lg
-                                                                                    @if($this->isFieldMandatory($fid))
-                                                                                        opacity-50 cursor-not-allowed
-                                                                                    @else
-                                                                                        hover:text-red-600
-                                                                                    @endif
-                                                                                " @if($this->isFieldMandatory($fid)) disabled @endif>
+                        text-red-500 font-bold text-lg
+                        @if($this->isFieldMandatory($fid))
+                            opacity-50 cursor-not-allowed
+                        @else
+                            hover:text-red-600
+                        @endif
+                    " @if($this->isFieldMandatory($fid)) disabled @endif>
                             ✕
                         </button>
-
-
                     </div>
                     @endforeach
                 </div>
@@ -120,7 +109,7 @@
             <div class="p-6 grid grid-cols-2 gap-3 max-h-[70vh] overflow-y-auto">
                 @foreach($modalFields as $field)
                 <label class="flex gap-3 items-center p-3 rounded border border-gray-200
-                                           {{ $field['is_mandatory'] ? 'border-green-300 bg-green-50' : 'bg-gray-50' }}">
+                       {{ $field['is_mandatory'] ? 'border-green-300 bg-green-50' : 'bg-gray-50' }}">
                     <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}"
                         @if($field['is_mandatory'] && $field['tab_code'] !=0) disabled @endif>
                     <span>{{ $field['field_name'] }} @if($field['is_mandatory'] === 1)
@@ -170,15 +159,26 @@
                 <div>
                     <livewire:filter-lgd-master-entry :login_type="'state_office'" />
                 </div>
+                @endif
+                   
+                 @if($previewTabCode == 104 &&
+                collect($this->previewFields)
+                ->pluck('field_id')
+                ->isNotEmpty()
+                )
+                <div>
+                    <livewire:enclosure-list :is_page="1"  />
+                </div>
 
                 @endif
+                
+
                 <div class="grid gap-2 md:grid-cols-2 pl-4 pr-4">
 
                     {{-- ===============================
                         NORMAL FIELD RENDERING
                         =============================== --}}
                     @foreach($this->previewFields as $index => $field)
-
                     {{-- Skip location fields for TAB 102 --}}
                     @if(
                     $activeTabCode == 102 &&
@@ -187,6 +187,15 @@
                     'rural_urban',
                     'blockurban',
                     'gpWard'
+                    ])
+                    )
+                    @continue
+                    @endif
+                     @if(
+                    $activeTabCode == 104 &&
+                    in_array($field->id, [
+                    '107',
+                    '111'
                     ])
                     )
                     @continue
