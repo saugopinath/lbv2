@@ -318,7 +318,7 @@ Route::get(
 )->name('dynamic-form-page');
 
 Route::get('/master-tab', MasterTabManager::class)->name('master-tab');
-Route::get('/tab-field-manager/{scheme_id?}', SchemeTabFieldManager::class)
+Route::get('/tab-field-manager', SchemeTabFieldManager::class)
     ->name('tab-field-manager');
 
 // Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name(name: 'menu-tab');

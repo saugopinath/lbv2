@@ -8,6 +8,7 @@ use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabBasefield;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Http\Request;
 
 class SchemeTabFieldManager extends Component
 {
@@ -18,8 +19,10 @@ class SchemeTabFieldManager extends Component
     public $finalPreviewFields = [];
 
 
-    public function mount($scheme_id = null)
+    public function mount(Request $request)
     {
+        $scheme_id = $request->query('scheme_id');
+
         if ($scheme_id) {
             try {
                 $this->schemeId = (int) Crypt::decryptString($scheme_id);
@@ -30,6 +33,7 @@ class SchemeTabFieldManager extends Component
             }
         }
     }
+
     public function openFinalPreview()
     {
         $this->showFinalPreview = true;

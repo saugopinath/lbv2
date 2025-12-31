@@ -24,13 +24,11 @@
 
                         <div class="flex gap-2 items-center">
                             <a href="{{ route('create-dynamicformfield', [
-                    'ref' => encrypt($tab->scheme_id . '|' . $tab->tab_code)
-                ]) }}">
+                    'ref' => encrypt($tab->scheme_id . '|' . $tab->tab_code)]) }}">
                                 <x-button.primary class="bg-indigo-400 hover:bg-indigo-500 text-sm">
                                     Add Another Fields
                                 </x-button.primary>
                             </a>
-
 
                             <x-button.primary wire:click="openManageModal({{ $tab->tab_code }})"
                                 class="bg-green-600 hover:bg-green-700 text-sm">
@@ -54,16 +52,16 @@
 
                             {{-- FIELD GRID (Drag & Drop) --}}
                             <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
-                                                                new Sortable($el, {
-                                                                    animation: 150,
-                                                                    handle: '.drag-handle',
-                                                                    onEnd() {
-                                                                        let ordered = Array.from($el.children)
-                                                                            .map(el => el.dataset.fid);
-                                                                        $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
-                                                                    }
-                                                                })
-                                                            ">
+                                        new Sortable($el, {
+                                            animation: 150,
+                                            handle: '.drag-handle',
+                                            onEnd() {
+                                                let ordered = Array.from($el.children)
+                                                    .map(el => el.dataset.fid);
+                                                $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
+                                            }
+                                        })
+                                    ">
                                 @foreach($tabFields[$tab->tab_code] as $fid => $fname)
                                     <div data-fid="{{ $fid }}"
                                         class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
@@ -77,13 +75,13 @@
 
                                         </div>
                                         <button wire:click.stop="removeField({{ $tab->tab_code }}, '{{ $fid }}')" class="
-                                                                                    text-red-500 font-bold text-lg
-                                                                                    @if($this->isFieldMandatory($fid))
-                                                                                        opacity-50 cursor-not-allowed
-                                                                                    @else
-                                                                                        hover:text-red-600
-                                                                                    @endif
-                                                                                " @if($this->isFieldMandatory($fid)) disabled @endif>
+                                                text-red-500 font-bold text-lg
+                                                @if($this->isFieldMandatory($fid))
+                                                    opacity-50 cursor-not-allowed
+                                                @else
+                                                    hover:text-red-600
+                                                @endif
+                                            " @if($this->isFieldMandatory($fid)) disabled @endif>
                                             ✕
                                         </button>
                                     </div>
