@@ -20,18 +20,19 @@ class EnclosureList extends Component
     public $application_id;
     public $currentDocMaxSize = '';
     public $currentDocExtensions = '';
-    public $mode, $is_page;
+    public $mode, $is_page,$form_preview;
     public $doc_type_id_array_list = [];
     public $doc_type_id_array = [];
     public $showErrors = false;
     public $enclosureSource = null;
     public $showUploadModal = false;
 
-    public function mount($application_id = null, $is_page = null, $doc_type_id_array_list = [], $doc_type_id_array = [], $enclosureSource = null)
+    public function mount($application_id = null, $is_page = null, $doc_type_id_array_list = [], $doc_type_id_array = [], $enclosureSource = null,$form_preview = null)
     {
         $this->application_id = $application_id;
         // dd($this->application_id);
         $this->is_page        = $is_page;
+        $this->form_preview        = $form_preview;
         $this->enclosureSource = $enclosureSource;
         // dd($this->enclosureSource);
         $this->doc_type_id_array_list = $doc_type_id_array_list;

@@ -10,17 +10,17 @@
             currentFileName: '',
             currentFileMime: '',
             errorMessage:'',
-    
+
             handleFileChange(event) {
                 const file = event.target.files[0];
                 if (!file) {
                     this.resetFileData();
                     return;
                 }
-    
+
                 this.currentFileName = file.name;
                 this.currentFileMime = file.type || 'Unknown MIME type';
-    
+
                 if (this.currentFileMime.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = e => this.currentFilePreview = e.target.result;
@@ -29,7 +29,7 @@
                     this.currentFilePreview = null;
                 }
             },
-    
+
             openModal(docId, docName) {
                 this.currentDocName = docName || '';
                 this.resetFileData();
@@ -39,21 +39,21 @@
                 this.currentDocId = docId;
                 this.$wire.call('setCurrentDoc', docId);
                 this.showUploadModal = true;
-    
+
             },
-    
+
             async uploadFile() {
                     if (!this.$refs.fileInput.files.length) {
                         this.errorMessage = 'Please select a file to upload.';
                         return;
                     }
-    
+
                     this.errorMessage = ''; // reset error if file selected
-    
+
                     try {
                         // Livewire Method Call
                         await this.$wire.saveSingleDocument();
-    
+
                         // Reset data after upload success
                         this.resetFileData();
                         if (this.$refs.fileInput) this.$refs.fileInput.value = null;
@@ -63,7 +63,7 @@
                         this.errorMessage = 'Something went wrong while uploading.';
                     }
                 },
-    
+
                 closeModal() {
                     this.showUploadModal = false;
                     this.errorMessage = '';
@@ -75,14 +75,14 @@
                     this.$wire.call('resetSingleDocumentErrors');
                     this.$wire.dispatch('$refresh');
                 },
-    
+
                 resetFileData() {
                     this.currentFilePreview = null;
                     this.currentFileName = '';
                     this.currentFileMime = '';
                     this.errorMessage = '';
                 }
-    
+
     }" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         @foreach ($doc_lists as $doc)
         <div wire:key="doc_{{ $doc->doc_type_id }}">
@@ -91,10 +91,10 @@
         </div>
         @endforeach
 
-        <x-upload-modal :currentDocExtensions="$currentDocExtensions" :currentDocMaxSize="$currentDocMaxSize" />
+        <x-upload-modal :currentDocExtensions="$currentDocExtensions" :currentDocMaxSize="$currentDocMaxSize" :formPreview="$form_preview" />
     </div>
     <div class="flex justify-between mt-4 pl-6 pr-6">
-        @if (!$is_page && empty($doc_type_id_array_list))
+        @if (!$is_page && empty($doc_type_id_array_list) && !$form_preview)
             @if ($mode != '0')
                 <x-button.danger wire:click="$dispatch('goPrevious')">Previous</x-button.danger>
             @endif
@@ -104,7 +104,7 @@
                 return $doc->is_required && empty($existingDocuments[$doc->doc_type_id] ?? null);
             });
         @endphp
-        @if (!$is_page && empty($doc_type_id_array_list))
+        @if (!$is_page && empty($doc_type_id_array_list) && !$form_preview)
             @if ($missingRequired->isNotEmpty())
                 <x-button.primary type="button" wire:click="$set('showErrors', true)">
                     {{ $mode == '0' ? 'Save' : 'Save & Next' }}

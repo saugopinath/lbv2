@@ -12,12 +12,13 @@ class UploadModal extends Component
      * Create a new component instance.
      */
     public $currentDocExtensions;
-    public $currentDocMaxSize;
+    public $currentDocMaxSize,$formPreview;
 
-    public function __construct($currentDocExtensions = '', $currentDocMaxSize = '')
+    public function __construct($currentDocExtensions = '', $currentDocMaxSize = '',$formPreview)
     {
         $this->currentDocExtensions = $currentDocExtensions;
         $this->currentDocMaxSize = $currentDocMaxSize;
+        $this->formPreview = $formPreview;
     }
 
     /**

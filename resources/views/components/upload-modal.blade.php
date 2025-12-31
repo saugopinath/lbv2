@@ -1,5 +1,5 @@
-<div x-show="showUploadModal" x-cloak x-transition class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
-    @click.outside="closeModal()">
+<div x-show="showUploadModal" x-cloak x-transition
+    class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center" @click.outside="closeModal()">
 
     <div class="bg-white rounded shadow p-6 w-full max-w-md" @click.stop>
         <!-- Header -->
@@ -40,17 +40,26 @@
             </div>
         </template>
 
-        <!-- Buttons -->       
+        <!-- Buttons -->
 
         <div class="flex justify-end space-x-2 mt-4">
-            <x-button.primary @click="closeModal()"
-                class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">Cancel</x-button.primary>
-            <x-button.primary @click="uploadFile()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+
+            {{-- Cancel always enabled --}}
+            <x-button.primary @click="closeModal()" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+                Cancel
+            </x-button.primary>
+
+            {{-- Upload button --}}
+            <x-button.primary @click="uploadFile()" :disabled="$formPreview" class="px-4 py-2 bg-green-600 text-white rounded
+               {{ $formPreview ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700' }}"
                 wire:loading.attr="disabled" wire:target="saveSingleDocument">
-                <span wire:loading.remove wire:target="saveSingleDocument">Upload</span>
-                <span wire:loading wire:target="saveSingleDocument">Uploading...</span>
+                <span wire:loading.remove wire:target="saveSingleDocument">
+                    Upload
+                </span>
+                <span wire:loading wire:target="saveSingleDocument">
+                    Uploading...
+                </span>
             </x-button.primary>
         </div>
-
     </div>
 </div>

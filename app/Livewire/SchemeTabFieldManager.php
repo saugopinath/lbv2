@@ -53,14 +53,11 @@ class SchemeTabFieldManager extends Component
 
         $this->loadFinalPreviewFields();
     }
-
     public function setFinalPreviewTab($tabCode)
     {
         $this->finalActiveTabCode = $tabCode;
         $this->loadFinalPreviewFields();
     }
-
-
     public function closeFinalPreview()
     {
         $this->showFinalPreview = false;
@@ -102,7 +99,6 @@ class SchemeTabFieldManager extends Component
         $this->tabFields = [];
         $this->activeTabCode = null;
     }
-
     private function loadTabs()
     {
         if (!$this->schemeId) return;
@@ -138,7 +134,6 @@ class SchemeTabFieldManager extends Component
             $this->tabFields[$temp->tab_code] = $ordered;
         }
     }
-
     public function saveDocumentMapping()
     {
         $this->validate([
@@ -203,7 +198,6 @@ class SchemeTabFieldManager extends Component
             $this->loadAttachedDocuments();
         }
     }
-
     public function loadAttachedDocuments()
     {
         $this->attachedDocuments = SchemeAttachedDocMappings::with('docType')
@@ -212,8 +206,6 @@ class SchemeTabFieldManager extends Component
             ->orderBy('position')
             ->get();
     }
-
-
     public function openManageModal($tabCode)
     {
         $this->activeTabCode = $tabCode;

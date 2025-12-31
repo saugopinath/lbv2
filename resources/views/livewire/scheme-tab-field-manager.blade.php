@@ -303,7 +303,7 @@
 
                         @if($attachedDocuments->count())
                             <div class="space-y-3">
-                                <livewire:enclosure-list :is_page="1" />
+                                <livewire:enclosure-list :form_preview="1" />
                         @endif
 
                     @endif
@@ -416,7 +416,7 @@
                     {{-- Content --}}
                     <div class="p-6 max-h-[70vh] overflow-y-auto">
                         @if($finalActiveTabCode == 104)
-                            <livewire:enclosure-list :is_page="1" />
+                            <livewire:enclosure-list :form_preview="1" />
                         @else
                             @if($finalPreviewFields->isEmpty())
                                 <div class="text-center text-gray-400">
