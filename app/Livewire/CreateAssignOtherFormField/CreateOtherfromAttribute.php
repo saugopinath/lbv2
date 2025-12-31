@@ -34,6 +34,7 @@ class CreateOtherfromAttribute extends Component
     public string $is_choose_default = 'no';
     public $default_values;
     public $default_value;
+    public $defaultOptions;
     public function mount()
     {
         $this->schemes = Scheme::all();
@@ -84,6 +85,16 @@ class CreateOtherfromAttribute extends Component
     public function updatedIsChooseDefault($value)
     {
         $this->is_choose_default = $value;
+        $this->default_value = null;
+    }
+    public function updatedDefaultValue($value)
+    {
+        $this->defaultOptions = [];
+        if ($this->is_choose_default === 'yes') {
+            if (isset($this->default_values[$value])) {
+                $this->defaultOptions = $this->default_values[$value];
+            }
+        }
     }
 
     protected function rules()
@@ -139,7 +150,11 @@ class CreateOtherfromAttribute extends Component
             'validation_rule' => implode('|', $validationRules),
 
             'options' => in_array($this->field_type, ['select', 'checkbox', 'radio'])
-                ? $options
+                ? (
+                    $this->is_choose_default === 'yes'
+                    ? $this->defaultOptions
+                    : $options
+                )
                 : null,
             'section_id' => $this->is_under_section === 'yes'
                 ? $this->section_id
@@ -159,7 +174,9 @@ class CreateOtherfromAttribute extends Component
             'is_under_section',
             'section_id',
             'is_multiple',
-            'is_choose_default'
+            'is_choose_default',
+            'default_value',
+            'defaultOptions'
         ]);
 
         session()->flash('success', 'Field created successfully');

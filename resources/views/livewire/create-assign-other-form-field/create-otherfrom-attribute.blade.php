@@ -67,6 +67,11 @@
         </x-form.select>
 
         <div class="grid grid-cols-2 gap-4 md:col-span-2">
+            <x-form.multiselect
+                label="Validation Rules"
+                wire:model="validation_rule"
+                :options="$validationRuleOptions"
+                required />
 
             <div class="">
                 <label class="font-semibold block mb-1">
@@ -86,7 +91,23 @@
                         wire:model.live="is_under_section" />
                 </div>
             </div>
+            @if ($is_under_section === 'yes')
+            <x-form.select
+                name="section_id"
+                label="Select Section"
+                wire:model.live="section_id"
+                required>
+                <option value="">-- Select Section --</option>
 
+                @forelse ($sections as $section)
+                <option value="{{ $section->id }}">
+                    {{ $section->section_name }}
+                </option>
+                @empty
+                <option value="">No sections found</option>
+                @endforelse
+            </x-form.select>
+            @endif
             @if ($field_type === 'select')
             <div class="">
                 <label class="font-semibold block mb-1">
@@ -110,12 +131,12 @@
             <x-form.select
                 name="default_value"
                 label="Default Value"
-                wire:model="default_value"
+                wire:model.live="default_value"
                 required>
                 <option value="">-- Select --</option>
                 @foreach ($default_values as $key => $value)
                 <option value="{{ $key }}">
-                    {{ $value }}
+                    {{ $key }}
                 </option>
                 @endforeach
             </x-form.select>
@@ -144,31 +165,11 @@
         </div>
 
         {{-- Validation Rules (Alpine Multi-select) --}}
-        <x-form.multiselect
-            label="Validation Rules"
-            wire:model="validation_rule"
-            :options="$validationRuleOptions"
-            required />
+
 
         {{-- Is Under Any Section --}}
 
-        @if ($is_under_section === 'yes')
-        <x-form.select
-            name="section_id"
-            label="Select Section"
-            wire:model.live="section_id"
-            required>
-            <option value="">-- Select Section --</option>
 
-            @forelse ($sections as $section)
-            <option value="{{ $section->id }}">
-                {{ $section->section_name }}
-            </option>
-            @empty
-            <option value="">No sections found</option>
-            @endforelse
-        </x-form.select>
-        @endif
 
         @if (
         in_array($field_type, ['checkbox','radio']) ||
