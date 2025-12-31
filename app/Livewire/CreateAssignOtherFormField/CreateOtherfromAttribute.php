@@ -35,6 +35,9 @@ class CreateOtherfromAttribute extends Component
     public $default_values;
     public $default_value;
     public $defaultOptions;
+    public $isdependent = 'no';
+    public $depenentOptions;
+    public $depenent_on;
     public function mount()
     {
         $this->schemes = Scheme::all();
@@ -45,10 +48,6 @@ class CreateOtherfromAttribute extends Component
                 'label' => $rule->description,
             ])
             ->toArray();
-        $this->default_values = json_decode(
-            Storage::get('form-options.json'),
-            true
-        );
     }
     public function updatedSchemeId()
     {
@@ -68,6 +67,7 @@ class CreateOtherfromAttribute extends Component
             $this->is_multiple = 'no';
             $this->is_choose_default = 'no';
         }
+        $this->isdependent = 'no';
     }
 
     protected function loadSections()
@@ -85,6 +85,10 @@ class CreateOtherfromAttribute extends Component
     public function updatedIsChooseDefault($value)
     {
         $this->is_choose_default = $value;
+        $this->default_values = json_decode(
+            Storage::get('form-options.json'),
+            true
+        );
         $this->default_value = null;
     }
     public function updatedDefaultValue($value)
@@ -96,7 +100,16 @@ class CreateOtherfromAttribute extends Component
             }
         }
     }
-
+    public function updatedIsdependent($value)
+    {
+        $this->isdependent = $value;
+        $this->depenentOptions = FromFieldAttribute::all();
+        $this->depenent_on = null;
+    }
+    public function updatedDepenentOn($value)
+    {
+        $this->depenent_on = $value;
+    }
     protected function rules()
     {
         return [
@@ -110,7 +123,9 @@ class CreateOtherfromAttribute extends Component
             'section_id' => 'required_if:is_under_section,yes',
             'is_multiple' => 'required_if:field_type,select',
             'is_choose_default' => 'required_if:field_type,select',
-            'default_value' => 'required_if:is_choose_default,yes'
+            'default_value' => 'required_if:is_choose_default,yes',
+            'isdependent' => 'required',
+            'depenent_on' => 'required_if:isdependent,yes'
         ];
     }
     public function addOption()

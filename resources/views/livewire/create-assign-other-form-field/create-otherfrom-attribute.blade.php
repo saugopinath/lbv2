@@ -108,6 +108,38 @@
                 @endforelse
             </x-form.select>
             @endif
+            <div class="">
+                <label class="font-semibold block mb-1">
+                    Is depenent?
+                </label>
+                <div class="flex gap-6">
+                    <x-form.radio
+                        name="isdependent"
+                        value="yes"
+                        label="Yes"
+                        wire:model.live="isdependent" />
+
+                    <x-form.radio
+                        name="isdependent"
+                        value="no"
+                        label="No"
+                        wire:model.live="isdependent" />
+                </div>
+            </div>
+            @if ($isdependent === 'yes')
+            <x-form.select
+                name="depenent_on"
+                label="Depenent On"
+                wire:model.live="depenent_on"
+                required>
+                <option value="">-- Select --</option>
+                @foreach ($depenentOptions as $option)
+                <option value="{{ $option->id }}">
+                    {{ $option->level_name }}
+                </option>
+                @endforeach
+            </x-form.select>
+            @endif
             @if ($field_type === 'select')
             <div class="">
                 <label class="font-semibold block mb-1">
