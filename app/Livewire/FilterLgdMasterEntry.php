@@ -13,7 +13,7 @@ class FilterLgdMasterEntry extends Component
 
     public $selectedDistrict, $selectedRuralurban, $selectedBlockurban, $selectedGpWard;
     public $login_type;
-    public bool $preview = false;
+    public  $preview;
 
 
     public $visible = [
@@ -23,9 +23,10 @@ class FilterLgdMasterEntry extends Component
         'gp_ward_dropdown' => 0,
     ];
 
-    public function mount($login_type = null, $selectedDistrict = null, $selectedRuralurban = null, $selectedBlockurban = null, $selectedGpWard = null)
+    public function mount($login_type = null, $selectedDistrict = null, $selectedRuralurban = null, $selectedBlockurban = null, $selectedGpWard = null,$preview = null)
     {
         $this->login_type = $login_type;
+        $this->preview = $preview;
         $this->selectedDistrict = $selectedDistrict;
         $this->selectedRuralurban = $selectedRuralurban;
         $this->selectedBlockurban = $selectedBlockurban;

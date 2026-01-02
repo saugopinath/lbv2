@@ -13,30 +13,40 @@ use App\Models\SchemeAttachedDocMappings;
 class EnclosureList extends Component
 {
     use WithFileUploads;
-    public $doc_lists;
+    public $doc_lists, $scheme_id, $tabCode;
     public $existingDocuments = [];
     public $singleDocument;
     public $currentDocId;
     public $application_id;
     public $currentDocMaxSize = '';
     public $currentDocExtensions = '';
-    public $mode, $is_page,$form_preview;
+    public $mode, $is_page, $form_preview;
     public $doc_type_id_array_list = [];
     public $doc_type_id_array = [];
     public $showErrors = false;
     public $enclosureSource = null;
     public $showUploadModal = false;
 
-    public function mount($application_id = null, $is_page = null, $doc_type_id_array_list = [], $doc_type_id_array = [], $enclosureSource = null,$form_preview = null)
+    public function mount($scheme_id, $application_id = null, $is_page = null, $doc_type_id_array_list = [], $doc_type_id_array = [], $enclosureSource = null, $form_preview = null, $tabCode = null)
     {
+        $this->scheme_id = $scheme_id;
         $this->application_id = $application_id;
         // dd($this->application_id);
         $this->is_page        = $is_page;
-        $this->form_preview        = $form_preview;
         $this->enclosureSource = $enclosureSource;
+        $this->form_preview = $form_preview;
+
+        $this->tabCode = $tabCode;
         // dd($this->enclosureSource);
         $this->doc_type_id_array_list = $doc_type_id_array_list;
         $this->doc_type_id_array      = $doc_type_id_array;
+
+        $conditions = [
+            ['scheme_id', '=', $this->scheme_id],
+        ];
+        if (!empty($this->tabCode)) {
+            $conditions[] = ['tab_code', '=', $this->tabCode];
+        }
 
         if (!empty($this->doc_type_id_array)) {
             $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
@@ -53,7 +63,7 @@ class EnclosureList extends Component
                 }
             }
         } else {
-            // dd($this->doc_type_id_array_list);
+            // dd($this->scheme_id);
             if (!empty($this->doc_type_id_array_list)) {
 
                 if ($this->enclosureSource == 5) {
@@ -61,8 +71,7 @@ class EnclosureList extends Component
                         ->whereIn('document_type', $this->doc_type_id_array_list)
                         ->get();
                     // dd($app);
-                }
-                else {
+                } else {
                     $app = BeneficiaryEnclosure::where('application_id', $application_id)
                         ->whereIn('document_type', $this->doc_type_id_array_list)
                         ->get();
@@ -84,7 +93,8 @@ class EnclosureList extends Component
                         ->get();
                 }
             } else {
-                $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->get();
+
+                $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')->where($conditions)->get();
 
                 if ($application_id) {
                     $app = BeneficiaryEnclosure::where('application_id', $application_id)->get();
@@ -238,7 +248,7 @@ class EnclosureList extends Component
             }
         }
 
-        $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.', docId:$docId);
+        $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.', docId: $docId);
         $this->dispatch('$refresh');
     }
 

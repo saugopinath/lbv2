@@ -53,19 +53,19 @@
 
                             @if(count($attachedDocuments))
                                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
-                                                            new Sortable($el, {
-                                                                animation: 150,
-                                                                handle: '.drag-handle',
-                                                                onEnd() {
-                                                                    let ordered = Array.from($el.children)
-                                                                        .map(el => el.dataset.id);
-                                                                    $wire.updateDocumentOrder(ordered);
-                                                                }
-                                                            })
-                                                            ">
+                                            new Sortable($el, {
+                                                animation: 150,
+                                                handle: '.drag-handle',
+                                                onEnd() {
+                                                    let ordered = Array.from($el.children)
+                                                        .map(el => el.dataset.id);
+                                                    $wire.updateDocumentOrder(ordered);
+                                                }
+                                            })
+                                            ">
                                     @foreach($attachedDocuments as $doc)
                                         <div data-id="{{ $doc->id }}"
-                                            class="flex justify-between items-center bg-gray-50 p-3 rounded border">
+                                            class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
                                             {{-- LEFT --}}
                                             <div class="flex items-center gap-3">
                                                 <span class="drag-handle cursor-move text-gray-400 text-lg">☰</span>
@@ -102,16 +102,16 @@
 
                             @if(isset($tabFields[$tab->tab_code]) && count($tabFields[$tab->tab_code]))
                                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
-                                                    new Sortable($el, {
-                                                        animation: 150,
-                                                        handle: '.drag-handle',
-                                                        onEnd() {
-                                                            let ordered = Array.from($el.children)
-                                                                .map(el => el.dataset.fid);
-                                                            $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
-                                                        }
-                                                    })
-                                                ">
+                                            new Sortable($el, {
+                                                animation: 150,
+                                                handle: '.drag-handle',
+                                                onEnd() {
+                                                    let ordered = Array.from($el.children)
+                                                        .map(el => el.dataset.fid);
+                                                    $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
+                                                }
+                                            })
+                                        ">
                                     @foreach($tabFields[$tab->tab_code] as $fid => $fname)
                                         <div data-fid="{{ $fid }}"
                                             class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
@@ -123,12 +123,12 @@
                                                 </span>
                                             </div>
 
-                                            <button wire:click.stop="removeField({{ $tab->tab_code }}, '{{ $fid }}')" class="text-red-500 font-bold text-lg
-                                                                    @if($this->isFieldMandatory($fid))
-                                                                        opacity-50 cursor-not-allowed
-                                                                    @else
-                                                                        hover:text-red-600
-                                                                    @endif" @if($this->isFieldMandatory($fid)) disabled @endif>
+                                <button wire:click.stop="removeField({{ $tab->tab_code }}, '{{ $fid }}')" class="text-red-500 font-bold text-lg
+                                @if($this->isFieldMandatory($fid))
+                                    opacity-50 cursor-not-allowed
+                                @else
+                                    hover:text-red-600
+                                @endif" @if($this->isFieldMandatory($fid)) disabled @endif>
                                                 ✕
                                             </button>
                                         </div>
@@ -213,10 +213,9 @@
                                     Attached Documents
                                 </h3>
 
-                                <div class="space-y-2">
+                                <div class="grid grid-cols-2 gap-3 p-4">
                                     @foreach($attachedDocuments as $doc)
-                                        <div class="flex justify-between items-center
-                                                                            bg-gray-50 p-3 rounded border">
+                                        <div class="flex justify-between items-center p-3 rounded border border-green-400 bg-green-100">
                                             <div>
                                                 <div class="font-medium">
                                                     {{ $doc->docType->name }}
@@ -303,7 +302,8 @@
 
                         @if($attachedDocuments->count())
                             <div class="space-y-3">
-                                <livewire:enclosure-list :form_preview="1" />
+                                {{--  <livewire:enclosure-list :form_preview="1" />  --}}
+                                <livewire:enclosure-list :scheme_id="$schemeId" :form_preview="1" :tabCode="$previewTabCode" />
                         @endif
 
                     @endif
@@ -320,7 +320,7 @@
                             )
                             {{-- LOCATION COMPONENT --}}
                             <div>
-                                <livewire:filter-lgd-master-entry :login_type="'state_office'" />
+                                <livewire:filter-lgd-master-entry :login_type="'state_office'" :preview="1" />
                             </div>
 
                         @endif
@@ -416,7 +416,8 @@
                     {{-- Content --}}
                     <div class="p-6 max-h-[70vh] overflow-y-auto">
                         @if($finalActiveTabCode == 104)
-                            <livewire:enclosure-list :form_preview="1" />
+                            {{--  <livewire:enclosure-list :form_preview="1" />  --}}
+                            <livewire:enclosure-list :scheme_id="$schemeId" :form_preview="1" :tabCode="$previewTabCode" />
                         @else
                             @if($finalPreviewFields->isEmpty())
                                 <div class="text-center text-gray-400">
