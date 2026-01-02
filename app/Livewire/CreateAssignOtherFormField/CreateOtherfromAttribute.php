@@ -117,6 +117,10 @@ class CreateOtherfromAttribute extends Component
         $this->depenent_on = $value;
         $ram = FromFieldAttribute::find($value);
         $this->depvaluesopt = collect($ram->options)
+            ->map(fn($val, $key) => [
+                'value' => (string) $key,
+                'label' => $val,
+            ])
             ->values()
             ->toArray();
     }
@@ -154,6 +158,8 @@ class CreateOtherfromAttribute extends Component
     }
     public function save()
     {
+        $values = json_encode($this->depvalues);
+        // dd($values);
         $this->validate();
         $validationRules = collect($this->validation_rule)
             ->flatten()
