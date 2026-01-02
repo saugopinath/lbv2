@@ -142,6 +142,15 @@
                 @endforeach
             </x-form.select>
             @endif
+
+            @if ($depvaluesopt)
+            <x-form.multiselect
+                label="Dependent on Values"
+                wire:model="depvalues"
+                :options="$depvaluesopt"
+                required />
+            @endif
+
             @if ($field_type === 'select')
             <div class="">
                 <label class="font-semibold block mb-1">

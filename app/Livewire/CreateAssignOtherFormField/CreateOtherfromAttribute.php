@@ -39,6 +39,8 @@ class CreateOtherfromAttribute extends Component
     public $depenentOptions;
     public $depenent_on;
     public $isdepenentsec = false;
+    public $depvalues = [];
+    public $depvaluesopt = [];
     public function mount()
     {
         $this->schemes = Scheme::all();
@@ -113,7 +115,13 @@ class CreateOtherfromAttribute extends Component
     public function updatedDepenentOn($value)
     {
         $this->depenent_on = $value;
+        $ram = FromFieldAttribute::find($value);
+        $this->depvaluesopt = collect($ram->options)
+            ->values()
+            ->toArray();
     }
+
+
     protected function rules()
     {
         return [
