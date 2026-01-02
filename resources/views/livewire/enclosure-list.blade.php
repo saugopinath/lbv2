@@ -91,10 +91,10 @@
         </div>
         @endforeach
 
-        <x-upload-modal :currentDocExtensions="$currentDocExtensions" :currentDocMaxSize="$currentDocMaxSize" />
+        <x-upload-modal :currentDocExtensions="$currentDocExtensions" :currentDocMaxSize="$currentDocMaxSize" :formPreview="$form_preview" />
     </div>
     <div class="flex justify-between mt-4 pl-6 pr-6">
-        @if (!$is_page && empty($doc_type_id_array_list))
+        @if (!$is_page && empty($doc_type_id_array_list) && !$form_preview)
             @if ($mode != '0')
                 <x-button.danger wire:click="$dispatch('goPrevious')">Previous</x-button.danger>
             @endif
@@ -104,7 +104,7 @@
                 return $doc->is_required && empty($existingDocuments[$doc->doc_type_id] ?? null);
             });
         @endphp
-        @if (!$is_page && empty($doc_type_id_array_list))
+        @if ((!$is_page && empty($doc_type_id_array_list))&& !$form_preview)
             @if ($missingRequired->isNotEmpty())
                 <x-button.primary type="button" wire:click="$set('showErrors', true)">
                     {{ $mode == '0' ? 'Save' : 'Save & Next' }}

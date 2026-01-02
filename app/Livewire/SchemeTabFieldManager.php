@@ -3,9 +3,9 @@
 namespace App\Livewire;
 
 use App\Models\Codemaster;
+use App\Models\SchemeAttachedDocMappings;
 use Livewire\Component;
 use App\Models\Scheme;
-use App\Models\SchemeAttachedDocMappings;
 use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabBasefield;
 use App\Models\SchemeTabFieldTemp;
@@ -39,6 +39,9 @@ class SchemeTabFieldManager extends Component
             } catch (DecryptException $e) {
                 abort(403, 'Invalid scheme reference');
             }
+        }
+        if ($this->schemeId) {
+            $this->loadAttachedDocuments();
         }
     }
     public function openFinalPreview()
@@ -74,6 +77,7 @@ class SchemeTabFieldManager extends Component
             $this->finalPreviewFields = collect();
             return;
         }
+
         $this->finalPreviewFields = SchemeTabBasefield::whereIn('id', $fieldIds)
             ->whereIn('scheme_id', [0, $this->schemeId])
             ->whereIn('tab_code', [0, $this->finalActiveTabCode])
@@ -82,11 +86,6 @@ class SchemeTabFieldManager extends Component
             ->sortBy(fn($f) => array_search($f->id, $fieldIds))
             ->values();
     }
-
-
-    /* -----------------------------
-     | Scheme Change
-     |-----------------------------*/
     public function updatedSchemeId()
     {
         if ($this->lockScheme) return;
@@ -94,17 +93,14 @@ class SchemeTabFieldManager extends Component
         $this->resetState();
         $this->loadTabs();
     }
-
     private function resetState()
     {
         $this->tabs = [];
         $this->tabFields = [];
         $this->activeTabCode = null;
     }
-
     private function loadTabs()
     {
-        // dd('fsf');
         if (!$this->schemeId) return;
         $this->tabs = SchemeTabMapping::with('masterTab')
             ->where('scheme_id', $this->schemeId)
@@ -116,23 +112,17 @@ class SchemeTabFieldManager extends Component
     private function hydrateTabFieldsFromTemp(): void
     {
         $temps = SchemeTabFieldTemp::where('scheme_id', $this->schemeId)->get();
-        // dd($temps);
+
         foreach ($temps as $temp) {
-            $tab_code = $temp->tab_code;
-            // dd($tab);
+
             $raw = $temp->field_ids;
             if (empty($raw) || !is_array($raw)) {
                 continue;
             }
             $fieldIds = collect($raw)->pluck('field_id')->toArray();
             // Resolve names
-            if ($tab_code == 104) {
-                $names = Codemaster::whereIn('id', $fieldIds)
-                    ->pluck('name', 'id');
-            } else {
-                $names = SchemeTabBasefield::whereIn('id', $fieldIds)
-                    ->pluck('level_name', 'id');
-            }
+            $names = SchemeTabBasefield::whereIn('id', $fieldIds)
+                ->pluck('level_name', 'id');
             // Order by position
             $ordered = collect($raw)
                 ->sortBy('position')
@@ -144,79 +134,93 @@ class SchemeTabFieldManager extends Component
             $this->tabFields[$temp->tab_code] = $ordered;
         }
     }
+    public function saveDocumentMapping()
+    {
+        $this->validate([
+            'selectedDocType' => 'required',
+            'maxFileSize'     => 'required',
+            'extensionTypes'  => 'required|array|min:1',
+        ]);
 
-    /* -----------------------------
-     | Open Manage Modal
-     |-----------------------------*/
-    // public function openManageModal($tabCode)
-    // {
-    //     $this->activeTabCode = $tabCode;
-    //     $this->showManageModal = true;
+        $lastPosition = SchemeAttachedDocMappings::where('scheme_id', $this->schemeId)
+            ->where('tab_code', $this->activeTabCode)
+            ->max('position');
 
-    //     $fields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
-    //         ->whereIn('tab_code', [$tabCode, 0])
-    //         ->where('is_active', true)
-    //         ->orderBy('field_position')
-    //         ->get();
+        $nextPosition = ($lastPosition ?? 0) + 1;
 
-    //     $this->modalFields = $fields
-    //         ->filter(function ($field) use ($tabCode) {
-    //             if ($field->tab_code == 0 && $field->is_mendetory == 1) {
-    //                 if ($this->isGlobalMandatoryUsed($field->id, $tabCode)) {
-    //                     return false;
-    //                 }
-    //             }
-    //             return true;
-    //         })
-    //         ->map(fn($f) => [
-    //             'field_id'     => $f->id,
-    //             'field_name'   => $f->level_name,
-    //             'is_mandatory' => $f->is_mendetory,
-    //             'tab_code' => $f->tab_code
-    //         ])
-    //         ->toArray();
+        SchemeAttachedDocMappings::updateOrCreate(
+            [
+                'scheme_id'   => $this->schemeId,
+                'doc_type_id' => $this->selectedDocType,
+                'tab_code' => $this->activeTabCode,
+                'position'       => $nextPosition,
+            ],
+            [
+                'is_required'    => $this->isRequired,
+                'max_file_size'  => $this->maxFileSize,
+                'extension_type' => implode(',', $this->extensionTypes),
+            ]
+        );
 
-    //     $mandatoryIds = collect($this->modalFields)
-    //         ->filter(fn($f) => $f['is_mandatory'] == 1 &&  $f['tab_code'] != 0)
-    //         ->pluck('field_id')
-    //         ->toArray();
+        $this->loadAttachedDocuments();
 
-    //     $existing = array_keys($this->tabFields[$tabCode] ?? []);
+        $this->reset([
+            'selectedDocType',
+            'isRequired',
+            'maxFileSize',
+            'extensionTypes',
+        ]);
 
-    //     $this->modalSelected = array_values(
-    //         array_unique(array_merge($existing, $mandatoryIds))
-    //     );
-    // }
-    // After save in temp table
+        session()->flash('message', 'Document saved successfully');
+    }
+    public function removeDocument($id)
+    {
+        SchemeAttachedDocMappings::where('id', $id)
+            ->where('scheme_id', $this->schemeId)
+            ->delete();
+
+        $this->loadAttachedDocuments();
+    }
+    public function updateDocumentOrder($orderedIds)
+    {
+        foreach ($orderedIds as $index => $id) {
+            SchemeAttachedDocMappings::where('id', $id)
+                ->update(['position' => $index + 1]);
+        }
+
+        $this->loadAttachedDocuments();
+    }
+    public function setActiveTab($tabCode)
+    {
+        $this->activeTabCode = $tabCode;
+
+        if ($tabCode == 104) {
+            $this->loadAttachedDocuments();
+        }
+    }
+    public function loadAttachedDocuments()
+    {
+        $this->attachedDocuments = SchemeAttachedDocMappings::with('docType')
+            ->where('scheme_id', $this->schemeId)
+            ->where('tab_code', 104)
+            ->orderBy('position')
+            ->get();
+    }
     public function openManageModal($tabCode)
     {
         $this->activeTabCode = $tabCode;
         $this->showManageModal = true;
-        // dd($this->activeTabCode);
-        if ($this->activeTabCode == 104) {
-            // dd('ughg');
-            // $this->modalFields = Codemaster::where('parent_id', 16)
-            //     ->where('is_active', 1)
-            //     ->orderBy('name')
-            //     ->get()
-            //     // dd($this->modalFields);
-            //     ->map(fn($c) => [
-            //         'field_id'     => $c->id,
-            //         'field_name'   => $c->name,
-            //         'is_mandatory' => 0,
-            //         'tab_code'     => 104,
-            //     ])
-            //     ->toArray();
-            // // dd($this->modalFields);
-            // $this->modalSelected = array_keys($this->tabFields[$tabCode] ?? []);
-            // return;
+
+        if ($tabCode == 104) {
 
             $this->docTypes = Codemaster::where('parent_id', 16)
                 ->orderBy('name')
                 ->get();
+
             $this->loadAttachedDocuments();
             return;
         }
+
         $fields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
             ->whereIn('tab_code', [$tabCode, 0])
             ->where('is_active', true)
@@ -245,7 +249,7 @@ class SchemeTabFieldManager extends Component
             ->pluck('field_id')
             ->toArray();
 
-        // 🔽 ADD THIS
+
         $temp = SchemeTabFieldTemp::where('scheme_id', $this->schemeId)
             ->where('tab_code', $tabCode)
             ->first();
@@ -255,7 +259,7 @@ class SchemeTabFieldManager extends Component
             ->pluck('field_id')
             ->toArray();
 
-        // 🔽 REPLACE THIS
+
         $existing = !empty($savedIds)
             ? $savedIds
             : array_keys($this->tabFields[$tabCode] ?? []);
@@ -264,10 +268,8 @@ class SchemeTabFieldManager extends Component
             array_unique(array_merge($existing, $mandatoryIds))
         );
     }
-
     public function isFieldMandatory($fieldId)
     {
-        // dd('bhjbc');
         return SchemeTabBasefield::where('id', $fieldId)
             ->where('is_mendetory', 1)
             ->where('tab_code', '!=', 0)
@@ -287,7 +289,6 @@ class SchemeTabFieldManager extends Component
 
         return false;
     }
-
     public function closeManageModal()
     {
         $this->showManageModal = false;
@@ -295,42 +296,10 @@ class SchemeTabFieldManager extends Component
         $this->modalFields = [];
         $this->modalSelected = [];
     }
-
-    /* -----------------------------
-     | Save Fields
-     |-----------------------------*/
-    public function saveManageFields(int $fieldId = null, int $position = null)
+    public function saveManageFields()
     {
-        if ($this->activeTabCode == 104) {
-            if (!$fieldId) {
-                return;
-            }
-            $temp = SchemeTabFieldTemp::firstOrNew([
-                'scheme_id' => $this->schemeId,
-                'tab_code'  => $this->activeTabCode,
-            ]);
-            $existing = collect($temp->field_ids ?? []);
-            // prevent duplicate
-            if ($existing->contains('field_id', $fieldId)) {
-                $this->closeManageModal();
-                return;
-            }
-            $nextPosition = $position
-                ?? ($existing->max('position') ?? 0) + 1;
-            $existing->push([
-                'field_id' => $fieldId,
-                'position' => $nextPosition,
-            ]);
-            $temp->field_ids = $existing->values()->toArray();
-            $temp->save();
-            // update UI list
-            $this->tabFields[$this->activeTabCode][$fieldId] = Codemaster::where('id', $fieldId)->first()->name;;
-            $this->closeManageModal();
-            return;
-        }
-        // dd($this->modalSelected);
-        // dd('fff');
         $payload = [];
+
         foreach ($this->modalSelected as $index => $fid) {
             $payload[] = [
                 'field_id' => (int) $fid,
@@ -338,8 +307,6 @@ class SchemeTabFieldManager extends Component
             ];
         }
 
-        // dd($payload);
-        // Save to temp table
         SchemeTabFieldTemp::updateOrCreate(
             [
                 'scheme_id' => $this->schemeId,
@@ -349,8 +316,9 @@ class SchemeTabFieldManager extends Component
                 'field_ids' => $payload,
             ]
         );
+
         $this->tabFields[$this->activeTabCode] = [];
-        // $this->tabFields[$this->activeTabCode] = [];
+
         foreach ($this->modalSelected as $fid) {
             $field = collect($this->modalFields)
                 ->firstWhere('field_id', $fid);
@@ -359,6 +327,7 @@ class SchemeTabFieldManager extends Component
                     = $field['field_name'];
             }
         }
+
         $this->closeManageModal();
     }
     public function removeField($tabCode, $fieldId)
@@ -366,6 +335,7 @@ class SchemeTabFieldManager extends Component
         if ($this->isFieldMandatory($fieldId)) {
             return;
         }
+
         unset($this->tabFields[$tabCode][$fieldId]);
         if (empty($this->tabFields[$tabCode])) {
             unset($this->tabFields[$tabCode]);
@@ -388,9 +358,6 @@ class SchemeTabFieldManager extends Component
             'field_ids' => $filtered,
         ]);
     }
-    /* -----------------------------
-     | Preview
-     |-----------------------------*/
     public function openPreview($tabCode)
     {
         $this->activeTabCode = $tabCode;
@@ -398,8 +365,12 @@ class SchemeTabFieldManager extends Component
         $tab = collect($this->tabs)
             ->firstWhere('tab_code', $tabCode);
         $this->previewTabName = $tab?->masterTab?->tab_name ?? 'Preview';
-        $this->previewTabCode = $tab?->masterTab?->tab_code;
+        $this->previewTabCode = $tab?->masterTab?->tab_code ?? 'Preview';
         $this->showPreviewModal = true;
+
+        if ($this->activeTabCode == 104) {
+            $this->loadAttachedDocuments();
+        }
     }
     public function closePreview()
     {
@@ -407,20 +378,10 @@ class SchemeTabFieldManager extends Component
         $this->activeTabCode = null;
         $this->previewTabName = '';
     }
-    // public function updateFieldOrder($tabCode, $orderedIds)
-    // {
-    //     if (!isset($this->tabFields[$tabCode])) return;
-    //     $newOrder = [];
-    //     foreach ($orderedIds as $fid) {
-    //         if (isset($this->tabFields[$tabCode][$fid])) {
-    //             $newOrder[$fid] = $this->tabFields[$tabCode][$fid];
-    //         }
-    //     }
-    //     $this->tabFields[$tabCode] = $newOrder;
-    // }
     public function updateFieldOrder($tabCode, $orderedIds)
     {
         if (!isset($this->tabFields[$tabCode])) return;
+
         // Update in-memory
         $newOrder = [];
         foreach ($orderedIds as $fid) {
@@ -448,124 +409,22 @@ class SchemeTabFieldManager extends Component
             ]
         );
     }
-    public function loadAttachedDocuments()
-    {
-        $this->attachedDocuments = SchemeAttachedDocMappings::with('docType')
-            ->where('scheme_id', $this->schemeId)
-            ->where('is_active', 1)
-            ->where('tab_code', $this->activeTabCode)
-            ->orderBy('position')
-            ->get();
-    }
-    public function updateDocumentOrder($orderedIds)
-    {
-        foreach ($orderedIds as $index => $id) {
-            SchemeAttachedDocMappings::where('id', $id)
-                ->update(['position' => $index + 1]);
-        }
-
-        $this->loadAttachedDocuments();
-    }
-    public function removeDocument($id)
-    {
-        SchemeAttachedDocMappings::where('id', $id)
-            ->where('scheme_id', $this->schemeId)
-            ->delete();
-
-        $this->loadAttachedDocuments();
-    }
-    public function saveDocumentMapping()
-    {
-        $this->validate([
-            'selectedDocType' => 'required',
-            'maxFileSize'     => 'required',
-            'extensionTypes'  => 'required|array|min:1',
-        ]);
-        $lastPosition = SchemeAttachedDocMappings::where('scheme_id', $this->schemeId)
-            ->where('tab_code', $this->activeTabCode)
-            ->max('position');
-
-        $nextPosition = ($lastPosition ?? 0) + 1;
-
-        SchemeAttachedDocMappings::updateOrCreate(
-            [
-                'scheme_id'   => $this->schemeId,
-                'doc_type_id' => $this->selectedDocType,
-                'tab_code' => $this->activeTabCode,
-                'position' => $nextPosition,
-            ],
-            [
-                'is_required'    => $this->isRequired,
-                'max_file_size'  => $this->maxFileSize,
-                'extension_type' => implode(',', $this->extensionTypes),
-            ]
-        );
-        $this->saveManageFields((int) $this->selectedDocType);
-        // $this->saveManageFields();
-        // $this->saveFieldToTemp((int) $this->selectedDocType);
-        $this->reset([
-            'selectedDocType',
-            'isRequired',
-            'maxFileSize',
-            'extensionTypes',
-        ]);
-    }
-    // public function saveFieldToTemp(int $fieldId, ?int $position = null): void
-    // {
-    //     $temp = SchemeTabFieldTemp::firstOrNew([
-    //         'scheme_id' => $this->schemeId,
-    //         'tab_code'  => $this->activeTabCode,
-    //     ]);
-
-    //     $existing = collect($temp->field_ids ?? []);
-
-    //     if ($existing->pluck('field_id')->contains($fieldId)) {
-    //         return;
-    //     }
-    //     $nextPosition = $position
-    //         ?? ($existing->max('position') ?? 0) + 1;
-
-    //     $existing->push([
-    //         'field_id' => $fieldId,
-    //         'position' => $nextPosition,
-    //     ]);
-
-    //     $temp->field_ids = $existing->values()->toArray();
-    //     $temp->save();
-    // }
     public function getPreviewFieldsProperty()
     {
-        // dd('vghbh');
-        // dd($this->activeTabCode);
         if (!$this->activeTabCode) {
             return collect();
         }
-
         $fieldIds = array_keys($this->tabFields[$this->activeTabCode] ?? []);
-        // dd($fieldIds);
         if (empty($fieldIds)) {
             return collect();
         }
-        if ($this->activeTabCode == 104) {
-            // dd('bgbjk');
-            return Codemaster::where('id', $fieldIds)
-                ->where('is_active', 1)
-                ->orderBy('name')
-                ->get()
-                // dd($this->modalFields);
-                ->sortBy(fn($f) => array_search($f->id, $fieldIds))
-                ->values();
-            // dd();
-        } else {
-
-            return SchemeTabBasefield::whereIn('id', $fieldIds)
-                ->whereIn('scheme_id', [0, $this->schemeId])
-                ->whereIn('tab_code', [0, $this->activeTabCode])
-                ->where('is_active', true)
-                ->get()
-                ->sortBy(fn($f) => array_search($f->id, $fieldIds))
-                ->values();
-        }
+        return SchemeTabBasefield::whereIn('id', $fieldIds)
+            ->whereIn('scheme_id', [0, $this->schemeId])
+            ->whereIn('tab_code', [0, $this->activeTabCode])
+            ->where('is_active', true)
+            ->get()
+            ->sortBy(fn($f) => array_search($f->id, $fieldIds))
+            ->values();
     }
     public function render()
     {
