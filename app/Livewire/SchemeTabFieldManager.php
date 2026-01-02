@@ -136,11 +136,19 @@ class SchemeTabFieldManager extends Component
     }
     public function saveDocumentMapping()
     {
-        $this->validate([
-            'selectedDocType' => 'required',
-            'maxFileSize'     => 'required',
-            'extensionTypes'  => 'required|array|min:1',
-        ]);
+        $this->validate(
+            [
+                'selectedDocType' => 'required',
+                'maxFileSize' => 'required|in:100KB,500KB',
+                'extensionTypes'  => 'required|array|min:1',
+            ],
+            [
+                'selectedDocType.required' => 'Document type is required',
+                'maxFileSize.required' => 'Please fill the file size',
+                'maxFileSize.in' => 'Max file size must be like 100KB or 500KB',
+                'extensionTypes.required'  => 'Select at least one extension',
+            ]
+        );
 
         $lastPosition = SchemeAttachedDocMappings::where('scheme_id', $this->schemeId)
             ->where('tab_code', $this->activeTabCode)
@@ -172,6 +180,14 @@ class SchemeTabFieldManager extends Component
         ]);
 
         session()->flash('message', 'Document saved successfully');
+    }
+    public function updatedMaxFileSize($value)
+    {
+        if ($value === null || $value === '') {
+            return;
+        }
+
+        $this->maxFileSize = preg_replace('/[^0-9]/', '', $value) . 'KB';
     }
     public function removeDocument($id)
     {

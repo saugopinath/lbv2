@@ -179,30 +179,40 @@
                         {{-- DOCUMENT FORM --}}
                         <div class="grid grid-cols-2 gap-4 mb-6">
 
-                            <x-form.select name="doc_type_id" label="Document Type" wire:model="selectedDocType">
+                            <x-form.select name="selectedDocType" label="Document Type" wire:model="selectedDocType">
                                 <option value="">-- Select Document --</option>
                                 @foreach($docTypes as $doc)
                                     <option value="{{ $doc->id }}">{{ $doc->name }}</option>
                                 @endforeach
                             </x-form.select>
 
-                            <x-form.select name="is_required" label="Is Required" wire:model="isRequired">
+                            <x-form.select name="isRequired" label="Is Required" wire:model="isRequired">
                                 <option value="0">No</option>
                                 <option value="1">Yes</option>
                             </x-form.select>
 
-                            <x-form.input name="max_file_size" label="Max File Size" wire:model="maxFileSize" />
+                            {{--  <x-form.input name="maxFileSize" label="Max File Size" wire:model="maxFileSize" />  --}}
+                            <x-form.input
+                                        name="maxFileSize"
+                                        label="Max File Size"
+                                        wire:model.live="maxFileSize"
+                                        x-data
+                                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g,'')"
+                                    />
 
                             <div class="col-span-2">
                                 <label class="font-semibold">Allowed Extensions</label>
                                 <div class="flex gap-4 mt-2 flex-wrap">
                                     @foreach(['jpg', 'jpeg', 'png', 'pdf'] as $ext)
                                         <label class="flex items-center gap-2">
-                                            <input type="checkbox" wire:model="extensionTypes" value="{{ $ext }}">
+                                            <input type="checkbox" name="extensionTypes" wire:model="extensionTypes" value="{{ $ext }}">
                                             {{ strtoupper($ext) }}
                                         </label>
                                     @endforeach
                                 </div>
+                                    @error('extensionTypes')
+                                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
