@@ -17,13 +17,16 @@
                             {{ $tab->position }}. {{ $tab->masterTab->tab_name }}
                         </span>
                         <div class="flex gap-2 items-center">
+                              @if(!in_array($tab->tab_code, [104, 105]))
                             <a href="{{ route('create-dynamicformfield', [
                     'ref' => encrypt($tab->scheme_id . '|' . $tab->tab_code)
                 ]) }}">
+
                                 <x-button.primary class="bg-indigo-400 hover:bg-indigo-500 text-sm">
                                     Add Another Fields
                                 </x-button.primary>
                             </a>
+                            @endif
                             <x-button.primary wire:click="openManageModal({{ $tab->tab_code }})"
                                 class="bg-green-600 hover:bg-green-700 text-sm">
                                 Manage Fields
@@ -69,11 +72,6 @@
                                                         @if($doc->is_required)
                                                             <span class="text-red-600 font-bold ml-1">*</span>
                                                         @endif
-                                                    </div>
-                                                    <div class="text-sm text-gray-500">
-                                                        {{-- Size: {{ $doc->max_file_size }} |
-                                                        Required: {{ $doc->is_required ? 'Yes' : 'No' }} |
-                                                        Ext: {{ $doc->extension_type }} --}}
                                                     </div>
                                                 </div>
                                             </div>
@@ -160,9 +158,22 @@
                         flex flex-col overflow-hidden">
 
                 {{-- HEADER (fixed) --}}
-                <div class="bg-indigo-100 px-6 py-4 font-semibold shrink-0 border-b">
-                    Manage Fields
-                </div>
+               <div class="bg-indigo-100 px-6 py-4 font-semibold shrink-0 border-b
+                     flex items-center justify-between">
+
+                    <span>Manage Fields</span>
+
+                    @if($activeTabCode == 105)
+                        <x-button.primary
+                            wire:click="$dispatch('openSectionLevelModal')"
+                            class="bg-indigo-600 text-sm">
+                            Add New Section / Level
+                        </x-button.primary>
+                    @endif
+                    </div>
+
+                    <livewire:section-level-modal />
+
 
                 {{-- BODY (scrollable) --}}
                 <div class="p-6 flex-1 overflow-y-auto">
@@ -288,7 +299,6 @@
         </div>
     @endif
 
-
     @if($showPreviewModal)
         <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div class="bg-white w-full max-w-3xl rounded-lg shadow-lg overflow-hidden">
@@ -391,92 +401,92 @@
             </div>
     @endif
 
-        @if($showFinalPreview)
-            <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
-                <div class="bg-white rounded-xl shadow-lg w-auto max-w-auto max-h-[90vh] flex flex-col overflow-hidden">
-                    <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
-                        <h3 class="text-lg font-semibold text-gray-800">
-                            Final Preview
-                        </h3>
-                        <button wire:click="closeFinalPreview" class="text-gray-400 hover:text-gray-600 text-xl">
-                            ✕
-                        </button>
-                    </div>
-                    <div class="px-6 pt-4 border-b shrink-0">
-                        <nav class="flex space-x-6">
-                            @foreach($tabs as $tab)
-                                            <button wire:click="setFinalPreviewTab({{ $tab->tab_code }})" class="flex items-center gap-2 pb-2 text-sm font-medium border-b-2 transition
-                                                {{ $finalActiveTabCode == $tab->tab_code ? 'border-indigo-600 text-indigo-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700'}}">
-                                                <x-entrytab-nav-link :active="$tab === 0" :icon="$tab->masterTab?->tab_icon">
-                                                    {{ $tab->masterTab?->tab_name }}
-                                                </x-entrytab-nav-link>
-                                            </button>
-                            @endforeach
-                        </nav>
-                    </div>
-                    {{-- Content --}}
-                    <div class="p-6 max-h-[70vh] overflow-y-auto">
-                        @if($finalActiveTabCode == 104)
-                            {{--  <livewire:enclosure-list :form_preview="1" />  --}}
-                            <livewire:enclosure-list :scheme_id="$schemeId" :form_preview="1" :tabCode="$previewTabCode" />
-                        @else
-                            @if($finalPreviewFields->isEmpty())
-                                <div class="text-center text-gray-400">
-                                    No fields configured for this tab
-                                </div>
-                            @else
-                                <div class="grid md:grid-cols-2 gap-4">
-                                    @foreach($finalPreviewFields as $field)
-
-                                        @if($field->field_type === 'text')
-                                            <div>
-                                                <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}"
-                                                    placeholder="Enter {{ $field->level_name }}" disabled />
-                                            </div>
-
-                                            {{-- DATE --}}
-                                        @elseif($field->field_type === 'date')
-                                            <div>
-                                                <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}"
-                                                    disabled />
-                                            </div>
-
-                                            {{-- SELECT --}}
-                                        @elseif($field->field_type === 'select')
-                                            <div>
-                                                <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
-                                                    <option value="">
-                                                        -- Select {{ $field->level_name }} --
-                                                    </option>
-                                                    @foreach($field->options ?? [] as $opt)
-                                                        <option>{{ $opt }}</option>
-                                                    @endforeach
-                                                </x-form.select>
-                                            </div>
-                                            {{-- TEXTAREA --}}
-                                        @elseif($field->field_type === 'textarea')
-                                            <div>
-                                                <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}"
-                                                    placeholder="Enter {{ $field->level_name }}" disabled />
-                                            </div>
-                                        @endif
-
-                                    @endforeach
-                                </div>
-                            @endif
-                        @endif
-                    </div>
-
-                    <div class="flex justify-end gap-3 px-6 py-4 border-t">
-                        <x-button.primary wire:click="closeFinalPreview" type="button">
-                            Close
-                        </x-button.primary>
-                    </div>
-
+    @if($showFinalPreview)
+        <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-lg w-auto max-w-auto max-h-[90vh] flex flex-col overflow-hidden">
+                <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
+                    <h3 class="text-lg font-semibold text-gray-800">
+                        Final Preview
+                    </h3>
+                    <button wire:click="closeFinalPreview" class="text-gray-400 hover:text-gray-600 text-xl">
+                        ✕
+                    </button>
                 </div>
+                <div class="px-6 pt-4 border-b shrink-0">
+                    <nav class="flex space-x-6">
+                        @foreach($tabs as $tab)
+                                        <button wire:click="setFinalPreviewTab({{ $tab->tab_code }})" class="flex items-center gap-2 pb-2 text-sm font-medium border-b-2 transition
+                                            {{ $finalActiveTabCode == $tab->tab_code ? 'border-indigo-600 text-indigo-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700'}}">
+                                            <x-entrytab-nav-link :active="$tab === 0" :icon="$tab->masterTab?->tab_icon">
+                                                {{ $tab->masterTab?->tab_name }}
+                                            </x-entrytab-nav-link>
+                                        </button>
+                        @endforeach
+                    </nav>
+                </div>
+                {{-- Content --}}
+                <div class="p-6 max-h-[70vh] overflow-y-auto">
+                    @if($finalActiveTabCode == 104)
+                        {{--  <livewire:enclosure-list :form_preview="1" />  --}}
+                        <livewire:enclosure-list :scheme_id="$schemeId" :form_preview="1" :tabCode="$previewTabCode" />
+                    @else
+                        @if($finalPreviewFields->isEmpty())
+                            <div class="text-center text-gray-400">
+                                No fields configured for this tab
+                            </div>
+                        @else
+                            <div class="grid md:grid-cols-2 gap-4">
+                                @foreach($finalPreviewFields as $field)
+
+                                    @if($field->field_type === 'text')
+                                        <div>
+                                            <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}"
+                                                placeholder="Enter {{ $field->level_name }}" disabled />
+                                        </div>
+
+                                        {{-- DATE --}}
+                                    @elseif($field->field_type === 'date')
+                                        <div>
+                                            <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}"
+                                                disabled />
+                                        </div>
+
+                                        {{-- SELECT --}}
+                                    @elseif($field->field_type === 'select')
+                                        <div>
+                                            <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
+                                                <option value="">
+                                                    -- Select {{ $field->level_name }} --
+                                                </option>
+                                                @foreach($field->options ?? [] as $opt)
+                                                    <option>{{ $opt }}</option>
+                                                @endforeach
+                                            </x-form.select>
+                                        </div>
+                                        {{-- TEXTAREA --}}
+                                    @elseif($field->field_type === 'textarea')
+                                        <div>
+                                            <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}"
+                                                placeholder="Enter {{ $field->level_name }}" disabled />
+                                        </div>
+                                    @endif
+
+                                @endforeach
+                            </div>
+                        @endif
+                    @endif
+                </div>
+
+                <div class="flex justify-end gap-3 px-6 py-4 border-t">
+                    <x-button.primary wire:click="closeFinalPreview" type="button">
+                        Close
+                    </x-button.primary>
+                </div>
+
             </div>
-        @endif
+        </div>
+    @endif
 
         {{-- SUCCESS MESSAGE --}}
         @if(session()->has('message'))

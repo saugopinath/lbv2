@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Codemaster;
 use App\Models\SchemeAttachedDocMappings;
+use App\Models\SectionLevelMaster;
 use Livewire\Component;
 use App\Models\Scheme;
 use App\Models\SchemeTabMapping;
@@ -12,6 +13,7 @@ use App\Models\SchemeTabFieldTemp;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SchemeTabFieldManager extends Component
 {
@@ -27,6 +29,7 @@ class SchemeTabFieldManager extends Component
     public $attachedDocuments = [];
     public $extensionTypes = [];
 
+    protected $listeners = ['openSectionLevelModal' => 'open'];
 
     public function mount(Request $request)
     {
@@ -44,6 +47,7 @@ class SchemeTabFieldManager extends Component
             $this->loadAttachedDocuments();
         }
     }
+
     public function openFinalPreview()
     {
         $this->showFinalPreview = true;
