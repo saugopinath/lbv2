@@ -188,10 +188,9 @@
 
                             <x-form.select name="isRequired" label="Is Required" wire:model="isRequired">
                                 <option value="0">No</option>
-                                <option value="1">Yes</option>
+                                <option value="1">Yes</option> 
                             </x-form.select>
 
-                            {{--  <x-form.input name="maxFileSize" label="Max File Size" wire:model="maxFileSize" />  --}}
                             <x-form.input
                                         name="maxFileSize"
                                         label="Max File Size"
