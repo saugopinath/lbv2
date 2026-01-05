@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('from_field_attributes', function (Blueprint $table) {
             $table->bigInteger('dependent_on')->nullable();
+            $table->jsonb('dependent_on_values')->nullable();
         });
     }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('from_field_attributes', function (Blueprint $table) {
             $table->dropColumn('dependent_on');
+            $table->dropColumn('dependent_on_values');
         });
     }
 };

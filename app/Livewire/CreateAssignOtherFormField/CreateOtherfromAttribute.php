@@ -115,14 +115,19 @@ class CreateOtherfromAttribute extends Component
     public function updatedDepenentOn($value)
     {
         $this->depenent_on = $value;
-        $ram = FromFieldAttribute::find($value);
-        $this->depvaluesopt = collect($ram->options)
-            ->map(fn($val, $key) => [
-                'value' => (string) $key,
-                'label' => $val,
-            ])
-            ->values()
-            ->toArray();
+        if ($this->depenent_on) {
+            $ram = FromFieldAttribute::find($this->depenent_on);
+            $this->depvaluesopt = collect($ram->options)
+                ->map(fn($val, $key) => [
+                    'value' => (string) $key,
+                    'label' => $val,
+                ])
+                ->values()
+                ->toArray();
+        } else {
+            $this->depvaluesopt = [];
+        }
+        $this->depvalues = [];
     }
 
 
