@@ -144,11 +144,14 @@
             @endif
 
             @if ($depvaluesopt)
-            <x-form.multiselect
-                label="Dependent on Values"
-                wire:model="depvalues"
-                :options="$depvaluesopt"
-                required />
+            <div wire:key="container-{{ $depenent_on }}">
+                <x-form.multiselect
+                    wire:key="dependent-multiselect-{{ $depenent_on }}"
+                    label="Dependent on Values"
+                    wire:model="depvalues"
+                    :options="$depvaluesopt"
+                    required />
+            </div>
             @endif
 
             @if($isdependent === 'no')
