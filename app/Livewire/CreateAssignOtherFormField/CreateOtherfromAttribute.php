@@ -146,7 +146,8 @@ class CreateOtherfromAttribute extends Component
             'is_choose_default' => 'required_if:field_type,select',
             'default_value' => 'required_if:is_choose_default,yes',
             'isdependent' => 'required',
-            'depenent_on' => 'required_if:isdependent,yes'
+            'depenent_on' => 'required_if:isdependent,yes',
+            'depvalues' => 'required_if:isdependent,yes',
         ];
     }
     public function addOption()
@@ -163,7 +164,7 @@ class CreateOtherfromAttribute extends Component
     }
     public function save()
     {
-        $values = json_encode($this->depvalues);
+        // $values = json_encode($this->depvalues);
         // dd($values);
         $this->validate();
         $validationRules = collect($this->validation_rule)
@@ -201,6 +202,7 @@ class CreateOtherfromAttribute extends Component
                 ? ($this->is_multiple === 'yes')
                 : false,
             'dependent_on' => $this->isdependent === 'yes' ? $this->depenent_on : null,
+            'dependent_on_values' => $this->isdependent === 'yes' ? json_encode((object)$this->depvalues) : null,
         ]);
         $this->reset([
             'level_name',
@@ -217,7 +219,8 @@ class CreateOtherfromAttribute extends Component
             'default_value',
             'defaultOptions',
             'isdependent',
-            'depenent_on'
+            'depenent_on',
+            'depvalues'
         ]);
 
         session()->flash('success', 'Field created successfully');

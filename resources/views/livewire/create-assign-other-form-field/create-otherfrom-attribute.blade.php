@@ -151,6 +151,7 @@
                 required />
             @endif
 
+            @if($isdependent === 'no')
             @if ($field_type === 'select')
             <div class="">
                 <label class="font-semibold block mb-1">
@@ -256,7 +257,7 @@
             @endif
         </div>
         @endif
-
+        @endif
         <!-- Save Button (outside conditional block) -->
         <div class="md:col-span-2 mt-6 pt-6 border-t">
             <x-button.loading-button
