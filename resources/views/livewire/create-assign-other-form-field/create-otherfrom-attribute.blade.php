@@ -146,7 +146,6 @@
             @if ($depvaluesopt)
             <div wire:key="container-{{ $depenent_on }}">
                 <x-form.multiselect
-                    wire:key="dependent-multiselect-{{ $depenent_on }}"
                     label="Dependent on Values"
                     wire:model="depvalues"
                     :options="$depvaluesopt"

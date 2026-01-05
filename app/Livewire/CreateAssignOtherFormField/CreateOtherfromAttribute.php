@@ -131,6 +131,28 @@ class CreateOtherfromAttribute extends Component
         $this->depvalues = [];
     }
 
+    public function updatedDepvalues()
+    {
+        $selectedValues = collect($this->depvalues)
+            ->map(fn($v) => is_array($v) ? (string)$v['value'] : (string)$v)
+            ->toArray();
+
+        // ALL = "1"
+        if (in_array('0', $selectedValues)) {
+
+            $ram = FromFieldAttribute::find($this->depenent_on);
+
+            if ($ram && is_array($ram->options)) {
+
+                $this->depvalues = collect($ram->options)
+                    ->keys()
+                    ->map(fn($k) => (string) $k)
+                    ->reject(fn($k) => $k === '0') // ALL remove
+                    ->values()
+                    ->toArray();
+            }
+        }
+    }
 
     protected function rules()
     {
