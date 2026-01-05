@@ -33,16 +33,9 @@
                                 Preview
                             </x-button.primary>
 
-
-                            @if($tab->tab_code == 104)
-                                <button @click="open = !open" class="text-sm">
-                                    ▼
-                                </button>
-                            @else
                                 <button @click="open=!open" class="text-sm">
                                     ▼
                                 </button>
-                            @endif
 
                         </div>
                     </div>
@@ -188,7 +181,7 @@
 
                             <x-form.select name="isRequired" label="Is Required" wire:model="isRequired">
                                 <option value="0">No</option>
-                                <option value="1">Yes</option> 
+                                <option value="1">Yes</option>
                             </x-form.select>
 
                             <x-form.input
