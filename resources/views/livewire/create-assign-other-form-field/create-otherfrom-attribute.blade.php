@@ -154,7 +154,7 @@
             </div>
             @endif
 
-            @if($isdependent === 'no')
+            
             @if ($field_type === 'select')
             <div class="">
                 <label class="font-semibold block mb-1">
@@ -217,7 +217,7 @@
         {{-- Is Under Any Section --}}
 
 
-
+@if($isdependent === 'no')
         @if (
         in_array($field_type, ['checkbox','radio']) ||
         ($field_type === 'select' && $is_choose_default === 'no')

@@ -111,6 +111,7 @@ class CreateOtherfromAttribute extends Component
         $this->isdependent = $value;
         $this->depenentOptions = FromFieldAttribute::whereNull('dependent_on')->get();
         $this->depenent_on = null;
+        $this->depvaluesopt = [];
     }
     public function updatedDepenentOn($value)
     {
