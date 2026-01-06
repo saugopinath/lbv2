@@ -15,7 +15,7 @@ class CreateOtherfromAttribute extends Component
 {
     public $scheme_id;
     public $level_name;
-    public $field_id,$class;
+    public $field_id,$field_class;
     public $field_name;
     public $field_type;
     public array $validation_rule = [];
@@ -107,6 +107,7 @@ class CreateOtherfromAttribute extends Component
         if ($this->is_choose_default === 'yes') {
             if (isset($this->default_values[$value])) {
                 $this->defaultOptions = $this->default_values[$value];
+                $this->field_class = strtolower($value);
             }
         }
     }
@@ -182,7 +183,6 @@ class CreateOtherfromAttribute extends Component
             'scheme_id' => 'required',
             'level_name' => 'required|string|max:100',
             'field_id' => 'required|string|max:100',
-            'class' => 'required|string|max:100',
             'field_name' => 'required|string|max:150',
             'field_type' => 'required|string',
             'validation_rule' => 'required|array|min:1',
@@ -229,7 +229,7 @@ class CreateOtherfromAttribute extends Component
             'scheme_id' => $this->scheme_id,
             'level_name' => $this->level_name,
             'field_id' => $this->field_id,
-            'class' => $this->class,
+            'field_class' => $this->field_class,
             'field_label' => $this->field_name,
             'field_type' => $this->field_type,
 
@@ -254,7 +254,6 @@ class CreateOtherfromAttribute extends Component
         $this->reset([
             'level_name',
             'field_id',
-            'class',
             'field_name',
             'field_type',
             'validation_rule',

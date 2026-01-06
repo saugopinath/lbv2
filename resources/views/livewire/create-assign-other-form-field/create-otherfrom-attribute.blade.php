@@ -44,14 +44,6 @@
             wire:model="field_id"
             required />
 
-        {{-- Field ID --}}
-        <x-form.input
-            name="class"
-            label="Class"
-            placeholder="Enter Class"
-            wire:model="class"
-            required />
-
         {{-- Field Label --}}
         <x-form.input
             name="field_name"
