@@ -20,7 +20,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- Alpine.js local -->
-    <!-- <script src="{{ asset('js/alpine.min.js') }}" defer></script> -->
+      <script src="{{ asset('js/master-data-v2.js') }}" defer></script>
 </head>
 
 <body x-data="$store.app" class="bg-[#def0f4] dark:bg-gray-900 text-black dark:text-white">

@@ -21,7 +21,13 @@ class RenderDynamicForm extends Component
     public  $application_id;
     public array $fields = [];
     public array $sections = [];
-    public array $formData = [];
+    // public array $formData = [];
+    public $formData = [
+    'district' => '',
+    'assembly' => '',
+];
+
+
     use WithFileUploads;
     public function mount( $schemeId = null,  $application_id = null, $mode = null)
     {

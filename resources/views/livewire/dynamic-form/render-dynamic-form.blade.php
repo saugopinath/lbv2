@@ -1,4 +1,5 @@
-     <form x-on:submit.prevent="
+     <form x-data="locationForm()"
+         x-init="init()" x-on:submit.prevent="
             Livewire.dispatch('showLoader');
             $wire.save();
         ">
@@ -139,11 +140,16 @@
                          {{-- SELECT (MULTIPLE) --}}
                          @if ($field['field_type'] === 'select' && $field['is_multiple'] === false)
                          @if($field['field_class'])
-                         <x-form.select name="{{ $field['field_label'] }}" id="client-js-{{ $field['field_class'] }}" label="{{ $field['level_name'] }}" wire:model="formData.{{ $field['field_label'] }}">
-                             <option value="">-- Select {{ $field['field_label'] }} --</option>
-                             @foreach ($field['options'] as $key => $option)
-                             <option value="{{ $key }}">{{ $option }}</option>
-                             @endforeach
+                         <x-form.select
+                             name="{{ $field['field_label'] }}"
+                             label="{{ $field['level_name'] }}"
+                             wire:ignore
+                             x-model="models['{{ str_replace('/', '_', $field['field_class']) }}']">
+                             <option value="">-- Select {{ $field['level_name'] }} --</option>
+
+                             <template x-for="opt in getOptions('{{ $field['field_class'] }}')" :key="opt.id">
+                                 <option :value="opt.id" x-text="opt.text"></option>
+                             </template>
                          </x-form.select>
                          @else
                          <x-form.select name="{{ $field['field_label'] }}" id="{{ $field['field_id'] }}" label="{{ $field['level_name'] }}" wire:model="formData.{{ $field['field_label'] }}">
@@ -212,3 +218,121 @@
 
          </div>
      </form>
+     <script>
+         function locationForm() {
+             return {
+                 // ===== MODELS =====
+                 models: {
+                     district: '',
+                     assemblies: '',
+                     rural_urban: '',
+                     block: '',
+                     panchayat: ''
+                 },
+
+                 // ===== MASTER DATA =====
+                 districts: [],
+                 assemblies: [],
+                 blocks: [],
+                 gps: [],
+                 ulbs: [],
+                 ulbWards: [],
+
+                 // ===== FILTERED =====
+                 assembliesFiltered: [],
+                 localBodiesFiltered: [],
+                 gpFiltered: [],
+
+                 init() {
+                     const md = window.masterDataV2 || {};
+
+                     this.districts = md.districts || [];
+                     this.assemblies = md.assemblies || [];
+                     this.blocks = md.blocks || [];
+                     this.gps = md.gps || [];
+                     this.ulbs = md.ulbs || [];
+                     this.ulbWards = md.ulb_wards || [];
+
+                     // ✅ DISTRICT → ASSEMBLY
+                     this.$watch('models.district', v => {
+                         this.models.assemblies = '';
+                         this.models.rural_urban = '';
+                         this.models.block = '';
+                         this.models.panchayat = '';
+
+                         this.assembliesFiltered =
+                             this.assemblies.filter(a => a.district_code == v);
+
+                         this.$wire?.set('formData.district', v);
+                     });
+
+                     // ✅ RURAL / URBAN → BLOCK / ULB
+                     this.$watch('models.rural_urban', v => {
+                         this.models.block = '';
+                         this.models.panchayat = '';
+
+                         if (v == 2) {
+                             this.localBodiesFiltered =
+                                 this.blocks.filter(b => b.district_code == this.models.district);
+                         } else if (v == 1) {
+                             this.localBodiesFiltered =
+                                 this.ulbs.filter(u => u.district_code == this.models.district);
+                         } else {
+                             this.localBodiesFiltered = [];
+                         }
+
+                         this.$wire?.set('formData.rural_urban', v);
+                     });
+
+                     // ✅ BLOCK → GP
+                     this.$watch('models.block', v => {
+                         this.models.panchayat = '';
+
+                         this.gpFiltered =
+                             this.gps.filter(g =>
+                                 g.district_code == this.models.district &&
+                                 g.block_code == v
+                             );
+
+                         this.$wire?.set('formData.block', v);
+                     });
+
+                     // ✅ GP
+                     this.$watch('models.panchayat', v => {
+                         this.$wire?.set('formData.panchayat', v);
+                     });
+                 },
+
+                 // ===== OPTIONS =====
+                 getOptions(fieldClass) {
+                     switch (fieldClass) {
+                         case 'district':
+                             return this.districts;
+
+                         case 'assemblies':
+                             return this.assembliesFiltered;
+
+                         case 'rural/urban':
+                             return [{
+                                     id: 1,
+                                     text: 'Urban'
+                                 },
+                                 {
+                                     id: 2,
+                                     text: 'Rural'
+                                 }
+                             ];
+
+                         case 'block':
+                             return this.localBodiesFiltered;
+
+                         case 'panchayat':
+                             return this.gpFiltered;
+
+                         default:
+                             return [];
+                     }
+                 }
+             }
+         }
+     </script>
