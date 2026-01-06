@@ -58,7 +58,6 @@ class CreateOtherfromAttribute extends Component
             $this->is_multiple = 'no';
         }
     }
-
     protected function loadSections()
     {
         $this->sections = MasterSection::where('scheme_id', $this->scheme_id)
