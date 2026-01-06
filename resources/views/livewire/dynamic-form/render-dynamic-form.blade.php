@@ -226,7 +226,7 @@
                      district: '',
                      assemblies: '',
                      rural_urban: '',
-                     block: '',
+                     localbody: '',
                      panchayat: ''
                  },
 
@@ -287,12 +287,20 @@
                      // ✅ BLOCK → GP
                      this.$watch('models.block', v => {
                          this.models.panchayat = '';
+                         this.gpFiltered = [];
 
-                         this.gpFiltered =
-                             this.gps.filter(g =>
-                                 g.district_code == this.models.district &&
-                                 g.block_code == v
-                             );
+                         if (this.models.rural_urban == 2) {
+                             // Rural → GP
+                             this.gpFiltered =
+                                 this.gps.filter(g =>
+                                     g.district_code == this.models.district &&
+                                     g.block_code == v
+                                 );
+                         } else if (this.models.rural_urban == 1) {
+                             // Urban → Ward
+                             this.gpFiltered =
+                                 this.ulbWards.filter(w => w.urban_body_code == v);
+                         }
 
                          this.$wire?.set('formData.block', v);
                      });
