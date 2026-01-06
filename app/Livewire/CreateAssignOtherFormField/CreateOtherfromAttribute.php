@@ -15,7 +15,7 @@ class CreateOtherfromAttribute extends Component
 {
     public $scheme_id;
     public $level_name;
-    public $field_id;
+    public $field_id,$class;
     public $field_name;
     public $field_type;
     public array $validation_rule = [];
@@ -41,6 +41,10 @@ class CreateOtherfromAttribute extends Component
     public $isdepenentsec = false;
     public $depvalues = [];
     public $depvaluesopt = [];
+    public $isdependentvalue = 'no';
+    public $depvalueradio = false;
+
+
     public function mount()
     {
         $this->schemes = Scheme::all();
@@ -116,19 +120,37 @@ class CreateOtherfromAttribute extends Component
     public function updatedDepenentOn($value)
     {
         $this->depenent_on = $value;
-        if ($this->depenent_on) {
-            $ram = FromFieldAttribute::find($this->depenent_on);
-            $this->depvaluesopt = collect($ram->options)
-                ->map(fn($val, $key) => [
-                    'value' => (string) $key,
-                    'label' => $val,
-                ])
-                ->values()
-                ->toArray();
+        $this->reset(['isdependentvalue', 'depvalues']);
+        if ($value) {
+            $this->depvalueradio = true;   // radio show
         } else {
+            $this->depvalueradio = false;
+            $this->isdependentvalue = 'no';
             $this->depvaluesopt = [];
+            $this->depvalues = [];
         }
-        $this->depvalues = [];
+    }
+
+    public function updatedIsdependentValue($value)
+    {
+        if ($value === 'yes') {
+
+            $ram = FromFieldAttribute::find($this->depenent_on);
+
+            if ($ram && is_array($ram->options)) {
+                $this->depvaluesopt = collect($ram->options)
+                    ->map(fn($val, $key) => [
+                        'value' => (string)$key,
+                        'label' => $val,
+                    ])
+                    ->values()
+                    ->toArray();
+            }
+        } else {
+            // radio = no
+            $this->depvaluesopt = [];
+            $this->depvalues = [];
+        }
     }
 
     public function updatedDepvalues()
@@ -160,6 +182,7 @@ class CreateOtherfromAttribute extends Component
             'scheme_id' => 'required',
             'level_name' => 'required|string|max:100',
             'field_id' => 'required|string|max:100',
+            'class' => 'required|string|max:100',
             'field_name' => 'required|string|max:150',
             'field_type' => 'required|string',
             'validation_rule' => 'required|array|min:1',
@@ -170,7 +193,7 @@ class CreateOtherfromAttribute extends Component
             'default_value' => 'required_if:is_choose_default,yes',
             'isdependent' => 'required',
             'depenent_on' => 'required_if:isdependent,yes',
-            'depvalues' => 'required_if:isdependent,yes',
+            'depvalues' => 'required_if:isdependentvalue,yes',
         ];
     }
     public function addOption()
@@ -206,6 +229,7 @@ class CreateOtherfromAttribute extends Component
             'scheme_id' => $this->scheme_id,
             'level_name' => $this->level_name,
             'field_id' => $this->field_id,
+            'class' => $this->class,
             'field_label' => $this->field_name,
             'field_type' => $this->field_type,
 
@@ -225,11 +249,12 @@ class CreateOtherfromAttribute extends Component
                 ? ($this->is_multiple === 'yes')
                 : false,
             'dependent_on' => $this->isdependent === 'yes' ? $this->depenent_on : null,
-            'dependent_on_values' => $this->isdependent === 'yes' ? json_encode((object)$this->depvalues) : null,
+            'dependent_on_values' => $this->isdependentvalue === 'yes' ? json_encode((object)$this->depvalues) : null,
         ]);
         $this->reset([
             'level_name',
             'field_id',
+            'class',
             'field_name',
             'field_type',
             'validation_rule',

@@ -44,6 +44,14 @@
             wire:model="field_id"
             required />
 
+        {{-- Field ID --}}
+        <x-form.input
+            name="class"
+            label="Class"
+            placeholder="Enter Class"
+            wire:model="class"
+            required />
+
         {{-- Field Label --}}
         <x-form.input
             name="field_name"
@@ -142,8 +150,30 @@
                 @endforeach
             </x-form.select>
             @endif
+            @if ($depvalueradio)
+            <div>
+                <label class="font-semibold block mb-1">
+                    Dependent on Values?
+                </label>
 
-            @if ($depvaluesopt)
+                <div class="flex gap-6">
+                    <x-form.radio
+                        name="isdependentvalue"
+                        value="yes"
+                        label="Yes"
+                        wire:model.live="isdependentvalue" />
+
+                    <x-form.radio
+                        name="isdependentvalue"
+                        value="no"
+                        label="No"
+                        wire:model.live="isdependentvalue" />
+                </div>
+            </div>
+            @endif
+
+
+            @if ($isdependentvalue === 'yes' && $depvaluesopt)
             <div wire:key="container-{{ $depenent_on }}">
                 <x-form.multiselect
                     label="Dependent on Values"
@@ -153,7 +183,7 @@
             </div>
             @endif
 
-            
+
             @if ($field_type === 'select')
             <div class="">
                 <label class="font-semibold block mb-1">
@@ -216,7 +246,7 @@
         {{-- Is Under Any Section --}}
 
 
-@if($isdependent === 'no')
+        @if($isdependent === 'no')
         @if (
         in_array($field_type, ['checkbox','radio']) ||
         ($field_type === 'select' && $is_choose_default === 'no')
