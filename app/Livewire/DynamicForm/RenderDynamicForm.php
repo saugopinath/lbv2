@@ -2,176 +2,135 @@
 
 namespace App\Livewire\DynamicForm;
 
-use App\Models\AcceptRejectInfo;
-use App\Models\Codemaster;
-use App\Models\DraftBeneficiaryPersonal;
+use Livewire\Component;
 use App\Models\FromFieldAttribute;
 use App\Models\MasterSection;
-use App\Models\OtherDetails;
-use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
-use Livewire\WithFileUploads;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
-
+use App\Models\District;
+use App\Models\Subdivision;
+use App\Models\Municipality;
+use App\Models\Block;
+use App\Models\Panchayat;
+use Illuminate\Support\Collection;
 
 class RenderDynamicForm extends Component
 {
-    public  $schemeId;
-    public $mode;
-    public  $application_id;
+    public $schemeId;
     public array $fields = [];
     public array $sections = [];
-    // public array $formData = [];
-    public $formData = [
-    'district' => '',
-    'assembly' => '',
-];
+    public array $formData = [];
 
-
-    use WithFileUploads;
-    public function mount( $schemeId = null,  $application_id = null, $mode = null)
+    public function mount($schemeId)
     {
-        // dd('')
-        // dump($schemeId);
-        // dd($application_id);
-        $this->mode = $mode;
         $this->schemeId = $schemeId;
-        $this->application_id = $application_id;
-        $this->fields = FromFieldAttribute::where('scheme_id', $this->schemeId)
+
+        $allFields = FromFieldAttribute::where('scheme_id', $this->schemeId)
             ->where('is_active', true)
-            ->orderBy('created_at')
-            ->get()
-            ->groupBy('section_id')
-            ->toArray();
+            ->orderBy('sort_order')
+            ->get();
+
+        $this->fields = $allFields->groupBy('section_id')->toArray();
         $this->sections = MasterSection::where('scheme_id', $this->schemeId)
-            ->get()
-            ->keyBy('id')
-            ->toArray();
+            ->get()->keyBy('id')->toArray();
 
-        foreach ($this->fields as $group) {
-            foreach ($group as $field) {
-                if (in_array($field['field_type'], ['checkbox', 'select', 'radio'])) {
-                    $this->formData[$field['field_label']] = [];
-                } else {
-                    $this->formData[$field['field_label']] = null;
+        foreach ($allFields as $field) {
+            $this->formData[$field->field_label] = null;
+        }
+    }
+
+    public function getFieldOptions($field)
+    {
+        if (!empty($field['options'])) {
+            return is_array($field['options']) ? $field['options'] : json_decode($field['options'], true);
+        }
+
+        $distCode = $this->formData['district'] ?? null;
+        $ruralUrban = $this->formData['rural/urban'] ?? null;
+
+        switch ($field['field_class']) {
+            case 'district':
+                return \App\Models\District::pluck('name', 'lgd_code')->toArray();
+
+            case 'block':
+                if ($distCode && $ruralUrban) {
+                    // ১ = Urban (Municipality)
+                    if ($ruralUrban == 1) {
+                        return \App\Models\Block::where('district_id', $distCode)->pluck('name', 'lgd_code')->toArray();
+                    }
+                    // ২ = Rural (Block)
+                    else if ($ruralUrban == 2) {
+                        $subdivisionCodes = \App\Models\Subdivision::where('district_id', $distCode)->pluck('ref_code');
+                        return \App\Models\Municipality::whereIn('subdivision_id', $subdivisionCodes)
+                            ->pluck('name', 'lgd_code')->toArray();
+                    }
                 }
-            }
-        }
-        // dd($field);
-        // dd($field['level_name']);
-        $existing = OtherDetails::where('application_id', $application_id)->first();
-        if ($existing && is_array($existing->details)) {
-            foreach ($existing->details as $key => $value) {
-                $this->formData[$key] = $value;
-            }
-        }
-    }
-    private function fileToBase64(TemporaryUploadedFile $file): array
-    {
-        return [
-            'name' => $file->getClientOriginalName(),
-            'mime' => $file->getMimeType(),
-            'size' => $file->getSize(),
-            'base64' => base64_encode(
-                file_get_contents($file->getRealPath())
-            ),
-        ];
-    }
-    public function save()
-    {
-        // dd($this->formData);
-        $this->validate(
-            $this->buildValidationRules()
-        );
-        $payload = [];
-        foreach ($this->formData as $key => $value) {
-            if ($value instanceof TemporaryUploadedFile) {
-                $payload[$key] = $this->fileToBase64($value);
-            } else {
-                $payload[$key] = $value;
-            }
-        }
-        // dd($payload);
-        OtherDetails::updateOrCreate(
-            [
-                'application_id' => $this->application_id,
-                'scheme_id'      => $this->schemeId,
-            ],
-            [
-                'details' => $payload,
-            ]
-        );
-        $draftbenPar = DraftBeneficiaryPersonal::find($this->application_id);
-        $draftbenPar->next_level_role_id = Codemaster::getIdByCode(22);
-        $draftbenPar->is_final_submit = 1;
-        $draftbenPar->save();
-        $AcceptRejectInfo = new AcceptRejectInfo;
-        $AcceptRejectInfo->application_id = $this->application_id;
-        $AcceptRejectInfo->beneficiary_id = $draftbenPar->beneficiary_id;
-        $AcceptRejectInfo->ip_address = request()->ip();
-        $AcceptRejectInfo->user_id = Auth::id();
-        $AcceptRejectInfo->browser = request()->header('User-Agent');
-        $AcceptRejectInfo->model_name = null;
-        $AcceptRejectInfo->op_type = Codemaster::getIdByCode(22);
-        $AcceptRejectInfo->revert_reason_cause_id = null;
-        $AcceptRejectInfo->revert_reason_remarks = null;
-        $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $this->application_id)
-            ->latest('id')
-            ->value('id') ?? null;
-        $AcceptRejectInfo->save();
+                return [];
 
-        $this->dispatch('selfDec1');
-        $this->dispatch('hideLoader');
-        $this->dispatch('toastr', [
-            'type' => 'success',
-            'message' => 'Application submitted successfully!'
-        ]);
-    }
-    private function buildValidationRules(): array
-    {
-        $rules = [];
-        foreach ($this->fields as $group) {
-            foreach ($group as $field) {
+            case 'panchayat':
+                $blockCode = $this->formData['block'] ?? null;
+                if (!$blockCode) return [];
 
-                $rule = $field['validation_rule'];
-                // Skip empty rules
-                if (!$rule || $rule === 'nullable') {
-                    continue;
-                } else {
-                    $rules["formData.{$field['field_label']}"] = $rule;
+                // যদি আরবান হয় (১), তবে Ward টেবিল থেকে ডেটা আসবে
+                if ($ruralUrban == 1) {
+                    return \App\Models\Panchayat::where('block_id', $blockCode)
+                        ->pluck('name', 'lgd_code')->toArray();
                 }
-            }
+                // যদি রুরাল হয় (২), তবে Panchayat (GP) টেবিল থেকে ডেটা আসবে
+                else {
+
+                    return \App\Models\Ward::where('municipality_id', $blockCode)
+                        ->pluck('name', 'lgd_code')->toArray();
+                }
+
+            default:
+                return [];
         }
-        // dd($rules);
-        return $rules;
     }
-    protected function validationAttributes(): array
+    /**
+     * যখনই formData অ্যারের কোনো ভ্যালু আপডেট হবে, এই ফাংশনটি ট্রিগার হবে
+     */
+    public function updatedFormData($value, $key)
     {
-        $attributes = [];
-        foreach ($this->fields as $group) {
-            foreach ($group as $field) {
-                $attributes["formData.{$field['field_label']}"]
-                    = $field['level_name'];
+        // ১. যদি District পরিবর্তন হয়, তবে তার নিচের সব রিসেট হবে
+        if ($key === 'district') {
+            $this->formData['block'] = null;
+            $this->formData['panchayat'] = null;
+            $this->formData['rural/urban'] = null;
+            // যদি subdivision ইন্টারনালি ব্যবহার করেন, সেটিও রিসেট করতে পারেন
+            if (isset($this->formData['subdivision'])) {
+                $this->formData['subdivision'] = null;
             }
         }
-        return $attributes;
+
+        // ২. যদি Rural/Urban পরিবর্তন হয়, তবে ব্লক এবং পঞ্চায়েত রিসেট হবে
+        if ($key === 'rural/urban') {
+            $this->formData['block'] = null;
+            $this->formData['panchayat'] = null;
+        }
+
+        // ৩. যদি Block/Municipality পরিবর্তন হয়, তবে Panchayat/Ward রিসেট হবে
+        if ($key === 'block') {
+            $this->formData['panchayat'] = null;
+        }
     }
     public function shouldShowField($field)
-{
-    // if not dependent → always show
-    if (empty($field['dependent_on'])) {
-        return true;
+    {
+        if (empty($field['dependent_on'])) return true;
+
+        $allFields = collect($this->fields)->flatten(1);
+        $parentField = $allFields->firstWhere('id', $field['dependent_on']);
+        $parentLabel = $parentField['field_label'] ?? '';
+        $parentValue = $this->formData[$parentLabel] ?? null;
+
+        if (!empty($field['dependent_on_values'])) {
+            $allowedValues = is_array($field['dependent_on_values'])
+                ? $field['dependent_on_values']
+                : json_decode($field['dependent_on_values'], true);
+
+            return in_array((string)$parentValue, array_map('strval', $allowedValues));
+        }
+
+        return !empty($parentValue);
     }
-
-    // parent field label
-    $parentLabel = $field['dependent_on_label']; 
-    // e.g. "caste"
-
-    $parentValue = $this->formData[$parentLabel] ?? null;
-
-    // SC / ST values (based on your JSON keys)
-    return in_array($parentValue, ['1', '2']);
-}
 
     public function render()
     {
