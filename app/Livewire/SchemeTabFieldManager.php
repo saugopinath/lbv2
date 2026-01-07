@@ -32,6 +32,13 @@ class SchemeTabFieldManager extends Component
     public $extensionTypes = [];
     public $selfDeclarationFields;
     public $selfDeclarationGrouped = [];
+    public $selfDeclarationDisplay = [];
+    // Edit modal state
+    public $showEditSelfDeclModal = false;
+    public $editingSelfDeclId = null;
+    public $editingLevelName = '';
+
+
     protected $listeners = [
         'openSectionLevelModal' => 'open',
     ];
@@ -442,45 +449,116 @@ class SchemeTabFieldManager extends Component
         $this->loadSelfDeclarationFields();
         $this->loadTabs();
     }
-    public function loadSelfDeclarationFields()
+
+    public function updateSelfDeclarationOrder(array $orderedIds)
     {
-        // dd('bnjn');
-        $selfDeclarationFields = SelfDeclerationBasefield::where('scheme_id', $this->schemeId)
+        foreach ($orderedIds as $index => $id) {
+            SelfDeclerationBasefield::where('id', $id)
+                ->update([
+                    'field_position' => $index + 1
+                ]);
+        }
+        $this->loadSelfDeclarationFields();
+    }
+    public function removeSelfDeclarationField(int $fieldId): void
+    {
+        SelfDeclerationBasefield::where('id', $fieldId)
+            ->where('scheme_id', $this->schemeId)
+            ->delete();
+        $fields = SelfDeclerationBasefield::where('scheme_id', $this->schemeId)
             ->where('tab_code', 105)
             ->where('is_active', true)
-            // ->groupBy('section_level_id', 'id')
             ->orderBy('field_position')
             ->get();
-        // // dd($this->selfDeclarationFields);
-        // $this->tabFields[105] = $this->selfDeclarationFields
-        //     ->pluck('level_name', 'id')
-        //     ->toArray();
-        $sections = SectionLevelMaster::where('is_active', true)
-            ->pluck('section_level_name', 'id');
-        $grouped = [
-            'none' => [],
-            'sections' => [],
-            'levels' => [],
-        ];
-        foreach ($selfDeclarationFields as $field) {
-            if (!$field->section_level_id) {
-                $grouped['none'][] = $field;
-                continue;
-            }
-// dd($field);
-            if ($field->section_level_type == 0) {
-                $grouped['sections'][$field->section_level_id]['name']
-                    = $sections[$field->section_level_id] ?? 'Unknown Section';
-                $grouped['sections'][$field->section_level_id]['fields'][] = $field;
-            }
-            if ($field->section_level_type == 1) {
-                $grouped['levels'][$field->section_level_id]['name']
-                    = $sections[$field->section_level_id] ?? 'Unknown Level';
-                $grouped['levels'][$field->section_level_id]['fields'][] = $field;
+
+        foreach ($fields as $index => $field) {
+            $field->update([
+                'field_position' => $index + 1
+            ]);
+        }
+        $this->loadSelfDeclarationFields();
+    }
+
+    public function editSelfDeclarationField($fieldId)
+    {
+        $field = SelfDeclerationBasefield::findOrFail($fieldId);
+
+        $this->editingSelfDeclId = $field->id;
+        $this->editingLevelName = $field->level_name;
+        $this->showEditSelfDeclModal = true;
+    }
+
+    public function updateSelfDeclarationField()
+    {
+        $this->validate([
+            'editingLevelName' => 'required|string|max:255',
+        ]);
+
+        SelfDeclerationBasefield::where('id', $this->editingSelfDeclId)
+            ->update([
+                'level_name' => $this->editingLevelName,
+            ]);
+
+        // reset modal state
+        $this->showEditSelfDeclModal = false;
+        $this->editingSelfDeclId = null;
+        $this->editingLevelName = '';
+
+        // reload list
+        $this->loadSelfDeclarationFields();
+
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'Self Declaration label updated successfully'
+        ]);
+    }
+
+    public function loadSelfDeclarationFields()
+    {
+        $fields = SelfDeclerationBasefield::where('scheme_id', $this->schemeId)
+            ->where('tab_code', 105)
+            ->where('is_active', true)
+            ->orderBy('field_position')
+            ->get()
+            ->values(); // important for index
+
+        $sectionMap = SectionLevelMaster::pluck('section_level_name', 'id')->toArray();
+
+        $result = [];
+        $lastKey = null;
+
+        foreach ($fields as $i => $field) {
+
+            $hasSection = !empty($field->section_level_id);
+
+            $currentKey = $hasSection
+                ? $field->section_level_type . '-' . $field->section_level_id
+                : null;
+
+            $next = $fields[$i + 1] ?? null;
+
+            $nextKey = (!empty($next?->section_level_id))
+                ? $next->section_level_type . '-' . $next->section_level_id
+                : null;
+
+            $result[] = [
+                'field' => $field,
+                'show_section_start' => $hasSection && $currentKey !== $lastKey,
+                'show_section_end'   => $hasSection && $currentKey !== $nextKey,
+                'section_title'      => $hasSection
+                    ? ($sectionMap[$field->section_level_id] ?? 'Section / Level')
+                    : null,
+            ];
+            if ($hasSection) {
+                $lastKey = $currentKey;
+            } else {
+                $lastKey = null;
             }
         }
-        $this->selfDeclarationGrouped = $grouped;
+        $this->selfDeclarationDisplay = $result;
     }
+
+
     public function render()
     {
         return view('livewire.scheme-tab-field-manager', [

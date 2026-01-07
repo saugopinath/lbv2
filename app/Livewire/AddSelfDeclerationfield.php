@@ -201,7 +201,7 @@ class AddSelfDeclerationField extends Component
             'level_name'     => $this->level_name,
             'field_type'     => $this->field_type,
             'section_level_id'     => $this->section_id,
-            ''=> $this->section_level_type,
+            'section_level_type'=> $this->section_level_type,
             'is_multiple'    => $this->is_multiple,
             'options'        => $this->options,
             'validation_rule' => $this->validation_rule,

@@ -91,55 +91,52 @@
                 </div>
                 @endif
                 @elseif($tab->tab_code == 105)
-                <div class="p-4 space-y-4">
-                    @if(!empty($selfDeclarationGrouped['none']))
-                    <div>
-                        <div class="grid grid-cols-2 gap-3">
-                            @foreach($selfDeclarationGrouped['none'] as $field)
-                            <div class="bg-gray-50 border rounded p-3">
-                                {{ $loop->iteration }}. {{ $field->level_name }}
-                            </div>
-                            @endforeach
-                        </div>
+                <div class="p-4 space-y-1" x-data
+                    x-init="
+                    new Sortable($el, {
+                        animation: 150,
+                        handle: '.drag-handle',
+                        ghostClass: 'bg-indigo-100',
+                        onEnd() {
+                            let ordered = Array.from($el.querySelectorAll('[data-field-id]'))
+                                .map(el => el.dataset.fieldId);
+                            $wire.updateSelfDeclarationOrder(ordered);
+                        }
+                    })">
+                    @foreach($selfDeclarationDisplay as $row)
+                    @if($row['show_section_start'])
+                    <div class="mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+                        <span class="font-semibold text-indigo-700">
+                            {{ $row['section_title'] }}
+                        </span>
                     </div>
                     @endif
-                    @foreach($selfDeclarationGrouped['sections'] as $section)
-                    <div>
-                        <h3 class="font-semibold text-indigo-700 mb-2">
-                            Section: {{ $section['name'] }}
-                        </h3>
-                        <div class="grid grid-cols-2 gap-3">
-                            @foreach($section['fields'] as $field)
-                            <div class="bg-indigo-50 border rounded p-3">
-                                {{ $loop->iteration }}. {{ $field->level_name }}
-                            </div>
-                            @endforeach
-                        </div>
+                    <div
+                        data-field-id="{{ $row['field']->id }}"
+                        class="pl-6 py-2 flex items-center gap-3 border rounded bg-white
+                   {{ $row['field']->section_level_id ? 'bg-gray-50' : '' }}">
+                        <span class="drag-handle cursor-move text-gray-400 text-lg">☰</span>
+                        <span class="text-gray-700 font-medium flex-1">
+                            {{ $loop->iteration }}. {{ $row['field']->level_name }}
+                        </span>
+                        <button
+                            wire:click="editSelfDeclarationField({{ $row['field']->id }})"
+                            class="text-indigo-600 font-bold text-lg hover:text-indigo-800 mr-2"
+                            title="Edit field label">
+                            ✎
+                        </button>
+
+                        <button
+                            wire:click="removeSelfDeclarationField({{ $row['field']->id }})"
+                            class="text-red-500 font-bold text-lg hover:text-red-600 mr-2"
+                            title="Remove field">
+                            ✕
+                        </button>
                     </div>
-                    @endforeach
-                    @foreach($selfDeclarationGrouped['levels'] as $level)
-                    <div>
-                        <h3 class="font-semibold text-green-700 mb-2">
-                            Level: {{ $level['name'] }}
-                        </h3>
-                        <div class="grid grid-cols-2 gap-3">
-                            @foreach($level['fields'] as $field)
-                            <div class="bg-green-50 border rounded p-3">
-                                {{ $loop->iteration }}. {{ $field->level_name }}
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endforeach
-                    @if(
-                    empty($selfDeclarationGrouped['none']) &&
-                    empty($selfDeclarationGrouped['sections']) &&
-                    empty($selfDeclarationGrouped['levels'])
-                    )
-                    <div class="text-gray-400 text-center">
-                        No self declaration fields added
-                    </div>
+                    @if($row['show_section_end'])
+                    <div class="border-b border-dashed border-indigo-300 ml-6 mt-3 mb-3"></div>
                     @endif
+                    @endforeach
                 </div>
 
                 @else
@@ -210,9 +207,7 @@
             {{-- HEADER (fixed) --}}
             <div class="bg-indigo-100 px-6 py-4 font-semibold shrink-0 border-b
                      flex items-center justify-between">
-
                 <span>Manage Fields</span>
-
                 @if($activeTabCode == 105)
                 <x-button.primary
                     wire:click="$dispatch('openSectionLevelModal')"
@@ -284,7 +279,6 @@
                                     Ext: {{ $doc->extension_type }}
                                 </div>
                             </div>
-
                             <button wire:click="removeDocument({{ $doc->id }})"
                                 class="text-red-500 font-bold text-lg hover:text-red-600">
                                 ✕
@@ -362,6 +356,84 @@
 
             {{-- Body --}}
             <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                @if ($previewTabCode == 105)
+                <div>
+                    @foreach($selfDeclarationDisplay as $row)
+                    {{-- SECTION START --}}
+                    @if($row['show_section_start'])
+                    <div class="mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+                        <span class="font-semibold text-indigo-700">
+                            {{ $row['section_title'] }}
+                        </span>
+                    </div>
+                    @endif
+
+                    {{-- FIELD --}}
+                    <div class="py-2 bg-white {{ $row['field']->section_level_id ? 'pl-6 bg-gray-50' : 'pl-0' }}">
+                        {{-- FIELD TYPE RENDER --}}
+                        @switch($row['field']->field_type)
+                        {{-- TEXT --}}
+                        @case('text')
+                        <x-form.input name="{{ $row['field']->level_name }}"
+                            placeholder="Enter {{ $row['field']->level_name }}"
+                            disabled />
+                        @break
+
+                        {{-- DATE --}}
+                        @case('date')
+                        <x-form.input type="date" name="{{ $row['field']->level_name }}" disabled />
+                        @break
+
+                        {{-- TEXTAREA --}}
+                        @case('textarea')
+                        <x-form.textarea name="{{ $row['field']->level_name }}"
+                            placeholder="Enter {{ $row['field']->level_name }}"
+                            disabled />
+                        @break
+                        {{-- SELECT --}}
+                        @case('select')
+                        <x-form.select name="{{ $row['field']->level_name }}" disabled>
+                            <option value="">
+                                -- Select {{ $row['field']->level_name }} --
+                            </option>
+                            @foreach($row['field']->options ?? [] as $opt)
+                            <option>{{ $opt }}</option>
+                            @endforeach
+                        </x-form.select>
+                        @break
+                        {{-- RADIO --}}
+                        @case('radio')
+                        <div class="flex flex-wrap gap-4 mt-1">
+                            @foreach($row['field']->options ?? [] as $opt)
+                            <label class="flex items-center gap-2 text-gray-700">
+                                <input type="radio" disabled />
+                                {{ $opt }}
+                            </label>
+                            @endforeach
+                        </div>
+                        @break
+                        {{-- CHECKBOX --}}
+                        @case('checkbox')
+                        <label class="flex items-center gap-2 text-gray-700">
+                            <input type="checkbox" disabled />
+                            {{ $row['field']->level_name }}
+                        </label>
+                        @break
+                        {{-- FALLBACK --}}
+                        @default
+                        <div class="text-sm text-red-500">
+                            Unsupported field type: {{ $row['field']->field_type }}
+                        </div>
+                        @endswitch
+                    </div>
+                    {{-- SECTION END --}}
+                    @if($row['show_section_end'])
+                    <div class="my-3"></div>
+                    @endif
+                    @endforeach
+                </div>
+                @endif
+
                 @if($previewTabCode == 104)
                 @if($attachedDocuments->count())
                 <div class="space-y-3">
@@ -478,10 +550,107 @@
                 </div>
                 {{-- Content --}}
                 <div class="p-6 max-h-[70vh] overflow-y-auto">
+
+                    {{-- ================= TAB 104 : ENCLOSURE ================= --}}
                     @if($finalActiveTabCode == 104)
-                    {{-- <livewire:enclosure-list :form_preview="1" />  --}}
-                    <livewire:enclosure-list :scheme_id="$schemeId" :form_preview="1" :tabCode="$previewTabCode" />
+
+                    <livewire:enclosure-list
+                        :scheme_id="$schemeId"
+                        :form_preview="1"
+                        :tabCode="$finalActiveTabCode" />
+
+                    {{-- ================= TAB 105 : SELF DECLARATION ================= --}}
+                    @elseif($finalActiveTabCode == 105)
+
+                    @if(empty($selfDeclarationDisplay))
+                    <div class="text-center text-gray-400">
+                        No self declaration fields configured
+                    </div>
                     @else
+                    <div class="space-y-2">
+                        @foreach($selfDeclarationDisplay as $row)
+                        {{-- SECTION START --}}
+                        @if($row['show_section_start'])
+                        <div class="mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+                            <span class="font-semibold text-indigo-700">
+                                {{ $row['section_title'] }}
+                            </span>
+                        </div>
+                        @endif
+                        {{-- FIELD --}}
+                        <div class="py-2 bg-white {{ $row['field']->section_level_id ? 'pl-6 bg-gray-50' : 'pl-0' }}">
+                            {{-- FIELD TYPE RENDER --}}
+                            @switch($row['field']->field_type)
+                            {{-- TEXT --}}
+                            @case('text')
+                            <x-form.input name="{{ $row['field']->level_name }}"
+                                placeholder="Enter {{ $row['field']->level_name }}"
+                                disabled />
+                            @break
+                            @case('number')
+                            <x-form.input name="{{ $row['field']->level_name }}"
+                                placeholder="Enter {{ $row['field']->level_name }}"
+                                disabled />
+                            @break
+                            {{-- DATE --}}
+                            @case('date')
+                            <x-form.input type="date" name="{{ $row['field']->level_name }}" disabled />
+                            @break
+
+                            {{-- TEXTAREA --}}
+                            @case('textarea')
+                            <x-form.textarea name="{{ $row['field']->level_name }}"
+                                placeholder="Enter {{ $row['field']->level_name }}"
+                                disabled />
+                            @break
+                            {{-- SELECT --}}
+                            @case('select')
+                            <x-form.select name="{{ $row['field']->level_name }}" disabled>
+                                <option value="">
+                                    -- Select {{ $row['field']->level_name }} --
+                                </option>
+                                @foreach($row['field']->options ?? [] as $opt)
+                                <option>{{ $opt }}</option>
+                                @endforeach
+                            </x-form.select>
+                            @break
+                            {{-- RADIO --}}
+                            @case('radio')
+                            <div class="flex flex-wrap gap-4 mt-1">
+                                @foreach($row['field']->options ?? [] as $opt)
+                                <label class="flex items-center gap-2 text-gray-700">
+                                    <input type="radio" disabled />
+                                    {{ $opt }}
+                                </label>
+                                @endforeach
+                            </div>
+                            @break
+                            {{-- CHECKBOX --}}
+                            @case('checkbox')
+                            <label class="flex items-center gap-2 text-gray-700">
+                                <input type="checkbox" disabled />
+                                {{ $row['field']->level_name }}
+                            </label>
+                            @break
+                            {{-- FALLBACK --}}
+                            @default
+                            <div class="text-sm text-red-500">
+                                Unsupported field type: {{ $row['field']->field_type }}
+                            </div>
+                            @endswitch
+                        </div>
+                        {{-- SECTION END --}}
+                        @if($row['show_section_end'])
+                        <div class="my-3"></div>
+                        @endif
+                        @endforeach
+
+                    </div>
+                    @endif
+
+                    {{-- ================= OTHER TABS ================= --}}
+                    @else
+
                     @if($finalPreviewFields->isEmpty())
                     <div class="text-center text-gray-400">
                         No fields configured for this tab
@@ -524,10 +693,14 @@
                         @endif
 
                         @endforeach
+
                     </div>
                     @endif
+
                     @endif
+
                 </div>
+
 
                 <div class="flex justify-end gap-3 px-6 py-4 border-t">
                     <x-button.primary wire:click="closeFinalPreview" type="button">
@@ -538,6 +711,39 @@
             </div>
         </div>
         @endif
+        @if($showEditSelfDeclModal)
+        <div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-lg p-6">
+
+                <h3 class="text-lg font-semibold mb-4">
+                    Edit Self Declaration Label
+                </h3>
+
+                <x-form.textarea
+                    name="editingLevelName"
+                    label="Field Label"
+                    wire:model.defer="editingLevelName"
+                    required />
+
+                <div class="flex justify-end gap-3 mt-6">
+                    <x-button.primary
+                        wire:click="$set('showEditSelfDeclModal', false)"
+                        class="bg-gray-600">
+                        Cancel
+                    </x-button.primary>
+
+                    <x-button.primary
+                        wire:click="updateSelfDeclarationField"
+                        class="bg-indigo-600">
+                        Update
+                    </x-button.primary>
+                </div>
+
+            </div>
+        </div>
+        @endif
+
+
 
         {{-- SUCCESS MESSAGE --}}
         @if(session()->has('message'))

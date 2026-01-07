@@ -12,4 +12,11 @@ class SelfDeclerationBasefield extends Model
         'options' => 'array',
         'validation_rule' => 'array',
     ];
+    public function sectionLevel()
+    {
+        return $this->belongsTo(
+            SectionLevelMaster::class,
+            'section_id'
+        );
+    }
 }
