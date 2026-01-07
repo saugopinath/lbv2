@@ -10,10 +10,12 @@ use App\Models\Scheme;
 use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabBasefield;
 use App\Models\SchemeTabFieldTemp;
+use App\Models\SelfDeclerationBasefield;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
 
 class SchemeTabFieldManager extends Component
 {
@@ -28,8 +30,18 @@ class SchemeTabFieldManager extends Component
     public $maxFileSize = '500KB';
     public $attachedDocuments = [];
     public $extensionTypes = [];
+    public $selfDeclarationFields;
+    public $selfDeclarationGrouped = [];
+    public $selfDeclarationDisplay = [];
+    // Edit modal state
+    public $showEditSelfDeclModal = false;
+    public $editingSelfDeclId = null;
+    public $editingLevelName = '';
 
-    protected $listeners = ['openSectionLevelModal' => 'open'];
+
+    protected $listeners = [
+        'openSectionLevelModal' => 'open',
+    ];
 
     public function mount(Request $request)
     {
@@ -45,6 +57,7 @@ class SchemeTabFieldManager extends Component
         }
         if ($this->schemeId) {
             $this->loadAttachedDocuments();
+            $this->loadSelfDeclarationFields();
         }
     }
 
@@ -116,25 +129,20 @@ class SchemeTabFieldManager extends Component
     private function hydrateTabFieldsFromTemp(): void
     {
         $temps = SchemeTabFieldTemp::where('scheme_id', $this->schemeId)->get();
-
         foreach ($temps as $temp) {
-
             $raw = $temp->field_ids;
             if (empty($raw) || !is_array($raw)) {
                 continue;
             }
             $fieldIds = collect($raw)->pluck('field_id')->toArray();
-            // Resolve names
             $names = SchemeTabBasefield::whereIn('id', $fieldIds)
                 ->pluck('level_name', 'id');
-            // Order by position
             $ordered = collect($raw)
                 ->sortBy('position')
                 ->mapWithKeys(fn($row) => [
                     $row['field_id'] => $names[$row['field_id']] ?? 'Unknown'
                 ])
                 ->toArray();
-
             $this->tabFields[$temp->tab_code] = $ordered;
         }
     }
@@ -153,13 +161,10 @@ class SchemeTabFieldManager extends Component
                 'extensionTypes.required'  => 'Select at least one extension',
             ]
         );
-
         $lastPosition = SchemeAttachedDocMappings::where('scheme_id', $this->schemeId)
             ->where('tab_code', $this->activeTabCode)
             ->max('position');
-
         $nextPosition = ($lastPosition ?? 0) + 1;
-
         SchemeAttachedDocMappings::updateOrCreate(
             [
                 'scheme_id'   => $this->schemeId,
@@ -173,16 +178,13 @@ class SchemeTabFieldManager extends Component
                 'extension_type' => implode(',', $this->extensionTypes),
             ]
         );
-
         $this->loadAttachedDocuments();
-
         $this->reset([
             'selectedDocType',
             'isRequired',
             'maxFileSize',
             'extensionTypes',
         ]);
-
         session()->flash('message', 'Document saved successfully');
     }
     public function updatedMaxFileSize($value)
@@ -190,7 +192,6 @@ class SchemeTabFieldManager extends Component
         if ($value === null || $value === '') {
             return;
         }
-
         $this->maxFileSize = preg_replace('/[^0-9]/', '', $value) . 'KB';
     }
     public function removeDocument($id)
@@ -198,7 +199,6 @@ class SchemeTabFieldManager extends Component
         SchemeAttachedDocMappings::where('id', $id)
             ->where('scheme_id', $this->schemeId)
             ->delete();
-
         $this->loadAttachedDocuments();
     }
     public function updateDocumentOrder($orderedIds)
@@ -212,10 +212,13 @@ class SchemeTabFieldManager extends Component
     }
     public function setActiveTab($tabCode)
     {
+        // dd('dcsf');
         $this->activeTabCode = $tabCode;
-
         if ($tabCode == 104) {
             $this->loadAttachedDocuments();
+        }
+        if ($tabCode == 105) {
+            $this->loadSelfDeclarationFields();
         }
     }
     public function loadAttachedDocuments()
@@ -228,19 +231,20 @@ class SchemeTabFieldManager extends Component
     }
     public function openManageModal($tabCode)
     {
+        // dd('fff');
         $this->activeTabCode = $tabCode;
         $this->showManageModal = true;
 
         if ($tabCode == 104) {
-
             $this->docTypes = Codemaster::where('parent_id', 16)
                 ->orderBy('name')
                 ->get();
-
             $this->loadAttachedDocuments();
             return;
         }
-
+        if ($tabCode == 105) {
+            return;
+        }
         $fields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
             ->whereIn('tab_code', [$tabCode, 0])
             ->where('is_active', true)
@@ -301,12 +305,10 @@ class SchemeTabFieldManager extends Component
             if ((int)$tabCode === (int)$currentTabCode) {
                 continue;
             }
-
             if (array_key_exists($fieldId, $fields)) {
                 return true;
             }
         }
-
         return false;
     }
     public function closeManageModal()
@@ -319,14 +321,12 @@ class SchemeTabFieldManager extends Component
     public function saveManageFields()
     {
         $payload = [];
-
         foreach ($this->modalSelected as $index => $fid) {
             $payload[] = [
                 'field_id' => (int) $fid,
                 'position' => $index + 1,
             ];
         }
-
         SchemeTabFieldTemp::updateOrCreate(
             [
                 'scheme_id' => $this->schemeId,
@@ -336,9 +336,7 @@ class SchemeTabFieldManager extends Component
                 'field_ids' => $payload,
             ]
         );
-
         $this->tabFields[$this->activeTabCode] = [];
-
         foreach ($this->modalSelected as $fid) {
             $field = collect($this->modalFields)
                 ->firstWhere('field_id', $fid);
@@ -347,7 +345,6 @@ class SchemeTabFieldManager extends Component
                     = $field['field_name'];
             }
         }
-
         $this->closeManageModal();
     }
     public function removeField($tabCode, $fieldId)
@@ -355,7 +352,6 @@ class SchemeTabFieldManager extends Component
         if ($this->isFieldMandatory($fieldId)) {
             return;
         }
-
         unset($this->tabFields[$tabCode][$fieldId]);
         if (empty($this->tabFields[$tabCode])) {
             unset($this->tabFields[$tabCode]);
@@ -381,13 +377,11 @@ class SchemeTabFieldManager extends Component
     public function openPreview($tabCode)
     {
         $this->activeTabCode = $tabCode;
-
         $tab = collect($this->tabs)
             ->firstWhere('tab_code', $tabCode);
         $this->previewTabName = $tab?->masterTab?->tab_name ?? 'Preview';
         $this->previewTabCode = $tab?->masterTab?->tab_code ?? 'Preview';
         $this->showPreviewModal = true;
-
         if ($this->activeTabCode == 104) {
             $this->loadAttachedDocuments();
         }
@@ -401,7 +395,6 @@ class SchemeTabFieldManager extends Component
     public function updateFieldOrder($tabCode, $orderedIds)
     {
         if (!isset($this->tabFields[$tabCode])) return;
-
         // Update in-memory
         $newOrder = [];
         foreach ($orderedIds as $fid) {
@@ -410,7 +403,6 @@ class SchemeTabFieldManager extends Component
             }
         }
         $this->tabFields[$tabCode] = $newOrder;
-
         // Update temp table
         $payload = [];
         foreach ($orderedIds as $i => $fid) {
@@ -446,6 +438,127 @@ class SchemeTabFieldManager extends Component
             ->sortBy(fn($f) => array_search($f->id, $fieldIds))
             ->values();
     }
+    #[On('self-declaration-saved')]
+    public function afterSelfDeclarationSaved()
+    {
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'Self Decleration Field configured successfully!'
+        ]);
+        $this->closeManageModal();
+        $this->loadSelfDeclarationFields();
+        $this->loadTabs();
+    }
+
+    public function updateSelfDeclarationOrder(array $orderedIds)
+    {
+        foreach ($orderedIds as $index => $id) {
+            SelfDeclerationBasefield::where('id', $id)
+                ->update([
+                    'field_position' => $index + 1
+                ]);
+        }
+        $this->loadSelfDeclarationFields();
+    }
+    public function removeSelfDeclarationField(int $fieldId): void
+    {
+        SelfDeclerationBasefield::where('id', $fieldId)
+            ->where('scheme_id', $this->schemeId)
+            ->delete();
+        $fields = SelfDeclerationBasefield::where('scheme_id', $this->schemeId)
+            ->where('tab_code', 105)
+            ->where('is_active', true)
+            ->orderBy('field_position')
+            ->get();
+
+        foreach ($fields as $index => $field) {
+            $field->update([
+                'field_position' => $index + 1
+            ]);
+        }
+        $this->loadSelfDeclarationFields();
+    }
+
+    public function editSelfDeclarationField($fieldId)
+    {
+        $field = SelfDeclerationBasefield::findOrFail($fieldId);
+
+        $this->editingSelfDeclId = $field->id;
+        $this->editingLevelName = $field->level_name;
+        $this->showEditSelfDeclModal = true;
+    }
+
+    public function updateSelfDeclarationField()
+    {
+        $this->validate([
+            'editingLevelName' => 'required|string|max:255',
+        ]);
+
+        SelfDeclerationBasefield::where('id', $this->editingSelfDeclId)
+            ->update([
+                'level_name' => $this->editingLevelName,
+            ]);
+
+        // reset modal state
+        $this->showEditSelfDeclModal = false;
+        $this->editingSelfDeclId = null;
+        $this->editingLevelName = '';
+
+        // reload list
+        $this->loadSelfDeclarationFields();
+
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'Self Declaration label updated successfully'
+        ]);
+    }
+
+    public function loadSelfDeclarationFields()
+    {
+        $fields = SelfDeclerationBasefield::where('scheme_id', $this->schemeId)
+            ->where('tab_code', 105)
+            ->where('is_active', true)
+            ->orderBy('field_position')
+            ->get()
+            ->values(); // important for index
+
+        $sectionMap = SectionLevelMaster::pluck('section_level_name', 'id')->toArray();
+
+        $result = [];
+        $lastKey = null;
+
+        foreach ($fields as $i => $field) {
+
+            $hasSection = !empty($field->section_level_id);
+
+            $currentKey = $hasSection
+                ? $field->section_level_type . '-' . $field->section_level_id
+                : null;
+
+            $next = $fields[$i + 1] ?? null;
+
+            $nextKey = (!empty($next?->section_level_id))
+                ? $next->section_level_type . '-' . $next->section_level_id
+                : null;
+
+            $result[] = [
+                'field' => $field,
+                'show_section_start' => $hasSection && $currentKey !== $lastKey,
+                'show_section_end'   => $hasSection && $currentKey !== $nextKey,
+                'section_title'      => $hasSection
+                    ? ($sectionMap[$field->section_level_id] ?? 'Section / Level')
+                    : null,
+            ];
+            if ($hasSection) {
+                $lastKey = $currentKey;
+            } else {
+                $lastKey = null;
+            }
+        }
+        $this->selfDeclarationDisplay = $result;
+    }
+
+
     public function render()
     {
         return view('livewire.scheme-tab-field-manager', [

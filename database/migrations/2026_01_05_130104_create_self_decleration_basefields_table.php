@@ -12,9 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('self_decleration_basefields', function (Blueprint $table) {
+            $table->id();
             $table->integer('scheme_id');
             $table->integer('tab_code');
-            $table->integer( 'section_level_id');
+            $table->integer( 'section_level_id')->nullable();
             $table->string('field_type', 50);
             $table->string('level_name', 100);
             $table->string('field_name', 100);
