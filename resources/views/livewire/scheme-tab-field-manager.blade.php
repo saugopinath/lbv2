@@ -44,7 +44,6 @@
             </div>
             {{-- Body --}}
             <div x-show="open" x-collapse class="bg-white">
-
                 @if($tab->tab_code == 104)
                 @if(count($attachedDocuments))
                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
@@ -93,7 +92,6 @@
                 @endif
                 @elseif($tab->tab_code == 105)
                 <div class="p-4 space-y-4">
-                    {{-- 🔹 NO SECTION / LEVEL --}}
                     @if(!empty($selfDeclarationGrouped['none']))
                     <div>
                         <div class="grid grid-cols-2 gap-3">
@@ -105,8 +103,6 @@
                         </div>
                     </div>
                     @endif
-
-                    {{-- 🔹 SECTION WISE --}}
                     @foreach($selfDeclarationGrouped['sections'] as $section)
                     <div>
                         <h3 class="font-semibold text-indigo-700 mb-2">
@@ -135,7 +131,6 @@
                         </div>
                     </div>
                     @endforeach
-
                     @if(
                     empty($selfDeclarationGrouped['none']) &&
                     empty($selfDeclarationGrouped['sections']) &&
@@ -145,7 +140,6 @@
                         No self declaration fields added
                     </div>
                     @endif
-
                 </div>
 
                 @else
@@ -234,18 +228,26 @@
                 @if($activeTabCode == 104)
                 {{-- DOCUMENT FORM --}}
                 <div class="grid grid-cols-2 gap-4 mb-6">
+
                     <x-form.select name="selectedDocType" label="Document Type" wire:model="selectedDocType">
                         <option value="">-- Select Document --</option>
                         @foreach($docTypes as $doc)
                         <option value="{{ $doc->id }}">{{ $doc->name }}</option>
                         @endforeach
                     </x-form.select>
+
+                    <x-form.select name="isRequired" label="Is Required" wire:model="isRequired">
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </x-form.select>
+
                     <x-form.input
                         name="maxFileSize"
                         label="Max File Size"
                         wire:model.live="maxFileSize"
                         x-data
                         x-on:input="$el.value = $el.value.replace(/[^0-9]/g,'')" />
+
                     <div class="col-span-2">
                         <label class="font-semibold">Allowed Extensions</label>
                         <div class="flex gap-4 mt-2 flex-wrap">
