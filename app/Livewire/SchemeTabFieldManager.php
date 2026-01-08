@@ -10,6 +10,7 @@ use App\Models\Scheme;
 use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabBasefield;
 use App\Models\SchemeTabFieldTemp;
+use App\Models\SchemeTabFormField;
 use App\Models\SelfDeclerationBasefield;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Encryption\DecryptException;
@@ -420,6 +421,9 @@ class SchemeTabFieldManager extends Component
                 'field_ids' => $payload,
             ]
         );
+        // SchemeTabFormField::where('scheme_id', $this->schemeId)
+        //     ->where('tab_code', $tabCode)
+        //     ->delete();
     }
     public function getPreviewFieldsProperty()
     {
@@ -450,16 +454,6 @@ class SchemeTabFieldManager extends Component
         $this->loadTabs();
     }
 
-    public function updateSelfDeclarationOrder(array $orderedIds)
-    {
-        foreach ($orderedIds as $index => $id) {
-            SelfDeclerationBasefield::where('id', $id)
-                ->update([
-                    'field_position' => $index + 1
-                ]);
-        }
-        $this->loadSelfDeclarationFields();
-    }
     public function removeSelfDeclarationField(int $fieldId): void
     {
         SelfDeclerationBasefield::where('id', $fieldId)
@@ -512,7 +506,85 @@ class SchemeTabFieldManager extends Component
             'message' => 'Self Declaration label updated successfully'
         ]);
     }
+    //  public function updateSelfDeclarationOrder(array $orderedIds)
+    // {
+    //     foreach ($orderedIds as $index => $id) {
+    //         SelfDeclerationBasefield::where('id', $id)
+    //             ->update([
+    //                 'field_position' => $index + 1
+    //             ]);
+    //     }
+    //     $this->loadSelfDeclarationFields();
+    // }
+    // public function loadSelfDeclarationFields()
+    // {
+    //     $fields = SelfDeclerationBasefield::where('scheme_id', $this->schemeId)
+    //         ->where('tab_code', 105)
+    //         ->where('is_active', true)
+    //         ->orderBy('field_position')
+    //         ->get()
+    //         ->values(); // important for index
 
+    //     $sectionMap = SectionLevelMaster::pluck('section_level_name', 'id')->toArray();
+
+    //     $result = [];
+    //     $lastKey = null;
+
+    //     foreach ($fields as $i => $field) {
+
+    //         $hasSection = !empty($field->section_level_id);
+
+    //         $currentKey = $hasSection
+    //             ? $field->section_level_type . '-' . $field->section_level_id
+    //             : null;
+
+    //         $next = $fields[$i + 1] ?? null;
+
+    //         $nextKey = (!empty($next?->section_level_id))
+    //             ? $next->section_level_type . '-' . $next->section_level_id
+    //             : null;
+
+    //         $result[] = [
+    //             'field' => $field,
+    //             'show_section_start' => $hasSection && $currentKey !== $lastKey,
+    //             'show_section_end'   => $hasSection && $currentKey !== $nextKey,
+    //             'section_title'      => $hasSection
+    //                 ? ($sectionMap[$field->section_level_id] ?? 'Section / Level')
+    //                 : null,
+    //         ];
+    //         if ($hasSection) {
+    //             $lastKey = $currentKey;
+    //         } else {
+    //             $lastKey = null;
+    //         }
+    //     }
+    //     $this->selfDeclarationDisplay = $result;
+    // }
+
+    public function updateSelfDeclarationOrderAndSection(array $rows)
+    {
+        DB::transaction(function () use ($rows) {
+
+            foreach ($rows as $index => $row) {
+
+                $sectionType = null;
+                $sectionId   = null;
+
+                if (!empty($row['section'])) {
+                    [$sectionType, $sectionId] = explode('-', $row['section']);
+                }
+
+                SelfDeclerationBasefield::where('id', $row['id'])
+                    ->update([
+                        'field_position'     => $index + 1,
+                        'section_level_type' => $sectionType,
+                        'section_level_id'   => $sectionId,
+                    ]);
+            }
+        });
+
+        $this->loadSelfDeclarationFields();
+    }
     public function loadSelfDeclarationFields()
     {
         $fields = SelfDeclerationBasefield::where('scheme_id', $this->schemeId)
@@ -520,44 +592,33 @@ class SchemeTabFieldManager extends Component
             ->where('is_active', true)
             ->orderBy('field_position')
             ->get()
-            ->values(); // important for index
-
+            ->values();
         $sectionMap = SectionLevelMaster::pluck('section_level_name', 'id')->toArray();
-
         $result = [];
         $lastKey = null;
-
         foreach ($fields as $i => $field) {
-
             $hasSection = !empty($field->section_level_id);
-
             $currentKey = $hasSection
                 ? $field->section_level_type . '-' . $field->section_level_id
                 : null;
-
             $next = $fields[$i + 1] ?? null;
-
             $nextKey = (!empty($next?->section_level_id))
                 ? $next->section_level_type . '-' . $next->section_level_id
                 : null;
-
             $result[] = [
                 'field' => $field,
                 'show_section_start' => $hasSection && $currentKey !== $lastKey,
                 'show_section_end'   => $hasSection && $currentKey !== $nextKey,
                 'section_title'      => $hasSection
-                    ? ($sectionMap[$field->section_level_id] ?? 'Section / Level')
+                    ? ($sectionMap[$field->section_level_id] ?? 'Section')
                     : null,
             ];
             if ($hasSection) {
                 $lastKey = $currentKey;
-            } else {
-                $lastKey = null;
             }
         }
         $this->selfDeclarationDisplay = $result;
     }
-
 
     public function render()
     {
