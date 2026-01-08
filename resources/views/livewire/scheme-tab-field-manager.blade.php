@@ -90,7 +90,7 @@
                     No documents attached
                 </div>
                 @endif
-             @elseif($tab->tab_code == 105)
+                @elseif($tab->tab_code == 105)
                     <div class="grid grid-cols-2 gap-3 p-4"
                         x-data
                         x-init="
@@ -179,7 +179,6 @@
                         @endforeach
                     </div>
                 @else
-
                 @if(isset($tabFields[$tab->tab_code]) && count($tabFields[$tab->tab_code]))
                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
                             new Sortable($el, {

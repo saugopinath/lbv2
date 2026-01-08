@@ -449,7 +449,6 @@ class SchemeTabFieldManager extends Component
         $this->loadSelfDeclarationFields();
         $this->loadTabs();
     }
-
     public function updateSelfDeclarationOrder(array $orderedIds)
     {
         foreach ($orderedIds as $index => $id) {
@@ -478,7 +477,6 @@ class SchemeTabFieldManager extends Component
         }
         $this->loadSelfDeclarationFields();
     }
-
     public function editSelfDeclarationField($fieldId)
     {
         $field = SelfDeclerationBasefield::findOrFail($fieldId);
@@ -487,7 +485,6 @@ class SchemeTabFieldManager extends Component
         $this->editingLevelName = $field->level_name;
         $this->showEditSelfDeclModal = true;
     }
-
     public function updateSelfDeclarationField()
     {
         $this->validate([
@@ -580,7 +577,6 @@ class SchemeTabFieldManager extends Component
 
         $this->selfDeclarationDisplay = $result;
     }
-
     public function render()
     {
         return view('livewire.scheme-tab-field-manager', [
