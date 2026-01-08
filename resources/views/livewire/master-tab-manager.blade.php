@@ -32,16 +32,16 @@
     {{-- Selected Tabs (Drag & Drop) --}}
     @if(count($selectedTabs))
         <div class="border-t pt-4" x-data x-init="
-                                    new Sortable($refs.tabList, {
-                                        animation: 150,
-                                        handle: '.drag-handle',
-                                        onEnd() {
-                                            let ordered = Array.from($refs.tabList.children)
-                                                .map(el => el.dataset.code);
-                                            $wire.updateOrder(ordered);
-                                        }
-                                    })
-                                 ">
+                    new Sortable($refs.tabList, {
+                        animation: 150,
+                        handle: '.drag-handle',
+                        onEnd() {
+                            let ordered = Array.from($refs.tabList.children)
+                                .map(el => el.dataset.code);
+                            $wire.updateOrder(ordered);
+                        }
+                    })
+                    ">
             <h3 class="text-base font-semibold text-gray-800 mb-3">
                 Selected Tabs (Drag to reorder)
             </h3>

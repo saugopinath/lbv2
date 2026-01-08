@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('tab_code');
             $table->integer( 'section_level_id')->nullable();
             $table->string('field_type', 50);
-            $table->string('level_name', 100);
+            $table->string('level_name', 500);
             $table->string('field_name', 100);
             $table->string('field_id', 50)->unique();
             $table->jsonb('options')->nullable();

@@ -226,6 +226,10 @@
 
     {{-- FINAL ACTION BUTTONS --}}
     <div class="flex justify-center gap-4 pt-6">
+       <x-button.primary wire:click="openDigitalPreview" class="bg-blue-600 hover:bg-blue-700">
+                Digital Preview
+        </x-button.primary>
+
         <x-button.primary wire:click="openFinalPreview" class="bg-blue-600 hover:bg-blue-700">
             Form Preview
         </x-button.primary>
@@ -754,6 +758,8 @@
             </div>
         </div>
         @endif
+
+
         @if($showEditSelfDeclModal)
         <div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
             <div class="bg-white rounded-xl shadow-lg w-full max-w-lg p-6">
@@ -785,8 +791,6 @@
             </div>
         </div>
         @endif
-
-
 
         {{-- SUCCESS MESSAGE --}}
         @if(session()->has('message'))
