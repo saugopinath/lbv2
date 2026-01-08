@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Livewire\Attributes\On;
 
 class SchemeTabFieldManager extends Component
@@ -26,6 +27,7 @@ class SchemeTabFieldManager extends Component
     public $finalPreviewFields = [];
     public $docTypes = [];
     public $selectedDocType = null;
+    public $digitalPreviewFields = [];
     public $isRequired = false;
     public $maxFileSize = '500KB';
     public $attachedDocuments = [];
@@ -33,12 +35,10 @@ class SchemeTabFieldManager extends Component
     public $selfDeclarationFields;
     public $selfDeclarationGrouped = [];
     public $selfDeclarationDisplay = [];
-    // Edit modal state
     public $showEditSelfDeclModal = false;
     public $editingSelfDeclId = null;
     public $editingLevelName = '';
-
-
+    public $showDigitalPreview = false;
     protected $listeners = [
         'openSectionLevelModal' => 'open',
     ];
@@ -60,7 +60,68 @@ class SchemeTabFieldManager extends Component
             $this->loadSelfDeclarationFields();
         }
     }
+    public function openDigitalPreview()
+    {
+        $this->showDigitalPreview = true;
 
+        $this->loadTabs();
+        $this->loadSelfDeclarationFields();
+
+        $this->prepareDigitalPreviewFields();
+    }
+    public function closeDigitalPreview()
+    {
+        $this->showDigitalPreview = false;
+        $this->digitalPreviewFields = [];
+    }
+    public function downloadDigitalPreviewPdf()
+    {
+        $this->loadTabs();
+        $this->loadSelfDeclarationFields();
+        $this->prepareDigitalPreviewFields();
+
+        $pdf = Pdf::loadView('pdf.scheme-digital-preview', [
+            'scheme' => Scheme::find($this->schemeId),
+            'tabs' => $this->tabs,
+            'digitalPreviewFields' => $this->digitalPreviewFields,
+            'selfDeclarationDisplay' => $this->selfDeclarationDisplay,
+            'attachedDocuments' => $this->attachedDocuments,
+        ])->setPaper('A4', 'portrait');
+
+        return response()->streamDownload(
+            fn() => print($pdf->output()),
+            'scheme_preview_' . $this->schemeId . '.pdf'
+        );
+    }
+    private function prepareDigitalPreviewFields()
+    {
+        $this->digitalPreviewFields = [];
+
+        foreach ($this->tabs as $tab) {
+
+            // skip enclosure & self declaration
+            if (in_array($tab->tab_code, [104, 105])) {
+                continue;
+            }
+
+            $fieldIds = array_keys($this->tabFields[$tab->tab_code] ?? []);
+
+            if (empty($fieldIds)) {
+                $this->digitalPreviewFields[$tab->tab_code] = collect();
+                continue;
+            }
+
+            $ids = implode(',', $fieldIds);
+
+            $this->digitalPreviewFields[$tab->tab_code] =
+                \App\Models\SchemeTabBasefield::whereIn('id', $fieldIds)
+                ->whereIn('scheme_id', [0, $this->schemeId])
+                ->whereIn('tab_code', [0, $tab->tab_code])
+                ->where('is_active', true)
+                ->orderByRaw("array_position(ARRAY[$ids]::int[], id)")
+                ->get();
+        }
+    }
     public function openFinalPreview()
     {
         $this->showFinalPreview = true;
@@ -231,7 +292,6 @@ class SchemeTabFieldManager extends Component
     }
     public function openManageModal($tabCode)
     {
-        // dd('fff');
         $this->activeTabCode = $tabCode;
         $this->showManageModal = true;
 
@@ -347,6 +407,7 @@ class SchemeTabFieldManager extends Component
         }
         $this->closeManageModal();
     }
+
     public function removeField($tabCode, $fieldId)
     {
         if ($this->isFieldMandatory($fieldId)) {
@@ -395,7 +456,7 @@ class SchemeTabFieldManager extends Component
     public function updateFieldOrder($tabCode, $orderedIds)
     {
         if (!isset($this->tabFields[$tabCode])) return;
-        // Update in-memory
+
         $newOrder = [];
         foreach ($orderedIds as $fid) {
             if (isset($this->tabFields[$tabCode][$fid])) {
@@ -403,7 +464,7 @@ class SchemeTabFieldManager extends Component
             }
         }
         $this->tabFields[$tabCode] = $newOrder;
-        // Update temp table
+
         $payload = [];
         foreach ($orderedIds as $i => $fid) {
             $payload[] = [

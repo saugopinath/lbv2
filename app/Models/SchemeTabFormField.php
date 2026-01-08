@@ -6,5 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class SchemeTabFormField extends Model
 {
-    //
+     protected $fillable = [
+        'scheme_id',
+        'level_name',
+        'field_name',
+        'field_id',
+        'field_type',
+        'options',
+        'is_common',
+        'tab_code',
+        'validation_rule',
+        'regex',
+        'section_id',
+        'is_multiple',
+        'field_position',
+        'is_active',
+    ];
 }
