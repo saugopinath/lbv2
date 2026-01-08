@@ -513,31 +513,29 @@ class SchemeTabFieldManager extends Component
         ]);
     }
     public function updateSelfDeclarationOrderAndSection(array $rows)
-{
-    DB::transaction(function () use ($rows) {
+    {
+        DB::transaction(function () use ($rows) {
 
-        foreach ($rows as $index => $row) {
+            foreach ($rows as $index => $row) {
 
-            $sectionType = null;
-            $sectionId   = null;
+                $sectionType = null;
+                $sectionId   = null;
 
-            if (!empty($row['section'])) {
-                [$sectionType, $sectionId] = explode('-', $row['section']);
+                if (!empty($row['section'])) {
+                    [$sectionType, $sectionId] = explode('-', $row['section']);
+                }
+
+                SelfDeclerationBasefield::where('id', $row['id'])
+                    ->update([
+                        'field_position'     => $index + 1,
+                        'section_level_type' => $sectionType,
+                        'section_level_id'   => $sectionId,
+                    ]);
             }
+        });
 
-            SelfDeclerationBasefield::where('id', $row['id'])
-                ->update([
-                    'field_position'     => $index + 1,
-                    'section_level_type' => $sectionType,
-                    'section_level_id'   => $sectionId,
-                ]);
-        }
-    });
-
-    $this->loadSelfDeclarationFields();
-}
-
-
+        $this->loadSelfDeclarationFields();
+    }
     public function loadSelfDeclarationFields()
     {
         $fields = SelfDeclerationBasefield::where('scheme_id', $this->schemeId)

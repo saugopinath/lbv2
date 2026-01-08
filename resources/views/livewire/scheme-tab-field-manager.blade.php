@@ -47,16 +47,16 @@
                 @if($tab->tab_code == 104)
                 @if(count($attachedDocuments))
                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
-                                            new Sortable($el, {
-                                                animation: 150,
-                                                handle: '.drag-handle',
-                                                onEnd() {
-                                                    let ordered = Array.from($el.children)
-                                                        .map(el => el.dataset.id);
-                                                    $wire.updateDocumentOrder(ordered);
-                                                }
-                                            })
-                                            ">
+                            new Sortable($el, {
+                                animation: 150,
+                                handle: '.drag-handle',
+                                onEnd() {
+                                    let ordered = Array.from($el.children)
+                                        .map(el => el.dataset.id);
+                                    $wire.updateDocumentOrder(ordered);
+                                }
+                            })
+                            ">
                     @foreach($attachedDocuments as $doc)
                     <div data-id="{{ $doc->id }}"
                         class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
@@ -90,96 +90,96 @@
                     No documents attached
                 </div>
                 @endif
-                @elseif($tab->tab_code == 105)
+             @elseif($tab->tab_code == 105)
+                    <div class="grid grid-cols-2 gap-3 p-4"
+                        x-data
+                        x-init="
+                            new Sortable($el, {
+                                animation: 150,
+                                handle: '.drag-handle',
+                                ghostClass: 'bg-indigo-100',
+                                onEnd() {
 
-<div class="p-4 space-y-1"
-     x-data
-     x-init="
-        new Sortable($el, {
-            animation: 150,
-            handle: '.drag-handle',
-            ghostClass: 'bg-indigo-100',
-            onEnd() {
+                                    let rows = Array.from(
+                                        $el.querySelectorAll('[data-field-id]')
+                                    ).map(el => {
 
-                let rows = Array.from(
-                    $el.querySelectorAll('[data-field-id]')
-                ).map(el => {
+                                        let section = null;
+                                        let prev = el.previousElementSibling;
 
-                    let section = null;
-                    let prev = el.previousElementSibling;
+                                        while (prev) {
 
-                    while (prev) {
+                                            if (prev.dataset.sectionBreak) break;
 
-                        if (prev.dataset.sectionBreak) {
-                            break;
-                        }
+                                            if (prev.dataset.sectionKey) {
+                                                section = prev.dataset.sectionKey;
+                                                break;
+                                            }
 
-                        if (prev.dataset.sectionKey) {
-                            section = prev.dataset.sectionKey;
-                            break;
-                        }
+                                            prev = prev.previousElementSibling;
+                                        }
 
-                        prev = prev.previousElementSibling;
-                    }
+                                        return {
+                                            id: el.dataset.fieldId,
+                                            section: section
+                                        };
+                                    });
 
-                    return {
-                        id: el.dataset.fieldId,
-                        section: section
-                    };
-                });
+                                    $wire.updateSelfDeclarationOrderAndSection(rows);
+                                }
+                            })
+                        ">
 
-                $wire.updateSelfDeclarationOrderAndSection(rows);
-            }
-        })
-     ">
+                        @foreach($selfDeclarationDisplay as $row)
 
-    @foreach($selfDeclarationDisplay as $row)
+                            {{-- SECTION HEADER --}}
+                            @if($row['show_section_start'])
+                                <div
+                                    data-section-key="{{ $row['field']->section_level_type }}-{{ $row['field']->section_level_id }}"
+                                    class="col-span-2 mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+                                    <span class="font-semibold text-indigo-700">
+                                        {{ $row['section_title'] }}
+                                    </span>
+                                </div>
+                            @endif
 
-        {{-- SECTION HEADER --}}
-        @if($row['show_section_start'])
-            <div
-                data-section-key="{{ $row['field']->section_level_type }}-{{ $row['field']->section_level_id }}"
-                class="mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
-                <span class="font-semibold text-indigo-700">
-                    {{ $row['section_title'] }}
-                </span>
-            </div>
-        @endif
+                            {{-- FIELD --}}
+                            <div
+                                data-field-id="{{ $row['field']->id }}"
+                                class="pl-6 py-2 flex items-center gap-3 border rounded bg-white
+                                    {{ $row['field']->section_level_id ? 'bg-gray-50' : '' }}">
 
-        {{-- FIELD --}}
-        <div
-            data-field-id="{{ $row['field']->id }}"
-            class="pl-6 py-2 flex items-center gap-3 border rounded bg-white
-                   {{ $row['field']->section_level_id ? 'bg-gray-50' : '' }}">
+                                <span class="drag-handle cursor-move text-gray-400 text-lg">☰</span>
 
-            <span class="drag-handle cursor-move text-gray-400 text-lg">☰</span>
+                                <span class="flex-1 text-gray-700 font-medium">
+                                    {{ $loop->iteration }}. {{ $row['field']->level_name }}
+                                </span>
 
-            <span class="flex-1 text-gray-700 font-medium">
-                {{ $row['field']->level_name }}
-            </span>
+                                <button
+                                    wire:click="editSelfDeclarationField({{ $row['field']->id }})"
+                                    class="text-indigo-600 font-bold text-lg hover:text-indigo-800 mr-2">
+                                    ✎
+                                </button>
 
-            <button
-                wire:click="editSelfDeclarationField({{ $row['field']->id }})"
-                class="text-indigo-600 font-bold text-lg hover:text-indigo-800 mr-2">✎</button>
+                                <button
+                                    wire:click="removeSelfDeclarationField({{ $row['field']->id }})"
+                                    class="text-red-500 font-bold text-lg hover:text-red-600 mr-2">
+                                    ✕
+                                </button>
+                            </div>
 
-            <button
-                wire:click="removeSelfDeclarationField({{ $row['field']->id }})"
-                class="text-red-500 font-bold text-lg hover:text-red-600 mr-2">✕</button>
-        </div>
+                            {{-- SECTION END --}}
+                            @if($row['show_section_end'])
+                                <div
+                                    data-section-break="true"
+                                    class="col-span-2 border-b border-dashed border-indigo-300 my-3">
+                                </div>
+                            @endif
 
-        {{-- SECTION END --}}
-        @if($row['show_section_end'])
-            <div
-                data-section-break="true"
-                class="border-b border-dashed border-indigo-300 ml-6 mt-3 mb-3">
-            </div>
-        @endif
-
-    @endforeach
-</div>
-
-
+                        @endforeach
+                    </div>
                 @else
+
                 @if(isset($tabFields[$tab->tab_code]) && count($tabFields[$tab->tab_code]))
                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
                             new Sortable($el, {
