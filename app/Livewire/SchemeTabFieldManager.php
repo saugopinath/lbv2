@@ -407,7 +407,6 @@ class SchemeTabFieldManager extends Component
         }
         $this->closeManageModal();
     }
-
     public function removeField($tabCode, $fieldId)
     {
         if ($this->isFieldMandatory($fieldId)) {
