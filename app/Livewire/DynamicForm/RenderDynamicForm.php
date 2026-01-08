@@ -83,7 +83,7 @@ class RenderDynamicForm extends Component
         switch ($field['field_class']) {
             case 'district':
                 return \App\Models\District::pluck('name', 'lgd_code')->toArray();
-            case 'block':
+            case 'block/municipality':
                 if (!$distCode || !$ruralUrban) return [];
                 if ($ruralUrban == 1) {
                     return \App\Models\Block::where('district_id', $distCode)->pluck('name', 'lgd_code')->toArray();
@@ -92,8 +92,8 @@ class RenderDynamicForm extends Component
                     return \App\Models\Municipality::whereIn('subdivision_id', $subdivisionCodes)
                         ->pluck('name', 'lgd_code')->toArray();
                 }
-            case 'panchayat':
-                $blockCode = $this->formData['block'] ?? null;
+            case 'gp/ward':
+                $blockCode = $this->formData['block/municipality'] ?? null;
                 if (!$blockCode) return [];
                 if ($ruralUrban == 1) {
                     return \App\Models\Panchayat::where('block_id', $blockCode)
@@ -110,13 +110,13 @@ class RenderDynamicForm extends Component
     public function updatedFormData($value, $key)
     {
         if ($key === 'district') {
-            $this->formData['block'] = null;
-            $this->formData['panchayat'] = null;
+            $this->formData['block/municipality'] = null;
+            $this->formData['gp/ward'] = null;
             $this->formData['rural/urban'] = null;
         }
-        if ($key === 'rural/urban' || $key === 'block') {
-            if ($key === 'rural/urban') $this->formData['block'] = null;
-            $this->formData['panchayat'] = null;
+        if ($key === 'rural/urban' || $key === 'block/municipality') {
+            if ($key === 'rural/urban') $this->formData['block/municipality'] = null;
+            $this->formData['gp/ward'] = null;
         }
     }
 
