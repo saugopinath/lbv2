@@ -99,7 +99,6 @@ class SchemeTabFieldManager extends Component
 
         foreach ($this->tabs as $tab) {
 
-            // skip enclosure & self declaration
             if (in_array($tab->tab_code, [104, 105])) {
                 continue;
             }
@@ -114,7 +113,7 @@ class SchemeTabFieldManager extends Component
             $ids = implode(',', $fieldIds);
 
             $this->digitalPreviewFields[$tab->tab_code] =
-                \App\Models\SchemeTabBasefield::whereIn('id', $fieldIds)
+                SchemeTabBasefield::whereIn('id', $fieldIds)
                 ->whereIn('scheme_id', [0, $this->schemeId])
                 ->whereIn('tab_code', [0, $tab->tab_code])
                 ->where('is_active', true)
@@ -273,7 +272,6 @@ class SchemeTabFieldManager extends Component
     }
     public function setActiveTab($tabCode)
     {
-        // dd('dcsf');
         $this->activeTabCode = $tabCode;
         if ($tabCode == 104) {
             $this->loadAttachedDocuments();
