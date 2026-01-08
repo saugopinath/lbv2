@@ -512,6 +512,31 @@ class SchemeTabFieldManager extends Component
             'message' => 'Self Declaration label updated successfully'
         ]);
     }
+    public function updateSelfDeclarationOrderAndSection(array $rows)
+{
+    DB::transaction(function () use ($rows) {
+
+        foreach ($rows as $index => $row) {
+
+            $sectionType = null;
+            $sectionId   = null;
+
+            if (!empty($row['section'])) {
+                [$sectionType, $sectionId] = explode('-', $row['section']);
+            }
+
+            SelfDeclerationBasefield::where('id', $row['id'])
+                ->update([
+                    'field_position'     => $index + 1,
+                    'section_level_type' => $sectionType,
+                    'section_level_id'   => $sectionId,
+                ]);
+        }
+    });
+
+    $this->loadSelfDeclarationFields();
+}
+
 
     public function loadSelfDeclarationFields()
     {
@@ -520,7 +545,7 @@ class SchemeTabFieldManager extends Component
             ->where('is_active', true)
             ->orderBy('field_position')
             ->get()
-            ->values(); // important for index
+            ->values();
 
         $sectionMap = SectionLevelMaster::pluck('section_level_name', 'id')->toArray();
 
@@ -546,18 +571,17 @@ class SchemeTabFieldManager extends Component
                 'show_section_start' => $hasSection && $currentKey !== $lastKey,
                 'show_section_end'   => $hasSection && $currentKey !== $nextKey,
                 'section_title'      => $hasSection
-                    ? ($sectionMap[$field->section_level_id] ?? 'Section / Level')
+                    ? ($sectionMap[$field->section_level_id] ?? 'Section')
                     : null,
             ];
+
             if ($hasSection) {
                 $lastKey = $currentKey;
-            } else {
-                $lastKey = null;
             }
         }
+
         $this->selfDeclarationDisplay = $result;
     }
-
 
     public function render()
     {
