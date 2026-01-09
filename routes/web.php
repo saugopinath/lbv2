@@ -36,6 +36,7 @@ use App\Http\Controllers\MarkedUpdateBeneficiary;
 use App\Http\Controllers\MarkedUpdateBeneficiaryController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
+use App\Http\Controllers\ValidationManagerController;
 use App\Livewire\SchemeTabFieldManager;
 
 // Guest Routes
@@ -111,7 +112,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // LB & Workflow
     Route::post('/select-scheme', [LBController::class, 'selectScheme'])
-    ->name('select-scheme');
+        ->name('select-scheme');
 
     Route::get('lbform', [LBController::class, 'index'])
         ->middleware('permission.redirect:canEntry')
@@ -234,15 +235,15 @@ Route::controller(MarkedUpdateBeneficiaryController::class)->group(function () {
     Route::get('/marked-beneficiary',  'index')
         ->name('marked-beneficiary');
     Route::get('/mark-beneficiary', 'editview')
-    ->name('mark-beneficiary');
+        ->name('mark-beneficiary');
     Route::post('/final-marked', 'marked')
-    ->name('final-marked');
+        ->name('final-marked');
     Route::get('/marked-beneficiary-list', 'list')
-    ->name('marked-beneficiary-list');
+        ->name('marked-beneficiary-list');
     Route::get('/view-marked-beneficiary-details', 'viewmarkedbeneficiarydetails')
-    ->name('view-marked-beneficiary-details');
-     Route::post('/marked-beneficiary-details-update', 'updatemarkedbeneficiarydetails')
-    ->name('marked-beneficiary-details-update');
+        ->name('view-marked-beneficiary-details');
+    Route::post('/marked-beneficiary-details-update', 'updatemarkedbeneficiarydetails')
+        ->name('marked-beneficiary-details-update');
 });
 
 
@@ -262,3 +263,5 @@ Route::get('/tab-field-manager', SchemeTabFieldManager::class)
     ->name('tab-field-manager');
 
 // Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name(name: 'menu-tab');
+
+Route::get('/edit-validation', [ValidationManagerController::class, 'index'])->name('edit-validation');

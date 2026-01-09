@@ -34,11 +34,9 @@ class SchemeTabFieldManager extends Component
     public $selfDeclarationFields;
     public $selfDeclarationGrouped = [];
     public $selfDeclarationDisplay = [];
-    // Edit modal state
     public $showEditSelfDeclModal = false;
     public $editingSelfDeclId = null;
     public $editingLevelName = '';
-
 
     protected $listeners = [
         'openSectionLevelModal' => 'open',
@@ -129,22 +127,35 @@ class SchemeTabFieldManager extends Component
     }
     private function hydrateTabFieldsFromTemp(): void
     {
-        $temps = SchemeTabFieldTemp::where('scheme_id', $this->schemeId)->get();
-        foreach ($temps as $temp) {
-            $raw = $temp->field_ids;
-            if (empty($raw) || !is_array($raw)) {
-                continue;
-            }
-            $fieldIds = collect($raw)->pluck('field_id')->toArray();
-            $names = SchemeTabBasefield::whereIn('id', $fieldIds)
-                ->pluck('level_name', 'id');
-            $ordered = collect($raw)
-                ->sortBy('position')
-                ->mapWithKeys(fn($row) => [
-                    $row['field_id'] => $names[$row['field_id']] ?? 'Unknown'
-                ])
-                ->toArray();
-            $this->tabFields[$temp->tab_code] = $ordered;
+        // $temps = SchemeTabFieldTemp::where('scheme_id', $this->schemeId)->get();
+        // foreach ($temps as $temp) {
+        //     $raw = $temp->field_ids;
+        //     if (empty($raw) || !is_array($raw)) {
+        //         continue;
+        //     }
+        //     $fieldIds = collect($raw)->pluck('field_id')->toArray();
+        //     $names = SchemeTabBasefield::whereIn('id', $fieldIds)
+        //         ->pluck('level_name', 'id');
+        //     $ordered = collect($raw)
+        //         ->sortBy('position')
+        //         ->mapWithKeys(fn($row) => [
+        //             $row['field_id'] => $names[$row['field_id']] ?? 'Unknown'
+        //         ])
+        //         ->toArray();
+        //     $this->tabFields[$temp->tab_code] = $ordered;
+        // }
+
+        if (!$this->schemeId) {
+            return;
+        }
+        $fields = SchemeTabFormField::where('scheme_id', $this->schemeId)
+            ->where('is_active', true)
+            ->orderBy('tab_code')
+            ->orderBy('field_position')
+            ->get();
+        $this->tabFields = [];
+        foreach ($fields as $field) {
+            $this->tabFields[$field->tab_code][$field->tab_field_id] = $field->level_name;
         }
     }
     public function saveDocumentMapping()
@@ -274,16 +285,24 @@ class SchemeTabFieldManager extends Component
             ->pluck('field_id')
             ->toArray();
 
-
-        $temp = SchemeTabFieldTemp::where('scheme_id', $this->schemeId)
+        $savedIds = SchemeTabFormField::where('scheme_id', $this->schemeId)
             ->where('tab_code', $tabCode)
-            ->first();
-
-        $savedIds = collect($temp?->field_ids ?? [])
-            ->sortBy('position')
-            ->pluck('field_id')
+            ->where('is_active', true)
+            ->orderBy('field_position')
+            ->pluck('tab_field_id')
             ->toArray();
+        // dd($savedIds);
+        // $existing = !empty($savedIds)
+        //     ? $savedIds
+        //     : array_keys($this->tabFields[$tabCode] ?? []);
+        // $temp = SchemeTabFieldTemp::where('scheme_id', $this->schemeId)
+        //     ->where('tab_code', $tabCode)
+        //     ->first();
 
+        // $savedIds = collect($temp?->field_ids ?? [])
+        //     ->sortBy('position')
+        //     ->pluck('field_id')
+        //     ->toArray();
 
         $existing = !empty($savedIds)
             ? $savedIds
@@ -292,6 +311,7 @@ class SchemeTabFieldManager extends Component
         $this->modalSelected = array_values(
             array_unique(array_merge($existing, $mandatoryIds))
         );
+        // dd($this->modalSelected);
     }
     public function isFieldMandatory($fieldId)
     {
@@ -319,61 +339,152 @@ class SchemeTabFieldManager extends Component
         $this->modalFields = [];
         $this->modalSelected = [];
     }
+    // public function saveManageFields()
+    // {
+    //     $payload = [];
+    //     foreach ($this->modalSelected as $index => $fid) {
+    //         $payload[] = [
+    //             'field_id' => (int) $fid,
+    //             'position' => $index + 1,
+    //         ];
+    //     }
+    //     SchemeTabFieldTemp::updateOrCreate(
+    //         [
+    //             'scheme_id' => $this->schemeId,
+    //             'tab_code'  => $this->activeTabCode,
+    //         ],
+    //         [
+    //             'field_ids' => $payload,
+    //         ]
+    //     );
+    //     $this->tabFields[$this->activeTabCode] = [];
+    //     foreach ($this->modalSelected as $fid) {
+    //         $field = collect($this->modalFields)
+    //             ->firstWhere('field_id', $fid);
+    //         if ($field) {
+    //             $this->tabFields[$this->activeTabCode][$fid]
+    //                 = $field['field_name'];
+    //         }
+    //     }
+    //     $this->closeManageModal();
+    // }
+
+
     public function saveManageFields()
     {
-        $payload = [];
-        foreach ($this->modalSelected as $index => $fid) {
-            $payload[] = [
-                'field_id' => (int) $fid,
-                'position' => $index + 1,
-            ];
-        }
-        SchemeTabFieldTemp::updateOrCreate(
-            [
-                'scheme_id' => $this->schemeId,
-                'tab_code'  => $this->activeTabCode,
-            ],
-            [
-                'field_ids' => $payload,
-            ]
-        );
-        $this->tabFields[$this->activeTabCode] = [];
-        foreach ($this->modalSelected as $fid) {
-            $field = collect($this->modalFields)
-                ->firstWhere('field_id', $fid);
-            if ($field) {
-                $this->tabFields[$this->activeTabCode][$fid]
-                    = $field['field_name'];
+        DB::transaction(function () {
+            $schemeId = $this->schemeId;
+            $tabCode  = $this->activeTabCode;
+            $existingFormFields = SchemeTabFormField::where('scheme_id', $schemeId)
+                ->where('tab_code', $tabCode)
+                ->where('is_active', true)
+                ->pluck('tab_field_id') // IMPORTANT: base field_id
+                ->toArray();
+            $selectedBaseIds = array_map('intval', $this->modalSelected);
+            // dd($selectedBaseIds);
+            $toDeactivate = array_diff($existingFormFields, $selectedBaseIds);
+            if (!empty($toDeactivate)) {
+                SchemeTabFormField::where('scheme_id', $schemeId)
+                    ->where('tab_code', $tabCode)
+                    ->whereIn('tab_field_id', $toDeactivate)
+                    ->delete();
             }
-        }
+            foreach ($selectedBaseIds as $index => $baseFieldId) {
+                // dd($baseFieldId);
+                $base = SchemeTabBasefield::findOrFail($baseFieldId);
+                if (!$base) {
+                    continue;
+                }
+                // dd($baseFieldId);
+                SchemeTabFormField::updateOrCreate(
+                    [
+                        'tab_field_id' => $baseFieldId,
+                        'scheme_id' => $schemeId,
+                        'tab_code'  => $tabCode,
+
+                    ],
+                    [
+                        'level_name'      => $base->level_name,
+                        'field_name'      => $base->field_name,
+                        'field_type'      => $base->field_type,
+                        'field_id'        => $base->field_id,
+                        'options'         => $base->options,
+                        'validation_rule' => $base->validation_rule,
+                        'regex'           => $base->regex,
+                        'section_id'      => $base->section_id,
+                        'is_multiple'     => $base->is_multiple,
+                        'field_position'  => $index + 1,
+                        'is_common'       => $base->is_common,
+                        'db_column'       => $base->db_colunm,
+                        'is_mandatory'    => $base->is_mandatory,
+                        'is_active'       => true,
+                    ]
+                );
+            }
+            $this->tabFields[$tabCode] = SchemeTabFormField::where('scheme_id', $schemeId)
+                ->where('tab_code', $tabCode)
+                ->where('is_active', true)
+                ->orderBy('field_position')
+                ->pluck('level_name', 'tab_field_id')
+                ->toArray();
+        });
+
         $this->closeManageModal();
+
+        $this->dispatch('toastr', [
+            'type'    => 'success',
+            'message' => 'Fields saved successfully',
+        ]);
     }
+
+    // public function removeField($tabCode, $fieldId)
+    // {
+    //     if ($this->isFieldMandatory($fieldId)) {
+    //         return;
+    //     }
+    //     unset($this->tabFields[$tabCode][$fieldId]);
+    //     if (empty($this->tabFields[$tabCode])) {
+    //         unset($this->tabFields[$tabCode]);
+    //     }
+    //     $temp = SchemeTabFieldTemp::where('scheme_id', $this->schemeId)
+    //         ->where('tab_code', $tabCode)
+    //         ->first();
+    //     if (!$temp || !is_array($temp->field_ids)) {
+    //         return;
+    //     }
+    //     $filtered = collect($temp->field_ids)
+    //         ->reject(fn($f) => (int)$f['field_id'] === (int)$fieldId)
+    //         ->values()
+    //         ->map(fn($f, $i) => [
+    //             'field_id' => $f['field_id'],
+    //             'position' => $i + 1,
+    //         ])
+    //         ->toArray();
+    //     $temp->update([
+    //         'field_ids' => $filtered,
+    //     ]);
+    // }
     public function removeField($tabCode, $fieldId)
     {
         if ($this->isFieldMandatory($fieldId)) {
             return;
         }
-        unset($this->tabFields[$tabCode][$fieldId]);
-        if (empty($this->tabFields[$tabCode])) {
-            unset($this->tabFields[$tabCode]);
-        }
-        $temp = SchemeTabFieldTemp::where('scheme_id', $this->schemeId)
-            ->where('tab_code', $tabCode)
-            ->first();
-        if (!$temp || !is_array($temp->field_ids)) {
-            return;
-        }
-        $filtered = collect($temp->field_ids)
-            ->reject(fn($f) => (int)$f['field_id'] === (int)$fieldId)
-            ->values()
-            ->map(fn($f, $i) => [
-                'field_id' => $f['field_id'],
-                'position' => $i + 1,
-            ])
-            ->toArray();
-        $temp->update([
-            'field_ids' => $filtered,
-        ]);
+        DB::transaction(function () use ($tabCode, $fieldId) {
+            SchemeTabFormField::where('tab_field_id', $fieldId)
+                ->where('scheme_id', $this->schemeId)
+                ->where('tab_code', $tabCode)
+                ->delete();
+            // Reorder remaining fields
+            $remainingFields = SchemeTabFormField::where('scheme_id', $this->schemeId)
+                ->where('tab_code', $tabCode)
+                ->where('is_active', true)
+                ->orderBy('field_position')
+                ->get();
+            foreach ($remainingFields as $index => $field) {
+                $field->update(['field_position' => $index + 1]);
+            }
+            $this->tabFields[$tabCode] = $remainingFields->pluck('level_name', 'tab_field_id')->toArray();
+        });
     }
     public function openPreview($tabCode)
     {
@@ -393,37 +504,58 @@ class SchemeTabFieldManager extends Component
         $this->activeTabCode = null;
         $this->previewTabName = '';
     }
+    // public function updateFieldOrder($tabCode, $orderedIds)
+    // {
+    //     if (!isset($this->tabFields[$tabCode])) return;
+    //     // Update in-memory
+    //     $newOrder = [];
+    //     foreach ($orderedIds as $fid) {
+    //         if (isset($this->tabFields[$tabCode][$fid])) {
+    //             $newOrder[$fid] = $this->tabFields[$tabCode][$fid];
+    //         }
+    //     }
+    //     $this->tabFields[$tabCode] = $newOrder;
+    //     $payload = [];
+    //     foreach ($orderedIds as $i => $fid) {
+
+    //             'tab_field_id' =>  $fid,
+    //             'field_position' => $i + 1,
+
+    //     }
+    //     SchemeTabFormField::updateOrCreate(
+    //         [
+    //             'scheme_id' => $this->schemeId,
+    //             'tab_code'  => $tabCode,
+    //         ],
+    //     );
+    // }
     public function updateFieldOrder($tabCode, $orderedIds)
     {
-        if (!isset($this->tabFields[$tabCode])) return;
-        // Update in-memory
-        $newOrder = [];
-        foreach ($orderedIds as $fid) {
-            if (isset($this->tabFields[$tabCode][$fid])) {
-                $newOrder[$fid] = $this->tabFields[$tabCode][$fid];
+        if (empty($orderedIds) || !$this->schemeId) {
+            return;
+        }
+        DB::transaction(function () use ($tabCode, $orderedIds) {
+            // 1️⃣ Update DB positions
+            foreach ($orderedIds as $index => $fieldId) {
+                SchemeTabFormField::where('tab_field_id', $fieldId)
+                    ->where('scheme_id', $this->schemeId)
+                    ->where('tab_code', $tabCode)
+                    ->update([
+                        'field_position' => $index + 1,
+                    ]);
             }
-        }
-        $this->tabFields[$tabCode] = $newOrder;
-        // Update temp table
-        $payload = [];
-        foreach ($orderedIds as $i => $fid) {
-            $payload[] = [
-                'field_id' => (int) $fid,
-                'position' => $i + 1,
-            ];
-        }
-        SchemeTabFieldTemp::updateOrCreate(
-            [
-                'scheme_id' => $this->schemeId,
-                'tab_code'  => $tabCode,
-            ],
-            [
-                'field_ids' => $payload,
-            ]
-        );
-        // SchemeTabFormField::where('scheme_id', $this->schemeId)
-        //     ->where('tab_code', $tabCode)
-        //     ->delete();
+
+            // 2️⃣ Update in-memory order (for instant UI refresh)
+            $fields = SchemeTabFormField::where('scheme_id', $this->schemeId)
+                ->where('tab_code', $tabCode)
+                ->where('is_active', true)
+                ->orderBy('field_position')
+                ->get();
+            $this->tabFields[$tabCode] = [];
+            foreach ($fields as $field) {
+                $this->tabFields[$tabCode][$field->tab_field_id] = $field->level_name;
+            }
+        });
     }
     public function getPreviewFieldsProperty()
     {

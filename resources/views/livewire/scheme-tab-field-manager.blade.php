@@ -19,7 +19,7 @@
                 <div class="flex gap-2 items-center">
                     @if(!in_array($tab->tab_code, [104, 105]))
                     <a href="{{ route('create-dynamicformfield', [
-                    'ref' => encrypt($tab->scheme_id . '|' . $tab->tab_code)
+                    'ref' => Crypt::encryptString($tab->scheme_id . '|' . $tab->tab_code)
                 ]) }}">
 
                         <x-button.primary class="bg-indigo-400 hover:bg-indigo-500 text-sm">
@@ -41,20 +41,6 @@
                             Reset Validation
                         </x-button.primary>
                     </a>
-
-                    <form method="POST"
-                        action="{{ route('edit-validation') }}"
-                        class="inline">
-                        @csrf
-                        <input type="hidden"
-                            name="ref"
-                            value="{{ Crypt::encryptString($tab->scheme_id.'|'.$tab->tab_code) }}">
-                        <x-button.primary
-                            type="submit"
-                            class="bg-yellow-400 hover:bg-yellow-500 text-sm">
-                            Reset Validation
-                        </x-button.primary>
-                    </form>
                     <x-button.primary wire:click="openPreview({{ $tab->tab_code }})"
                         class="bg-gray-500 hover:bg-gray-600 text-sm">
                         Preview
@@ -115,7 +101,7 @@
                 </div>
                 @endif
                 @elseif($tab->tab_code == 105)
-
+                @if(!empty($selfDeclarationDisplay))
                 <div class="grid grid-cols-2 gap-3 p-4"
                     x-data
                     x-init="
@@ -203,7 +189,11 @@
 
                     @endforeach
                 </div>
-
+                @else
+                <div class="p-4 text-gray-400 text-sm text-center">
+                    No self declaration fields added
+                </div>
+                @endif
 
                 @else
                 @if(isset($tabFields[$tab->tab_code]) && count($tabFields[$tab->tab_code]))
@@ -324,7 +314,6 @@
                         @enderror
                     </div>
                 </div>
-
                 {{-- ATTACHED DOCUMENT LIST --}}
                 @if($attachedDocuments->count())
                 <div class="border-t pt-4">
@@ -358,7 +347,6 @@
                 <livewire:add-self-declerationfield
                     :scheme_id="$schemeId"
                     :tab_code="$activeTabCode" />
-
                 @else
                 {{-- OTHER TABS --}}
                 <div class="grid grid-cols-2 gap-3">
@@ -370,7 +358,6 @@
 
                         <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}"
                             @if($field['is_mandatory'] && $field['tab_code'] !=0) disabled @endif>
-
                         <span>
                             {{ $field['field_name'] }}
                             @if($field['is_mandatory'])
@@ -380,10 +367,8 @@
                     </label>
                     @endforeach
                 </div>
-
                 @endif
             </div>
-
             {{-- FOOTER (fixed) --}}
             <div class="flex justify-end gap-3 px-6 py-4 border-t shrink-0">
 
@@ -410,16 +395,13 @@
         </div>
     </div>
     @endif
-
     @if($showPreviewModal)
     <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-3xl rounded-lg shadow-lg overflow-hidden">
 
-
             <div class="bg-green-100 px-6 py-4 text-center font-semibold">
                 {{ $previewTabName }}
             </div>
-
             {{-- Body --}}
             <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
                 @if ($previewTabCode == 105)
@@ -504,14 +486,12 @@
                     @endforeach
                 </div>
                 @endif
-
                 @if($previewTabCode == 104)
                 @if($attachedDocuments->count())
                 <div class="space-y-3">
                     {{-- <livewire:enclosure-list :form_preview="1" />  --}}
                     <livewire:enclosure-list :scheme_id="$schemeId" :form_preview="1" :tabCode="$previewTabCode" />
                     @endif
-
                     @endif
                     @if($previewTabCode == 102 &&
                     collect($this->previewFields)
@@ -528,12 +508,9 @@
                     <div>
                         <livewire:filter-lgd-master-entry :login_type="'state_office'" :preview="1" />
                     </div>
-
                     @endif
                     <div class="grid gap-2 md:grid-cols-2 pl-4 pr-4">
-
                         @foreach($this->previewFields as $index => $field)
-
                         @if(
                         $activeTabCode == 102 &&
                         in_array($field->field_name, [

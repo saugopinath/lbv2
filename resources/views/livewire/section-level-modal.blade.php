@@ -1,6 +1,6 @@
 <div>
     @if($show)
-        <div class="fixed inset-0 z-[60] bg-black/80 opacity-80 flex items-center justify-center p-4">
+        <div class="fixed inset-0 z-50 bg-black/80 opacity-100 flex items-center justify-center p-4">
             <div class="bg-white rounded-xl shadow-lg w-full max-w-lg overflow-hidden">
                 {{-- HEADER --}}
                 <div class="bg-indigo-100 px-6 py-4 font-semibold border-b">

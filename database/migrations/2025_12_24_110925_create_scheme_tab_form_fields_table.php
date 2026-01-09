@@ -13,13 +13,16 @@ return new class extends Migration
     {
         Schema::create('scheme_tab_form_fields', function (Blueprint $table) {
             $table->id();
+            $table->integer('tab_field_id')->references('id')->on('scheme_tab_basefields')->onDelete('cascade');;
             $table->integer('scheme_id');
             $table->string('level_name', 100)->nullable();
             $table->string('field_name', 100);
-            $table->string('field_id', 50)->unique();
+            $table->string('field_id', 50);
             $table->string('field_type', 50);
             $table->jsonb('options')->nullable();
             $table->boolean('is_common')->default(false);
+            $table->string('db_column')->nullable();
+            $table->integer('is_mandatory')->nullable()->default(0);
             $table->integer('tab_code');
             $table->string('validation_rule', 255)->nullable();
             $table->string('regex', 255)->nullable();
@@ -27,10 +30,11 @@ return new class extends Migration
             $table->boolean('is_multiple')->default(false);
             $table->integer('field_position');
             $table->boolean('is_active')->default(true);
+
             $table->timestamps();
             $table->foreign('tab_code')->references('tab_code')->on('master_tabs')->onDelete('cascade');
             // Ensure position is unique per tab + scheme (for extras) or per tab (for common)
-            $table->unique(['tab_code', 'scheme_id','field_position']);
+            $table->unique(['tab_code', 'scheme_id', 'tab_field_id', 'field_name', 'level_name']);
             $table->index(['tab_code', 'scheme_id']);
         });
     }
