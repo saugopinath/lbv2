@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" x-data
+  x-init="$watch('$store.app.mode', mode => document.documentElement.classList.toggle('dark', mode === 'dark'))"
+  x-cloak>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    [x-cloak] {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body x-data="$store.app" class="bg-[#def0f4] dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+  <div class= "flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside :class="sidebar ? 'w-52' : 'w-16'"
+      class="transition-all duration-300 bg-gradient-to-l from-cyan-500 to-cyan-400 dark:bg-gray-800 shadow-lg flex flex-col h-screen"
+      x-data="{ activeMenu: null }">
+      <!-- Logo -->
+      <div class="flex flex-col items-center p-2 border-b border-gray-700 dark:border-gray-700">
+        <img src="https://c.animaapp.com/mdn4r47eB5hzlO/img/biswo-1.png" alt="Lakshmir Bhandar" class="w-8 mb-1" />
+        <template x-if="sidebar">
+          <div class="text-center font-bold text-sm text-white">Lakshmir Bhandar</div>
+        </template>
+      </div>
+
+      <!-- Menu -->
+      <nav class="flex-1 overflow-y-auto mt-2 space-y-1 text-sm">
+
+        <!-- Menu Item: Dashboard -->
+        <div>
+          <button @click="activeMenu === 'dashboard' ? activeMenu = null : activeMenu = 'dashboard'"
+            class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
+            <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path opacity="0.3"
+                d="M10.8939 22H13.1061C16.5526 22 18.2759 22 19.451 20.9882C20.626 19.9764 20.8697 18.2827 21.3572 14.8952L21.6359 12.9579C22.0154 10.3208 22.2051 9.00229 21.6646 7.87495C21.1242 6.7476 19.9738 6.06234 17.6731 4.69182L17.6731 4.69181L16.2882 3.86687C14.199 2.62229 13.1543 2 12 2C10.8457 2 9.80104 2.62229 7.71175 3.86687L6.32691 4.69181L6.32691 4.69181C4.02619 6.06234 2.87583 6.7476 2.33537 7.87495C1.79491 9.00229 1.98463 10.3208 2.36407 12.9579L2.64284 14.8952C3.13025 18.2827 3.37396 19.9764 4.54903 20.9882C5.72409 22 7.44737 22 10.8939 22Z"
+                fill="currentColor" fill="currentColor" />
+              <path
+                d="M9.44666 15.397C9.11389 15.1504 8.64418 15.2202 8.39752 15.5529C8.15086 15.8857 8.22067 16.3554 8.55343 16.6021C9.52585 17.3229 10.7151 17.7496 12 17.7496C13.285 17.7496 14.4742 17.3229 15.4467 16.6021C15.7794 16.3554 15.8492 15.8857 15.6026 15.5529C15.3559 15.2202 14.8862 15.1504 14.5534 15.397C13.8251 15.9369 12.9459 16.2496 12 16.2496C11.0541 16.2496 10.175 15.9369 9.44666 15.397Z"
+                fill="currentColor" />
+            </svg>
+            <span x-show="sidebar" class="mr-2 truncate">Dashboard</span>
+             <svg class="mr-2 w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                  </svg>
+          </button>
+          <!-- Sub-menu -->
+          <div x-show="activeMenu === 'dashboard'" x-collapse x-transition class="pl-4">
+            <a href="#"
+              class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
+              <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path opacity="0.3"
+                  d="M10.8939 22H13.1061C16.5526 22 18.2759 22 19.451 20.9882C20.626 19.9764 20.8697 18.2827 21.3572 14.8952L21.6359 12.9579C22.0154 10.3208 22.2051 9.00229 21.6646 7.87495C21.1242 6.7476 19.9738 6.06234 17.6731 4.69182L17.6731 4.69181L16.2882 3.86687C14.199 2.62229 13.1543 2 12 2C10.8457 2 9.80104 2.62229 7.71175 3.86687L6.32691 4.69181L6.32691 4.69181C4.02619 6.06234 2.87583 6.7476 2.33537 7.87495C1.79491 9.00229 1.98463 10.3208 2.36407 12.9579L2.64284 14.8952C3.13025 18.2827 3.37396 19.9764 4.54903 20.9882C5.72409 22 7.44737 22 10.8939 22Z"
+                  fill="currentColor" fill="currentColor" />
+                <path
+                  d="M9.44666 15.397C9.11389 15.1504 8.64418 15.2202 8.39752 15.5529C8.15086 15.8857 8.22067 16.3554 8.55343 16.6021C9.52585 17.3229 10.7151 17.7496 12 17.7496C13.285 17.7496 14.4742 17.3229 15.4467 16.6021C15.7794 16.3554 15.8492 15.8857 15.6026 15.5529C15.3559 15.2202 14.8862 15.1504 14.5534 15.397C13.8251 15.9369 12.9459 16.2496 12 16.2496C11.0541 16.2496 10.175 15.9369 9.44666 15.397Z"
+                  fill="currentColor" />
+              </svg><span x-show="sidebar" class="truncate" svg="truncate">Process Application</span></a>
+            <a href="#" class="block px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Submenu 2</a>
+            <a href="#" class="block px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Submenu 3</a>
+          </div>
+        </div>
+
+        <!-- Menu Item: Reports -->
+        <!-- <div>
+      <button 
+        @click="activeMenu === 'reports' ? activeMenu = null : activeMenu = 'reports'" 
+      class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
+        <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6M7 21h10a2 2 0 002-2v-5a2 2 0 00-2-2h-4l-2 2H9a2 2 0 00-2 2v3a2 2 0 002 2z"/>
+        </svg>
+        <span x-show="sidebar" class="truncate">Reports</span>
+      </button>
+      <div x-show="activeMenu === 'reports'" x-collapse x-transition class="pl-10">
+        <a href="#" class="block px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Submenu A</a>
+        <a href="#" class="block px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Submenu B</a>
+        <a href="#" class="block px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Submenu C</a>
+      </div>
+    </div> -->
+
+        <!-- Menu Item: Settings -->
+        <!-- <div>
+      <button 
+        @click="activeMenu === 'settings' ? activeMenu = null : activeMenu = 'settings'" 
+      class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
+        <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path d="M12 8c-2.21 0-4 .89-4 2s1.79 2 4 2 4-.89 4-2-1.79-2-4-2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 12c0 2.21 3.58 4 8 4s8-1.79 8-4M2 12c0-2.21 3.58-4 8-4s8 1.79 8 4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span x-show="sidebar" class="truncate">Settings</span>
+      </button>
+      <div x-show="activeMenu === 'settings'" x-collapse x-transition class="pl-10">
+        <a href="#" class="block px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Profile</a>
+        <a href="#" class="block px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Preferences</a>
+        <a href="#" class="block px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Security</a>
+      </div>
+    </div> -->
+      </nav>
+    </aside>
+
+
+    <!-- Main content -->
+    <div class="flex-1 flex flex-col">
+      <!-- Topbar -->
+      <header class="flex items-center justify-between p-2 bg-white dark:bg-gray-800 shadow">
+        <button @click="toggleSidebar" class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+
+        <div class="flex items-center space-x-4">
+          <!-- Dark mode toggle -->
+          <button @click="toggleMode(mode === 'dark' ? 'light' : 'dark')"
+            class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" aria-label="Toggle Dark Mode">
+            <svg x-show="mode === 'light'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                d="M12 3v1M12 20v1M4.22 4.22l.7.7M17.66 17.66l.7.7M1 12h1M20 12h1M4.22 19.78l.7-.7M17.66 6.34l.7-.7M12 5a7 7 0 0 0 0 14a7 7 0 0 0 0-14z"
+                stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+            </svg>
+            <svg x-show="mode === 'dark'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-linecap="round" stroke-linejoin="round"
+                stroke-width="2" />
+            </svg>
+          </button>
+
+          <!-- Profile dropdown -->
+          <div class="relative" x-data="{ open: false }">
+            <button @click="open = !open"
+              class="flex items-center space-x-2 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path
+                  d="M5.121 17.804A13.937 13.937 0 0 1 12 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 1 0-6 0 3 3 0 0 0 6 0z"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span x-show="$store.app.sidebar">Profile</span>
+            </button>
+            <div x-show="open" @click.outside="open = false"
+              class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded shadow-lg z-10">
+              <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Profile</a>
+              <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Sign Out</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <div class="flex-1 p-2 overflow-auto">
+        <div class="p-4">
+          <div class="bg-white dark:bg-gray-800 shadow-md rounded-2xl p-4">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Welcome to the Dashboard</h1>
+            <p class="text-gray-600 dark:text-gray-300">Here is your main content area.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="p-4 bg-white dark:bg-gray-800 text-center border-t border-gray-200 dark:border-gray-700">
+        <p class="text-sm">&copy; 2025 Lakshmir Bhandar. All rights reserved.</p>
+      </footer>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('alpine:init', () => {
+      Alpine.store('app', {
+        sidebar: true,
+        toggleSidebar() {
+          this.sidebar = !this.sidebar;
+          this.activeMenu === null;
+        },
+        mode: 'light',
+        toggleMode(mode) {
+          this.mode = mode;
+        }
+      });
+    });
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@import 'tailwindcss';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '..//*.blade.php';
+@source '..//*.js';
+
+
+.bg-login-cover {
+    background-image: url('/images/background-cover.jpg');
+    /* filter: brightness(0.5); */
+}
+[x-cloak] {
+    display: none !important;
+}

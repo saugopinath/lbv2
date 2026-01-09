@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en" x-data
+    x-init="$watch('$store.app.mode', mode => document.documentElement.classList.toggle('dark', mode === 'dark'))"
+    x-cloak>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LB Entry Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body x-data="$store.app" class="bg-[#def0f4] dark:bg-gray-900 text-black dark:text-black">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar bg-gradient-to-l from-cyan-500 to-cyan-200 bg-opacity-50-->
+        <!-- bg-gradient-to-l from-green-400 to-blue-500 -->
+        <aside :class="sidebar ? 'w-52' : 'w-16'"
+            class="transition-all duration-300 bg-gradient-to-r from-cyan-800 to-cyan-600 dark:bg-gray-800 shadow-lg flex flex-col h-screen"
+            x-data="{ activeMenu: null }">
+            <!-- Logo -->
+            <div class="flex flex-col items-center p-2 border-b border-gray-700 dark:border-gray-700">
+                <img src="https://c.animaapp.com/mdn4r47eB5hzlO/img/biswo-1.png" alt="Lakshmir Bhandar"
+                    class="w-8 mb-1" />
+                <template x-if="sidebar">
+                    <div class="text-center font-bold text-sm text-white">Lakshmir Bhandar</div>
+                </template>
+            </div>
+
+            <!-- Menu -->
+            <nav class="flex-1 overflow-y-auto mt-2 space-y-1 text-sm">
+
+                <!-- Menu Item: Dashboard -->
+                <div>
+                    <button
+                        class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
+                        <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path opacity="0.3"
+                                d="M10.8939 22H13.1061C16.5526 22 18.2759 22 19.451 20.9882C20.626 19.9764 20.8697 18.2827 21.3572 14.8952L21.6359 12.9579C22.0154 10.3208 22.2051 9.00229 21.6646 7.87495C21.1242 6.7476 19.9738 6.06234 17.6731 4.69182L17.6731 4.69181L16.2882 3.86687C14.199 2.62229 13.1543 2 12 2C10.8457 2 9.80104 2.62229 7.71175 3.86687L6.32691 4.69181L6.32691 4.69181C4.02619 6.06234 2.87583 6.7476 2.33537 7.87495C1.79491 9.00229 1.98463 10.3208 2.36407 12.9579L2.64284 14.8952C3.13025 18.2827 3.37396 19.9764 4.54903 20.9882C5.72409 22 7.44737 22 10.8939 22Z"
+                                fill="currentColor" fill="currentColor" />
+                            <path
+                                d="M9.44666 15.397C9.11389 15.1504 8.64418 15.2202 8.39752 15.5529C8.15086 15.8857 8.22067 16.3554 8.55343 16.6021C9.52585 17.3229 10.7151 17.7496 12 17.7496C13.285 17.7496 14.4742 17.3229 15.4467 16.6021C15.7794 16.3554 15.8492 15.8857 15.6026 15.5529C15.3559 15.2202 14.8862 15.1504 14.5534 15.397C13.8251 15.9369 12.9459 16.2496 12 16.2496C11.0541 16.2496 10.175 15.9369 9.44666 15.397Z"
+                                fill="currentColor" />
+                        </svg>
+                        <span x-show="sidebar" class="mr-2 truncate">Dashboard</span>
+                    </button>
+                </div>
+
+                <div>
+                    <button @click="activeMenu === 'Application' ? activeMenu = null : activeMenu = 'Application'"
+                        class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
+                        <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path opacity="0.3"
+                                d="M10.8939 22H13.1061C16.5526 22 18.2759 22 19.451 20.9882C20.626 19.9764 20.8697 18.2827 21.3572 14.8952L21.6359 12.9579C22.0154 10.3208 22.2051 9.00229 21.6646 7.87495C21.1242 6.7476 19.9738 6.06234 17.6731 4.69182L17.6731 4.69181L16.2882 3.86687C14.199 2.62229 13.1543 2 12 2C10.8457 2 9.80104 2.62229 7.71175 3.86687L6.32691 4.69181L6.32691 4.69181C4.02619 6.06234 2.87583 6.7476 2.33537 7.87495C1.79491 9.00229 1.98463 10.3208 2.36407 12.9579L2.64284 14.8952C3.13025 18.2827 3.37396 19.9764 4.54903 20.9882C5.72409 22 7.44737 22 10.8939 22Z"
+                                fill="currentColor" fill="currentColor" />
+                            <path
+                                d="M9.44666 15.397C9.11389 15.1504 8.64418 15.2202 8.39752 15.5529C8.15086 15.8857 8.22067 16.3554 8.55343 16.6021C9.52585 17.3229 10.7151 17.7496 12 17.7496C13.285 17.7496 14.4742 17.3229 15.4467 16.6021C15.7794 16.3554 15.8492 15.8857 15.6026 15.5529C15.3559 15.2202 14.8862 15.1504 14.5534 15.397C13.8251 15.9369 12.9459 16.2496 12 16.2496C11.0541 16.2496 10.175 15.9369 9.44666 15.397Z"
+                                fill="currentColor" />
+                        </svg>
+                        <span x-show="sidebar" class="mr-2 truncate">Process Application</span>
+                        <svg class="mr-2 w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 10 6">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m1 1 4 4 4-4" />
+                        </svg>
+                    </button>
+                    <!-- Sub-menu -->
+
+                    <div x-show="activeMenu === 'Application'" x-collapse x-transition class="pl-4">
+                        <ul>
+                            <li>
+                                <a href="#"
+                                    class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
+                                    <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path opacity="0.3"
+                                            d="M6.22209 4.60104C6.66665 4.30399 7.13344 4.04635 7.6171 3.82975C8.98898 3.21538 9.67491 2.90819 10.5875 3.4994C11.5 4.0906 11.5 5.0604 11.5 7V8.5C11.5 10.3856 11.5 11.3284 12.0858 11.9142C12.6716 12.5 13.6144 12.5 15.5 12.5H17C18.9396 12.5 19.9094 12.5 20.5006 13.4125C21.0918 14.3251 20.7846 15.011 20.1702 16.3829C19.9536 16.8666 19.696 17.3333 19.399 17.7779C18.3551 19.3402 16.8714 20.5578 15.1355 21.2769C13.3996 21.9959 11.4895 22.184 9.64665 21.8175C7.80383 21.4509 6.11109 20.5461 4.78249 19.2175C3.45389 17.8889 2.5491 16.1962 2.18254 14.3534C1.81598 12.5105 2.00412 10.6004 2.72315 8.8645C3.44218 7.12861 4.65982 5.64491 6.22209 4.60104Z"
+                                            fill="currentColor"></path>
+                                        <path
+                                            d="M21.446 7.06899C20.6342 5.0083 18.9917 3.36577 16.931 2.55397C15.3895 1.94668 14 3.34315 14 5V9C14 9.55229 14.4477 10 15 10H19C20.6569 10 22.0533 8.61054 21.446 7.06899Z"
+                                            fill="currentColor"></path>
+                                    </svg><span x-show="sidebar" class="truncate" svg="truncate">Process Application
+                                        1</span></a>
+                            </li>
+                            <li>
+                                <a href="#"
+                                    class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
+                                    <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path opacity="0.3"
+                                            d="M6.22209 4.60104C6.66665 4.30399 7.13344 4.04635 7.6171 3.82975C8.98898 3.21538 9.67491 2.90819 10.5875 3.4994C11.5 4.0906 11.5 5.0604 11.5 7V8.5C11.5 10.3856 11.5 11.3284 12.0858 11.9142C12.6716 12.5 13.6144 12.5 15.5 12.5H17C18.9396 12.5 19.9094 12.5 20.5006 13.4125C21.0918 14.3251 20.7846 15.011 20.1702 16.3829C19.9536 16.8666 19.696 17.3333 19.399 17.7779C18.3551 19.3402 16.8714 20.5578 15.1355 21.2769C13.3996 21.9959 11.4895 22.184 9.64665 21.8175C7.80383 21.4509 6.11109 20.5461 4.78249 19.2175C3.45389 17.8889 2.5491 16.1962 2.18254 14.3534C1.81598 12.5105 2.00412 10.6004 2.72315 8.8645C3.44218 7.12861 4.65982 5.64491 6.22209 4.60104Z"
+                                            fill="currentColor"></path>
+                                        <path
+                                            d="M21.446 7.06899C20.6342 5.0083 18.9917 3.36577 16.931 2.55397C15.3895 1.94668 14 3.34315 14 5V9C14 9.55229 14.4477 10 15 10H19C20.6569 10 22.0533 8.61054 21.446 7.06899Z"
+                                            fill="currentColor"></path>
+                                    </svg><span x-show="sidebar" class="truncate" svg="truncate">Process Application
+                                        2</span></a>
+                            </li>
+                            <li>
+                                <a href="#"
+                                    class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
+                                    <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path opacity="0.3"
+                                            d="M6.22209 4.60104C6.66665 4.30399 7.13344 4.04635 7.6171 3.82975C8.98898 3.21538 9.67491 2.90819 10.5875 3.4994C11.5 4.0906 11.5 5.0604 11.5 7V8.5C11.5 10.3856 11.5 11.3284 12.0858 11.9142C12.6716 12.5 13.6144 12.5 15.5 12.5H17C18.9396 12.5 19.9094 12.5 20.5006 13.4125C21.0918 14.3251 20.7846 15.011 20.1702 16.3829C19.9536 16.8666 19.696 17.3333 19.399 17.7779C18.3551 19.3402 16.8714 20.5578 15.1355 21.2769C13.3996 21.9959 11.4895 22.184 9.64665 21.8175C7.80383 21.4509 6.11109 20.5461 4.78249 19.2175C3.45389 17.8889 2.5491 16.1962 2.18254 14.3534C1.81598 12.5105 2.00412 10.6004 2.72315 8.8645C3.44218 7.12861 4.65982 5.64491 6.22209 4.60104Z"
+                                            fill="currentColor"></path>
+                                        <path
+                                            d="M21.446 7.06899C20.6342 5.0083 18.9917 3.36577 16.931 2.55397C15.3895 1.94668 14 3.34315 14 5V9C14 9.55229 14.4477 10 15 10H19C20.6569 10 22.0533 8.61054 21.446 7.06899Z"
+                                            fill="currentColor"></path>
+                                    </svg><span x-show="sidebar" class="truncate" svg="truncate">Process Application
+                                        3</span></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Topbar -->
+            <header class="flex items-center justify-between p-2 bg-white dark:bg-gray-800 shadow">
+                <button @click="toggleSidebar" class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </button>
+                <div class="flex items-center space-x-4">
+                    <!-- Dark mode toggle -->
+                    <button @click="toggleMode(mode === 'dark' ? 'light' : 'dark')"
+                        class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" aria-label="Toggle Dark Mode">
+                        <svg x-show="mode === 'light'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                d="M12 3v1M12 20v1M4.22 4.22l.7.7M17.66 17.66l.7.7M1 12h1M20 12h1M4.22 19.78l.7-.7M17.66 6.34l.7-.7M12 5a7 7 0 0 0 0 14a7 7 0 0 0 0-14z"
+                                stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                        </svg>
+                        <svg x-show="mode === 'dark'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-linecap="round"
+                                stroke-linejoin="round" stroke-width="2" />
+                        </svg>
+                    </button>
+                    <!-- Profile dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open"
+                            class="flex items-center space-x-2 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <circle opacity="0.3" cx="12" cy="6" r="4" fill="currentColor"></circle>
+                                <ellipse cx="12" cy="17" rx="7" ry="4" fill="currentColor"></ellipse>
+                            </svg>
+                            <span x-show="$store.app.sidebar">Profile</span>
+                        </button>
+                        <div x-show="open" @click.outside="open = false"
+                            class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded shadow-lg z-10">
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Profile
+                                Details</a>
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Sign Out</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- <main class="flex-1 overflow-y-auto p-2">
+                Main content goes here -->
+            <!-- <div class="mx-auto"> -->
+            <!-- <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-2">
+                        <h1 class="text-2xl font-semibold mb-1">Application Form</h1> -->
+            <!-- Include the form content here -->
+
+            <!-- </div> -->
+            <!-- </div> -->
+            <!-- </main> -->
+
+
+            <!-- form Content -->
+            <div class="flex-1 p-2 overflow-auto">
+                <div class="p-4">
+                    <div class="bg-white dark:bg-gray-800 shadow-md rounded-2xl p-4">
+                        <h2
+                            class="block p-2 bg-gray-200 border text-2xl rounded-lg shadow-sm dark:bg-white-800 dark:border-gray-700 text-cyan-800 mb-2  border-b border-gray-300 dark:border-gray-600">
+                            Government Of West Bengal Lakshmir Bhandar Scheme
+                        </h2>
+
+                        <div class="grid gap-6 md:grid-cols-2 mb-6 p-4 border-b border-gray-200 dark:border-gray-700 ">
+                            <div>
+                                <label for="check_aadhar"
+                                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Aadhar
+                                    Number</label>
+                                <input type="text" id="check_aadhar"
+                                    class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                    placeholder=" Enter Aadhar Number" required />
+                            </div>
+                            <div class="flex items-end">
+                                <button type="button"
+                                    class="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 w-full md:w-auto">Check
+                                    Availability</button>
+                            </div>
+                        </div>
+
+
+
+                        <div x-data="{
+                            tab: 1,
+                            tabs: [
+                                    { name: 'Personal Details', icon: 'M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z' },
+
+                                    { name: 'Contact Details', icon: 'M14.25 9.75v-4.5m0 4.5h4.5m-4.5 0 6-6m-3 18c-8.284 0-15-6.716-15-15V4.5A2.25 2.25 0 0 1 4.5 2.25h1.372c.516 0 .966.351 1.091.852l1.106 4.423c.11.44-.054.902-.417 1.173l-1.293.97a1.062 1.062 0 0 0-.38 1.21 12.035 12.035 0 0 0 7.143 7.143c.441.162.928-.004 1.21-.38l.97-1.293a1.125 1.125 0 0 1 1.173-.417l4.423 1.106c.5.125.852.575.852 1.091V19.5a2.25 2.25 0 0 1-2.25 2.25h-2.25Z' },
+
+                                    { name: 'Bank Details', icon: 'M2 10L12 3l10 7v2H2v-2zm1 3h2v6H3v-6zm4 0h2v6H7v-6zm4 0h2v6h-2v-6zm4 0h2v6h-2v-6zm4 0h2v6h-2v-6zM2 20h20v1H2v-1z' },
+
+                                    { name: 'Encloser List', icon: 'm18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13' },
+
+                                    { name: 'Self Declaration', icon: 'M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z' }
+                                ]
+                            }">
+                            <!-- hidden md:flex border-b mb-6 space-x-4  -->
+                            <div
+                                class="flex flex-wrap -mb-px text-xl font-medium text-center justify-center border-b mb-6 space-x-4 text-gray-500 dark:text-gray-400">
+                                <template x-for="(tabItem, i) in tabs" :key="i">
+                                    <button @click="tab = i + 1"
+                                        :class="tab === (i + 1) ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-blue-500'"
+                                        class="py-2 px-4 border-b-2 -mb-px flex items-center space-x-1">
+                                        <svg class="w-6 h-6 me-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300"
+                                            aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                            viewBox="0 0 20 24">
+                                            <path :d="tabItem.icon" />
+                                        </svg>
+                                        <span x-text="tabItem.name" class="hidden md:inline"></span>
+                                    </button>
+                                </template>
+                            </div>
+                            <!-- Personal Details -->
+                            <div x-show="tab === 1" x-transition>
+                                <form>
+                                    <div class="grid gap-6 md:grid-cols-2 mb-2 pl-4 pr-4">
+                                        <div>
+                                            <label for="entry_type"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
+                                                Entry Type</label>
+                                            <select id="entry_type"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400">
+                                                <option selected="">--Select Entry Type--</option>
+                                                <option value="1">Normal Entry</option>
+                                                <option value="2">Duare Sarkar Entry</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="ds_date"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Duare
+                                                Sakar Date</label>
+                                            <input type="date" id="ds_date" name="ds_date"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="Select Date" required />
+                                        </div>
+                                        <div>
+                                            <label for="ds_registration_number"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Duare
+                                                Sakar Registration
+                                                Number</label>
+                                            <input type="text" id="ds_registration_number" name="ds_registration_number"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="Enter Duare Sakar Registration Number" required />
+                                        </div>
+
+                                        <div>
+                                            <label for="application_date"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Application
+                                                Date</label>
+                                            <input type="date" id="application_date" name="application_date"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="Select Date" required />
+                                        </div>
+                                    </div>
+                                    <div class="grid gap-6 mb-2 md:grid-cols-2 pl-4 pr-4">
+                                        <div>
+                                            <label for="applicant_name"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Applicant
+                                                Name</label>
+                                            <input type="text" id="applicant_name"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="Enter Applicant Name" required />
+                                        </div>
+                                    </div>
+
+                                    <div class="grid gap-6 mb-1 md:grid-cols-2 pl-4 pr-4">
+                                        <div>
+                                            <label for="phone"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Phone
+                                                number</label>
+                                            <input type="tel" id="phone"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="123-45-678" pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}"
+                                                required />
+                                        </div>
+                                        <div>
+                                            <label for="email"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email
+                                                address</label>
+                                            <input type="email" id="email"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="example@example.com" required />
+                                        </div>
+                                        <div>
+                                            <label for="dob"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date
+                                                of Birth</label>
+                                            <input type="date" id="dob" name="dob"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="Date of Birth" required />
+                                        </div>
+                                        <div>
+                                            <label for="age"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Age
+                                                as on</label>
+                                            <input type="text" id="age" name="age" value="25" placeholder="Age" readonly
+                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-0 focus:border-gray-300 cursor-not-allowed block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
+                                        </div>
+                                    </div>
+                                    <div class="grid gap-6 mb-2 md:grid-cols-2 pl-4 pr-4">
+                                        <!-- <h1 class="text-sm font-medium mt-2 col-span-3">Father's Name</h1> -->
+                                        <div>
+                                            <label for="father_name"
+                                                class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Father's
+                                                Name</label>
+                                            <input type="text" id="father_name" name="father_name"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="Father's Name" required />
+                                        </div>
+
+                                        <div>
+                                            <label for="mother_name"
+                                                class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Mother's
+                                                Name</label>
+                                            <input type="text" id="mother_name" name="mother_name"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="Mother's Name" required />
+                                        </div>
+                                        <div>
+                                            <label for="Marital_status"
+                                                class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Marital
+                                                Status</label>
+                                            <select id="Marital_status" name="Marital_status"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400">
+                                                <option selected="">--Select Marital Status--</option>
+                                                <option value="1">Unmarried</option>
+                                                <option value="2">Married</option>
+                                                <option value="3">Others</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label for="spouse_name"
+                                                class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Spouse's
+                                                Name</label>
+                                            <input type="text" id="spouse_name" name="spouse_name"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="Spouse Name" required />
+                                        </div>
+
+                                    </div>
+                                    <div class="grid gap-6 mb-2 md:grid-cols-2 pl-4 pr-4">
+                                        <div>
+                                            <label for="caste"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
+                                                Caste</label>
+                                            <select id="caste" name="caste"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400">
+                                                <option selected="">--Select Caste--</option>
+                                                <option value="1">SC</option>
+                                                <option value="2">ST</option>
+                                                <option value="3">Others</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="caste_certificate_number"
+                                                class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Caste
+                                                Certificate Number</label>
+                                            <input type="text" id="caste_certificate_number"
+                                                name="caste_certificate_number"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="Caste Certificate Number" required />
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-end mt-4 pr-4">
+                                        <button @click="tab++" class="bg-cyan-600 text-white px-4 py-2 rounded">Save &
+                                            Next</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- Contact Details -->
+                            <div x-show="tab === 2" x-transition>
+                                <form>
+                                    <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
+                                        <div>
+                                            <label for="state"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">State</label>
+                                            <select id="state" name="state" readonly
+                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-0 focus:border-gray-300 cursor-not-allowed block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                                                <option selected="19">West Bengal </option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="district"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">District</label>
+                                            <select id="district" name="district"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400">
+                                                <option selected="">--Select District--</option>
+                                                <option value="1">Kolkata</option>
+                                                <option value="2">Howrah</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="rural_urban"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Rural/Urban</label>
+                                            <select id="rural_urban" name="rural_urban"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400">
+                                                <option selected="">--Select Rural/Urban--</option>
+                                                <option value="1">Rural</option>
+                                                <option value="2">Urban</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="block_municipality_crop"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Block/Municipality/Crop</label>
+                                            <select id="block_municipality_crop" name="block_municipality_crop"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400">
+                                                <option selected="">--Select Block/Municipality/Crop--</option>
+                                                <option value="1">Kolkata</option>
+                                                <option value="2">Howrah</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="gp_ward"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Gp/Ward</label>
+                                            <select id="gp_ward" name="gp_ward"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400">
+                                                <option selected="">--Select Gp/Ward--</option>
+                                                <option value="1">Kolkata</option>
+                                                <option value="2">Howrah</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="police_station"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Police
+                                                Station</label>
+                                            <input type="text" id="police_station" name="police_station"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="Enter Police Station" required />
+                                        </div>
+                                        <div>
+                                            <label for="village_town_city"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Village/Town/City</label>
+                                            <input type="text" id="village_town_city" name="village_town_city"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="Enter Village/Town/City" required />
+                                        </div>
+                                        <div>
+                                            <label for="House_Premises_no"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">House/Premises
+                                                No</label>
+                                            <input type="text" id="House_Premises_no" name="House_Premises_no"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="Enter House/Premises No" required />
+                                        </div>
+                                        <div>
+                                            <label for="pin"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">PIN</label>
+                                            <input type="number" id="pin" name="pin"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="PIN Number" required />
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between mt-4 pl-6 pr-6">
+                                        <button @click="tab--"
+                                            class="bg-gray-500 text-white px-4 py-2 rounded">Previous</button>
+                                        <button @click="tab++" class="bg-blue-600 text-white px-4 py-2 rounded">Save &
+                                            Next</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- Bank Details -->
+                            <div x-show="tab === 3" x-transition>
+                                <form>
+                                    <div class="grid gap-6 mb-4 md:grid-cols-2 pl-4 pr-4">
+                                        <div>
+                                            <label for="ifsc"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">IFSC</label>
+                                            <input type="text" id="ifsc" name="ifsc"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="Enter IFSC Code" required />
+                                        </div>
+                                        <div>
+                                            <label for="bank_name"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Bank
+                                                Name</label>
+                                            <input type="text" id="bank_name" name="bank_name" readonly
+                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-0 focus:border-gray-300 cursor-not-allowed block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                                                value="Bank of America" required />
+                                        </div>
+                                        <div>
+                                            <label for="bank_branch_name"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Bank
+                                                branch Name</label>
+                                            <input type="text" id="bank_branch_name" name="bank_branch_name" readonly
+                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-0 focus:border-gray-300 cursor-not-allowed block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                                                value="Bank of America" required />
+                                        </div>
+                                        <div>
+                                            <label for="bank_account_no"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Bank
+                                                Account Number</label>
+                                            <input type="text" id="bank_account_no" name="bank_account_no"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="Enter Bank Account Number" required />
+                                        </div>
+                                        <div>
+                                            <label for="bank_account_no"
+                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirm
+                                                Bank Account Number</label>
+                                            <input type="text" id="confirm_bank_account_no"
+                                                name="confirm_bank_account_no"
+                                                class="border border-gray-300 hover:border-blue-500  focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
+                                                placeholder="Enter Confirm Bank Account Number" required />
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between mt-4 pl-6 pr-6">
+                                        <button @click="tab--"
+                                            class="bg-gray-500 text-white px-4 py-2 rounded">Previous</button>
+                                        <button @click="tab++" class="bg-blue-600 text-white px-4 py-2 rounded">Save &
+                                            Next</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- enclosure list -->
+                            <div x-show="tab === 4" x-transition>
+                                <div class="grid gap-6 mb-4 md:grid-cols-1 pl-4 pr-4" 
+                                x-data="{
+                                        showUploadModal: false,
+                                        showPreviewModal: false,
+                                        currentDocId: null,
+                                        uploadedFiles: {},  // Store uploaded files by docId
+                                            filePreviews: {},   // Store preview paths by docId
+
+                                            documents: [
+                                                { id: 1, name: 'Aadhaar Card' },
+                                                { id: 2, name: 'Bank' },
+                                                { id: 3, name: 'Photo' },
+                                                { id: 4, name: 'Aadhar consent' },
+                                                { id: 5, name: 'Others' },
+                                                { id: 6, name: 'SC/ST Certificate' }
+                                            ],
+
+                                            openUploadModal(id) {
+                                                this.currentDocId = id;
+                                                this.showUploadModal = true;
+                                            },
+
+                                            openPreviewModal(id) {
+                                                this.currentDocId = id;
+                                                this.showPreviewModal = true;
+                                            },
+
+                                            handleFileChange(event) {
+                                                const file = event.target.files[0];
+                                                if (!file) return;
+
+                                                const reader = new FileReader();
+                                                reader.onload = (e) => {
+                                                    this.uploadedFiles[this.currentDocId] = file;
+                                                    if (file.type.startsWith('image/')) {
+                                                        this.filePreviews[this.currentDocId] = e.target.result;
+                                                    } else {
+                                                        this.filePreviews[this.currentDocId] = null;
+                                                    }
+                                                };
+                                                reader.readAsDataURL(file);
+                                            },
+
+                                            uploadFile() {
+                                                if (!this.uploadedFiles[this.currentDocId]) {
+                                                    alert('No file selected!');
+                                                    return;
+                                                }
+                                                // Simulate upload here
+                                                alert('File uploaded for Document ID: ' + this.currentDocId);
+                                                this.showUploadModal = false;
+                                            }
+                                        }">
+
+                                    <!-- Document List with Upload/Preview -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                                        <template x-for="doc in documents" :key="doc.id">
+                                            <div class="bg-white p-4 rounded shadow flex flex-col space-y-2">
+                                                <span class="text-gray-800 font-medium"
+                                                    x-text="'Upload ' + doc.name"></span>
+
+                                                <div class="flex space-x-2">
+                                                    <button @click="openUploadModal(doc.id)"
+                                                        class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition">
+                                                        Upload
+                                                    </button>
+
+                                                    <template x-if="uploadedFiles[doc.id]">
+                                                        <button @click="openPreviewModal(doc.id)"
+                                                            class="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 w-full md:w-auto transition">
+                                                            Preview
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <!-- Upload Modal -->
+                                    <div x-show="showUploadModal" x-cloak x-transition
+                                        class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
+                                        @click.outside="showUploadModal = false">
+                                        <div class="bg-white rounded-lg p-6 shadow-md w-full max-w-lg">
+                                            <div class="flex justify-between items-center mb-4">
+                                                <h2 class="text-lg font-semibold text-gray-800">Upload Document</h2>
+                                                <button @click="showUploadModal = false"
+                                                    class="text-gray-500 hover:text-red-500 text-xl">×</button>
+                                            </div>
+                                           <input type="file" @change="handleFileChange" class="mb-4">
+
+                                            <!-- Preview Inside Modal -->
+                                            <template x-if="filePreviews[currentDocId]">
+                                                <div class="mb-4">
+                                                    <img :src="filePreviews[currentDocId]" alt="Preview"
+                                                        class="max-w-full h-48 object-contain rounded border">
+                                                </div>
+                                            </template>
+
+                                            <div class="flex justify-end space-x-2">
+                                                <button @click="showUploadModal = false"
+                                                    class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Cancel</button>
+                                                <button @click="uploadFile()"
+                                                    class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Upload</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Preview Modal -->
+                                    <div x-show="showPreviewModal" x-cloak x-transition
+                                        class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
+                                        @click.outside="showPreviewModal = false">
+                                        <div class="bg-white rounded-lg p-6 shadow-md w-full max-w-lg">
+                                            <div class="flex justify-between items-center mb-4">
+                                                <h2 class="text-lg font-semibold text-gray-800">Document Preview</h2>
+                                                <button @click="showPreviewModal = false"
+                                                    class="text-gray-500 hover:text-red-500 text-xl">×</button>
+                                            </div>
+
+                                            <template x-if="filePreviews[currentDocId]">
+                                                <img :src="filePrevi
+                                                
+                                                
+                                                ews[currentDocId]" alt="Preview"
+                                                    class="max-w-full h-64 object-contain rounded border mx-auto">
+                                            </template>
+
+                                            <template x-if="!filePreviews[currentDocId]">
+                                                <p class="text-gray-600 text-sm text-center">No preview available for
+                                                    this file type.</p>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-between mt-4 pl-6 pr-6">
+                                        <button @click="tab--"
+                                            class="bg-gray-500 text-white px-4 py-2 rounded">Previous</button>
+                                        <button @click="tab++" class="bg-blue-600 text-white px-4 py-2 rounded">Save &
+                                            Next</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Self Decleration -->
+                            <div x-show="tab === 5" x-transition>
+                                <!-- <form> -->
+                                    <div class="grid gap-6 mb-4 md:grid-cols-1 mt-4 pl-6 pr-4">
+                                        <div>
+                                            <input id="check1" type="checkbox" value="0"
+                                                class="w-4 h-4 text-yellow-400 bg-gray-100 border-gray-300 rounded-sm focus:ring-yellow-500 dark:focus:ring-yellow-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                            <label for="check1"
+                                                class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">That I
+                                                am a resident of West Bengal.</label>
+                                        </div>
+                                        <div>
+                                            <input id="check2" type="checkbox" value="1"
+                                                class="w-4 h-4 text-yellow-400 bg-gray-100 border-gray-300 rounded-sm focus:ring-yellow-500 dark:focus:ring-yellow-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                            <label for="check2"
+                                                class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">That i
+                                                do not earn any monthly remuneration fron any regular Government
+                                                Job.</label>
+                                        </div>
+                                        <div>
+                                            <input id="check3" type="checkbox" value="2"
+                                                class="w-4 h-4 text-yellow-400 bg-gray-100 border-gray-300 rounded-sm focus:ring-yellow-500 dark:focus:ring-yellow-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                            <label for="check3"
+                                                class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">That
+                                                all the information and documents submitted by me are correct/genuine.
+                                                In case any of the information/document is found to be false,penal
+                                                action shall be taken against me and the benefit will be
+                                                terminated.</label>
+                                        </div>
+                                        <div>
+                                            <input id="check4" type="checkbox" value="3"
+                                                class="w-4 h-4 text-yellow-400 bg-gray-100 border-gray-300 rounded-sm focus:ring-cyan-500 dark:focus:ring-yellow-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                            <label for="check4"
+                                                class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">I give
+                                                consent to the use of the Aadhaar number for authenticating my identity
+                                                for social pension (in case Aadhaar no. provided by the
+                                                applicant).</label>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between mt-4 pl-6 pr-6">
+                                        <button @click="tab--"
+                                            class="bg-gray-500 text-white px-4 py-2 rounded">Previous</button>
+                                        <button @click="alert('Form Submitted!')"
+                                            class="bg-green-600 text-white px-4 py-2 rounded">Submit</button>
+                                    </div>
+                                <!-- </form> -->
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End form Content -->
+
+            <!-- Footer -->
+            <footer class="p-2 bg-white dark:bg-gray-800 text-center border-t border-gray-200 dark:border-gray-700">
+                <p class="text-sm">&copy; 2025 Lakshmir Bhandar. All rights reserved.</p>
+            </footer>
+        </div>
+
+    </div>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('app', {
+                sidebar: true,
+                toggleSidebar() {
+                    this.sidebar = !this.sidebar;
+                    // this.menuOpen = null;
+
+                },
+                mode: 'light',
+                toggleMode(mode) {
+                    this.mode = mode;
+                }
+            });
+        });
+
+    </script>
+</body>
+
+</html>

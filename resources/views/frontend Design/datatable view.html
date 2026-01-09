@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Responsive Data Table with Icons</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+</head>
+
+<body class="bg-gray-100">
+  <div class="max-w-6xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md space-y-4">
+    <!-- Top Bar -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex gap-2">
+        <button
+          class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          Add
+        </button>
+        <button
+          class="flex items-center gap-2 px-2 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition">
+          <i class="fas fa-file-excel text-green-600"></i>
+          Export
+        </button>
+      </div>
+      <div class="flex justify-center">
+        <select
+          class="w-48 px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          <option>Show 10 entries</option>
+          <option>Show 25 entries</option>
+          <option>Show 50 entries</option>
+        </select>
+      </div>
+      <div class="flex justify-end w-full md:w-auto">
+        <div class="relative w-full md:w-64">
+          <input type="text" placeholder="Search..."
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-blue-500 focus:border-blue-500" />
+          <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto border rounded-lg shadow-sm">
+      <table class="min-w-full text-sm text-left text-gray-700 text-center">
+        <thead class="bg-teal-200 text-xs uppercase py-3">
+          <tr>
+            <th class="py-3">ID</th>
+            <th class="py-3">Name</th>
+            <th class="py-3">Email</th>
+            <th class="py-3">Role</th>
+            <th class="py-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 bg-white y-overflow-y-auto">
+          <!-- Row 1 -->
+          <tr class="hover:bg-gray-50">
+            <td class="py-3">1</td>
+            <td class="py-3 font-medium text-gray-900">Alice Johnson</td>
+            <td class="py-3">alice@example.com</td>
+            <td class="py-3 text-indigo-600">Admin</td>
+            <td class="py-3 space-x-4">
+              <!-- View Button -->
+              <div x-data="{ show: false }" class="relative inline-block">
+                <button @mouseenter="show = true" @mouseleave="show = false"
+                  class="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -50 576 576" class="w-4 h-4 text-blue-600"
+                    fill="currentColor">
+                    <path d="M572.52 241.4C518.29 135.59 410.93 64 288 64S57.68 135.64 3.48 241.41
+           a32.35 32.35 0 000 29.19C57.71 376.41 165.07 448 288 448s230.32-71.64
+           284.52-177.41a32.35 32.35 0 000-29.19zM288 400a144 144 0 1 1 144-144
+           143.93 143.93 0 0 1-144 144zm0-240a95.31 95.31 0 0 0-25.31 3.79
+           a47.85 47.85 0 0 1-66.9 66.9A95.78 95.78 0 1 0 288 160z" />
+                  </svg>
+                </button>
+
+                <div x-show="show" x-transition
+                  class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded shadow z-10">
+                  View
+                </div>
+              </div>
+
+              <!-- Delete Button -->
+              <div x-data="{ show: false }" class="relative inline-block">
+                <button @mouseenter="show = true" @mouseleave="show = false">
+                  <i data-lucide="trash-2" class="w-4 h-4 text-red-600"></i>
+                </button>
+                <div x-show="show" x-transition
+                  class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded shadow z-10">
+                  Delete
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 2 -->
+          <tr class="hover:bg-gray-50">
+            <td class="py-3">2</td>
+            <td class="py-3 font-medium text-gray-900">Bob Smith</td>
+            <td class="py-3">bob@example.com</td>
+            <td class="py-3 text-green-600">User</td>
+            <td class="py-3 space-x-4">
+              <!-- View Button -->
+              <div x-data="{ show: false }" class="relative inline-block">
+                <button @mouseenter="show = true" @mouseleave="show = false"
+                  class="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300 transition">
+                  <i class="fas fa-eye text-blue-600"></i>
+
+                </button>
+                <div x-show="show" x-transition
+                  class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded shadow z-10">
+                  View
+                </div>
+              </div>
+
+              <!-- Delete Button -->
+              <div x-data="{ show: false }" class="relative inline-block">
+                <button @mouseenter="show = true" @mouseleave="show = false">
+                  <i data-lucide="trash-2" class="w-4 h-4 text-red-600"></i>
+                </button>
+                <div x-show="show" x-transition
+                  class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded shadow z-10">
+                  Delete
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex flex-col md:flex-row items-center justify-between mt-4 space-y-2 md:space-y-0">
+      <div class="text-sm text-gray-600">Showing 1 to 10 of 50 entries</div>
+      <div class="flex items-center space-x-1">
+        <button class="px-2 py-1 text-sm text-gray-500 bg-gray-100 rounded hover:bg-gray-200">
+          <i class="fa fa-angle-double-right text-xs"></i>
+        </button>
+        <button class="px-3 py-1 text-sm text-white bg-blue-600 rounded">1</button>
+        <button class="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded hover:bg-gray-200">2</button>
+        <button class="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded hover:bg-gray-200">3</button>
+        <span class="px-2 text-sm text-gray-500">…</span>
+        <button class="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded hover:bg-gray-200">5</button>
+        <button class="px-2 py-1 text-sm text-gray-500 bg-gray-100 rounded hover:bg-gray-200">
+          <i class="fa fa-angle-double-right text-xs"></i>
+
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+    });
+  </script>
+</body>
+
+</html>
