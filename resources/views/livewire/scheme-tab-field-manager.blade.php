@@ -31,6 +31,30 @@
                         class="bg-green-600 hover:bg-green-700 text-sm">
                         Manage Fields
                     </x-button.primary>
+                    <a href="{{ route('edit-validation', [
+                     'ref' => Crypt::encryptString($tab->scheme_id.'|'.$tab->tab_code)
+                ]) }}">
+
+                         <x-button.primary
+                            type="submit"
+                            class="bg-yellow-400 hover:bg-yellow-500 text-sm">
+                            Reset Validation
+                        </x-button.primary>
+                    </a>
+
+                    <form method="POST"
+                        action="{{ route('edit-validation') }}"
+                        class="inline">
+                        @csrf
+                        <input type="hidden"
+                            name="ref"
+                            value="{{ Crypt::encryptString($tab->scheme_id.'|'.$tab->tab_code) }}">
+                        <x-button.primary
+                            type="submit"
+                            class="bg-yellow-400 hover:bg-yellow-500 text-sm">
+                            Reset Validation
+                        </x-button.primary>
+                    </form>
                     <x-button.primary wire:click="openPreview({{ $tab->tab_code }})"
                         class="bg-gray-500 hover:bg-gray-600 text-sm">
                         Preview
