@@ -26,9 +26,6 @@ class RenderDynamicForm extends Component
     use WithFileUploads;
     public function mount($schemeId = null,  $application_id = null, $mode = null)
     {
-        // dd('')
-        // dump($schemeId);
-        // dd($application_id);
         $this->mode = $mode;
         $this->schemeId = $schemeId;
         $this->application_id = $application_id;
@@ -52,8 +49,7 @@ class RenderDynamicForm extends Component
                 }
             }
         }
-        // dd($field);
-        // dd($field['level_name']);
+
         $existing = OtherDetails::where('application_id', $application_id)->first();
         if ($existing && is_array($existing->details)) {
             foreach ($existing->details as $key => $value) {
@@ -74,7 +70,7 @@ class RenderDynamicForm extends Component
     }
     public function save()
     {
-        // dd($this->formData);
+
         $this->validate(
             $this->buildValidationRules()
         );
@@ -86,7 +82,7 @@ class RenderDynamicForm extends Component
                 $payload[$key] = $value;
             }
         }
-        // dd($payload);
+
         OtherDetails::updateOrCreate(
             [
                 'application_id' => $this->application_id,
@@ -129,7 +125,7 @@ class RenderDynamicForm extends Component
             foreach ($group as $field) {
 
                 $rule = $field['validation_rule'];
-                // Skip empty rules
+
                 if (!$rule || $rule === 'nullable') {
                     continue;
                 } else {
@@ -137,7 +133,7 @@ class RenderDynamicForm extends Component
                 }
             }
         }
-        // dd($rules);
+
         return $rules;
     }
     protected function validationAttributes(): array
@@ -167,18 +163,15 @@ class RenderDynamicForm extends Component
         $parentLabel = $parentField['field_label'];
         $parentValue = $this->formData[$parentLabel] ?? null;
 
-        // 🔑 normalize allowed values
         $allowed = [];
         if (!empty($field['dependent_on_values'])) {
             $raw = is_array($field['dependent_on_values'])
                 ? $field['dependent_on_values']
                 : json_decode($field['dependent_on_values'], true);
 
-            $allowed = array_values($raw); // ⭐ IMPORTANT LINE
+            $allowed = array_values($raw);
         }
-        // =========================
-        // Parent value ARRAY
-        // =========================
+
         if (is_array($parentValue)) {
             if (empty($allowed)) {
                 return !empty($parentValue);
@@ -190,9 +183,6 @@ class RenderDynamicForm extends Component
             )) > 0;
         }
 
-        // =========================
-        // Parent value SCALAR
-        // =========================
         if (!empty($allowed)) {
             return in_array(
                 (string)$parentValue,

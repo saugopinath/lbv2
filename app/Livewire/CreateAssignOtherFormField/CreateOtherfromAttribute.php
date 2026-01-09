@@ -15,7 +15,7 @@ class CreateOtherfromAttribute extends Component
 {
     public $scheme_id;
     public $level_name;
-    public $field_id,$field_class;
+    public $field_id, $field_class;
     public $field_name;
     public $field_type;
     public array $validation_rule = [];
@@ -95,12 +95,15 @@ class CreateOtherfromAttribute extends Component
     public function updatedIsChooseDefault($value)
     {
         $this->is_choose_default = $value;
+
         $this->default_values = json_decode(
-            Storage::get('form-options.json'),
+            file_get_contents(public_path('js/form-options.json')),
             true
         );
+
         $this->default_value = null;
     }
+
     public function updatedDefaultValue($value)
     {
         $this->defaultOptions = [];
