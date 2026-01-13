@@ -8,6 +8,9 @@ use App\Models\MasterTab;
 use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabFormField;
 use App\Models\SchemeTabBasefield;
+use App\Models\SchemeAttachedDocMappings;
+use App\Models\SelfDeclerationBasefield;
+use App\Models\SectionLevelMaster;
 use Illuminate\Support\Facades\DB;
 
 class MasterTabManager extends Component
@@ -23,6 +26,8 @@ class MasterTabManager extends Component
     public $showPreview = false;
     public $previewActiveTabCode = null;
     public $previewFormFields;
+    public $attachedDocuments = [];
+    public $selfDeclarationDisplay = [];
 
     public $mappingSaved = false;
 
@@ -31,9 +36,9 @@ class MasterTabManager extends Component
         'selectedTabs'     => 'required|array|min:1',
     ];
 
-    /* ------------------------------
+    /* =========================
      | SCHEME CHANGE
-     |------------------------------*/
+     =========================*/
     public function updatedSelectedSchemeId($value)
     {
         if (!$value) {
@@ -44,6 +49,8 @@ class MasterTabManager extends Component
                 'selectedTabCode',
                 'mappingSaved',
                 'previewFormFields',
+                'attachedDocuments',
+                'selfDeclarationDisplay',
             ]);
             return;
         }
@@ -72,9 +79,9 @@ class MasterTabManager extends Component
         }
     }
 
-    /* ------------------------------
+    /* =========================
      | ADD TAB
-     |------------------------------*/
+     =========================*/
     public function updatedSelectedTabCode()
     {
         if (!$this->selectedTabCode) return;
@@ -88,9 +95,9 @@ class MasterTabManager extends Component
         $this->selectedTabCode = null;
     }
 
-    /* ------------------------------
+    /* =========================
      | REMOVE TAB
-     |------------------------------*/
+     =========================*/
     public function removeTab($tabCode)
     {
         $this->selectedTabs = array_values(
@@ -101,9 +108,9 @@ class MasterTabManager extends Component
         $this->mappingSaved = false;
     }
 
-    /* ------------------------------
+    /* =========================
      | DRAG ORDER
-     |------------------------------*/
+     =========================*/
     public function updateOrder(array $ordered)
     {
         $this->selectedTabs = array_map('intval', $ordered);
@@ -119,9 +126,9 @@ class MasterTabManager extends Component
         }
     }
 
-    /* ------------------------------
+    /* =========================
      | SAVE
-     |------------------------------*/
+     =========================*/
     public function submit()
     {
         $this->validate();
@@ -148,22 +155,37 @@ class MasterTabManager extends Component
         session()->flash('message', 'Tabs mapped successfully.');
     }
 
-    /* ------------------------------
+    /* =========================
      | PREVIEW
-     |------------------------------*/
+     =========================*/
     public function openPreview()
     {
         $this->showPreview = true;
         $this->previewActiveTabCode = $this->selectedTabs[0] ?? null;
 
         if ($this->previewActiveTabCode) {
-            $this->loadPreviewFields($this->previewActiveTabCode);
+            $this->loadPreviewByTab($this->previewActiveTabCode);
         }
     }
 
     public function setPreviewTab($tabCode)
     {
         $this->previewActiveTabCode = (int) $tabCode;
+        $this->loadPreviewByTab($tabCode);
+    }
+
+    private function loadPreviewByTab($tabCode)
+    {
+        if ($tabCode == 104) {
+            $this->loadAttachedDocuments();
+            return;
+        }
+
+        if ($tabCode == 105) {
+            $this->loadSelfDeclarationFields();
+            return;
+        }
+
         $this->loadPreviewFields($tabCode);
     }
 
@@ -190,11 +212,64 @@ class MasterTabManager extends Component
             ->values();
     }
 
+    private function loadAttachedDocuments()
+    {
+        $this->attachedDocuments = SchemeAttachedDocMappings::with('docType')
+            ->where('scheme_id', $this->selectedSchemeId)
+            ->where('tab_code', 104)
+            ->orderBy('position')
+            ->get();
+    }
+
+    private function loadSelfDeclarationFields()
+    {
+        $fields = SelfDeclerationBasefield::where('scheme_id', $this->selectedSchemeId)
+            ->where('tab_code', 105)
+            ->where('is_active', true)
+            ->orderBy('field_position')
+            ->get()
+            ->values();
+
+        $sectionMap = SectionLevelMaster::pluck('section_level_name', 'id')->toArray();
+
+        $result = [];
+        $lastKey = null;
+
+        foreach ($fields as $i => $field) {
+            $hasSection = !empty($field->section_level_id);
+            $currentKey = $hasSection
+                ? $field->section_level_type . '-' . $field->section_level_id
+                : null;
+
+            $next = $fields[$i + 1] ?? null;
+            $nextKey = (!empty($next?->section_level_id))
+                ? $next->section_level_type . '-' . $next->section_level_id
+                : null;
+
+            $result[] = [
+                'field' => $field,
+                'show_section_start' => $hasSection && $currentKey !== $lastKey,
+                'show_section_end'   => $hasSection && $currentKey !== $nextKey,
+                'section_title'      => $hasSection
+                    ? ($sectionMap[$field->section_level_id] ?? 'Section')
+                    : null,
+            ];
+
+            if ($hasSection) {
+                $lastKey = $currentKey;
+            }
+        }
+
+        $this->selfDeclarationDisplay = $result;
+    }
+
     public function closePreview()
     {
         $this->showPreview = false;
         $this->previewActiveTabCode = null;
         $this->previewFormFields = collect();
+        $this->attachedDocuments = [];
+        $this->selfDeclarationDisplay = [];
     }
 
     public function render()
