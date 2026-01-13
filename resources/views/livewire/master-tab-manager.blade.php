@@ -101,51 +101,163 @@
             </div>
         </div>
     @endif
-    {{-- PREVIEW MODAL --}}
+
+    {{-- Preview Modal --}}
     @if($showPreview)
         <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
-            <div class="bg-white rounded-xl shadow-lg w-auto max-w-auto">
+            <div class="bg-white rounded-xl shadow-lg w-auto max-w-auto max-h-[90vh] flex flex-col overflow-hidden">
 
-                {{-- Header --}}
-                <div class="flex items-center justify-between px-6 py-4 border-b">
-                    <h3 class="text-lg font-semibold text-gray-800">
-                        Tab Preview
-                    </h3>
-                    <button wire:click="closePreview" class="text-gray-400 hover:text-gray-600 text-xl">
-                        ✕
-                    </button>
-                </div>
+            {{-- HEADER --}}
+            <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
+                <h3 class="text-lg font-semibold text-gray-800">
+                    Preview
+                </h3>
+                <button wire:click="closePreview"
+                    class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+            </div>
 
-                {{-- TAB NAV (USING YOUR COMPONENT) --}}
-                <div class="px-6 pt-4">
-                    <nav class="flex space-x-6 border-b">
-                        @foreach($selectedTabs as $index => $tabCode)
-                            @php
-                                $tab = $allTabs->firstWhere('tab_code', $tabCode);
-                            @endphp
+            {{-- TAB NAV --}}
+            <div class="px-6 pt-4 border-b shrink-0">
+                <nav class="flex space-x-6">
+                    @foreach($selectedTabs as $tabCode)
+                        @php $tab = $allTabs->firstWhere('tab_code', $tabCode); @endphp
 
-                            <x-entrytab-nav-link :active="$index === 0" :icon="$tab?->tab_icon">
+                        <button
+                            wire:click="setPreviewTab({{ $tabCode }})"
+                            class="flex items-center gap-2 pb-2 text-sm font-medium
+                            {{ $previewActiveTabCode == $tabCode
+                                ? 'border-indigo-600 text-indigo-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+
+                            <x-entrytab-nav-link
+                                :active="$previewActiveTabCode == $tabCode"
+                                :icon="$tab?->tab_icon">
                                 {{ $tab?->tab_name }}
                             </x-entrytab-nav-link>
-                        @endforeach
-                    </nav>
-                </div>
-
-                {{-- Dummy Content Area (Preview Only) --}}
-                <div class="px-6 py-10 text-center text-gray-400">
-                    Selected tab content preview will appear here
-                </div>
-
-                {{-- Footer --}}
-                <div class="flex justify-end gap-3 px-6 py-4 border-t">
-                    <x-button.primary wire:click="closePreview" type="button">
-                        Close
-                    </x-button.primary>
-
-                </div>
-
+                        </button>
+                    @endforeach
+                </nav>
             </div>
+
+            {{-- CONTENT --}}
+            <div class="p-6 max-h-[70vh] overflow-y-auto">
+
+                {{-- ========== TAB 104 : ENCLOSURE ========== --}}
+                @if($previewActiveTabCode == 104)
+                    <livewire:enclosure-list
+                        :scheme_id="$selectedSchemeId"
+                        :form_preview="1"
+                        :tabCode="$previewActiveTabCode" />
+
+                {{-- ========== TAB 105 : SELF DECLARATION ========== --}}
+                @elseif($previewActiveTabCode == 105)
+
+                    @if(empty($selfDeclarationDisplay))
+                        <div class="text-center text-gray-400">
+                            No self declaration fields configured
+                        </div>
+                    @else
+                        <div class="space-y-2">
+                            @foreach($selfDeclarationDisplay as $row)
+
+                                {{-- SECTION START --}}
+                                @if($row['show_section_start'])
+                                    <div class="mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+                                        <span class="font-semibold text-indigo-700">
+                                            {{ $row['section_title'] }}
+                                        </span>
+                                    </div>
+                                @endif
+
+                                {{-- FIELD --}}
+                                <div class="py-2 bg-white {{ $row['field']->section_level_id ? 'pl-6 bg-gray-50' : '' }}">
+                                    @php $name = 'preview_'.$row['field']->id; @endphp
+
+                                    @switch($row['field']->field_type)
+                                        @case('text')
+                                            <x-form.input name="{{ $name }}" label="{{ $row['field']->level_name }}" disabled />
+                                            @break
+
+                                        @case('number')
+                                            <x-form.input type="number" name="{{ $name }}" label="{{ $row['field']->level_name }}" disabled />
+                                            @break
+
+                                        @case('date')
+                                            <x-form.input type="date" name="{{ $name }}" label="{{ $row['field']->level_name }}" disabled />
+                                            @break
+
+                                        @case('textarea')
+                                            <x-form.textarea name="{{ $name }}" label="{{ $row['field']->level_name }}" disabled />
+                                            @break
+
+                                        @case('select')
+                                            <x-form.select name="{{ $name }}" label="{{ $row['field']->level_name }}" disabled>
+                                                <option value="">-- Select --</option>
+                                                @foreach($row['field']->options ?? [] as $opt)
+                                                    <option>{{ $opt }}</option>
+                                                @endforeach
+                                            </x-form.select>
+                                            @break
+                                    @endswitch
+                                </div>
+
+                                {{-- SECTION END --}}
+                                @if($row['show_section_end'])
+                                    <div class="my-3"></div>
+                                @endif
+
+                            @endforeach
+                        </div>
+                    @endif
+
+                {{-- ========== OTHER TABS ========== --}}
+                @else
+
+                    @if($previewFormFields->isEmpty())
+                        <div class="text-center text-gray-400">
+                            No fields configured for this tab
+                        </div>
+                    @else
+                        <div class="grid md:grid-cols-2 gap-4">
+                            @foreach($previewFormFields as $field)
+                                @php $name = 'preview_'.$field->id; @endphp
+
+                                @if($field->field_type === 'text')
+                                    <x-form.input name="{{ $name }}" label="{{ $field->level_name }}" disabled />
+
+                                @elseif($field->field_type === 'number')
+                                    <x-form.input type="number" name="{{ $name }}" label="{{ $field->level_name }}" disabled />
+
+                                @elseif($field->field_type === 'date')
+                                    <x-form.input type="date" name="{{ $name }}" label="{{ $field->level_name }}" disabled />
+
+                                @elseif($field->field_type === 'textarea')
+                                    <x-form.textarea name="{{ $name }}" label="{{ $field->level_name }}" disabled />
+
+                                @elseif($field->field_type === 'select')
+                                    <x-form.select name="{{ $name }}" label="{{ $field->level_name }}" disabled>
+                                        <option value="">-- Select --</option>
+                                        @foreach($field->options ?? [] as $opt)
+                                            <option>{{ $opt }}</option>
+                                        @endforeach
+                                    </x-form.select>
+                                @endif
+                            @endforeach
+                        </div>
+                    @endif
+
+                @endif
+            </div>
+
+            {{-- FOOTER --}}
+            <div class="flex justify-end gap-3 px-6 py-4 border-t">
+                <x-button.primary wire:click="closePreview">
+                    Close
+                </x-button.primary>
+            </div>
+
         </div>
+    </div>
     @endif
     {{-- Success Message --}}
     @if(session()->has('message'))

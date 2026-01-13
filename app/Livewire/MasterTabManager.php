@@ -6,6 +6,8 @@ use Livewire\Component;
 use App\Models\Scheme;
 use App\Models\MasterTab;
 use App\Models\SchemeTabMapping;
+use App\Models\SchemeTabFormField;
+use App\Models\SchemeTabBasefield;
 use Illuminate\Support\Facades\DB;
 
 class MasterTabManager extends Component
@@ -17,9 +19,11 @@ class MasterTabManager extends Component
     public $positions = [];
     public $selectedTabCode = null;
 
+    // 🔹 Preview
     public $showPreview = false;
+    public $previewActiveTabCode = null;
+    public $previewFormFields;
 
-    // 🔑 Button control
     public $mappingSaved = false;
 
     protected $rules = [
@@ -32,13 +36,14 @@ class MasterTabManager extends Component
      |------------------------------*/
     public function updatedSelectedSchemeId($value)
     {
-        if (blank($value)) {
+        if (!$value) {
             $this->reset([
                 'selectedSchemeName',
                 'selectedTabs',
                 'positions',
                 'selectedTabCode',
                 'mappingSaved',
+                'previewFormFields',
             ]);
             return;
         }
@@ -47,7 +52,7 @@ class MasterTabManager extends Component
         $this->selectedTabs = [];
         $this->positions = [];
 
-        $scheme = Scheme::find((int) $value);
+        $scheme = Scheme::find($value);
         if (!$scheme) return;
 
         $this->selectedSchemeName = $scheme->name;
@@ -91,12 +96,13 @@ class MasterTabManager extends Component
         $this->selectedTabs = array_values(
             array_diff($this->selectedTabs, [(int)$tabCode])
         );
+
         $this->recalculatePositions();
         $this->mappingSaved = false;
     }
 
     /* ------------------------------
-     | DRAG & DROP
+     | DRAG ORDER
      |------------------------------*/
     public function updateOrder(array $ordered)
     {
@@ -121,9 +127,8 @@ class MasterTabManager extends Component
         $this->validate();
 
         DB::transaction(function () {
-
             SchemeTabMapping::where('scheme_id', $this->selectedSchemeId)
-                ->increment('position', 1000, ['is_active' => false]);
+                ->update(['is_active' => false]);
 
             foreach ($this->selectedTabs as $tabCode) {
                 SchemeTabMapping::updateOrCreate(
@@ -149,11 +154,47 @@ class MasterTabManager extends Component
     public function openPreview()
     {
         $this->showPreview = true;
+        $this->previewActiveTabCode = $this->selectedTabs[0] ?? null;
+
+        if ($this->previewActiveTabCode) {
+            $this->loadPreviewFields($this->previewActiveTabCode);
+        }
+    }
+
+    public function setPreviewTab($tabCode)
+    {
+        $this->previewActiveTabCode = (int) $tabCode;
+        $this->loadPreviewFields($tabCode);
+    }
+
+    private function loadPreviewFields($tabCode)
+    {
+        $fieldIds = SchemeTabFormField::where('scheme_id', $this->selectedSchemeId)
+            ->where('tab_code', $tabCode)
+            ->where('is_active', true)
+            ->orderBy('field_position')
+            ->pluck('tab_field_id')
+            ->toArray();
+
+        if (empty($fieldIds)) {
+            $this->previewFormFields = collect();
+            return;
+        }
+
+        $this->previewFormFields = SchemeTabBasefield::whereIn('id', $fieldIds)
+            ->whereIn('scheme_id', [0, $this->selectedSchemeId])
+            ->whereIn('tab_code', [0, $tabCode])
+            ->where('is_active', true)
+            ->get()
+            ->sortBy(fn ($f) => array_search($f->id, $fieldIds))
+            ->values();
     }
 
     public function closePreview()
     {
         $this->showPreview = false;
+        $this->previewActiveTabCode = null;
+        $this->previewFormFields = collect();
     }
 
     public function render()
