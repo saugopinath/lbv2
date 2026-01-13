@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Traits\WithLiveValidation;
 use Illuminate\Support\Facades\DB;
 use App\Models\CmoSmData;
+use App\Models\WorkflowsteproleMapping;
 
 class PersonalDetails extends Component
 {
@@ -25,6 +26,7 @@ class PersonalDetails extends Component
     public $name, $mobile, $email, $dob, $age, $mar_statu;
     public $ffname, $mfname, $sfname;
     public $caste, $cas_cer_no, $encoded, $hash, $grievance_id, $hideAppTypeSection;
+    public $sameLabelRoleId, $nextLabelRoleId;
     public function updatedDob($value)
     {
         try {
@@ -87,6 +89,15 @@ class PersonalDetails extends Component
     }
     public function mount($mode = null, $application_id = null, $aadhaarData = null)
     {
+        $encryptedRoleId = session('lgd_session.role_id');
+        if ($encryptedRoleId) {
+            $roleId = Crypt::decryptString($encryptedRoleId);
+            $labelRoles = WorkflowsteproleMapping::getLabelRoleIdsByRole($roleId);
+            if ($labelRoles) {
+                $this->sameLabelRoleId = $labelRoles->same_label_role_id;
+                $this->nextLabelRoleId = $labelRoles->next_label_role_id;
+            }
+        }
         if ($aadhaarData) {
             $this->encoded = $aadhaarData['encoded'];
             $this->hash = $aadhaarData['hash'];
@@ -190,7 +201,7 @@ class PersonalDetails extends Component
                 $draftbenPar->entry_type = $validated['app_type'];
                 $draftbenPar->caste = $validated['caste'];
                 $draftbenPar->district_id = Crypt::decryptString(Session::get('lgd_session.district_id'));
-                $draftbenPar->next_level_role_id = Codemaster::getIdByCode(21);
+                $draftbenPar->next_level_role_id = $this->nextLabelRoleId;
                 $draftbenPar->marital_status = $validated['mar_statu'];
                 $draftbenPar->is_final_submit = 0;
                 $draftbenPar->is_faulty = 0;

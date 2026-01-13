@@ -10,7 +10,6 @@
             currentFileName: '',
             currentFileMime: '',
             errorMessage:'',
-
             handleFileChange(event) {
                 const file = event.target.files[0];
                 if (!file) {
@@ -29,7 +28,6 @@
                     this.currentFilePreview = null;
                 }
             },
-
             openModal(docId, docName) {
                 this.currentDocName = docName || '';
                 this.resetFileData();
@@ -63,7 +61,6 @@
                         this.errorMessage = 'Something went wrong while uploading.';
                     }
                 },
-
                 closeModal() {
                     this.showUploadModal = false;
                     this.errorMessage = '';
@@ -75,14 +72,12 @@
                     this.$wire.call('resetSingleDocumentErrors');
                     this.$wire.dispatch('$refresh');
                 },
-
                 resetFileData() {
                     this.currentFilePreview = null;
                     this.currentFileName = '';
                     this.currentFileMime = '';
                     this.errorMessage = '';
                 }
-
     }" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         @foreach ($doc_lists as $doc)
         <div wire:key="doc_{{ $doc->doc_type_id }}">

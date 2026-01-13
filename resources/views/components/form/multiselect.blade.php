@@ -75,9 +75,9 @@
         x-show="open"
         @click.outside="open = false"
         x-transition
-       class="absolute z-50 mt-1 w-full bg-white border rounded shadow max-h-48 overflow-y-auto 
+       class="absolute z-50 mt-1 w-full bg-white border rounded shadow max-h-48 overflow-y-auto
          border-gray-300 hover:border-blue-500 focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm  dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400"
-    
+
     >
         <template x-for="item in options" :key="getValue(item)">
             <div

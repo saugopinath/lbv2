@@ -1,0 +1,22 @@
+{
+  "Gender": {
+    "1": "Male",
+    "2": "Female",
+    "3": "Other"
+  },
+  "Caste": {
+    "1": "SC",
+    "2": "ST",
+    "3": "OBC",
+    "4": "General"
+  },
+  "Maritual Status": {
+    "1": "Married",
+    "2": "Unmarried"
+  },
+  "District": {},
+  "Assemblies": {},
+  "Rural/Urban": {},
+  "Block": {},
+  "Panchayat": {}
+}

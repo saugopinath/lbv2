@@ -246,7 +246,7 @@
          <x-button.primary wire:click="openDigitalPreview" class="bg-blue-600 hover:bg-blue-700">
             Digital Preview
         </x-button.primary>
-        
+
         <x-button.primary wire:click="openFinalPreview" class="bg-blue-600 hover:bg-blue-700">
             Form Preview
         </x-button.primary>

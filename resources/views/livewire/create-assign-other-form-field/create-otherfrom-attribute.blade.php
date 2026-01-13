@@ -67,6 +67,11 @@
         </x-form.select>
 
         <div class="grid grid-cols-2 gap-4 md:col-span-2">
+            <x-form.multiselect
+                label="Validation Rules"
+                wire:model="validation_rule"
+                :options="$validationRuleOptions"
+                required />
 
             <div class="">
                 <label class="font-semibold block mb-1">
@@ -86,8 +91,124 @@
                         wire:model.live="is_under_section" />
                 </div>
             </div>
+            @if ($is_under_section === 'yes')
+            <x-form.select
+                name="section_id"
+                label="Select Section"
+                wire:model.live="section_id"
+                required>
+                <option value="">-- Select Section --</option>
+
+                @forelse ($sections as $section)
+                <option value="{{ $section->id }}">
+                    {{ $section->section_name }}
+                </option>
+                @empty
+                <option value="">No sections found</option>
+                @endforelse
+            </x-form.select>
+            @endif
+            @if($isdepenentsec)
+            <div class="">
+                <label class="font-semibold block mb-1">
+                    Is depenent?
+                </label>
+                <div class="flex gap-6">
+                    <x-form.radio
+                        name="isdependent"
+                        value="yes"
+                        label="Yes"
+                        wire:model.live="isdependent" />
+
+                    <x-form.radio
+                        name="isdependent"
+                        value="no"
+                        label="No"
+                        wire:model.live="isdependent" />
+                </div>
+            </div>
+            @endif
+            @if ($isdependent === 'yes')
+            <x-form.select
+                name="depenent_on"
+                label="Depenent On"
+                wire:model.live="depenent_on"
+                required>
+                <option value="">-- Select --</option>
+                @foreach ($depenentOptions as $option)
+                <option value="{{ $option->id }}">
+                    {{ $option->level_name }}
+                </option>
+                @endforeach
+            </x-form.select>
+            @endif
+            @if ($depvalueradio)
+            <div>
+                <label class="font-semibold block mb-1">
+                    Dependent on Values?
+                </label>
+
+                <div class="flex gap-6">
+                    <x-form.radio
+                        name="isdependentvalue"
+                        value="yes"
+                        label="Yes"
+                        wire:model.live="isdependentvalue" />
+
+                    <x-form.radio
+                        name="isdependentvalue"
+                        value="no"
+                        label="No"
+                        wire:model.live="isdependentvalue" />
+                </div>
+            </div>
+            @endif
+
+
+            @if ($isdependentvalue === 'yes' && $depvaluesopt)
+            <div wire:key="container-{{ $depenent_on }}">
+                <x-form.multiselect
+                    label="Dependent on Values"
+                    wire:model="depvalues"
+                    :options="$depvaluesopt"
+                    required />
+            </div>
+            @endif
+
 
             @if ($field_type === 'select')
+            <div class="">
+                <label class="font-semibold block mb-1">
+                    Is choose from default?
+                </label>
+                <div class="flex gap-6">
+                    <x-form.radio
+                        name="is_choose_default"
+                        value="yes"
+                        label="Yes"
+                        wire:model.live="is_choose_default" />
+
+                    <x-form.radio
+                        name="is_choose_default"
+                        value="no"
+                        label="No"
+                        wire:model.live="is_choose_default" />
+                </div>
+            </div>
+            @if ($is_choose_default === 'yes')
+            <x-form.select
+                name="default_value"
+                label="Default Value"
+                wire:model.live="default_value"
+                required>
+                <option value="">-- Select --</option>
+                @foreach ($default_values as $key => $value)
+                <option value="{{ $key }}">
+                    {{ $key }}
+                </option>
+                @endforeach
+            </x-form.select>
+            @endif
             <div class="">
                 <label class="font-semibold block mb-2">
                     Is Multiple Select Allowed?
@@ -112,33 +233,16 @@
         </div>
 
         {{-- Validation Rules (Alpine Multi-select) --}}
-        <x-form.multiselect
-            label="Validation Rules"
-            wire:model="validation_rule"
-            :options="$validationRuleOptions"
-            required />
+
 
         {{-- Is Under Any Section --}}
 
-        @if ($is_under_section === 'yes')
-        <x-form.select
-            name="section_id"
-            label="Select Section"
-            wire:model.live="section_id"
-            required>
-            <option value="">-- Select Section --</option>
 
-            @forelse ($sections as $section)
-            <option value="{{ $section->id }}">
-                {{ $section->section_name }}
-            </option>
-            @empty
-            <option value="">No sections found</option>
-            @endforelse
-        </x-form.select>
-        @endif
-
-        @if (in_array($field_type, ['select','checkbox','radio']))
+        @if($isdependent === 'no')
+        @if (
+        in_array($field_type, ['checkbox','radio']) ||
+        ($field_type === 'select' && $is_choose_default === 'no')
+        )
         <!-- Options Section -->
         <div class="md:col-span-2 mt-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -177,7 +281,7 @@
             @endif
         </div>
         @endif
-
+        @endif
         <!-- Save Button (outside conditional block) -->
         <div class="md:col-span-2 mt-6 pt-6 border-t">
             <x-button.loading-button

@@ -5721,6 +5721,7 @@
         {
             "name": "symfony/clock",
             "version": "v7.4.0",
+
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/clock.git",

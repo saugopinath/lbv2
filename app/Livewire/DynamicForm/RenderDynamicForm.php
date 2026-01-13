@@ -16,18 +16,16 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class RenderDynamicForm extends Component
 {
-    public int $schemeId;
+    public  $schemeId;
     public $mode;
-    public int $application_id;
+    public  $application_id;
     public array $fields = [];
     public array $sections = [];
     public array $formData = [];
+
     use WithFileUploads;
-    public function mount(int $schemeId, int $application_id, $mode = null)
+    public function mount($schemeId = null,  $application_id = null, $mode = null)
     {
-        // dd('')
-        // dump($schemeId);
-        // dd($application_id);
         $this->mode = $mode;
         $this->schemeId = $schemeId;
         $this->application_id = $application_id;
@@ -51,8 +49,6 @@ class RenderDynamicForm extends Component
                 }
             }
         }
-        // dd($field);
-        // dd($field['level_name']);
         $existing = OtherDetails::where('application_id', $application_id)->first();
         if ($existing && is_array($existing->details)) {
             foreach ($existing->details as $key => $value) {
@@ -73,7 +69,6 @@ class RenderDynamicForm extends Component
     }
     public function save()
     {
-        // dd($this->formData);
         $this->validate(
             $this->buildValidationRules()
         );
@@ -85,7 +80,6 @@ class RenderDynamicForm extends Component
                 $payload[$key] = $value;
             }
         }
-        // dd($payload);
         OtherDetails::updateOrCreate(
             [
                 'application_id' => $this->application_id,
@@ -128,7 +122,6 @@ class RenderDynamicForm extends Component
             foreach ($group as $field) {
 
                 $rule = $field['validation_rule'];
-                // Skip empty rules
                 if (!$rule || $rule === 'nullable') {
                     continue;
                 } else {
@@ -136,7 +129,6 @@ class RenderDynamicForm extends Component
                 }
             }
         }
-        // dd($rules);
         return $rules;
     }
     protected function validationAttributes(): array
@@ -149,6 +141,67 @@ class RenderDynamicForm extends Component
             }
         }
         return $attributes;
+    }
+    public function shouldShowField($field)
+    {
+        if (empty($field['dependent_on'])) {
+            return true;
+        }
+
+        $allFields = collect($this->fields)->flatten(1);
+        $parentField = $allFields->firstWhere('id', $field['dependent_on']);
+
+        if (!$parentField) {
+            return true;
+        }
+
+        $parentLabel = $parentField['field_label'];
+        $parentValue = $this->formData[$parentLabel] ?? null;
+
+        $allowed = [];
+        if (!empty($field['dependent_on_values'])) {
+            $raw = is_array($field['dependent_on_values'])
+                ? $field['dependent_on_values']
+                : json_decode($field['dependent_on_values'], true);
+
+            $allowed = array_values($raw);
+        }
+
+        if (is_array($parentValue)) {
+            if (empty($allowed)) {
+                return !empty($parentValue);
+            }
+
+            return count(array_intersect(
+                array_map('strval', $parentValue),
+                array_map('strval', $allowed)
+            )) > 0;
+        }
+
+        if (!empty($allowed)) {
+            return in_array(
+                (string)$parentValue,
+                array_map('strval', $allowed),
+                true
+            );
+        }
+
+        return $parentValue !== '' && $parentValue !== null;
+    }
+    public function updatedFormData() {}
+
+    protected function rules()
+    {
+        $rules = [];
+        foreach (collect($this->fields)->flatten(1) as $field) {
+            if ($this->shouldShowField($field)) {
+                $rule = $field['validation_rule'];
+                if ($rule && $rule !== 'nullable') {
+                    $rules["formData.{$field['field_label']}"] = $rule;
+                }
+            }
+        }
+        return $rules;
     }
     public function render()
     {

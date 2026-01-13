@@ -16,7 +16,6 @@ class SchemeSeeder extends Seeder
     public function run(): void
     {
         $schemes = array(
-
             array(
                 "id" => "20",
                 "name" => "Lakshmir Bhandar",

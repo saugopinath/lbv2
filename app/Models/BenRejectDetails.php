@@ -63,14 +63,14 @@ class BenRejectDetails extends Model implements Auditable
             $nextLevelRoleId = $benrej->personal_details[0]['next_level_role_id'] ?? null;
             // dd($nextLevelRoleId);
             $commonList = BeneficiaryCommonList::find($benrej->application_id);
-            // dd($benrej);
+            $nextLevelRoleId = $benrej->personal_details[0]['next_level_role_id'] ?? null;
+
             // dd( get_class($benrej));
             if ($commonList) {
                 $commonList->update([
                     'sourceable_type' => get_class($benrej),
                     'is_reject'       => true,
                     'next_level_role_id' => $nextLevelRoleId,
-
                 ]);
             }
         });

@@ -21,7 +21,6 @@ class IndexAcceptRejectInfoElasticSearchJob
        $accept_reject_info->user_details = $user->toArray();
        $accept_reject_info->action_description = Codemaster::select('name')->where('id',$accept_reject_info->op_type)->first()->toArray();
        $this->accept_reject_info = $accept_reject_info;
-
     }
 
     /**
