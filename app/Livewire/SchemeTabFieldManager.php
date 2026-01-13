@@ -34,6 +34,7 @@ class SchemeTabFieldManager extends Component
     public $attachedDocuments = [];
     public $extensionTypes = [];
     public $selfDeclarationFields;
+    public $digitalPreviewFields = [];
     public $selfDeclarationGrouped = [];
     public $selfDeclarationDisplay = [];
     public $showEditSelfDeclModal = false;
