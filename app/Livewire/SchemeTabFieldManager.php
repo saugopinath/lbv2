@@ -398,7 +398,7 @@ class SchemeTabFieldManager extends Component
                 if (!$base) {
                     continue;
                 }
-                // dd($baseFieldId);
+                // dd($base);
                 SchemeTabFormField::updateOrCreate(
                     [
                         'tab_field_id' => $baseFieldId,
@@ -419,7 +419,7 @@ class SchemeTabFieldManager extends Component
                         'field_position'  => $index + 1,
                         'is_common'       => $base->is_common,
                         'db_column'       => $base->db_colunm,
-                        'is_mandatory'    => $base->is_mandatory,
+                       'is_mandatory'    => $base->is_mendetory,
                         'is_active'       => true,
                     ]
                 );

@@ -100,18 +100,20 @@ class SchemeFieldValidationTable extends DataTableComponent
             ->where('scheme_id', $this->schemeId)
             ->where('tab_code', $this->tabCode)
             ->where('is_active', true)
-            ->orderBy('field_position', 'desc');
+            ->orderBy('field_position');
     }
     public function columns(): array
     {
         return [
             Column::make("No.")
                 ->label(function ($value, $row) {
-                    static $i = 0; // counter per page
+                    static $i = 0;
                     $i++;
                     return ($this->getPage() - 1) * $this->getPerPage() + $i;
                 }),
             Column::make("ID", "id")->hideIf(true),
+             Column::make("IsMandatory", "is_mandatory")->hideIf(true),
+            Column::make("regex", "regex")->hideIf(true),
             Column::make('Field Name', 'field_name'),
             Column::make('Level Name', 'level_name'),
             Column::make('Type', 'field_type'),
@@ -119,37 +121,45 @@ class SchemeFieldValidationTable extends DataTableComponent
                 ->label(
                     fn($row) =>
                     view('coulmn_button.validation-editor', [
-                        'fieldId' => $row->id,
+                        'fieldId'     => $row->id,
+                        'isMandatory' => (int) $row->is_mandatory,
                     ])
                 ),
-            Column::make('Regex', 'regex')
-                ->format(fn($value) => $value ?: 'N/A'),
-            // Column::make('Validation')
-            //     ->label(fn($row) => view(
-            //         'livewire.tables.validation-editor',
-            //         ['fieldId' => $row->id]
-            //     )),
-
-            // Column::make('Action')
-            //     ->label(fn($row) => view(
-            //         'livewire.tables.validation-save',
-            //         ['fieldId' => $row->id]
-            //     )),
+            Column::make('Regex')
+                ->format(function ($value, $row, Column $column) {
+                    return view('coulmn_button.regex-editor', [
+                        'fieldId' => $row->id,
+                        'regex'   => $row->regex ?? '',
+                    ])->render();
+                })
+                ->html(),
         ];
     }
     public function saveValidation($fieldId): void
     {
         $rules = $this->selectedValidations[$fieldId] ?? [];
-
-        SchemeTabFormField::where('id', $fieldId)->update([
+        $field = SchemeTabFormField::findOrFail($fieldId);
+        if ((int) $field->is_mandatory === 1 && !in_array('required', $rules)) {
+            array_unshift($rules, 'required');
+        }
+        $field->update([
             'validation_rule' => empty($rules)
                 ? null
-                : implode('|', $rules),
+                : implode('|', array_unique($rules)),
         ]);
-
-        $this->dispatch(
-            'notify',
-            'Validation updated successfully'
-        );
+        $this->dispatch('toastr', [
+            'type'    => 'success',
+            'message' => 'Validation Rule updated successfully',
+        ]);
+    }
+    public function saveRegex(int $id, string $regex): void
+    {
+        SchemeTabFormField::where('id', $id)->update([
+            'regex' => $regex,
+        ]);
+         $this->dispatch('toastr', [
+            'type'    => 'success',
+            'message' => 'Regex updated successfully',
+        ]);
     }
 }

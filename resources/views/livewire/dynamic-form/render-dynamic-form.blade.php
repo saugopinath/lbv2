@@ -200,7 +200,7 @@
 </form>
 
 <script src="{{ asset('js/master-data/master-data-v2.js') }}"></script>
-<script src="{{ asset('js/master-data/dynamic-form.js') }}"></script>
+
 
 
 
