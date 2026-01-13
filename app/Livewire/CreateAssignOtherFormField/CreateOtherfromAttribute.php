@@ -2,6 +2,7 @@
 
 namespace App\Livewire\CreateAssignOtherFormField;
 
+
 use Livewire\Component;
 use App\Models\Scheme;
 use App\Models\FromFieldType;
@@ -49,10 +50,7 @@ class CreateOtherfromAttribute extends Component
         $this->schemes = Scheme::all();
         $this->fieldTypes = FromFieldType::all();
         $this->validationRuleOptions = ValidationRule::all()
-            ->map(fn($rule) => [
-                'value' => $rule->rule,
-                'label' => $rule->description,
-            ])
+            ->pluck('description', 'rule')
             ->toArray();
         if (FromFieldAttribute::exists()) {
             $this->isdepenentsec = true;
@@ -144,11 +142,6 @@ class CreateOtherfromAttribute extends Component
 
             if ($ram && is_array($ram->options)) {
                 $this->depvaluesopt = collect($ram->options)
-                    ->map(fn($val, $key) => [
-                        'value' => (string)$key,
-                        'label' => $val,
-                    ])
-                    ->values()
                     ->toArray();
             }
         } else {
@@ -223,10 +216,17 @@ class CreateOtherfromAttribute extends Component
             ->values()
             ->toArray();
 
+        // $options = collect($this->options)
+        //     ->flatten()
+        //     ->filter(fn($v) => is_string($v))
+        //     ->values()
+        //     ->toArray();
+
         $options = collect($this->options)
             ->flatten()
             ->filter(fn($v) => is_string($v))
             ->values()
+            ->mapWithKeys(fn($value, $index) => [$index + 1 => $value])
             ->toArray();
 
         FromFieldAttribute::create([
