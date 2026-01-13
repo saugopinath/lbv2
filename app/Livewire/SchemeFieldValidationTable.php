@@ -107,7 +107,7 @@ class SchemeFieldValidationTable extends DataTableComponent
         return [
             Column::make("No.")
                 ->label(function ($value, $row) {
-                    static $i = 0; // counter per page
+                    static $i = 0;
                     $i++;
                     return ($this->getPage() - 1) * $this->getPerPage() + $i;
                 }),
@@ -140,13 +140,11 @@ class SchemeFieldValidationTable extends DataTableComponent
     public function saveValidation($fieldId): void
     {
         $rules = $this->selectedValidations[$fieldId] ?? [];
-
         SchemeTabFormField::where('id', $fieldId)->update([
             'validation_rule' => empty($rules)
                 ? null
                 : implode('|', $rules),
         ]);
-
         $this->dispatch(
             'notify',
             'Validation updated successfully'
