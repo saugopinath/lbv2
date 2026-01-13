@@ -95,11 +95,27 @@ class MasterTabManager extends Component
         $this->selectedTabCode = null;
     }
 
-    /* =========================
-     | REMOVE TAB
-     =========================*/
     public function removeTab($tabCode)
     {
+        DB::transaction(function () use ($tabCode) {
+
+            SchemeTabMapping::where('scheme_id', $this->selectedSchemeId)
+                ->where('tab_code', $tabCode)
+                ->delete();
+
+            SchemeTabFormField::where('scheme_id', $this->selectedSchemeId)
+                ->where('tab_code', $tabCode)
+                ->delete();
+
+            SchemeAttachedDocMappings::where('scheme_id', $this->selectedSchemeId)
+                ->where('tab_code', $tabCode)
+                ->delete();
+
+            SelfDeclerationBasefield::where('scheme_id', $this->selectedSchemeId)
+                ->where('tab_code', $tabCode)
+                ->delete();
+        });
+
         $this->selectedTabs = array_values(
             array_diff($this->selectedTabs, [(int)$tabCode])
         );
@@ -108,9 +124,6 @@ class MasterTabManager extends Component
         $this->mappingSaved = false;
     }
 
-    /* =========================
-     | DRAG ORDER
-     =========================*/
     public function updateOrder(array $ordered)
     {
         $this->selectedTabs = array_map('intval', $ordered);
@@ -208,7 +221,7 @@ class MasterTabManager extends Component
             ->whereIn('tab_code', [0, $tabCode])
             ->where('is_active', true)
             ->get()
-            ->sortBy(fn ($f) => array_search($f->id, $fieldIds))
+            ->sortBy(fn($f) => array_search($f->id, $fieldIds))
             ->values();
     }
 
