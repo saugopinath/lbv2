@@ -6,8 +6,6 @@ use App\Models\User;
 use App\Interfaces\UserInterface;
 class UserService implements UserInterface
 {
-  
-  
     public function find(int $id): ?User
     {
         return User::where('id',$id)->where('is_active',1)->first();
@@ -25,15 +23,15 @@ class UserService implements UserInterface
         else
         return true;
     }
-    
+
     public function isDDOLogin(int $userId): bool
     {
-       
+
         return true;
     }
     public function validPassword(int $userId,string $password): bool
     {
-       
+
         $user=User::where('id',$userId)->where('is_active',1)->first();
         if( Hash::check($password, $user->password)){
             return true;
@@ -52,6 +50,6 @@ class UserService implements UserInterface
         else
         return false;
     }
-    
-    
+
+
 }
