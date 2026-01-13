@@ -110,7 +110,9 @@ class CreateOtherfromAttribute extends Component
         if ($this->is_choose_default === 'yes') {
             if (isset($this->default_values[$value])) {
                 $this->defaultOptions = $this->default_values[$value];
-                $this->field_class = strtolower($value);
+                if (empty($this->defaultOptions)) {
+                    $this->field_class = strtolower(str_replace('/', '_', $value));
+                }
             }
         }
     }
