@@ -6,8 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class SchemeTabFormField extends Model
 {
-     protected $fillable = [
+    protected $fillable = [
         'scheme_id',
+        'db_column',
+        'is_mandatory',
+        'tab_field_id',
         'level_name',
         'field_name',
         'field_id',
@@ -21,5 +24,12 @@ class SchemeTabFormField extends Model
         'is_multiple',
         'field_position',
         'is_active',
+    ];
+
+    protected $casts = [
+        'options' => 'array',
+        'is_common' => 'boolean',
+        'is_multiple' => 'boolean',
+        'is_active' => 'boolean',
     ];
 }

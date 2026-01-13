@@ -30,7 +30,7 @@ return new class extends Migration
             $table->integer('field_position')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            $table->unique(['tab_code', 'scheme_id', 'field_name','level_name']);
+            $table->unique(['tab_code', 'scheme_id', 'field_name', 'level_name']);
             $table->index(['tab_code', 'scheme_id']);
         });
     }

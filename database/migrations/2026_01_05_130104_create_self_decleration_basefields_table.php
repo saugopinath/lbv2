@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('scheme_id');
             $table->integer('tab_code');
-            $table->integer( 'section_level_id')->nullable();
+            $table->integer('section_level_id')->nullable();
             $table->string('field_type', 50);
             $table->string('level_name', 500);
             $table->string('field_name', 100);
@@ -27,8 +27,9 @@ return new class extends Migration
             $table->boolean('is_multiple')->default(false);
             $table->integer('field_position')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->integer('section_level_type')->nullable();
             $table->timestamps();
-            $table->unique(['tab_code', 'scheme_id', 'field_name','level_name']);
+            $table->unique(['tab_code', 'scheme_id', 'field_name', 'level_name']);
             $table->index(['tab_code', 'scheme_id']);
         });
     }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\RejectApprovedBeneficiaryController;
+use App\Http\Controllers\ValidationManagerController;
 use App\Livewire\ApplicationView;
 use App\Livewire\IncompletTypePage;
 use Illuminate\Support\Facades\Route;
@@ -322,3 +323,5 @@ Route::get('/tab-field-manager', SchemeTabFieldManager::class)
     ->name('tab-field-manager');
 
 // Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name(name: 'menu-tab');
+
+Route::get('/edit-validation', [ValidationManagerController::class, 'index'])->name('edit-validation');

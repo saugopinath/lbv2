@@ -35,33 +35,33 @@ class ElasticsearchService
      * @param string $indexName
      * @return array
      */
-     public function createIndex($indexName)
-     {
-         $params = [
-             'index' => $indexName,
-             'body' => [
-                'settings' => [
-                     'number_of_shards' => 1,
-                    'number_of_replicas' => 0
-                ],
-                'mappings' => [
-                     'properties' => [
-                        'title' => [
-                             'type' => 'text'
-                        ],
-                        'content' => [
-                         'type' => 'text'
-                         ]
-                     ]
-                 ]
-            ]
-         ];
+    //  public function createIndex($indexName)
+    //  {
+    //      $params = [
+    //          'index' => $indexName,
+    //          'body' => [
+    //             'settings' => [
+    //                  'number_of_shards' => 1,
+    //                 'number_of_replicas' => 0
+    //             ],
+    //             'mappings' => [
+    //                  'properties' => [
+    //                     'title' => [
+    //                          'type' => 'text'
+    //                     ],
+    //                     'content' => [
+    //                      'type' => 'text'
+    //                      ]
+    //                  ]
+    //              ]
+    //         ]
+    //      ];
 
-         if($this->client->indices()->create($params))
-            return true;
-         else
-              return false;
-     }
+    //      if($this->client->indices()->create($params))
+    //         return true;
+    //      else
+    //           return false;
+    //  }
      public function verifyIndex($indexName)
      {
         $indexParams['index']  = $indexName;
@@ -80,29 +80,29 @@ class ElasticsearchService
      * @param array $data
      * @return array
      */
-     public function populateIndex($indexName, $data)
-     {
-        //dd($data);
-         try{
-            $params = [
-                        'index' => $indexName,
-                        'body' => $data
-                    ];
+    //  public function populateIndex($indexName, $data)
+    //  {
+    //     //dd($data);
+    //      try{
+    //         $params = [
+    //                     'index' => $indexName,
+    //                     'body' => $data
+    //                 ];
 
-     if($this->client->index($params)){
-        //dd('done');
-            return true;
-     }
-         else{
-              //dd('not done');
-             return false;
-         }
-     }
-         catch (Exception $e) {
-            dd($e);
-        }
-         //dd($indexName);
-    }
+    //  if($this->client->index($params)){
+    //     //dd('done');
+    //         return true;
+    //  }
+    //      else{
+    //           //dd('not done');
+    //          return false;
+    //      }
+    //  }
+    //      catch (Exception $e) {
+    //         dd($e);
+    //     }
+    //      //dd($indexName);
+    // }
     /**
      * Verify if a document with the given ID exists in the specified index.
      *

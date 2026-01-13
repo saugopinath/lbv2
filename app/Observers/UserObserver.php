@@ -16,7 +16,7 @@ class UserObserver
         unset($user->password_expires_at);
         unset($user->last_otp_generation_time);
         unset($user->last_otp_expire_time);
-        dispatch(new IndexUserElasticSearchJob($user));
+        // dispatch(new IndexUserElasticSearchJob($user));
      }
 
     /**
@@ -24,7 +24,7 @@ class UserObserver
      */
     public function updated(User $user): void
     {
-         dispatch(new IndexUserElasticSearchJob($user));
+        //  dispatch(new IndexUserElasticSearchJob($user));
     }
 
     /**
@@ -32,7 +32,7 @@ class UserObserver
      */
     public function deleted(User $user): void
     {
-        dispatch(new IndexUserElasticSearchJob($user));
+        // dispatch(new IndexUserElasticSearchJob($user));
     }
 
     /**
@@ -40,7 +40,7 @@ class UserObserver
      */
     public function restored(User $user): void
     {
-        dispatch(new IndexUserElasticSearchJob($user));
+        // dispatch(new IndexUserElasticSearchJob($user));
     }
 
     /**
@@ -48,6 +48,6 @@ class UserObserver
      */
     public function forceDeleted(User $user): void
     {
-        dispatch(new IndexUserElasticSearchJob($user));
+        // dispatch(new IndexUserElasticSearchJob($user));
     }
 }

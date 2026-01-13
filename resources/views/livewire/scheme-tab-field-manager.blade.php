@@ -19,7 +19,7 @@
                 <div class="flex gap-2 items-center">
                     @if(!in_array($tab->tab_code, [104, 105]))
                     <a href="{{ route('create-dynamicformfield', [
-                    'ref' => encrypt($tab->scheme_id . '|' . $tab->tab_code)
+                    'ref' => Crypt::encryptString($tab->scheme_id . '|' . $tab->tab_code)
                 ]) }}">
 
                         <x-button.primary class="bg-indigo-400 hover:bg-indigo-500 text-sm">
@@ -31,6 +31,16 @@
                         class="bg-green-600 hover:bg-green-700 text-sm">
                         Manage Fields
                     </x-button.primary>
+                    <a href="{{ route('edit-validation', [
+                     'ref' => Crypt::encryptString($tab->scheme_id.'|'.$tab->tab_code)
+                ]) }}">
+
+                         <x-button.primary
+                            type="submit"
+                            class="bg-yellow-400 hover:bg-yellow-500 text-sm">
+                            Reset Validation
+                        </x-button.primary>
+                    </a>
                     <x-button.primary wire:click="openPreview({{ $tab->tab_code }})"
                         class="bg-gray-500 hover:bg-gray-600 text-sm">
                         Preview
@@ -47,16 +57,16 @@
                 @if($tab->tab_code == 104)
                 @if(count($attachedDocuments))
                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
-                            new Sortable($el, {
-                                animation: 150,
-                                handle: '.drag-handle',
-                                onEnd() {
-                                    let ordered = Array.from($el.children)
-                                        .map(el => el.dataset.id);
-                                    $wire.updateDocumentOrder(ordered);
-                                }
-                            })
-                            ">
+                                            new Sortable($el, {
+                                                animation: 150,
+                                                handle: '.drag-handle',
+                                                onEnd() {
+                                                    let ordered = Array.from($el.children)
+                                                        .map(el => el.dataset.id);
+                                                    $wire.updateDocumentOrder(ordered);
+                                                }
+                                            })
+                                            ">
                     @foreach($attachedDocuments as $doc)
                     <div data-id="{{ $doc->id }}"
                         class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
@@ -91,9 +101,10 @@
                 </div>
                 @endif
                 @elseif($tab->tab_code == 105)
-                    <div class="grid grid-cols-2 gap-3 p-4"
-                        x-data
-                        x-init="
+                @if(!empty($selfDeclarationDisplay))
+                <div class="grid grid-cols-2 gap-3 p-4"
+                    x-data
+                    x-init="
                             new Sortable($el, {
                                 animation: 150,
                                 handle: '.drag-handle',
@@ -130,67 +141,73 @@
                             })
                         ">
 
-                        @foreach($selfDeclarationDisplay as $row)
+                    @foreach($selfDeclarationDisplay as $row)
 
-                            {{-- SECTION HEADER --}}
-                            @if($row['show_section_start'])
-                                <div
-                                    data-section-key="{{ $row['field']->section_level_type }}-{{ $row['field']->section_level_id }}"
-                                    class="col-span-2 mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
-                                    <span class="font-semibold text-indigo-700">
-                                        {{ $row['section_title'] }}
-                                    </span>
-                                </div>
-                            @endif
+                    {{-- SECTION HEADER --}}
+                    @if($row['show_section_start'])
+                    <div
+                        data-section-key="{{ $row['field']->section_level_type }}-{{ $row['field']->section_level_id }}"
+                        class="col-span-2 mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+                        <span class="font-semibold text-indigo-700">
+                            {{ $row['section_title'] }}
+                        </span>
+                    </div>
+                    @endif
 
-                            {{-- FIELD --}}
-                            <div
-                                data-field-id="{{ $row['field']->id }}"
-                                class="pl-6 py-2 flex items-center gap-3 border rounded bg-white
+                    {{-- FIELD --}}
+                    <div
+                        data-field-id="{{ $row['field']->id }}"
+                        class="pl-6 py-2 flex items-center gap-3 border rounded bg-white
                                     {{ $row['field']->section_level_id ? 'bg-gray-50' : '' }}">
 
-                                <span class="drag-handle cursor-move text-gray-400 text-lg">☰</span>
+                        <span class="drag-handle cursor-move text-gray-400 text-lg">☰</span>
 
-                                <span class="flex-1 text-gray-700 font-medium">
-                                    {{ $loop->iteration }}. {{ $row['field']->level_name }}
-                                </span>
+                        <span class="flex-1 text-gray-700 font-medium">
+                            {{ $loop->iteration }}. {{ $row['field']->level_name }}
+                        </span>
 
-                                <button
-                                    wire:click="editSelfDeclarationField({{ $row['field']->id }})"
-                                    class="text-indigo-600 font-bold text-lg hover:text-indigo-800 mr-2">
-                                    ✎
-                                </button>
+                        <button
+                            wire:click="editSelfDeclarationField({{ $row['field']->id }})"
+                            class="text-indigo-600 font-bold text-lg hover:text-indigo-800 mr-2">
+                            ✎
+                        </button>
 
-                                <button
-                                    wire:click="removeSelfDeclarationField({{ $row['field']->id }})"
-                                    class="text-red-500 font-bold text-lg hover:text-red-600 mr-2">
-                                    ✕
-                                </button>
-                            </div>
-
-                            {{-- SECTION END --}}
-                            @if($row['show_section_end'])
-                                <div
-                                    data-section-break="true"
-                                    class="col-span-2 border-b border-dashed border-indigo-300 my-3">
-                                </div>
-                            @endif
-
-                        @endforeach
+                        <button
+                            wire:click="removeSelfDeclarationField({{ $row['field']->id }})"
+                            class="text-red-500 font-bold text-lg hover:text-red-600 mr-2">
+                            ✕
+                        </button>
                     </div>
+
+                    {{-- SECTION END --}}
+                    @if($row['show_section_end'])
+                    <div
+                        data-section-break="true"
+                        class="col-span-2 border-b border-dashed border-indigo-300 my-3">
+                    </div>
+                    @endif
+
+                    @endforeach
+                </div>
+                @else
+                <div class="p-4 text-gray-400 text-sm text-center">
+                    No self declaration fields added
+                </div>
+                @endif
+
                 @else
                 @if(isset($tabFields[$tab->tab_code]) && count($tabFields[$tab->tab_code]))
                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
-                            new Sortable($el, {
-                                animation: 150,
-                                handle: '.drag-handle',
-                                onEnd() {
-                                    let ordered = Array.from($el.children)
-                                        .map(el => el.dataset.fid);
-                                    $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
-                                }
-                            })
-                        ">
+                                            new Sortable($el, {
+                                                animation: 150,
+                                                handle: '.drag-handle',
+                                                onEnd() {
+                                                    let ordered = Array.from($el.children)
+                                                        .map(el => el.dataset.fid);
+                                                    $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
+                                                }
+                                            })
+                                        ">
                     @foreach($tabFields[$tab->tab_code] as $fid => $fname)
                     <div data-fid="{{ $fid }}"
                         class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
@@ -226,10 +243,10 @@
 
     {{-- FINAL ACTION BUTTONS --}}
     <div class="flex justify-center gap-4 pt-6">
-       <x-button.primary wire:click="openDigitalPreview" class="bg-blue-600 hover:bg-blue-700">
-                Digital Preview
+         <x-button.primary wire:click="openDigitalPreview" class="bg-blue-600 hover:bg-blue-700">
+            Digital Preview
         </x-button.primary>
-
+        
         <x-button.primary wire:click="openFinalPreview" class="bg-blue-600 hover:bg-blue-700">
             Form Preview
         </x-button.primary>
@@ -301,7 +318,6 @@
                         @enderror
                     </div>
                 </div>
-
                 {{-- ATTACHED DOCUMENT LIST --}}
                 @if($attachedDocuments->count())
                 <div class="border-t pt-4">
@@ -335,7 +351,6 @@
                 <livewire:add-self-declerationfield
                     :scheme_id="$schemeId"
                     :tab_code="$activeTabCode" />
-
                 @else
                 {{-- OTHER TABS --}}
                 <div class="grid grid-cols-2 gap-3">
@@ -347,7 +362,6 @@
 
                         <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}"
                             @if($field['is_mandatory'] && $field['tab_code'] !=0) disabled @endif>
-
                         <span>
                             {{ $field['field_name'] }}
                             @if($field['is_mandatory'])
@@ -357,10 +371,8 @@
                     </label>
                     @endforeach
                 </div>
-
                 @endif
             </div>
-
             {{-- FOOTER (fixed) --}}
             <div class="flex justify-end gap-3 px-6 py-4 border-t shrink-0">
 
@@ -387,16 +399,13 @@
         </div>
     </div>
     @endif
-
     @if($showPreviewModal)
     <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-3xl rounded-lg shadow-lg overflow-hidden">
 
-
             <div class="bg-green-100 px-6 py-4 text-center font-semibold">
                 {{ $previewTabName }}
             </div>
-
             {{-- Body --}}
             <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
                 @if ($previewTabCode == 105)
@@ -431,6 +440,7 @@
                             placeholder="Enter {{ $row['field']->level_name }}"
                             disabled />
                         @break
+
                         {{-- TEXTAREA --}}
                         @case('textarea')
                         <x-form.textarea name="{{ $row['field']->level_name }}"
@@ -480,14 +490,12 @@
                     @endforeach
                 </div>
                 @endif
-
                 @if($previewTabCode == 104)
                 @if($attachedDocuments->count())
                 <div class="space-y-3">
                     {{-- <livewire:enclosure-list :form_preview="1" />  --}}
                     <livewire:enclosure-list :scheme_id="$schemeId" :form_preview="1" :tabCode="$previewTabCode" />
                     @endif
-
                     @endif
                     @if($previewTabCode == 102 &&
                     collect($this->previewFields)
@@ -504,12 +512,9 @@
                     <div>
                         <livewire:filter-lgd-master-entry :login_type="'state_office'" :preview="1" />
                     </div>
-
                     @endif
                     <div class="grid gap-2 md:grid-cols-2 pl-4 pr-4">
-
                         @foreach($this->previewFields as $index => $field)
-
                         @if(
                         $activeTabCode == 102 &&
                         in_array($field->field_name, [
@@ -635,10 +640,10 @@
                                 disabled />
                             @break
                             @case('number')
-                        <x-form.input type="number" name="{{ $row['field']->level_name }}"
-                            placeholder="Enter {{ $row['field']->level_name }}"
-                            disabled />
-                        @break
+                            <x-form.input type="number" name="{{ $row['field']->level_name }}"
+                                placeholder="Enter {{ $row['field']->level_name }}"
+                                disabled />
+                            @break
                             {{-- DATE --}}
                             @case('date')
                             <x-form.input type="date" name="{{ $row['field']->level_name }}" disabled />
@@ -743,12 +748,9 @@
 
                     </div>
                     @endif
-
                     @endif
 
                 </div>
-
-
                 <div class="flex justify-end gap-3 px-6 py-4 border-t">
                     <x-button.primary wire:click="closeFinalPreview" type="button">
                         Close
@@ -758,8 +760,6 @@
             </div>
         </div>
         @endif
-
-
         @if($showEditSelfDeclModal)
         <div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
             <div class="bg-white rounded-xl shadow-lg w-full max-w-lg p-6">
@@ -792,8 +792,7 @@
         </div>
         @endif
 
-
-        @if($showDigitalPreview)
+         @if($showDigitalPreview)
         <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
 
@@ -872,7 +871,6 @@
             </div>
         </div>
         @endif
-
         {{-- SUCCESS MESSAGE --}}
         @if(session()->has('message'))
         <div class="rounded-lg bg-green-50 border border-green-200 p-3 text-green-700 font-medium">
