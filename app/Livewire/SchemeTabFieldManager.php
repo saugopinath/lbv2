@@ -636,7 +636,7 @@ class SchemeTabFieldManager extends Component
                 ]);
             }
         } catch (\Throwable $e) {
-
+// dd($e);
             DB::rollBack();
             if (isset($path)) {
                 Storage::disk('local')->delete($path);
