@@ -90,4 +90,66 @@ class SchemewiseStoreDataJsonHelper
             ->toArray();
         return $missingFieldNames;
     }
+    public static function store(int $schemeId, array $tabs): array
+    {
+        $basePath = resource_path("views/schemes/generated_{$schemeId}");
+
+        if (!file_exists($basePath)) {
+            mkdir($basePath, 0755, true);
+        }
+
+        $storedViews = [];
+
+        foreach ($tabs as $tab) {
+
+            $tabId = $tab['tab_code']; // or tab_id if you have it
+            $fileName = "{$tabId}_scheme_{$schemeId}.blade.php";
+            $filePath = $basePath . '/' . $fileName;
+
+            file_put_contents($filePath, self::bladeTemplate());
+
+            $storedViews[] = "schemes.generated_{$schemeId}.{$tabId}_scheme_{$schemeId}";
+        }
+
+        return $storedViews;
+    }
+
+    protected static function bladeTemplate(): string
+    {
+        return <<<'BLADE'
+<div class="grid md:grid-cols-2 gap-4 mt-4">
+
+@foreach($tab['fields'] as $field)
+    <div>
+        <label class="block mb-2 text-sm font-medium text-gray-900">
+            {{ $field['field_label'] ?? '' }}
+        </label>
+
+        @switch($field['field_type'])
+            @case('text')
+                <input disabled
+                       class="border rounded-lg w-full p-2.5"
+                       placeholder="{{ $field['placeholder'] ?? '' }}">
+                @break
+
+            @case('date')
+                <input type="date" disabled
+                       class="border rounded-lg w-full p-2.5">
+                @break
+
+            @case('select')
+                <select disabled class="border rounded-lg w-full p-2.5">
+                    <option>-- Select --</option>
+                    @foreach(($field['options'] ?? []) as $opt)
+                        <option>{{ $opt }}</option>
+                    @endforeach
+                </select>
+                @break
+        @endswitch
+    </div>
+@endforeach
+
+</div>
+BLADE;
+    }
 }
