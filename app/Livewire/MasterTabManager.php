@@ -3,9 +3,12 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Scheme;
 use App\Models\MasterTab;
 use App\Models\SchemeTabMapping;
+use App\Models\SchemeFinalSubmitCheck;
+use App\Helpers\SchemewiseStoreDataJsonHelper;
 use Illuminate\Support\Facades\DB;
 
 class MasterTabManager extends Component
@@ -17,6 +20,16 @@ class MasterTabManager extends Component
     public $selectedTabCode = null;
     public $showPreview = false;
     public $mappingSaved = false;
+
+    /* ========= FINAL PREVIEW ========= */
+    public $showFinalPreview = false;
+    public $finalActiveTabCode = null;
+
+    public $tabs = [];
+    public $finalPreviewFields = [];
+    public $selfDeclarationDisplay = [];
+    public $attachedDocuments = [];
+    public bool $isFinal = false;
 
     protected $rules = [
         'selectedSchemeId' => 'required|exists:schemes,id',
@@ -61,6 +74,9 @@ class MasterTabManager extends Component
             $this->selectedTabs[] = (int) $map->tab_code;
             $this->positions[$map->tab_code] = (int) $map->position;
         }
+        $this->isFinal = SchemeFinalSubmitCheck::where('scheme_id', $value)
+            ->where('is_final_submitted', true)
+            ->exists();
     }
 
     /* ------------------------------
@@ -142,14 +158,103 @@ class MasterTabManager extends Component
     /* ------------------------------
      | PREVIEW
      |------------------------------*/
+    /* ================= OPEN FINAL PREVIEW (JSON) ================= */
     public function openPreview()
     {
-        $this->showPreview = true;
+        if (!$this->selectedSchemeId) {
+            return;
+        }
+
+        $path = "final_schemes_formdata/scheme_{$this->selectedSchemeId}.json";
+
+        if (!Storage::disk('local')->exists($path)) {
+            $isFinal = SchemeFinalSubmitCheck::where('scheme_id', $this->selectedSchemeId)
+                ->where('is_final_submitted', true)
+                ->exists();
+
+            if (!$isFinal) {
+                $data = SchemewiseStoreDataJsonHelper::generateSchemeJson($this->selectedSchemeId);
+
+                Storage::disk('local')->put(
+                    $path,
+                    json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+                );
+            }
+        }
+
+        if (!Storage::disk('local')->exists($path)) {
+            return;
+        }
+
+        $json = json_decode(Storage::disk('local')->get($path), true);
+
+
+        $this->tabs = collect($json['tabs'] ?? [])->values()->toArray();
+
+        $this->showFinalPreview = true;
+        $this->finalActiveTabCode = $this->tabs[0]['tab_code'] ?? null;
+
+        $this->loadPreviewByTab($this->finalActiveTabCode);
+    }
+
+    public function setFinalPreviewTab($tabCode)
+    {
+        $this->finalActiveTabCode = (int) $tabCode;
+        $this->loadPreviewByTab($tabCode);
+    }
+
+    /* ================= LOAD TAB DATA FROM JSON ================= */
+    private function loadPreviewByTab($tabCode)
+    {
+        // 🔴 RESET FIRST (VERY IMPORTANT)
+        $this->finalPreviewFields = [];
+        $this->selfDeclarationDisplay = [];
+        $this->attachedDocuments = [];
+
+        if (!$tabCode) return;
+
+        $tab = collect($this->tabs)->firstWhere('tab_code', $tabCode);
+
+        if (!$tab) return;
+
+        // TAB 104
+        if ($tabCode == 104) {
+            $this->attachedDocuments = $tab['fields'] ?? [];
+            return;
+        }
+
+        // TAB 105
+        if ($tabCode == 105) {
+            $this->selfDeclarationDisplay = collect($tab['fields'] ?? [])
+                ->map(fn($f) => [
+                    'field' => (object) $f,
+                    'show_section_start' => false,
+                    'show_section_end' => false,
+                    'section_title' => null,
+                ])
+                ->toArray();
+            return;
+        }
+
+        // OTHER TABS
+        $this->finalPreviewFields = collect($tab['fields'] ?? [])
+            ->map(fn($f) => (object) $f)
+            ->toArray();
     }
 
     public function closePreview()
     {
-        $this->showPreview = false;
+        $this->resetPreviewState();
+    }
+
+    private function resetPreviewState()
+    {
+        $this->showFinalPreview = false;
+        $this->finalActiveTabCode = null;
+        $this->tabs = [];
+        $this->finalPreviewFields = [];
+        $this->selfDeclarationDisplay = [];
+        $this->attachedDocuments = [];
     }
 
     public function render()
