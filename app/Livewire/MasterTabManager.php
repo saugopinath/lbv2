@@ -12,14 +12,10 @@ class MasterTabManager extends Component
 {
     public $selectedSchemeId;
     public $selectedSchemeName;
-
     public $selectedTabs = [];
     public $positions = [];
     public $selectedTabCode = null;
-
     public $showPreview = false;
-
-    // 🔑 Button control
     public $mappingSaved = false;
 
     protected $rules = [
