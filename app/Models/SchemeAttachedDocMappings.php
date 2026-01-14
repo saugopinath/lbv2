@@ -15,7 +15,8 @@ class SchemeAttachedDocMappings extends Model
         'is_required',
         'max_file_size',
         'extension_type',
-        'position',
+        'field_position',
+        'is_active',
     ];
 
 

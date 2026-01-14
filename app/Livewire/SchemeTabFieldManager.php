@@ -2,11 +2,13 @@
 
 namespace App\Livewire;
 
+use App\Helpers\SchemewiseStoreDataJsonHelper;
 use App\Models\Codemaster;
 use App\Models\SchemeAttachedDocMappings;
 use App\Models\SectionLevelMaster;
 use Livewire\Component;
 use App\Models\Scheme;
+use App\Models\SchemeFinalSubmitCheck;
 use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabBasefield;
 use App\Models\SchemeTabFieldTemp;
@@ -18,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Storage;
 
 class SchemeTabFieldManager extends Component
 {
@@ -26,6 +29,7 @@ class SchemeTabFieldManager extends Component
         $modalSelected = [], $showFinalPreview = false, $showPreviewModal = false,
         $finalActiveTabCode = null;
     public $finalPreviewFields = [];
+    public $digitalPreviewFields = [];
     public $docTypes = [];
     public $selectedDocType = null;
     public $isRequired = false;
@@ -34,7 +38,6 @@ class SchemeTabFieldManager extends Component
     public $attachedDocuments = [];
     public $extensionTypes = [];
     public $selfDeclarationFields;
-    public $digitalPreviewFields = [];
     public $selfDeclarationGrouped = [];
     public $selfDeclarationDisplay = [];
     public $showEditSelfDeclModal = false;
@@ -178,14 +181,14 @@ class SchemeTabFieldManager extends Component
         );
         $lastPosition = SchemeAttachedDocMappings::where('scheme_id', $this->schemeId)
             ->where('tab_code', $this->activeTabCode)
-            ->max('position');
+            ->max('field_position');
         $nextPosition = ($lastPosition ?? 0) + 1;
         SchemeAttachedDocMappings::updateOrCreate(
             [
                 'scheme_id'   => $this->schemeId,
                 'doc_type_id' => $this->selectedDocType,
                 'tab_code' => $this->activeTabCode,
-                'position'       => $nextPosition,
+                'field_position'       => $nextPosition,
             ],
             [
                 'is_required'    => $this->isRequired,
@@ -220,7 +223,7 @@ class SchemeTabFieldManager extends Component
     {
         foreach ($orderedIds as $index => $id) {
             SchemeAttachedDocMappings::where('id', $id)
-                ->update(['position' => $index + 1]);
+                ->update(['field_position' => $index + 1]);
         }
 
         $this->loadAttachedDocuments();
@@ -241,7 +244,7 @@ class SchemeTabFieldManager extends Component
         $this->attachedDocuments = SchemeAttachedDocMappings::with('docType')
             ->where('scheme_id', $this->schemeId)
             ->where('tab_code', 104)
-            ->orderBy('position')
+            ->orderBy('field_position')
             ->get();
     }
     public function openManageModal($tabCode)
@@ -398,7 +401,7 @@ class SchemeTabFieldManager extends Component
                 if (!$base) {
                     continue;
                 }
-                // dd($base);
+                // dd($baseFieldId);
                 SchemeTabFormField::updateOrCreate(
                     [
                         'tab_field_id' => $baseFieldId,
@@ -419,7 +422,7 @@ class SchemeTabFieldManager extends Component
                         'field_position'  => $index + 1,
                         'is_common'       => $base->is_common,
                         'db_column'       => $base->db_colunm,
-                       'is_mandatory'    => $base->is_mendetory,
+                        'is_mandatory'    => $base->is_mendetory,
                         'is_active'       => true,
                     ]
                 );
@@ -440,33 +443,7 @@ class SchemeTabFieldManager extends Component
         ]);
     }
 
-    // public function removeField($tabCode, $fieldId)
-    // {
-    //     if ($this->isFieldMandatory($fieldId)) {
-    //         return;
-    //     }
-    //     unset($this->tabFields[$tabCode][$fieldId]);
-    //     if (empty($this->tabFields[$tabCode])) {
-    //         unset($this->tabFields[$tabCode]);
-    //     }
-    //     $temp = SchemeTabFieldTemp::where('scheme_id', $this->schemeId)
-    //         ->where('tab_code', $tabCode)
-    //         ->first();
-    //     if (!$temp || !is_array($temp->field_ids)) {
-    //         return;
-    //     }
-    //     $filtered = collect($temp->field_ids)
-    //         ->reject(fn($f) => (int)$f['field_id'] === (int)$fieldId)
-    //         ->values()
-    //         ->map(fn($f, $i) => [
-    //             'field_id' => $f['field_id'],
-    //             'position' => $i + 1,
-    //         ])
-    //         ->toArray();
-    //     $temp->update([
-    //         'field_ids' => $filtered,
-    //     ]);
-    // }
+
     public function removeField($tabCode, $fieldId)
     {
         if ($this->isFieldMandatory($fieldId)) {
@@ -507,38 +484,13 @@ class SchemeTabFieldManager extends Component
         $this->activeTabCode = null;
         $this->previewTabName = '';
     }
-    // public function updateFieldOrder($tabCode, $orderedIds)
-    // {
-    //     if (!isset($this->tabFields[$tabCode])) return;
-    //     // Update in-memory
-    //     $newOrder = [];
-    //     foreach ($orderedIds as $fid) {
-    //         if (isset($this->tabFields[$tabCode][$fid])) {
-    //             $newOrder[$fid] = $this->tabFields[$tabCode][$fid];
-    //         }
-    //     }
-    //     $this->tabFields[$tabCode] = $newOrder;
-    //     $payload = [];
-    //     foreach ($orderedIds as $i => $fid) {
 
-    //             'tab_field_id' =>  $fid,
-    //             'field_position' => $i + 1,
-
-    //     }
-    //     SchemeTabFormField::updateOrCreate(
-    //         [
-    //             'scheme_id' => $this->schemeId,
-    //             'tab_code'  => $tabCode,
-    //         ],
-    //     );
-    // }
     public function updateFieldOrder($tabCode, $orderedIds)
     {
         if (empty($orderedIds) || !$this->schemeId) {
             return;
         }
         DB::transaction(function () use ($tabCode, $orderedIds) {
-            // 1️⃣ Update DB positions
             foreach ($orderedIds as $index => $fieldId) {
                 SchemeTabFormField::where('tab_field_id', $fieldId)
                     ->where('scheme_id', $this->schemeId)
@@ -547,8 +499,6 @@ class SchemeTabFieldManager extends Component
                         'field_position' => $index + 1,
                     ]);
             }
-
-            // 2️⃣ Update in-memory order (for instant UI refresh)
             $fields = SchemeTabFormField::where('scheme_id', $this->schemeId)
                 ->where('tab_code', $tabCode)
                 ->where('is_active', true)
@@ -611,7 +561,6 @@ class SchemeTabFieldManager extends Component
     public function editSelfDeclarationField($fieldId)
     {
         $field = SelfDeclerationBasefield::findOrFail($fieldId);
-
         $this->editingSelfDeclId = $field->id;
         $this->editingLevelName = $field->level_name;
         $this->showEditSelfDeclModal = true;
@@ -622,7 +571,6 @@ class SchemeTabFieldManager extends Component
         $this->validate([
             'editingLevelName' => 'required|string|max:255',
         ]);
-
         SelfDeclerationBasefield::where('id', $this->editingSelfDeclId)
             ->update([
                 'level_name' => $this->editingLevelName,
@@ -754,7 +702,44 @@ class SchemeTabFieldManager extends Component
         }
         $this->selfDeclarationDisplay = $result;
     }
-    public function openDigitalPreview()
+
+
+    //final submit form
+    public function finalSubmit()
+    {
+        // dd('final submit');
+        // dd($this->schemeId);
+        if (!$this->schemeId) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Please select a scheme first',
+            ]);
+            return;
+        }
+        $missingFieldNames = SchemewiseStoreDataJsonHelper::checkMandatoryBaseFields($this->schemeId);
+
+        if (!empty($missingFieldNames)) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Mandatory fields missing: ' . implode(', ', $missingFieldNames),
+            ]);
+            return;
+        }
+        // if (!SchemewiseStoreDataJsonHelper::validateSchemeData($this->schemeId)) {
+        //     $this->dispatch('toastr', [
+        //         'type' => 'error',
+        //         'message' => 'Please fill all the required fields before final submission',
+        //     ]);
+        //     return;
+        // }
+        $data = SchemewiseStoreDataJsonHelper::generateSchemeJson($this->schemeId);
+        $path = SchemewiseStoreDataJsonHelper::storeSchemeJson($this->schemeId, $data);
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'Scheme saved for final submission',
+        ]);
+    }
+     public function openDigitalPreview()
     {
         $this->showDigitalPreview = true;
 

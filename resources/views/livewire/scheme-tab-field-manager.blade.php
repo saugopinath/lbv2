@@ -31,16 +31,19 @@
                         class="bg-green-600 hover:bg-green-700 text-sm">
                         Manage Fields
                     </x-button.primary>
-                    <a href="{{ route('edit-validation', [
-                     'ref' => Crypt::encryptString($tab->scheme_id.'|'.$tab->tab_code)
-                ]) }}">
 
-                         <x-button.primary
-                            type="submit"
+                    @if($tab->showValidationButton())
+                    <a href="{{ route('edit-validation', [
+        'ref' => Crypt::encryptString($tab->scheme_id.'|'.$tab->tab_code)
+    ]) }}">
+                        <x-button.primary
+                            type="button"
                             class="bg-yellow-400 hover:bg-yellow-500 text-sm">
                             Reset Validation
                         </x-button.primary>
                     </a>
+                    @endif
+
                     <x-button.primary wire:click="openPreview({{ $tab->tab_code }})"
                         class="bg-gray-500 hover:bg-gray-600 text-sm">
                         Preview
@@ -57,16 +60,16 @@
                 @if($tab->tab_code == 104)
                 @if(count($attachedDocuments))
                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
-                            new Sortable($el, {
-                                animation: 150,
-                                handle: '.drag-handle',
-                                onEnd() {
-                                    let ordered = Array.from($el.children)
-                                        .map(el => el.dataset.id);
-                                    $wire.updateDocumentOrder(ordered);
-                                }
-                            })
-                            ">
+                                            new Sortable($el, {
+                                                animation: 150,
+                                                handle: '.drag-handle',
+                                                onEnd() {
+                                                    let ordered = Array.from($el.children)
+                                                        .map(el => el.dataset.id);
+                                                    $wire.updateDocumentOrder(ordered);
+                                                }
+                                            })
+                                            ">
                     @foreach($attachedDocuments as $doc)
                     <div data-id="{{ $doc->id }}"
                         class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
@@ -748,9 +751,12 @@
 
                     </div>
                     @endif
+
                     @endif
 
                 </div>
+
+
                 <div class="flex justify-end gap-3 px-6 py-4 border-t">
                     <x-button.primary wire:click="closeFinalPreview" type="button">
                         Close
@@ -791,8 +797,7 @@
             </div>
         </div>
         @endif
-
-         @if($showDigitalPreview)
+        @if($showDigitalPreview)
         <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
 

@@ -23,4 +23,10 @@ class SchemeTabMapping extends Model
     {
         return $this->belongsTo(Scheme::class, 'scheme_id');
     }
+    public function showValidationButton(): bool
+{
+    $hiddenTabs = [104]; // add more if needed
+    return !in_array($this->tab_code, $hiddenTabs, true);
+}
+
 }

@@ -15,13 +15,14 @@ return new class extends Migration
 
             // TAB CODE (for 104)
             $table->integer('tab_code')
-                  ->default(0)
-                  ->after('doc_type_id');
+                ->default(0)
+                ->after('doc_type_id');
 
             // POSITION FOR DRAG & DROP
             $table->integer('field_position')
-                  ->nullable()
-                  ->after('tab_code');
+                ->nullable()
+                ->after('tab_code');
+            $table->boolean('is_active')->default(true)->after('field_position');;
 
             // Optional composite index (recommended)
             $table->index(['scheme_id', 'tab_code'], 'scheme_tab_doc_idx');
@@ -37,7 +38,7 @@ return new class extends Migration
 
             $table->dropIndex('scheme_tab_doc_idx');
 
-            $table->dropColumn(['tab_code', 'position']);
+            $table->dropColumn(['tab_code', 'field_position','is_active']);
         });
     }
 };
