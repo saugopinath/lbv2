@@ -29,6 +29,8 @@ class MasterTabManager extends Component
     public $finalPreviewFields = [];
     public $selfDeclarationDisplay = [];
     public $attachedDocuments = [];
+    public array $docTypeIds = [];
+
     public bool $isFinal = false;
 
     protected $rules = [
@@ -217,9 +219,17 @@ class MasterTabManager extends Component
 
         if (!$tab) return;
 
-        // TAB 104
+
         if ($tabCode == 104) {
+
             $this->attachedDocuments = $tab['fields'] ?? [];
+
+            $this->docTypeIds = collect($this->attachedDocuments)
+                ->pluck('doc_type_id')
+                ->filter()
+                ->values()
+                ->toArray();
+
             return;
         }
 
@@ -255,6 +265,7 @@ class MasterTabManager extends Component
         $this->finalPreviewFields = [];
         $this->selfDeclarationDisplay = [];
         $this->attachedDocuments = [];
+        $this->docTypeIds = [];
     }
 
     public function render()

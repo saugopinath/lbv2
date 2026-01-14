@@ -190,9 +190,19 @@
                         <div class="text-gray-400">No self declaration fields</div>
                         @endif
 
-                        {{-- TAB 104 --}}
                         @elseif($finalActiveTabCode == 104)
-                        <div class="text-gray-400">Enclosure preview from JSON</div>
+
+                            @if(!empty($docTypeIds))
+                                <livewire:enclosure-list
+                                    :scheme_id="$selectedSchemeId"
+                                    :docTypeIds="$docTypeIds"
+                                    :form_preview="1"
+                                />
+                            @else
+                                <div class="text-gray-400">
+                                    No enclosure documents found in JSON
+                                </div>
+                            @endif
 
                         {{-- OTHER TABS --}}
                         @else
