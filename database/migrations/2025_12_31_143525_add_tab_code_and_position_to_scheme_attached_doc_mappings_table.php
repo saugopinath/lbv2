@@ -19,7 +19,7 @@ return new class extends Migration
                   ->after('doc_type_id');
 
             // POSITION FOR DRAG & DROP
-            $table->integer('position')
+            $table->integer('field_position')
                   ->nullable()
                   ->after('tab_code');
 
