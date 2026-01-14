@@ -60,16 +60,16 @@
                 @if($tab->tab_code == 104)
                 @if(count($attachedDocuments))
                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
-                                            new Sortable($el, {
-                                                animation: 150,
-                                                handle: '.drag-handle',
-                                                onEnd() {
-                                                    let ordered = Array.from($el.children)
-                                                        .map(el => el.dataset.id);
-                                                    $wire.updateDocumentOrder(ordered);
-                                                }
-                                            })
-                                            ">
+                            new Sortable($el, {
+                                animation: 150,
+                                handle: '.drag-handle',
+                                onEnd() {
+                                    let ordered = Array.from($el.children)
+                                        .map(el => el.dataset.id);
+                                    $wire.updateDocumentOrder(ordered);
+                                }
+                            })
+                            ">
                     @foreach($attachedDocuments as $doc)
                     <div data-id="{{ $doc->id }}"
                         class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
