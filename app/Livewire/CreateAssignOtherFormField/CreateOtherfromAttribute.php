@@ -43,7 +43,7 @@ class CreateOtherfromAttribute extends Component
     public $depvaluesopt = [];
     public $isdependentvalue = 'no';
     public $depvalueradio = false;
-
+    public $view_type;
 
     public function mount()
     {
@@ -183,6 +183,7 @@ class CreateOtherfromAttribute extends Component
             'field_name' => 'required|string|max:150',
             'field_type' => 'required|string',
             'validation_rule' => 'required|array|min:1',
+            'view_type' => 'required',
             'is_under_section' => 'required|in:yes,no',
             'section_id' => 'required_if:is_under_section,yes',
             'is_multiple' => 'required_if:field_type,select',
@@ -236,7 +237,7 @@ class CreateOtherfromAttribute extends Component
             'field_class' => $this->field_class,
             'field_label' => $this->field_name,
             'field_type' => $this->field_type,
-
+            'view_type' => $this->view_type,
             'validation_rule' => implode('|', $validationRules),
 
             'options' => in_array($this->field_type, ['select', 'checkbox', 'radio'])
@@ -271,7 +272,8 @@ class CreateOtherfromAttribute extends Component
             'defaultOptions',
             'isdependent',
             'depenent_on',
-            'depvalues'
+            'depvalues',
+            'view_type'
         ]);
 
         session()->flash('success', 'Field created successfully');

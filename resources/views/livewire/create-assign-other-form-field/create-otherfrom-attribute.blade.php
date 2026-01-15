@@ -66,6 +66,16 @@
             @endforeach
         </x-form.select>
 
+        <x-form.select
+            name="view_type"
+            label="View Type"
+            wire:model="view_type"
+            required>
+            <option value="">-- Select View Type --</option>
+            <option value="1">1</option>
+            <option value="2">1/2</option>
+            <option value="3">1/3</option>
+        </x-form.select>
         <div class="grid grid-cols-2 gap-4 md:col-span-2">
             <x-form.multiselect
                 label="Validation Rules"
