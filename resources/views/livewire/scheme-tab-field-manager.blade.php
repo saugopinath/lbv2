@@ -768,13 +768,13 @@
                     $layout = $layoutJson ? json_decode($layoutJson, true) : null;
                     @endphp
 
-                    {{-- ===== CUSTOM LAYOUT ===== --}}
+                    {{-- ===== CUSTOM / FIXED LAYOUT ===== --}}
                     @if($layout && is_array($layout))
 
                     @foreach($layout as $row)
                     @php $cols = count($row['fields']); @endphp
 
-                    <div class="grid grid-cols-1 md:grid-cols-{{ $cols }} gap-4 mb-4">
+                    <div class="grid md:grid-cols-{{ $cols }} gap-4 mb-4 ">
                         @foreach($row['fields'] as $fid)
                         @php
                         $field = $finalPreviewFields->firstWhere('id', $fid);
@@ -819,7 +819,7 @@
                     </div>
                     @endforeach
 
-                    {{-- ===== FALLBACK (NO LAYOUT) ===== --}}
+                    {{-- ===== FALLBACK (NO LAYOUT SAVED) ===== --}}
                     @else
 
                     @if($finalPreviewFields->isEmpty())
@@ -834,25 +834,25 @@
 
                             @case('text')
                             <div>
-                            <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}"
-                                placeholder="Enter {{ $field->level_name }}" disabled />
-                        </div>
+                                <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}"
+                                    placeholder="Enter {{ $field->level_name }}" disabled />
+                            </div>
                             @break
 
                             @case('number')
-                            <x-form.input type="number" label="{{ $field->level_name }}" disabled />
+                            <x-form.input name="{{ $field->field_name }}" type="number" label="{{ $field->level_name }}" disabled />
                             @break
 
                             @case('date')
-                            <x-form.input type="date" label="{{ $field->level_name }}" disabled />
+                            <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
                             @break
 
                             @case('textarea')
-                            <x-form.textarea label="{{ $field->level_name }}" disabled />
+                            <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
                             @break
 
                             @case('select')
-                            <x-form.select label="{{ $field->level_name }}" disabled>
+                            <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
                                 <option value="">-- Select {{ $field->level_name }} --</option>
                                 @foreach($field->options ?? [] as $opt)
                                 <option>{{ $opt }}</option>
@@ -941,8 +941,9 @@
                     @foreach($rowConfig as $i => $cnt)
                     <div class="flex items-center gap-3">
                         <span class="w-16">Row {{ $i+1 }}</span>
-                        <select wire:model.live="rowConfig.{{ $i }}" class="border rounded px-2 py-1">
-                            <option value="">select number of Field</option>
+                        <select wire:model.live="rowConfig.{{ $i }}"
+                            class="border rounded px-2 py-1">
+                            <option selected value="">select number of Field</option>
                             <option value="1">1 field</option>
                             <option value="2">2 fields</option>
                             <option value="3">3 fields</option>
