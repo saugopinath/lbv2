@@ -12,7 +12,7 @@
         <div x-data="{ open:false }" class="border border-cyan-300 rounded-lg overflow-hidden">
             <div class="flex justify-between items-center bg-gray-100 px-4 py-3">
                 <span class="font-semibold">
-                    {{ $tab->position }}. {{ $tab->masterTab->tab_name }}
+                    {{ $tab->position }}. {{ $tab->masterTab->tab_name }} (Selected Fields only without any configuration)
                 </span>
                 <div class="flex gap-2 items-center">
                     @if(!in_array($tab->tab_code, [104, 105]) && !$isFinalSubmitted)
@@ -30,6 +30,13 @@
                         Manage Fields
                     </x-button.primary>
                     @endif
+                    @if(!$isFinalSubmitted)
+                    <x-button.primary wire:click="openLayoutModal({{ $tab->tab_code }})"
+                        class="bg-green-600 hover:bg-green-700 rounded-xl text-sm">
+                        Fix Form Layout
+                    </x-button.primary>
+                    @endif
+
 
                     @if($tab->showValidationButton() && !$isFinalSubmitted)
                     <a href="{{ route('edit-validation', [
@@ -623,14 +630,19 @@
         @if($showFinalPreview)
         <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
             <div class="bg-white rounded-xl shadow-lg w-auto max-w-auto max-h-[90vh] flex flex-col overflow-hidden">
+
+                {{-- HEADER --}}
                 <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
                     <h3 class="text-lg font-semibold text-gray-800">
                         Final Preview
                     </h3>
-                    <button wire:click="closeFinalPreview" class="text-gray-400 hover:text-gray-600 text-xl">
+                    <button wire:click="closeFinalPreview"
+                        class="text-gray-400 hover:text-gray-600 text-xl">
                         ✕
                     </button>
                 </div>
+
+                {{-- TAB NAV --}}
                 <div class="px-6 pt-4 border-b shrink-0">
                     <nav class="flex space-x-6">
                         @foreach($tabs as $tab)
@@ -644,7 +656,8 @@
                         @endforeach
                     </nav>
                 </div>
-                {{-- Content --}}
+
+                {{-- CONTENT --}}
                 <div class="p-6 max-h-[70vh] overflow-y-auto">
 
                     {{-- ================= TAB 104 : ENCLOSURE ================= --}}
@@ -665,6 +678,7 @@
                     @else
                     <div class="space-y-2">
                         @foreach($selfDeclarationDisplay as $row)
+
                         {{-- SECTION START --}}
                         @if($row['show_section_start'])
                         <div class="mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
@@ -673,6 +687,7 @@
                             </span>
                         </div>
                         @endif
+
                         {{-- FIELD --}}
                         <div class="py-2 bg-white {{ $row['field']->section_level_id ? 'pl-6 bg-gray-50' : 'pl-0' }}">
                             {{-- FIELD TYPE RENDER --}}
@@ -735,16 +750,76 @@
                             </div>
                             @endswitch
                         </div>
+
                         {{-- SECTION END --}}
                         @if($row['show_section_end'])
                         <div class="my-3"></div>
                         @endif
-                        @endforeach
 
+                        @endforeach
                     </div>
                     @endif
 
-                    {{-- ================= OTHER TABS ================= --}}
+                    {{-- ================= OTHER TABS (LAYOUT AWARE) ================= --}}
+                    @else
+
+                    @php
+                    $layoutJson = $this->getTabLayout($finalActiveTabCode);
+                    $layout = $layoutJson ? json_decode($layoutJson, true) : null;
+                    @endphp
+
+                    {{-- ===== CUSTOM LAYOUT ===== --}}
+                    @if($layout && is_array($layout))
+
+                    @foreach($layout as $row)
+                    @php $cols = count($row['fields']); @endphp
+
+                    <div class="grid grid-cols-1 md:grid-cols-{{ $cols }} gap-4 mb-4">
+                        @foreach($row['fields'] as $fid)
+                        @php
+                        $field = $finalPreviewFields->firstWhere('id', $fid);
+                        @endphp
+
+                        @if($field)
+                        <div>
+                            @switch($field->field_type)
+
+                            @case('text')
+                            <div>
+                                <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}"
+                                    placeholder="Enter {{ $field->level_name }}" disabled />
+                            </div>
+                            @break
+
+                            @case('number')
+                            <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                            @break
+
+                            @case('date')
+                            <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                            @break
+
+                            @case('textarea')
+                            <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                            @break
+
+                            @case('select')
+                            <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
+                                <option value="">-- Select {{ $field->level_name }} --</option>
+                                @foreach($field->options ?? [] as $opt)
+                                <option>{{ $opt }}</option>
+                                @endforeach
+                            </x-form.select>
+                            @break
+
+                            @endswitch
+                        </div>
+                        @endif
+                        @endforeach
+                    </div>
+                    @endforeach
+
+                    {{-- ===== FALLBACK (NO LAYOUT) ===== --}}
                     @else
 
                     @if($finalPreviewFields->isEmpty())
@@ -754,52 +829,50 @@
                     @else
                     <div class="grid md:grid-cols-2 gap-4">
                         @foreach($finalPreviewFields as $field)
-
-                        @if($field->field_type === 'text')
                         <div>
+                            @switch($field->field_type)
+
+                            @case('text')
+                            <div>
                             <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}"
                                 placeholder="Enter {{ $field->level_name }}" disabled />
                         </div>
+                            @break
 
-                        {{-- DATE --}}
-                        @elseif($field->field_type === 'date')
-                        <div>
-                            <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}"
-                                disabled />
-                        </div>
+                            @case('number')
+                            <x-form.input type="number" label="{{ $field->level_name }}" disabled />
+                            @break
 
-                        {{-- SELECT --}}
-                        @elseif($field->field_type === 'select')
-                        <div>
-                            <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
-                                <option value="">
-                                    -- Select {{ $field->level_name }} --
-                                </option>
+                            @case('date')
+                            <x-form.input type="date" label="{{ $field->level_name }}" disabled />
+                            @break
+
+                            @case('textarea')
+                            <x-form.textarea label="{{ $field->level_name }}" disabled />
+                            @break
+
+                            @case('select')
+                            <x-form.select label="{{ $field->level_name }}" disabled>
+                                <option value="">-- Select {{ $field->level_name }} --</option>
                                 @foreach($field->options ?? [] as $opt)
                                 <option>{{ $opt }}</option>
                                 @endforeach
                             </x-form.select>
-                        </div>
-                        {{-- TEXTAREA --}}
-                        @elseif($field->field_type === 'textarea')
-                        <div>
-                            <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}"
-                                placeholder="Enter {{ $field->level_name }}" disabled />
-                        </div>
-                        @endif
+                            @break
 
+                            @endswitch
+                        </div>
                         @endforeach
-
                     </div>
                     @endif
 
                     @endif
-
+                    @endif
                 </div>
 
-
+                {{-- FOOTER --}}
                 <div class="flex justify-end gap-3 px-6 py-4 border-t">
-                    <x-button.primary wire:click="closeFinalPreview" type="button">
+                    <x-button.primary wire:click="closeFinalPreview">
                         Close
                     </x-button.primary>
                 </div>
@@ -807,6 +880,10 @@
             </div>
         </div>
         @endif
+
+
+
+
         @if($showEditSelfDeclModal)
         <div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
             <div class="bg-white rounded-xl shadow-lg w-full max-w-lg p-6">
@@ -838,6 +915,62 @@
             </div>
         </div>
         @endif
+
+        @if($showLayoutModal)
+        <div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+            <div class="bg-white w-full max-w-lg rounded-xl p-6 space-y-4">
+
+                <h3 class="font-semibold text-lg">
+                    Form Layout Settings
+                </h3>
+
+                <x-form.select label="Layout Mode" wire:model.live="layoutMode">
+                    <option value="1">1 field per row</option>
+                    <option value="2">2 fields per row</option>
+                    <option value="3">3 fields per row</option>
+                    <option value="custom">Custom</option>
+                </x-form.select>
+
+                @if($layoutMode === 'custom')
+                <div class="space-y-2">
+                    <p class="text-sm text-gray-600">
+                        Total: {{ $totalFields }} |
+                        Remaining: {{ $remainingFixFields }}
+                    </p>
+
+                    @foreach($rowConfig as $i => $cnt)
+                    <div class="flex items-center gap-3">
+                        <span class="w-16">Row {{ $i+1 }}</span>
+                        <select wire:model.live="rowConfig.{{ $i }}" class="border rounded px-2 py-1">
+                            <option value="">select number of Field</option>
+                            <option value="1">1 field</option>
+                            <option value="2">2 fields</option>
+                            <option value="3">3 fields</option>
+                        </select>
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+
+                <div class="flex justify-end gap-3 pt-4">
+                    <x-button.primary
+                        wire:click="applyLayout"
+                        class="bg-green-600">
+                        Apply
+                    </x-button.primary>
+
+                    <x-button.primary
+                        wire:click="$set('showLayoutModal', false)"
+                        class="bg-gray-600">
+                        Cancel
+                    </x-button.primary>
+                </div>
+
+            </div>
+        </div>
+        @endif
+
+
 
 
 
