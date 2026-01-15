@@ -93,7 +93,7 @@ class SchemewiseStoreDataJsonHelper
     }
     public static function store(int $schemeId, array $tabs): string
     {
-        $dir = resource_path("views/schemes/generated_{$schemeId}");
+        $dir = resource_path("views/schemes/scheme_{$schemeId}");
 
         if (!File::exists($dir)) {
             File::makeDirectory($dir, 0755, true);
@@ -177,7 +177,7 @@ class SchemewiseStoreDataJsonHelper
             $blade .= "</div>";
 
             File::put(
-                $dir . "/{$tab['tab_code']}_scheme_{$schemeId}.blade.php",
+                $dir . "/{$tab['tab_code']}.blade.php",
                 $blade
             );
         }
