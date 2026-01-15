@@ -32,7 +32,7 @@ class AddSelfDeclerationField extends Component
     public $validationRuleOptions = [];
     public array $options = [];
     public string $option_input = '';
-    public $validation_rule = [];
+    public array $validation_rule = [];
     public $show_multiple;
     public $isContextLocked = false;
     protected $listeners = [
@@ -201,17 +201,16 @@ class AddSelfDeclerationField extends Component
             'level_name'     => $this->level_name,
             'field_type'     => $this->field_type,
             'section_level_id'     => $this->section_id,
-            'section_level_type'=> $this->section_level_type,
+            'section_level_type' => $this->section_level_type,
             'is_multiple'    => $this->is_multiple,
             'options'        => $this->options,
-            'validation_rule' => $this->validation_rule,
+            'validation_rule' => empty($this->validation_rule)
+                ? null
+                : implode('|', array_unique($this->validation_rule)),
+
             'field_position' => $nextPosition,
             'is_active'      => true,
         ]);
-        // $this->dispatch('toastr', [
-        //     'type' => 'success',
-        //     'message' => 'Self Decleration Field configured successfully!'
-        // ]);
 
         $this->dispatch('self-declaration-saved');
         $this->reset([

@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('validation_rule', 255)->nullable();
             $table->string('regex', 255)->nullable();
             $table->boolean('is_multiple')->default(false);
+            $table->integer('is_mandatory')->default(0);
             $table->integer('field_position')->nullable();
             $table->boolean('is_active')->default(true);
             $table->integer('section_level_type')->nullable();

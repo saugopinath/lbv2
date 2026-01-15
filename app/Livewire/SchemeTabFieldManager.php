@@ -2,11 +2,13 @@
 
 namespace App\Livewire;
 
+use App\Helpers\SchemewiseStoreDataJsonHelper;
 use App\Models\Codemaster;
 use App\Models\SchemeAttachedDocMappings;
 use App\Models\SectionLevelMaster;
 use Livewire\Component;
 use App\Models\Scheme;
+use App\Models\SchemeFinalSubmitCheck;
 use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabBasefield;
 use App\Models\SchemeTabFieldTemp;
@@ -17,6 +19,7 @@ use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Storage;
 
 class SchemeTabFieldManager extends Component
 {
@@ -37,6 +40,7 @@ class SchemeTabFieldManager extends Component
     public $showEditSelfDeclModal = false;
     public $editingSelfDeclId = null;
     public $editingLevelName = '';
+    public $isFinalSubmitted = false;
 
     protected $listeners = [
         'openSectionLevelModal' => 'open',
@@ -57,16 +61,14 @@ class SchemeTabFieldManager extends Component
         if ($this->schemeId) {
             $this->loadAttachedDocuments();
             $this->loadSelfDeclarationFields();
+            $this->syncFinalSubmitStatus();
         }
     }
-
     public function openFinalPreview()
     {
         $this->showFinalPreview = true;
-
         $firstTab = collect($this->tabs)->first();
         $this->finalActiveTabCode = $firstTab?->tab_code;
-
         $this->loadFinalPreviewFields();
     }
     public function setFinalPreviewTab($tabCode)
@@ -86,14 +88,11 @@ class SchemeTabFieldManager extends Component
             $this->finalPreviewFields = collect();
             return;
         }
-
         $fieldIds = array_keys($this->tabFields[$this->finalActiveTabCode] ?? []);
-
         if (empty($fieldIds)) {
             $this->finalPreviewFields = collect();
             return;
         }
-
         $this->finalPreviewFields = SchemeTabBasefield::whereIn('id', $fieldIds)
             ->whereIn('scheme_id', [0, $this->schemeId])
             ->whereIn('tab_code', [0, $this->finalActiveTabCode])
@@ -108,6 +107,7 @@ class SchemeTabFieldManager extends Component
 
         $this->resetState();
         $this->loadTabs();
+        $this->syncFinalSubmitStatus();
     }
     private function resetState()
     {
@@ -127,24 +127,6 @@ class SchemeTabFieldManager extends Component
     }
     private function hydrateTabFieldsFromTemp(): void
     {
-        // $temps = SchemeTabFieldTemp::where('scheme_id', $this->schemeId)->get();
-        // foreach ($temps as $temp) {
-        //     $raw = $temp->field_ids;
-        //     if (empty($raw) || !is_array($raw)) {
-        //         continue;
-        //     }
-        //     $fieldIds = collect($raw)->pluck('field_id')->toArray();
-        //     $names = SchemeTabBasefield::whereIn('id', $fieldIds)
-        //         ->pluck('level_name', 'id');
-        //     $ordered = collect($raw)
-        //         ->sortBy('position')
-        //         ->mapWithKeys(fn($row) => [
-        //             $row['field_id'] => $names[$row['field_id']] ?? 'Unknown'
-        //         ])
-        //         ->toArray();
-        //     $this->tabFields[$temp->tab_code] = $ordered;
-        // }
-
         if (!$this->schemeId) {
             return;
         }
@@ -175,14 +157,14 @@ class SchemeTabFieldManager extends Component
         );
         $lastPosition = SchemeAttachedDocMappings::where('scheme_id', $this->schemeId)
             ->where('tab_code', $this->activeTabCode)
-            ->max('position');
+            ->max('field_position');
         $nextPosition = ($lastPosition ?? 0) + 1;
         SchemeAttachedDocMappings::updateOrCreate(
             [
                 'scheme_id'   => $this->schemeId,
                 'doc_type_id' => $this->selectedDocType,
                 'tab_code' => $this->activeTabCode,
-                'position'       => $nextPosition,
+                'field_position'       => $nextPosition,
             ],
             [
                 'is_required'    => $this->isRequired,
@@ -208,16 +190,34 @@ class SchemeTabFieldManager extends Component
     }
     public function removeDocument($id)
     {
+        if ($this->isFinalSubmitted) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Final submission completed. You cannot modify documents.',
+            ]);
+            return;
+        }
         SchemeAttachedDocMappings::where('id', $id)
             ->where('scheme_id', $this->schemeId)
             ->delete();
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'Document removed successfully',
+        ]);
         $this->loadAttachedDocuments();
     }
     public function updateDocumentOrder($orderedIds)
     {
+        if ($this->isFinalSubmitted) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Final submission completed. You cannot modify documents.',
+            ]);
+            return;
+        }
         foreach ($orderedIds as $index => $id) {
             SchemeAttachedDocMappings::where('id', $id)
-                ->update(['position' => $index + 1]);
+                ->update(['field_position' => $index + 1]);
         }
 
         $this->loadAttachedDocuments();
@@ -238,7 +238,7 @@ class SchemeTabFieldManager extends Component
         $this->attachedDocuments = SchemeAttachedDocMappings::with('docType')
             ->where('scheme_id', $this->schemeId)
             ->where('tab_code', 104)
-            ->orderBy('position')
+            ->orderBy('field_position')
             ->get();
     }
     public function openManageModal($tabCode)
@@ -292,18 +292,7 @@ class SchemeTabFieldManager extends Component
             ->pluck('tab_field_id')
             ->toArray();
         // dd($savedIds);
-        // $existing = !empty($savedIds)
-        //     ? $savedIds
-        //     : array_keys($this->tabFields[$tabCode] ?? []);
-        // $temp = SchemeTabFieldTemp::where('scheme_id', $this->schemeId)
-        //     ->where('tab_code', $tabCode)
-        //     ->first();
-
-        // $savedIds = collect($temp?->field_ids ?? [])
-        //     ->sortBy('position')
-        //     ->pluck('field_id')
-        //     ->toArray();
-
+        
         $existing = !empty($savedIds)
             ? $savedIds
             : array_keys($this->tabFields[$tabCode] ?? []);
@@ -339,37 +328,7 @@ class SchemeTabFieldManager extends Component
         $this->modalFields = [];
         $this->modalSelected = [];
     }
-    // public function saveManageFields()
-    // {
-    //     $payload = [];
-    //     foreach ($this->modalSelected as $index => $fid) {
-    //         $payload[] = [
-    //             'field_id' => (int) $fid,
-    //             'position' => $index + 1,
-    //         ];
-    //     }
-    //     SchemeTabFieldTemp::updateOrCreate(
-    //         [
-    //             'scheme_id' => $this->schemeId,
-    //             'tab_code'  => $this->activeTabCode,
-    //         ],
-    //         [
-    //             'field_ids' => $payload,
-    //         ]
-    //     );
-    //     $this->tabFields[$this->activeTabCode] = [];
-    //     foreach ($this->modalSelected as $fid) {
-    //         $field = collect($this->modalFields)
-    //             ->firstWhere('field_id', $fid);
-    //         if ($field) {
-    //             $this->tabFields[$this->activeTabCode][$fid]
-    //                 = $field['field_name'];
-    //         }
-    //     }
-    //     $this->closeManageModal();
-    // }
-
-
+    
     public function saveManageFields()
     {
         DB::transaction(function () {
@@ -401,7 +360,6 @@ class SchemeTabFieldManager extends Component
                         'tab_field_id' => $baseFieldId,
                         'scheme_id' => $schemeId,
                         'tab_code'  => $tabCode,
-
                     ],
                     [
                         'level_name'      => $base->level_name,
@@ -416,7 +374,7 @@ class SchemeTabFieldManager extends Component
                         'field_position'  => $index + 1,
                         'is_common'       => $base->is_common,
                         'db_column'       => $base->db_colunm,
-                        'is_mandatory'    => $base->is_mandatory,
+                        'is_mandatory'    => $base->is_mendetory,
                         'is_active'       => true,
                     ]
                 );
@@ -437,35 +395,16 @@ class SchemeTabFieldManager extends Component
         ]);
     }
 
-    // public function removeField($tabCode, $fieldId)
-    // {
-    //     if ($this->isFieldMandatory($fieldId)) {
-    //         return;
-    //     }
-    //     unset($this->tabFields[$tabCode][$fieldId]);
-    //     if (empty($this->tabFields[$tabCode])) {
-    //         unset($this->tabFields[$tabCode]);
-    //     }
-    //     $temp = SchemeTabFieldTemp::where('scheme_id', $this->schemeId)
-    //         ->where('tab_code', $tabCode)
-    //         ->first();
-    //     if (!$temp || !is_array($temp->field_ids)) {
-    //         return;
-    //     }
-    //     $filtered = collect($temp->field_ids)
-    //         ->reject(fn($f) => (int)$f['field_id'] === (int)$fieldId)
-    //         ->values()
-    //         ->map(fn($f, $i) => [
-    //             'field_id' => $f['field_id'],
-    //             'position' => $i + 1,
-    //         ])
-    //         ->toArray();
-    //     $temp->update([
-    //         'field_ids' => $filtered,
-    //     ]);
-    // }
+
     public function removeField($tabCode, $fieldId)
     {
+        if ($this->isFinalSubmitted) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Final submission completed. You cannot modify documents.',
+            ]);
+            return;
+        }
         if ($this->isFieldMandatory($fieldId)) {
             return;
         }
@@ -504,38 +443,20 @@ class SchemeTabFieldManager extends Component
         $this->activeTabCode = null;
         $this->previewTabName = '';
     }
-    // public function updateFieldOrder($tabCode, $orderedIds)
-    // {
-    //     if (!isset($this->tabFields[$tabCode])) return;
-    //     // Update in-memory
-    //     $newOrder = [];
-    //     foreach ($orderedIds as $fid) {
-    //         if (isset($this->tabFields[$tabCode][$fid])) {
-    //             $newOrder[$fid] = $this->tabFields[$tabCode][$fid];
-    //         }
-    //     }
-    //     $this->tabFields[$tabCode] = $newOrder;
-    //     $payload = [];
-    //     foreach ($orderedIds as $i => $fid) {
 
-    //             'tab_field_id' =>  $fid,
-    //             'field_position' => $i + 1,
-
-    //     }
-    //     SchemeTabFormField::updateOrCreate(
-    //         [
-    //             'scheme_id' => $this->schemeId,
-    //             'tab_code'  => $tabCode,
-    //         ],
-    //     );
-    // }
     public function updateFieldOrder($tabCode, $orderedIds)
     {
+        if ($this->isFinalSubmitted) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Final submission completed. You cannot modify documents.',
+            ]);
+            return;
+        }
         if (empty($orderedIds) || !$this->schemeId) {
             return;
         }
         DB::transaction(function () use ($tabCode, $orderedIds) {
-            // 1️⃣ Update DB positions
             foreach ($orderedIds as $index => $fieldId) {
                 SchemeTabFormField::where('tab_field_id', $fieldId)
                     ->where('scheme_id', $this->schemeId)
@@ -544,8 +465,6 @@ class SchemeTabFieldManager extends Component
                         'field_position' => $index + 1,
                     ]);
             }
-
-            // 2️⃣ Update in-memory order (for instant UI refresh)
             $fields = SchemeTabFormField::where('scheme_id', $this->schemeId)
                 ->where('tab_code', $tabCode)
                 ->where('is_active', true)
@@ -588,6 +507,13 @@ class SchemeTabFieldManager extends Component
 
     public function removeSelfDeclarationField(int $fieldId): void
     {
+        if ($this->isFinalSubmitted) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Final submission completed. You cannot modify documents.',
+            ]);
+            return;
+        }
         SelfDeclerationBasefield::where('id', $fieldId)
             ->where('scheme_id', $this->schemeId)
             ->delete();
@@ -607,8 +533,14 @@ class SchemeTabFieldManager extends Component
 
     public function editSelfDeclarationField($fieldId)
     {
+        if ($this->isFinalSubmitted) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Final submission completed. You cannot modify documents.',
+            ]);
+            return;
+        }
         $field = SelfDeclerationBasefield::findOrFail($fieldId);
-
         $this->editingSelfDeclId = $field->id;
         $this->editingLevelName = $field->level_name;
         $this->showEditSelfDeclModal = true;
@@ -619,7 +551,6 @@ class SchemeTabFieldManager extends Component
         $this->validate([
             'editingLevelName' => 'required|string|max:255',
         ]);
-
         SelfDeclerationBasefield::where('id', $this->editingSelfDeclId)
             ->update([
                 'level_name' => $this->editingLevelName,
@@ -638,74 +569,23 @@ class SchemeTabFieldManager extends Component
             'message' => 'Self Declaration label updated successfully'
         ]);
     }
-    //  public function updateSelfDeclarationOrder(array $orderedIds)
-    // {
-    //     foreach ($orderedIds as $index => $id) {
-    //         SelfDeclerationBasefield::where('id', $id)
-    //             ->update([
-    //                 'field_position' => $index + 1
-    //             ]);
-    //     }
-    //     $this->loadSelfDeclarationFields();
-    // }
-    // public function loadSelfDeclarationFields()
-    // {
-    //     $fields = SelfDeclerationBasefield::where('scheme_id', $this->schemeId)
-    //         ->where('tab_code', 105)
-    //         ->where('is_active', true)
-    //         ->orderBy('field_position')
-    //         ->get()
-    //         ->values(); // important for index
-
-    //     $sectionMap = SectionLevelMaster::pluck('section_level_name', 'id')->toArray();
-
-    //     $result = [];
-    //     $lastKey = null;
-
-    //     foreach ($fields as $i => $field) {
-
-    //         $hasSection = !empty($field->section_level_id);
-
-    //         $currentKey = $hasSection
-    //             ? $field->section_level_type . '-' . $field->section_level_id
-    //             : null;
-
-    //         $next = $fields[$i + 1] ?? null;
-
-    //         $nextKey = (!empty($next?->section_level_id))
-    //             ? $next->section_level_type . '-' . $next->section_level_id
-    //             : null;
-
-    //         $result[] = [
-    //             'field' => $field,
-    //             'show_section_start' => $hasSection && $currentKey !== $lastKey,
-    //             'show_section_end'   => $hasSection && $currentKey !== $nextKey,
-    //             'section_title'      => $hasSection
-    //                 ? ($sectionMap[$field->section_level_id] ?? 'Section / Level')
-    //                 : null,
-    //         ];
-    //         if ($hasSection) {
-    //             $lastKey = $currentKey;
-    //         } else {
-    //             $lastKey = null;
-    //         }
-    //     }
-    //     $this->selfDeclarationDisplay = $result;
-    // }
-
+   
     public function updateSelfDeclarationOrderAndSection(array $rows)
     {
+        if ($this->isFinalSubmitted) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Final submission completed. You cannot modify documents.',
+            ]);
+            return;
+        }
         DB::transaction(function () use ($rows) {
-
             foreach ($rows as $index => $row) {
-
                 $sectionType = null;
                 $sectionId   = null;
-
                 if (!empty($row['section'])) {
                     [$sectionType, $sectionId] = explode('-', $row['section']);
                 }
-
                 SelfDeclerationBasefield::where('id', $row['id'])
                     ->update([
                         'field_position'     => $index + 1,
@@ -750,6 +630,79 @@ class SchemeTabFieldManager extends Component
             }
         }
         $this->selfDeclarationDisplay = $result;
+    }
+
+    //final submit form
+    public function finalSubmit()
+    {
+        // dd('final submit');
+        // dd($this->schemeId);
+        if (!$this->schemeId) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Please select a scheme first',
+            ]);
+            return;
+        }
+        if ($this->isFinalSubmitted) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Final submission has been completed.',
+            ]);
+            return;
+        }
+        $missingFieldNames = SchemewiseStoreDataJsonHelper::checkMandatoryBaseFields($this->schemeId);
+        if (!empty($missingFieldNames)) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Mandatory fields missing: ' . implode(', ', $missingFieldNames),
+            ]);
+            return;
+        }
+        DB::beginTransaction();
+        try {
+            $data = SchemewiseStoreDataJsonHelper::generateSchemeJson($this->schemeId);
+            $path = SchemewiseStoreDataJsonHelper::storeSchemeJson($this->schemeId, $data);
+            if (!$path) {
+                throw new \Exception('JSON file could not be saved');
+            }
+
+            $finalSubmitStatus = SchemeFinalSubmitCheck::updateOrCreate(
+                ['scheme_id' => $this->schemeId],
+                ['is_final_submitted' => true]
+            );
+            if ($finalSubmitStatus) {
+                $this->isFinalSubmitted = true;
+                DB::commit();
+                $this->dispatch('toastr', [
+                    'type' => 'success',
+                    'message' => 'Scheme Form Field final submitted successfully',
+                ]);
+            } else {
+                if (isset($path)) {
+                    Storage::disk('local')->delete($path);
+                }
+                $this->dispatch('toastr', [
+                    'type' => 'error',
+                    'message' => 'Final submission failed. Please try again.',
+                ]);
+            }
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            if (isset($path)) {
+                Storage::disk('local')->delete($path);
+            }
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Final submission failed. Please try again.',
+            ]);
+        }
+    }
+    protected function syncFinalSubmitStatus(): void
+    {
+        $this->isFinalSubmitted = SchemeFinalSubmitCheck::where('scheme_id', $this->schemeId)
+            ->where('is_final_submitted', true)
+            ->exists();
     }
 
     public function render()

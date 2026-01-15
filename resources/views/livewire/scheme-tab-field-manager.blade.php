@@ -1,5 +1,4 @@
 <div class="max-w-7xl mx-auto bg-white rounded-xl shadow p-6 space-y-6">
-
     {{-- Scheme --}}
     <x-form.select label="Select Scheme" wire:model.live="schemeId" :disabled="$lockScheme">
         <option value="">-- Select --</option>
@@ -7,48 +6,52 @@
         <option value="{{ $scheme->id }}">{{ $scheme->name }}</option>
         @endforeach
     </x-form.select>
-
     @if($schemeId)
     <div class="space-y-4">
         @foreach($tabs as $tab)
-        <div x-data="{ open:false }" class="border border-b-cyan-300 rounded-lg overflow-hidden">
+        <div x-data="{ open:false }" class="border border-cyan-300 rounded-lg overflow-hidden">
             <div class="flex justify-between items-center bg-gray-100 px-4 py-3">
                 <span class="font-semibold">
                     {{ $tab->position }}. {{ $tab->masterTab->tab_name }}
                 </span>
                 <div class="flex gap-2 items-center">
-                    @if(!in_array($tab->tab_code, [104, 105]))
+                    @if(!in_array($tab->tab_code, [104, 105]) && !$isFinalSubmitted)
                     <a href="{{ route('create-dynamicformfield', [
                     'ref' => Crypt::encryptString($tab->scheme_id . '|' . $tab->tab_code)
                 ]) }}">
-
-                        <x-button.primary class="bg-indigo-400 hover:bg-indigo-500 text-sm">
+                        <x-button.primary class="bg-indigo-600 hover:bg-indigo-700 rounded-xl text-sm">
                             Add Another Fields
                         </x-button.primary>
                     </a>
                     @endif
+                    @if(!$isFinalSubmitted)
                     <x-button.primary wire:click="openManageModal({{ $tab->tab_code }})"
-                        class="bg-green-600 hover:bg-green-700 text-sm">
+                        class="bg-green-600 hover:bg-green-700 rounded-xl text-sm">
                         Manage Fields
                     </x-button.primary>
-                    <a href="{{ route('edit-validation', [
-                     'ref' => Crypt::encryptString($tab->scheme_id.'|'.$tab->tab_code)
-                ]) }}">
+                    @endif
 
-                         <x-button.primary
-                            type="submit"
-                            class="bg-yellow-400 hover:bg-yellow-500 text-sm">
-                            Reset Validation
+                    @if($tab->showValidationButton() && !$isFinalSubmitted)
+                    <a href="{{ route('edit-validation', [
+        'ref' => Crypt::encryptString($tab->scheme_id.'|'.$tab->tab_code)
+    ]) }}">
+                        <x-button.primary
+                            type="button"
+                            class="bg-cyan-600 hover:bg-cyan-700 rounded-xl text-sm">
+                            Modify Defult Validation
                         </x-button.primary>
                     </a>
+                    @endif
+
                     <x-button.primary wire:click="openPreview({{ $tab->tab_code }})"
-                        class="bg-gray-500 hover:bg-gray-600 text-sm">
+                        class="bg-gray-500 hover:bg-gray-600 rounded-xl text-sm">
                         Preview
                     </x-button.primary>
 
                     <button @click="open=!open" class="text-sm">
                         ▼
                     </button>
+
 
                 </div>
             </div>
@@ -57,6 +60,7 @@
                 @if($tab->tab_code == 104)
                 @if(count($attachedDocuments))
                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
+                @if($isFinalSubmitted)
                                             new Sortable($el, {
                                                 animation: 150,
                                                 handle: '.drag-handle',
@@ -66,13 +70,18 @@
                                                     $wire.updateDocumentOrder(ordered);
                                                 }
                                             })
+                @endif
                                             ">
                     @foreach($attachedDocuments as $doc)
                     <div data-id="{{ $doc->id }}"
                         class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
                         {{-- LEFT --}}
                         <div class="flex items-center gap-3">
-                            <span class="drag-handle cursor-move text-gray-400 text-lg">☰</span>
+                            <span
+                                class="drag-handle text-gray-400 text-lg
+                                 {{ $isFinalSubmitted ? 'opacity-40 cursor-not-allowed' : 'cursor-move' }}">
+                                ☰
+                            </span>
                             <div>
                                 <div class="font-medium">
                                     {{ $loop->iteration }}. {{ $doc->docType->name }}
@@ -89,7 +98,9 @@
                         </div>
                         {{-- REMOVE --}}
                         <button wire:click="removeDocument({{ $doc->id }})"
-                            class="text-red-500 font-bold text-lg hover:text-red-600">
+                            @if($isFinalSubmitted) disabled @endif
+                            class="text-red-500 font-bold text-lg mr-2
+                                {{ $isFinalSubmitted ? 'opacity-50 cursor-not-allowed' : 'hover:text-red-600' }}">
                             ✕
                         </button>
                     </div>
@@ -105,6 +116,7 @@
                 <div class="grid grid-cols-2 gap-3 p-4"
                     x-data
                     x-init="
+                     @if(!$isFinalSubmitted)
                             new Sortable($el, {
                                 animation: 150,
                                 handle: '.drag-handle',
@@ -139,6 +151,7 @@
                                     $wire.updateSelfDeclarationOrderAndSection(rows);
                                 }
                             })
+                        @endif
                         ">
 
                     @foreach($selfDeclarationDisplay as $row)
@@ -160,23 +173,31 @@
                         class="pl-6 py-2 flex items-center gap-3 border rounded bg-white
                                     {{ $row['field']->section_level_id ? 'bg-gray-50' : '' }}">
 
-                        <span class="drag-handle cursor-move text-gray-400 text-lg">☰</span>
-
+                        <span
+                            class="drag-handle text-gray-400 text-lg
+                                 {{ $isFinalSubmitted ? 'opacity-40 cursor-not-allowed' : 'cursor-move' }}">
+                            ☰
+                        </span>
                         <span class="flex-1 text-gray-700 font-medium">
                             {{ $loop->iteration }}. {{ $row['field']->level_name }}
                         </span>
 
                         <button
                             wire:click="editSelfDeclarationField({{ $row['field']->id }})"
-                            class="text-indigo-600 font-bold text-lg hover:text-indigo-800 mr-2">
+                            @if($isFinalSubmitted) disabled @endif
+                            class="text-indigo-600 font-bold text-lg mr-2
+                                    {{ $isFinalSubmitted ? 'opacity-50 cursor-not-allowed' : 'hover:text-indigo-800' }}">
                             ✎
                         </button>
 
                         <button
                             wire:click="removeSelfDeclarationField({{ $row['field']->id }})"
-                            class="text-red-500 font-bold text-lg hover:text-red-600 mr-2">
+                            @if($isFinalSubmitted) disabled @endif
+                            class="text-red-500 font-bold text-lg mr-2
+                                {{ $isFinalSubmitted ? 'opacity-50 cursor-not-allowed' : 'hover:text-red-600' }}">
                             ✕
                         </button>
+
                     </div>
 
                     {{-- SECTION END --}}
@@ -197,7 +218,8 @@
 
                 @else
                 @if(isset($tabFields[$tab->tab_code]) && count($tabFields[$tab->tab_code]))
-                <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
+                <div class="grid grid-cols-3 gap-3 p-4" x-data x-init="
+                                        @if(!$isFinalSubmitted)
                                             new Sortable($el, {
                                                 animation: 150,
                                                 handle: '.drag-handle',
@@ -207,24 +229,31 @@
                                                     $wire.updateFieldOrder({{ $tab->tab_code }}, ordered);
                                                 }
                                             })
+                                        @endif
                                         ">
                     @foreach($tabFields[$tab->tab_code] as $fid => $fname)
                     <div data-fid="{{ $fid }}"
                         class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
                         <div class="flex items-center gap-2">
-                            <span class="drag-handle cursor-move text-gray-400">☰</span>
+                            <span
+                                class="drag-handle text-gray-400 text-lg
+                                 {{ $isFinalSubmitted ? 'opacity-40 cursor-not-allowed' : 'cursor-move' }}">
+                                ☰
+                            </span>
                             <span class="font-semibold text-gray-600">
                                 {{ $loop->iteration }}. {{ $fname }}
                             </span>
                         </div>
-                        <button wire:click.stop="removeField({{ $tab->tab_code }}, '{{ $fid }}')" class="text-red-500 font-bold text-lg
-                                @if($this->isFieldMandatory($fid))
-                                    opacity-50 cursor-not-allowed
-                                @else
-                                    hover:text-red-600
-                                @endif" @if($this->isFieldMandatory($fid)) disabled @endif>
+                        <button
+                            wire:click.stop="removeField({{ $tab->tab_code }}, '{{ $fid }}')"
+                            @if($this->isFinalSubmitted || $this->isFieldMandatory($fid)) disabled @endif
+                            class="text-red-500 font-bold text-lg
+                            {{ ($this->isFinalSubmitted || $this->isFieldMandatory($fid))
+                                    ? 'opacity-50 cursor-not-allowed'
+                                    : 'hover:text-red-600' }}">
                             ✕
                         </button>
+
                     </div>
                     @endforeach
                 </div>
@@ -243,13 +272,32 @@
 
     {{-- FINAL ACTION BUTTONS --}}
     <div class="flex justify-center gap-4 pt-6">
-        <x-button.primary wire:click="openFinalPreview" class="bg-blue-600 hover:bg-blue-700">
+        <x-button.primary wire:click="openFinalPreview" class="bg-blue-600 hover:bg-blue-700 rounded-xl">
             Form Preview
         </x-button.primary>
-
-        <x-button.primary wire:click="finalSubmit" class="bg-green-600 hover:bg-green-700">
+        @if(!$isFinalSubmitted)
+        <x-form.confirm-action
+            action="finalSubmit"
+            title="Final Submit"
+            message="Once submitted, this scheme cannot be edited."
+            confirmLabel="Yes, Submit">
             Final Submit
-        </x-button.primary>
+        </x-form.confirm-action>
+        @else
+        <div class="inline-flex items-center gap-2.5 px-4 py-2 bg-white rounded-lg border border-green-200 shadow-sm">
+            <!-- Circular icon background -->
+            <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                <svg class="w-3.5 h-3.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+
+            <span class="text-green-700 font-semibold text-sm">
+                Finaly Submitted
+            </span>
+        </div>
+        @endif
+
     </div>
 
     @endif

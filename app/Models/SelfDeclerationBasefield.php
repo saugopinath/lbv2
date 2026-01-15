@@ -10,7 +10,6 @@ class SelfDeclerationBasefield extends Model
     protected $guarded = [];
     protected $casts = [
         'options' => 'array',
-        'validation_rule' => 'array',
     ];
     public function sectionLevel()
     {

@@ -19,14 +19,11 @@ return new class extends Migration
                   ->after('doc_type_id');
 
             // POSITION FOR DRAG & DROP
-            $table->integer('position')
+            $table->integer('field_position')
                   ->nullable()
                   ->after('tab_code');
-             $table->integer('is_active')
-                  ->default(1)
-                  ->after('position');    
-
-            // Optional composite index (recommended)
+             $table->boolean('is_active')->default(true)
+                  ->after('field_position');    
             $table->index(['scheme_id', 'tab_code'], 'scheme_tab_doc_idx');
         });
     }
