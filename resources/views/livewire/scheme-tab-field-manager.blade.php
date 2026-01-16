@@ -739,7 +739,6 @@
 
                     @if($rowFields->isNotEmpty())
                         <div class="grid md:grid-cols-{{ $cols }} gap-4 mb-4">
-
                         @foreach($rowFields as $field)
                         <div>
                             @switch($field->field_type)

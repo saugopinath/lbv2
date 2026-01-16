@@ -776,7 +776,7 @@ class SchemeTabFieldManager extends Component
 
     public function updatedRowConfig()
     {
-        // 1️⃣ Sanitize values (0–3)
+
         $this->rowConfig = array_values(array_map(
             fn($v) => max(0, min(3, (int)$v)),
             $this->rowConfig
@@ -786,7 +786,7 @@ class SchemeTabFieldManager extends Component
         $used  = 0;
         $newConfig = [];
 
-        // 2️⃣ Walk through rows sequentially
+
         foreach ($this->rowConfig as $count) {
 
             if ($used >= $total) {
@@ -799,16 +799,15 @@ class SchemeTabFieldManager extends Component
             $used += $canUse;
         }
 
-        // 3️⃣ Auto-fill remaining fields (flow to bottom)
         while ($used < $total) {
             $take = min(3, $total - $used);
             $newConfig[] = $take;
             $used += $take;
         }
 
-        // 4️⃣ Update state
+
         $this->rowConfig = $newConfig;
-        $this->remainingFixFields = 0; // always balanced
+        $this->remainingFixFields = 0;
     }
 
     private function syncRowConfigWithTotalFields(): void
