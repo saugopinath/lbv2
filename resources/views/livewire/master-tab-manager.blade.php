@@ -16,31 +16,30 @@
         </x-form.select>
     </div>
 
-    {{-- Tab Select --}}
-    @if($selectedSchemeId)
-        <div>
-            <x-form.select
-                name="tab_code"
-                id="tab_code"
-                label="Select Tab"
-                wire:model.live="selectedTabCode"
-                class="border rounded px-3 py-2 w-full"
-                :disabled="$isFinal"
-            >
-                <option value="">
-                    {{ $isFinal ? 'Final Submitted (Read Only)' : '-- Select Tab --' }}
-                </option>
-
-                @foreach($allTabs as $tab)
-                    @if(!in_array($tab->tab_code, $selectedTabs))
-                        <option value="{{ $tab->tab_code }}">
-                            {{ $tab->tab_name }}
+            {{-- Tab Select --}}
+            @if($selectedSchemeId && !$isFinal)
+                <div>
+                    <x-form.select
+                        name="tab_code"
+                        id="tab_code"
+                        label="Select Tab"
+                        wire:model.live="selectedTabCode"
+                        class="border rounded px-3 py-2 w-full"
+                    >
+                        <option value="">
+                            -- Select Tab --
                         </option>
-                    @endif
-                @endforeach
-            </x-form.select>
-        </div>
-    @endif
+
+                        @foreach($allTabs as $tab)
+                            @if(!in_array($tab->tab_code, $selectedTabs))
+                                <option value="{{ $tab->tab_code }}">
+                                    {{ $tab->tab_name }}
+                                </option>
+                            @endif
+                        @endforeach
+                    </x-form.select>
+                </div>
+             @endif
 
     {{-- Selected Tabs --}}
     @if(count($selectedTabs))
@@ -166,11 +165,31 @@
                     <div class="px-6 pt-4 border-b">
                         <nav class="flex space-x-6">
                             @foreach($tabs as $tab)
-                            <button wire:click="setFinalPreviewTab({{ $tab['tab_code'] }})"
-                                class="{{ $finalActiveTabCode == $tab['tab_code'] ? 'text-indigo-600 border-b-2' : '' }}">
-                                {{ $tab['tab_name'] }}
-                            </button>
+                                <button
+                                    wire:click="setFinalPreviewTab({{ $tab['tab_code'] }})"
+                                    class="flex items-center gap-2 pb-2 text-sm font-medium transition
+                                    {{ $finalActiveTabCode == $tab['tab_code']
+                                        ? 'text-indigo-600 border-b-2 border-indigo-600'
+                                        : 'text-gray-500 hover:text-gray-700' }}"
+                                >
+
+                                    {{-- ICON FROM JSON --}}
+                                    @if(!empty($tab['tab_icon']))
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                            class="w-4 h-4"
+                                        >
+                                            <path d="{{ $tab['tab_icon'] }}" />
+                                        </svg>
+                                    @endif
+
+                                    {{-- TAB NAME --}}
+                                    <span>{{ $tab['tab_name'] }}</span>
+                                </button>
                             @endforeach
+
                         </nav>
                     </div>
 
