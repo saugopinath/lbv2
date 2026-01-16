@@ -47,17 +47,12 @@ class SchemeTabFieldManager extends Component
     ];
 
 
-
-    // public bool $showLayoutModal = false;
-    // public string $layoutMode = '1'; // 1 | 2 | 3 | custom
-    // public array $rowConfig = [];
-    // public int $totalFields = 0;
-    // public int $remainingFixFields = 0;
     public bool $showLayoutModal = false;
     public string $layoutMode = '1'; // 1 | 2 | 3 | custom
-    public array $rowConfig = [];
+    public array $rowConfig = [];    // [2,3,1]
     public int $totalFields = 0;
     public int $remainingFixFields = 0;
+
 
 
     public function mount(Request $request)
@@ -488,190 +483,8 @@ class SchemeTabFieldManager extends Component
             foreach ($fields as $field) {
                 $this->tabFields[$tabCode][$field->tab_field_id] = $field->level_name;
             }
-            $this->syncLayoutAfterOrderChange($tabCode);
-            // if ($this->layoutMode === 'custom') {
-            //     $this->buildLayoutFromUserConfig($tabCode);
-            // }
         });
     }
-
-
-    // private function syncLayoutAfterFieldOrderChange(int $tabCode): void
-    // {
-    //     $layoutJson = DB::table('scheme_tab_layouts')
-    //         ->where('scheme_id', $this->schemeId)
-    //         ->where('tab_code', $tabCode)
-    //         ->value('layout_json');
-
-    //     if (!$layoutJson) {
-    //         return;
-    //     }
-
-    //     $layout = json_decode($layoutJson, true);
-    //     if (!is_array($layout)) {
-    //         return;
-    //     }
-    //     // 🔹 All ordered field IDs (truth)
-    //     $orderedFieldIds = SchemeTabFormField::where('scheme_id', $this->schemeId)
-    //         ->where('tab_code', $tabCode)
-    //         ->where('is_active', true)
-    //         ->orderBy('field_position')
-    //         ->pluck('tab_field_id')
-    //         ->toArray();
-
-    //     $cursor = 0;
-    //     $newLayout = [];
-
-    //     // 1️⃣ Fill existing layout rows safely
-    //     foreach ($layout as $row) {
-    //         $columns = max(1, (int)($row['columns'] ?? 1));
-
-    //         $fields = array_slice($orderedFieldIds, $cursor, $columns);
-
-    //         if (empty($fields)) {
-    //             break;
-    //         }
-
-    //         $newLayout[] = [
-    //             'columns' => $columns,
-    //             'fields'  => $fields,
-    //         ];
-
-    //         $cursor += count($fields);
-    //     }
-
-    //     // 2️⃣ Remaining fields → auto rows (1 per row)
-    //     while ($cursor < count($orderedFieldIds)) {
-    //         $newLayout[] = [
-    //             'columns' => 1,
-    //             'fields'  => [$orderedFieldIds[$cursor]],
-    //         ];
-    //         $cursor++;
-    //     }
-
-    //     // 3️⃣ Save safely
-    //     DB::table('scheme_tab_layouts')->updateOrInsert(
-    //         [
-    //             'scheme_id' => $this->schemeId,
-    //             'tab_code'  => $tabCode,
-    //         ],
-    //         [
-    //             'layout_json' => json_encode($newLayout),
-    //             'updated_at'  => now(),
-    //         ]
-    //     );
-    // }
-
-
-
-    // private function buildLayoutFromUserConfig(int $tabCode): void
-    // {
-    //     // 1️⃣ ordered field list (truth)
-    //     $orderedIds = SchemeTabFormField::where('scheme_id', $this->schemeId)
-    //         ->where('tab_code', $tabCode)
-    //         ->where('is_active', true)
-    //         ->orderBy('field_position')
-    //         ->pluck('tab_field_id')
-    //         ->toArray();
-
-    //     $layout = [];
-    //     $cursor = 0;
-
-    //     // 2️⃣ user-defined rows
-    //     foreach ($this->rowConfig as $rowIndex => $cols) {
-    //         if ($cursor >= count($orderedIds)) break;
-
-    //         $slice = array_slice($orderedIds, $cursor, $cols);
-    //         if (empty($slice)) break;
-
-    //         $layout[] = [
-    //             'row'    => $rowIndex + 1,
-    //             'fields' => $slice,
-    //         ];
-
-    //         $cursor += count($slice);
-    //     }
-
-    //     // 3️⃣ remaining → auto 1 per row
-    //     while ($cursor < count($orderedIds)) {
-    //         $layout[] = [
-    //             'row'    => count($layout) + 1,
-    //             'fields' => [$orderedIds[$cursor]],
-    //         ];
-    //         $cursor++;
-    //     }
-
-    //     // 4️⃣ save JSON
-    //     DB::table('scheme_tab_layouts')->updateOrInsert(
-    //         [
-    //             'scheme_id' => $this->schemeId,
-    //             'tab_code'  => $tabCode,
-    //         ],
-    //         [
-    //             'layout_json' => json_encode($layout),
-    //             'updated_at'  => now(),
-    //         ]
-    //     );
-    // }
-
-    private function syncLayoutAfterOrderChange(int $tabCode)
-    {
-        $layoutJson = DB::table('scheme_tab_layouts')
-            ->where('scheme_id', $this->schemeId)
-            ->where('tab_code', $tabCode)
-            ->value('layout_json');
-
-        if (!$layoutJson) return;
-
-        $layout = json_decode($layoutJson, true);
-
-        $ordered = SchemeTabFormField::where('scheme_id', $this->schemeId)
-            ->where('tab_code', $tabCode)
-            ->orderBy('field_position')
-            ->pluck('tab_field_id')
-            ->toArray();
-
-        $flat = collect($layout)->pluck('fields')->flatten()->toArray();
-
-        usort(
-            $flat,
-            fn($a, $b) =>
-            array_search($a, $ordered) <=> array_search($b, $ordered)
-        );
-
-        $cursor = 0;
-        $newLayout = [];
-
-        foreach ($layout as $row) {
-            $cols = count($row['fields']);
-            $slice = array_slice($flat, $cursor, $cols);
-            if (!$slice) break;
-
-            $newLayout[] = [
-                'row' => count($newLayout) + 1,
-                'fields' => $slice
-            ];
-
-            $cursor += count($slice);
-        }
-
-        while ($cursor < count($flat)) {
-            $newLayout[] = [
-                'row' => count($newLayout) + 1,
-                'fields' => [$flat[$cursor]]
-            ];
-            $cursor++;
-        }
-
-        DB::table('scheme_tab_layouts')->updateOrInsert(
-            [
-                'scheme_id' => $this->schemeId,
-                'tab_code'  => $tabCode,
-            ],
-            ['layout_json' => json_encode($newLayout)]
-        );
-    }
-
 
     public function getPreviewFieldsProperty()
     {
@@ -903,116 +716,39 @@ class SchemeTabFieldManager extends Component
     }
 
 
-    //custom field layout
-    // public function openLayoutModal($tabCode)
-    // {
-    //     $this->activeTabCode = $tabCode;
-    //     $fieldIds = array_keys($this->tabFields[$tabCode] ?? []);
-    //     $this->totalFields = count($fieldIds);
-    //     $this->layoutMode = '1';
-    //     $this->buildDefaultLayout();
-    //     $this->remainingFixFields = 0;
-    //     $this->showLayoutModal = true;
-    // }
-    // public function openLayoutModal($tabCode)
-    // {
-    //     $this->activeTabCode = $tabCode;
-
-    //     $fieldIds = array_keys($this->tabFields[$tabCode] ?? []);
-    //     $this->totalFields = count($fieldIds);
-
-    //     // 🔑 1️⃣ Try loading saved layout
-    //     $savedLayout = DB::table('scheme_tab_layouts')
-    //         ->where('scheme_id', $this->schemeId)
-    //         ->where('tab_code', $tabCode)
-    //         ->value('layout_json');
-
-    //     if ($savedLayout) {
-    //         // ✅ Load existing layout
-    //         $layout = json_decode($savedLayout, true);
-
-    //         $this->layoutMode = 'custom';
-    //         $this->rowConfig = array_map(
-    //             fn($row) => count($row['fields']),
-    //             $layout
-    //         );
-
-    //         $this->remainingFixFields = 0;
-    //     } else {
-    //         // 🆕 First time → default layout
-    //         $this->layoutMode = '1';
-    //         $this->buildDefaultLayout();
-    //     }
-
-    //     $this->showLayoutModal = true;
-    // }
     public function openLayoutModal($tabCode)
     {
         $this->activeTabCode = $tabCode;
 
-        $fieldIds = array_keys($this->tabFields[$tabCode] ?? []);
-        $this->totalFields = count($fieldIds);
+        $this->totalFields = count(
+            $this->tabFields[$tabCode] ?? []
+        );
 
-        $savedLayout = DB::table('scheme_tab_layouts')
+        $saved = DB::table('scheme_tab_layouts')
             ->where('scheme_id', $this->schemeId)
             ->where('tab_code', $tabCode)
             ->value('layout_json');
 
-        if ($savedLayout) {
-            // 🔁 previously saved layout
-            $layout = json_decode($savedLayout, true);
+        if ($saved) {
+            $layout = json_decode($saved, true);
 
             $this->layoutMode = 'custom';
             $this->rowConfig = array_map(
-                fn($row) => count($row['fields']),
+                fn($row) => (int)($row['columns'] ?? 1),
                 $layout
             );
-            $this->remainingFixFields = 0;
         } else {
-            // 🆕 first time
             $this->layoutMode = '1';
             $this->buildDefaultLayout();
         }
 
         $this->showLayoutModal = true;
     }
-
-
-    // private function buildDefaultLayout()
-    // {
-    //     if ($this->layoutMode === 'custom') return;
-
-    //     $perRow = (int) $this->layoutMode;
-    //     $rows   = ceil($this->totalFields / $perRow);
-
-    //     $this->rowConfig = array_fill(0, $rows, $perRow);
-
-    //     $used = $rows * $perRow;
-    //     $this->remainingFixFields = $this->totalFields - $used;
-    // }
-
-
-
-    // private function buildDefaultLayout()
-    // {
-    //     if ($this->layoutMode === 'custom') return;
-
-    //     $perRow = (int) $this->layoutMode;
-    //     if ($perRow < 1) $perRow = 1;
-
-    //     $rows = ceil($this->totalFields / $perRow);
-
-    //     $this->rowConfig = array_fill(0, $rows, $perRow);
-
-    //     $used = array_sum($this->rowConfig);
-    //     $this->remainingFixFields = $this->totalFields - $used;
-    // }
-
-    private function buildDefaultLayout()
+    private function buildDefaultLayout(): void
     {
         if ($this->layoutMode === 'custom') return;
 
-        $perRow = max(1, (int) $this->layoutMode);
+        $perRow = max(1, (int)$this->layoutMode);
 
         $rows = ceil($this->totalFields / $perRow);
 
@@ -1021,126 +757,22 @@ class SchemeTabFieldManager extends Component
         $used = array_sum($this->rowConfig);
         $this->remainingFixFields = $this->totalFields - $used;
     }
-
-
-    // public function updatedRowConfig()
-    // {
-    //     $used = array_sum($this->rowConfig);
-    //     $this->remainingFixFields = $this->totalFields - $used;
-    //     // add rows if needed
-    //     while ($this->remainingFixFields > 0) {
-    //         $this->rowConfig[] = 1;
-    //         $this->remainingFixFields--;
-    //     }
-    //     // trim rows if exceeded
-    //     while ($this->remainingFixFields < 0) {
-    //         $last = array_pop($this->rowConfig);
-    //         $this->remainingFixFields += $last;
-    //     }
-    // }
-
-
-    // public function updatedRowConfig()
-    // {
-    //     $used = array_sum($this->rowConfig);
-    //     $this->remainingFixFields = $this->totalFields - $used;
-
-    //     // add rows if needed
-    //     while ($this->remainingFixFields > 0) {
-    //         $this->rowConfig[] = 1;
-    //         $this->remainingFixFields--;
-    //     }
-
-    //     // trim rows if exceeded
-    //     while ($this->remainingFixFields < 0) {
-    //         $last = array_pop($this->rowConfig);
-    //         $this->remainingFixFields += $last;
-    //     }
-    // }
     public function updatedRowConfig()
     {
         $used = array_sum($this->rowConfig);
         $this->remainingFixFields = $this->totalFields - $used;
 
-        // add rows if needed
+        // 🔹 add rows if fields remaining
         while ($this->remainingFixFields > 0) {
-            $this->rowConfig[] = 1;
-            $this->remainingFixFields--;
+            $this->rowConfig[] = min(3, $this->remainingFixFields);
+            $this->remainingFixFields -= end($this->rowConfig);
         }
 
-        // trim rows if exceeded
+        // 🔹 trim extra rows
         while ($this->remainingFixFields < 0) {
             $last = array_pop($this->rowConfig);
             $this->remainingFixFields += $last;
         }
-
-        // 🔑 ADD THIS BLOCK
-        if ($this->layoutMode === 'custom' && $this->activeTabCode) {
-            $this->buildLayoutFromUserConfig($this->activeTabCode);
-        }
-    }
-    private function buildLayoutFromUserConfig(int $tabCode): void
-    {
-        if (!$this->schemeId || !$tabCode) {
-            return;
-        }
-
-        // 🔑 truth source: ordered fields
-        $orderedIds = SchemeTabFormField::where('scheme_id', $this->schemeId)
-            ->where('tab_code', $tabCode)
-            ->where('is_active', true)
-            ->orderBy('field_position')
-            ->pluck('tab_field_id')
-            ->toArray();
-
-        if (empty($orderedIds)) {
-            return;
-        }
-
-        $layout = [];
-        $cursor = 0;
-
-        // 1️⃣ User defined rows
-        foreach ($this->rowConfig as $rowIndex => $cols) {
-            if ($cursor >= count($orderedIds)) {
-                break;
-            }
-
-            $cols = max(1, (int) $cols);
-
-            $slice = array_slice($orderedIds, $cursor, $cols);
-            if (empty($slice)) {
-                break;
-            }
-
-            $layout[] = [
-                'row'    => $rowIndex + 1,
-                'fields' => $slice,
-            ];
-
-            $cursor += count($slice);
-        }
-
-        // 2️⃣ Remaining fields → auto 1 per row
-        while ($cursor < count($orderedIds)) {
-            $layout[] = [
-                'row'    => count($layout) + 1,
-                'fields' => [$orderedIds[$cursor]],
-            ];
-            $cursor++;
-        }
-
-        // 3️⃣ Save layout JSON
-        DB::table('scheme_tab_layouts')->updateOrInsert(
-            [
-                'scheme_id' => $this->schemeId,
-                'tab_code'  => $tabCode,
-            ],
-            [
-                'layout_json' => json_encode($layout),
-                'updated_at'  => now(),
-            ]
-        );
     }
 
 
@@ -1148,77 +780,30 @@ class SchemeTabFieldManager extends Component
     public function updatedLayoutMode()
     {
         if ($this->layoutMode === 'custom') {
-            // custom → manual control
-            $this->rowConfig = [1];
-            $this->remainingFixFields = $this->totalFields - 1;
+
+            // 🟢 Each field in its own row initially
+            $this->rowConfig = array_fill(0, $this->totalFields, 1);
+
+            // 🟢 Nothing remaining
+            $this->remainingFixFields = 0;
+
             return;
         }
 
+        // non-custom (1 / 2 / 3)
         $this->buildDefaultLayout();
     }
 
 
-    // public function applyLayout()
-    // {
-    //     $fieldIds = array_keys(
-    //         $this->tabFields[$this->activeTabCode] ?? []
-    //     );
-
-    //     $layout = [];
-    //     $index = 0;
-
-    //     foreach ($this->rowConfig as $i => $count) {
-    //         $layout[] = [
-    //             'row'    => $i + 1,
-    //             'fields' => array_slice($fieldIds, $index, $count),
-    //         ];
-    //         $index += $count;
-    //     }
-
-    //     DB::table('scheme_tab_layouts')->updateOrInsert(
-    //         [
-    //             'scheme_id' => $this->schemeId,
-    //             'tab_code'  => $this->activeTabCode,
-    //         ],
-    //         [
-    //             'layout_json' => json_encode($layout),
-    //         ]
-    //     );
-
-    //     $this->showLayoutModal = false;
-    // }
-
     public function applyLayout()
     {
-        $orderedIds = SchemeTabFormField::where('scheme_id', $this->schemeId)
-            ->where('tab_code', $this->activeTabCode)
-            ->where('is_active', true)
-            ->orderBy('field_position')
-            ->pluck('tab_field_id')
-            ->toArray();
-
         $layout = [];
-        $cursor = 0;
 
         foreach ($this->rowConfig as $i => $count) {
-            $slice = array_slice($orderedIds, $cursor, $count);
-            if (empty($slice)) break;
-
             $layout[] = [
-                'row'    => $i + 1,
-                'fields' => $slice,
+                'row'     => $i + 1,
+                'columns' => (int)$count,
             ];
-
-            $cursor += count($slice);
-        }
-
-        // remaining → auto single row
-        while ($cursor < count($orderedIds)) {
-            $layout[] = [
-                'row'    => count($layout) + 1,
-                'fields' => [$orderedIds[$cursor]],
-            ];
-            $cursor++;
         }
 
         DB::table('scheme_tab_layouts')->updateOrInsert(
@@ -1234,6 +819,10 @@ class SchemeTabFieldManager extends Component
 
         $this->showLayoutModal = false;
     }
+
+
+
+
 
 
     public function getTabLayout($tabCode)
