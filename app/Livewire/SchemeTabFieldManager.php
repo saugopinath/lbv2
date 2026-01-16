@@ -439,7 +439,7 @@ class SchemeTabFieldManager extends Component
         $this->editingLevelName = $field->level_name;
         $this->showEditSelfDeclModal = true;
     }
-     public function openPreview($tabCode)
+    public function openPreview($tabCode)
     {
         $this->activeTabCode = $tabCode;
         $tab = collect($this->tabs)
@@ -774,42 +774,42 @@ class SchemeTabFieldManager extends Component
         $this->remainingFixFields = 0;
     }
 
-   public function updatedRowConfig()
-{
-    // 1️⃣ Sanitize values (0–3)
-    $this->rowConfig = array_values(array_map(
-        fn ($v) => max(0, min(3, (int)$v)),
-        $this->rowConfig
-    ));
+    public function updatedRowConfig()
+    {
+        // 1️⃣ Sanitize values (0–3)
+        $this->rowConfig = array_values(array_map(
+            fn($v) => max(0, min(3, (int)$v)),
+            $this->rowConfig
+        ));
 
-    $total = $this->totalFields;
-    $used  = 0;
-    $newConfig = [];
+        $total = $this->totalFields;
+        $used  = 0;
+        $newConfig = [];
 
-    // 2️⃣ Walk through rows sequentially
-    foreach ($this->rowConfig as $count) {
+        // 2️⃣ Walk through rows sequentially
+        foreach ($this->rowConfig as $count) {
 
-        if ($used >= $total) {
-            break;
+            if ($used >= $total) {
+                break;
+            }
+
+            $canUse = min($count ?: 0, $total - $used);
+
+            $newConfig[] = $canUse;
+            $used += $canUse;
         }
 
-        $canUse = min($count ?: 0, $total - $used);
+        // 3️⃣ Auto-fill remaining fields (flow to bottom)
+        while ($used < $total) {
+            $take = min(3, $total - $used);
+            $newConfig[] = $take;
+            $used += $take;
+        }
 
-        $newConfig[] = $canUse;
-        $used += $canUse;
+        // 4️⃣ Update state
+        $this->rowConfig = $newConfig;
+        $this->remainingFixFields = 0; // always balanced
     }
-
-    // 3️⃣ Auto-fill remaining fields (flow to bottom)
-    while ($used < $total) {
-        $take = min(3, $total - $used);
-        $newConfig[] = $take;
-        $used += $take;
-    }
-
-    // 4️⃣ Update state
-    $this->rowConfig = $newConfig;
-    $this->remainingFixFields = 0; // always balanced
-}
 
     private function syncRowConfigWithTotalFields(): void
     {

@@ -738,7 +738,6 @@
                     @endphp
 
                     @if($rowFields->isNotEmpty())
-                    {{--  <div class="grid md:grid-cols-{{ $rowFields->count() }} gap-4 mb-4">  --}}
                         <div class="grid md:grid-cols-{{ $cols }} gap-4 mb-4">
 
                         @foreach($rowFields as $field)
