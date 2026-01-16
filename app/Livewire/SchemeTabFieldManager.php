@@ -607,6 +607,10 @@ class SchemeTabFieldManager extends Component
 
         try {
             $data = SchemewiseStoreDataJsonHelper::generateSchemeJson($this->schemeId);
+            $viewPath = SchemewiseStoreDataJsonHelper::store(
+                $this->schemeId,
+                $data['tabs']
+            );
             $path = SchemewiseStoreDataJsonHelper::storeSchemeJson($this->schemeId, $data);
             if (!$path) {
                 throw new \Exception('JSON file could not be saved');
@@ -632,7 +636,7 @@ class SchemeTabFieldManager extends Component
                 ]);
             }
         } catch (\Throwable $e) {
-
+// dd($e);
             DB::rollBack();
             if (isset($path)) {
                 Storage::disk('local')->delete($path);
@@ -700,7 +704,7 @@ class SchemeTabFieldManager extends Component
                 ->whereIn('scheme_id', [0, $this->schemeId])
                 ->whereIn('tab_code', [0, $tab->tab_code])
                 ->where('is_active', true)
-                ->orderByRaw("array_position(ARRAY[$ids]::int[], id)")
+                ->orderByRaw("array_position(ARRAY[$ids]::int[], id::int)")
                 ->get();
         }
     }

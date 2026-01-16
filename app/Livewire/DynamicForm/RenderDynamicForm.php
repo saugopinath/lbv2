@@ -203,6 +203,16 @@ class RenderDynamicForm extends Component
         }
         return $rules;
     }
+
+    public function getColSpanClass(int $viewType): string
+    {
+        return match ($viewType) {
+            1 => 'sm:col-span-12 md:col-span-12',
+            2 => 'sm:col-span-6 md:col-span-6',
+            3 => 'sm:col-span-4 md:col-span-4',
+        };
+    }
+
     public function render()
     {
         return view('livewire.dynamic-form.render-dynamic-form');

@@ -7,6 +7,7 @@ use App\Models\SchemeTabBasefield;
 use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabFormField;
 use App\Models\SelfDeclerationBasefield;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class SchemewiseStoreDataJsonHelper
