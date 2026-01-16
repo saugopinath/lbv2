@@ -6,6 +6,7 @@ use App\Models\AcceptRejectInfo;
 use App\Models\Codemaster;
 use App\Models\DraftBeneficiaryPersonal;
 use App\Models\FromFieldAttribute;
+use App\Models\Ifsccodemaster;
 use App\Models\MasterSection;
 use App\Models\OtherDetails;
 use Illuminate\Support\Facades\Auth;
@@ -42,10 +43,11 @@ class RenderDynamicForm extends Component
 
         foreach ($this->fields as $group) {
             foreach ($group as $field) {
+                $key = $this->getFieldKey($field);
                 if (in_array($field['field_type'], ['checkbox', 'select', 'radio'])) {
-                    $this->formData[$field['field_label']] = [];
+                    $this->formData[$key] = [];
                 } else {
-                    $this->formData[$field['field_label']] = null;
+                    $this->formData[$key] = null;
                 }
             }
         }
@@ -188,8 +190,21 @@ class RenderDynamicForm extends Component
 
         return $parentValue !== '' && $parentValue !== null;
     }
-    public function updatedFormData() {}
-
+    public function updatedFormData($value, $key)
+    {
+        if ($key == 'ifsc' && strlen($value) >= 11) {
+            $ifs = Ifsccodemaster::with('bankmaster')
+                ->where('code', $value)
+                ->where('is_active', 1)
+                ->first();
+                dd($ifs);
+        }
+        
+    }
+    public function fieldKey(array $field): string
+    {
+        return $field['field_class'] ?: $field['field_label'];
+    }
     protected function rules()
     {
         $rules = [];
@@ -202,6 +217,13 @@ class RenderDynamicForm extends Component
             }
         }
         return $rules;
+    }
+
+    private function getFieldKey(array $field): string
+    {
+        return !empty($field['field_class'])
+            ? $field['field_class']
+            : $field['field_label'];
     }
 
     public function getColSpanClass(int $viewType): string

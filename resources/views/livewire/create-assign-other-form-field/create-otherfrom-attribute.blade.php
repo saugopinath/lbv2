@@ -186,7 +186,7 @@
             @endif
 
 
-            @if ($field_type === 'select')
+            
             <div class="">
                 <label class="font-semibold block mb-1">
                     Is choose from default?
@@ -219,6 +219,7 @@
                 @endforeach
             </x-form.select>
             @endif
+            @if ($field_type === 'select')
             <div class="">
                 <label class="font-semibold block mb-2">
                     Is Multiple Select Allowed?
