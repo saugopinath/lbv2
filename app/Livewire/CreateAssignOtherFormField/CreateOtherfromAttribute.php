@@ -9,6 +9,7 @@ use App\Models\FromFieldType;
 use App\Models\ValidationRule;
 use App\Models\SchemeTabBasefield;
 use App\Models\MasterSection;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Storage;
 
 class CreateOtherfromAttribute extends Component
@@ -47,8 +48,21 @@ class CreateOtherfromAttribute extends Component
     public $isconfirm = 'no';
     public $confirmOptions;
     public $confirm_of;
-    public function mount()
-    {
+    
+    public $schemeId, $lockScheme = false;
+    
+    public function mount($data = null)
+    {      
+
+        if ($data) {
+            try {
+                $this->schemeId = $data['scheme_id'];
+                $this->lockScheme = true;            
+            } catch (DecryptException $e) {
+                abort(403, 'Invalid scheme reference');
+            }
+        }
+
         $this->schemes = Scheme::all();
         $this->fieldTypes = FromFieldType::all();
         $this->validationRuleOptions = ValidationRule::all()
