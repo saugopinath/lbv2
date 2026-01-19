@@ -107,7 +107,7 @@
                         <x-form.input 
                             name="{{ $field['field_label'] }}" 
                             id="{{ $field['field_id'] }}"
-                            wire:model.live="formData.{{ $this->fieldKey($field) }}" 
+                            wire:model.lazy="formData.{{ $this->fieldKey($field) }}" 
                             label="{{ $field['level_name'] }}"
                             placeholder="Enter {{ $field['level_name'] }}" 
                             type="{{ $field['field_type'] }}" />

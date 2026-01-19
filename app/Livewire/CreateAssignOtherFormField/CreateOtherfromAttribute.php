@@ -108,7 +108,9 @@ class CreateOtherfromAttribute extends Component
             if (isset($this->default_values[$value])) {
                 $this->defaultOptions = $this->default_values[$value];
                 if (empty($this->defaultOptions)) {
-                    $this->field_class = strtolower(str_replace('/', '_', $value));
+                    $this->field_class = strtolower(
+                        preg_replace('/[^a-zA-Z0-9]+/', '_', $value)
+                    );
                 }
             }
         }

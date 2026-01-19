@@ -19,5 +19,7 @@
   "Rural/Urban": {},
   "Block": {},
   "Panchayat": {},
-  "IFSC": {}
+  "IFSC": {},
+  "Bank Name": {},
+  "Branch Name": {}
 }

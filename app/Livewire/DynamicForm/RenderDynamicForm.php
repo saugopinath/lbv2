@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Livewire\DynamicForm;
-
 use App\Models\AcceptRejectInfo;
 use App\Models\Codemaster;
 use App\Models\DraftBeneficiaryPersonal;
@@ -14,7 +12,6 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
-
 class RenderDynamicForm extends Component
 {
     public  $schemeId;
@@ -23,8 +20,8 @@ class RenderDynamicForm extends Component
     public array $fields = [];
     public array $sections = [];
     public array $formData = [];
-
     use WithFileUploads;
+
     public function mount($schemeId = null,  $application_id = null, $mode = null)
     {
         $this->mode = $mode;
@@ -40,7 +37,6 @@ class RenderDynamicForm extends Component
             ->get()
             ->keyBy('id')
             ->toArray();
-
         foreach ($this->fields as $group) {
             foreach ($group as $field) {
                 $key = $this->getFieldKey($field);
@@ -58,6 +54,7 @@ class RenderDynamicForm extends Component
             }
         }
     }
+
     private function fileToBase64(TemporaryUploadedFile $file): array
     {
         return [
@@ -69,6 +66,7 @@ class RenderDynamicForm extends Component
             ),
         ];
     }
+
     public function save()
     {
         $this->validate(
@@ -109,7 +107,6 @@ class RenderDynamicForm extends Component
             ->latest('id')
             ->value('id') ?? null;
         $AcceptRejectInfo->save();
-
         $this->dispatch('selfDec1');
         $this->dispatch('hideLoader');
         $this->dispatch('toastr', [
@@ -117,12 +114,12 @@ class RenderDynamicForm extends Component
             'message' => 'Application submitted successfully!'
         ]);
     }
+
     private function buildValidationRules(): array
     {
         $rules = [];
         foreach ($this->fields as $group) {
             foreach ($group as $field) {
-
                 $rule = $field['validation_rule'];
                 if (!$rule || $rule === 'nullable') {
                     continue;
@@ -133,6 +130,7 @@ class RenderDynamicForm extends Component
         }
         return $rules;
     }
+
     protected function validationAttributes(): array
     {
         $attributes = [];
@@ -144,42 +142,35 @@ class RenderDynamicForm extends Component
         }
         return $attributes;
     }
+
     public function shouldShowField($field)
     {
         if (empty($field['dependent_on'])) {
             return true;
         }
-
         $allFields = collect($this->fields)->flatten(1);
         $parentField = $allFields->firstWhere('id', $field['dependent_on']);
-
         if (!$parentField) {
             return true;
         }
-
         $parentLabel = $parentField['field_label'];
         $parentValue = $this->formData[$parentLabel] ?? null;
-
         $allowed = [];
         if (!empty($field['dependent_on_values'])) {
             $raw = is_array($field['dependent_on_values'])
                 ? $field['dependent_on_values']
                 : json_decode($field['dependent_on_values'], true);
-
             $allowed = array_values($raw);
         }
-
         if (is_array($parentValue)) {
             if (empty($allowed)) {
                 return !empty($parentValue);
             }
-
             return count(array_intersect(
                 array_map('strval', $parentValue),
                 array_map('strval', $allowed)
             )) > 0;
         }
-
         if (!empty($allowed)) {
             return in_array(
                 (string)$parentValue,
@@ -187,24 +178,57 @@ class RenderDynamicForm extends Component
                 true
             );
         }
-
         return $parentValue !== '' && $parentValue !== null;
     }
+
+    private function getFieldIdByKey(string $key): ?int
+    {
+        $field = collect($this->fields)
+            ->flatten(1)
+            ->first(function ($field) use ($key) {
+                return $this->getFieldKey($field) === $key;
+            });
+        return $field['id'] ?? null;
+    }
+
     public function updatedFormData($value, $key)
     {
-        if ($key == 'ifsc' && strlen($value) >= 11) {
-            $ifs = Ifsccodemaster::with('bankmaster')
-                ->where('code', $value)
-                ->where('is_active', 1)
-                ->first();
-                dd($ifs);
+        if ($key !== 'ifsc') {
+            return;
         }
-        
+        $parentFieldId = $this->getFieldIdByKey($key);
+        $dependentFields = collect($this->fields)
+            ->flatten(1)
+            ->where('dependent_on', $parentFieldId);
+        foreach ($dependentFields as $field) {
+            $this->formData[$this->getFieldKey($field)] = '';
+        }
+        if (strlen($value) !== 11) {
+            return;
+        }
+        $ifs = Ifsccodemaster::with('bankmaster')
+            ->where('code', $value)
+            ->where('is_active', 1)
+            ->first();
+        if (!$ifs) {
+            return;
+        }
+        foreach ($dependentFields as $field) {
+            $fieldKey = $this->getFieldKey($field);
+            if (str_contains(strtolower($field['field_class']), 'bank_name')) {
+                $this->formData[$fieldKey] = $ifs->bankmaster->name ?? '';
+            }
+            if (str_contains(strtolower($field['field_class']), 'branch_name')) {
+                $this->formData[$fieldKey] = $ifs->branch ?? '';
+            }
+        }
     }
+
     public function fieldKey(array $field): string
     {
         return $field['field_class'] ?: $field['field_label'];
     }
+
     protected function rules()
     {
         $rules = [];
