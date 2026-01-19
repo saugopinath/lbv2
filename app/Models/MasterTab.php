@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MasterTab extends Model
 {
+     protected $table = 'master_tabs'; 
       protected $fillable = [
         'tab_name',
         'tab_code',

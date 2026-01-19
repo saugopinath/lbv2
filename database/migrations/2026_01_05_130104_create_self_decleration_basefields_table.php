@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('field_type', 50);
             $table->string('level_name', 500);
             $table->string('field_name', 100);
-            $table->string('field_id', 50)->unique();
+            $table->string('field_id', 50);
             $table->jsonb('options')->nullable();
             $table->string('db_colunm')->nullable();
             $table->string('validation_rule', 255)->nullable();

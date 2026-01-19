@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\RejectApprovedBeneficiaryController;
+use App\Http\Controllers\SchemeController;
 use App\Http\Controllers\ValidationManagerController;
 use App\Livewire\ApplicationView;
 use App\Livewire\IncompletTypePage;
@@ -325,3 +326,6 @@ Route::get('/tab-field-manager', SchemeTabFieldManager::class)
 // Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name(name: 'menu-tab');
 
 Route::get('/edit-validation', [ValidationManagerController::class, 'index'])->name('edit-validation');
+
+Route::get('/schemes-final-submitted', [SchemeController::class, 'finalSubmitted'])
+    ->name('schemes.final-submitted');
