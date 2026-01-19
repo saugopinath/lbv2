@@ -13,7 +13,7 @@
             <div class="flex justify-between items-center bg-gray-100 px-4 py-3">
                 <span class="font-semibold text-slate-800">
                     {{ $tab->position }}. {{ $tab->masterTab->tab_name }}
-                    <span class="ml-2 text-fuchsia-600 font-bold animate-pulse">(Selected Fields only)</span>
+                    <span class="ml-2 text-amber-600 font-bold animate-pulse">(Selected Fields only)</span>
                 </span>
                 <div class="flex gap-2 items-center">
                     @if(!in_array($tab->tab_code, [104, 105]) && !$isFinalSubmitted)
@@ -757,7 +757,6 @@
                     </div>
                     @endif
 
-                    {{-- ================= OTHER TABS (LAYOUT AWARE) ================= --}}
                     {{-- ================= OTHER TABS (LAYOUT AWARE) ================= --}}
                     @else
                     @php
