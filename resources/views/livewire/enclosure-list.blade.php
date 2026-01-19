@@ -88,7 +88,7 @@
 
         <x-upload-modal :currentDocExtensions="$currentDocExtensions" :currentDocMaxSize="$currentDocMaxSize" :formPreview="$form_preview" />
     </div>
-    <div class="flex justify-between mt-4 pl-6 pr-6">
+    {{--  <div class="flex justify-between mt-4 pl-6 pr-6">
         @if (!$is_page && empty($doc_type_id_array_list) && !$form_preview)
             @if ($mode != '0')
                 <x-button.danger wire:click="$dispatch('goPrevious')">Previous</x-button.danger>
@@ -110,5 +110,5 @@
                 </x-button.primary>
             @endif
         @endif
-    </div>
+    </div>  --}}
 </div>

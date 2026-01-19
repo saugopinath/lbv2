@@ -56,7 +56,6 @@ class SchemewiseStoreDataJsonHelper
                 'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
                 'fields'   => $fields,
             ];
-           
         }
         return [
             'scheme_id'    => $schemeId,
@@ -109,17 +108,20 @@ class SchemewiseStoreDataJsonHelper
             if ($tab['tab_code'] == 104) {
 
                 $blade = <<<BLADE
-{{-- ================= DOCUMENT UPLOAD TAB ================= --}}
-@include('livewire.enclosure-list')
-BLADE;
+            {{-- ================= DOCUMENT UPLOAD TAB ================= --}}
+            <livewire:enclosure-list
+                :scheme_id="\$schemeId"
+            />
+            BLADE;
 
-                File::put(
-                    $dir . "/104.blade.php",
-                    $blade
-                );
+            File::put(
+                $dir . "/104.blade.php",
+                $blade
+            );
 
-                continue; // ⚠️ very important
-            }
+            continue;
+        }
+
 
             /* =====================================================
          | DECLARATION TAB (105)
@@ -131,18 +133,16 @@ BLADE;
                 foreach ($tab['fields'] as $field) {
 
                     $label = $field['level_name'] ?? 'Declaration';
-                    $name  = 'declaration_' . ($field['id'] ?? uniqid());
-
+                    $name  = $field['field_name'];
+                    $value = $field['value'];
                     $blade .= <<<BLADE
-<div class="flex items-start gap-2">
-    <x-form.checkbox
-        name="{$name}"
-        wire:model="formData.{$name}"
-    />
-    <span class="text-sm">{$label}</span>
-</div>
-BLADE;
-                }
+
+                <div class="flex items-start gap-2">
+                    <x-form.checkbox name="{$name}" value="{$value}" label="{$label}" wire:model="formData.{$name}"
+                    />
+                </div>
+                BLADE;
+                                }
 
                 $blade .= "\n</div>";
 
