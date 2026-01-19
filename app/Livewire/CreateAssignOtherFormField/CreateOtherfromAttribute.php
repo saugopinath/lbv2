@@ -7,7 +7,7 @@ use Livewire\Component;
 use App\Models\Scheme;
 use App\Models\FromFieldType;
 use App\Models\ValidationRule;
-use App\Models\FromFieldAttribute;
+use App\Models\SchemeTabBasefield;
 use App\Models\MasterSection;
 use Illuminate\Support\Facades\Storage;
 
@@ -54,7 +54,7 @@ class CreateOtherfromAttribute extends Component
         $this->validationRuleOptions = ValidationRule::all()
             ->pluck('description', 'rule')
             ->toArray();
-        if (FromFieldAttribute::exists()) {
+        if (SchemeTabBasefield::exists()) {
             $this->isdepenentsec = true;
         }
     }
@@ -121,13 +121,13 @@ class CreateOtherfromAttribute extends Component
     {
         $this->isconfirm = $value;
         if ($this->isconfirm == 'yes') {
-            $this->confirmOptions = FromFieldAttribute::get();
+            $this->confirmOptions = SchemeTabBasefield::get();
         }
     }
     public function updatedIsdependent($value)
     {
         $this->isdependent = $value;
-        $this->depenentOptions = FromFieldAttribute::get();
+        $this->depenentOptions = SchemeTabBasefield::get();
         $this->depenent_on = null;
         $this->depvaluesopt = [];
     }
@@ -149,7 +149,7 @@ class CreateOtherfromAttribute extends Component
     {
         if ($value === 'yes') {
 
-            $ram = FromFieldAttribute::find($this->depenent_on);
+            $ram = SchemeTabBasefield::find($this->depenent_on);
 
             if ($ram && is_array($ram->options)) {
                 $this->depvaluesopt = collect($ram->options)
@@ -171,7 +171,7 @@ class CreateOtherfromAttribute extends Component
         // ALL = "1"
         if (in_array('0', $selectedValues)) {
 
-            $ram = FromFieldAttribute::find($this->depenent_on);
+            $ram = SchemeTabBasefield::find($this->depenent_on);
 
             if ($ram && is_array($ram->options)) {
 
@@ -243,12 +243,12 @@ class CreateOtherfromAttribute extends Component
             ->mapWithKeys(fn($value, $index) => [$index + 1 => $value])
             ->toArray();
 
-        FromFieldAttribute::create([
+        SchemeTabBasefield::create([
             'scheme_id' => $this->scheme_id,
             'level_name' => $this->level_name,
             'field_id' => $this->field_id,
             'field_class' => $this->field_class,
-            'field_label' => $this->field_name,
+            'field_name' => $this->field_name,
             'field_type' => $this->field_type,
             'view_type' => $this->view_type,
             'validation_rule' => implode('|', $validationRules),

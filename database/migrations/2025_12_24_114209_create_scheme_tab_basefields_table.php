@@ -29,6 +29,11 @@ return new class extends Migration
             $table->boolean('is_multiple')->default(false);
             $table->integer('field_position')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->smallInteger('view_type')->nullable();
+            $table->bigInteger('confirm_of')->nullable();
+            $table->bigInteger('dependent_on')->nullable();
+            $table->jsonb('dependent_on_values')->nullable();
+            $table->string('field_class', 100)->nullable();
             $table->timestamps();
             $table->unique(['tab_code', 'scheme_id', 'field_name', 'level_name']);
             $table->index(['tab_code', 'scheme_id']);

@@ -5,7 +5,7 @@ namespace App\Livewire\DynamicForm;
 use App\Models\AcceptRejectInfo;
 use App\Models\Codemaster;
 use App\Models\DraftBeneficiaryPersonal;
-use App\Models\FromFieldAttribute;
+use App\Models\SchemeTabBasefield;
 use App\Models\Ifsccodemaster;
 use App\Models\MasterSection;
 use App\Models\OtherDetails;
@@ -29,7 +29,7 @@ class RenderDynamicForm extends Component
         $this->mode = $mode;
         $this->schemeId = $schemeId;
         $this->application_id = $application_id;
-        $this->fields = FromFieldAttribute::where('scheme_id', $this->schemeId)
+        $this->fields = SchemeTabBasefield::where('scheme_id', $this->schemeId)
             ->where('is_active', true)
             ->orderBy('created_at')
             ->get()
@@ -166,7 +166,7 @@ class RenderDynamicForm extends Component
         $attributes = [];
         foreach ($this->fields as $group) {
             foreach ($group as $field) {
-                $attributes["formData.{$field['field_label']}"]
+                $attributes["formData.{$field['field_name']}"]
                     = $field['level_name'];
             }
         }
@@ -183,7 +183,7 @@ class RenderDynamicForm extends Component
         if (!$parentField) {
             return true;
         }
-        $parentLabel = $parentField['field_label'];
+        $parentLabel = $parentField['field_name'];
         $parentValue = $this->formData[$parentLabel] ?? null;
         $allowed = [];
         if (!empty($field['dependent_on_values'])) {
@@ -256,7 +256,7 @@ class RenderDynamicForm extends Component
 
     public function fieldKey(array $field): string
     {
-        return $field['field_class'] ?: $field['field_label'];
+        return $field['field_class'] ?: $field['field_name'];
     }
 
     protected function rules()
@@ -266,7 +266,7 @@ class RenderDynamicForm extends Component
             if ($this->shouldShowField($field)) {
                 $rule = $field['validation_rule'];
                 if ($rule && $rule !== 'nullable') {
-                    $rules["formData.{$field['field_label']}"] = $rule;
+                    $rules["formData.{$field['field_name']}"] = $rule;
                 }
             }
         }
@@ -277,7 +277,7 @@ class RenderDynamicForm extends Component
     {
         return !empty($field['field_class'])
             ? $field['field_class']
-            : $field['field_label'];
+            : $field['field_name'];
     }
 
     public function getColSpanClass(int $viewType): string
