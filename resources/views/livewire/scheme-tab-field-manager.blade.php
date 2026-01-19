@@ -11,8 +11,9 @@
         @foreach($tabs as $tab)
         <div x-data="{ open:false }" class="border border-cyan-300 rounded-lg overflow-hidden">
             <div class="flex justify-between items-center bg-gray-100 px-4 py-3">
-                <span class="font-semibold">
-                    {{ $tab->position }}. {{ $tab->masterTab->tab_name }} (Selected Fields only without any configuration)
+                <span class="font-semibold text-slate-800">
+                    {{ $tab->position }}. {{ $tab->masterTab->tab_name }}
+                    <span class="ml-2 text-fuchsia-600 font-bold animate-pulse">(Selected Fields only)</span>
                 </span>
                 <div class="flex gap-2 items-center">
                     @if(!in_array($tab->tab_code, [104, 105]) && !$isFinalSubmitted)
@@ -30,7 +31,7 @@
                         Manage Fields
                     </x-button.primary>
                     @endif
-                    @if(!$isFinalSubmitted)
+                    @if(!in_array($tab->tab_code, [104, 105]) && !$isFinalSubmitted)
                     <x-button.primary wire:click="openLayoutModal({{ $tab->tab_code }})"
                         class="bg-green-600 hover:bg-green-700 rounded-xl text-sm">
                         Fix Form Layout

@@ -435,6 +435,7 @@ class SchemeTabFieldManager extends Component
             }
             $this->tabFields[$tabCode] = $remainingFields->pluck('level_name', 'tab_field_id')->toArray();
         });
+        $this->syncLayoutAfterFieldChange();
     }
     public function openPreview($tabCode)
     {
@@ -831,7 +832,7 @@ class SchemeTabFieldManager extends Component
         $rows = [];
         $used = 0;
 
-        // existing rows respect করা হবে
+        // existing rows respect replace kora hobe 
         foreach ($this->rowConfig as $cols) {
             if ($used >= $this->totalFields) {
                 break;
@@ -842,9 +843,9 @@ class SchemeTabFieldManager extends Component
             $used += $cols;
         }
 
-        // field বাকি থাকলে → minimum 1 করে row add হবে
+        // field remain thakle  → minimum 1 kore row add
         while ($used < $this->totalFields) {
-            $rows[] = 1;          // ✅ IMPORTANT: default = 1
+            $rows[] = 1;          //  default = 1
             $used += 1;
         }
 
@@ -872,11 +873,8 @@ class SchemeTabFieldManager extends Component
 
         foreach ($this->rowConfig as $i => $cols) {
             $cols = max(1, min(3, (int) $cols));
-
             // this row can host fields (even partially)
             $remainingFields -= $cols;
-
-            // ✅ IMPORTANT:
             // if this row has extra capacity OR fields spill over,
             // we MUST show next row
             if ($remainingFields < 0) {
@@ -906,7 +904,7 @@ class SchemeTabFieldManager extends Component
             ->value('layout_json');
 
         if ($saved) {
-            // 🔹 DB layout load
+            // DB layout load
             $layout = json_decode($saved, true);
 
             $this->layoutMode = 'custom';
@@ -916,7 +914,7 @@ class SchemeTabFieldManager extends Component
                 $layout
             );
 
-            // 🔥 FIELD COUNT অনুযায়ী row ensure
+            //FIELD COUNT wise row ensure
             $this->rebuildRowConfig();
         } else {
             // 🔹 First time custom
@@ -1003,16 +1001,12 @@ class SchemeTabFieldManager extends Component
     }
     private function syncLayoutAfterFieldChange(): void
     {
-        if (!$this->activeTabCode) {
-            return;
-        }
-
-        // updated field count
+        // 1️field count update
         $this->totalFields = count(
             $this->tabFields[$this->activeTabCode] ?? []
         );
 
-        // load saved layout
+        // 2load saved layout
         $saved = DB::table('scheme_tab_layouts')
             ->where('scheme_id', $this->schemeId)
             ->where('tab_code', $this->activeTabCode)
@@ -1024,22 +1018,26 @@ class SchemeTabFieldManager extends Component
 
         $layout = json_decode($saved, true);
 
-        // restore rowConfig
-        $this->rowConfig = array_map(
-            fn($row) => max(1, min(3, (int) ($row['columns'] ?? 1))),
-            $layout
-        );
-
-        // 🔥 THIS IS THE KEY
-        // ensure enough rows exist for new fields
-        $used = array_sum($this->rowConfig);
-
+        // 3️⃣ restore rowConfig safely
+        $rows = [];
+        $used = 0;
+        foreach ($layout as $row) {
+            if ($used >= $this->totalFields) {
+                break;
+            }
+            $cols = max(1, min(3, (int) ($row['columns'] ?? 1)));
+            $rows[] = $cols;
+            $used += $cols;
+        }
+        // ensure minimum rows for remaining fields
         while ($used < $this->totalFields) {
-            $this->rowConfig[] = 1;
+            $rows[] = 1;          //  default new row
             $used += 1;
         }
 
-        // save back corrected layout
+        $this->rowConfig = $rows;
+
+        // save normalized layout back to DB
         DB::table('scheme_tab_layouts')->updateOrInsert(
             [
                 'scheme_id' => $this->schemeId,
@@ -1047,11 +1045,10 @@ class SchemeTabFieldManager extends Component
             ],
             [
                 'layout_json' => json_encode(
-                    array_map(
-                        fn($c, $i) => ['row' => $i + 1, 'columns' => $c],
-                        $this->rowConfig,
-                        array_keys($this->rowConfig)
-                    )
+                    collect($rows)->map(fn($c, $i) => [
+                        'row'     => $i + 1,
+                        'columns' => $c,
+                    ])->values()
                 ),
                 'updated_at' => now(),
             ]
@@ -1065,7 +1062,6 @@ class SchemeTabFieldManager extends Component
             ->where('tab_code', $tabCode)
             ->value('layout_json');
     }
-
     public function render()
     {
         return view('livewire.scheme-tab-field-manager', [

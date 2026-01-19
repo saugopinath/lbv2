@@ -6,6 +6,7 @@ use App\Models\SchemeAttachedDocMappings;
 use App\Models\SchemeTabBasefield;
 use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabFormField;
+use App\Models\SchemeTabLayout;
 use App\Models\SelfDeclerationBasefield;
 use Illuminate\Support\Facades\Storage;
 
@@ -48,11 +49,20 @@ class SchemewiseStoreDataJsonHelper
                     ->get()
                     ->toArray();
             }
+            /** ================= LAYOUT ================= */
+
+            $schemeTabLayout = SchemeTabLayout::where('scheme_id', $schemeId)
+                ->where('tab_code', $tab->tab_code)
+                ->first();
+
+            $layout = $schemeTabLayout?->layout_json;
+
             $tabData[] = [
                 'tab_code' => $tab->tab_code,
                 'tab_name' => $tab->masterTab->tab_name ?? '',
                 'tab_icon' => $tab->masterTab->tab_icon ?? '',
                 'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
+                'layout'         => $layout,
                 'fields'   => $fields,
             ];
             // $fields = $model::where('scheme_id', $schemeId)
