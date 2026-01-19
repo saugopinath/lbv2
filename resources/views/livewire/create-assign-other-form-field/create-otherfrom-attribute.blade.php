@@ -121,6 +121,41 @@
             @if($isdepenentsec)
             <div class="">
                 <label class="font-semibold block mb-1">
+                    Is Confirm?
+                </label>
+                <div class="flex gap-6">
+                    <x-form.radio
+                        name="isconfirm"
+                        value="yes"
+                        label="Yes"
+                        wire:model.live="isconfirm" />
+
+                    <x-form.radio
+                        name="isconfirm"
+                        value="no"
+                        label="No"
+                        wire:model.live="isconfirm" />
+                </div>
+            </div>
+            @endif
+            @if ($isconfirm === 'yes')
+            <x-form.select
+                name="confirm_of"
+                label="Confirm Of"
+                wire:model.live="confirm_of"
+                required>
+                <option value="">-- Select --</option>
+                @foreach ($confirmOptions as $option)
+                <option value="{{ $option->id }}">
+                    {{ $option->level_name }}
+                </option>
+                @endforeach
+            </x-form.select>
+            @else
+
+            @if($isdepenentsec)
+            <div class="">
+                <label class="font-semibold block mb-1">
                     Is depenent?
                 </label>
                 <div class="flex gap-6">
@@ -186,7 +221,7 @@
             @endif
 
 
-            
+
             <div class="">
                 <label class="font-semibold block mb-1">
                     Is choose from default?
@@ -291,6 +326,7 @@
             </div>
             @endif
         </div>
+        @endif
         @endif
         @endif
         <!-- Save Button (outside conditional block) -->

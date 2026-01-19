@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Livewire\DynamicForm;
+
 use App\Models\AcceptRejectInfo;
 use App\Models\Codemaster;
 use App\Models\DraftBeneficiaryPersonal;
@@ -114,22 +116,50 @@ class RenderDynamicForm extends Component
             'message' => 'Application submitted successfully!'
         ]);
     }
+    private function getFieldKeyById(int $id): ?string
+    {
+        $field = collect($this->fields)
+            ->flatten(1)
+            ->firstWhere('id', $id);
+
+        return $field ? $this->getFieldKey($field) : null;
+    }
 
     private function buildValidationRules(): array
     {
         $rules = [];
+
         foreach ($this->fields as $group) {
             foreach ($group as $field) {
-                $rule = $field['validation_rule'];
-                if (!$rule || $rule === 'nullable') {
-                    continue;
-                } else {
-                    $rules["formData.{$field['field_label']}"] = $rule;
+
+                $fieldKey = "formData." . $this->getFieldKey($field);
+
+                // Base rule
+                if (!empty($field['validation_rule']) && $field['validation_rule'] !== 'nullable') {
+                    $rules[$fieldKey] = $field['validation_rule'];
+                }
+
+                // ✅ confirm_of can be array OR single
+                if (!empty($field['confirm_of'])) {
+
+                    foreach ((array) $field['confirm_of'] as $parentId) {
+
+                        $parentKey = $this->getFieldKeyById($parentId);
+
+                        if ($parentKey) {
+                            $rules[$fieldKey] =
+                                ($rules[$fieldKey] ?? 'required') .
+                                "|same:formData.$parentKey";
+                        }
+                    }
                 }
             }
         }
+
         return $rules;
     }
+
+
 
     protected function validationAttributes(): array
     {

@@ -44,7 +44,9 @@ class CreateOtherfromAttribute extends Component
     public $isdependentvalue = 'no';
     public $depvalueradio = false;
     public $view_type;
-
+    public $isconfirm = 'no';
+    public $confirmOptions;
+    public $confirm_of;
     public function mount()
     {
         $this->schemes = Scheme::all();
@@ -113,6 +115,13 @@ class CreateOtherfromAttribute extends Component
                     );
                 }
             }
+        }
+    }
+    public function updatedIsconfirm($value)
+    {
+        $this->isconfirm = $value;
+        if ($this->isconfirm == 'yes') {
+            $this->confirmOptions = FromFieldAttribute::get();
         }
     }
     public function updatedIsdependent($value)
@@ -189,11 +198,13 @@ class CreateOtherfromAttribute extends Component
             'is_under_section' => 'required|in:yes,no',
             'section_id' => 'required_if:is_under_section,yes',
             'is_multiple' => 'required_if:field_type,select',
-            'is_choose_default' => 'required_if:field_type,select',
+            'is_choose_default' => 'required|in:yes,no',
             'default_value' => 'required_if:is_choose_default,yes',
-            'isdependent' => 'required',
+            'isdependent' => 'required|in:yes,no',
             'depenent_on' => 'required_if:isdependent,yes',
             'depvalues' => 'required_if:isdependentvalue,yes',
+            'isconfirm' => 'required|in:yes,no',
+            'confirm_of' => 'required_if:isconfirm,yes',
         ];
     }
     public function addOption()
@@ -257,6 +268,7 @@ class CreateOtherfromAttribute extends Component
                 : false,
             'dependent_on' => $this->isdependent === 'yes' ? $this->depenent_on : null,
             'dependent_on_values' => $this->isdependentvalue === 'yes' ? json_encode((object)$this->depvalues) : null,
+            'confirm_of' => $this->isconfirm === 'yes' ? $this->confirm_of : null,
         ]);
         $this->reset([
             'level_name',
