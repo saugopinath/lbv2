@@ -757,107 +757,45 @@
                     @endif
 
                     {{-- ================= OTHER TABS (LAYOUT AWARE) ================= --}}
+                    {{-- ================= OTHER TABS (LAYOUT AWARE) ================= --}}
                     @else
                     @php
                     $layoutJson = $this->getTabLayout($finalActiveTabCode);
-                    $layout = $layoutJson ? json_decode($layoutJson, true) : null;
+                    $layout = $layoutJson ? json_decode($layoutJson, true) : [];
                     $orderedFields = $finalPreviewFields->values();
                     $cursor = 0;
+                    $total = $orderedFields->count();
                     @endphp
 
-                    {{-- CHECK IF LAYOUT EXISTS --}}
-                    @if($layout && is_array($layout) && count($layout) > 0)
+                    @if(!empty($layout))
+
+                    {{-- ===== APPLY SAVED LAYOUT ===== --}}
                     @foreach($layout as $row)
                     @php
-                    $cols = max(1, (int) ($row['columns'] ?? 1));
+                    if ($cursor >= $total) break;
+
+                    $cols = max(1, min(3, (int) $row['columns']));
                     $rowFields = $orderedFields->slice($cursor, $cols);
                     $cursor += $rowFields->count();
                     @endphp
 
                     @if($rowFields->isNotEmpty())
-                    <div class="grid md:grid-cols-{{ $rowFields->count() }} gap-4 mb-4">
+                    <div class="grid md:grid-cols-{{ $cols }} gap-4 mb-4">
                         @foreach($rowFields as $field)
                         <div>
                             @switch($field->field_type)
                             @case('text')
-                            <x-form.input
-                                name="{{ $field->field_name }}"
-                                label="{!! $field->level_name !!}"
-                                placeholder="Enter {{ $field->level_name }}"
-                                disabled />
+                            <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" disabled />
                             @break
-
                             @case('number')
-                            <x-form.input
-                                type="number"
-                                name="{{ $field->field_name }}"
-                                label="{{ $field->level_name }}"
-                                disabled />
+                            <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
                             @break
-
-                            @case('date')
-                            <x-form.input
-                                type="date"
-                                name="{{ $field->field_name }}"
-                                label="{{ $field->level_name }}"
-                                disabled />
-                            @break
-
-                            @case('textarea')
-                            <x-form.textarea
-                                name="{{ $field->field_name }}"
-                                label="{{ $field->level_name }}"
-                                disabled />
-                            @break
-
-                            @case('select')
-                            <x-form.select
-                                name="{{ $field->field_name }}"
-                                label="{{ $field->level_name }}"
-                                disabled>
-                                <option value="">-- Select {{ $field->level_name }} --</option>
-                                @foreach($field->options ?? [] as $opt)
-                                <option>{{ $opt }}</option>
-                                @endforeach
-                            </x-form.select>
-                            @break
-                            @endswitch
-                        </div>
-                        @endforeach
-                    </div>
-                    @endif
-                    @endforeach
-
-                    {{-- FALLBACK (NO LAYOUT SAVED) --}}
-                    @else
-                    @if($finalPreviewFields->isEmpty())
-                    <div class="text-center text-gray-400">
-                        No fields configured for this tab
-                    </div>
-                    @else
-                    <div class="grid md:grid-cols-2 gap-4">
-                        @foreach($finalPreviewFields as $field)
-                        <div>
-                            @switch($field->field_type)
-                            @case('text')
-                            <div>
-                                <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}"
-                                    placeholder="Enter {{ $field->level_name }}" disabled />
-                            </div>
-                            @break
-
-                            @case('number')
-                            <x-form.input name="{{ $field->field_name }}" type="number" label="{{ $field->level_name }}" disabled />
-                            @break
-
                             @case('date')
                             <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
                             @break
-
                             @case('textarea')
                             <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
                             @break
-
                             @case('select')
                             <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
                                 <option value="">-- Select {{ $field->level_name }} --</option>
@@ -871,8 +809,79 @@
                         @endforeach
                     </div>
                     @endif
-                    @endif
-                    @endif
+                    @endforeach
+
+                    {{-- ===== REMAINING FIELDS (AUTO ROWS) ===== --}}
+                    @if($cursor < $total)
+                        @foreach($orderedFields->slice($cursor) as $field)
+                        <div class="grid md:grid-cols-1 gap-4 mb-4">
+                            <div>
+                                @switch($field->field_type)
+                                @case('text')
+                                <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" disabled />
+                                @break
+                                @case('number')
+                                <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                                @break
+                                @case('date')
+                                <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                                @break
+                                @case('textarea')
+                                <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                                @break
+                                @case('select')
+                                <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
+                                    <option value="">-- Select {{ $field->level_name }} --</option>
+                                    @foreach($field->options ?? [] as $opt)
+                                    <option>{{ $opt }}</option>
+                                    @endforeach
+                                </x-form.select>
+                                @break
+                                @endswitch
+                            </div>
+                        </div>
+                        @endforeach
+                        @endif
+
+                        @else
+                        {{-- ===== FALLBACK : NO LAYOUT SAVED ===== --}}
+                        @if($finalPreviewFields->isEmpty())
+                        <div class="text-center text-gray-400">
+                            No fields configured for this tab
+                        </div>
+                        @else
+                        <div class="grid md:grid-cols-2 gap-4">
+                            @foreach($finalPreviewFields as $field)
+                            <div>
+                                @switch($field->field_type)
+                                @case('text')
+                                <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" disabled />
+                                @break
+                                @case('number')
+                                <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                                @break
+                                @case('date')
+                                <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                                @break
+                                @case('textarea')
+                                <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                                @break
+                                @case('select')
+                                <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
+                                    <option value="">-- Select {{ $field->level_name }} --</option>
+                                    @foreach($field->options ?? [] as $opt)
+                                    <option>{{ $opt }}</option>
+                                    @endforeach
+                                </x-form.select>
+                                @break
+                                @endswitch
+                            </div>
+                            @endforeach
+                        </div>
+                        @endif
+                        @endif
+                        @endif
+
                 </div>
 
                 {{-- FOOTER --}}
@@ -924,10 +933,7 @@
         <div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
             <div class="bg-white w-full max-w-lg rounded-xl p-6 space-y-4">
 
-                <h3 class="font-semibold text-lg">
-                    Form Layout Settings
-                </h3>
-
+                <h3 class="font-semibold text-lg">Form Layout Settings</h3>
                 <x-form.select label="Layout Mode" wire:model.live="layoutMode">
                     <option value="1">1 field per row</option>
                     <option value="2">2 fields per row</option>
@@ -936,50 +942,43 @@
                 </x-form.select>
 
                 @if($layoutMode === 'custom')
+                @php $visibleRows = $this->visibleRowCount(); @endphp
                 <div class="space-y-2">
-                    <p class="text-sm text-gray-600">
-                        Total: {{ $totalFields }} |
-                        Remaining: {{ $remainingFixFields }}
-                    </p>
-
                     @foreach($rowConfig as $i => $cnt)
-                    <div class="flex items-center gap-3">
-                        <span class="w-16">Row {{ $i+1 }}</span>
+                    @if($i < $visibleRows)
+                        <div class="flex items-center gap-3">
+                        <span class="w-16">Row {{ $i + 1 }}</span>
                         <select wire:model.live="rowConfig.{{ $i }}"
                             class="border rounded px-2 py-1">
-                            <option selected value="">select number of Field</option>
                             <option value="1">1 field</option>
                             <option value="2">2 fields</option>
                             <option value="3">3 fields</option>
                         </select>
-                    </div>
-                    @endforeach
                 </div>
                 @endif
+                @endforeach
+            </div>
+            @endif
 
-                <div class="flex justify-end gap-3 pt-4">
-                    <x-button.primary
-                        wire:click="applyLayout"
-                        class="bg-green-600">
-                        Apply
-                    </x-button.primary>
-
-                    <x-button.primary
-                        wire:click="$set('showLayoutModal', false)"
-                        class="bg-gray-600">
-                        Cancel
-                    </x-button.primary>
-                </div>
-
+            <div class="flex justify-end gap-3 pt-4">
+                <x-button.primary
+                    wire:click="applyLayout"
+                    class="bg-green-600">
+                    Apply
+                </x-button.primary>
+                <x-button.primary
+                    wire:click="$set('showLayoutModal', false)"
+                    class="bg-gray-600">
+                    Cancel
+                </x-button.primary>
             </div>
         </div>
-        @endif
-
-        {{-- SUCCESS MESSAGE --}}
-        @if(session()->has('message'))
-        <div class="rounded-lg bg-green-50 border border-green-200 p-3 text-green-700 font-medium">
-            {{ session('message') }}
-        </div>
-        @endif
-
     </div>
+    @endif
+    {{-- SUCCESS MESSAGE --}}
+    @if(session()->has('message'))
+    <div class="rounded-lg bg-green-50 border border-green-200 p-3 text-green-700 font-medium">
+        {{ session('message') }}
+    </div>
+    @endif
+</div>
