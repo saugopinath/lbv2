@@ -48,16 +48,18 @@ class CreateOtherfromAttribute extends Component
     public $isconfirm = 'no';
     public $confirmOptions;
     public $confirm_of;
-    
+
     public $schemeId, $lockScheme = false;
-    
+
     public function mount($data = null)
-    {      
+    {
 
         if ($data) {
             try {
                 $this->schemeId = $data['scheme_id'];
-                $this->lockScheme = true;            
+                if ($this->schemeId) {
+                    $this->lockScheme = true;
+                }
             } catch (DecryptException $e) {
                 abort(403, 'Invalid scheme reference');
             }
