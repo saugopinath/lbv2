@@ -14,7 +14,7 @@
 
         toggle(item) {
             if (this.locked.includes(item.rule)) {
-                return; // 🔒 required locked
+                return;
             }
 
             if (this.selected.includes(item.rule)) {
@@ -45,11 +45,10 @@
 
         selected = existing;
 
-        // ✅ CORE FIX
         if (isMandatory === 1 && existing.includes('required')) {
-            locked = ['required'];   // 🔒 ONLY required
+            locked = ['required'];
         } else {
-            locked = [];             // 🔓 nothing locked
+            locked = [];
         }
     "
     class="relative w-full"
@@ -74,8 +73,6 @@
                     <span
                         x-text="options.find(o => o.rule === rule)?.description ?? rule">
                     </span>
-
-                    <!-- ❌ remove only if NOT required -->
                     <button
                         x-show="!locked.includes(rule)"
                         type="button"

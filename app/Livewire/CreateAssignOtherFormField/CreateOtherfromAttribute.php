@@ -94,7 +94,6 @@ class CreateOtherfromAttribute extends Component
         }
         $this->isdependent = 'no';
     }
-
     protected function loadSections()
     {
         $this->sections = MasterSection::where('scheme_id', $this->scheme_id)

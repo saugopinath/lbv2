@@ -3,7 +3,9 @@
 namespace App\Livewire;
 
 use App\Models\SchemeTabFormField;
+use App\Models\SelfDeclerationBasefield;
 use App\Models\ValidationRule;
+use Database\Seeders\SelfDeclarationBasefieldSeeder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -72,7 +74,9 @@ class SchemeFieldValidationTable extends DataTableComponent
     }
     protected function loadExisting()
     {
-        SchemeTabFormField::where('scheme_id', $this->schemeId)
+        $model = $this->getFieldModel();
+
+        $model::where('scheme_id', $this->schemeId)
             ->where('tab_code', $this->tabCode)
             ->where('is_active', true)
             ->get()
@@ -93,15 +97,27 @@ class SchemeFieldValidationTable extends DataTableComponent
             ])
             ->toArray();
     }
+    protected function getFieldModel(): string
+    {
+        return match ($this->tabCode) {
+            105     => SelfDeclerationBasefield::class,
+            default => SchemeTabFormField::class,
+        };
+    }
 
     public function builder(): Builder
     {
-        return SchemeTabFormField::query()
+        $model = $this->getFieldModel();
+
+        $query = $model::query()
             ->where('scheme_id', $this->schemeId)
             ->where('tab_code', $this->tabCode)
             ->where('is_active', true)
             ->orderBy('field_position');
+        return $query;
+        // dd($query->get());
     }
+
     public function columns(): array
     {
         return [
@@ -112,7 +128,7 @@ class SchemeFieldValidationTable extends DataTableComponent
                     return ($this->getPage() - 1) * $this->getPerPage() + $i;
                 }),
             Column::make("ID", "id")->hideIf(true),
-             Column::make("IsMandatory", "is_mandatory")->hideIf(true),
+            Column::make("IsMandatory", "is_mandatory")->hideIf(true),
             Column::make("regex", "regex")->hideIf(true),
             Column::make('Field Name', 'field_name'),
             Column::make('Level Name', 'level_name'),
@@ -135,17 +151,46 @@ class SchemeFieldValidationTable extends DataTableComponent
                 ->html(),
         ];
     }
-    public function saveValidation($fieldId): void
+    // public function saveValidation($fieldId): void
+    // {
+    //     $rules = $this->selectedValidations[$fieldId] ?? [];
+    //     $field = SchemeTabFormField::findOrFail($fieldId);
+    //     if ((int) $field->is_mandatory === 1 && !in_array('required', $rules)) {
+    //         array_unshift($rules, 'required');
+    //     }
+    //     $field->update([
+    //         'validation_rule' => empty($rules)
+    //             ? null
+    //             : implode('|', array_unique($rules)),
+    //     ]);
+    //     $this->dispatch('toastr', [
+    //         'type'    => 'success',
+    //         'message' => 'Validation Rule updated successfully',
+    //     ]);
+    // }
+    public function saveValidation(int $fieldId): void
     {
         $rules = $this->selectedValidations[$fieldId] ?? [];
-        $field = SchemeTabFormField::findOrFail($fieldId);
-        if ((int) $field->is_mandatory === 1 && !in_array('required', $rules)) {
-            array_unshift($rules, 'required');
+        $model = $this->getFieldModel();
+        $field = $model::findOrFail($fieldId);
+        if (in_array('required', $rules)) {
+            $rules = array_diff($rules, ['nullable']);
+        } else {
+            if (!in_array('nullable', $rules)) {
+                array_unshift($rules, 'nullable');
+            }
         }
+        if (isset($field->is_mandatory) && (int) $field->is_mandatory === 1) {
+            $rules = array_diff($rules, ['nullable']);
+            if (!in_array('required', $rules)) {
+                array_unshift($rules, 'required');
+            }
+        }
+        $rules = array_values(array_unique($rules));
         $field->update([
             'validation_rule' => empty($rules)
                 ? null
-                : implode('|', array_unique($rules)),
+                : implode('|', $rules),
         ]);
         $this->dispatch('toastr', [
             'type'    => 'success',
@@ -154,10 +199,11 @@ class SchemeFieldValidationTable extends DataTableComponent
     }
     public function saveRegex(int $id, string $regex): void
     {
-        SchemeTabFormField::where('id', $id)->update([
+        $model = $this->getFieldModel();
+        $model::where('id', $id)->update([
             'regex' => $regex,
         ]);
-         $this->dispatch('toastr', [
+        $this->dispatch('toastr', [
             'type'    => 'success',
             'message' => 'Regex updated successfully',
         ]);

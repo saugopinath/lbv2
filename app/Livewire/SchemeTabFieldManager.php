@@ -75,10 +75,8 @@ class SchemeTabFieldManager extends Component
     public function openFinalPreview()
     {
         $this->showFinalPreview = true;
-
         $firstTab = collect($this->tabs)->first();
         $this->finalActiveTabCode = $firstTab?->tab_code;
-
         $this->loadFinalPreviewFields();
     }
     public function setFinalPreviewTab($tabCode)
@@ -98,14 +96,11 @@ class SchemeTabFieldManager extends Component
             $this->finalPreviewFields = collect();
             return;
         }
-
         $fieldIds = array_keys($this->tabFields[$this->finalActiveTabCode] ?? []);
-
         if (empty($fieldIds)) {
             $this->finalPreviewFields = collect();
             return;
         }
-
         $this->finalPreviewFields = SchemeTabBasefield::whereIn('id', $fieldIds)
             ->whereIn('scheme_id', [0, $this->schemeId])
             ->whereIn('tab_code', [0, $this->finalActiveTabCode])
@@ -120,6 +115,7 @@ class SchemeTabFieldManager extends Component
 
         $this->resetState();
         $this->loadTabs();
+        $this->syncFinalSubmitStatus();
     }
     private function resetState()
     {
@@ -249,6 +245,7 @@ class SchemeTabFieldManager extends Component
     }
     public function openManageModal($tabCode)
     {
+        // dd('fff');
         $this->activeTabCode = $tabCode;
         $this->showManageModal = true;
 
@@ -304,6 +301,7 @@ class SchemeTabFieldManager extends Component
         $this->modalSelected = array_values(
             array_unique(array_merge($existing, $mandatoryIds))
         );
+        // dd($this->modalSelected);
     }
     public function isFieldMandatory($fieldId)
     {
@@ -362,7 +360,6 @@ class SchemeTabFieldManager extends Component
                         'tab_field_id' => $baseFieldId,
                         'scheme_id' => $schemeId,
                         'tab_code'  => $tabCode,
-
                     ],
                     [
                         'level_name'      => $base->level_name,
@@ -488,6 +485,7 @@ class SchemeTabFieldManager extends Component
             }
         });
     }
+
     public function getPreviewFieldsProperty()
     {
         if (!$this->activeTabCode) {

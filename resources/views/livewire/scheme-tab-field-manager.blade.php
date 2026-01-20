@@ -1,5 +1,4 @@
 <div class="max-w-7xl mx-auto bg-white rounded-xl shadow p-6 space-y-6">
-
     {{-- Scheme --}}
     <x-form.select label="Select Scheme" wire:model.live="schemeId" :disabled="$lockScheme">
         <option value="">-- Select --</option>
@@ -7,14 +6,14 @@
         <option value="{{ $scheme->id }}">{{ $scheme->name }}</option>
         @endforeach
     </x-form.select>
-
     @if($schemeId)
     <div class="space-y-4">
         @foreach($tabs as $tab)
         <div x-data="{ open:false }" class="border border-b-cyan-300 rounded-lg overflow-hidden">
             <div class="flex justify-between items-center bg-gray-100 px-4 py-3">
-                <span class="font-semibold">
+                <span class="font-semibold text-slate-800">
                     {{ $tab->position }}. {{ $tab->masterTab->tab_name }}
+                    <span class="ml-2 text-amber-600 font-bold animate-pulse">(Selected Fields only)</span>
                 </span>
                 <div class="flex gap-2 items-center">
                     @if(!in_array($tab->tab_code, [104, 105]))
@@ -55,7 +54,7 @@
                     @endif
 
                     <x-button.primary wire:click="openPreview({{ $tab->tab_code }})"
-                        class="bg-gray-500 hover:bg-gray-600 text-sm">
+                        class="bg-gray-500 hover:bg-gray-600 rounded-xl text-sm">
                         Preview
                     </x-button.primary>
 
@@ -263,10 +262,29 @@
         <x-button.primary wire:click="openFinalPreview" class="bg-blue-600 hover:bg-blue-700">
             Form Preview
         </x-button.primary>
-
-        <x-button.primary wire:click="finalSubmit" class="bg-green-600 hover:bg-green-700">
+        @if(!$isFinalSubmitted)
+        <x-form.confirm-action
+            action="finalSubmit"
+            title="Final Submit"
+            message="Once submitted, this scheme cannot be edited."
+            confirmLabel="Yes, Submit">
             Final Submit
-        </x-button.primary>
+        </x-form.confirm-action>
+        @else
+        <div class="inline-flex items-center gap-2.5 px-4 py-2 bg-white rounded-lg border border-green-200 shadow-sm">
+            <!-- Circular icon background -->
+            <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                <svg class="w-3.5 h-3.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+
+            <span class="text-green-700 font-semibold text-sm">
+                Finaly Submitted
+            </span>
+        </div>
+        @endif
+
     </div>
 
     @endif
@@ -883,6 +901,150 @@
                         </select>
                     </div>
                     @endforeach
+
+                    {{-- ===== REMAINING FIELDS (AUTO ROWS) ===== --}}
+                    @if($cursor < $total)
+                        @foreach($orderedFields->slice($cursor) as $field)
+                        <div class="grid md:grid-cols-1 gap-4 mb-4">
+                            <div>
+                                @switch($field->field_type)
+                                @case('text')
+                                <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" disabled />
+                                @break
+                                @case('number')
+                                <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                                @break
+                                @case('date')
+                                <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                                @break
+                                @case('textarea')
+                                <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                                @break
+                                @case('select')
+                                <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
+                                    <option value="">-- Select {{ $field->level_name }} --</option>
+                                    @foreach($field->options ?? [] as $opt)
+                                    <option>{{ $opt }}</option>
+                                    @endforeach
+                                </x-form.select>
+                                @break
+                                @endswitch
+                            </div>
+                        </div>
+                        @endforeach
+                        @endif
+
+                        @else
+                        {{-- ===== FALLBACK : NO LAYOUT SAVED ===== --}}
+                        @if($finalPreviewFields->isEmpty())
+                        <div class="text-center text-gray-400">
+                            No fields configured for this tab
+                        </div>
+                        @else
+                        <div class="grid md:grid-cols-2 gap-4">
+                            @foreach($finalPreviewFields as $field)
+                            <div>
+                                @switch($field->field_type)
+                                @case('text')
+                                <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" disabled />
+                                @break
+                                @case('number')
+                                <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                                @break
+                                @case('date')
+                                <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                                @break
+                                @case('textarea')
+                                <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                                @break
+                                @case('select')
+                                <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
+                                    <option value="">-- Select {{ $field->level_name }} --</option>
+                                    @foreach($field->options ?? [] as $opt)
+                                    <option>{{ $opt }}</option>
+                                    @endforeach
+                                </x-form.select>
+                                @break
+                                @endswitch
+                            </div>
+                            @endforeach
+                        </div>
+                        @endif
+                        @endif
+                        @endif
+
+                </div>
+
+                {{-- FOOTER --}}
+                <div class="flex justify-end gap-3 px-6 py-4 border-t">
+                    <x-button.primary wire:click="closeFinalPreview">
+                        Close
+                    </x-button.primary>
+                </div>
+
+            </div>
+        </div>
+        @endif
+
+
+
+        @if($showEditSelfDeclModal)
+        <div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-lg p-6">
+
+                <h3 class="text-lg font-semibold mb-4">
+                    Edit Self Declaration Label
+                </h3>
+
+                <x-form.textarea
+                    name="editingLevelName"
+                    label="Field Label"
+                    wire:model.defer="editingLevelName"
+                    required />
+
+                <div class="flex justify-end gap-3 mt-6">
+                    <x-button.primary
+                        wire:click="$set('showEditSelfDeclModal', false)"
+                        class="bg-gray-600">
+                        Cancel
+                    </x-button.primary>
+
+                    <x-button.primary
+                        wire:click="updateSelfDeclarationField"
+                        class="bg-indigo-600">
+                        Update
+                    </x-button.primary>
+                </div>
+
+            </div>
+        </div>
+        @endif
+
+        @if($showLayoutModal)
+        <div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+            <div class="bg-white w-full max-w-lg rounded-xl p-6 space-y-4">
+
+                <h3 class="font-semibold text-lg">Form Layout Settings</h3>
+                <x-form.select label="Layout Mode" wire:model.live="layoutMode">
+                    <option value="1">1 field per row</option>
+                    <option value="2">2 fields per row</option>
+                    <option value="3">3 fields per row</option>
+                    <option value="custom">Custom</option>
+                </x-form.select>
+
+                @if($layoutMode === 'custom')
+                @php $visibleRows = $this->visibleRowCount(); @endphp
+                <div class="space-y-2">
+                    @foreach($rowConfig as $i => $cnt)
+                    @if($i < $visibleRows)
+                        <div class="flex items-center gap-3">
+                        <span class="w-16">Row {{ $i + 1 }}</span>
+                        <select wire:model.live="rowConfig.{{ $i }}"
+                            class="border rounded px-2 py-1">
+                            <option value="1">1 field</option>
+                            <option value="2">2 fields</option>
+                            <option value="3">3 fields</option>
+                        </select>
                 </div>
                 @endif
 

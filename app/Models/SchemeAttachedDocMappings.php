@@ -22,6 +22,7 @@ class SchemeAttachedDocMappings extends Model
 
     protected $casts = [
         'is_required' => 'boolean',
+        'is_active' => 'boolean',
     ];
     public function codemaster()
     {

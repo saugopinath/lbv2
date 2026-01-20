@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class SchemeTabFormField extends Model
 {
+    protected $table = 'scheme_tab_form_fields';
+
     protected $fillable = [
         'scheme_id',
         'db_column',

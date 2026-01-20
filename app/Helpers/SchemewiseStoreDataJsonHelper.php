@@ -8,6 +8,7 @@ use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabFormField;
 use App\Models\SelfDeclerationBasefield;
 use Illuminate\Support\Facades\File;
+use App\Models\SchemeTabLayout;
 use Illuminate\Support\Facades\Storage;
 
 class SchemewiseStoreDataJsonHelper
@@ -49,13 +50,61 @@ class SchemewiseStoreDataJsonHelper
                     ->get()
                     ->toArray();
             }
+            /** ================= LAYOUT ================= */
+
+            $schemeTabLayout = SchemeTabLayout::where('scheme_id', $schemeId)
+                ->where('tab_code', $tab->tab_code)
+                ->first();
+
+            $layout = $schemeTabLayout?->layout_json;
+
             $tabData[] = [
                 'tab_code' => $tab->tab_code,
                 'tab_name' => $tab->masterTab->tab_name ?? '',
                 'tab_icon' => $tab->masterTab->tab_icon ?? '',
                 'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
                 'fields'   => $fields,
+                'layout'    => $layout,
             ];
+            // $fields = $model::where('scheme_id', $schemeId)
+            //     ->where('tab_code', $tab->tab_code)
+            //     ->where('is_active', true)
+            //     ->orderBy('field_position')
+            //     ->get()
+            //     ->map(fn ($field) => [
+            //         'id'                 => $field->id,
+            //         'tab_field_id'      => $field->tab_field_id ?? null,
+            //         'field_name'         => $field->field_name ?? null,
+            //         'level_name'         => $field->level_name,
+            //         'field_type'         => $field->field_type,
+            //         'validation_rule'    => $field->validation_rule,
+            //         'regex'              => $field->regex ?? null,
+            //         'is_mandatory'       => $field->is_mandatory ?? null,
+            //         'section_level_id'   => $field->section_level_id ?? null,
+            //         'section_level_type' => $field->section_level_type ?? null,
+            //         'options'            => $field->options ?? [],
+            //         'is_multiple'      => $field->is_multiple ?? false,
+            //         'db_column'        => $field->db_column ?? null,
+            //         'is_active'          => $field->is_active ?? null,
+            //         'field_position'     => $field->field_position ?? null,
+            //         'tab_code'           => $field->tab_code ?? null,
+            //         'scheme_id'          => $field->scheme_id ?? null,
+            //         'created_by'         => $field->created_by ?? null,
+            //         'updated_by'         => $field->updated_by ?? null,
+
+            //     ])
+            //     ->toArray();
+            // $fields = $model::where('scheme_id', $schemeId)
+            //     ->where('tab_code', $tab->tab_code)
+            //     ->where('is_active', true)
+            //     ->orderBy('field_position')
+            //     ->get()
+            //     ->toArray();
+            // $tabData[] = [
+            //     'tab_code' => $tab->tab_code,
+            //     'tab_name' => $tab->masterTab->tab_name ?? '',
+            //     'fields'   => $fields,
+            // ];
         }
         return [
             'scheme_id'    => $schemeId,

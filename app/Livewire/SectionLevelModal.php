@@ -50,7 +50,8 @@ class SectionLevelModal extends Component
             [
                 'slType.required' => 'Please select Section or Label',
                 'slName.required' => 'Name is required',
-                'slShortName.unique' => 'This short name already exists',
+                'slShortName.required' => 'This Short name is Required',
+                'slShortName.unique' => 'This Short name already exists',
             ]
         );
 

@@ -6,8 +6,8 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Scheme;
 use App\Models\MasterTab;
-use App\Models\SchemeTabMapping;
 use App\Models\SchemeFinalSubmitCheck;
+use App\Models\SchemeTabMapping;
 use App\Helpers\SchemewiseStoreDataJsonHelper;
 use Illuminate\Support\Facades\DB;
 
@@ -20,6 +20,7 @@ class MasterTabManager extends Component
     public $selectedTabCode = null;
     public $showPreview = false;
     public $mappingSaved = false;
+    public $isFinalSubmitted = false;
 
     /* ========= FINAL PREVIEW ========= */
     public $showFinalPreview = false;
@@ -38,9 +39,7 @@ class MasterTabManager extends Component
         'selectedTabs'     => 'required|array|min:1',
     ];
 
-    /* ------------------------------
-     | SCHEME CHANGE
-     |------------------------------*/
+
     public function updatedSelectedSchemeId($value)
     {
         if (blank($value)) {
@@ -79,20 +78,23 @@ class MasterTabManager extends Component
         $this->isFinal = SchemeFinalSubmitCheck::where('scheme_id', $value)
             ->where('is_final_submitted', true)
             ->exists();
+        $this->syncFinalSubmitStatus();
     }
-
-    /* ------------------------------
-     | ADD TAB
-     |------------------------------*/
     public function updatedSelectedTabCode()
     {
+        if ($this->isFinalSubmitted) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Final submission has been completed.',
+            ]);
+            return;
+        }
         if (!$this->selectedTabCode) return;
 
         if (!in_array($this->selectedTabCode, $this->selectedTabs)) {
             $this->selectedTabs[] = (int) $this->selectedTabCode;
             $this->recalculatePositions();
         }
-
         $this->mappingSaved = false;
         $this->selectedTabCode = null;
     }
@@ -102,6 +104,13 @@ class MasterTabManager extends Component
      |------------------------------*/
     public function removeTab($tabCode)
     {
+        if ($this->isFinalSubmitted) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Final submission has been completed.',
+            ]);
+            return;
+        }
         $this->selectedTabs = array_values(
             array_diff($this->selectedTabs, [(int)$tabCode])
         );
@@ -109,11 +118,15 @@ class MasterTabManager extends Component
         $this->mappingSaved = false;
     }
 
-    /* ------------------------------
-     | DRAG & DROP
-     |------------------------------*/
     public function updateOrder(array $ordered)
     {
+        if ($this->isFinalSubmitted) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Final submission has been completed.',
+            ]);
+            return;
+        }
         $this->selectedTabs = array_map('intval', $ordered);
         $this->recalculatePositions();
         $this->mappingSaved = false;
@@ -127,18 +140,20 @@ class MasterTabManager extends Component
         }
     }
 
-    /* ------------------------------
-     | SAVE
-     |------------------------------*/
     public function submit()
     {
+        if ($this->isFinalSubmitted) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Final submission has been completed.',
+            ]);
+            return;
+        }
         $this->validate();
 
         DB::transaction(function () {
-
             SchemeTabMapping::where('scheme_id', $this->selectedSchemeId)
                 ->increment('position', 1000, ['is_active' => false]);
-
             foreach ($this->selectedTabs as $tabCode) {
                 SchemeTabMapping::updateOrCreate(
                     [
@@ -266,6 +281,12 @@ class MasterTabManager extends Component
         $this->selfDeclarationDisplay = [];
         $this->attachedDocuments = [];
         $this->docTypeIds = [];
+    }
+    protected function syncFinalSubmitStatus(): void
+    {
+        $this->isFinalSubmitted = SchemeFinalSubmitCheck::where('scheme_id', $this->selectedSchemeId)
+            ->where('is_final_submitted', true)
+            ->exists();
     }
 
     public function render()

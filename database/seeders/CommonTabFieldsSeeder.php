@@ -276,12 +276,6 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_position'  => 1,
                     'is_active'       => true,
                 ],
-
-                /*
-                |--------------------------------------------------------------------------
-                | Rural / Urban
-                |--------------------------------------------------------------------------
-                */
                 [
                     'field_id'        => 'rural_urban',
                     'field_name'      => 'rural_urban',
@@ -302,11 +296,6 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_active'       => true,
                 ],
 
-                /*
-                |--------------------------------------------------------------------------
-                | Block / Municipality
-                |--------------------------------------------------------------------------
-                */
                 [
                     'field_id'        => 'blockurban',
                     'field_name'      => 'blockurban',

@@ -119,7 +119,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // LB & Workflow
     Route::post('/select-scheme', [LBController::class, 'selectScheme'])
-    ->name('select-scheme');
+        ->name('select-scheme');
 
     Route::get('lbform', [LBController::class, 'index'])
         ->middleware('permission.redirect:canEntry')
@@ -297,15 +297,15 @@ Route::controller(MarkedUpdateBeneficiaryController::class)->group(function () {
     Route::get('/marked-beneficiary',  'index')
         ->name('marked-beneficiary');
     Route::get('/mark-beneficiary', 'editview')
-    ->name('mark-beneficiary');
+        ->name('mark-beneficiary');
     Route::post('/final-marked', 'marked')
-    ->name('final-marked');
+        ->name('final-marked');
     Route::get('/marked-beneficiary-list', 'list')
-    ->name('marked-beneficiary-list');
+        ->name('marked-beneficiary-list');
     Route::get('/view-marked-beneficiary-details', 'viewmarkedbeneficiarydetails')
-    ->name('view-marked-beneficiary-details');
-     Route::post('/marked-beneficiary-details-update', 'updatemarkedbeneficiarydetails')
-    ->name('marked-beneficiary-details-update');
+        ->name('view-marked-beneficiary-details');
+    Route::post('/marked-beneficiary-details-update', 'updatemarkedbeneficiarydetails')
+        ->name('marked-beneficiary-details-update');
 });
 
 
