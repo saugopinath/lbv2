@@ -14,10 +14,18 @@
     <form wire:submit.prevent="save"
         class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-        <x-form.select label="Select Scheme" wire:model.live="schemeId" :disabled="$lockScheme">
+        <x-form.select label="Select Scheme" wire:model.live="scheme_id" name="scheme_id" :disabled="$lock">
             <option value="">-- Select --</option>
+            <option value="0">All</option>
             @foreach($schemes as $scheme)
             <option value="{{ $scheme->id }}">{{ $scheme->name }}</option>
+            @endforeach
+        </x-form.select>
+
+        <x-form.select label="Select Tab" wire:model.live="tabId"  name="tabId" :disabled="$lock">
+            <option value="">-- Select --</option>
+            @foreach($tabs as $tab)
+            <option value="{{ $tab->tab_code }}">{{ $tab->tab_name }}</option>
             @endforeach
         </x-form.select>
 

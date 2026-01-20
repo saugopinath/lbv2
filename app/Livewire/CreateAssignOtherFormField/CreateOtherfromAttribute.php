@@ -9,6 +9,7 @@ use App\Models\FromFieldType;
 use App\Models\ValidationRule;
 use App\Models\SchemeTabBasefield;
 use App\Models\MasterSection;
+use App\Models\MasterTab;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Storage;
 
@@ -49,16 +50,18 @@ class CreateOtherfromAttribute extends Component
     public $confirmOptions;
     public $confirm_of;
 
-    public $schemeId, $lockScheme = false;
+    public $lock = false;
+    public $tabs, $tabId;
 
     public function mount($data = null)
     {
 
         if ($data) {
             try {
-                $this->schemeId = $data['scheme_id'];
-                if ($this->schemeId) {
-                    $this->lockScheme = true;
+                $this->scheme_id = $data['scheme_id'];
+                $this->tabId = $data['tab_code'];
+                if (filled($this->scheme_id) && filled($this->tabId)) {
+                    $this->lock = true;
                 }
             } catch (DecryptException $e) {
                 abort(403, 'Invalid scheme reference');
@@ -66,6 +69,7 @@ class CreateOtherfromAttribute extends Component
         }
 
         $this->schemes = Scheme::all();
+        $this->tabs = MasterTab::all();
         $this->fieldTypes = FromFieldType::all();
         $this->validationRuleOptions = ValidationRule::all()
             ->pluck('description', 'rule')
@@ -205,6 +209,7 @@ class CreateOtherfromAttribute extends Component
     {
         return [
             'scheme_id' => 'required',
+            'tabId' => 'required',
             'level_name' => 'required|string|max:100',
             'field_id' => 'required|string|max:100',
             'field_name' => 'required|string|max:150',
@@ -261,6 +266,7 @@ class CreateOtherfromAttribute extends Component
 
         SchemeTabBasefield::create([
             'scheme_id' => $this->scheme_id,
+            'tab_code' => $this->tabId,
             'level_name' => $this->level_name,
             'field_id' => $this->field_id,
             'field_class' => $this->field_class,
@@ -303,7 +309,9 @@ class CreateOtherfromAttribute extends Component
             'isdependent',
             'depenent_on',
             'depvalues',
-            'view_type'
+            'view_type',
+            'scheme_id',
+            'tabId'
         ]);
 
         session()->flash('success', 'Field created successfully');
