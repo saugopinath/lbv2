@@ -1,83 +1,70 @@
-<div class="grid md:grid-cols-2 gap-4 mt-4">
-<div wire:key="field-mobile_no">
-<x-form.input
-    type="text"
-    name="mobile_no"
-    wire:model="formData.mobile_no"
-    label="Mobile Number"
-/></div>
-<div wire:key="field-rural_urban">
+<div class="grid md:grid-cols-1 gap-4 mt-4">
 <x-form.select
     name="rural_urban"
-    wire:model.live="formData.rural_urban"
     label="Rural/Urbar"
+    wire:model="formData.rural_urban"
 >
-    <option value="">-- Select Rural/Urbar --</option></x-form.select>
-</div>
-<div wire:key="field-policestation">
-<x-form.input
-    type="text"
-    name="policestation"
-    wire:model="formData.policestation"
-    label="Police Station"
-/></div>
-<div wire:key="field-gpWard">
+    <option value="">-- Select Rural/Urbar --</option>
+    
+</x-form.select></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
 <x-form.select
     name="gpWard"
-    wire:model.live="formData.gpWard"
     label="GP / Ward"
+    wire:model="formData.gpWard"
 >
-    <option value="">-- Select GP / Ward --</option></x-form.select>
-</div>
-<div wire:key="field-housepremiseno">
-<x-form.input
+    <option value="">-- Select GP / Ward --</option>
+    
+</x-form.select><x-form.input
+    type="text"
+    name="policestation"
+    label="Police Station"
+    wire:model="formData.policestation"
+/><x-form.input
     type="text"
     name="housepremiseno"
-    wire:model="formData.housepremiseno"
     label="House / Premise No"
+    wire:model="formData.housepremiseno"
 /></div>
-<div wire:key="field-pincode">
+<div class="grid md:grid-cols-1 gap-4 mt-4">
 <x-form.input
     type="text"
     name="pincode"
-    wire:model="formData.pincode"
     label="Pin Code"
+    wire:model="formData.pincode"
 /></div>
-<div wire:key="field-district_id">
+<div class="grid md:grid-cols-2 gap-4 mt-4">
 <x-form.select
     name="district_id"
-    wire:model.live="formData.district_id"
     label="District"
+    wire:model="formData.district_id"
 >
-    <option value="">-- Select District --</option></x-form.select>
-</div>
-<div wire:key="field-blockurban">
-<x-form.select
+    <option value="">-- Select District --</option>
+    
+</x-form.select><x-form.select
     name="blockurban"
-    wire:model.live="formData.blockurban"
     label="Block/Municipality"
+    wire:model="formData.blockurban"
 >
-    <option value="">-- Select Block/Municipality --</option></x-form.select>
-</div>
-<div wire:key="field-state">
+    <option value="">-- Select Block/Municipality --</option>
+    
+</x-form.select></div>
+<div class="grid md:grid-cols-1 gap-4 mt-4">
 <x-form.input
     type="text"
     name="state"
-    wire:model="formData.state"
     label="State"
+    wire:model="formData.state"
 /></div>
-<div wire:key="field-villtowncity">
+<div class="grid md:grid-cols-3 gap-4 mt-4">
 <x-form.input
     type="text"
     name="villtowncity"
-    wire:model="formData.villtowncity"
     label="Village / Town / City"
-/></div>
-<div wire:key="field-postoffice">
-<x-form.input
+    wire:model="formData.villtowncity"
+/><x-form.input
     type="text"
     name="postoffice"
-    wire:model="formData.postoffice"
     label="Post Office"
+    wire:model="formData.postoffice"
 /></div>
-</div>

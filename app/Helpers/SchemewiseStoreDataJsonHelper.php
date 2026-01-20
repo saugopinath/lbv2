@@ -8,6 +8,7 @@ use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabFormField;
 use App\Models\SelfDeclerationBasefield;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
 use App\Models\SchemeTabLayout;
 use Illuminate\Support\Facades\Storage;
 
@@ -151,143 +152,148 @@ class SchemewiseStoreDataJsonHelper
 
         foreach ($tabs as $tab) {
 
-            /* =====================================================
-         | DOCUMENT TAB (104) → x-component based (FIXED)
-         ===================================================== */
-            if ($tab['tab_code'] == 104) {
+            $tabCode = $tab['tab_code'];
 
-                $blade = <<<BLADE
-            {{-- ================= DOCUMENT UPLOAD TAB ================= --}}
-            <livewire:enclosure-list
-                :scheme_id="\$schemeId"
-            />
-            BLADE;
-
-            File::put(
-                $dir . "/104.blade.php",
-                $blade
-            );
-
-            continue;
-        }
-
-
-            /* =====================================================
-         | DECLARATION TAB (105)
-         ===================================================== */
-            if ($tab['tab_code'] == 105) {
-
-                $blade = "<div class=\"mt-4 space-y-3\">\n";
-
-                foreach ($tab['fields'] as $field) {
-
-                    $label = $field['level_name'] ?? 'Declaration';
-                    $name  = $field['field_name'];
-                    $value = $field['value'];
-                    $blade .= <<<BLADE
-
-                <div class="flex items-start gap-2">
-                    <x-form.checkbox name="{$name}" value="{$value}" label="{$label}" wire:model="formData.{$name}"
-                    />
-                </div>
-                BLADE;
-                                }
-
-                $blade .= "\n</div>";
+            /* ================= TAB 104 : DOCUMENT ================= */
+            if ($tabCode == 104) {
 
                 File::put(
-                    $dir . "/105.blade.php",
-                    $blade
+                    "{$dir}/104.blade.php",
+                    <<<BLADE
+{{-- DOCUMENT TAB --}}
+<livewire:enclosure-list :scheme_id="\$schemeId" />
+BLADE
                 );
-
                 continue;
             }
 
-            /* =====================================================
-         | NORMAL FORM TABS (TEXT, DATE, SELECT etc.)
-         ===================================================== */
-            $blade = "<div class=\"grid md:grid-cols-2 gap-4 mt-4\">\n";
+            /* ================= TAB 105 : SELF DECLARATION ================= */
+            if ($tabCode == 105) {
 
-            foreach ($tab['fields'] as $field) {
+                $blade = <<<BLADE
+<div class="space-y-3 mt-4">
+@foreach(\$selfDeclarationDisplay as \$row)
 
-                $label = $field['level_name'] ?? '';
-                $name  = $field['field_label']
-                    ?? $field['field_id']
-                    ?? 'field_' . ($field['id'] ?? uniqid());
+    @if(\$row['show_section_start'])
+        <div class="px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+            <strong>{{ \$row['section_title'] }}</strong>
+        </div>
+    @endif
 
-                $type  = $field['field_type'] ?? 'text';
+    <x-form.checkbox
+        name="{{ \$row['field']->field_name }}"
+        label="{{ \$row['field']->level_name }}"
+        wire:model="formData.{{ \$row['field']->field_name }}"
+    />
 
-                $blade .= "<div wire:key=\"field-{$name}\">\n";
-
-                switch ($type) {
-
-                    case 'text':
-                    case 'date':
-                    case 'number':
-                    case 'password':
-                        $blade .= <<<BLADE
-<x-form.input
-    type="{$type}"
-    name="{$name}"
-    wire:model="formData.{$name}"
-    label="{$label}"
-/>
-BLADE;
-                        break;
-
-                    case 'textarea':
-                        $blade .= <<<BLADE
-<x-form.textarea
-    name="{$name}"
-    wire:model="formData.{$name}"
-    label="{$label}"
-/>
-BLADE;
-                        break;
-
-                    case 'select':
-                        $blade .= <<<BLADE
-<x-form.select
-    name="{$name}"
-    wire:model.live="formData.{$name}"
-    label="{$label}"
->
-    <option value="">-- Select {$label} --</option>
+@endforeach
+</div>
 BLADE;
 
-                        foreach ($field['options'] ?? [] as $key => $opt) {
-                            $blade .= "<option value=\"{$key}\">{$opt}</option>\n";
-                        }
+                File::put("{$dir}/105.blade.php", $blade);
+                continue;
+            }
 
-                        $blade .= "</x-form.select>\n";
-                        break;
+            /* ================= NORMAL FORM TABS ================= */
 
-                    case 'checkbox':
-                        $blade .= "<x-form.label name=\"{$label}\" />\n";
-                        foreach ($field['options'] ?? [] as $opt) {
-                            $blade .= <<<BLADE
-<x-form.checkbox
-    name="{$name}[]"
-    value="{$opt}"
-    wire:model="formData.{$name}"
-    label="{$opt}"
-/>
-BLADE;
-                        }
-                        break;
+            // 🔥 load saved layout
+            $layout = DB::table('scheme_tab_layouts')
+                ->where('scheme_id', $schemeId)
+                ->where('tab_code', $tabCode)
+                ->value('layout_json');
+
+
+            $layout = $layout ? json_decode($layout, true) : [];
+
+            $fields = $tab['fields'] ?? [];
+            $cursor = 0;
+            $total  = count($fields);
+
+            $blade = '';
+
+            if (!empty($layout)) {
+
+                foreach ($layout as $row) {
+
+                    if ($cursor >= $total) break;
+
+                    $cols = max(1, min(3, (int) $row['columns']));
+                    $rowFields = array_slice($fields, $cursor, $cols);
+                    $cursor += count($rowFields);
+
+                    $blade .= "<div class=\"grid md:grid-cols-{$cols} gap-4 mt-4\">\n";
+
+                    foreach ($rowFields as $field) {
+                        $blade .= self::renderField($field);
+                    }
+
+                    $blade .= "</div>\n";
                 }
+            }
 
+            /* ===== remaining fields fallback ===== */
+            while ($cursor < $total) {
+                $field = $fields[$cursor++];
+                $blade .= "<div class=\"grid md:grid-cols-1 gap-4 mt-4\">\n";
+                $blade .= self::renderField($field);
                 $blade .= "</div>\n";
             }
 
-            $blade .= "</div>";
-
-            File::put(
-                $dir . "/{$tab['tab_code']}.blade.php",
-                $blade
-            );
+            File::put("{$dir}/{$tabCode}.blade.php", $blade);
         }
 
         return $dir;
+    }
+    private static function renderField(array $field): string
+    {
+        $label = $field['level_name'] ?? '';
+        $name  = $field['field_name'] ?? uniqid();
+        $type  = $field['field_type'] ?? 'text';
+
+        switch ($type) {
+
+            case 'select':
+
+                $optionsHtml = '';
+                foreach ($field['options'] ?? [] as $opt) {
+                    $opt = e($opt);
+                    $optionsHtml .= "<option value=\"{$opt}\">{$opt}</option>\n";
+                }
+
+                return <<<BLADE
+<x-form.select
+    name="{$name}"
+    label="{$label}"
+    wire:model="formData.{$name}"
+>
+    <option value="">-- Select {$label} --</option>
+    {$optionsHtml}
+</x-form.select>
+BLADE;
+
+            case 'text':
+            case 'number':
+            case 'date':
+                return <<<BLADE
+<x-form.input
+    type="{$type}"
+    name="{$name}"
+    label="{$label}"
+    wire:model="formData.{$name}"
+/>
+BLADE;
+
+            case 'textarea':
+                return <<<BLADE
+<x-form.textarea
+    name="{$name}"
+    label="{$label}"
+    wire:model="formData.{$name}"
+/>
+BLADE;
+
+            default:
+                return "<!-- unsupported {$type} -->";
+        }
     }
 }

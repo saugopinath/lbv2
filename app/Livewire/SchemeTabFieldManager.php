@@ -671,6 +671,7 @@ class SchemeTabFieldManager extends Component
                 ]);
             }
         } catch (\Throwable $e) {
+            // dd($e);
             DB::rollBack();
             if (isset($path)) {
                 Storage::disk('local')->delete($path);
@@ -1076,7 +1077,7 @@ private function rebuildRowConfig(): void
     }
 
 
-    
+
     // public function getTabLayout($tabCode)
     // {
     //     return DB::table('scheme_tab_layouts')

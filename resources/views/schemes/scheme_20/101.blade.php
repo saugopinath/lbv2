@@ -1,113 +1,105 @@
 <div class="grid md:grid-cols-2 gap-4 mt-4">
-<div wire:key="field-app_date">
 <x-form.input
     type="date"
     name="app_date"
-    wire:model="formData.app_date"
     label="Application Date"
-/></div>
-<div wire:key="field-reg_no">
-<x-form.input
-    type="text"
-    name="reg_no"
-    wire:model="formData.reg_no"
-    label="Duare Sarkar Registration Number"
-/></div>
-<div wire:key="field-app_type">
-<x-form.select
-    name="app_type"
-    wire:model.live="formData.app_type"
-    label="Application Type"
->
-    <option value="">-- Select Application Type --</option><option value="0">Normal Entry</option>
-<option value="1">Duare Sarkar</option>
-</x-form.select>
-</div>
-<div wire:key="field-ds_date">
-<x-form.input
+    wire:model="formData.app_date"
+/><x-form.input
     type="date"
     name="ds_date"
-    wire:model="formData.ds_date"
     label="Duare Sarkar Date"
+    wire:model="formData.ds_date"
 /></div>
-<div wire:key="field-dob">
-<x-form.input
-    type="date"
-    name="dob"
-    wire:model="formData.dob"
-    label="Date of Birth"
-/></div>
-<div wire:key="field-mfname">
-<x-form.input
-    type="text"
-    name="mfname"
-    wire:model="formData.mfname"
-    label="Mother's Name"
-/></div>
-<div wire:key="field-sfname">
-<x-form.input
-    type="text"
-    name="sfname"
-    wire:model="formData.sfname"
-    label="Spouse's Name"
-/></div>
-<div wire:key="field-cas_cer_no">
-<x-form.input
-    type="text"
-    name="cas_cer_no"
-    wire:model="formData.cas_cer_no"
-    label="Caste Certificate Number"
-/></div>
-<div wire:key="field-caste">
-<x-form.select
-    name="caste"
-    wire:model.live="formData.caste"
-    label="Caste"
->
-    <option value="">-- Select Caste --</option><option value="0">SC</option>
-<option value="1">ST</option>
-<option value="2">General</option>
-</x-form.select>
-</div>
-<div wire:key="field-mar_statu">
-<x-form.select
-    name="mar_statu"
-    wire:model.live="formData.mar_statu"
-    label="Marital Status"
->
-    <option value="">-- Select Marital Status --</option><option value="0">Un Married</option>
-<option value="1">Married</option>
-<option value="2">Widow</option>
-<option value="3">Divorcee</option>
-<option value="4">Widower</option>
-</x-form.select>
-</div>
-<div wire:key="field-ffname">
-<x-form.input
-    type="text"
-    name="ffname"
-    wire:model="formData.ffname"
-    label="Father's Name"
-/></div>
-<div wire:key="field-age">
+<div class="grid md:grid-cols-3 gap-4 mt-4">
 <x-form.input
     type="text"
     name="age"
-    wire:model="formData.age"
     label="Age"
+    wire:model="formData.age"
+/><x-form.input
+    type="date"
+    name="dob"
+    label="Date of Birth"
+    wire:model="formData.dob"
+/><x-form.input
+    type="text"
+    name="mfname"
+    label="Mother's Name"
+    wire:model="formData.mfname"
 /></div>
-<div wire:key="field-email_id">
+<div class="grid md:grid-cols-2 gap-4 mt-4">
 <x-form.input
+    type="text"
+    name="sfname"
+    label="Spouse's Name"
+    wire:model="formData.sfname"
+/><x-form.input
+    type="text"
+    name="cas_cer_no"
+    label="Caste Certificate Number"
+    wire:model="formData.cas_cer_no"
+/></div>
+<div class="grid md:grid-cols-1 gap-4 mt-4">
+<x-form.select
+    name="caste"
+    label="Caste"
+    wire:model="formData.caste"
+>
+    <option value="">-- Select Caste --</option>
+    <option value="SC">SC</option>
+<option value="ST">ST</option>
+<option value="General">General</option>
+
+</x-form.select></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<x-form.select
+    name="mar_statu"
+    label="Marital Status"
+    wire:model="formData.mar_statu"
+>
+    <option value="">-- Select Marital Status --</option>
+    <option value="Un Married">Un Married</option>
+<option value="Married">Married</option>
+<option value="Widow">Widow</option>
+<option value="Divorcee">Divorcee</option>
+<option value="Widower">Widower</option>
+
+</x-form.select><x-form.input
+    type="text"
+    name="ffname"
+    label="Father's Name"
+    wire:model="formData.ffname"
+/><x-form.input
     type="text"
     name="email_id"
-    wire:model="formData.email_id"
     label="Email Address"
+    wire:model="formData.email_id"
 /></div>
-<div wire:key="field-full_name">
+<div class="grid md:grid-cols-3 gap-4 mt-4">
 <x-form.input
     type="text"
+    name="reg_no"
+    label="Duare Sarkar Registration Number"
+    wire:model="formData.reg_no"
+/><x-form.input
+    type="text"
     name="full_name"
-    wire:model="formData.full_name"
     label="Applicant Name"
+    wire:model="formData.full_name"
+/><x-form.select
+    name="app_type"
+    label="Application Type"
+    wire:model="formData.app_type"
+>
+    <option value="">-- Select Application Type --</option>
+    <option value="Normal Entry">Normal Entry</option>
+<option value="Duare Sarkar">Duare Sarkar</option>
+
+</x-form.select></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<x-form.input
+    type="text"
+    name="mobile_no"
+    label="Mobile Number"
+    wire:model="formData.mobile_no"
 /></div>
-</div>
