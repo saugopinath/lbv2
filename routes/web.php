@@ -34,6 +34,7 @@ use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\ElasticSearchController;
 use App\Http\Controllers\MarkedUpdateBeneficiary;
 use App\Http\Controllers\MarkedUpdateBeneficiaryController;
+use App\Http\Controllers\MasterTabCreationController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
 use App\Http\Controllers\ValidationManagerController;
@@ -265,3 +266,5 @@ Route::get('/tab-field-manager', SchemeTabFieldManager::class)
 // Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name(name: 'menu-tab');
 
 Route::get('/edit-validation', [ValidationManagerController::class, 'index'])->name('edit-validation');
+Route::get('/master-tab-creation', [MasterTabCreationController::class, 'index'])->name('master-tab-creation');
+
