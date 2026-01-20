@@ -18,5 +18,8 @@
   "Assemblies": {},
   "Rural/Urban": {},
   "Block": {},
-  "Panchayat": {}
+  "Panchayat": {},
+  "IFSC": {},
+  "Bank Name": {},
+  "Branch Name": {}
 }

@@ -27,6 +27,11 @@ return new class extends Migration
             $table->string('validation_rule', 255)->nullable();
             $table->string('regex', 255)->nullable();
             $table->integer('section_id')->nullable();
+            $table->smallInteger('view_type')->nullable();
+            $table->bigInteger('confirm_of')->nullable();
+            $table->bigInteger('dependent_on')->nullable();
+            $table->jsonb('dependent_on_values')->nullable();
+            $table->string('field_class', 100)->nullable();
             $table->boolean('is_multiple')->default(false);
             $table->integer('field_position');
             $table->boolean('is_active')->default(true);

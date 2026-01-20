@@ -7,8 +7,9 @@ use Livewire\Component;
 use App\Models\Scheme;
 use App\Models\FromFieldType;
 use App\Models\ValidationRule;
-use App\Models\FromFieldAttribute;
+use App\Models\SchemeTabBasefield;
 use App\Models\MasterSection;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Storage;
 
 class CreateOtherfromAttribute extends Component
@@ -44,15 +45,32 @@ class CreateOtherfromAttribute extends Component
     public $isdependentvalue = 'no';
     public $depvalueradio = false;
     public $view_type;
+    public $isconfirm = 'no';
+    public $confirmOptions;
+    public $confirm_of;
 
-    public function mount()
+    public $schemeId, $lockScheme = false;
+
+    public function mount($data = null)
     {
+
+        if ($data) {
+            try {
+                $this->schemeId = $data['scheme_id'];
+                if ($this->schemeId) {
+                    $this->lockScheme = true;
+                }
+            } catch (DecryptException $e) {
+                abort(403, 'Invalid scheme reference');
+            }
+        }
+
         $this->schemes = Scheme::all();
         $this->fieldTypes = FromFieldType::all();
         $this->validationRuleOptions = ValidationRule::all()
             ->pluck('description', 'rule')
             ->toArray();
-        if (FromFieldAttribute::exists()) {
+        if (SchemeTabBasefield::exists()) {
             $this->isdepenentsec = true;
         }
     }
@@ -108,15 +126,24 @@ class CreateOtherfromAttribute extends Component
             if (isset($this->default_values[$value])) {
                 $this->defaultOptions = $this->default_values[$value];
                 if (empty($this->defaultOptions)) {
-                    $this->field_class = strtolower(str_replace('/', '_', $value));
+                    $this->field_class = strtolower(
+                        preg_replace('/[^a-zA-Z0-9]+/', '_', $value)
+                    );
                 }
             }
+        }
+    }
+    public function updatedIsconfirm($value)
+    {
+        $this->isconfirm = $value;
+        if ($this->isconfirm == 'yes') {
+            $this->confirmOptions = SchemeTabBasefield::get();
         }
     }
     public function updatedIsdependent($value)
     {
         $this->isdependent = $value;
-        $this->depenentOptions = FromFieldAttribute::get();
+        $this->depenentOptions = SchemeTabBasefield::get();
         $this->depenent_on = null;
         $this->depvaluesopt = [];
     }
@@ -138,7 +165,7 @@ class CreateOtherfromAttribute extends Component
     {
         if ($value === 'yes') {
 
-            $ram = FromFieldAttribute::find($this->depenent_on);
+            $ram = SchemeTabBasefield::find($this->depenent_on);
 
             if ($ram && is_array($ram->options)) {
                 $this->depvaluesopt = collect($ram->options)
@@ -160,7 +187,7 @@ class CreateOtherfromAttribute extends Component
         // ALL = "1"
         if (in_array('0', $selectedValues)) {
 
-            $ram = FromFieldAttribute::find($this->depenent_on);
+            $ram = SchemeTabBasefield::find($this->depenent_on);
 
             if ($ram && is_array($ram->options)) {
 
@@ -187,11 +214,13 @@ class CreateOtherfromAttribute extends Component
             'is_under_section' => 'required|in:yes,no',
             'section_id' => 'required_if:is_under_section,yes',
             'is_multiple' => 'required_if:field_type,select',
-            'is_choose_default' => 'required_if:field_type,select',
+            'is_choose_default' => 'required|in:yes,no',
             'default_value' => 'required_if:is_choose_default,yes',
-            'isdependent' => 'required',
+            'isdependent' => 'required|in:yes,no',
             'depenent_on' => 'required_if:isdependent,yes',
             'depvalues' => 'required_if:isdependentvalue,yes',
+            'isconfirm' => 'required|in:yes,no',
+            'confirm_of' => 'required_if:isconfirm,yes',
         ];
     }
     public function addOption()
@@ -230,12 +259,12 @@ class CreateOtherfromAttribute extends Component
             ->mapWithKeys(fn($value, $index) => [$index + 1 => $value])
             ->toArray();
 
-        FromFieldAttribute::create([
+        SchemeTabBasefield::create([
             'scheme_id' => $this->scheme_id,
             'level_name' => $this->level_name,
             'field_id' => $this->field_id,
             'field_class' => $this->field_class,
-            'field_label' => $this->field_name,
+            'field_name' => $this->field_name,
             'field_type' => $this->field_type,
             'view_type' => $this->view_type,
             'validation_rule' => implode('|', $validationRules),
@@ -255,6 +284,7 @@ class CreateOtherfromAttribute extends Component
                 : false,
             'dependent_on' => $this->isdependent === 'yes' ? $this->depenent_on : null,
             'dependent_on_values' => $this->isdependentvalue === 'yes' ? json_encode((object)$this->depvalues) : null,
+            'confirm_of' => $this->isconfirm === 'yes' ? $this->confirm_of : null,
         ]);
         $this->reset([
             'level_name',

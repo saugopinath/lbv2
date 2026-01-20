@@ -14,17 +14,10 @@
     <form wire:submit.prevent="save"
         class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-        {{-- Scheme --}}
-        <x-form.select
-            name="scheme_id"
-            label="Scheme"
-            wire:model.live="scheme_id"
-            required>
-            <option value="">-- Select Scheme --</option>
-            @foreach ($schemes as $scheme)
-            <option value="{{ $scheme->id }}">
-                {{ $scheme->name }}
-            </option>
+        <x-form.select label="Select Scheme" wire:model.live="schemeId" :disabled="$lockScheme">
+            <option value="">-- Select --</option>
+            @foreach($schemes as $scheme)
+            <option value="{{ $scheme->id }}">{{ $scheme->name }}</option>
             @endforeach
         </x-form.select>
 
@@ -121,6 +114,41 @@
             @if($isdepenentsec)
             <div class="">
                 <label class="font-semibold block mb-1">
+                    Is Confirm?
+                </label>
+                <div class="flex gap-6">
+                    <x-form.radio
+                        name="isconfirm"
+                        value="yes"
+                        label="Yes"
+                        wire:model.live="isconfirm" />
+
+                    <x-form.radio
+                        name="isconfirm"
+                        value="no"
+                        label="No"
+                        wire:model.live="isconfirm" />
+                </div>
+            </div>
+            @endif
+            @if ($isconfirm === 'yes')
+            <x-form.select
+                name="confirm_of"
+                label="Confirm Of"
+                wire:model.live="confirm_of"
+                required>
+                <option value="">-- Select --</option>
+                @foreach ($confirmOptions as $option)
+                <option value="{{ $option->id }}">
+                    {{ $option->level_name }}
+                </option>
+                @endforeach
+            </x-form.select>
+            @else
+
+            @if($isdepenentsec)
+            <div class="">
+                <label class="font-semibold block mb-1">
                     Is depenent?
                 </label>
                 <div class="flex gap-6">
@@ -186,7 +214,7 @@
             @endif
 
 
-            @if ($field_type === 'select')
+
             <div class="">
                 <label class="font-semibold block mb-1">
                     Is choose from default?
@@ -219,6 +247,7 @@
                 @endforeach
             </x-form.select>
             @endif
+            @if ($field_type === 'select')
             <div class="">
                 <label class="font-semibold block mb-2">
                     Is Multiple Select Allowed?
@@ -290,6 +319,7 @@
             </div>
             @endif
         </div>
+        @endif
         @endif
         @endif
         <!-- Save Button (outside conditional block) -->

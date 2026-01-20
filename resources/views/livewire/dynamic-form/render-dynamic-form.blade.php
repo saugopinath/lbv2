@@ -19,45 +19,45 @@
                           <div wire:key="field-{{ $field['id'] }}">
 
                                 @if ($field['field_type'] === 'text' || $field['field_type'] === 'date')
-                                    <x-form.input name="{{ $field['field_label'] }}" id="{{ $field['field_id'] }}"
-                                        wire:model="formData.{{ $field['field_label'] }}" label="{{ $field['level_name'] }}"
+                                    <x-form.input name="{{ $field['field_name'] }}" id="{{ $field['field_id'] }}"
+                                        wire:model="formData.{{ $field['field_name'] }}" label="{{ $field['level_name'] }}"
                                         placeholder="Enter {{ $field['level_name'] }}" required type="{{ $field['field_type'] }}" />
                                 @endif
                                 {{-- NUMBER --}}
                                 @if ($field['field_type'] === 'textarea')
-                                    <x-form.textarea name="{{ $field['field_label'] }}" id="{{ $field['field_id'] }}"
-                                        wire:model="formData.{{ $field['field_label'] }}" label="{{ $field['level_name'] }}"
+                                    <x-form.textarea name="{{ $field['field_name'] }}" id="{{ $field['field_id'] }}"
+                                        wire:model="formData.{{ $field['field_name'] }}" label="{{ $field['level_name'] }}"
                                         placeholder="Enter {{ $field['level_name'] }}" required type="{{ $field['field_type'] }}" />
                                 @endif
                                 {{-- NUMBER --}}
                                 @if ($field['field_type'] === 'number')
-                                    <x-form.input name="{{ $field['field_label'] }}" id="{{ $field['field_id'] }}"
-                                        wire:model="formData.{{ $field['field_label'] }}" label="{{ $field['level_name'] }}"
+                                    <x-form.input name="{{ $field['field_name'] }}" id="{{ $field['field_id'] }}"
+                                        wire:model="formData.{{ $field['field_name'] }}" label="{{ $field['level_name'] }}"
                                         placeholder="Enter {{ $field['level_name'] }}" required type="{{ $field['field_type'] }}" />
                                 @endif
                                 @if ($field['field_type'] === 'file')
-                                    <x-form.input name="{{ $field['field_label'] }}" id="{{ $field['field_id'] }}"
-                                        wire:model="formData.{{ $field['field_label'] }}" label="{{ $field['level_name'] }}" type="file"
+                                    <x-form.input name="{{ $field['field_name'] }}" id="{{ $field['field_id'] }}"
+                                        wire:model="formData.{{ $field['field_name'] }}" label="{{ $field['level_name'] }}" type="file"
                                         required />
                                 @endif
                                 @if ($field['field_type'] === 'password')
-                                    <x-form.input name="{{ $field['field_label'] }}" id="{{ $field['field_id'] }}"
-                                        wire:model="formData.{{ $field['field_label'] }}" label="{{ $field['level_name'] }}"
+                                    <x-form.input name="{{ $field['field_name'] }}" id="{{ $field['field_id'] }}"
+                                        wire:model="formData.{{ $field['field_name'] }}" label="{{ $field['level_name'] }}"
                                         placeholder="Enter {{ $field['level_name'] }}" required type="{{ $field['field_type'] }}" />
                                 @endif
                                 {{-- SELECT (MULTIPLE) --}}
                                 @if ($field['field_type'] === 'select' && $field['is_multiple'] === false)
-                                    <x-form.select name="{{ $field['field_label'] }}" id="{{ $field['field_id'] }}"
-                                        label="{{ $field['level_name'] }}" wire:model.live="formData.{{ $field['field_label'] }}">
-                                        <option value="">-- Select {{ $field['field_label'] }} --</option>
+                                    <x-form.select name="{{ $field['field_name'] }}" id="{{ $field['field_id'] }}"
+                                        label="{{ $field['level_name'] }}" wire:model.live="formData.{{ $field['field_name'] }}">
+                                        <option value="">-- Select {{ $field['field_name'] }} --</option>
                                         @foreach ($field['options'] as $key => $option)
                                         <option value="{{ $key }}">{{ $option }}</option>
                                     @endforeach
 
                                     </x-form.select>
                                 @elseif ($field['field_type'] === 'select' && $field['is_multiple'] === true)
-                                    <x-form.multiselect name="{{ $field['field_label'] }}[]" id="{{ $field['field_id'] }}"
-                                        label="{{ $field['level_name'] }}" wire:model.live="formData.{{ $field['field_label'] }}"
+                                    <x-form.multiselect name="{{ $field['field_name'] }}[]" id="{{ $field['field_id'] }}"
+                                        label="{{ $field['level_name'] }}" wire:model.live="formData.{{ $field['field_name'] }}"
                                         :options="$field['options']" multiple />
                                 @endif
                                 {{-- RADIO (treated as multiple) --}}
@@ -65,12 +65,12 @@
                                     <x-form.label name="{{ $field['level_name'] }}" class="mt-3" />
                                     <div class="flex flex-wrap items-center gap-4">
                                         @foreach ($field['options'] as $option)
-                                            <x-form.radio name="{{ $field['field_label'] }}" value="{{ $option }}" label="{{ $option }}"
-                                                wire:model="formData.{{ $field['field_label'] }}" />
+                                            <x-form.radio name="{{ $field['field_name'] }}" value="{{ $option }}" label="{{ $option }}"
+                                                wire:model="formData.{{ $field['field_name'] }}" />
                                         @endforeach
                                     </div>
                                     {{-- VALIDATION ERROR --}}
-                                    <x-form.error name="formData.{{ $field['field_label'] }}" />
+                                    <x-form.error name="formData.{{ $field['field_name'] }}" />
                                 @endif
                                 {{-- CHECKBOX --}}
                                 @if ($field['field_type'] === 'checkbox')
@@ -78,10 +78,10 @@
                                     <div class="space-y-2">
                                         @foreach ($field['options'] as $option)
                                             <x-form.checkbox name="{{ $field['field_id'] }}[]" value="{{ $option }}" label="{{ $option }}"
-                                                wire:model="formData.{{ $field['field_label'] }}" />
+                                                wire:model="formData.{{ $field['field_name'] }}" />
                                         @endforeach
                                     </div>
-                                    <x-form.error name="formData.{{ $field['field_label'] }}" />
+                                    <x-form.error name="formData.{{ $field['field_name'] }}" />
                                 @endif
 
                             </div>
@@ -105,9 +105,9 @@
                     {{-- TEXT & DATE --}}
                     @if (in_array($field['field_type'], ['text', 'date']))
                         <x-form.input 
-                            name="{{ $field['field_label'] }}" 
+                            name="{{ $field['field_name'] }}" 
                             id="{{ $field['field_id'] }}"
-                            wire:model="formData.{{ $field['field_label'] }}" 
+                            wire:model.lazy="formData.{{ $this->fieldKey($field) }}" 
                             label="{{ $field['level_name'] }}"
                             placeholder="Enter {{ $field['level_name'] }}" 
                             type="{{ $field['field_type'] }}" />
@@ -116,9 +116,9 @@
                     {{-- TEXTAREA --}}
                     @if ($field['field_type'] === 'textarea')
                         <x-form.textarea 
-                            name="{{ $field['field_label'] }}" 
+                            name="{{ $field['field_name'] }}" 
                             id="{{ $field['field_id'] }}"
-                            wire:model="formData.{{ $field['field_label'] }}" 
+                            wire:model="formData.{{ $field['field_name'] }}" 
                             label="{{ $field['level_name'] }}"
                             placeholder="Enter {{ $field['level_name'] }}" />
                     @endif
@@ -126,9 +126,9 @@
                     {{-- NUMBER --}}
                     @if ($field['field_type'] === 'number')
                         <x-form.input 
-                            name="{{ $field['field_label'] }}" 
+                            name="{{ $field['field_name'] }}" 
                             id="{{ $field['field_id'] }}"
-                            wire:model="formData.{{ $field['field_label'] }}" 
+                            wire:model="formData.{{ $field['field_name'] }}" 
                             label="{{ $field['level_name'] }}"
                             placeholder="Enter {{ $field['level_name'] }}" 
                             type="number" />
@@ -137,9 +137,9 @@
                     {{-- FILE --}}
                     @if ($field['field_type'] === 'file')
                         <x-form.input 
-                            name="{{ $field['field_label'] }}" 
+                            name="{{ $field['field_name'] }}" 
                             id="{{ $field['field_id'] }}"
-                            wire:model="formData.{{ $field['field_label'] }}" 
+                            wire:model="formData.{{ $field['field_name'] }}" 
                             label="{{ $field['level_name'] }}"
                             type="file" />
                     @endif
@@ -147,9 +147,9 @@
                     {{-- PASSWORD --}}
                     @if ($field['field_type'] === 'password')
                         <x-form.input 
-                            name="{{ $field['field_label'] }}" 
+                            name="{{ $field['field_name'] }}" 
                             id="{{ $field['field_id'] }}"
-                            wire:model="formData.{{ $field['field_label'] }}" 
+                            wire:model="formData.{{ $field['field_name'] }}" 
                             label="{{ $field['level_name'] }}"
                             placeholder="Enter {{ $field['level_name'] }}" 
                             type="password" />
@@ -159,27 +159,27 @@
                     @if ($field['field_type'] === 'select')
                         @if ($field['is_multiple'])
                             <x-form.multiselect 
-                                name="{{ $field['field_label'] }}[]" 
+                                name="{{ $field['field_name'] }}[]" 
                                 id="{{ $field['field_id']}}"
                                 label="{{ $field['level_name'] }}" 
-                                wire:model="formData.{{ $field['field_label'] }}"
+                                wire:model="formData.{{ $field['field_name'] }}"
                                 :options="$field['options']" 
                                 multiple />
                         @else
                             @if ($field['field_class'])
                                 <x-form.select wire:ignore
                                     data-field="{{ $field['field_class'] }}" 
-                                    name="{{ $field['field_label'] }}"
-                                    wire:model="formData.{{ $field['field_label'] }}"
+                                    name="{{ $field['field_name'] }}"
+                                    wire:model="formData.{{ $field['field_name'] }}"
                                     label="{{ $field['level_name'] }}">
                                     <option value="">-- Select {{ $field['level_name'] }} --</option>
                                 </x-form.select>
                             @else
                                 <x-form.select 
-                                    name="{{ $field['field_label'] }}" 
+                                    name="{{ $field['field_name'] }}" 
                                     id="{{ $field['field_id'] }}"
                                     label="{{ $field['level_name'] }}" 
-                                    wire:model.live="formData.{{ $field['field_label'] }}">
+                                    wire:model.live="formData.{{ $field['field_name'] }}">
                                     <option value="">-- Select {{ $field['level_name'] }} --</option>
                                     @foreach ($field['options'] as $key => $option)
                                         <option value="{{ $key }}">{{ $option }}</option>
@@ -195,10 +195,10 @@
                         <div class="flex flex-wrap items-center gap-4">
                             @foreach ($field['options'] as $option)
                                 <x-form.radio 
-                                    name="{{ $field['field_label'] }}" 
+                                    name="{{ $field['field_name'] }}" 
                                     value="{{ $option }}" 
                                     label="{{ $option }}"
-                                    wire:model="formData.{{ $field['field_label'] }}" />
+                                    wire:model="formData.{{ $field['field_name'] }}" />
                             @endforeach
                         </div>
                     @endif
@@ -209,10 +209,10 @@
                         <div class="space-y-2">
                             @foreach ($field['options'] as $option)
                                 <x-form.checkbox 
-                                    name="{{ $field['field_label'] }}[]" 
+                                    name="{{ $field['field_name'] }}[]" 
                                     value="{{ $option }}"
                                     label="{{ $option }}" 
-                                    wire:model="formData.{{ $field['field_label'] }}" />
+                                    wire:model="formData.{{ $field['field_name'] }}" />
                             @endforeach
                         </div>
                     @endif

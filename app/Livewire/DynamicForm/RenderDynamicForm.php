@@ -5,14 +5,14 @@ namespace App\Livewire\DynamicForm;
 use App\Models\AcceptRejectInfo;
 use App\Models\Codemaster;
 use App\Models\DraftBeneficiaryPersonal;
-use App\Models\FromFieldAttribute;
+use App\Models\SchemeTabBasefield;
+use App\Models\Ifsccodemaster;
 use App\Models\MasterSection;
 use App\Models\OtherDetails;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
-
 
 class RenderDynamicForm extends Component
 {
@@ -22,14 +22,14 @@ class RenderDynamicForm extends Component
     public array $fields = [];
     public array $sections = [];
     public array $formData = [];
-
     use WithFileUploads;
+
     public function mount($schemeId = null,  $application_id = null, $mode = null)
     {
         $this->mode = $mode;
         $this->schemeId = $schemeId;
         $this->application_id = $application_id;
-        $this->fields = FromFieldAttribute::where('scheme_id', $this->schemeId)
+        $this->fields = SchemeTabBasefield::where('scheme_id', $this->schemeId)
             ->where('is_active', true)
             ->orderBy('created_at')
             ->get()
@@ -39,13 +39,13 @@ class RenderDynamicForm extends Component
             ->get()
             ->keyBy('id')
             ->toArray();
-
         foreach ($this->fields as $group) {
             foreach ($group as $field) {
+                $key = $this->getFieldKey($field);
                 if (in_array($field['field_type'], ['checkbox', 'select', 'radio'])) {
-                    $this->formData[$field['field_label']] = [];
+                    $this->formData[$key] = [];
                 } else {
-                    $this->formData[$field['field_label']] = null;
+                    $this->formData[$key] = null;
                 }
             }
         }
@@ -56,6 +56,7 @@ class RenderDynamicForm extends Component
             }
         }
     }
+
     private function fileToBase64(TemporaryUploadedFile $file): array
     {
         return [
@@ -67,6 +68,7 @@ class RenderDynamicForm extends Component
             ),
         ];
     }
+
     public function save()
     {
         $this->validate(
@@ -107,7 +109,6 @@ class RenderDynamicForm extends Component
             ->latest('id')
             ->value('id') ?? null;
         $AcceptRejectInfo->save();
-
         $this->dispatch('selfDec1');
         $this->dispatch('hideLoader');
         $this->dispatch('toastr', [
@@ -115,69 +116,91 @@ class RenderDynamicForm extends Component
             'message' => 'Application submitted successfully!'
         ]);
     }
+    private function getFieldKeyById(int $id): ?string
+    {
+        $field = collect($this->fields)
+            ->flatten(1)
+            ->firstWhere('id', $id);
+
+        return $field ? $this->getFieldKey($field) : null;
+    }
+
     private function buildValidationRules(): array
     {
         $rules = [];
+
         foreach ($this->fields as $group) {
             foreach ($group as $field) {
 
-                $rule = $field['validation_rule'];
-                if (!$rule || $rule === 'nullable') {
-                    continue;
-                } else {
-                    $rules["formData.{$field['field_label']}"] = $rule;
+                $fieldKey = "formData." . $this->getFieldKey($field);
+
+                // Base rule
+                if (!empty($field['validation_rule']) && $field['validation_rule'] !== 'nullable') {
+                    $rules[$fieldKey] = $field['validation_rule'];
+                }
+
+                // ✅ confirm_of can be array OR single
+                if (!empty($field['confirm_of'])) {
+
+                    foreach ((array) $field['confirm_of'] as $parentId) {
+
+                        $parentKey = $this->getFieldKeyById($parentId);
+
+                        if ($parentKey) {
+                            $rules[$fieldKey] =
+                                ($rules[$fieldKey] ?? 'required') .
+                                "|same:formData.$parentKey";
+                        }
+                    }
                 }
             }
         }
+
         return $rules;
     }
+
+
+
     protected function validationAttributes(): array
     {
         $attributes = [];
         foreach ($this->fields as $group) {
             foreach ($group as $field) {
-                $attributes["formData.{$field['field_label']}"]
+                $attributes["formData.{$field['field_name']}"]
                     = $field['level_name'];
             }
         }
         return $attributes;
     }
+
     public function shouldShowField($field)
     {
         if (empty($field['dependent_on'])) {
             return true;
         }
-
         $allFields = collect($this->fields)->flatten(1);
         $parentField = $allFields->firstWhere('id', $field['dependent_on']);
-
         if (!$parentField) {
             return true;
         }
-
-        $parentLabel = $parentField['field_label'];
+        $parentLabel = $parentField['field_name'];
         $parentValue = $this->formData[$parentLabel] ?? null;
-
         $allowed = [];
         if (!empty($field['dependent_on_values'])) {
             $raw = is_array($field['dependent_on_values'])
                 ? $field['dependent_on_values']
                 : json_decode($field['dependent_on_values'], true);
-
             $allowed = array_values($raw);
         }
-
         if (is_array($parentValue)) {
             if (empty($allowed)) {
                 return !empty($parentValue);
             }
-
             return count(array_intersect(
                 array_map('strval', $parentValue),
                 array_map('strval', $allowed)
             )) > 0;
         }
-
         if (!empty($allowed)) {
             return in_array(
                 (string)$parentValue,
@@ -185,10 +208,56 @@ class RenderDynamicForm extends Component
                 true
             );
         }
-
         return $parentValue !== '' && $parentValue !== null;
     }
-    public function updatedFormData() {}
+
+    private function getFieldIdByKey(string $key): ?int
+    {
+        $field = collect($this->fields)
+            ->flatten(1)
+            ->first(function ($field) use ($key) {
+                return $this->getFieldKey($field) === $key;
+            });
+        return $field['id'] ?? null;
+    }
+
+    public function updatedFormData($value, $key)
+    {
+        if ($key !== 'ifsc') {
+            return;
+        }
+        $parentFieldId = $this->getFieldIdByKey($key);
+        $dependentFields = collect($this->fields)
+            ->flatten(1)
+            ->where('dependent_on', $parentFieldId);
+        foreach ($dependentFields as $field) {
+            $this->formData[$this->getFieldKey($field)] = '';
+        }
+        if (strlen($value) !== 11) {
+            return;
+        }
+        $ifs = Ifsccodemaster::with('bankmaster')
+            ->where('code', $value)
+            ->where('is_active', 1)
+            ->first();
+        if (!$ifs) {
+            return;
+        }
+        foreach ($dependentFields as $field) {
+            $fieldKey = $this->getFieldKey($field);
+            if (str_contains(strtolower($field['field_class']), 'bank_name')) {
+                $this->formData[$fieldKey] = $ifs->bankmaster->name ?? '';
+            }
+            if (str_contains(strtolower($field['field_class']), 'branch_name')) {
+                $this->formData[$fieldKey] = $ifs->branch ?? '';
+            }
+        }
+    }
+
+    public function fieldKey(array $field): string
+    {
+        return $field['field_class'] ?: $field['field_name'];
+    }
 
     protected function rules()
     {
@@ -197,11 +266,18 @@ class RenderDynamicForm extends Component
             if ($this->shouldShowField($field)) {
                 $rule = $field['validation_rule'];
                 if ($rule && $rule !== 'nullable') {
-                    $rules["formData.{$field['field_label']}"] = $rule;
+                    $rules["formData.{$field['field_name']}"] = $rule;
                 }
             }
         }
         return $rules;
+    }
+
+    private function getFieldKey(array $field): string
+    {
+        return !empty($field['field_class'])
+            ? $field['field_class']
+            : $field['field_name'];
     }
 
     public function getColSpanClass(int $viewType): string

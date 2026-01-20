@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('from_field_attributes', function (Blueprint $table) {
             $table->smallInteger('view_type');
+            $table->bigInteger('confirm_of')->nullable();
         });
     }
 
@@ -21,8 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-       Schema::table('from_field_attributes', function (Blueprint $table) {
+        Schema::table('from_field_attributes', function (Blueprint $table) {
             $table->dropColumn('view_type');
+            $table->dropColumn('confirm_of');
         });
     }
 };

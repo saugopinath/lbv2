@@ -379,6 +379,11 @@ class SchemeTabFieldManager extends Component
                         'db_column'       => $base->db_colunm,
                         'is_mandatory'    => $base->is_mendetory,
                         'is_active'       => true,
+                        'view_type'       => $base->view_type,
+                        'confirm_of'      => $base->confirm_of,
+                        'dependent_on'    => $base->dependent_on,
+                        'dependent_on_values' => $base->dependent_on_values,
+                        'field_class' => $base->field_class,
                     ]
                 );
             }
