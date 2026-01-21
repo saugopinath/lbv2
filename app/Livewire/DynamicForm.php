@@ -33,7 +33,6 @@ class DynamicForm extends Component
 
     public function setActiveTab($tabCode)
     {
-        // 🔥 always keep as STRING
         $this->activeTab = (string) $tabCode;
         $this->updateTabNavigation();
     }
@@ -49,7 +48,6 @@ class DynamicForm extends Component
             return;
         }
 
-        // 🔥 FIX: string compare
         $index = array_search((string) $this->activeTab, $this->views);
 
         if ($index === false) {
@@ -75,7 +73,6 @@ class DynamicForm extends Component
             return;
         }
 
-        // load blade files → STRING tab codes
         foreach (File::files($path) as $file) {
             $this->views[] = str_replace('.blade.php', '', $file->getFilename());
         }
@@ -89,7 +86,6 @@ class DynamicForm extends Component
 
     public function finalSubmit()
     {
-        // final submit logic
         dd('FINAL SUBMIT WORKING');
     }
 
