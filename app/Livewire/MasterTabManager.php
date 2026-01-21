@@ -2,6 +2,9 @@
 
 namespace App\Livewire;
 
+use App\Models\SchemeAttachedDocMappings;
+use App\Models\SchemeTabFormField;
+use App\Models\SelfDeclerationBasefield;
 use Livewire\Component;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Scheme;
@@ -36,7 +39,7 @@ class MasterTabManager extends Component
 
     protected $rules = [
         'selectedSchemeId' => 'required|exists:schemes,id',
-        'selectedTabs'     => 'required|array|min:1',
+        'selectedTabs' => 'required|array|min:1',
     ];
 
 
@@ -58,7 +61,8 @@ class MasterTabManager extends Component
         $this->positions = [];
 
         $scheme = Scheme::find((int) $value);
-        if (!$scheme) return;
+        if (!$scheme)
+            return;
 
         $this->selectedSchemeName = $scheme->name;
 
@@ -88,7 +92,8 @@ class MasterTabManager extends Component
             ]);
             return;
         }
-        if (!$this->selectedTabCode) return;
+        if (!$this->selectedTabCode)
+            return;
         if (!in_array($this->selectedTabCode, $this->selectedTabs)) {
             $this->selectedTabs[] = (int) $this->selectedTabCode;
             $this->recalculatePositions();
@@ -110,10 +115,31 @@ class MasterTabManager extends Component
             return;
         }
         $this->selectedTabs = array_values(
-            array_diff($this->selectedTabs, [(int)$tabCode])
+            array_diff($this->selectedTabs, [(int) $tabCode])
         );
         $this->recalculatePositions();
         $this->mappingSaved = false;
+
+
+        DB::transaction(function () use ($tabCode) {
+
+            SchemeTabMapping::where('scheme_id', $this->selectedSchemeId)
+                ->where('tab_code', $tabCode)
+                ->delete();
+
+            SchemeTabFormField::where('scheme_id', $this->selectedSchemeId)
+                ->where('tab_code', $tabCode)
+                ->delete();
+
+            SchemeAttachedDocMappings::where('scheme_id', $this->selectedSchemeId)
+                ->where('tab_code', $tabCode)
+                ->delete();
+
+            SelfDeclerationBasefield::where('scheme_id', $this->selectedSchemeId)
+                ->where('tab_code', $tabCode)
+                ->delete();
+        });
+
     }
 
     public function updateOrder(array $ordered)
@@ -155,10 +181,10 @@ class MasterTabManager extends Component
                 SchemeTabMapping::updateOrCreate(
                     [
                         'scheme_id' => $this->selectedSchemeId,
-                        'tab_code'  => $tabCode,
+                        'tab_code' => $tabCode,
                     ],
                     [
-                        'position'  => $this->positions[$tabCode],
+                        'position' => $this->positions[$tabCode],
                         'is_active' => true,
                     ]
                 );
@@ -211,9 +237,11 @@ class MasterTabManager extends Component
         $this->finalPreviewFields = [];
         $this->selfDeclarationDisplay = [];
         $this->attachedDocuments = [];
-        if (!$tabCode) return;
+        if (!$tabCode)
+            return;
         $tab = collect($this->tabs)->firstWhere('tab_code', $tabCode);
-        if (!$tab) return;
+        if (!$tab)
+            return;
         if ($tabCode == 104) {
 
             $this->attachedDocuments = $tab['fields'] ?? [];

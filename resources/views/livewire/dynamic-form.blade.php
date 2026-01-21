@@ -25,11 +25,9 @@
     [
         'schemeId' => $schemeId,
         'selfDeclarationDisplay' => $selfDeclarationDisplay
-    ]
-)
-
-
-            </div>
+            ]
+        )
+        </div>
 
             {{-- ACTION BUTTONS --}}
         <div class="flex justify-between mt-6">

@@ -184,7 +184,7 @@ class DynamicForm extends Component
 
         foreach ($tab['fields'] ?? [] as $field) {
             $result[] = [
-                'show_section_start' => false, // future use
+                'show_section_start' => false, 
                 'section_title'      => null,
                 'field'              => (object) $field,
             ];
