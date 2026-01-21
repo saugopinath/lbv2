@@ -10,16 +10,18 @@ class DynamicForm extends Component
 {
     public $schemeId;
 
-    public array $views = [];   // tab codes as STRING
-    public $tabs;               // MasterTab collection
+    public array $views = [];
+    public $tabs;
     public $activeTab = null;
 
-    // navigation state
     public int $currentIndex = 0;
     public bool $isFirst = true;
     public bool $isLast  = false;
     public $prevTab = null;
     public $nextTab = null;
+
+    /** 🔥 All form values */
+    public array $formData = [];
 
     public function mount($schemeId)
     {
@@ -31,6 +33,8 @@ class DynamicForm extends Component
         }
     }
 
+    /* ---------------- TAB CONTROL ---------------- */
+
     public function setActiveTab($tabCode)
     {
         $this->activeTab = (string) $tabCode;
@@ -39,20 +43,34 @@ class DynamicForm extends Component
 
     public function saveAndNext($nextTab)
     {
+        // ✅ validate current tab
+        $rules = $this->getValidationRulesForActiveTab();
+
+        if (!empty($rules)) {
+            $this->validate($rules);
+        }
+
+        // 👉 here you can save partial data (optional)
+        // ApplicationData::updateOrCreate(...)
+
         $this->setActiveTab($nextTab);
+    }
+
+    public function finalSubmit()
+    {
+        // ✅ validate ALL tabs
+        // $rules = $this->getValidationRulesForAllTabs();
+        // $this->validate($rules);
+// dd($this->activeTab);
+        // 👉 Final save
+        // Application::create($this->formData);
+
+        dd('FINAL SUBMIT SUCCESS', $this->formData);
     }
 
     private function updateTabNavigation(): void
     {
-        if (!$this->activeTab || empty($this->views)) {
-            return;
-        }
-
         $index = array_search((string) $this->activeTab, $this->views);
-
-        if ($index === false) {
-            return;
-        }
 
         $this->currentIndex = $index;
         $this->isFirst = ($index === 0);
@@ -61,6 +79,8 @@ class DynamicForm extends Component
         $this->prevTab = $this->views[$index - 1] ?? null;
         $this->nextTab = $this->views[$index + 1] ?? null;
     }
+
+    /* ---------------- SCHEME LOAD ---------------- */
 
     private function loadScheme($schemeId)
     {
@@ -84,9 +104,72 @@ class DynamicForm extends Component
             ->keyBy('tab_code');
     }
 
-    public function finalSubmit()
+    /* ---------------- JSON HELPERS ---------------- */
+
+    private function getSchemeJson(): array
     {
-        dd('FINAL SUBMIT WORKING');
+        $path = storage_path("app/final_schemes_formdata/scheme_{$this->schemeId}.json");
+
+        if (!File::exists($path)) {
+            return [];
+        }
+
+        return json_decode(File::get($path), true);
+    }
+
+    private function getValidationRulesForActiveTab(): array
+    {
+        $json = $this->getSchemeJson();
+        $rules = [];
+
+        foreach ($json['tabs'] ?? [] as $tab) {
+
+            if ((string)$tab['tab_code'] !== (string)$this->activeTab) {
+                continue;
+            }
+
+            foreach ($tab['fields'] ?? [] as $field) {
+
+                if (empty($field['field_name']) || empty($field['validation_rule'])) {
+                    continue;
+                }
+
+                $fieldRules = explode('|', $field['validation_rule']);
+
+                if (!empty($field['regex'])) {
+                    $fieldRules[] = 'regex:/'.$field['regex'].'/';
+                }
+
+                $rules["formData.{$field['field_name']}"] = $fieldRules;
+            }
+        }
+
+        return $rules;
+    }
+
+    private function getValidationRulesForAllTabs(): array
+    {
+        $json = $this->getSchemeJson();
+        $rules = [];
+
+        foreach ($json['tabs'] ?? [] as $tab) {
+            foreach ($tab['fields'] ?? [] as $field) {
+
+                if (empty($field['field_name']) || empty($field['validation_rule'])) {
+                    continue;
+                }
+
+                $fieldRules = explode('|', $field['validation_rule']);
+
+                if (!empty($field['regex'])) {
+                    $fieldRules[] = 'regex:/'.$field['regex'].'/';
+                }
+
+                $rules["formData.{$field['field_name']}"] = $fieldRules;
+            }
+        }
+
+        return $rules;
     }
 
     public function render()
