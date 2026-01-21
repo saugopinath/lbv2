@@ -104,6 +104,8 @@ class DynamicModelMigrationService
 
         $schema = $this->getSchema();
 
+        $tableBlock = "    protected \$table = '{$schema}.{$table}';\n\n";
+
         $fillable = collect($fields)
             ->pluck('db_column')
             ->unique()
@@ -111,13 +113,11 @@ class DynamicModelMigrationService
             ->map(fn($f) => "        '{$f}',")
             ->implode("\n");
 
-        $tableBlock = "    protected \$table = '{$schema}.{$table}';\n\n";
+
 
         $fillableBlock = <<<PHP
-    protected \$fillable = [
-{$fillable}
-    ];
-PHP;
+            protected \$fillable = [{$fillable}];
+        PHP;
 
         $content = File::get($modelPath);
 

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('tab_name', 100);
             $table->Integer('tab_code')->unique();
             $table->string('tab_short_name', 50);
-            $table->string('tab_component', 100)->nullable();
+            $table->string('tab_model_name', 100)->nullable();
             $table->text('tab_icon')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();

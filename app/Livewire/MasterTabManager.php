@@ -5,8 +5,11 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Scheme;
 use App\Models\MasterTab;
+use App\Models\SchemeAttachedDocMappings;
 use App\Models\SchemeFinalSubmitCheck;
+use App\Models\SchemeTabFormField;
 use App\Models\SchemeTabMapping;
+use App\Models\SelfDeclerationBasefield;
 use Illuminate\Support\Facades\DB;
 
 class MasterTabManager extends Component
@@ -96,6 +99,30 @@ class MasterTabManager extends Component
             array_diff($this->selectedTabs, [(int)$tabCode])
         );
         $this->recalculatePositions();
+        DB::transaction(function () use ($tabCode) {
+
+            SchemeTabMapping::where('scheme_id', $this->selectedSchemeId)
+                ->where('tab_code', $tabCode)
+                ->delete();
+            if ($tabCode == 104) {
+                SchemeAttachedDocMappings::where('scheme_id', $this->selectedSchemeId)
+                    ->where('tab_code', $tabCode)
+                    ->delete();
+            } else if ($tabCode == 105) {
+                SelfDeclerationBasefield::where('scheme_id', $this->selectedSchemeId)
+                    ->where('tab_code', $tabCode)
+                    ->delete();
+            } else {
+                SchemeTabFormField::where('scheme_id', $this->selectedSchemeId)
+                    ->where('tab_code', $tabCode)
+                    ->delete();
+            }
+        });
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'Tab removed successfully.',
+        ]);
+
         $this->mappingSaved = false;
     }
 

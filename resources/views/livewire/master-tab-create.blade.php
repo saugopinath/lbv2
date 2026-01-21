@@ -271,7 +271,7 @@
         <!-- Modal Container -->
         <div class="flex min-h-full items-center justify-center p-4">
             <!-- Modal Content -->
-            <div class="relative bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="relative bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden">
                 <!-- Modal Header -->
                 <div class="px-6 pt-6 pb-4 border-b border-gray-200">
                     <h2 class="text-xl font-bold text-gray-900">Add / Edit Field</h2>
@@ -280,39 +280,10 @@
 
                 <!-- Scrollable Content Area -->
                 <div class="flex-1 overflow-y-auto p-6">
-                    <!-- Read-only Info Section -->
-                    <div class="mb-6">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    Tab Name
-                                </label>
-                                <input type="text"
-                                    wire:model.live="tab_name"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    Tab Short Name
-                                </label>
-                                <input type="text"
-                                    readonly wire:model="tab_short_name"
-                                    class="w-full border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 text-gray-600 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    Tab Code
-                                </label>
-                                <input type="text"
-                                    readonly wire:model="tab_code"
-                                    class="w-full border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 text-gray-600 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Model Name</label>
-                                <input readonly wire:model="model_name"
-                                    class="w-full border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 text-gray-600 text-sm">
-                            </div>
+                    <!-- Basic Information Section -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Table Name</label>
                                 <input readonly wire:model="table_name"
@@ -321,19 +292,20 @@
                         </div>
                     </div>
 
-                    <!-- Column Info Section -->
-                    <div class="mb-6">
+                    <!-- Database Column Section -->
+                    <div class="mb-8">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900">Column Information</h3>
+                            <h3 class="text-lg font-semibold text-gray-900">Database Column</h3>
                             <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Database</span>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Column Name *</label>
-                                <input wire:model.live="column_name" placeholder="e.g., user_name"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                            </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                            <x-form.input
+                                name="column_name"
+                                label="Column Name *"
+                                placeholder="e.g., user_name"
+                                wire:model.live="column_name"
+                                required />
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Data Type *</label>
@@ -347,11 +319,13 @@
                                     <option value="decimal">Decimal</option>
                                 </select>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Length</label>
-                                <input wire:model="length" placeholder="255"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                            </div>
+
+                            <x-form.input
+                                name="length"
+                                label="Length"
+                                placeholder="255"
+                                wire:model="length" />
+
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Key Type</label>
                                 <select wire:model="key_type"
@@ -363,105 +337,326 @@
                                     <option value="index">Index</option>
                                 </select>
                             </div>
+
+                            @if($key_type === 'foreign')
+                            <x-form.input
+                                name="key_reference"
+                                label="Foreign Key Reference"
+                                placeholder="e.g., users(id)"
+                                wire:model="key_reference" />
+                            @endif
+
+                            @if(in_array($key_type, ['primary', 'unique', 'foreign', 'index']))
+                            <x-form.input
+                                name="key_name"
+                                label="Key Name"
+                                placeholder="e.g., idx_user_name"
+                                wire:model="key_name" />
+                            @endif
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div class="flex items-center space-x-3">
-                                <label class="flex items-center space-x-2 cursor-pointer">
-                                    <input type="checkbox" wire:model.live="nullable"
-                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-sm font-medium text-gray-700">Nullable</span>
-                                </label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox"
+                                    id="nullable"
+                                    wire:model.live="nullable"
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <label for="nullable" class="text-sm font-medium text-gray-700 cursor-pointer">Nullable</label>
                             </div>
 
-                            <div class="flex items-center space-x-3">
-                                <label class="flex items-center space-x-2 cursor-pointer">
-                                    <input type="checkbox" wire:model.live="default_enabled"
-                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-sm font-medium text-gray-700">Default Value</span>
-                                </label>
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox"
+                                    id="default_enabled"
+                                    wire:model.live="default_enabled"
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <label for="default_enabled" class="text-sm font-medium text-gray-700 cursor-pointer">Default Value</label>
                             </div>
 
-                            <div>
-                                @if($default_enabled)
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Default</label>
-                                <input wire:model="default_value" placeholder="Enter default value"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                                @endif
-                            </div>
-
-
+                            @if($default_enabled)
+                            <x-form.input
+                                name="column_default_value"
+                                label="Default Value"
+                                placeholder="Enter default value"
+                                wire:model="column_default_value" />
+                            @endif
                         </div>
                     </div>
 
                     <!-- Form Field Section -->
-                    <div>
+                    <div class="mb-8">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900">Form Field Information</h3>
+                            <h3 class="text-lg font-semibold text-gray-900">Form Field</h3>
                             <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">UI</span>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Field Name *</label>
-                                <input wire:model.live="field_name" placeholder="e.g., User Name"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                            <x-form.input
+                                name="level_name"
+                                label="Level Name *"
+                                placeholder="Enter Level Name"
+                                wire:model="level_name"
+                                required />
+
+                            <x-form.input
+                                name="field_name"
+                                label="Field Label *"
+                                placeholder="e.g., User Name"
+                                wire:model.live="field_name"
+                                required />
+
+                            <x-form.input
+                                name="field_id"
+                                label="Field ID"
+                                placeholder="e.g., user-name"
+                                wire:model="field_id"
+                                readonly />
+
+                            <x-form.select
+                                name="field_type"
+                                label="Field Type *"
+                                wire:model.live="field_type"
+                                required>
+                                <option value="">-- Select Field Type --</option>
+                                @foreach ($fieldTypes as $type)
+                                <option value="{{ $type->name }}">
+                                    {{ $type->name }}
+                                </option>
+                                @endforeach
+                            </x-form.select>
+
+                            <x-form.select
+                                name="view_type"
+                                label="View Type"
+                                wire:model="view_type"
+                                required>
+                                <option value="">-- Select View Type --</option>
+                                <option value="1">Full Width</option>
+                                <option value="2">Half Width</option>
+                                <option value="3">One Third</option>
+                            </x-form.select>
+
+                            <x-form.multiselect
+                                label="Validation Rules"
+                                wire:model="validation_rule"
+                                :options="$validationRuleOptions"
+                                placeholder="Select validation rules" />
+
+                            @if($field_type === 'select')
+                            <div class="md:col-span-2">
+                                <label class="font-semibold block mb-2">
+                                    Is Multiple Select Allowed?
+                                </label>
+                                <div class="flex gap-6">
+                                    <x-form.radio
+                                        name="is_multiple"
+                                        value="yes"
+                                        label="Yes"
+                                        wire:model.live="is_multiple" />
+
+                                    <x-form.radio
+                                        name="is_multiple"
+                                        value="no"
+                                        label="No"
+                                        wire:model.live="is_multiple" />
+                                </div>
                             </div>
+                            @endif
+                        </div>
+
+                        <!-- Section and Dependencies -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <!-- Section Selection -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Field ID</label>
-                                <input wire:model="field_id" readonly placeholder="e.g., user-name"
-                                    class="w-full border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 text-gray-600">
+                                <label class="font-semibold block mb-2">
+                                    Is under any section?
+                                </label>
+                                <div class="flex gap-6 mb-4">
+                                    <x-form.radio
+                                        name="is_under_section"
+                                        value="yes"
+                                        label="Yes"
+                                        wire:model.live="is_under_section" />
+
+                                    <x-form.radio
+                                        name="is_under_section"
+                                        value="no"
+                                        label="No"
+                                        wire:model.live="is_under_section" />
+                                </div>
+
+                                @if ($is_under_section === 'yes')
+                                <x-form.select
+                                    name="section_id"
+                                    label="Select Section"
+                                    wire:model.live="section_id"
+                                    required>
+                                    <option value="">-- Select Section --</option>
+                                    @forelse ($sections as $section)
+                                    <option value="{{ $section->id }}">
+                                        {{ $section->section_name }}
+                                    </option>
+                                    @empty
+                                    <option value="">No sections found</option>
+                                    @endforelse
+                                </x-form.select>
+                                @endif
                             </div>
+
+                            <!-- Default Value Selection -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Field Label</label>
-                                <input wire:model="field_label" placeholder="e.g., Enter your name"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Field Type</label>
-                                <select wire:model="field_type"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                                    <option value="text">Text Input</option>
-                                    <option value="textarea">Textarea</option>
-                                    <option value="select">Select Dropdown</option>
-                                    <option value="date">Date Picker</option>
-                                    <option value="checkbox">Checkbox</option>
-                                    <option value="radio">Radio Buttons</option>
-                                    <option value="file">File Upload</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">DB Column</label>
-                                <input wire:model="db_column" readonly
-                                    class="w-full border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 text-gray-600">
+                                <label class="font-semibold block mb-2">
+                                    Is choose from default?
+                                </label>
+                                <div class="flex gap-6 mb-4">
+                                    <x-form.radio
+                                        name="is_choose_default"
+                                        value="yes"
+                                        label="Yes"
+                                        wire:model.live="is_choose_default" />
+
+                                    <x-form.radio
+                                        name="is_choose_default"
+                                        value="no"
+                                        label="No"
+                                        wire:model.live="is_choose_default" />
+                                </div>
+
+                                @if ($is_choose_default === 'yes')
+                                <x-form.select
+                                    name="default_value"
+                                    label="Default Value"
+                                    wire:model.live="default_value">
+                                    <option value="">-- Select --</option>
+                                    @foreach ($default_values as $key => $value)
+                                    <option value="{{ $key }}">
+                                        {{ $key }}
+                                    </option>
+                                    @endforeach
+                                </x-form.select>
+                                @endif
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Validation Rules</label>
-                            <div class="relative">
-                                <input wire:model="validation_rule"
-                                    placeholder="required|string|max:255|min:3"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 pl-10 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                        <!-- Conditional Fields -->
+                        @if($isdepenentsec)
+                        <div class="space-y-6 border-t pt-6">
+                            <!-- Confirm Field -->
+                            <div>
+                                <label class="font-semibold block mb-2">
+                                    Is Confirm Field?
+                                </label>
+                                <div class="flex gap-6 mb-4">
+                                    <x-form.radio
+                                        name="isconfirm"
+                                        value="yes"
+                                        label="Yes"
+                                        wire:model.live="isconfirm" />
+
+                                    <x-form.radio
+                                        name="isconfirm"
+                                        value="no"
+                                        label="No"
+                                        wire:model.live="isconfirm" />
                                 </div>
+
+                                @if ($isconfirm === 'yes')
+                                <x-form.select
+                                    name="confirm_of"
+                                    label="Confirm Of"
+                                    wire:model.live="confirm_of">
+                                    <option value="">-- Select --</option>
+                                    @foreach ($confirmOptions as $option)
+                                    <option value="{{ $option->id }}">
+                                        {{ $option->level_name }}
+                                    </option>
+                                    @endforeach
+                                </x-form.select>
+                                @endif
                             </div>
-                            <p class="mt-1 text-xs text-gray-500">Separate rules with | character. Leave empty for no validation.</p>
+
+                            @if($isconfirm !== 'yes')
+                            <!-- Dependent Field -->
+                            <div>
+                                <label class="font-semibold block mb-2">
+                                    Is Dependent Field?
+                                </label>
+                                <div class="flex gap-6 mb-4">
+                                    <x-form.radio
+                                        name="isdependent"
+                                        value="yes"
+                                        label="Yes"
+                                        wire:model.live="isdependent" />
+
+                                    <x-form.radio
+                                        name="isdependent"
+                                        value="no"
+                                        label="No"
+                                        wire:model.live="isdependent" />
+                                </div>
+
+                                @if ($isdependent === 'yes')
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <x-form.select
+                                        name="depenent_on"
+                                        label="Dependent On"
+                                        wire:model.live="depenent_on">
+                                        <option value="">-- Select --</option>
+                                        @foreach ($depenentOptions as $option)
+                                        <option value="{{ $option->id }}">
+                                            {{ $option->level_name }}
+                                        </option>
+                                        @endforeach
+                                    </x-form.select>
+
+                                    @if ($depvalueradio)
+                                    <div>
+                                        <label class="font-semibold block mb-2">
+                                            Dependent on Specific Values?
+                                        </label>
+                                        <div class="flex gap-6">
+                                            <x-form.radio
+                                                name="isdependentvalue"
+                                                value="yes"
+                                                label="Yes"
+                                                wire:model.live="isdependentvalue" />
+
+                                            <x-form.radio
+                                                name="isdependentvalue"
+                                                value="no"
+                                                label="No"
+                                                wire:model.live="isdependentvalue" />
+                                        </div>
+                                    </div>
+                                    @endif
+                                </div>
+
+                                @if ($isdependentvalue === 'yes' && $depvaluesopt)
+                                <div class="mt-4" wire:key="container-{{ $depenent_on }}">
+                                    <x-form.multiselect
+                                        label="Dependent on Values"
+                                        wire:model="depvalues"
+                                        :options="$depvaluesopt"
+                                        placeholder="Select dependent values" />
+                                </div>
+                                @endif
+                                @endif
+                            </div>
+                            @endif
                         </div>
+                        @endif
                     </div>
                 </div>
 
                 <!-- Modal Footer -->
                 <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
                     <div class="flex justify-end space-x-3">
-                        <button type="button" wire:click="closeModal"
+                        <button type="button"
+                            wire:click="closeModal"
                             class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
                             Cancel
                         </button>
-                        <button type="button" wire:click="saveField"
+                        <button type="button"
+                            wire:click="saveField"
                             class="px-6 py-2 bg-blue-600 border border-transparent rounded-lg text-white font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                             Save Field
                         </button>
