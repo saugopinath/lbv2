@@ -70,7 +70,6 @@ class MasterTabManager extends Component
         if ($mappings->count()) {
             $this->mappingSaved = true;
         }
-
         foreach ($mappings as $map) {
             $this->selectedTabs[] = (int) $map->tab_code;
             $this->positions[$map->tab_code] = (int) $map->position;
@@ -90,7 +89,6 @@ class MasterTabManager extends Component
             return;
         }
         if (!$this->selectedTabCode) return;
-
         if (!in_array($this->selectedTabCode, $this->selectedTabs)) {
             $this->selectedTabs[] = (int) $this->selectedTabCode;
             $this->recalculatePositions();
@@ -150,7 +148,6 @@ class MasterTabManager extends Component
             return;
         }
         $this->validate();
-
         DB::transaction(function () {
             SchemeTabMapping::where('scheme_id', $this->selectedSchemeId)
                 ->increment('position', 1000, ['is_active' => false]);
@@ -167,7 +164,6 @@ class MasterTabManager extends Component
                 );
             }
         });
-
         $this->mappingSaved = true;
         session()->flash('message', 'Tabs mapped successfully.');
     }
@@ -181,36 +177,26 @@ class MasterTabManager extends Component
         if (!$this->selectedSchemeId) {
             return;
         }
-
         $path = "final_schemes_formdata/scheme_{$this->selectedSchemeId}.json";
-
         if (!Storage::disk('local')->exists($path)) {
             $isFinal = SchemeFinalSubmitCheck::where('scheme_id', $this->selectedSchemeId)
                 ->where('is_final_submitted', true)
                 ->exists();
-
             if (!$isFinal) {
                 $data = SchemewiseStoreDataJsonHelper::generateSchemeJson($this->selectedSchemeId);
-
                 Storage::disk('local')->put(
                     $path,
                     json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
                 );
             }
         }
-
         if (!Storage::disk('local')->exists($path)) {
             return;
         }
-
         $json = json_decode(Storage::disk('local')->get($path), true);
-
-
         $this->tabs = collect($json['tabs'] ?? [])->values()->toArray();
-
         $this->showFinalPreview = true;
         $this->finalActiveTabCode = $this->tabs[0]['tab_code'] ?? null;
-
         $this->loadPreviewByTab($this->finalActiveTabCode);
     }
 
@@ -219,22 +205,15 @@ class MasterTabManager extends Component
         $this->finalActiveTabCode = (int) $tabCode;
         $this->loadPreviewByTab($tabCode);
     }
-
     /* ================= LOAD TAB DATA FROM JSON ================= */
     private function loadPreviewByTab($tabCode)
     {
-        // 🔴 RESET FIRST (VERY IMPORTANT)
         $this->finalPreviewFields = [];
         $this->selfDeclarationDisplay = [];
         $this->attachedDocuments = [];
-
         if (!$tabCode) return;
-
         $tab = collect($this->tabs)->firstWhere('tab_code', $tabCode);
-
         if (!$tab) return;
-
-
         if ($tabCode == 104) {
 
             $this->attachedDocuments = $tab['fields'] ?? [];
@@ -247,7 +226,6 @@ class MasterTabManager extends Component
 
             return;
         }
-
         // TAB 105
         if ($tabCode == 105) {
             $this->selfDeclarationDisplay = collect($tab['fields'] ?? [])
@@ -266,12 +244,10 @@ class MasterTabManager extends Component
             ->map(fn($f) => (object) $f)
             ->toArray();
     }
-
     public function closePreview()
     {
         $this->resetPreviewState();
     }
-
     private function resetPreviewState()
     {
         $this->showFinalPreview = false;
