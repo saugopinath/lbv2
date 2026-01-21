@@ -37,7 +37,7 @@ class EnclosureList extends Component
         $this->form_preview = $form_preview;
 
         $this->tabCode = $tabCode;
-        // dd($this->enclosureSource);
+        // dd( $this->tabCode);
         $this->doc_type_id_array_list = $doc_type_id_array_list;
         $this->doc_type_id_array      = $doc_type_id_array;
 

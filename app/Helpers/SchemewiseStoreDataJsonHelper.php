@@ -161,7 +161,7 @@ class SchemewiseStoreDataJsonHelper
                     "{$dir}/104.blade.php",
                     <<<BLADE
 {{-- DOCUMENT TAB --}}
-<livewire:enclosure-list :scheme_id="\$schemeId" />
+<livewire:enclosure-list :scheme_id="\$schemeId" :tabCode="$tabCode" />
 BLADE
                 );
                 continue;
@@ -183,6 +183,7 @@ BLADE
     <x-form.checkbox
         name="{{ \$row['field']->field_name }}"
         label="{{ \$row['field']->level_name }}"
+        value="1"
         wire:model="formData.{{ \$row['field']->field_name }}"
     />
 

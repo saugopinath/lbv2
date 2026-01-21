@@ -1,4 +1,11 @@
 <div class="grid md:grid-cols-1 gap-4 mt-4">
+<x-form.input
+    type="text"
+    name="mobile_no"
+    label="Mobile Number"
+    wire:model="formData.mobile_no"
+/></div>
+<div class="grid md:grid-cols-1 gap-4 mt-4">
 <x-form.select
     name="rural_urban"
     label="Rural/Urbar"
@@ -7,7 +14,14 @@
     <option value="">-- Select Rural/Urbar --</option>
     
 </x-form.select></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div class="grid md:grid-cols-1 gap-4 mt-4">
+<x-form.input
+    type="text"
+    name="policestation"
+    label="Police Station"
+    wire:model="formData.policestation"
+/></div>
+<div class="grid md:grid-cols-1 gap-4 mt-4">
 <x-form.select
     name="gpWard"
     label="GP / Ward"
@@ -15,12 +29,9 @@
 >
     <option value="">-- Select GP / Ward --</option>
     
-</x-form.select><x-form.input
-    type="text"
-    name="policestation"
-    label="Police Station"
-    wire:model="formData.policestation"
-/><x-form.input
+</x-form.select></div>
+<div class="grid md:grid-cols-1 gap-4 mt-4">
+<x-form.input
     type="text"
     name="housepremiseno"
     label="House / Premise No"
@@ -33,7 +44,7 @@
     label="Pin Code"
     wire:model="formData.pincode"
 /></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
+<div class="grid md:grid-cols-1 gap-4 mt-4">
 <x-form.select
     name="district_id"
     label="District"
@@ -41,7 +52,9 @@
 >
     <option value="">-- Select District --</option>
     
-</x-form.select><x-form.select
+</x-form.select></div>
+<div class="grid md:grid-cols-1 gap-4 mt-4">
+<x-form.select
     name="blockurban"
     label="Block/Municipality"
     wire:model="formData.blockurban"
@@ -56,13 +69,15 @@
     label="State"
     wire:model="formData.state"
 /></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div class="grid md:grid-cols-1 gap-4 mt-4">
 <x-form.input
     type="text"
     name="villtowncity"
     label="Village / Town / City"
     wire:model="formData.villtowncity"
-/><x-form.input
+/></div>
+<div class="grid md:grid-cols-1 gap-4 mt-4">
+<x-form.input
     type="text"
     name="postoffice"
     label="Post Office"

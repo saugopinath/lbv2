@@ -1,37 +1,35 @@
-<div class="grid md:grid-cols-2 gap-4 mt-4">
-<div wire:key="field-ifscode">
+<div class="grid md:grid-cols-1 gap-4 mt-4">
 <x-form.input
     type="text"
     name="ifscode"
-    wire:model="formData.ifscode"
     label="IFSC Code"
+    wire:model="formData.ifscode"
 /></div>
-<div wire:key="field-bankname">
+<div class="grid md:grid-cols-1 gap-4 mt-4">
 <x-form.input
     type="text"
     name="bankname"
-    wire:model="formData.bankname"
     label="Bank Name"
+    wire:model="formData.bankname"
 /></div>
-<div wire:key="field-bank_branch_name">
+<div class="grid md:grid-cols-1 gap-4 mt-4">
 <x-form.input
     type="text"
     name="bank_branch_name"
-    wire:model="formData.bank_branch_name"
     label="Bank Branch Name"
+    wire:model="formData.bank_branch_name"
 /></div>
-<div wire:key="field-bankaccountnumber">
+<div class="grid md:grid-cols-1 gap-4 mt-4">
 <x-form.input
     type="text"
     name="bankaccountnumber"
-    wire:model="formData.bankaccountnumber"
     label="Bank Account Number"
+    wire:model="formData.bankaccountnumber"
 /></div>
-<div wire:key="field-confirmbankaccountnumber">
+<div class="grid md:grid-cols-1 gap-4 mt-4">
 <x-form.input
     type="text"
     name="confirmbankaccountnumber"
-    wire:model="formData.confirmbankaccountnumber"
     label="Confirm Bank Account Number"
+    wire:model="formData.confirmbankaccountnumber"
 /></div>
-</div>

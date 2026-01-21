@@ -171,9 +171,35 @@ class DynamicForm extends Component
 
         return $rules;
     }
+    private function getSelfDeclarationDisplay(): array
+{
+    $json = $this->getSchemeJson();
+    $result = [];
+
+    foreach ($json['tabs'] ?? [] as $tab) {
+
+        if ((string)$tab['tab_code'] !== '105') {
+            continue;
+        }
+
+        foreach ($tab['fields'] ?? [] as $field) {
+            $result[] = [
+                'show_section_start' => false, // future use
+                'section_title'      => null,
+                'field'              => (object) $field,
+            ];
+        }
+    }
+
+    return $result;
+}
+
 
     public function render()
-    {
-        return view('livewire.dynamic-form');
-    }
+{
+    return view('livewire.dynamic-form', [
+        'selfDeclarationDisplay' => $this->getSelfDeclarationDisplay(),
+    ]);
+}
+
 }

@@ -20,10 +20,14 @@
     @if($activeTab)
         <div class="border rounded p-4">
 
-            @includeIf(
-                "schemes.scheme_{$schemeId}.{$activeTab}",
-                ['schemeId' => $schemeId]
-            )
+           @includeIf(
+    "schemes.scheme_{$schemeId}.{$activeTab}",
+    [
+        'schemeId' => $schemeId,
+        'selfDeclarationDisplay' => $selfDeclarationDisplay
+    ]
+)
+
 
             </div>
 
