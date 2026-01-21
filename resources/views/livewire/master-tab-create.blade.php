@@ -23,11 +23,10 @@
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    Add Field
+                    Create New Tab Details
                 </button>
             </div>
         </div>
-
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-white rounded-xl border border-gray-200 p-4">
@@ -43,7 +42,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="bg-white rounded-xl border border-gray-200 p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 bg-green-100 p-3 rounded-lg">
@@ -59,7 +57,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="bg-white rounded-xl border border-gray-200 p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 bg-purple-100 p-3 rounded-lg">
@@ -75,7 +72,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="bg-white rounded-xl border border-gray-200 p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 bg-amber-100 p-3 rounded-lg">
@@ -301,25 +297,25 @@
                                     Tab Short Name
                                 </label>
                                 <input type="text"
-                                    wire:model="tab_short_name"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                    readonly wire:model="tab_short_name"
+                                    class="w-full border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 text-gray-600 text-sm">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">
                                     Tab Code
                                 </label>
                                 <input type="text"
-                                    wire:model="tab_code"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                    readonly wire:model="tab_code"
+                                    class="w-full border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 text-gray-600 text-sm">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Model Name</label>
-                                <input readonly value="{{ $model_name }}"
+                                <input readonly wire:model="model_name"
                                     class="w-full border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 text-gray-600 text-sm">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Table Name</label>
-                                <input readonly value="{{ $table_name }}"
+                                <input readonly wire:model="table_name"
                                     class="w-full border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 text-gray-600 text-sm">
                             </div>
                         </div>
@@ -407,14 +403,14 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Field ID</label>
-                                <input wire:model="field_id" placeholder="e.g., user-name"
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Field Name *</label>
+                                <input wire:model.live="field_name" placeholder="e.g., User Name"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Field Name *</label>
-                                <input wire:model="field_name" placeholder="e.g., User Name"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Field ID</label>
+                                <input wire:model="field_id" readonly placeholder="e.g., user-name"
+                                    class="w-full border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 text-gray-600">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Field Label</label>

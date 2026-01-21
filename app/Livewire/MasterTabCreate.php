@@ -2,8 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Models\MasterTab;
 use Livewire\Component;
 use Illuminate\Support\Str;
+use App\Services\DynamicModelMigrationService;
 
 class MasterTabCreate extends Component
 {
@@ -54,10 +56,16 @@ class MasterTabCreate extends Component
     }
 
     public function updatedTabName($value)
-{
-    $this->model_name = Str::studly(Str::singular($value));
-    $this->table_name = Str::snake($value);
-}
+    {
+        $this->model_name = Str::studly(Str::singular($value));
+        $this->table_name = Str::snake(Str::pluralStudly($value));
+        $this->tab_short_name = Str::snake($value);
+        $this->tab_code = (MasterTab::max('tab_code') ?? 100) + 001;
+    }
+    public function updatedFieldName($value)
+    {
+        $this->field_id = Str::snake($value);
+    }
 
     /* ---------------- MODAL ---------------- */
     public function openFieldModal(): void
@@ -99,13 +107,11 @@ class MasterTabCreate extends Component
             'default_value'   => $this->default_enabled ? $this->default_value : null,
             'constant_value'  => $this->constant_value,
             'key_type'        => $this->key_type,
-
             'field_id'        => $this->field_id,
             'field_name'      => $this->field_name,
             'field_label'     => $this->field_label,
             'field_type'      => $this->field_type,
             'validation_rule' => $this->validation_rule,
-
             'description'     => $this->nullable ? 'Nullable' : 'Not Nullable',
         ];
 
@@ -125,11 +131,28 @@ class MasterTabCreate extends Component
     }
 
     /* ---------------- FINAL SUBMIT ---------------- */
-    public function finalSubmit(): void
+    public function finalSubmit(DynamicModelMigrationService $service): void
     {
-        // Service / Migration / DB logic here
-        dd($this->fields);
+        $this->validate([
+            'tab_name' => 'required|string',
+            'fields'   => 'required|array|min:1',
+        ]);
+
+        $newTab = MasterTab::create([
+            'tab_name'       => $this->tab_name,
+            'tab_short_name' => $this->tab_short_name,
+            'tab_code'       => $this->tab_code,
+            'model_name'     => $this->model_name,
+            'table_name'     => $this->table_name,
+        ]);
+        $service->generate($this->tab_name, $this->fields);
+
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'Final submission completed. Migration executed successfully.',
+        ]);
     }
+
 
     /* ---------------- RESET ---------------- */
     private function resetFieldForm(): void
