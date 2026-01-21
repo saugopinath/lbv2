@@ -146,60 +146,9 @@ class DynamicForm extends Component
 
         return $rules;
     }
-
-    private function getValidationRulesForAllTabs(): array
-    {
-        $json = $this->getSchemeJson();
-        $rules = [];
-
-        foreach ($json['tabs'] ?? [] as $tab) {
-            foreach ($tab['fields'] ?? [] as $field) {
-
-                if (empty($field['field_name']) || empty($field['validation_rule'])) {
-                    continue;
-                }
-
-                $fieldRules = explode('|', $field['validation_rule']);
-
-                if (!empty($field['regex'])) {
-                    $fieldRules[] = 'regex:/' . $field['regex'] . '/';
-                }
-
-                $rules["formData.{$field['field_name']}"] = $fieldRules;
-            }
-        }
-
-        return $rules;
-    }
-    private function getSelfDeclarationDisplay(): array
-    {
-        $json = $this->getSchemeJson();
-        $result = [];
-
-        foreach ($json['tabs'] ?? [] as $tab) {
-
-            if ((string) $tab['tab_code'] !== '105') {
-                continue;
-            }
-
-            foreach ($tab['fields'] ?? [] as $field) {
-                $result[] = [
-                    'show_section_start' => false,
-                    'section_title' => null,
-                    'field' => (object) $field,
-                ];
-            }
-        }
-
-        return $result;
-    }
-
-
     public function render()
     {
-        return view('livewire.dynamic-form', [
-            'selfDeclarationDisplay' => $this->getSelfDeclarationDisplay(),
-        ]);
+        return view('livewire.dynamic-form');
     }
 
 }

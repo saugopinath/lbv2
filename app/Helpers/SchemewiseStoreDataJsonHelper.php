@@ -160,40 +160,42 @@ class SchemewiseStoreDataJsonHelper
                 File::put(
                     "{$dir}/104.blade.php",
                     <<<BLADE
-{{-- DOCUMENT TAB --}}
-<livewire:enclosure-list :scheme_id="\$schemeId" :tabCode="$tabCode" />
-BLADE
+                {{-- DOCUMENT TAB --}}
+                <livewire:enclosure-list :scheme_id="\$schemeId" :tabCode="$tabCode" />
+                BLADE
                 );
                 continue;
             }
 
             /* ================= TAB 105 : SELF DECLARATION ================= */
-            if ($tabCode == 105) {
+           if ($tab['tab_code'] == 105) {
 
-                $blade = <<<BLADE
-<div class="space-y-3 mt-4">
-@foreach(\$selfDeclarationDisplay as \$row)
+                $blade = "<div class=\"mt-4 space-y-3\">\n";
 
-    @if(\$row['show_section_start'])
-        <div class="px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
-            <strong>{{ \$row['section_title'] }}</strong>
-        </div>
-    @endif
+                foreach ($tab['fields'] as $field) {
 
-    <x-form.checkbox
-        name="{{ \$row['field']->field_name }}"
-        label="{{ \$row['field']->level_name }}"
-        value="1"
-        wire:model="formData.{{ \$row['field']->field_name }}"
-    />
+                    $label = $field['level_name'] ?? 'Declaration';
+                    $name  = $field['field_name'];
+                    $value = $field['value'];
+                    $blade .= <<<BLADE
 
-@endforeach
-</div>
-BLADE;
+                <div class="flex items-start gap-2">
+                    <x-form.checkbox name="{$name}" value="{$value}" label="{$label}" wire:model="formData.{$name}"
+                    />
+                </div>
+                BLADE;
+                                }
 
-                File::put("{$dir}/105.blade.php", $blade);
+                $blade .= "\n</div>";
+
+                File::put(
+                    $dir . "/105.blade.php",
+                    $blade
+                );
+
                 continue;
             }
+
 
             /* ================= NORMAL FORM TABS ================= */
 
