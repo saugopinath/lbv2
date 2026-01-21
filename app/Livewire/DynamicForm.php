@@ -16,7 +16,7 @@ class DynamicForm extends Component
 
     public int $currentIndex = 0;
     public bool $isFirst = true;
-    public bool $isLast  = false;
+    public bool $isLast = false;
     public $prevTab = null;
     public $nextTab = null;
 
@@ -74,7 +74,7 @@ class DynamicForm extends Component
 
         $this->currentIndex = $index;
         $this->isFirst = ($index === 0);
-        $this->isLast  = ($index === count($this->views) - 1);
+        $this->isLast = ($index === count($this->views) - 1);
 
         $this->prevTab = $this->views[$index - 1] ?? null;
         $this->nextTab = $this->views[$index + 1] ?? null;
@@ -124,7 +124,7 @@ class DynamicForm extends Component
 
         foreach ($json['tabs'] ?? [] as $tab) {
 
-            if ((string)$tab['tab_code'] !== (string)$this->activeTab) {
+            if ((string) $tab['tab_code'] !== (string) $this->activeTab) {
                 continue;
             }
 
@@ -137,7 +137,7 @@ class DynamicForm extends Component
                 $fieldRules = explode('|', $field['validation_rule']);
 
                 if (!empty($field['regex'])) {
-                    $fieldRules[] = 'regex:/'.$field['regex'].'/';
+                    $fieldRules[] = 'regex:/' . $field['regex'] . '/';
                 }
 
                 $rules["formData.{$field['field_name']}"] = $fieldRules;
@@ -162,7 +162,7 @@ class DynamicForm extends Component
                 $fieldRules = explode('|', $field['validation_rule']);
 
                 if (!empty($field['regex'])) {
-                    $fieldRules[] = 'regex:/'.$field['regex'].'/';
+                    $fieldRules[] = 'regex:/' . $field['regex'] . '/';
                 }
 
                 $rules["formData.{$field['field_name']}"] = $fieldRules;
@@ -172,34 +172,34 @@ class DynamicForm extends Component
         return $rules;
     }
     private function getSelfDeclarationDisplay(): array
-{
-    $json = $this->getSchemeJson();
-    $result = [];
+    {
+        $json = $this->getSchemeJson();
+        $result = [];
 
-    foreach ($json['tabs'] ?? [] as $tab) {
+        foreach ($json['tabs'] ?? [] as $tab) {
 
-        if ((string)$tab['tab_code'] !== '105') {
-            continue;
+            if ((string) $tab['tab_code'] !== '105') {
+                continue;
+            }
+
+            foreach ($tab['fields'] ?? [] as $field) {
+                $result[] = [
+                    'show_section_start' => false,
+                    'section_title' => null,
+                    'field' => (object) $field,
+                ];
+            }
         }
 
-        foreach ($tab['fields'] ?? [] as $field) {
-            $result[] = [
-                'show_section_start' => false, 
-                'section_title'      => null,
-                'field'              => (object) $field,
-            ];
-        }
+        return $result;
     }
-
-    return $result;
-}
 
 
     public function render()
-{
-    return view('livewire.dynamic-form', [
-        'selfDeclarationDisplay' => $this->getSelfDeclarationDisplay(),
-    ]);
-}
+    {
+        return view('livewire.dynamic-form', [
+            'selfDeclarationDisplay' => $this->getSelfDeclarationDisplay(),
+        ]);
+    }
 
 }

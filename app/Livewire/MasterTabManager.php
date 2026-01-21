@@ -105,6 +105,43 @@ class MasterTabManager extends Component
     /* ------------------------------
      | REMOVE TAB
      |------------------------------*/
+    // public function removeTab($tabCode)
+    // {
+    //     if ($this->isFinalSubmitted) {
+    //         $this->dispatch('toastr', [
+    //             'type' => 'error',
+    //             'message' => 'Final submission has been completed.',
+    //         ]);
+    //         return;
+    //     }
+    //     $this->selectedTabs = array_values(
+    //         array_diff($this->selectedTabs, [(int) $tabCode])
+    //     );
+    //     $this->recalculatePositions();
+    //     $this->mappingSaved = false;
+
+
+    //     DB::transaction(function () use ($tabCode) {
+
+    //         SchemeTabMapping::where('scheme_id', $this->selectedSchemeId)
+    //             ->where('tab_code', $tabCode)
+    //             ->delete();
+
+    //         SchemeTabFormField::where('scheme_id', $this->selectedSchemeId)
+    //             ->where('tab_code', $tabCode)
+    //             ->delete();
+
+    //         SchemeAttachedDocMappings::where('scheme_id', $this->selectedSchemeId)
+    //             ->where('tab_code', $tabCode)
+    //             ->delete();
+
+    //         SelfDeclerationBasefield::where('scheme_id', $this->selectedSchemeId)
+    //             ->where('tab_code', $tabCode)
+    //             ->delete();
+    //     });
+
+    // }
+
     public function removeTab($tabCode)
     {
         if ($this->isFinalSubmitted) {
@@ -118,28 +155,32 @@ class MasterTabManager extends Component
             array_diff($this->selectedTabs, [(int) $tabCode])
         );
         $this->recalculatePositions();
-        $this->mappingSaved = false;
-
-
+        
         DB::transaction(function () use ($tabCode) {
 
             SchemeTabMapping::where('scheme_id', $this->selectedSchemeId)
                 ->where('tab_code', $tabCode)
                 ->delete();
-
-            SchemeTabFormField::where('scheme_id', $this->selectedSchemeId)
-                ->where('tab_code', $tabCode)
-                ->delete();
-
-            SchemeAttachedDocMappings::where('scheme_id', $this->selectedSchemeId)
-                ->where('tab_code', $tabCode)
-                ->delete();
-
-            SelfDeclerationBasefield::where('scheme_id', $this->selectedSchemeId)
-                ->where('tab_code', $tabCode)
-                ->delete();
+            if ($tabCode == 104) {
+                SchemeAttachedDocMappings::where('scheme_id', $this->selectedSchemeId)
+                    ->where('tab_code', $tabCode)
+                    ->delete();
+            } else if ($tabCode == 105) {
+                SelfDeclerationBasefield::where('scheme_id', $this->selectedSchemeId)
+                    ->where('tab_code', $tabCode)
+                    ->delete();
+            } else {
+                SchemeTabFormField::where('scheme_id', $this->selectedSchemeId)
+                    ->where('tab_code', $tabCode)
+                    ->delete();
+            }
         });
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'Tab removed successfully.',
+        ]);
 
+        $this->mappingSaved = false;
     }
 
     public function updateOrder(array $ordered)
