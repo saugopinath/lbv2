@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\MasterTab;
 use Livewire\Component;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
 
 class DynamicForm extends Component
 {
@@ -19,24 +20,27 @@ class DynamicForm extends Component
     public bool $isLast = false;
     public $prevTab = null;
     public $nextTab = null;
+
     public array $formData = [];
+
     protected $listeners = [
         'document-validation-passed' => 'goToNextTab',
         'document-validation-failed' => 'stayOnTab',
     ];
 
+    /* ================= MOUNT ================= */
 
     public function mount($schemeId)
     {
         $this->loadScheme($schemeId);
 
         if (!empty($this->views)) {
-            $this->activeTab = $this->views[0];
+            $this->activeTab = (string) $this->views[0];
             $this->updateTabNavigation();
         }
     }
 
-    /* ---------------- TAB CONTROL ---------------- */
+    /* ================= TAB CONTROL ================= */
 
     public function setActiveTab($tabCode)
     {
@@ -44,27 +48,36 @@ class DynamicForm extends Component
         $this->updateTabNavigation();
     }
 
+    /* ================= SAVE & NEXT ================= */
+
     public function saveAndNext($nextTab)
     {
-
+        // 🔥 Document tab
         if ((string) $this->activeTab === '104') {
-
-
             $this->dispatch('check-documents-before-next');
-
             return;
         }
 
+        // ✅ JSON based validation
         $rules = $this->getValidationRulesForActiveTab();
-
         if (!empty($rules)) {
             $this->validate($rules);
         }
 
+        // ✅ Save data tab-wise
+        $this->saveCurrentTabData();
+
+        // 👉 Go next
         $this->setActiveTab($nextTab);
     }
+
+    /* ================= DOCUMENT CALLBACK ================= */
+
     public function goToNextTab()
     {
+        // 🔥 save document tab model data
+        $this->saveCurrentTabData();
+
         if ($this->nextTab) {
             $this->setActiveTab($this->nextTab);
         }
@@ -72,24 +85,22 @@ class DynamicForm extends Component
 
     public function stayOnTab()
     {
-
+        // do nothing
     }
+
+    /* ================= FINAL SUBMIT ================= */
 
     public function finalSubmit()
     {
-        // ✅ validate ALL tabs
-        // $rules = $this->getValidationRulesForAllTabs();
-        // $this->validate($rules);
-// dd($this->activeTab);
-        // 👉 Final save
-        // Application::create($this->formData);
-
+        // optional: final validation / flag update
         dd('FINAL SUBMIT SUCCESS', $this->formData);
     }
 
+    /* ================= TAB NAVIGATION ================= */
+
     private function updateTabNavigation(): void
     {
-        $index = array_search((string) $this->activeTab, $this->views);
+        $index = array_search((string) $this->activeTab, $this->views, true);
 
         $this->currentIndex = $index;
         $this->isFirst = ($index === 0);
@@ -99,7 +110,82 @@ class DynamicForm extends Component
         $this->nextTab = $this->views[$index + 1] ?? null;
     }
 
-    /* ---------------- SCHEME LOAD ---------------- */
+    /* ================= DB SAVE LOGIC ================= */
+
+    // private function saveCurrentTabData(): void
+    // {
+    //     // get tab config from master_tabs
+    //     $tab = DB::table('master_tabs')
+    //         ->where('tab_code', $this->activeTab)
+    //         ->first();
+
+    //     if (!$tab || empty($tab->tab_model_name)) {
+    //         return;
+    //     }
+
+    //     // Build model class
+    //     $modelClass = "App\\Models\\{$tab->tab_model_name}";
+
+    //     if (!class_exists($modelClass)) {
+    //         return;
+    //     }
+
+    //     // application_id (adjust if your key is different)
+    //     $applicationId = $this->formData['application_id'] ?? null;
+
+    //     // insert or update
+    //     try{
+
+    //         $modelClass::updateOrCreate(
+    //             [
+    //                 'application_id' => $applicationId,
+    //             ],
+    //             $this->formData
+    //         );
+    //     }catch (\Exception $e){
+    //         dd($e);
+    //     }
+    // }
+    private function saveCurrentTabData(): void
+    {
+        // get tab config from master_tabs
+        $tab = DB::table('master_tabs')
+            ->where('tab_code', $this->activeTab)
+            ->first();
+
+        if (!$tab || empty($tab->tab_model_name)) {
+            return;
+        }
+
+        // Build model class
+        $modelClass = "App\\Models\\{$tab->tab_model_name}";
+        // dd( $modelClass, $tab->tab_model_name);
+
+        if (!class_exists($modelClass)) {
+            return;
+        }
+
+        // application_id (adjust if your key is different)
+        $applicationId = $this->formData['application_id'] ?? null;
+
+        // 🔥 excluded fields
+        $excludedFields = ['app_date', 'age'];
+
+        // filter formData
+        $dataToSave = collect($this->formData)
+            ->except($excludedFields)
+            ->toArray();
+
+        // insert or update
+        $modelClass::updateOrCreate(
+            [
+                'application_id' => $applicationId,
+            ],
+            $dataToSave
+        );
+    }
+
+    /* ================= SCHEME LOAD ================= */
 
     private function loadScheme($schemeId)
     {
@@ -123,7 +209,7 @@ class DynamicForm extends Component
             ->keyBy('tab_code');
     }
 
-    /* ---------------- JSON HELPERS ---------------- */
+    /* ================= JSON HELPERS ================= */
 
     private function getSchemeJson(): array
     {
@@ -165,9 +251,11 @@ class DynamicForm extends Component
 
         return $rules;
     }
+
+    /* ================= RENDER ================= */
+
     public function render()
     {
         return view('livewire.dynamic-form');
     }
-
 }

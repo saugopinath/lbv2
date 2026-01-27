@@ -176,7 +176,7 @@ class SchemewiseStoreDataJsonHelper
 
                     $label = $field['level_name'] ?? 'Declaration';
                     $name  = $field['field_name'];
-                    $value = $field['value'];
+                    $value = $field['value'] ?? 1;
                     $blade .= <<<BLADE
 
                 <div class="flex items-start gap-2">
