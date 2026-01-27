@@ -17,7 +17,7 @@ class CreateOtherfromAttribute extends Component
 {
     public $scheme_id;
     public $level_name;
-    public $field_id, $field_class, $showManageModal = false;
+    public $field_id, $field_class;
     public $field_name;
     public $field_type;
     public array $validation_rule = [];
@@ -54,6 +54,10 @@ class CreateOtherfromAttribute extends Component
     public $lock = false;
     public $tabs, $tabId;
     public $master_sec = 'yes';
+    public $selectedDocType = null;
+    public $isRequired = false;
+    public $maxFileSize = '500KB';
+    public $extensionTypes = [];
     public function mount($data = null)
     {
 
@@ -85,10 +89,7 @@ class CreateOtherfromAttribute extends Component
         // dd($this->docTypes);
     }  
 
-    public function closeManageModal()
-    {
-        $this->showManageModal = false;
-    }
+    
 
     public function updatedSchemeId()
     {
@@ -110,10 +111,8 @@ class CreateOtherfromAttribute extends Component
         }
         if ($value == 'file') {
             $this->master_sec = 'no';
-            $this->showManageModal = true;
         } else {
             $this->master_sec = 'yes';
-            $this->showManageModal = false;
         }
         $this->isdependent = 'no';
     }
