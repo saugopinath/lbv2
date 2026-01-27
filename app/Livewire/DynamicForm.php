@@ -19,9 +19,12 @@ class DynamicForm extends Component
     public bool $isLast = false;
     public $prevTab = null;
     public $nextTab = null;
-
-    /** 🔥 All form values */
     public array $formData = [];
+    protected $listeners = [
+        'document-validation-passed' => 'goToNextTab',
+        'document-validation-failed' => 'stayOnTab',
+    ];
+
 
     public function mount($schemeId)
     {
@@ -43,17 +46,33 @@ class DynamicForm extends Component
 
     public function saveAndNext($nextTab)
     {
-        // ✅ validate current tab
+
+        if ((string) $this->activeTab === '104') {
+
+
+            $this->dispatch('check-documents-before-next');
+
+            return;
+        }
+
         $rules = $this->getValidationRulesForActiveTab();
 
         if (!empty($rules)) {
             $this->validate($rules);
         }
 
-        // 👉 here you can save partial data (optional)
-        // ApplicationData::updateOrCreate(...)
-
         $this->setActiveTab($nextTab);
+    }
+    public function goToNextTab()
+    {
+        if ($this->nextTab) {
+            $this->setActiveTab($this->nextTab);
+        }
+    }
+
+    public function stayOnTab()
+    {
+
     }
 
     public function finalSubmit()

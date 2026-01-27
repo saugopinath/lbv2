@@ -26,20 +26,24 @@ class EnclosureList extends Component
     public $showErrors = false;
     public $enclosureSource = null;
     public $showUploadModal = false;
+    protected $listeners = [
+        'check-documents-before-next' => 'validateBeforeNext',
+    ];
+
 
     public function mount($scheme_id, $application_id = null, $is_page = null, $doc_type_id_array_list = [], $doc_type_id_array = [], $enclosureSource = null, $form_preview = null, $tabCode = null)
     {
         $this->scheme_id = $scheme_id;
         $this->application_id = $application_id;
         // dd($this->application_id);
-        $this->is_page        = $is_page;
+        $this->is_page = $is_page;
         $this->enclosureSource = $enclosureSource;
         $this->form_preview = $form_preview;
 
         $this->tabCode = $tabCode;
         // dd( $this->tabCode);
         $this->doc_type_id_array_list = $doc_type_id_array_list;
-        $this->doc_type_id_array      = $doc_type_id_array;
+        $this->doc_type_id_array = $doc_type_id_array;
 
         $conditions = [
             ['scheme_id', '=', $this->scheme_id],
@@ -160,12 +164,12 @@ class EnclosureList extends Component
         $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
         $docName = $doc?->codemaster?->name ?? 'Document';
         $extensions = $this->currentDocExtensions ?: 'JPG, PNG, PDF';
-        $maxSize    = $this->currentDocMaxSize ?: '1024 KB';
+        $maxSize = $this->currentDocMaxSize ?: '1024 KB';
 
         return [
             'singleDocument.required' => "{$docName} is required.",
-            'singleDocument.mimes'    => "{$docName} must be of type: {$extensions}.",
-            'singleDocument.max'      => "{$docName} must not be greater than {$maxSize}.",
+            'singleDocument.mimes' => "{$docName} must be of type: {$extensions}.",
+            'singleDocument.max' => "{$docName} must not be greater than {$maxSize}.",
         ];
     }
 
@@ -264,6 +268,30 @@ class EnclosureList extends Component
         }, $filename, [
             'Content-Type' => $document->document_mime_type,
         ]);
+    }
+    public function validateBeforeNext()
+    {
+        $this->showErrors = false;
+
+        foreach ($this->doc_lists as $doc) {
+
+            $existing = $this->existingDocuments[$doc->doc_type_id] ?? null;
+
+            if ($doc->is_required && empty($existing)) {
+
+                $this->showErrors = true;
+
+
+                $this->dispatch('$refresh');
+
+
+                $this->dispatch('document-validation-failed');
+
+                return;
+            }
+        }
+
+        $this->dispatch('document-validation-passed');
     }
 
     public function save()
