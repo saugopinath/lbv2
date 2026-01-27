@@ -22,13 +22,26 @@
             @endforeach
         </x-form.select>
 
-        <x-form.select label="Select Tab" wire:model.live="tabId"  name="tabId" :disabled="$lock">
+        <x-form.select label="Select Tab" wire:model.live="tabId" name="tabId" :disabled="$lock">
             <option value="">-- Select --</option>
             @foreach($tabs as $tab)
             <option value="{{ $tab->tab_code }}">{{ $tab->tab_name }}</option>
             @endforeach
         </x-form.select>
 
+        <x-form.select
+            name="field_type"
+            label="Field Type"
+            wire:model.live="field_type"
+            required>
+            <option value="">-- Select Field Type --</option>
+            @foreach ($fieldTypes as $type)
+            <option value="{{ $type->name }}">
+                {{ $type->name }}
+            </option>
+            @endforeach
+        </x-form.select>
+        @if($master_sec === 'yes')
         {{-- Level Name --}}
         <x-form.input
             name="level_name"
@@ -54,18 +67,7 @@
             required />
 
         {{-- Field Type --}}
-        <x-form.select
-            name="field_type"
-            label="Field Type"
-            wire:model.live="field_type"
-            required>
-            <option value="">-- Select Field Type --</option>
-            @foreach ($fieldTypes as $type)
-            <option value="{{ $type->name }}">
-                {{ $type->name }}
-            </option>
-            @endforeach
-        </x-form.select>
+
 
         <x-form.select
             name="view_type"
@@ -329,6 +331,72 @@
         </div>
         @endif
         @endif
+        @endif
+        @endif
+        @if($showManageModal)
+        <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
+
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-3xl max-h-[90vh]
+                        flex flex-col overflow-hidden">
+
+                {{-- BODY (scrollable) --}}
+                <div class="p-6 flex-1 overflow-y-auto">
+                  
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+
+                        <x-form.select name="selectedDocType" label="Document Type" wire:model="selectedDocType">
+                            <option value="">-- Select Document --</option>
+                            @foreach($docTypes as $doc)
+                            <option value="{{ $doc->id }}">{{ $doc->name }}</option>
+                            @endforeach
+                        </x-form.select>
+
+                        <x-form.select name="isRequired" label="Is Required" wire:model="isRequired">
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </x-form.select>
+
+                        <x-form.input
+                            name="maxFileSize"
+                            label="Max File Size"
+                            wire:model.live="maxFileSize"
+                            x-data
+                            x-on:input="$el.value = $el.value.replace(/[^0-9]/g,'')" />
+
+                        <div class="col-span-2">
+                            <label class="font-semibold">Allowed Extensions</label>
+                            <div class="flex gap-4 mt-2 flex-wrap">
+                                @foreach(['jpg', 'jpeg', 'png', 'pdf'] as $ext)
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" name="extensionTypes" wire:model="extensionTypes" value="{{ $ext }}">
+                                    {{ strtoupper($ext) }}
+                                </label>
+                                @endforeach
+                            </div>
+                            @error('extensionTypes')
+                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                    
+
+
+                </div>
+                {{-- FOOTER (fixed) --}}
+                <div class="flex justify-end gap-3 px-6 py-4 border-t shrink-0">
+
+                    <x-button.primary wire:click="closeManageModal" class="bg-gray-600">
+                        Close
+                    </x-button.primary>
+
+                   
+                    <x-button.primary wire:click="saveManageFields" class="bg-indigo-600">
+                        Add
+                    </x-button.primary>
+                  
+                </div>
+            </div>
+        </div>
         @endif
         <!-- Save Button (outside conditional block) -->
         <div class="md:col-span-2 mt-6 pt-6 border-t">

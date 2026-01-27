@@ -2,7 +2,7 @@
 
 namespace App\Livewire\CreateAssignOtherFormField;
 
-
+use App\Models\Codemaster;
 use Livewire\Component;
 use App\Models\Scheme;
 use App\Models\FromFieldType;
@@ -17,12 +17,13 @@ class CreateOtherfromAttribute extends Component
 {
     public $scheme_id;
     public $level_name;
-    public $field_id, $field_class;
+    public $field_id, $field_class, $showManageModal = false;
     public $field_name;
     public $field_type;
     public array $validation_rule = [];
     public array $options = [];
     public string $option_input = '';
+    public $docTypes = [];
 
     public string $is_under_section = 'no';
     public string $is_multiple = 'no';
@@ -52,7 +53,7 @@ class CreateOtherfromAttribute extends Component
 
     public $lock = false;
     public $tabs, $tabId;
-
+    public $master_sec = 'yes';
     public function mount($data = null)
     {
 
@@ -77,7 +78,18 @@ class CreateOtherfromAttribute extends Component
         if (SchemeTabBasefield::exists()) {
             $this->isdepenentsec = true;
         }
+
+        $this->docTypes = Codemaster::where('parent_id', 16)
+            ->orderBy('name')
+            ->get();
+        // dd($this->docTypes);
+    }  
+
+    public function closeManageModal()
+    {
+        $this->showManageModal = false;
     }
+
     public function updatedSchemeId()
     {
         $this->resetSection();
@@ -95,6 +107,13 @@ class CreateOtherfromAttribute extends Component
         if ($value !== 'select') {
             $this->is_multiple = 'no';
             $this->is_choose_default = 'no';
+        }
+        if ($value == 'file') {
+            $this->master_sec = 'no';
+            $this->showManageModal = true;
+        } else {
+            $this->master_sec = 'yes';
+            $this->showManageModal = false;
         }
         $this->isdependent = 'no';
     }

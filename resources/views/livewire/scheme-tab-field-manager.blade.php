@@ -246,7 +246,7 @@
 
     {{-- FINAL ACTION BUTTONS --}}
     <div class="flex justify-center gap-4 pt-6">
-         <x-button.primary wire:click="openDigitalPreview" class="bg-blue-600 hover:bg-blue-700">
+        <x-button.primary wire:click="openDigitalPreview" class="bg-blue-600 hover:bg-blue-700">
             Digital Preview
         </x-button.primary>
 
@@ -799,80 +799,80 @@
         @endif
         @if($showDigitalPreview)
         <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
 
-        {{-- HEADER --}}
-        <div class="flex items-center justify-between px-6 py-4 border-b">
-            <h3 class="text-lg font-semibold text-gray-800">
-                Digital Preview
-            </h3>
-            <button wire:click="closeDigitalPreview"
-                class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
-        </div>
-
-        {{-- BODY --}}
-        <div class="p-6 overflow-y-auto space-y-10">
-
-            @foreach($tabs as $tab)
-
-                {{-- TAB TITLE --}}
-                <div>
-                    <h2 class="text-xl font-semibold text-indigo-700 border-b pb-2">
-                        {{ $tab->masterTab->tab_name }}
-                    </h2>
+                {{-- HEADER --}}
+                <div class="flex items-center justify-between px-6 py-4 border-b">
+                    <h3 class="text-lg font-semibold text-gray-800">
+                        Digital Preview
+                    </h3>
+                    <button wire:click="closeDigitalPreview"
+                        class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
                 </div>
 
-                {{-- TAB CONTENT --}}
-                @if($tab->tab_code == 104)
+                {{-- BODY --}}
+                <div class="p-6 overflow-y-auto space-y-10">
+
+                    @foreach($tabs as $tab)
+
+                    {{-- TAB TITLE --}}
+                    <div>
+                        <h2 class="text-xl font-semibold text-indigo-700 border-b pb-2">
+                            {{ $tab->masterTab->tab_name }}
+                        </h2>
+                    </div>
+
+                    {{-- TAB CONTENT --}}
+                    @if($tab->tab_code == 104)
                     {{-- ENCLOSURE --}}
                     <livewire:enclosure-list
                         :scheme_id="$schemeId"
                         :form_preview="1"
                         :tabCode="$tab->tab_code" />
 
-                @elseif($tab->tab_code == 105)
+                    @elseif($tab->tab_code == 105)
                     {{-- SELF DECLARATION --}}
                     @foreach($selfDeclarationDisplay as $row)
 
-                        @if($row['show_section_start'])
-                            <div class="mt-4 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
-                                <span class="font-semibold text-indigo-700">
-                                    {{ $row['section_title'] }}
-                                </span>
-                            </div>
-                        @endif
+                    @if($row['show_section_start'])
+                    <div class="mt-4 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+                        <span class="font-semibold text-indigo-700">
+                            {{ $row['section_title'] }}
+                        </span>
+                    </div>
+                    @endif
 
-                        <div class="py-2 {{ $row['field']->section_level_id ? 'pl-6 bg-gray-50' : '' }}">
-                            @include('partials.preview-field', [
-                                'field' => $row['field']
-                            ])
-                        </div>
+                    <div class="py-2 {{ $row['field']->section_level_id ? 'pl-6 bg-gray-50' : '' }}">
+                        @include('partials.preview-field', [
+                        'field' => $row['field']
+                        ])
+                    </div>
 
                     @endforeach
 
-                @else
+                    @else
                     {{-- NORMAL TABS --}}
                     <div class="grid md:grid-cols-2 gap-4 mt-4">
                         @foreach($digitalPreviewFields[$tab->tab_code] ?? [] as $field)
-                            @include('partials.preview-field', ['field' => $field])
+                        @include('partials.preview-field', ['field' => $field])
                         @endforeach
                     </div>
-                @endif
-                @endforeach
+                    @endif
+                    @endforeach
                 </div>
 
                 <div class="flex justify-end gap-3 px-6 py-4 border-t">
-                <x-button.primary
-                    wire:click="downloadDigitalPreviewPdf"
-                    class="bg-green-600 hover:bg-green-700">
-                    Download PDF
-                </x-button.primary>
+                    <x-button.primary
+                        wire:click="downloadDigitalPreviewPdf"
+                        class="bg-green-600 hover:bg-green-700">
+                        Download PDF
+                    </x-button.primary>
 
-                <x-button.primary
-                    wire:click="closeDigitalPreview">
-                    Close
-                </x-button.primary>
-            </div>
+                    <x-button.primary
+                        wire:click="closeDigitalPreview">
+                        Close
+                    </x-button.primary>
+                </div>
             </div>
         </div>
         @endif
