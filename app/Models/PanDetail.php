@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class PanDetail extends Model
 {
-    protected $fillable = [
+    protected $fillable = [        'name',
         'pan_no',
-        'name',
         'address',
-        'issue_date',
-    ];
+        'issue_from',
+        'is_expire',
+        'issue_date',];
     protected $table = 'lb_scheme.pan_details';
 
 
