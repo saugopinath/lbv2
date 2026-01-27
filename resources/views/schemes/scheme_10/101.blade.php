@@ -1,60 +1,22 @@
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<x-form.input
+<div class="grid md:grid-cols-2 gap-4 mt-4">
+<x-form.select
+    name="c"
+    label="c"
+    wire:model="formData.c"
+>
+    <option value="">-- Select c --</option>
+    <option value="SC">SC</option>
+<option value="ST">ST</option>
+<option value="OBC">OBC</option>
+<option value="General">General</option>
+
+</x-form.select><x-form.input
     type="text"
-    name="mobile_no"
-    label="Mobile Number"
-    wire:model="formData.mobile_no"
+    name="cs"
+    label="cs"
+    wire:model="formData.cs"
 /></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<x-form.input
-    type="date"
-    name="app_date"
-    label="Application Date"
-    wire:model="formData.app_date"
-/></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<x-form.input
-    type="date"
-    name="ds_date"
-    label="Duare Sarkar Date"
-    wire:model="formData.ds_date"
-/></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<x-form.input
-    type="text"
-    name="age"
-    label="Age"
-    wire:model="formData.age"
-/></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<x-form.input
-    type="date"
-    name="dob"
-    label="Date of Birth"
-    wire:model="formData.dob"
-/></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<x-form.input
-    type="text"
-    name="mfname"
-    label="Mother's Name"
-    wire:model="formData.mfname"
-/></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<x-form.input
-    type="text"
-    name="sfname"
-    label="Spouse's Name"
-    wire:model="formData.sfname"
-/></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<x-form.input
-    type="text"
-    name="cas_cer_no"
-    label="Caste Certificate Number"
-    wire:model="formData.cas_cer_no"
-/></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
+<div class="grid md:grid-cols-2 gap-4 mt-4">
 <x-form.select
     name="app_type"
     label="Application Type"
@@ -64,37 +26,67 @@
     <option value="Normal Entry">Normal Entry</option>
 <option value="Duare Sarkar">Duare Sarkar</option>
 
-</x-form.select></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
+</x-form.select><x-form.input
+    type="text"
+    name="mobile_no"
+    label="Mobile Number"
+    wire:model="formData.mobile_no"
+/></div>
+<div class="grid md:grid-cols-2 gap-4 mt-4">
 <x-form.input
+    type="date"
+    name="app_date"
+    label="Application Date"
+    wire:model="formData.app_date"
+/><x-form.input
     type="text"
     name="reg_no"
     label="Duare Sarkar Registration Number"
     wire:model="formData.reg_no"
 /></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
+<div class="grid md:grid-cols-2 gap-4 mt-4">
 <x-form.input
     type="text"
     name="full_name"
     label="Applicant Name"
     wire:model="formData.full_name"
+/><x-form.input
+    type="date"
+    name="ds_date"
+    label="Duare Sarkar Date"
+    wire:model="formData.ds_date"
 /></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
+<div class="grid md:grid-cols-2 gap-4 mt-4">
 <x-form.input
+    type="text"
+    name="age"
+    label="Age"
+    wire:model="formData.age"
+/><x-form.input
     type="text"
     name="email_id"
     label="Email Address"
     wire:model="formData.email_id"
 /></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
+<div class="grid md:grid-cols-2 gap-4 mt-4">
 <x-form.input
     type="text"
     name="ffname"
     label="Father's Name"
     wire:model="formData.ffname"
+/><x-form.input
+    type="date"
+    name="dob"
+    label="Date of Birth"
+    wire:model="formData.dob"
 /></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<x-form.select
+<div class="grid md:grid-cols-2 gap-4 mt-4">
+<x-form.input
+    type="text"
+    name="mfname"
+    label="Mother's Name"
+    wire:model="formData.mfname"
+/><x-form.select
     name="mar_statu"
     label="Marital Status"
     wire:model="formData.mar_statu"
@@ -107,7 +99,7 @@
 <option value="Widower">Widower</option>
 
 </x-form.select></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
+<div class="grid md:grid-cols-2 gap-4 mt-4">
 <x-form.select
     name="caste"
     label="Caste"
@@ -118,4 +110,16 @@
 <option value="ST">ST</option>
 <option value="General">General</option>
 
-</x-form.select></div>
+</x-form.select><x-form.input
+    type="text"
+    name="sfname"
+    label="Spouse's Name"
+    wire:model="formData.sfname"
+/></div>
+<div class="grid md:grid-cols-2 gap-4 mt-4">
+<x-form.input
+    type="text"
+    name="cas_cer_no"
+    label="Caste Certificate Number"
+    wire:model="formData.cas_cer_no"
+/></div>

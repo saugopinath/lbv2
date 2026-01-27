@@ -283,7 +283,7 @@
                 <span>Manage Fields</span>
                 @if($activeTabCode == 105)
                 <x-button.primary
-                    wire:click="$dispatch('openSectionLevelModal')"
+                    wire:click="$dispatch('openSectionLevelModal', { tabCode: {{ $activeTabCode }} })"
                     class="bg-indigo-600 text-sm">
                     Add New Section / Level
                 </x-button.primary>

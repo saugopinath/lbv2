@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('section_level_name', 100);
             $table->string('section_level_short_name', 100);
             $table->integer('section_level_code');
+            $table->integer('tab_code');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

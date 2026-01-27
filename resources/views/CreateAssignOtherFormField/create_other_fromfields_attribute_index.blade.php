@@ -15,5 +15,5 @@
         <livewire:create-assign-other-form-field.create-otherfrom-attribute :data="$data" />
     </div>
     <!-- Modal -->
-     <livewire:section.create-section-form />
+     <livewire:section.create-section-form :data="$data" />
 </x-layouts.app>

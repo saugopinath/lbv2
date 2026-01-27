@@ -3,24 +3,39 @@
 namespace App\Livewire\Section;
 
 use App\Models\MasterSection;
+use App\Models\MasterTab;
 use App\Models\Scheme;
+use App\Models\SectionLevelMaster;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Livewire\Component;
 
 class CreateSectionForm extends Component
 {
 
-    public $name, $section_name, $section_short_name, $tab_code, $scheme_id, $schemes = [];
+    public $name, $section_name, $section_short_name, $tab_code, $scheme_id, $schemes = [], $tabs,$lock=false;
 
 
-    public function mount()
-    {
+   public function mount($data = null)    {
         $this->schemes = Scheme::all();
+        $this->tabs = MasterTab::all();        
+
+        if ($data) {
+            try {
+                $this->scheme_id = $data['scheme_id'];
+                $this->tab_code = $data['tab_code'];
+                if (filled($this->scheme_id) && filled($this->tab_code)) {
+                    $this->lock = true;
+                }
+            } catch (DecryptException $e) {
+                abort(403, 'Invalid scheme reference');
+            }
+        }
     }
     protected function rules()
     {
         return [
-            'scheme_id' => 'required|exists:schemes,id',
-            'section_name' => 'required',
+            // 'scheme_id' => 'required|exists:schemes,id',
+            // 'section_name' => 'required',
             'section_short_name' => 'required',
             'tab_code' => 'nullable|integer',
         ];
@@ -29,8 +44,8 @@ class CreateSectionForm extends Component
     protected function messages()
     {
         return [
-            'scheme_id.required' => 'Please select a scheme.',
-            'section_name.required' => 'Section name is required.',
+            // 'scheme_id.required' => 'Please select a scheme.',
+            // 'section_name.required' => 'Section name is required.',
             'section_short_name.required' => 'Section short name is required.',
         ];
     }
@@ -38,10 +53,10 @@ class CreateSectionForm extends Component
     {
         $this->validate();
 
-        MasterSection::create([
-            'scheme_id' => $this->scheme_id,
-            'section_name' => $this->section_name,
-            'section_short_name' => $this->section_short_name,
+        SectionLevelMaster::create([
+            // 'scheme_id' => $this->scheme_id,
+            'section_level_name' => 'ss',
+            'section_level_short_name' => $this->section_short_name,
             'tab_code' => $this->tab_code,
         ]);
 

@@ -13,5 +13,6 @@ class SectionLevelMaster extends Model
         'section_level_short_name',
         'section_level_code',
         'is_active',
+        'tab_code'
     ];
 }

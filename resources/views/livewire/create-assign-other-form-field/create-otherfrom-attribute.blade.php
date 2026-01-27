@@ -14,13 +14,34 @@
     <form wire:submit.prevent="save"
         class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-        <x-form.select label="Select Scheme" wire:model.live="schemeId" :disabled="$lockScheme">
+        <x-form.select label="Select Scheme" wire:model.live="scheme_id" name="scheme_id" :disabled="$lock">
             <option value="">-- Select --</option>
+            <option value="0">All</option>
             @foreach($schemes as $scheme)
             <option value="{{ $scheme->id }}">{{ $scheme->name }}</option>
             @endforeach
         </x-form.select>
 
+        <x-form.select label="Select Tab" wire:model.live="tabId" name="tabId" :disabled="$lock">
+            <option value="">-- Select --</option>
+            @foreach($tabs as $tab)
+            <option value="{{ $tab->tab_code }}">{{ $tab->tab_name }}</option>
+            @endforeach
+        </x-form.select>
+
+        <x-form.select
+            name="field_type"
+            label="Field Type"
+            wire:model.live="field_type"
+            required>
+            <option value="">-- Select Field Type --</option>
+            @foreach ($fieldTypes as $type)
+            <option value="{{ $type->name }}">
+                {{ $type->name }}
+            </option>
+            @endforeach
+        </x-form.select>
+        @if($master_sec === 'yes')
         {{-- Level Name --}}
         <x-form.input
             name="level_name"
@@ -46,29 +67,7 @@
             required />
 
         {{-- Field Type --}}
-        <x-form.select
-            name="field_type"
-            label="Field Type"
-            wire:model.live="field_type"
-            required>
-            <option value="">-- Select Field Type --</option>
-            @foreach ($fieldTypes as $type)
-            <option value="{{ $type->name }}">
-                {{ $type->name }}
-            </option>
-            @endforeach
-        </x-form.select>
 
-        <x-form.select
-            name="view_type"
-            label="View Type"
-            wire:model="view_type"
-            required>
-            <option value="">-- Select View Type --</option>
-            <option value="1">1</option>
-            <option value="2">1/2</option>
-            <option value="3">1/3</option>
-        </x-form.select>
         <div class="grid grid-cols-2 gap-4 md:col-span-2">
             <x-form.multiselect
                 label="Validation Rules"
@@ -95,6 +94,7 @@
                 </div>
             </div>
             @if ($is_under_section === 'yes')
+         
             <x-form.select
                 name="section_id"
                 label="Select Section"
@@ -104,7 +104,7 @@
 
                 @forelse ($sections as $section)
                 <option value="{{ $section->id }}">
-                    {{ $section->section_name }}
+                    {{ $section->section_level_name }}
                 </option>
                 @empty
                 <option value="">No sections found</option>
@@ -321,6 +321,38 @@
         </div>
         @endif
         @endif
+        @endif
+        @else
+        <x-form.select name="selectedDocType" label="Document Type" wire:model="selectedDocType">
+            <option value="">-- Select Document --</option>
+            @foreach($docTypes as $doc)
+            <option value="{{ $doc->id }}">{{ $doc->name }}</option>
+            @endforeach
+        </x-form.select>
+        <x-form.select name="isRequired" label="Is Required" wire:model="isRequired">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </x-form.select>
+        <x-form.input
+            name="maxFileSize"
+            label="Max File Size"
+            wire:model.live="maxFileSize"
+            x-data
+            x-on:input="$el.value = $el.value.replace(/[^0-9]/g,'')" />
+        <div class="col-span-2">
+            <label class="font-semibold">Allowed Extensions</label>
+            <div class="flex gap-4 mt-2 flex-wrap">
+                @foreach(['jpg', 'jpeg', 'png', 'pdf'] as $ext)
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" name="extensionTypes" wire:model="extensionTypes" value="{{ $ext }}">
+                    {{ strtoupper($ext) }}
+                </label>
+                @endforeach
+            </div>
+            @error('extensionTypes')
+            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+            @enderror
+        </div>
         @endif
         <!-- Save Button (outside conditional block) -->
         <div class="md:col-span-2 mt-6 pt-6 border-t">

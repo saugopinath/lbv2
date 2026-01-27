@@ -112,40 +112,6 @@ class DynamicForm extends Component
 
     /* ================= DB SAVE LOGIC ================= */
 
-    // private function saveCurrentTabData(): void
-    // {
-    //     // get tab config from master_tabs
-    //     $tab = DB::table('master_tabs')
-    //         ->where('tab_code', $this->activeTab)
-    //         ->first();
-
-    //     if (!$tab || empty($tab->tab_model_name)) {
-    //         return;
-    //     }
-
-    //     // Build model class
-    //     $modelClass = "App\\Models\\{$tab->tab_model_name}";
-
-    //     if (!class_exists($modelClass)) {
-    //         return;
-    //     }
-
-    //     // application_id (adjust if your key is different)
-    //     $applicationId = $this->formData['application_id'] ?? null;
-
-    //     // insert or update
-    //     try{
-
-    //         $modelClass::updateOrCreate(
-    //             [
-    //                 'application_id' => $applicationId,
-    //             ],
-    //             $this->formData
-    //         );
-    //     }catch (\Exception $e){
-    //         dd($e);
-    //     }
-    // }
     private function saveCurrentTabData(): void
     {
         // get tab config from master_tabs
@@ -159,7 +125,6 @@ class DynamicForm extends Component
 
         // Build model class
         $modelClass = "App\\Models\\{$tab->tab_model_name}";
-        // dd( $modelClass, $tab->tab_model_name);
 
         if (!class_exists($modelClass)) {
             return;
@@ -167,22 +132,18 @@ class DynamicForm extends Component
 
         // application_id (adjust if your key is different)
         $applicationId = $this->formData['application_id'] ?? null;
-
-        // 🔥 excluded fields
-        $excludedFields = ['app_date', 'age'];
-
-        // filter formData
-        $dataToSave = collect($this->formData)
-            ->except($excludedFields)
-            ->toArray();
-
+        // dd('', $this->formData);
         // insert or update
-        $modelClass::updateOrCreate(
-            [
-                'application_id' => $applicationId,
-            ],
-            $dataToSave
-        );
+        try {
+            $modelClass::updateOrCreate(
+                [
+                    'application_id' => $applicationId,
+                ],
+                $this->formData
+            );
+        } catch (\Exception $e) {
+            dd($e);
+        }
     }
 
     /* ================= SCHEME LOAD ================= */
