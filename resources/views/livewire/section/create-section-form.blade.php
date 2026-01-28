@@ -38,8 +38,13 @@
                     </x-form.select>
 
                     <!-- Section Short Name -->
+                    <x-form.input name="section_level_name" label="Section Level Name" placeholder="Enter Level Name" wire:model.live="section_level_name"  />
+
                     <x-form.input name="section_short_name" label="Section Short Name" placeholder="Enter Short Name"
-                        required wire:model.defer="section_short_name" />             
+                        required wire:model.live="section_short_name" readonly />                      
+                                               
+              
+                    
 
 
                 </div>

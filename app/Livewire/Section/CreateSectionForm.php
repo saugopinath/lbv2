@@ -12,12 +12,13 @@ use Livewire\Component;
 class CreateSectionForm extends Component
 {
 
-    public $name, $section_name, $section_short_name, $tab_code, $scheme_id, $schemes = [], $tabs,$lock=false;
+    public $name, $section_name, $tab_code, $scheme_id, $schemes = [], $tabs, $lock = false;
+    public $section_level_name,$section_short_name;  
 
-
-   public function mount($data = null)    {
+    public function mount($data = null)
+    {
         $this->schemes = Scheme::all();
-        $this->tabs = MasterTab::all();        
+        $this->tabs = MasterTab::all();
 
         if ($data) {
             try {
@@ -34,35 +35,39 @@ class CreateSectionForm extends Component
     protected function rules()
     {
         return [
-            // 'scheme_id' => 'required|exists:schemes,id',
-            // 'section_name' => 'required',
+            'scheme_id' => 'required|exists:schemes,id',
             'section_short_name' => 'required',
-            'tab_code' => 'nullable|integer',
+            'tab_code' => 'required',
         ];
     }
 
     protected function messages()
     {
         return [
-            // 'scheme_id.required' => 'Please select a scheme.',
-            // 'section_name.required' => 'Section name is required.',
+            'scheme_id.required' => 'Please select a scheme.',
             'section_short_name.required' => 'Section short name is required.',
         ];
+    }
+    public function updatedSectionLevelName($value)
+    {
+        $this->section_short_name = strtolower(
+            preg_replace('/[^a-zA-Z0-9]+/', '_', trim($value))
+        );
     }
     public function save()
     {
         $this->validate();
 
         SectionLevelMaster::create([
-            // 'scheme_id' => $this->scheme_id,
-            'section_level_name' => 'ss',
+            'scheme_id' => $this->scheme_id,
+            'section_level_name' => $this->section_level_name,
             'section_level_short_name' => $this->section_short_name,
+            'section_level_code' => 0,
             'tab_code' => $this->tab_code,
         ]);
 
         $this->reset([
             'scheme_id',
-            'section_name',
             'section_short_name',
             'tab_code',
         ]);

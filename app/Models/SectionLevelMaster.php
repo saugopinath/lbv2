@@ -9,6 +9,7 @@ class SectionLevelMaster extends Model
     protected $table = 'section_level_masters';
 
     protected $fillable = [
+        'scheme_id',
         'section_level_name',
         'section_level_short_name',
         'section_level_code',
