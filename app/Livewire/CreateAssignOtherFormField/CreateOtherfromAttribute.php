@@ -48,7 +48,6 @@ class CreateOtherfromAttribute extends Component
     public $depvaluesopt = [];
     public $isdependentvalue = 'no';
     public $depvalueradio = false;
-    public $view_type;
     public $isconfirm = 'no';
     public $confirmOptions;
     public $confirm_of;
@@ -244,7 +243,6 @@ class CreateOtherfromAttribute extends Component
             'field_name' => 'required|string|max:150',
             'field_type' => 'required|string',
             'validation_rule' => 'required|array|min:1',
-            'view_type' => 'required',
             'is_under_section' => 'required|in:yes,no',
             'section_id' => 'required_if:is_under_section,yes',
             'is_multiple' => 'required_if:field_type,select',
@@ -271,6 +269,9 @@ class CreateOtherfromAttribute extends Component
     }
     public function save()
     {
+    try{
+
+   
         // $values = json_encode($this->depvalues);
         // dd($values);
         $this->validate();
@@ -320,7 +321,6 @@ class CreateOtherfromAttribute extends Component
                 'field_class' => $this->field_class,
                 'field_name' => $this->field_name,
                 'field_type' => $this->field_type,
-                // 'view_type' => $this->view_type,
                 'validation_rule' => implode('|', $validationRules),
 
                 'options' => in_array($this->field_type, ['select', 'checkbox', 'radio'])
@@ -357,12 +357,14 @@ class CreateOtherfromAttribute extends Component
                 'isdependent',
                 'depenent_on',
                 'depvalues',
-                'view_type',
                 'scheme_id',
                 'tabId'
             ]);
         }
         session()->flash('success', 'Field created successfully');
+         }catch (\Exception $e){
+            dd($e);
+         }
     }
     public function render()
     {

@@ -100,7 +100,7 @@
         @foreach ($groupFields as $field)
             @if ($this->shouldShowField($field))
                 
-                <div wire:key="field-{{ $field['id'] }}" class="{{ $this->getColSpanClass($field['view_type']) }}">
+                <div wire:key="field-{{ $field['id'] }}">
                     
                     {{-- TEXT & DATE --}}
                     @if (in_array($field['field_type'], ['text', 'date']))
