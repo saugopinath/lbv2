@@ -29,6 +29,7 @@ class SchemeTabFieldManager extends Component
     $modalSelected = [], $showFinalPreview = false, $showPreviewModal = false,
     $finalActiveTabCode = null;
     public $finalPreviewFields = [];
+    public $PreviewFields = [];
     public $digitalPreviewFields = [];
     public $docTypes = [];
     public $selectedDocType = null;
@@ -384,7 +385,7 @@ class SchemeTabFieldManager extends Component
                         'db_column' => $base->db_colunm,
                         'is_mandatory' => $base->is_mendetory,
                         'is_active' => true,
-                        'view_type' => $base->view_type,                       
+                        'view_type' => $base->view_type,
                     ]
                 );
             }
@@ -452,10 +453,28 @@ class SchemeTabFieldManager extends Component
             ->firstWhere('tab_code', $tabCode);
         $this->previewTabName = $tab?->masterTab?->tab_name ?? 'Preview';
         $this->previewTabCode = $tab?->masterTab?->tab_code ?? 'Preview';
+
         $this->showPreviewModal = true;
         if ($this->activeTabCode == 104) {
             $this->loadAttachedDocuments();
         }
+
+        if (!$this->previewTabCode) {
+            $this->PreviewFields = collect();
+            return;
+        }
+        $fieldIds = array_keys($this->tabFields[$this->previewTabCode] ?? []);
+        if (empty($fieldIds)) {
+            $this->PreviewFields = collect();
+            return;
+        }
+        $this->PreviewFields = SchemeTabBasefield::whereIn('id', $fieldIds)
+            ->whereIn('scheme_id', [0, $this->schemeId])
+            ->whereIn('tab_code', [0, $this->previewTabCode])
+            ->where('is_active', true)
+            ->get()
+            ->sortBy(fn($f) => array_search($f->id, $fieldIds))
+            ->values();
     }
     public function closePreview()
     {
