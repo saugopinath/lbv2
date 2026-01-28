@@ -415,7 +415,7 @@
     @if($showPreviewModal)
     
         <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
-            <div class="bg-white rounded-xl shadow-lg w-auto max-w-auto max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="bg-white rounded-xl shadow-lg w-3xl max-w-auto max-h-[90vh] flex flex-col overflow-hidden">
 
                 {{-- HEADER --}}
                 <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
@@ -435,8 +435,8 @@
                     <livewire:enclosure-list
                         :scheme_id="$schemeId"
                         :form_preview="1"
-                        :tabCode="$previewTabCode" />
-
+                        :tabCode="$previewTabCode" />                       
+                    
                     {{-- ================= TAB 105 : SELF DECLARATION ================= --}}
                     @elseif($previewTabCode == 105)
                     @if(empty($selfDeclarationDisplay))
