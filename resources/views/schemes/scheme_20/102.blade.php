@@ -1,73 +1,73 @@
-<div class="grid md:grid-cols-3 gap-4 mt-4">
-<x-form.select
-    name="district_id"
-    label="District"
-    wire:model="formData.district_id"
+<div
+    class="address-master-data"
+    x-data
+    x-init="
+        const run = () => {
+            if (window.initAddressMasterData) {
+                window.initAddressMasterData();
+            }
+        };
+
+        if (!window.__masterDataLoaded) {
+            window.__masterDataLoaded = true;
+
+            const s = document.createElement('script');
+            s.src = '{{ asset('js/master-data/master-data-v2.js') }}';
+            s.onload = () => setTimeout(run, 300);
+            document.body.appendChild(s);
+        } else {
+            setTimeout(run, 100);
+        }
+    "
 >
-    <option value="">-- Select District --</option>
-    
-</x-form.select><x-form.select
-    name="rural_urban"
-    label="Rural/Urbar"
-    wire:model="formData.rural_urban"
->
-    <option value="">-- Select Rural/Urbar --</option>
-    
-</x-form.select><x-form.select
-    name="blockurban"
-    label="Block/Municipality"
-    wire:model="formData.blockurban"
->
-    <option value="">-- Select Block/Municipality --</option>
-    
-</x-form.select></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
-<x-form.select
-    name="gpWard"
-    label="GP / Ward"
-    wire:model="formData.gpWard"
->
-    <option value="">-- Select GP / Ward --</option>
-    
-</x-form.select><x-form.input
-    type="text"
-    name="state"
-    label="State"
-    wire:model="formData.state"
-/><x-form.input
-    type="text"
-    name="policestation"
-    label="Police Station"
-    wire:model="formData.policestation"
-/></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
-<x-form.input
-    type="text"
-    name="villtowncity"
-    label="Village / Town / City"
-    wire:model="formData.villtowncity"
-/><x-form.input
-    type="text"
-    name="housepremiseno"
-    label="House / Premise No"
-    wire:model="formData.housepremiseno"
-/></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<x-form.input
-    type="text"
-    name="postoffice"
-    label="Post Office"
-    wire:model="formData.postoffice"
-/></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
-<x-form.input
-    type="text"
-    name="pincode"
-    label="Pin Code"
-    wire:model="formData.pincode"
-/><x-form.input
-    type="text"
-    name="mobile_no"
-    label="Mobile Number"
-    wire:model="formData.mobile_no"
-/></div>
+    <div class="grid md:grid-cols-3 gap-4 mt-4">
+        {{-- DISTRICT --}}
+        <x-form.select
+            name="district_id"
+            label="District"
+            wire:ignore
+            data-field="district"
+            data-wire="district_id"
+        >
+            <option value="">-- Select District --</option>
+        </x-form.select>
+
+        {{-- RURAL / URBAN --}}
+        <x-form.select
+            name="rural_urban"
+            label="Rural / Urban"
+            wire:ignore
+            data-field="rural_urban"
+            data-wire="rural_urban"
+        >
+            <option value="">-- Select Rural / Urban --</option>
+        </x-form.select>
+
+        {{-- BLOCK / MUNICIPALITY --}}
+        <x-form.select
+            name="blockurban"
+            label="Block / Municipality"
+            wire:ignore
+            data-field="block"
+            data-wire="blockurban"
+        >
+            <option value="">-- Select Block / Municipality --</option>
+        </x-form.select>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4 mt-4">
+        {{-- GP / WARD --}}
+        <x-form.select
+            name="gpWard"
+            label="GP / Ward"
+            wire:ignore
+            data-field="panchayat"
+            data-wire="gpWard"
+        >
+            <option value="">-- Select GP / Ward --</option>
+        </x-form.select>
+
+        <x-form.input name="state" label="State" wire:model="formData.state" />
+        <x-form.input name="policestation" label="Police Station" wire:model="formData.policestation" />
+    </div>
+</div>
