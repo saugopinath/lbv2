@@ -20,6 +20,7 @@ class DynamicForm extends Component
     public bool $isLast = false;
     public $prevTab = null;
     public $nextTab = null;
+    public $ram;
 
     public array $formData = [];
 
@@ -30,14 +31,19 @@ class DynamicForm extends Component
 
     /* ================= MOUNT ================= */
 
-    public function mount($schemeId)
+    public function mount($schemeId,$ram = null)
     {
+        
         $this->loadScheme($schemeId);
 
         if (!empty($this->views)) {
             $this->activeTab = (string) $this->views[0];
             $this->updateTabNavigation();
         }
+        $this->schemeId = $schemeId;
+        $this->ram = $ram;
+
+        // dd($this->ram);
     }
 
     /* ================= TAB CONTROL ================= */

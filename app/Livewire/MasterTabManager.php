@@ -155,7 +155,7 @@ class MasterTabManager extends Component
             array_diff($this->selectedTabs, [(int) $tabCode])
         );
         $this->recalculatePositions();
-        
+
         DB::transaction(function () use ($tabCode) {
 
             SchemeTabMapping::where('scheme_id', $this->selectedSchemeId)

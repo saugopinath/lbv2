@@ -22,7 +22,7 @@
 
            @includeIf("schemes.scheme_{$schemeId}.{$activeTab}",['schemeId' => $schemeId])       
         </div>
-
+@if($ram == null)
             {{-- ACTION BUTTONS --}}
         <div class="flex justify-between mt-6">
 
@@ -55,5 +55,7 @@
             </div>
 
         </div>
+
+    @endif
     @endif
 </div>

@@ -1,4 +1,4 @@
-<div class="grid md:grid-cols-1 gap-4 mt-4">
+<div class="grid md:grid-cols-3 gap-4 mt-4">
 <x-form.select
     name="rural_urban"
     label="Rural/Urbar"
@@ -6,9 +6,7 @@
 >
     <option value="">-- Select Rural/Urbar --</option>
     
-</x-form.select></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
-<x-form.select
+</x-form.select><x-form.select
     name="district_id"
     label="District"
     wire:model="formData.district_id"
@@ -31,6 +29,30 @@
 >
     <option value="">-- Select GP / Ward --</option>
     
-</x-form.select>
-
-</div>
+</x-form.select></div>
+<div class="grid md:grid-cols-1 gap-4 mt-4">
+<x-form.input
+    type="text"
+    name="state"
+    label="State"
+    wire:model="formData.state"
+/></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<x-form.input
+    type="text"
+    name="villtowncity"
+    label="Village / Town / City"
+    wire:model="formData.villtowncity"
+/><x-form.input
+    type="text"
+    name="postoffice"
+    label="Post Office"
+    wire:model="formData.postoffice"
+/><x-form.select
+    name="dd"
+    label="dd"
+    wire:model="formData.dd"
+>
+    <option value="">-- Select dd --</option>
+    
+</x-form.select></div>
