@@ -25,8 +25,8 @@ class SchemewiseStoreDataJsonHelper
         $tabData = [];
         foreach ($tabs as $tab) {
             $model = match ($tab->tab_code) {
-                105     => SelfDeclerationBasefield::class,
-                104     => SchemeAttachedDocMappings::class,
+                105 => SelfDeclerationBasefield::class,
+                104 => SchemeAttachedDocMappings::class,
                 default => SchemeTabFormField::class,
             };
             if ($tab->tab_code == 104) {
@@ -64,8 +64,8 @@ class SchemewiseStoreDataJsonHelper
                 'tab_name' => $tab->masterTab->tab_name ?? '',
                 'tab_icon' => $tab->masterTab->tab_icon ?? '',
                 'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
-                'fields'   => $fields,
-                'layout'    => $layout,
+                'fields' => $fields,
+                'layout' => $layout,
             ];
             // $fields = $model::where('scheme_id', $schemeId)
             //     ->where('tab_code', $tab->tab_code)
@@ -108,9 +108,9 @@ class SchemewiseStoreDataJsonHelper
             // ];
         }
         return [
-            'scheme_id'    => $schemeId,
+            'scheme_id' => $schemeId,
             'generated_at' => now()->toDateTimeString(),
-            'tabs'         => $tabData,
+            'tabs' => $tabData,
         ];
     }
 
@@ -168,14 +168,14 @@ class SchemewiseStoreDataJsonHelper
             }
 
             /* ================= TAB 105 : SELF DECLARATION ================= */
-           if ($tab['tab_code'] == 105) {
+            if ($tab['tab_code'] == 105) {
 
                 $blade = "<div class=\"mt-4 space-y-3\">\n";
 
                 foreach ($tab['fields'] as $field) {
 
                     $label = $field['level_name'] ?? 'Declaration';
-                    $name  = $field['field_name'];
+                    $name = $field['field_name'];
                     $value = $field['value'] ?? 1;
                     $blade .= <<<BLADE
 
@@ -184,7 +184,7 @@ class SchemewiseStoreDataJsonHelper
                     />
                 </div>
                 BLADE;
-                                }
+                }
 
                 $blade .= "\n</div>";
 
@@ -210,7 +210,7 @@ class SchemewiseStoreDataJsonHelper
 
             $fields = $tab['fields'] ?? [];
             $cursor = 0;
-            $total  = count($fields);
+            $total = count($fields);
 
             $blade = '';
 
@@ -218,7 +218,8 @@ class SchemewiseStoreDataJsonHelper
 
                 foreach ($layout as $row) {
 
-                    if ($cursor >= $total) break;
+                    if ($cursor >= $total)
+                        break;
 
                     $cols = max(1, min(3, (int) $row['columns']));
                     $rowFields = array_slice($fields, $cursor, $cols);
@@ -250,8 +251,8 @@ class SchemewiseStoreDataJsonHelper
     private static function renderField(array $field): string
     {
         $label = $field['level_name'] ?? '';
-        $name  = $field['field_name'] ?? uniqid();
-        $type  = $field['field_type'] ?? 'text';
+        $name = $field['field_name'] ?? uniqid();
+        $type = $field['field_type'] ?? 'text';
 
         switch ($type) {
 

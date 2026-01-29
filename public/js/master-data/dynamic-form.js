@@ -19,7 +19,7 @@ window.initMasterData = function () {
             !districtSelect.dataset.loaded ||
             districtSelect.options.length <= 1
         ) {
-            console.log("Found District Dropdown: Populating...");
+          
             fillSelect(districtSelect, md.districts);
             districtSelect.dataset.loaded = "1";
         }
@@ -104,6 +104,7 @@ function clearSelect(select) {
 }
 
 function fillSelect(select, list) {
+    if (!select) return;
     clearSelect(select);
     list.forEach((row) => {
         const opt = document.createElement("option");

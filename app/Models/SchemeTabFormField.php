@@ -20,6 +20,7 @@ class SchemeTabFormField extends Model
         'options',
         'is_common',
         'tab_code',
+        'field_class',
         'validation_rule',
         'regex',
         'section_id',

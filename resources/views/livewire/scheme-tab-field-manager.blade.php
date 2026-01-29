@@ -289,7 +289,7 @@
                 </x-button.primary>
                 @endif
             </div>
-            <livewire:section-level-modal />
+            <livewire:section-level-modal schemeId="{{ $schemeId }}" />
 
             {{-- BODY (scrollable) --}}
             <div class="p-6 flex-1 overflow-y-auto">
