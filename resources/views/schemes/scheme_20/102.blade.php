@@ -5,19 +5,17 @@
             name="district_id"
             label="District"
             wire:ignore
-            data-field="district"
-            data-wire="district_id"
-        >
+            id="district"
+            wire:model="formData.district_id">
             <option value="">-- Select District --</option>
         </x-form.select>
 
-        {{-- RURAL / URBAN --}}
         <x-form.select
             name="rural_urban"
             label="Rural / Urban"
             wire:ignore
-            data-field="rural_urban"
-            data-wire="rural_urban">
+            id="rural_urban"
+            wire:model="formData.rural_urban">
             <option value="">-- Select Rural / Urban --</option>
         </x-form.select>
 
@@ -25,8 +23,8 @@
             name="blockurban"
             label="Block / Municipality"
             wire:ignore
-            data-field="block"
-            data-wire="blockurban">
+            id="block"
+            wire:model="formData.blockurban">
             <option value="">-- Select Block / Municipality --</option>
         </x-form.select>
     </div>
@@ -36,8 +34,8 @@
             name="gpWard"
             label="GP / Ward"
             wire:ignore
-            data-field="gpWard"
-            data-wire="gpWard">
+            id="gpWard"
+            wire:model="formData.gpWard">
             <option value="">-- Select GP / Ward --</option>
         </x-form.select>
     </div>

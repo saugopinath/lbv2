@@ -5,18 +5,15 @@ window.initMasterData = function () {
     const md = window.masterDataV2;
 
     // 2. Class chara sora-sori Select field khunje ber kora
-    const districtSelect = document.querySelector(
-        'select[data-field="district"]',
-    );
+    const districtSelect = document.querySelector('select[name="district_id"]');
 
     // Jodi district select-ti page-e thake (mane Contact Details tab active)
     if (districtSelect) {
         // Find other fields relative to this component or document
         const root = districtSelect.closest("[wire\\:id]") || document;
-        const urban = root.querySelector('select[data-field="rural_urban"]');
-        const localbody = root.querySelector('select[data-field="block"]');
-        const gpward = root.querySelector('select[data-field="gpWard"]');
-
+       const urban = root.querySelector('select[name="rural_urban"]');
+    const localbody = root.querySelector('select[name="blockurban"]');
+    const gpward = root.querySelector('select[name="gpWard"]');
         // District Fill (Jodi ekhono load na hoye thake)
         if (
             !districtSelect.dataset.loaded ||
