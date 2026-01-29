@@ -6,8 +6,10 @@ use App\Models\SchemeAttachedDocMappings;
 use App\Models\SchemeTabBasefield;
 use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabFormField;
-use App\Models\SchemeTabLayout;
 use App\Models\SelfDeclerationBasefield;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
+use App\Models\SchemeTabLayout;
 use Illuminate\Support\Facades\Storage;
 
 class SchemewiseStoreDataJsonHelper
@@ -23,8 +25,8 @@ class SchemewiseStoreDataJsonHelper
         $tabData = [];
         foreach ($tabs as $tab) {
             $model = match ($tab->tab_code) {
-                105     => SelfDeclerationBasefield::class,
-                104     => SchemeAttachedDocMappings::class,
+                105 => SelfDeclerationBasefield::class,
+                104 => SchemeAttachedDocMappings::class,
                 default => SchemeTabFormField::class,
             };
             if ($tab->tab_code == 104) {
@@ -62,8 +64,8 @@ class SchemewiseStoreDataJsonHelper
                 'tab_name' => $tab->masterTab->tab_name ?? '',
                 'tab_icon' => $tab->masterTab->tab_icon ?? '',
                 'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
-                'layout'         => $layout,
-                'fields'   => $fields,
+                'fields' => $fields,
+                'layout' => $layout,
             ];
             // $fields = $model::where('scheme_id', $schemeId)
             //     ->where('tab_code', $tab->tab_code)
@@ -106,9 +108,9 @@ class SchemewiseStoreDataJsonHelper
             // ];
         }
         return [
-            'scheme_id'    => $schemeId,
+            'scheme_id' => $schemeId,
             'generated_at' => now()->toDateTimeString(),
-            'tabs'         => $tabData,
+            'tabs' => $tabData,
         ];
     }
 
@@ -140,27 +142,162 @@ class SchemewiseStoreDataJsonHelper
         return $missingFieldNames;
     }
 
-    // public static function validateSchemeData(int $schemeId): bool
-    // {
-    //     $tabs = SchemeTabMapping::where('scheme_id', $schemeId)
-    //         ->where('is_active', true)
-    //         ->get();
-    //     foreach ($tabs as $tab) {
-    //         $model = match ($tab->tab_code) {
-    //             105     => SelfDeclerationBasefield::class,
-    //             default => SchemeTabFormField::class,
-    //         };
-    //         $fields = $model::where('scheme_id', $schemeId)
-    //             ->where('tab_code', $tab->tab_code)
-    //             ->where('is_active', true)
-    //             ->get();
-    //         foreach ($fields as $field) {
-    //             if ($field->is_mandatory && empty($field->validation_rule)) {
-    //                 return false;
-    //             }
-    //         }
-    //     }
+    public static function store(int $schemeId, array $tabs): string
+    {
+        $dir = resource_path("views/schemes/scheme_{$schemeId}");
 
-    //     return true;
-    // }
+        if (!File::exists($dir)) {
+            File::makeDirectory($dir, 0755, true);
+        }
+
+        foreach ($tabs as $tab) {
+
+            $tabCode = $tab['tab_code'];
+
+            /* ================= TAB 104 : DOCUMENT ================= */
+            if ($tabCode == 104) {
+
+                File::put(
+                    "{$dir}/104.blade.php",
+                    <<<BLADE
+                {{-- DOCUMENT TAB --}}
+                <livewire:enclosure-list :scheme_id="\$schemeId" :tabCode="$tabCode" />
+                BLADE
+                );
+                continue;
+            }
+
+            /* ================= TAB 105 : SELF DECLARATION ================= */
+            if ($tab['tab_code'] == 105) {
+
+                $blade = "<div class=\"mt-4 space-y-3\">\n";
+
+                foreach ($tab['fields'] as $field) {
+
+                    $label = $field['level_name'] ?? 'Declaration';
+                    $name = $field['field_name'];
+                    $value = $field['value'] ?? 1;
+                    $blade .= <<<BLADE
+
+                <div class="flex items-start gap-2">
+                    <x-form.checkbox name="{$name}" value="{$value}" label="{$label}" wire:model="formData.{$name}"
+                    />
+                </div>
+                BLADE;
+                }
+
+                $blade .= "\n</div>";
+
+                File::put(
+                    $dir . "/105.blade.php",
+                    $blade
+                );
+
+                continue;
+            }
+
+
+            /* ================= NORMAL FORM TABS ================= */
+
+            // 🔥 load saved layout
+            $layout = DB::table('scheme_tab_layouts')
+                ->where('scheme_id', $schemeId)
+                ->where('tab_code', $tabCode)
+                ->value('layout_json');
+
+
+            $layout = $layout ? json_decode($layout, true) : [];
+
+            $fields = $tab['fields'] ?? [];
+            $cursor = 0;
+            $total = count($fields);
+
+            $blade = '';
+
+            if (!empty($layout)) {
+
+                foreach ($layout as $row) {
+
+                    if ($cursor >= $total)
+                        break;
+
+                    $cols = max(1, min(3, (int) $row['columns']));
+                    $rowFields = array_slice($fields, $cursor, $cols);
+                    $cursor += count($rowFields);
+
+                    $blade .= "<div class=\"grid md:grid-cols-{$cols} gap-4 mt-4\">\n";
+
+                    foreach ($rowFields as $field) {
+                        $blade .= self::renderField($field);
+                    }
+
+                    $blade .= "</div>\n";
+                }
+            }
+
+            /* ===== remaining fields fallback ===== */
+            while ($cursor < $total) {
+                $field = $fields[$cursor++];
+                $blade .= "<div class=\"grid md:grid-cols-1 gap-4 mt-4\">\n";
+                $blade .= self::renderField($field);
+                $blade .= "</div>\n";
+            }
+
+            File::put("{$dir}/{$tabCode}.blade.php", $blade);
+        }
+
+        return $dir;
+    }
+    private static function renderField(array $field): string
+    {
+        $label = $field['level_name'] ?? '';
+        $name = $field['field_name'] ?? uniqid();
+        $type = $field['field_type'] ?? 'text';
+
+        switch ($type) {
+
+            case 'select':
+
+                $optionsHtml = '';
+                foreach ($field['options'] ?? [] as $opt) {
+                    $opt = e($opt);
+                    $optionsHtml .= "<option value=\"{$opt}\">{$opt}</option>\n";
+                }
+
+                return <<<BLADE
+<x-form.select
+    name="{$name}"
+    label="{$label}"
+    wire:model="formData.{$name}"
+>
+    <option value="">-- Select {$label} --</option>
+    {$optionsHtml}
+</x-form.select>
+BLADE;
+
+            case 'text':
+            case 'number':
+            case 'date':
+                return <<<BLADE
+<x-form.input
+    type="{$type}"
+    name="{$name}"
+    label="{$label}"
+    wire:model="formData.{$name}"
+/>
+BLADE;
+
+            case 'textarea':
+                return <<<BLADE
+<x-form.textarea
+    name="{$name}"
+    label="{$label}"
+    wire:model="formData.{$name}"
+/>
+BLADE;
+
+            default:
+                return "<!-- unsupported {$type} -->";
+        }
+    }
 }

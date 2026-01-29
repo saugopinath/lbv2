@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Helpers\SchemewiseStoreDataJsonHelper;
 use Livewire\Component;
 use App\Models\Scheme;
 use App\Models\MasterTab;
@@ -11,6 +12,7 @@ use App\Models\SchemeTabFormField;
 use App\Models\SchemeTabMapping;
 use App\Models\SelfDeclerationBasefield;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class MasterTabManager extends Component
 {
@@ -23,13 +25,20 @@ class MasterTabManager extends Component
     public $showPreview = false;
     public $mappingSaved = false;
     public $isFinalSubmitted = false;
+    public $showFinalPreview = false;
+    public $finalActiveTabCode = null;
+    public $tabs = [];
+    public $finalPreviewFields = [];
+    public $selfDeclarationDisplay = [];
+    public $attachedDocuments = [];
+    public array $docTypeIds = [];
+
+    public bool $isFinal = false;
 
     protected $rules = [
         'selectedSchemeId' => 'required|exists:schemes,id',
         'selectedTabs'     => 'required|array|min:1',
     ];
-
-
     public function updatedSelectedSchemeId($value)
     {
         if (blank($value)) {
@@ -85,7 +94,10 @@ class MasterTabManager extends Component
         $this->mappingSaved = false;
         $this->selectedTabCode = null;
     }
-
+    public function closePreview()
+    {
+        $this->resetPreviewState();
+    }
     public function removeTab($tabCode)
     {
         if ($this->isFinalSubmitted) {
@@ -178,14 +190,92 @@ class MasterTabManager extends Component
         $this->mappingSaved = true;
         session()->flash('message', 'Tabs mapped successfully.');
     }
+    /* ------------------------------
+     | PREVIEW
+     |------------------------------*/
+    /* ================= OPEN FINAL PREVIEW (JSON) ================= */
     public function openPreview()
     {
-        $this->showPreview = true;
+        if (!$this->selectedSchemeId) {
+            return;
+        }
+        $path = "final_schemes_formdata/scheme_{$this->selectedSchemeId}.json";
+        if (!Storage::disk('local')->exists($path)) {
+            $isFinal = SchemeFinalSubmitCheck::where('scheme_id', $this->selectedSchemeId)
+                ->where('is_final_submitted', true)
+                ->exists();
+            if (!$isFinal) {
+                $data = SchemewiseStoreDataJsonHelper::generateSchemeJson($this->selectedSchemeId);
+                Storage::disk('local')->put(
+                    $path,
+                    json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+                );
+            }
+        }
+        if (!Storage::disk('local')->exists($path)) {
+            return;
+        }
+        $json = json_decode(Storage::disk('local')->get($path), true);
+        $this->tabs = collect($json['tabs'] ?? [])->values()->toArray();
+        $this->showFinalPreview = true;
+        $this->finalActiveTabCode = $this->tabs[0]['tab_code'] ?? null;
+        $this->loadPreviewByTab($this->finalActiveTabCode);
     }
-
-    public function closePreview()
+    /* ================= LOAD TAB DATA FROM JSON ================= */
+    private function loadPreviewByTab($tabCode)
     {
-        $this->showPreview = false;
+        $this->finalPreviewFields = [];
+        $this->selfDeclarationDisplay = [];
+        $this->attachedDocuments = [];
+        if (!$tabCode)
+            return;
+        $tab = collect($this->tabs)->firstWhere('tab_code', $tabCode);
+        if (!$tab)
+            return;
+        if ($tabCode == 104) {
+
+            $this->attachedDocuments = $tab['fields'] ?? [];
+
+            $this->docTypeIds = collect($this->attachedDocuments)
+                ->pluck('doc_type_id')
+                ->filter()
+                ->values()
+                ->toArray();
+
+            return;
+        }
+        // TAB 105
+        if ($tabCode == 105) {
+            $this->selfDeclarationDisplay = collect($tab['fields'] ?? [])
+                ->map(fn($f) => [
+                    'field' => (object) $f,
+                    'show_section_start' => false,
+                    'show_section_end' => false,
+                    'section_title' => null,
+                ])
+                ->toArray();
+            return;
+        }
+
+        // OTHER TABS
+        $this->finalPreviewFields = collect($tab['fields'] ?? [])
+            ->map(fn($f) => (object) $f)
+            ->toArray();
+    }
+    public function setFinalPreviewTab($tabCode)
+    {
+        $this->finalActiveTabCode = (int) $tabCode;
+        $this->loadPreviewByTab($tabCode);
+    }
+    private function resetPreviewState()
+    {
+        $this->showFinalPreview = false;
+        $this->finalActiveTabCode = null;
+        $this->tabs = [];
+        $this->finalPreviewFields = [];
+        $this->selfDeclarationDisplay = [];
+        $this->attachedDocuments = [];
+        $this->docTypeIds = [];
     }
     protected function syncFinalSubmitStatus(): void
     {

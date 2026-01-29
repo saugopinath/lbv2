@@ -711,5 +711,3 @@ class MasterTabCreate extends Component
         return view('livewire.master-tab-create');
     }
 }
-
-

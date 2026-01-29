@@ -12,16 +12,26 @@ class SectionLevelModal extends Component
     public $slType = '';        // 0 = Section, 1 = Label
     public $slName = '';
     public $slShortName = '';
+    public $tabCode;
+    public $schemeId;
 
     /* ========= OPEN / CLOSE ========= */
 
     protected $listeners = ['openSectionLevelModal' => 'open'];
 
-    public function open()
+    // public function open()
+    // {
+    //     $this->resetForm();
+    //     $this->show = true;
+    // }
+
+    public function open($tabCode = null)
     {
         $this->resetForm();
+        $this->tabCode = $tabCode;
         $this->show = true;
     }
+
 
     public function close()
     {
@@ -56,10 +66,12 @@ class SectionLevelModal extends Component
         );
 
         SectionLevelMaster::create([
-            'section_level_name'       => $this->slName,
+            'scheme_id' => $this->schemeId,
+            'section_level_name' => $this->slName,
             'section_level_short_name' => $this->slShortName,
-            'section_level_code'       => (int) $this->slType,
-            'is_active'                => true,
+            'section_level_code' => (int) $this->slType,
+            'is_active' => true,
+            'tab_code' => (int) $this->tabCode,
         ]);
 
         $this->dispatch('toastr', [
