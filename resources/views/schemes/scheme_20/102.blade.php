@@ -6,10 +6,12 @@
             label="District"
             wire:ignore
             data-field="district"
-            data-wire="district_id">
+            data-wire="district_id"
+        >
             <option value="">-- Select District --</option>
         </x-form.select>
 
+        {{-- RURAL / URBAN --}}
         <x-form.select
             name="rural_urban"
             label="Rural / Urban"
