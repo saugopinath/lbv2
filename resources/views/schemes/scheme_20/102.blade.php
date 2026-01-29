@@ -31,4 +31,6 @@
 >
     <option value="">-- Select GP / Ward --</option>
     
-</x-form.select></div>
+</x-form.select>
+
+</div>

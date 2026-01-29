@@ -11,15 +11,15 @@ window.initMasterData = function () {
     if (districtSelect) {
         // Find other fields relative to this component or document
         const root = districtSelect.closest("[wire\\:id]") || document;
-       const urban = root.querySelector('select[name="rural_urban"]');
-    const localbody = root.querySelector('select[name="blockurban"]');
-    const gpward = root.querySelector('select[name="gpWard"]');
+        const assemblie = root.querySelector('select[name="assemblie"]');
+        const urban = root.querySelector('select[name="rural_urban"]');
+        const localbody = root.querySelector('select[name="blockurban"]');
+        const gpward = root.querySelector('select[name="gpWard"]');
         // District Fill (Jodi ekhono load na hoye thake)
         if (
             !districtSelect.dataset.loaded ||
             districtSelect.options.length <= 1
         ) {
-          
             fillSelect(districtSelect, md.districts);
             districtSelect.dataset.loaded = "1";
         }
@@ -36,11 +36,22 @@ window.initMasterData = function () {
         // --- Change Events ---
         districtSelect.onchange = () => {
             if (urban) urban.value = "";
+            clearSelect(assemblie);
             clearSelect(localbody);
             clearSelect(gpward);
+            if (md.assemblies) {
+                fillSelect(
+                    assemblie,
+                    md.assemblies.filter(
+                        (a) => a.district_code == districtSelect.value,
+                    ),
+                );
+            }
             syncLivewire(districtSelect);
         };
-
+        if (assemblie) {
+            assemblie.onchange = () => syncLivewire(assemblie);
+        }
         if (urban) {
             urban.onchange = () => {
                 clearSelect(localbody);
