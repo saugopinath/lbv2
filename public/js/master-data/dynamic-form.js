@@ -1,130 +1,134 @@
-(function () {
+window.initMasterData = function () {
+    // 1. Check data
+    if (!window.masterDataV2 || !window.masterDataV2.districts) return;
 
-    function clearSelect(select) {
-        if (select) select.innerHTML = '<option value="">--Select--</option>';
-    }
+    const md = window.masterDataV2;
 
-    function fillSelect(select, list) {
-        clearSelect(select);
-        list.forEach(row => {
-            const opt = document.createElement('option');
-            opt.value = row.id;
-            opt.textContent = row.text;
-            select.appendChild(opt);
-        });
-    }
+    // 2. Class chara sora-sori Select field khunje ber kora
+    const districtSelect = document.querySelector(
+        'select[data-field="district"]',
+    );
 
-    function syncLivewire(select) {
-        const root = select.closest('[wire\\:id]');
-        if (!root) return;
+    // Jodi district select-ti page-e thake (mane Contact Details tab active)
+    if (districtSelect) {
+        // Find other fields relative to this component or document
+        const root = districtSelect.closest("[wire\\:id]") || document;
+        const urban = root.querySelector('select[data-field="rural_urban"]');
+        const localbody = root.querySelector('select[data-field="block"]');
+        const gpward = root.querySelector('select[data-field="gpWard"]');
 
-        const wireKey = select.dataset.wire;
-        if (!wireKey) return;
+        // District Fill (Jodi ekhono load na hoye thake)
+        if (
+            !districtSelect.dataset.loaded ||
+            districtSelect.options.length <= 1
+        ) {
+            console.log("Found District Dropdown: Populating...");
+            fillSelect(districtSelect, md.districts);
+            districtSelect.dataset.loaded = "1";
+        }
 
-        Livewire.find(root.getAttribute('wire:id'))
-            ?.set('formData.' + wireKey, select.value);
-    }
+        // Rural/Urban Fill
+        if (urban && (!urban.dataset.loaded || urban.options.length <= 1)) {
+            fillSelect(urban, [
+                { id: 1, text: "Urban" },
+                { id: 2, text: "Rural" },
+            ]);
+            urban.dataset.loaded = "1";
+        }
 
-    function init() {
-        if (!window.masterDataV2) return;
+        // --- Change Events ---
+        districtSelect.onchange = () => {
+            if (urban) urban.value = "";
+            clearSelect(localbody);
+            clearSelect(gpward);
+            syncLivewire(districtSelect);
+        };
 
-        const md = window.masterDataV2;
-
-        document.querySelectorAll('[wire\\:id]').forEach(root => {
-
-            const district  = root.querySelector('select[data-field="district"]');
-            const assembly  = root.querySelector('select[data-field="assembly"]');
-            const urban     = root.querySelector('select[data-field="rural_urban"]');
-            const localbody = root.querySelector('select[data-field="block"]');
-            const gpward    = root.querySelector('select[data-field="panchayat"]');
-
-            if (!district) return;
-
-            if (!district.dataset.loaded) {
-                fillSelect(district, md.districts || []);
-                district.dataset.loaded = '1';
-            }
-
-            district.onchange = () => {
-                if (assembly && md.assemblies) {
-                    fillSelect(
-                        assembly,
-                        md.assemblies.filter(a => a.district_code == district.value)
-                    );
-                }
-
-                if (urban) urban.value = '';
+        if (urban) {
+            urban.onchange = () => {
                 clearSelect(localbody);
                 clearSelect(gpward);
-
-                syncLivewire(district);
-            };
-
-            if (urban) {
-                if (!urban.dataset.loaded) {
-                    fillSelect(urban, md.rural_urban || []);
-                    urban.dataset.loaded = '1';
+                if (urban.value == 2 && md.blocks) {
+                    fillSelect(
+                        localbody,
+                        md.blocks.filter(
+                            (b) => b.district_code == districtSelect.value,
+                        ),
+                    );
+                } else if (urban.value == 1 && md.ulbs) {
+                    fillSelect(
+                        localbody,
+                        md.ulbs.filter(
+                            (u) => u.district_code == districtSelect.value,
+                        ),
+                    );
                 }
+                syncLivewire(urban);
+            };
+        }
 
-                urban.onchange = () => {
-                    clearSelect(localbody);
-                    clearSelect(gpward);
-
-                    if (urban.value == 2 && md.blocks) {
-                        fillSelect(
-                            localbody,
-                            md.blocks.filter(b => b.district_code == district.value)
-                        );
-                    }
-
-                    if (urban.value == 1 && md.ulbs) {
-                        fillSelect(
-                            localbody,
-                            md.ulbs.filter(u => u.district_code == district.value)
-                        );
-                    }
-
-                    syncLivewire(urban);
-                };
-            }
-
-            if (localbody) {
-                localbody.onchange = () => {
-                    clearSelect(gpward);
-
-                    if (urban.value == 2 && md.gps) {
-                        fillSelect(
-                            gpward,
-                            md.gps.filter(g =>
-                                g.district_code == district.value &&
-                                g.block_code == localbody.value
-                            )
-                        );
-                    }
-
-                    if (urban.value == 1 && md.ulb_wards) {
-                        fillSelect(
-                            gpward,
-                            md.ulb_wards.filter(w =>
-                                w.urban_body_code == localbody.value
-                            )
-                        );
-                    }
-
-                    syncLivewire(localbody);
-                };
-            }
-
-            if (gpward) {
-                gpward.onchange = () => syncLivewire(gpward);
-            }
-        });
+        // Block & GP Change logic ager motoi thakbe...
+        if (localbody) {
+            localbody.onchange = () => {
+                clearSelect(gpward);
+                if (urban.value == 2 && md.gps) {
+                    fillSelect(
+                        gpward,
+                        md.gps.filter(
+                            (g) =>
+                                g.district_code == districtSelect.value &&
+                                g.block_code == localbody.value,
+                        ),
+                    );
+                } else if (urban.value == 1 && md.ulb_wards) {
+                    fillSelect(
+                        gpward,
+                        md.ulb_wards.filter(
+                            (w) => w.urban_body_code == localbody.value,
+                        ),
+                    );
+                }
+                syncLivewire(localbody);
+            };
+        }
+        if (gpward) {
+            gpward.onchange = () => syncLivewire(gpward);
+        }
     }
+};
 
-    window.addEventListener('masterdata:ready', init);
+// ... clearSelect, fillSelect, syncLivewire functions (ager motoi thakbe) ...
 
-    document.addEventListener('livewire:load', () => {
-        Livewire.hook('message.processed', init);
+function clearSelect(select) {
+    if (select) {
+        select.innerHTML = '<option value="">--Select--</option>';
+        delete select.dataset.loaded;
+    }
+}
+
+function fillSelect(select, list) {
+    clearSelect(select);
+    list.forEach((row) => {
+        const opt = document.createElement("option");
+        opt.value = row.id;
+        opt.textContent = row.text;
+        select.appendChild(opt);
     });
+}
 
-})();
+function syncLivewire(select) {
+    const root = select.closest("[wire\\:id]");
+    const wireKey = select.dataset.wire;
+    if (root && wireKey) {
+        Livewire.find(root.getAttribute("wire:id"))?.set(
+            "formData." + wireKey,
+            select.value,
+        );
+    }
+}
+
+// Smart Observer jeta HTML poriborton holei check korbe
+const observer = new MutationObserver(() => {
+    window.initMasterData();
+});
+observer.observe(document.body, { childList: true, subtree: true });

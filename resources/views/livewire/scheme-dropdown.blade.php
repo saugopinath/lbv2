@@ -17,3 +17,7 @@
 
 
 </div>
+
+@push('scripts')
+    <script src="{{ asset('js/master-data/master-data-v2.js') }}"></script>
+@endpush
