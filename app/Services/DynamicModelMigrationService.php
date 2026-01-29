@@ -8,23 +8,21 @@ use Illuminate\Support\Str;
 
 class DynamicModelMigrationService
 {
-    public function generate(string $tabName, array $fields): void
+    public function generate(string $tabName, array $fields, string $isAppendMultiple): void
     {
         $model = Str::studly(Str::singular($tabName));
         $table = Str::snake($tabName);
         $modelPath = app_path("Models/{$model}.php");
+        $isAppendMultiple = $isAppendMultiple === 'yes' ? 'yes' : 'no';
 
         if (!class_exists("App\\Models\\{$model}")) {
             Artisan::call("make:model {$model} -m");
         }
-        $this->writeMigration($table, $fields);
+        $this->writeMigration($table, $fields, $isAppendMultiple);
         $this->updateModel($modelPath, $table, $fields);
-        Artisan::call('migrate', ['--force' => false]);
+        // Artisan::call('migrate', ['--force' => false]);
     }
 
-    /**
-     * Get schema name from connection config
-     */
     private function getSchema(): string
     {
         return config('database.connections.lb_scheme.schema', 'public');
@@ -82,7 +80,7 @@ class DynamicModelMigrationService
     //     File::put($migration->getPathname(), $content);
     // }
 
-    private function writeMigration(string $table, array $fields): void
+    private function writeMigration(string $table, array $fields, string $isAppendMultiple): void
     {
         $migration = collect(File::files(database_path('migrations')))
             ->sortByDesc(fn($f) => $f->getCTime())
@@ -93,6 +91,19 @@ class DynamicModelMigrationService
         $columns = '';
         $foreignKeys = [];
         $indexes = [];
+        $appColumns = '';
+        $allowMultipleRows = $isAppendMultiple == 'yes';
+        if ($allowMultipleRows) {
+            $appColumns = <<<PHP
+            \$table->unsignedBigInteger('application_id');
+            \$table->unsignedBigInteger('beneficiary_id');
+            PHP;
+        } else {
+            $appColumns = <<<PHP
+            \$table->unsignedBigInteger('application_id')->unique();
+            \$table->unsignedBigInteger('beneficiary_id')->unique();
+            PHP;
+        }
 
 
 
@@ -182,28 +193,21 @@ class DynamicModelMigrationService
                 {
                     Schema::create('{$schema}.{$table}', function (Blueprint \$table) {
 
-                        \$table->id();
-
-                        \$table->unsignedBigInteger('application_id')->unique();
-                        \$table->unsignedBigInteger('beneficiary_id')->unique();
-
-            {$columns}
-
+                    \$table->id();
+                      {$appColumns}
+                      {$columns}
                         \$table->timestamps();
-
-            {$foreignKeyBlock}
-
-                        \$table->foreign('application_id', 'application_id_fk')
+                      {$foreignKeyBlock}
+                    \$table->foreign('application_id', 'application_id_fk')
                             ->references('application_id')
                             ->on('lb_scheme.unique_app_ben_ids')
                             ->cascadeOnDelete();
 
-                        \$table->foreign('beneficiary_id', 'beneficiary_id_fk')
+                    \$table->foreign('beneficiary_id', 'beneficiary_id_fk')
                             ->references('beneficiary_id')
                             ->on('lb_scheme.unique_app_ben_ids')
                             ->cascadeOnDelete();
-
-            {$indexBlock}
+                    {$indexBlock}
                     });
                 }
 
@@ -224,17 +228,17 @@ class DynamicModelMigrationService
             return;
         }
         $schema = $this->getSchema();
-        $tableBlock = "    protected \$table = '{$schema}.{$table}';\n\n";
         $fillable = collect($fields)
             ->pluck('column_name')
             ->unique()
             ->values()
-            ->map(fn($f) => "        '{$f}',")
+            ->map(fn($f) => "'{$f}',")
             ->implode("\n");
 
         $fillableBlock = <<<PHP
             protected \$fillable = [{$fillable}];
         PHP;
+        $tableBlock = "protected \$table = '{$schema}.{$table}';\n\n";
         $content = File::get($modelPath);
         /* ---------- TABLE ---------- */
         if (preg_match('/protected \$table\s*=/', $content)) {
@@ -263,7 +267,6 @@ class DynamicModelMigrationService
                 $content
             );
         }
-
         File::put($modelPath, $content);
     }
 }

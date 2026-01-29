@@ -264,7 +264,7 @@
             <!-- Modal Content -->
             <div class="relative bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden">
                 <!-- Modal Header -->
-                <div class="px-6 pt-6 pb-4 border-b border-gray-200">
+                <div class="px-6 pt-6 pb-2 border-b border-gray-200">
                     <h2 class="text-xl font-bold text-gray-900">Add / Edit Field</h2>
                     <p class="text-sm text-gray-600 mt-1">Configure database column and form field properties</p>
                 </div>
@@ -273,7 +273,7 @@
                 <div class="flex-1 overflow-y-auto p-6">
                     <!-- Basic Information Section -->
                     <div class="mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Tab Details</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div>
                                 <x-form.input
@@ -284,12 +284,25 @@
                                     required />
                             </div>
                             <div>
-                                <x-form.input
-                                    name="table_name"
-                                    label="Table Name"
-                                    placeholder="Enter Table Name"
-                                    wire:model.live="table_name"
-                                    required readonly />
+                                <div class="md:col-span-2 pl-4">
+                                    <label class="font-semibold block mb-2">
+                                        Is Field Append in multiple time?
+                                        <span class="text-red-500 ml-1">*</span>
+                                    </label>
+                                    <div class="flex gap-6">
+                                        <x-form.radio
+                                            name="is_append_multiple"
+                                            value="yes"
+                                            label="Yes"
+                                            wire:model.live="is_append_multiple" />
+
+                                        <x-form.radio
+                                            name="is_append_multiple"
+                                            value="no"
+                                            label="No"
+                                            wire:model.live="is_append_multiple" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -321,7 +334,8 @@
                                 label="Field ID"
                                 placeholder="e.g., user-name"
                                 wire:model="field_id"
-                                readonly />
+                                readonly
+                                required />
 
                             <x-form.select
                                 name="field_type"
@@ -343,7 +357,7 @@
                                 required />
 
                             @if($field_type === 'select')
-                            <div class="md:col-span-2">
+                            <div class="md:col-span-2 pl-4 ">
                                 <label class="font-semibold block mb-2">
                                     Is Multiple Select Allowed?
                                 </label>
@@ -365,7 +379,7 @@
                         </div>
 
                         <!-- Section and Dependencies -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4 pl-0 md:pl-4 pr-0 md:pr-4 ">
                             <!-- Section Selection -->
                             <div>
                                 <label class="font-semibold block mb-2">
@@ -445,7 +459,7 @@
 
                         <!-- Conditional Fields -->
                         @if($isdepenentsec)
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4 ">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4 pl-0 md:pl-4 pr-0 md:pr-4 ">
                             <!-- Confirm Field -->
                             <div>
                                 <label class="font-semibold block mb-2">
@@ -473,8 +487,8 @@
                                         wire:model.live="confirm_of">
                                         <option value="">-- Select --</option>
                                         @foreach ($confirmOptions as $option)
-                                        <option value="{{ $option->id }}">
-                                            {{ $option->level_name }}
+                                        <option value="{{ $option['field_name'] }}">
+                                            {{ $option['level_name'] }}
                                         </option>
                                         @endforeach
                                     </x-form.select>
@@ -554,22 +568,68 @@
                             @endif
                         </div>
                         @endif
+
+                        @if($isdependent === 'no')
+                        @if (in_array($field_type, ['checkbox','radio']) ||($field_type === 'select' && $is_choose_default === 'no')
+                        )
+                        <!-- Options Section -->
+                        <div class="md:col-span-2 mt-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <x-form.input
+                                    name="option_input"
+                                    label="Options"
+                                    placeholder="Enter option value"
+                                    wire:model="option_input" />
+
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 items-end ">
+                                    <x-button.primary
+                                        type="button"
+                                        wire:click="addOption"
+                                        class="w-full py-2">
+                                        + Add Option
+                                    </x-button.primary>
+                                </div>
+                            </div>
+
+                            @if(count($options) > 0)
+                            <div class="mt-4">
+                                <div class="space-y-3">
+                                    @foreach ($options as $index => $opt)
+                                    <div class="flex justify-between items-center bg-white p-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm font-medium">
+                                                {{ $index + 1 }}
+                                            </div>
+                                            <span class="text-gray-800 font-medium">{{ $opt }}</span>
+                                        </div>
+                                        <x-button.danger
+                                            type="button"
+                                            wire:click="removeOption({{ $index }})">
+                                            <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            Remove
+                                        </x-button.danger>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endif
+                        </div>
+                        @endif
+                        @endif
                     </div>
 
                     <div class="mb-4 border-t border-gray-200 pt-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                            <x-form.input
-                                name="column_name"
-                                label="Column Name"
-                                placeholder="e.g., user_name"
-                                wire:model.live="column_name"
-                                required />
-
                             <x-form.select
                                 name="column_type"
                                 label="Data Type"
                                 placeholder="-- Select --"
-                                wire:model.live="column_type">
+                                required
+                                wire:model.live="column_type"
+                                :disabled="$key_type === 'foreign'">
+                                @if($key_type !== 'foreign')
                                 <option value="">-- Select --</option>
                                 <option value="string">String</option>
                                 <option value="integer">Integer</option>
@@ -577,24 +637,33 @@
                                 <option value="date">Date</option>
                                 <option value="boolean">Boolean</option>
                                 <option value="decimal">Decimal</option>
+                                <option value="jsonb">JSON</option>
+                                @else
+                                @if($column_type)
+                                <option value="{{ $column_type }}">
+                                    {{ strtoupper($column_type) }}
+                                </option>
+                                @endif
+                                @endif
                             </x-form.select>
 
-                            @if(in_array($column_type, ['string', 'integer']))
+
+                            @if(in_array($column_type, ['string']))
                             <x-form.input
                                 name="length"
                                 label="Length"
-                                placeholder="Enter the length"
-                                wire:model="length" />
+                                placeholder="Enter the Max length"
+                                wire:model="length"
+                                required />
                             @endif
-
 
                             <x-form.select
                                 name="key_type"
                                 label="Key Type"
                                 placeholder="-- Select --"
+                                required
                                 wire:model.live="key_type">
                                 <option value="none">No Key</option>
-                                <option value="primary">Primary Key</option>
                                 <option value="unique">Unique Key</option>
                                 <option value="foreign">Foreign Key</option>
                                 <option value="index">Index</option>
@@ -626,10 +695,8 @@
                                 @endforeach
                             </x-form.select>
                             @endif
-
                         </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4 pl-0 md:pl-4 pr-0 md:pr-4">
                             <div>
                                 <label class="font-semibold block mb-2">
                                     Nullable?
@@ -640,12 +707,28 @@
                                         value="yes"
                                         label="Yes"
                                         wire:model="nullable" />
-
                                     <x-form.radio
                                         name="nullable"
                                         value="no"
                                         label="No"
                                         wire:model="nullable" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="font-semibold block mb-2">
+                                    Is Mendetory?
+                                </label>
+                                <div class="flex gap-6 mb-4">
+                                    <x-form.radio
+                                        name="mendetory"
+                                        value="yes"
+                                        label="Yes"
+                                        wire:model.live="mendetory" />
+                                    <x-form.radio
+                                        name="mendetory"
+                                        value="no"
+                                        label="No"
+                                        wire:model.live="mendetory" />
                                 </div>
                             </div>
                             <div>
@@ -658,7 +741,6 @@
                                         value="yes"
                                         label="Yes"
                                         wire:model.live="default_enabled" />
-
                                     <x-form.radio
                                         name="default_enabled"
                                         value="no"
@@ -666,17 +748,22 @@
                                         wire:model.live="default_enabled" />
                                 </div>
                             </div>
-                        </div>
 
-                        @if ($default_enabled === 'yes')
-                        <div class="max-w-md">
-                            <x-form.input
-                                name="default_value"
-                                label="Default Value"
-                                placeholder="Enter default value"
-                                wire:model.lazy="default_value" />
                         </div>
-                        @endif
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            @if ($default_enabled === 'yes')
+                            <x-form.input
+                                name="db_default_value"
+                                label="DB Default Value"
+                                placeholder="Enter default value"
+                                wire:model.lazy="db_default_value" />
+                            @endif
+                            <x-form.input
+                                name="regex"
+                                label="Regex Pattern"
+                                placeholder="Enter regex pattern"
+                                wire:model.lazy="regex" />
+                        </div>
                     </div>
                 </div>
 
@@ -691,7 +778,7 @@
                         <button type="button"
                             wire:click="saveField"
                             class="px-6 py-2 bg-blue-600 border border-transparent rounded-lg text-white font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                            Save Field
+                            Add
                         </button>
                     </div>
                 </div>
