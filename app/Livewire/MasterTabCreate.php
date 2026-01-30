@@ -503,7 +503,6 @@ class MasterTabCreate extends Component
         } else {
             $this->fields[] = $data;
         }
-
         $this->closeModal();
     }
 
@@ -512,7 +511,6 @@ class MasterTabCreate extends Component
         unset($this->fields[$index]);
         $this->fields = array_values($this->fields);
     }
-
     /* ---------------- FINAL SUBMIT ---------------- */
     public function finalSubmit(DynamicModelMigrationService $service): void
     {
@@ -607,6 +605,15 @@ class MasterTabCreate extends Component
                 $validationRule = $field['validation_rule'] ?? '';
                 if (($field['isconfirm'] ?? 'no') === 'yes') {
                     $validationRule .= ($validationRule ? '|' : '') . 'same:' . $field['confirm_of'];
+                }
+                if (($field['isdependent'] ?? 'no') === 'yes') {
+                    if (str_contains($validationRule, 'required')) {
+                        if (($field['isdependentvalue'] ?? 'no') === 'yes' && !empty($field['dep_values'])) {
+                            $vals = is_array($field['dep_values']) ? $field['dep_values'] : [];
+                            $values = ',' . implode(',', $vals);
+                            $validationRule = str_replace('required', 'required_if:' . 'formData.' . $field['dependent_on'] . $values, $validationRule);
+                        }
+                    }
                 }
                 $tabFieldDetails = SchemeTabBasefield::create([
                     'scheme_id' => $this->scheme_id ?? 0,

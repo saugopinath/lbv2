@@ -19,15 +19,13 @@
     label="Police Station"
     wire:model="formData.policestation"
 /></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
+<div class="grid md:grid-cols-3 gap-4 mt-4">
 <x-form.input
     type="text"
     name="housepremiseno"
     label="House / Premise No"
     wire:model="formData.housepremiseno"
-/></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
-<x-form.input
+/><x-form.input
     type="text"
     name="pincode"
     label="Pin Code"
@@ -39,26 +37,26 @@
 >
     <option value="">-- Select Block/Municipality --</option>
     
-</x-form.select><x-form.input
+</x-form.select></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<x-form.input
     type="text"
     name="state"
     label="State"
     wire:model="formData.state"
-/></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<x-form.input
+/><x-form.input
     type="text"
     name="villtowncity"
     label="Village / Town / City"
     wire:model="formData.villtowncity"
-/></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
-<x-form.input
+/><x-form.input
     type="text"
     name="postoffice"
     label="Post Office"
     wire:model="formData.postoffice"
-/><x-form.select
+/></div>
+<div class="grid md:grid-cols-1 gap-4 mt-4">
+<x-form.select
     name="district_id"
     label="District"
     wire:model="formData.district_id"

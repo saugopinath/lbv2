@@ -2,6 +2,7 @@
     window.masterDataV2 = window.masterDataV2 || {};
 
     const files = [
+        'castes.js',
         'districts.js',
         'assemblies.js',
         'blocks.js',

@@ -227,19 +227,17 @@ class DynamicModelMigrationService
         if (!File::exists($modelPath)) {
             return;
         }
-        $schema = $this->getSchema();
-        $fillable = collect($fields)
-            ->pluck('column_name')
-            ->unique()
-            ->values()
-            ->map(fn($f) => "'{$f}',")
-            ->implode("\n");
 
-        $fillableBlock = <<<PHP
-            protected \$fillable = [{$fillable}];
+        $schema = $this->getSchema();
+
+        $guardedBlock = <<<PHP
+            protected \$guarded = [];
         PHP;
+
         $tableBlock = "protected \$table = '{$schema}.{$table}';\n\n";
+
         $content = File::get($modelPath);
+
         /* ---------- TABLE ---------- */
         if (preg_match('/protected \$table\s*=/', $content)) {
             $content = preg_replace(
@@ -254,19 +252,22 @@ class DynamicModelMigrationService
                 $content
             );
         }
-        if (preg_match('/protected \$fillable\s*=\s*\[[\s\S]*?\];/m', $content)) {
+
+        /* ---------- GUARDED ONLY ---------- */
+        if (preg_match('/protected \$guarded\s*=\s*\[[\s\S]*?\];/m', $content)) {
             $content = preg_replace(
-                '/protected \$fillable\s*=\s*\[[\s\S]*?\];/m',
-                trim($fillableBlock),
+                '/protected \$guarded\s*=\s*\[[\s\S]*?\];/m',
+                trim($guardedBlock),
                 $content
             );
         } else {
             $content = preg_replace(
                 '/class\s+\w+\s+extends\s+Model\s*\{/m',
-                "$0\n{$fillableBlock}",
+                "$0\n{$guardedBlock}",
                 $content
             );
         }
+
         File::put($modelPath, $content);
     }
 }
