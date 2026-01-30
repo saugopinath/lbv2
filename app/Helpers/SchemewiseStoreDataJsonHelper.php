@@ -254,6 +254,12 @@ class SchemewiseStoreDataJsonHelper
         $name = $field['field_name'] ?? uniqid();
         $type = $field['field_type'] ?? 'text';
 
+        $ignore = false;
+        if ($field['field_class']) {
+            $ignore = true;
+        }
+        $wireIgnore = $ignore ? 'wire:ignore' : '';
+
         switch ($type) {
 
             case 'select':
@@ -265,36 +271,39 @@ class SchemewiseStoreDataJsonHelper
                     $optionsHtml .= "<option value=\"{$key}\">{$label}</option>\n";
                 }
                 return <<<BLADE
-<x-form.select
-    name="{$name}"
-    label="{$label}"
-    wire:model="formData.{$name}"
->
-    <option value="">-- Select {$label} --</option>
-    {$optionsHtml}
-</x-form.select>
-BLADE;
+                <x-form.select
+                    name="{$name}"
+                    label="{$label}"
+                    wire:model="formData.{$name}"
+                    {$wireIgnore}
+                >
+                    <option value="">-- Select {$label} --</option>
+                    {$optionsHtml}
+                </x-form.select>
+                BLADE;
 
             case 'text':
             case 'number':
             case 'date':
                 return <<<BLADE
-<x-form.input
-    type="{$type}"
-    name="{$name}"
-    label="{$label}"
-    wire:model="formData.{$name}"
-/>
-BLADE;
+            <x-form.input
+                type="{$type}"
+                name="{$name}"
+                label="{$label}"
+                {$wireIgnore}
+                wire:model="formData.{$name}"
+            />
+            BLADE;
 
             case 'textarea':
                 return <<<BLADE
-<x-form.textarea
-    name="{$name}"
-    label="{$label}"
-    wire:model="formData.{$name}"
-/>
-BLADE;
+            <x-form.textarea
+                name="{$name}"
+                label="{$label}"
+                wire:model="formData.{$name}"
+                {$wireIgnore}
+            />
+            BLADE;
 
             default:
                 return "<!-- unsupported {$type} -->";
