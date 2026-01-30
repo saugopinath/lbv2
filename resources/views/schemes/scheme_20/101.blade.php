@@ -18,11 +18,12 @@
 </div>
 <div class="grid md:grid-cols-3 gap-4 mt-4">
     <x-form.input type="text" name="sfname" label="Spouse's Name" wire:model="formData.sfname" />
-    <x-form.input
-        type="text" name="cas_cer_no" label="Caste Certificate Number" wire:model="formData.cas_cer_no" />
-        <x-form.input
-        type="text" name="full_name" label="Applicant Name" wire:model="formData.full_name" />
+    <div name="cas_cer_no">
+        <x-form.input type="text" name="cas_cer_no" label="Caste Certificate Number" wire:model="formData.cas_cer_no" />
+    </div>
+    <x-form.input type="text" name="full_name" label="Applicant Name" wire:model="formData.full_name" />
 </div>
+
 <div class="grid md:grid-cols-1 gap-4 mt-4">
     <x-form.input type="text" name="reg_no" label="Duare Sarkar Registration Number" wire:model="formData.reg_no" />
 </div>
@@ -45,5 +46,5 @@
         <option value="SC">SC</option>
         <option value="ST">ST</option>
         <option value="General">General</option>
-    </x-form.select>    
+    </x-form.select>
 </div>

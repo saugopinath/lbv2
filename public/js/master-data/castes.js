@@ -1,7 +1,7 @@
 (function () {
     function initCasteCertificate() {
         const casteSelect = document.querySelector('select[name="castes"]');
-        const certInput  = document.querySelector('input[name="cas_cer_no"]');
+        const certInput  = document.querySelector('div[name="cas_cer_no"]');
 
         if (!casteSelect || !certInput) return;
 
