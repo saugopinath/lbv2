@@ -308,9 +308,6 @@ class MasterTabCreate extends Component
             $this->column_type = $map[$column->data_type] ?? 'string';
         }
     }
-
-
-
     /* ---------------- MODAL ---------------- */
     public function openFieldModal(): void
     {
@@ -469,13 +466,11 @@ class MasterTabCreate extends Component
             'section_id' => $this->is_under_section === 'yes'
                 ? $this->section_id
                 : null,
-            'is_multiple' => $this->is_multiple === 'yes',
+            'is_multiple' => $this->is_multiple === 'yes' ? 'yes' : 'no',
             'confirm_of' => $this->isconfirm === 'yes'
                 ? $this->confirm_of
                 : null,
-            'dependent_on' => $this->isdependent === 'yes'
-                ? $this->depenent_on
-                : null,
+            'dependent_on' => $this->isdependent === 'yes' ? $this->depenent_on : null,
             'dep_values' => $this->isdependentvalue === 'yes'
                 ? $this->depvalues
                 : null,
