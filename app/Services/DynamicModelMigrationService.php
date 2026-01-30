@@ -20,7 +20,7 @@ class DynamicModelMigrationService
         }
         $this->writeMigration($table, $fields, $isAppendMultiple);
         $this->updateModel($modelPath, $table, $fields);
-        // Artisan::call('migrate', ['--force' => false]);
+        Artisan::call('migrate', ['--force' => false]);
     }
 
     private function getSchema(): string
@@ -121,11 +121,11 @@ class DynamicModelMigrationService
             }
             /* ---------------- DEFAULT ---------------- */
             if (
-                array_key_exists('default_value', $field) &&
-                $field['default_value'] !== null &&
-                $field['default_value'] !== ''
+                array_key_exists('db_default_value', $field) &&
+                $field['db_default_value'] !== null &&
+                $field['db_default_value'] !== ''
             ) {
-                $default = $field['default_value'];
+                $default = $field['db_default_value'];
                 if (is_numeric($default)) {
                     $line .= "->default({$default})";
                 } elseif (in_array($default, ['true', 'false'], true)) {

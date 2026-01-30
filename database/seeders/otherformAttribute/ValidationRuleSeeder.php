@@ -17,6 +17,8 @@ class ValidationRuleSeeder  extends Seeder
             ['rule' => 'numeric',  'description' => 'Must be numeric'],
             ['rule' => 'max:255',  'description' => 'Maximum 255 characters'],
             ['rule' => 'min:3',    'description' => 'Minimum 3 characters'],
+['url'=> 'url', 'description'=> 'Must be valid url'],
+
         ];
 
         foreach ($rules as $rule) {

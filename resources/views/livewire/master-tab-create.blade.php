@@ -525,8 +525,8 @@
                                             wire:model.live="depenent_on">
                                             <option value="">-- Select --</option>
                                             @foreach ($depenentOptions as $option)
-                                            <option value="{{ $option->id }}">
-                                                {{ $option->level_name }}
+                                            <option value="{{ $option['field_name'] }}">
+                                                {{ $option['level_name'] }}
                                             </option>
                                             @endforeach
                                         </x-form.select>
