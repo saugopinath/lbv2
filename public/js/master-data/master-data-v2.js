@@ -3,6 +3,7 @@
 
     const files = [
         'castes.js',
+        'spouse.js',
         'districts.js',
         'assemblies.js',
         'blocks.js',
