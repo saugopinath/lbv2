@@ -1,20 +1,8 @@
 window.initMasterData = function () {
     // 1. Check data
-    if (!window.masterDataV2) return;
+    if (!window.masterDataV2 || !window.masterDataV2.districts) return;
 
     const md = window.masterDataV2;
-    const casteSelect = document.querySelector('select[name="castes"]');
-
-    if (
-        casteSelect &&
-        md.castes &&
-        (!casteSelect.dataset.loaded || casteSelect.options.length <= 1)
-    ) {
-        fillSelect(casteSelect, md.castes);
-        casteSelect.dataset.loaded = "1";
-
-        casteSelect.onchange = () => syncLivewire(casteSelect);
-    }
 
     // 2. Class chara sora-sori Select field khunje ber kora
     const districtSelect = document.querySelector('select[name="district_id"]');

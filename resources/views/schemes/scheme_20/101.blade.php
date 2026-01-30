@@ -17,8 +17,10 @@
         wire:model="formData.mfname" />
 </div>
 <div class="grid md:grid-cols-3 gap-4 mt-4">
-    <x-form.input type="text" name="sfname" label="Spouse's Name" wire:model="formData.sfname" /><x-form.input
-        type="text" name="cas_cer_no" label="Caste Certificate Number" wire:model="formData.cas_cer_no" /><x-form.input
+    <x-form.input type="text" name="sfname" label="Spouse's Name" wire:model="formData.sfname" />
+    <x-form.input
+        type="text" name="cas_cer_no" label="Caste Certificate Number" wire:model="formData.cas_cer_no" />
+        <x-form.input
         type="text" name="full_name" label="Applicant Name" wire:model="formData.full_name" />
 </div>
 <div class="grid md:grid-cols-1 gap-4 mt-4">
@@ -38,15 +40,10 @@
     </x-form.select>
 </div>
 <div class="grid md:grid-cols-1 gap-4 mt-4">
-
-
     <x-form.select name="castes" label="Caste" wire:model="formData.castes">
         <option value="">-- Select Caste --</option>
-    </x-form.select>
-    
-    <div id="caste-cert-wrapper" class="grid md:grid-cols-1 gap-4 mt-4 hidden">
-        <x-form.input type="text" name="caste_certificate_no" label="Caste Certificate Number"
-            wire:model="formData.caste_certificate_no" data-wire="caste_certificate_no" />
-    </div>
-
+        <option value="SC">SC</option>
+        <option value="ST">ST</option>
+        <option value="General">General</option>
+    </x-form.select>    
 </div>
