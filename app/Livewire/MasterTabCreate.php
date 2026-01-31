@@ -81,7 +81,7 @@ class MasterTabCreate extends Component
     public  $confirmOptions = [];
 
     public string $isdependent = 'no';
-    public ?int $depenent_on = null;
+    public $depenent_on = null;
     public  $depenentOptions = [];
 
     public string $isdependentvalue = 'no';
@@ -171,7 +171,7 @@ class MasterTabCreate extends Component
             'number'    => 'integer',
             'date'      => 'date',
             'textarea'  => 'text',
-            'select'    => 'string',
+            'select'    => 'integer',
             'radio'     => 'smallInteger',
             'checkbox'  => 'smallInteger',
         ];
@@ -222,7 +222,7 @@ class MasterTabCreate extends Component
     public function updatedIsdependent($value): void
     {
         if ($value === 'yes') {
-            $this->depenentOptions = SchemeTabBasefield::all();
+            $this->depenentOptions = $this->fields;
             $this->depvalueradio = true;
         } else {
             $this->reset(['depenent_on', 'depvalues', 'depvaluesopt']);
@@ -245,10 +245,8 @@ class MasterTabCreate extends Component
     public function updatedIsdependentvalue($value): void
     {
         if ($value === 'yes' && $this->depenent_on) {
-            $ram = SchemeTabBasefield::find($this->depenent_on);
-            $this->depvaluesopt = is_array($ram?->options)
-                ? $ram->options
-                : [];
+            $field = collect($this->fields)->firstWhere('field_name', $this->depenent_on);
+            $this->depvaluesopt = $field['options'] ?? [];
         } else {
             $this->depvaluesopt = [];
             $this->depvalues = [];
@@ -310,9 +308,6 @@ class MasterTabCreate extends Component
             $this->column_type = $map[$column->data_type] ?? 'string';
         }
     }
-
-
-
     /* ---------------- MODAL ---------------- */
     public function openFieldModal(): void
     {
@@ -357,6 +352,13 @@ class MasterTabCreate extends Component
     /* ---------------- SAVE FIELD ---------------- */
     public function saveField(): void
     {
+
+
+        if (in_array($this->field_type, ['select', 'checkbox', 'radio']) && $this->is_choose_default === 'yes') {
+            $this->options = $this->defaultOptions;
+        }
+        // dd($this->options);
+        // dd($this->all());
         $this->validate([
             'tab_name'  => 'required|min:3|max:50|unique:master_tabs,tab_name',
             'column_name' => 'required',
@@ -385,7 +387,7 @@ class MasterTabCreate extends Component
                     ->where(fn($q) => $q->where('tab_code', $this->tab_code)),
             ],
             'validation_rule' => 'required|array|min:1',
-            'options' => in_array($this->field_type, ['select', 'checkbox', 'radio'])
+            'options' => in_array($this->field_type, ['select', 'checkbox', 'radio']) && $this->is_choose_default === 'no'
                 ? 'required|array|min:1'
                 : 'nullable',
             'key_type' => 'required',
@@ -464,13 +466,11 @@ class MasterTabCreate extends Component
             'section_id' => $this->is_under_section === 'yes'
                 ? $this->section_id
                 : null,
-            'is_multiple' => $this->is_multiple === 'yes',
+            'is_multiple' => $this->is_multiple === 'yes' ? 'yes' : 'no',
             'confirm_of' => $this->isconfirm === 'yes'
                 ? $this->confirm_of
                 : null,
-            'dependent_on' => $this->isdependent === 'yes'
-                ? $this->depenent_on
-                : null,
+            'dependent_on' => $this->isdependent === 'yes' ? $this->depenent_on : null,
             'dep_values' => $this->isdependentvalue === 'yes'
                 ? $this->depvalues
                 : null,
@@ -481,11 +481,7 @@ class MasterTabCreate extends Component
                 ? $this->fk_column
                 : null,
             'options' => in_array($this->field_type, ['select', 'checkbox', 'radio'])
-                ? (
-                    $this->is_choose_default === 'yes'
-                    ? $this->defaultOptions
-                    : $this->options
-                )
+                ? $this->options
                 : null,
             'is_choose_default' => $this->is_choose_default,
             'default_value' => $this->is_choose_default === 'yes'
@@ -507,7 +503,6 @@ class MasterTabCreate extends Component
         } else {
             $this->fields[] = $data;
         }
-
         $this->closeModal();
     }
 
@@ -516,7 +511,6 @@ class MasterTabCreate extends Component
         unset($this->fields[$index]);
         $this->fields = array_values($this->fields);
     }
-
     /* ---------------- FINAL SUBMIT ---------------- */
     public function finalSubmit(DynamicModelMigrationService $service): void
     {
@@ -543,6 +537,7 @@ class MasterTabCreate extends Component
         //     if (($field['isconfirm'] ?? 'no') === 'yes') {
         //         $validationRule .= ($validationRule ? '|' : '') . 'same:' . $field['confirm_of'];
         //     }
+
         //     dump([
         //         'fields' => $this->fields,
         //         'scheme_id' => $this->scheme_id ?? 0,
@@ -550,13 +545,7 @@ class MasterTabCreate extends Component
         //         'field_name' => $field['field_name'],
         //         'field_id'   => $field['field_id'],
         //         'field_type' => $field['field_type'],
-        //         'options' => in_array($field['field_type'], ['select', 'checkbox', 'radio'])
-        //             ? (
-        //                 $field['is_choose_default'] === 'yes'
-        //                 ? $this->defaultOptions
-        //                 : $options
-        //             )
-        //             : null,
+        //         'options' => $field['options'] ?? null,
         //         'is_common' => true,
         //         'db_colunm' => $field['column_name'],
         //         'is_mendetory' => $field['mendetory'] === 'yes' ? 1 : 0,
@@ -593,14 +582,14 @@ class MasterTabCreate extends Component
         //     ->values()
         //     ->toArray();
 
-        // /* ---------- OPTIONS ---------- */
+        /* ---------- OPTIONS ---------- */
         // $options = collect($this->options ?? [])
         //     ->flatten()
         //     ->filter(fn($v) => is_string($v) && $v !== '')
         //     ->values()
         //     ->mapWithKeys(fn($value, $index) => [$index + 1 => $value])
         //     ->toArray();
-        // $this->is_append_multiple = $this->is_append_multiple === 'yes' ? 'yes' : 'no';
+        $this->is_append_multiple = $this->is_append_multiple === 'yes' ? 'yes' : 'no';
 
         DB::transaction(function () use ($service) {
             $tabDetails = MasterTab::create([
@@ -617,7 +606,15 @@ class MasterTabCreate extends Component
                 if (($field['isconfirm'] ?? 'no') === 'yes') {
                     $validationRule .= ($validationRule ? '|' : '') . 'same:' . $field['confirm_of'];
                 }
-
+                if (($field['isdependent'] ?? 'no') === 'yes') {
+                    if (str_contains($validationRule, 'required')) {
+                        if (($field['isdependentvalue'] ?? 'no') === 'yes' && !empty($field['dep_values'])) {
+                            $vals = is_array($field['dep_values']) ? $field['dep_values'] : [];
+                            $values = ',' . implode(',', $vals);
+                            $validationRule = str_replace('required', 'required_if:' . 'formData.' . $field['dependent_on'] . $values, $validationRule);
+                        }
+                    }
+                }
                 $tabFieldDetails = SchemeTabBasefield::create([
                     'scheme_id' => $this->scheme_id ?? 0,
                     'level_name' => $field['level_name'],
@@ -650,7 +647,7 @@ class MasterTabCreate extends Component
                         ? $field['dependent_on']
                         : null,
                     'dependent_on_values' => $field['isdependentvalue'] === 'yes'
-                        ? json_encode($field['dependent_on_values'])
+                        ? json_encode($field['dep_values'], JSON_FORCE_OBJECT)
                         : null,
                     'field_class' => $field['field_class'] ?? null,
                     'section_level_id' => $field['is_under_section'] === 'yes'
@@ -675,6 +672,7 @@ class MasterTabCreate extends Component
             'column_name',
             'column_type',
             'length',
+            'options',
             'nullable',
             'default_enabled',
             'default_value',

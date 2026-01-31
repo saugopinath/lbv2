@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('validation_rule', 255)->nullable();
             $table->string('regex', 255)->nullable();
             $table->bigInteger('confirm_of')->nullable();
-            $table->bigInteger('dependent_on')->nullable();
+            $table->string('dependent_on', 50)->nullable();
             $table->jsonb('dependent_on_values')->nullable();
             $table->string('field_class', 100)->nullable();
             $table->boolean('is_multiple')->default(false);
@@ -37,7 +37,6 @@ return new class extends Migration
             $table->integer('section_level_type')->nullable();
             $table->timestamps();
             $table->foreign('tab_code')->references('tab_code')->on('master_tabs')->onDelete('cascade');
-            // Ensure position is unique per tab + scheme (for extras) or per tab (for common)
             $table->unique(['tab_code', 'scheme_id', 'tab_field_id', 'field_name', 'level_name']);
             $table->index(['tab_code', 'scheme_id']);
         });
