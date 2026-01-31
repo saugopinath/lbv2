@@ -604,7 +604,7 @@ class MasterTabCreate extends Component
             foreach ($this->fields as $field) {
                 $validationRule = $field['validation_rule'] ?? '';
                 if (($field['isconfirm'] ?? 'no') === 'yes') {
-                    $validationRule .= ($validationRule ? '|' : '') . 'same:' . $field['confirm_of'];
+                    $validationRule .= ($validationRule ? '|' : '') . 'same:' . 'formData.' . $field['confirm_of'];
                 }
                 if (($field['isdependent'] ?? 'no') === 'yes') {
                     if (str_contains($validationRule, 'required')) {

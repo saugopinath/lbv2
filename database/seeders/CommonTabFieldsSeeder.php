@@ -90,13 +90,13 @@ class CommonTabFieldsSeeder extends Seeder
 
                 ],
 
-                 [
+                [
                     'field_id'        => 'age',
                     'level_name'      => 'Age',
                     'field_name'      => 'age',
                     'field_type'      => 'text',
                     'is_common'       => true,
-                    'validation_rule' => 'required|digits:10',
+                    'validation_rule' => 'required',
                     'regex'           => '^[6-9][0-9]{9}$',
                     'section_level_id'      => null,
                     'is_multiple'     => false,
@@ -105,7 +105,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_position'  => 6,
 
                 ],
-               
+
                 [
                     'field_id'        => 'email_id',
                     'level_name'      => 'Email Address',
@@ -173,13 +173,14 @@ class CommonTabFieldsSeeder extends Seeder
                     'level_name'      => 'Marital Status',
                     'field_name'      => 'mar_statu',
                     'field_type'      => 'select',
-                    'options'         => [
-                        "Un Married",
-                        "Married",
-                        "Widow",
-                        "Divorcee",
-                        "Widower"
+                    'options' => [
+                        "1" => "Un Married",
+                        "2" => "Married",
+                        "3" => "Widow",
+                        "4" => "Divorcee",
+                        "5" => "Widower",
                     ],
+
                     'is_common'       => true,
                     'tab_code'        => 101,
                     'validation_rule' => 'required',
@@ -211,11 +212,13 @@ class CommonTabFieldsSeeder extends Seeder
                     'level_name'      => 'Caste',
                     'field_name'      => 'caste',
                     'field_type'      => 'select',
-                    'options'         => [
-                        "SC",
-                        "ST",
-                        "General",
+                    'options' => [
+                        "1" => "SC",
+                        "2" => "ST",
+                        "3" => "OBC",
+                        "4" => "General",
                     ],
+
                     'is_common'       => true,
                     'tab_code'        => 101,
                     'validation_rule' => 'required',
@@ -241,7 +244,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_position'  => 14,
 
                 ],
-                 [
+                [
                     'field_id'        => 'mobile_no',
                     'level_name'      => 'Mobile Number',
                     'field_name'      => 'mobile_no',
@@ -361,10 +364,9 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_name'      => 'state',
                     'level_name'      => 'State',
                     'field_type'      => 'text',
-                    // 'options'         => [
-                    //     'disabled' => true,
-                    //     'default'  => 'West Bengal'
-                    // ],
+                    'options'         => [
+                        '19'  => 'West Bengal'
+                    ],
                     'is_common'       => true,
                     'tab_code'        => 102,
                     'validation_rule' => 'required',
@@ -478,7 +480,7 @@ class CommonTabFieldsSeeder extends Seeder
                 ],
 
 
-                
+
 
                 /*
                 |--------------------------------------------------------------------------
