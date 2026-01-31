@@ -512,158 +512,96 @@ class MasterTabCreate extends Component
         $this->fields = array_values($this->fields);
     }
     /* ---------------- FINAL SUBMIT ---------------- */
-    public function finalSubmit(DynamicModelMigrationService $service): void
+
+    public function finalSubmit(DynamicModelMigrationService $service)
     {
-        // dd($this->fields);
-        // $this->reset('field_class');
-        // $validationRules = collect($field['validation_rule'] ?? [])
-        //     ->flatten()
-        //     ->filter(fn($v) => is_string($v) && $v !== '')
-        //     ->values()
-        //     ->toArray();
-
-        // /* ---------- OPTIONS ---------- */
-        // $options = collect($this->options ?? [])
-        //     ->flatten()
-        //     ->filter(fn($v) => is_string($v) && $v !== '')
-        //     ->values()
-        //     ->mapWithKeys(fn($value, $index) => [$index + 1 => $value])
-        //     ->toArray();
-
-
-        // foreach ($this->fields as $field) {
-        //     dump($field);
-        //     $validationRule = $field['validation_rule'] ?? '';
-        //     if (($field['isconfirm'] ?? 'no') === 'yes') {
-        //         $validationRule .= ($validationRule ? '|' : '') . 'same:' . $field['confirm_of'];
-        //     }
-
-        //     dump([
-        //         'fields' => $this->fields,
-        //         'scheme_id' => $this->scheme_id ?? 0,
-        //         'level_name' => $field['level_name'],
-        //         'field_name' => $field['field_name'],
-        //         'field_id'   => $field['field_id'],
-        //         'field_type' => $field['field_type'],
-        //         'options' => $field['options'] ?? null,
-        //         'is_common' => true,
-        //         'db_colunm' => $field['column_name'],
-        //         'is_mendetory' => $field['mendetory'] === 'yes' ? 1 : 0,
-        //         'tab_code' => $this->tab_code,
-        //         'validation_rule' => $validationRule ?: null,
-        //         'regex' => $field['regex'] ?? null,
-        //         'is_multiple' => $field['field_type'] === 'select'
-        //             ? ($this->is_multiple === 'yes')
-        //             : false,
-        //         'field_position' => $this->field_position + 1,
-        //         'is_active' => true,
-        //         'confirm_of' => $field['isconfirm'] === 'yes'
-        //             ? $field['confirm_of']
-        //             : null,
-        //         'dependent_on' => $field['isdependent'] === 'yes'
-        //             ? $field['dependent_on']
-        //             : null,
-        //         'dependent_on_values' => $field['isdependentvalue'] === 'yes'
-        //             ? json_encode($field['dependent_on_values'])
-        //             : null,
-        //         'field_class' => $field['field_class'] ?? null,
-        //         'section_level_id' => $field['is_under_section'] === 'yes'
-        //             ? $field['section_id']
-        //             : null,
-        //         'section_level_type' => $field['is_under_section'] === 'yes'
-        //             ? 0 : null,
-        //     ]);
-        // }
-        // dd('stop');
-
-        // $validationRules = collect($this->validation_rule ?? [])
-        //     ->flatten()
-        //     ->filter(fn($v) => is_string($v) && $v !== '')
-        //     ->values()
-        //     ->toArray();
-
-        /* ---------- OPTIONS ---------- */
-        // $options = collect($this->options ?? [])
-        //     ->flatten()
-        //     ->filter(fn($v) => is_string($v) && $v !== '')
-        //     ->values()
-        //     ->mapWithKeys(fn($value, $index) => [$index + 1 => $value])
-        //     ->toArray();
         $this->is_append_multiple = $this->is_append_multiple === 'yes' ? 'yes' : 'no';
 
-        DB::transaction(function () use ($service) {
+        try {
+            DB::beginTransaction();
+
             $tabDetails = MasterTab::create([
                 'tab_name'       => $this->tab_name,
                 'tab_short_name' => $this->tab_short_name,
                 'tab_code'       => $this->tab_code,
-                'tab_model_name'     => $this->model_name,
-                // 'table_name'     => $this->table_name,
+                'tab_model_name' => $this->model_name,
             ]);
+
             $service->generate($this->tab_name, $this->fields, $this->is_append_multiple);
+
             /* ---------- BASE FIELD ---------- */
             foreach ($this->fields as $field) {
+
                 $validationRule = $field['validation_rule'] ?? '';
+
                 if (($field['isconfirm'] ?? 'no') === 'yes') {
-                    $validationRule .= ($validationRule ? '|' : '') . 'same:' . 'formData.' . $field['confirm_of'];
+                    $validationRule .= ($validationRule ? '|' : '') . 'same:formData.' . $field['confirm_of'];
                 }
+
                 if (($field['isdependent'] ?? 'no') === 'yes') {
                     if (str_contains($validationRule, 'required')) {
                         if (($field['isdependentvalue'] ?? 'no') === 'yes' && !empty($field['dep_values'])) {
                             $vals = is_array($field['dep_values']) ? $field['dep_values'] : [];
                             $values = ',' . implode(',', $vals);
-                            $validationRule = str_replace('required', 'required_if:' . 'formData.' . $field['dependent_on'] . $values, $validationRule);
+                            $validationRule = str_replace(
+                                'required',
+                                'required_if:formData.' . $field['dependent_on'] . $values,
+                                $validationRule
+                            );
                         }
                     }
                 }
-                $tabFieldDetails = SchemeTabBasefield::create([
+
+                SchemeTabBasefield::create([
                     'scheme_id' => $this->scheme_id ?? 0,
                     'level_name' => $field['level_name'],
                     'field_name' => $field['field_name'],
                     'field_id'   => $field['field_id'],
                     'field_type' => $field['field_type'],
-                    'options' => $field['options'] ?? null,
-                    // 'options' => in_array($field['field_type'], ['select', 'checkbox', 'radio'])
-                    //     ? (
-                    //         $field['is_choose_default'] === 'yes'
-                    //         ? $this->defaultOptions
-                    //         : $options
-                    //     )
-                    //     : null,
+                    'options' => $field['options'] ?? null, // JSON cast handles this
                     'is_common' => true,
                     'db_colunm' => $field['column_name'],
-                    'is_mendetory' => $field['mendetory'] === 'yes' ? 1 : 0,
+                    'is_mendetory' => ($field['mendetory'] ?? 'no') === 'yes' ? 1 : 0,
                     'tab_code' => $this->tab_code,
                     'validation_rule' => $validationRule ?: null,
                     'regex' => $field['regex'] ?? null,
                     'is_multiple' => $field['field_type'] === 'select'
-                        ? ($this->is_multiple === 'yes')
+                        ? (($field['is_multiple'] ?? 'no') === 'yes')
                         : false,
                     'field_position' => $this->field_position + 1,
                     'is_active' => true,
-                    // 'confirm_of' => $field['isconfirm'] === 'yes'
-                    //     ? $field['confirm_of']
-                    //     : null,
-                    'dependent_on' => $field['isdependent'] === 'yes'
+                    'dependent_on' => ($field['isdependent'] ?? 'no') === 'yes'
                         ? $field['dependent_on']
                         : null,
-                    'dependent_on_values' => $field['isdependentvalue'] === 'yes'
-                        ? json_encode($field['dep_values'], JSON_FORCE_OBJECT)
-                        : null,
+                    'dependent_on_values' => ($field['isdependentvalue'] ?? 'no') === 'yes'
+                        ? $field['dep_values']
+                        : null, // let cast handle json
                     'field_class' => $field['field_class'] ?? null,
-                    'section_level_id' => $field['is_under_section'] === 'yes'
+                    'section_level_id' => ($field['is_under_section'] ?? 'no') === 'yes'
                         ? $field['section_id']
                         : null,
-                    'section_level_type' => $field['is_under_section'] === 'yes'
-                        ? 0 : null,
+                    'section_level_type' => ($field['is_under_section'] ?? 'no') === 'yes'
+                        ? 0
+                        : null,
                 ]);
             }
-        });
 
-        $this->dispatch('toastr', [
-            'type' => 'success',
-            'message' => 'Tab, fields, and migration created successfully.',
-        ]);
-        // }
+            DB::commit();
+
+            $this->dispatch('toastr', [
+                'type' => 'success',
+                'message' => 'Tab, fields, and migration created successfully.',
+            ]);
+            return redirect()->route('master-tab-creation');
+        } catch (\Throwable $e) {
+            dd($e);
+            DB::rollBack();
+
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Something went wrong. Please check logs or contact support.',
+            ]);
+        }
     }
 
     private function resetFieldForm(): void

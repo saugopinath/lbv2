@@ -1,58 +1,69 @@
+
 (function () {
-    function initCasteCertificate() {
-        const casteSelect = document.querySelector('select[name="castes"]');
-        const certInput  = document.querySelector('div[name="cas_cer_no"]');
 
-        if (!casteSelect || !certInput) return;
+    let schemeJson = null;
 
-        const label = certInput.previousElementSibling;
+    // Receive JSON from Livewire hydrate()
+    document.addEventListener('scheme-json-loaded', e => {
+        schemeJson = e.detail.json;
+        applyDependencies();
+    });
 
-        const handleCaste = () => {
-            const val = casteSelect.value;
+    function applyDependencies() {
 
-            if (["SC", "ST", "OBC"].includes(val)) {
-                // SHOW
-                certInput.classList.remove("hidden");
-                label?.classList.remove("hidden");
+        if (!schemeJson || !schemeJson.tabs) return;
 
-                // required ADD
-                certInput.setAttribute("required", "required");
-            } else {
-                // HIDE
-                certInput.classList.add("hidden");
-                label?.classList.add("hidden");
+        schemeJson.tabs.forEach(tab => {
 
-                // required REMOVE
-                certInput.removeAttribute("required");
+            (tab.fields || []).forEach(field => {
 
-                // clear value + error
-                certInput.value = "";
-            }
-        };
+                if (!field.dependent_on || !field.dependent_on_values) return;
 
-        if (!casteSelect.dataset.casteBound) {
-            casteSelect.dataset.casteBound = "1";
-            casteSelect.addEventListener("change", handleCaste);
-        }
+                const targetName = field.field_name;
+                const controllerName = field.dependent_on;
+                const allowedValues = Object.values(field.dependent_on_values).map(String);
 
-        // initial run
-        handleCaste();
+                const target = document.querySelector(`[name="${targetName}"]`);
+                const controller = document.querySelector(`[name="${controllerName}"]`);
+
+                if (!target || !controller) return;
+
+                // 🔥 THIS is the main fix (x-form.input compatible)
+                const wrapper = target.closest('div');
+                if (!wrapper) return;
+
+                const toggle = () => {
+                    const val = String(controller.value || '');
+
+                    if (allowedValues.includes(val)) {
+                        wrapper.classList.remove('hidden');
+                        target.setAttribute('required', 'required');
+                    } else {
+                        wrapper.classList.add('hidden');
+                        target.removeAttribute('required');
+                        target.value = '';
+
+                        // clear Livewire model
+                        const lw = target.closest('[wire\\:id]');
+                        if (lw && window.Livewire) {
+                            Livewire.find(lw.getAttribute('wire:id'))
+                                ?.set(`formData.${targetName}`, null);
+                        }
+                    }
+                };
+
+                controller.removeEventListener('change', toggle);
+                controller.addEventListener('change', toggle);
+
+                toggle(); // initial state
+            });
+        });
     }
 
-    document.addEventListener("DOMContentLoaded", initCasteCertificate);
-
-    // Livewire support
-    document.addEventListener("livewire:load", () => {
-        if (window.Livewire) {
-            Livewire.hook("message.processed", () => {
-                initCasteCertificate();
-            });
-        }
+    // rerun after Livewire DOM updates
+    document.addEventListener('livewire:load', () => {
+        Livewire.hook('message.processed', applyDependencies);
     });
 
-    // fallback observer
-    const observer = new MutationObserver(() => {
-        initCasteCertificate();
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
 })();
+
