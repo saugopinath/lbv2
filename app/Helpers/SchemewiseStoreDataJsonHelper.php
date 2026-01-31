@@ -265,10 +265,10 @@ class SchemewiseStoreDataJsonHelper
             case 'select':
 
                 $optionsHtml = '';
-                foreach (($field['options'] ?? []) as $key => $label) {
+                foreach (($field['options'] ?? []) as $key => $optionlabel) {
                     $key = e($key);
-                    $label = e($label);
-                    $optionsHtml .= "<option value=\"{$key}\">{$label}</option>\n";
+                    $optionlabel = e($optionlabel);
+                    $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
                 }
                 return <<<BLADE
                 <x-form.select
