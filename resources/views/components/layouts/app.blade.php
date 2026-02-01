@@ -52,8 +52,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Alpine Store -->
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('app', {
@@ -69,8 +67,6 @@
             });
         });
     </script>
-
-    <!-- Livewire Scripts -->
     @livewireScripts
     @stack('scripts')
 </body>

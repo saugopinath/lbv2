@@ -11,20 +11,20 @@ class UserObserver
      * Handle the User "created" event.
      */
     public function created(User $user): void
-     {
-        unset($user->password_set_time);
-        unset($user->password_expires_at);
-        unset($user->last_otp_generation_time);
-        unset($user->last_otp_expire_time);
-        dispatch(new IndexUserElasticSearchJob($user));
-     }
+    {
+        // unset($user->password_set_time);
+        // unset($user->password_expires_at);
+        // unset($user->last_otp_generation_time);
+        // unset($user->last_otp_expire_time);
+        // dispatch(new IndexUserElasticSearchJob($user));
+    }
 
     /**
      * Handle the User "updated" event.
      */
     public function updated(User $user): void
     {
-         dispatch(new IndexUserElasticSearchJob($user));
+        // dispatch(new IndexUserElasticSearchJob($user));
     }
 
     /**
@@ -32,7 +32,7 @@ class UserObserver
      */
     public function deleted(User $user): void
     {
-        dispatch(new IndexUserElasticSearchJob($user));
+        // dispatch(new IndexUserElasticSearchJob($user));
     }
 
     /**
@@ -40,7 +40,7 @@ class UserObserver
      */
     public function restored(User $user): void
     {
-        dispatch(new IndexUserElasticSearchJob($user));
+        // dispatch(new IndexUserElasticSearchJob($user));
     }
 
     /**
@@ -48,6 +48,6 @@ class UserObserver
      */
     public function forceDeleted(User $user): void
     {
-        dispatch(new IndexUserElasticSearchJob($user));
+        // dispatch(new IndexUserElasticSearchJob($user));
     }
 }

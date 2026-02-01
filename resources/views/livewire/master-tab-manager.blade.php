@@ -129,47 +129,39 @@
         </div>
     </div>
     @endif
-    {{-- PREVIEW MODAL --}}
-    @if($showPreview)
-    <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
-        <div class="bg-white rounded-xl shadow-lg w-auto max-w-auto">
+    @if($showFinalPreview)
+    <div class="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
 
-            {{-- Header --}}
-            <div class="flex items-center justify-between px-6 py-4 border-b">
-                <h3 class="text-lg font-semibold text-gray-800">
-                    Tab Preview
-                </h3>
-                <button wire:click="closePreview" class="text-gray-400 hover:text-gray-600 text-xl">
-                    ✕
+            {{-- HEADER --}}
+            <div class="flex items-center justify-between px-6 py-5 border-b">
+                <h3 class="text-xl font-semibold text-gray-800">configured Form Preview</h3>
+                <button
+                    wire:click="closePreview"
+                    class="text-gray-400 hover:text-gray-600 transition-colors text-xl">
+                    ×
                 </button>
             </div>
 
-            {{-- TAB NAV (USING YOUR COMPONENT) --}}
-            <div class="px-6 pt-4">
-                <nav class="flex space-x-6 border-b">
-                    @foreach($selectedTabs as $index => $tabCode)
-                    @php
-                    $tab = $allTabs->firstWhere('tab_code', $tabCode);
-                    @endphp
-
-                    <x-entrytab-nav-link :active="$index === 0" :icon="$tab?->tab_icon">
-                        {{ $tab?->tab_name }}
-                    </x-entrytab-nav-link>
-                    @endforeach
-                </nav>
+            {{-- CONTENT --}}
+            <div class="flex-1 overflow-y-auto p-6">
+                <div class="space-y-6">
+                    <livewire:dynamic-form
+                        :scheme-id="$selectedSchemeId"
+                        :ram="1"
+                        :wire:key="'dynamic-form-'.$selectedSchemeId" />
+                </div>
             </div>
 
-            {{-- Dummy Content Area (Preview Only) --}}
-            <div class="px-6 py-10 text-center text-gray-400">
-                Selected tab content preview will appear here
-            </div>
-
-            {{-- Footer --}}
-            <div class="flex justify-end gap-3 px-6 py-4 border-t">
-                <x-button.primary wire:click="closePreview" type="button">
-                    Close
-                </x-button.primary>
-
+            {{-- FOOTER --}}
+            <div class="px-6 py-4 border-t bg-gray-50">
+                <div class="flex justify-end">
+                    <x-button.primary
+                        wire:click="closePreview"
+                        class="px-5 py-2.5">
+                        Close
+                    </x-button.primary>
+                </div>
             </div>
 
         </div>

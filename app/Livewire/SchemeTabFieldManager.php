@@ -17,6 +17,7 @@ use App\Models\SelfDeclerationBasefield;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Storage;
@@ -52,8 +53,9 @@ class SchemeTabFieldManager extends Component
     public array $rowConfig = [];    // [2,3,1]
     public int $totalFields = 0;
     public int $remainingFixFields = 0;
-
-
+    public $showDigitalPreview = false;
+    public $PreviewFields = [];
+    public $digitalPreviewFields = [];
 
     public function mount(Request $request)
     {
@@ -378,7 +380,12 @@ class SchemeTabFieldManager extends Component
                         'options'         => $base->options,
                         'validation_rule' => $base->validation_rule,
                         'regex'           => $base->regex,
-                        'section_id'      => $base->section_id,
+                        'section_level_id'      => $base->section_level_id,
+                        'section_level_type'      => $base->section_level_type,
+                        'confirm_of'      => $base->confirm_of,
+                        'dependent_on'      => $base->dependent_on,
+                        'dependent_on_values'      => $base->dependent_on_values,
+                        'field_class'      => $base->field_class,
                         'is_multiple'     => $base->is_multiple,
                         'field_position'  => $index + 1,
                         'is_common'       => $base->is_common,
@@ -444,10 +451,28 @@ class SchemeTabFieldManager extends Component
             ->firstWhere('tab_code', $tabCode);
         $this->previewTabName = $tab?->masterTab?->tab_name ?? 'Preview';
         $this->previewTabCode = $tab?->masterTab?->tab_code ?? 'Preview';
+
         $this->showPreviewModal = true;
         if ($this->activeTabCode == 104) {
             $this->loadAttachedDocuments();
         }
+
+        if (!$this->previewTabCode) {
+            $this->PreviewFields = collect();
+            return;
+        }
+        $fieldIds = array_keys($this->tabFields[$this->previewTabCode] ?? []);
+        if (empty($fieldIds)) {
+            $this->PreviewFields = collect();
+            return;
+        }
+        $this->PreviewFields = SchemeTabBasefield::whereIn('id', $fieldIds)
+            ->whereIn('scheme_id', [0, $this->schemeId])
+            ->whereIn('tab_code', [0, $this->previewTabCode])
+            ->where('is_active', true)
+            ->get()
+            ->sortBy(fn($f) => array_search($f->id, $fieldIds))
+            ->values();
     }
     public function closePreview()
     {
@@ -676,10 +701,13 @@ class SchemeTabFieldManager extends Component
         try {
             $data = SchemewiseStoreDataJsonHelper::generateSchemeJson($this->schemeId);
             $path = SchemewiseStoreDataJsonHelper::storeSchemeJson($this->schemeId, $data);
+            $blade = SchemewiseStoreDataJsonHelper::store($this->schemeId, $data['tabs']);
             if (!$path) {
                 throw new \Exception('JSON file could not be saved');
             }
-
+            if (!$blade) {
+                throw new \Exception('Blade file could not be saved');
+            }
             $finalSubmitStatus = SchemeFinalSubmitCheck::updateOrCreate(
                 ['scheme_id' => $this->schemeId],
                 ['is_final_submitted' => true]
@@ -1062,6 +1090,69 @@ class SchemeTabFieldManager extends Component
             ->where('tab_code', $tabCode)
             ->value('layout_json');
     }
+
+    public function openDigitalPreview()
+    {
+        $this->showDigitalPreview = true;
+
+        $this->loadTabs();
+        $this->loadSelfDeclarationFields();
+
+        $this->prepareDigitalPreviewFields();
+    }
+    public function downloadDigitalPreviewPdf()
+    {
+        $this->loadTabs();
+        $this->loadSelfDeclarationFields();
+        $this->prepareDigitalPreviewFields();
+
+        $pdf = Pdf::loadView('pdf.scheme-digital-preview', [
+            'scheme' => Scheme::find($this->schemeId),
+            'tabs' => $this->tabs,
+            'digitalPreviewFields' => $this->digitalPreviewFields,
+            'selfDeclarationDisplay' => $this->selfDeclarationDisplay,
+            'attachedDocuments' => $this->attachedDocuments,
+        ])->setPaper('A4', 'portrait');
+
+        return response()->streamDownload(
+            fn() => print($pdf->output()),
+            'scheme_preview_' . $this->schemeId . '.pdf'
+        );
+    }
+    private function prepareDigitalPreviewFields()
+    {
+        $this->digitalPreviewFields = [];
+
+        foreach ($this->tabs as $tab) {
+
+            if (in_array($tab->tab_code, [104, 105])) {
+                continue;
+            }
+
+            $fieldIds = array_keys($this->tabFields[$tab->tab_code] ?? []);
+
+            if (empty($fieldIds)) {
+                $this->digitalPreviewFields[$tab->tab_code] = collect();
+                continue;
+            }
+
+            $ids = implode(',', $fieldIds);
+
+            $this->digitalPreviewFields[$tab->tab_code] =
+                SchemeTabBasefield::whereIn('id', $fieldIds)
+                ->whereIn('scheme_id', [0, $this->schemeId])
+                ->whereIn('tab_code', [0, $tab->tab_code])
+                ->where('is_active', true)
+                ->orderByRaw("array_position(ARRAY[$ids]::int[], id::int)")
+                ->get();
+        }
+    }
+    public function closeDigitalPreview()
+    {
+        $this->showDigitalPreview = false;
+        $this->digitalPreviewFields = [];
+    }
+
     public function render()
     {
         return view('livewire.scheme-tab-field-manager', [

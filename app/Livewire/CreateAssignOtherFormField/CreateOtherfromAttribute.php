@@ -2,23 +2,30 @@
 
 namespace App\Livewire\CreateAssignOtherFormField;
 
+use App\Models\Codemaster;
+use App\Models\SectionLevelMaster;
 use Livewire\Component;
 use App\Models\Scheme;
 use App\Models\FromFieldType;
 use App\Models\ValidationRule;
-use App\Models\FromFieldAttribute;
+use App\Models\SchemeTabBasefield;
 use App\Models\MasterSection;
+use App\Models\MasterTab;
+use App\Models\SchemeAttachedDocMappings;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Storage;
 
 class CreateOtherfromAttribute extends Component
 {
     public $scheme_id;
     public $level_name;
-    public $field_id;
+    public $field_id, $field_class;
     public $field_name;
     public $field_type;
     public array $validation_rule = [];
     public array $options = [];
     public string $option_input = '';
+    public $docTypes = [];
 
     public string $is_under_section = 'no';
     public string $is_multiple = 'no';
@@ -29,24 +36,69 @@ class CreateOtherfromAttribute extends Component
     public $fieldTypes = [];
     public $validationRules = [];
     public array $validationRuleOptions = [];
-    public function mount()
+    public string $is_choose_default = 'no';
+    public $default_values;
+    public $default_value;
+    public $defaultOptions;
+    public $isdependent = 'no';
+    public $depenentOptions;
+    public $depenent_on;
+    public $isdepenentsec = false;
+    public $depvalues = [];
+    public $depvaluesopt = [];
+    public $isdependentvalue = 'no';
+    public $depvalueradio = false;
+    public $isconfirm = 'no';
+    public $confirmOptions;
+    public $confirm_of;
+
+    public $lock = false;
+    public $tabs, $tabId;
+    public $master_sec = 'yes';
+    public $selectedDocType = null;
+    public $isRequired = 0;
+    public $maxFileSize = '500KB';
+    public $extensionTypes = [];
+    public function mount($data = null)
     {
+
+        if ($data) {
+            try {
+                $this->scheme_id = $data['scheme_id'];
+                $this->tabId = $data['tab_code'];
+                if (filled($this->scheme_id) && filled($this->tabId)) {
+                    $this->lock = true;
+                }
+            } catch (DecryptException $e) {
+                abort(403, 'Invalid scheme reference');
+            }
+        }
+
         $this->schemes = Scheme::all();
+        $this->tabs = MasterTab::all();
         $this->fieldTypes = FromFieldType::all();
         $this->validationRuleOptions = ValidationRule::all()
-            ->map(fn ($rule) => [
-                'value' => $rule->rule,          
-                'label' => $rule->description, 
-            ])
+            ->pluck('description', 'rule')
             ->toArray();
+        if (SchemeTabBasefield::exists()) {
+            $this->isdepenentsec = true;
+        }
+
+        $this->docTypes = Codemaster::where('parent_id', 16)
+            ->orderBy('name')
+            ->get();
+        // dd($this->docTypes);
     }
+
+
+
     public function updatedSchemeId()
     {
         $this->resetSection();
     }
     public function updatedIsUnderSection($value)
     {
-        if ($value === 'yes' && $this->scheme_id) {
+        if ($value === 'yes') {
             $this->loadSections();
         } else {
             $this->resetSection();
@@ -56,23 +108,136 @@ class CreateOtherfromAttribute extends Component
     {
         if ($value !== 'select') {
             $this->is_multiple = 'no';
+            $this->is_choose_default = 'no';
         }
+        if ($value == 'file') {
+            $this->master_sec = 'no';
+        } else {
+            $this->master_sec = 'yes';
+        }
+        $this->isdependent = 'no';
     }
+
     protected function loadSections()
     {
-        $this->sections = MasterSection::where('scheme_id', $this->scheme_id)
-            ->orderBy('section_name')
-            ->get();
+        $this->sections = SectionLevelMaster::where('is_active', true)->where('section_level_code', 0)->get();
+            // dd($this->sections);
     }
     protected function resetSection()
     {
         $this->sections = [];
         $this->section_id = null;
     }
+
+    public function updatedIsChooseDefault($value)
+    {
+        $this->is_choose_default = $value;
+
+        $this->default_values = json_decode(
+            file_get_contents(public_path('js/form-options.json')),
+            true
+        );
+
+        $this->default_value = null;
+    }
+
+    public function updatedDefaultValue($value)
+    {
+        $this->defaultOptions = [];
+        if ($this->is_choose_default === 'yes') {
+            if (isset($this->default_values[$value])) {
+                $this->defaultOptions = $this->default_values[$value];
+                if (empty($this->defaultOptions)) {
+                    $this->field_class = strtolower(
+                        preg_replace('/[^a-zA-Z0-9]+/', '_', $value)
+                    );
+                }
+            }
+        }
+    }
+    public function updatedIsconfirm($value)
+    {
+        $this->isconfirm = $value;
+        if ($this->isconfirm == 'yes') {
+            $this->confirmOptions = SchemeTabBasefield::get();
+        }
+    }
+    public function updatedIsdependent($value)
+    {
+        $this->isdependent = $value;
+        $this->depenentOptions = SchemeTabBasefield::get();
+        $this->depenent_on = null;
+        $this->depvaluesopt = [];
+    }
+    public function updatedDepenentOn($value)
+    {
+        $this->depenent_on = $value;
+        $this->reset(['isdependentvalue', 'depvalues']);
+        if ($value) {
+            $this->depvalueradio = true;   // radio show
+        } else {
+            $this->depvalueradio = false;
+            $this->isdependentvalue = 'no';
+            $this->depvaluesopt = [];
+            $this->depvalues = [];
+        }
+    }
+
+    public function updatedIsdependentValue($value)
+    {
+        if ($value === 'yes') {
+
+            $ram = SchemeTabBasefield::find($this->depenent_on);
+
+            if ($ram && is_array($ram->options)) {
+                $this->depvaluesopt = collect($ram->options)
+                    ->toArray();
+            }
+        } else {
+            // radio = no
+            $this->depvaluesopt = [];
+            $this->depvalues = [];
+        }
+    }
+
+    public function updatedDepvalues()
+    {
+        $selectedValues = collect($this->depvalues)
+            ->map(fn($v) => is_array($v) ? (string)$v['value'] : (string)$v)
+            ->toArray();
+
+        // ALL = "1"
+        if (in_array('0', $selectedValues)) {
+
+            $ram = SchemeTabBasefield::find($this->depenent_on);
+
+            if ($ram && is_array($ram->options)) {
+
+                $this->depvalues = collect($ram->options)
+                    ->keys()
+                    ->map(fn($k) => (string) $k)
+                    ->reject(fn($k) => $k === '0') // ALL remove
+                    ->values()
+                    ->toArray();
+            }
+        }
+    }
+
     protected function rules()
     {
+        if ($this->field_type === 'file') {
+            return [
+                'scheme_id' => 'required',
+                'tabId' => 'required',
+                'selectedDocType' => 'required',
+                'isRequired' => 'required|in:0,1',
+                'maxFileSize' => 'required|in:100KB,500KB',
+                'extensionTypes' => 'required|array|min:1',
+            ];
+        }
         return [
             'scheme_id' => 'required',
+            'tabId' => 'required',
             'level_name' => 'required|string|max:100',
             'field_id' => 'required|string|max:100',
             'field_name' => 'required|string|max:150',
@@ -81,7 +246,13 @@ class CreateOtherfromAttribute extends Component
             'is_under_section' => 'required|in:yes,no',
             'section_id' => 'required_if:is_under_section,yes',
             'is_multiple' => 'required_if:field_type,select',
-           
+            'is_choose_default' => 'required|in:yes,no',
+            'default_value' => 'required_if:is_choose_default,yes',
+            'isdependent' => 'required|in:yes,no',
+            'depenent_on' => 'required_if:isdependent,yes',
+            'depvalues' => 'required_if:isdependentvalue,yes',
+            'isconfirm' => 'required|in:yes,no',
+            'confirm_of' => 'required_if:isconfirm,yes',
         ];
     }
     public function addOption()
@@ -98,52 +269,102 @@ class CreateOtherfromAttribute extends Component
     }
     public function save()
     {
+    try{
+
+   
+        // $values = json_encode($this->depvalues);
+        // dd($values);
         $this->validate();
-        $validationRules = collect($this->validation_rule)
-            ->flatten()
-            ->filter(fn ($v) => is_string($v))
-            ->values()
-            ->toArray();
+        if ($this->field_type === 'file') {
+            // dd($this->selectedDocType,$this->isRequired,$this->maxFileSize,$this->extensionTypes);
+            SchemeAttachedDocMappings::updateOrCreate([
+                'scheme_id' => $this->scheme_id,
+                'tab_code' => $this->tabId,
+                'doc_type_id' => $this->selectedDocType,
+                'is_required' => $this->isRequired,
+                'max_file_size' => $this->maxFileSize,
+                'extension_type' => implode(',', $this->extensionTypes),
+            ]);
+            $this->reset([
+                'scheme_id',
+                'tabId',
+                'selectedDocType',
+                'isRequired',
+                'maxFileSize',
+                'extensionTypes'
+            ]);
+        } else {
+            $validationRules = collect($this->validation_rule)
+                ->flatten()
+                ->filter(fn($v) => is_string($v))
+                ->values()
+                ->toArray();
 
-        $options = collect($this->options)
-            ->flatten()
-            ->filter(fn($v) => is_string($v))
-            ->values()
-            ->toArray();
+            // $options = collect($this->options)
+            //     ->flatten()
+            //     ->filter(fn($v) => is_string($v))
+            //     ->values()
+            //     ->toArray();
 
-        FromFieldAttribute::create([
-            'scheme_id' => $this->scheme_id,
-            'level_name' => $this->level_name,
-            'field_id' => $this->field_id,
-            'field_label' => $this->field_name,
-            'field_type' => $this->field_type,
+            $options = collect($this->options)
+                ->flatten()
+                ->filter(fn($v) => is_string($v))
+                ->values()
+                ->mapWithKeys(fn($value, $index) => [$index + 1 => $value])
+                ->toArray();
 
-            'validation_rule' => implode('|', $validationRules),
+            SchemeTabBasefield::create([
+                'scheme_id' => $this->scheme_id,
+                'tab_code' => $this->tabId,
+                'level_name' => $this->level_name,
+                'field_id' => $this->field_id,
+                'field_class' => $this->field_class,
+                'field_name' => $this->field_name,
+                'field_type' => $this->field_type,
+                'validation_rule' => implode('|', $validationRules),
 
-            'options' => in_array($this->field_type, ['select', 'checkbox', 'radio'])
-                ? $options
-                : null,
-            'section_id' => $this->is_under_section === 'yes'
-                ? $this->section_id
-                : null,
-            'is_multiple' => $this->field_type === 'select'
-                ? ($this->is_multiple === 'yes')
-                : false,
-        ]);
-        $this->reset([
-            'level_name',
-            'field_id',
-            'field_name',
-            'field_type',
-            'validation_rule',
-            'options',
-            'option_input',
-            'is_under_section',
-            'section_id',
-            'is_multiple'
-        ]);
-
+                'options' => in_array($this->field_type, ['select', 'checkbox', 'radio'])
+                    ? (
+                        $this->is_choose_default === 'yes'
+                        ? $this->defaultOptions
+                        : $options
+                    )
+                    : null,
+                'section_level_id' => $this->is_under_section === 'yes'
+                    ? $this->section_id
+                    : null,
+                'is_multiple' => $this->field_type === 'select'
+                    ? ($this->is_multiple === 'yes')
+                    : false,
+                'dependent_on' => $this->isdependent === 'yes' ? $this->depenent_on : null,
+                'dependent_on_values' => $this->isdependentvalue === 'yes' ? json_encode((object)$this->depvalues) : null,
+                'confirm_of' => $this->isconfirm === 'yes' ? $this->confirm_of : null,
+            ]);
+            $this->reset([
+                'level_name',
+                'field_id',
+                'field_name',
+                'field_type',
+                'validation_rule',
+                'options',
+                'option_input',
+                'is_under_section',
+                'section_id',
+                'is_multiple',
+                'is_choose_default',
+                'default_value',
+                'defaultOptions',
+                'isdependent',
+                'depenent_on',
+                'depvalues',
+                'scheme_id',
+                'tabId'
+            ]);
+        }
         session()->flash('success', 'Field created successfully');
+         }catch (\Exception $e){
+            dd($e);
+         }
     }
     public function render()
     {

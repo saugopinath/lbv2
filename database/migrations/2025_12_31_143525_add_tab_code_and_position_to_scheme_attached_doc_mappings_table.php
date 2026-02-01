@@ -35,7 +35,7 @@ return new class extends Migration
     {
         Schema::table('public.scheme_attached_doc_mappings', function (Blueprint $table) {
             $table->dropIndex('scheme_tab_doc_idx');
-            $table->dropColumn(['tab_code', 'position','is_active']);
+            $table->dropColumn(['tab_code', 'field_position','is_active']);
         });
     }
 };
