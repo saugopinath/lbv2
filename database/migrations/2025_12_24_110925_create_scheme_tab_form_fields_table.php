@@ -30,10 +30,8 @@ return new class extends Migration
             $table->boolean('is_multiple')->default(false);
             $table->integer('field_position');
             $table->boolean('is_active')->default(true);
-
             $table->timestamps();
             $table->foreign('tab_code')->references('tab_code')->on('master_tabs')->onDelete('cascade');
-            // Ensure position is unique per tab + scheme (for extras) or per tab (for common)
             $table->unique(['tab_code', 'scheme_id', 'tab_field_id', 'field_name', 'level_name']);
             $table->index(['tab_code', 'scheme_id']);
         });
