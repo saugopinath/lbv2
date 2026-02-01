@@ -1,39 +1,92 @@
 <div class="grid md:grid-cols-3 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"   x-cloak x-transition>
-    <x-form.select name="app_type" label="Application Type" wire:model="formData.app_type">
+<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+    <x-form.select
+    name="app_type"
+    label="Application Type"
+    wire:model.live="formData.app_type"
+>
     <option value="">-- Select Application Type --</option>
     <option value="0">Normal Entry</option>
 <option value="1">Duare Sarkar</option>
 
 </x-form.select>
-</div><div x-data="{ formData: @entangle('formData').live }"   x-cloak x-transition>
-    <x-form.input type="date" name="app_date" label="Application Date" wire:model="formData.app_date" />
-</div><div x-data="{ formData: @entangle('formData').live }"   x-cloak x-transition>
-    <x-form.input type="date" name="ds_date" label="Duare Sarkar Date" wire:model="formData.ds_date" />
+</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+    <x-form.input
+    type="date"
+    name="app_date"
+    label="Application Date"
+    wire:model.live="formData.app_date"
+/>
+</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+    <x-form.input
+    type="date"
+    name="ds_date"
+    label="Duare Sarkar Date"
+    wire:model.live="formData.ds_date"
+/>
 </div></div>
 <div class="grid md:grid-cols-1 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"   x-cloak x-transition>
-    <x-form.input type="text" name="age" label="Age" wire:model="formData.age" />
+<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+    <x-form.input
+    type="text"
+    name="age"
+    label="Age"
+    wire:model.live="formData.age"
+/>
 </div></div>
 <div class="grid md:grid-cols-3 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"   x-cloak x-transition>
-    <x-form.input type="date" name="dob" label="Date of Birth" wire:model="formData.dob" />
-</div><div x-data="{ formData: @entangle('formData').live }"   x-cloak x-transition>
-    <x-form.input type="text" name="mfname" label="Mother's Name" wire:model="formData.mfname" />
-</div><div x-data="{ formData: @entangle('formData').live }"   x-cloak x-transition>
-    <x-form.input type="text" name="reg_no" label="Duare Sarkar Registration Number" wire:model="formData.reg_no" />
+<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+    <x-form.input
+    type="date"
+    name="dob"
+    label="Date of Birth"
+    wire:model.live="formData.dob"
+/>
+</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+    <x-form.input
+    type="text"
+    name="mfname"
+    label="Mother's Name"
+    wire:model.live="formData.mfname"
+/>
+</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+    <x-form.input
+    type="text"
+    name="reg_no"
+    label="Duare Sarkar Registration Number"
+    wire:model.live="formData.reg_no"
+/>
 </div></div>
 <div class="grid md:grid-cols-2 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"   x-cloak x-transition>
-    <x-form.input type="text" name="full_name" label="Applicant Name" wire:model="formData.full_name" />
-</div><div x-data="{ formData: @entangle('formData').live }"   x-cloak x-transition>
-    <x-form.input type="text" name="email_id" label="Email Address" wire:model="formData.email_id" />
+<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+    <x-form.input
+    type="text"
+    name="full_name"
+    label="Applicant Name"
+    wire:model.live="formData.full_name"
+/>
+</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+    <x-form.input
+    type="text"
+    name="email_id"
+    label="Email Address"
+    wire:model.live="formData.email_id"
+/>
 </div></div>
 <div class="grid md:grid-cols-3 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"   x-cloak x-transition>
-    <x-form.input type="text" name="ffname" label="Father's Name" wire:model="formData.ffname" />
-</div><div x-data="{ formData: @entangle('formData').live }"   x-cloak x-transition>
-    <x-form.select name="caste" label="Caste" wire:model="formData.caste">
+<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+    <x-form.input
+    type="text"
+    name="ffname"
+    label="Father's Name"
+    wire:model.live="formData.ffname"
+/>
+</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+    <x-form.select
+    name="caste"
+    label="Caste"
+    wire:model.live="formData.caste"
+>
     <option value="">-- Select Caste --</option>
     <option value="1">SC</option>
 <option value="2">ST</option>
@@ -44,20 +97,31 @@
 </div><div x-data="{
     formData: @entangle('formData').live,
     visible: false,
+    sync() {
+        this.visible = ['1','2','3'].includes(String(this.formData.caste));
+        if (!this.visible) {
+            this.formData.cas_cer_no = null;
+        }
+    },
     init() {
-        this.$watch('formData.caste', value => {
-            this.visible = ['1','2','3'].includes(String(value));
-            if (!this.visible) {
-                this.formData.cas_cer_no = null;
-            }
-        });
+        this.sync(); // ✅ initial sync (THIS WAS MISSING)
+        this.$watch('formData.caste', () => this.sync());
     }
-}" x-show="visible" x-effect="!visible && (formData.cas_cer_no = null)" x-cloak x-transition>
-    <x-form.input type="text" name="cas_cer_no" label="Caste Certificate Number" wire:model="formData.cas_cer_no" />
+}" x-show="visible" x-cloak>
+    <x-form.input
+    type="text"
+    name="cas_cer_no"
+    label="Caste Certificate Number"
+    wire:model.live="formData.cas_cer_no"
+/>
 </div></div>
 <div class="grid md:grid-cols-3 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"   x-cloak x-transition>
-    <x-form.select name="mar_statu" label="Marital Status" wire:model="formData.mar_statu">
+<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+    <x-form.select
+    name="mar_statu"
+    label="Marital Status"
+    wire:model.live="formData.mar_statu"
+>
     <option value="">-- Select Marital Status --</option>
     <option value="1">Un Married</option>
 <option value="2">Married</option>
@@ -69,14 +133,21 @@
 </div><div x-data="{
     formData: @entangle('formData').live,
     visible: false,
+    sync() {
+        this.visible = ['2','3','5'].includes(String(this.formData.mar_statu));
+        if (!this.visible) {
+            this.formData.sfname = null;
+        }
+    },
     init() {
-        this.$watch('formData.mar_statu', value => {
-            this.visible = ['2','3','5'].includes(String(value));
-            if (!this.visible) {
-                this.formData.sfname = null;
-            }
-        });
+        this.sync(); // ✅ initial sync (THIS WAS MISSING)
+        this.$watch('formData.mar_statu', () => this.sync());
     }
-}" x-show="visible" x-effect="!visible && (formData.sfname = null)" x-cloak x-transition>
-    <x-form.input type="text" name="sfname" label="Spouse's Name" wire:model="formData.sfname" />
+}" x-show="visible" x-cloak>
+    <x-form.input
+    type="text"
+    name="sfname"
+    label="Spouse's Name"
+    wire:model.live="formData.sfname"
+/>
 </div></div>
