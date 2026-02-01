@@ -3,6 +3,7 @@
     <x-form.select
     name="app_type"
     label="Application Type"
+    
     wire:model.live="formData.app_type"
 >
     <option value="">-- Select Application Type --</option>
@@ -15,6 +16,7 @@
     type="date"
     name="app_date"
     label="Application Date"
+    
     wire:model.live="formData.app_date"
 />
 </div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
@@ -22,6 +24,7 @@
     type="date"
     name="ds_date"
     label="Duare Sarkar Date"
+    
     wire:model.live="formData.ds_date"
 />
 </div></div>
@@ -31,6 +34,7 @@
     type="text"
     name="age"
     label="Age"
+    
     wire:model.live="formData.age"
 />
 </div></div>
@@ -40,6 +44,7 @@
     type="date"
     name="dob"
     label="Date of Birth"
+    
     wire:model.live="formData.dob"
 />
 </div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
@@ -47,6 +52,7 @@
     type="text"
     name="mfname"
     label="Mother's Name"
+    
     wire:model.live="formData.mfname"
 />
 </div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
@@ -54,6 +60,7 @@
     type="text"
     name="reg_no"
     label="Duare Sarkar Registration Number"
+    
     wire:model.live="formData.reg_no"
 />
 </div></div>
@@ -63,6 +70,7 @@
     type="text"
     name="full_name"
     label="Applicant Name"
+    
     wire:model.live="formData.full_name"
 />
 </div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
@@ -70,6 +78,7 @@
     type="text"
     name="email_id"
     label="Email Address"
+    
     wire:model.live="formData.email_id"
 />
 </div></div>
@@ -79,12 +88,14 @@
     type="text"
     name="ffname"
     label="Father's Name"
+    
     wire:model.live="formData.ffname"
 />
 </div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
     <x-form.select
     name="caste"
     label="Caste"
+    
     wire:model.live="formData.caste"
 >
     <option value="">-- Select Caste --</option>
@@ -104,7 +115,7 @@
         }
     },
     init() {
-        this.sync(); // ✅ initial sync (THIS WAS MISSING)
+        this.sync();
         this.$watch('formData.caste', () => this.sync());
     }
 }" x-show="visible" x-cloak>
@@ -112,6 +123,7 @@
     type="text"
     name="cas_cer_no"
     label="Caste Certificate Number"
+    
     wire:model.live="formData.cas_cer_no"
 />
 </div></div>
@@ -120,6 +132,7 @@
     <x-form.select
     name="mar_statu"
     label="Marital Status"
+    
     wire:model.live="formData.mar_statu"
 >
     <option value="">-- Select Marital Status --</option>
@@ -140,7 +153,7 @@
         }
     },
     init() {
-        this.sync(); // ✅ initial sync (THIS WAS MISSING)
+        this.sync();
         this.$watch('formData.mar_statu', () => this.sync());
     }
 }" x-show="visible" x-cloak>
@@ -148,6 +161,7 @@
     type="text"
     name="sfname"
     label="Spouse's Name"
+    
     wire:model.live="formData.sfname"
 />
 </div></div>
