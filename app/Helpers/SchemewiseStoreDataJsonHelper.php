@@ -248,65 +248,313 @@ class SchemewiseStoreDataJsonHelper
 
         return $dir;
     }
+
+
     private static function renderField(array $field): string
-    {
-        $label = $field['level_name'] ?? '';
-        $name = $field['field_name'] ?? uniqid();
-        $type = $field['field_type'] ?? 'text';
+{
+    $label = $field['level_name'] ?? '';
+    $name  = $field['field_name'] ?? uniqid();
+    $type  = $field['field_type'] ?? 'text';
 
-        $ignore = false;
-        if ($field['field_class']) {
-            $ignore = true;
-        }
-        $wireIgnore = $ignore ? 'wire:ignore' : '';
+    $dependentOn     = $field['dependent_on'] ?? null;
+    $dependentValues = $field['dependent_on_values'] ?? [];
 
-        switch ($type) {
+    $xShow   = '';
+    $xEffect = '';
 
-            case 'select':
+    if ($dependentOn && is_array($dependentValues) && count($dependentValues)) {
 
-                $optionsHtml = '';
-                foreach (($field['options'] ?? []) as $key => $optionlabel) {
-                    $key = e($key);
-                    $optionlabel = e($optionlabel);
-                    $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
-                }
-                return <<<BLADE
-                <x-form.select
-                    name="{$name}"
-                    label="{$label}"
-                    wire:model="formData.{$name}"
-                    {$wireIgnore}
-                >
-                    <option value="">-- Select {$label} --</option>
-                    {$optionsHtml}
-                </x-form.select>
-                BLADE;
+        $values = collect($dependentValues)
+            ->values()
+            ->map(fn ($v) => "'" . addslashes((string) $v) . "'")
+            ->implode(',');
 
-            case 'text':
-            case 'number':
-            case 'date':
-                return <<<BLADE
-            <x-form.input
-                type="{$type}"
-                name="{$name}"
-                label="{$label}"
-                {$wireIgnore}
-                wire:model="formData.{$name}"
-            />
-            BLADE;
+        $condition = "[{$values}].includes(String(formData.{$dependentOn}))";
 
-            case 'textarea':
-                return <<<BLADE
-            <x-form.textarea
-                name="{$name}"
-                label="{$label}"
-                wire:model="formData.{$name}"
-                {$wireIgnore}
-            />
-            BLADE;
+        // 👇 SAME blade style + watch support
+        $xShow   = "x-show=\"visible\"";
+        $xEffect = "x-effect=\"!visible && (formData.{$name} = null)\"";
 
-            default:
-                return "<!-- unsupported {$type} -->";
-        }
+        $xData = <<<HTML
+x-data="{
+    formData: @entangle('formData').live,
+    visible: false,
+    init() {
+        this.\$watch('formData.{$dependentOn}', value => {
+            this.visible = [{$values}].includes(String(value));
+            if (!this.visible) {
+                this.formData.{$name} = null;
+            }
+        });
     }
+}"
+HTML;
+    } else {
+        $xData = "x-data=\"{ formData: @entangle('formData').live }\"";
+    }
+
+    // ---------- FIELD HTML ----------
+    if ($type === 'select') {
+
+        $optionsHtml = '';
+        if (is_array($field['options'])) {
+            foreach ($field['options'] as $key => $opt) {
+                $value = is_numeric($key) ? $key : $key;
+                $optionsHtml .= "<option value=\"{$value}\">{$opt}</option>\n";
+            }
+        }
+
+        $input = <<<BLADE
+<x-form.select name="{$name}" label="{$label}" wire:model="formData.{$name}">
+    <option value="">-- Select {$label} --</option>
+    {$optionsHtml}
+</x-form.select>
+BLADE;
+
+    } else {
+
+        $input = <<<BLADE
+<x-form.input type="{$type}" name="{$name}" label="{$label}" wire:model="formData.{$name}" />
+BLADE;
+    }
+
+    return <<<BLADE
+<div {$xData} {$xShow} {$xEffect} x-cloak x-transition>
+    {$input}
+</div>
+BLADE;
+}
+
+//     private static function renderField(array $field): string
+// {
+//     $label = $field['level_name'] ?? '';
+//     $name  = $field['field_name'] ?? uniqid();
+//     $type  = $field['field_type'] ?? 'text';
+
+//     $dependentOn     = $field['dependent_on'] ?? null;
+//     $dependentValues = $field['dependent_on_values'] ?? [];
+
+//     $xShow   = '';
+//     $xEffect = '';
+
+//     if ($dependentOn && !empty($dependentValues)) {
+
+//         // ONLY values → JS safe
+//         $values = collect($dependentValues)
+//             ->values()
+//             ->map(fn ($v) => "'" . addslashes($v) . "'")
+//             ->implode(',');
+
+//         // PURE boolean expression
+//         $condition = "[{$values}].includes(String(formData.{$dependentOn}))";
+
+//         $xShow   = "x-show=\"{$condition}\"";
+//         $xEffect = "x-effect=\"!({$condition}) && (formData.{$name} = null)\"";
+//     }
+
+//     // FIELD HTML
+//     if ($type === 'select') {
+
+//         // $optionsHtml = '';
+//         // foreach ($field['options'] ?? [] as $opt) {
+//         //     $optionsHtml .= "<option value=\"{$opt}\">{$opt}</option>";
+//         // }
+
+//           $optionsHtml = '';
+
+//                 if (is_array($field['options'])) {
+//                     foreach ($field['options'] as $key => $opt) {
+
+//                         // support key => value OR flat array
+//                         $value = is_numeric($key) ? $opt : $key;
+//                         $labelOpt = $opt;
+
+//                         $optionsHtml .= "<option value=\"{$value}\">{$labelOpt}</option>\n";
+//                     }
+//                 }
+
+//         $input = <<<BLADE
+// <x-form.select name="{$name}" label="{$label}" wire:model="formData.{$name}">
+//     <option value="">-- Select {$label} --</option>
+//     {$optionsHtml}
+// </x-form.select>
+// BLADE;
+
+//     } else {
+
+//         $input = <<<BLADE
+// <x-form.input type="{$type}" name="{$name}" label="{$label}" wire:model="formData.{$name}" />
+// BLADE;
+//     }
+
+//     return <<<BLADE
+// <div x-data="{ formData: @entangle('formData') }" {$xShow} {$xEffect} x-transition>
+//     {$input}
+// </div>
+// BLADE;
+// }
+
+//     private static function renderField(array $field): string
+//     {
+//         $label = $field['level_name'] ?? '';
+//         $name  = $field['field_name'] ?? uniqid();
+//         $type  = $field['field_type'] ?? 'text';
+
+//         // ================= DEPENDENCY =================
+//         $dependentOn      = $field['dependent_on'] ?? null;
+//         $dependentValues  = $field['dependent_on_values'] ?? null;
+
+//         $alpineWrapperStart = '';
+//         $alpineWrapperEnd   = '';
+
+//         if ($dependentOn && !empty($dependentValues)) {
+
+//             // safe values array (string cast)
+//             $values = collect($dependentValues)
+//                 ->values()
+//                 ->map(fn($v) => "'" . (string) $v . "'")
+//                 ->implode(',');
+
+//             $alpineWrapperStart = <<<HTML
+// <div
+//     x-data="{
+//         formData: @entangle('formData'),
+//         show() {
+//             return [{$values}].includes(String(this.formData.{$dependentOn}));
+//         }
+//     }"
+//     x-show="show()"
+//     x-effect="
+//         if (!show()) {
+//             formData.{$name} = null;
+//         }
+//     "
+//     x-transition
+// >
+// HTML;
+
+//             $alpineWrapperEnd = "</div>";
+//         }
+
+//         // ================= FIELD HTML =================
+//         switch ($type) {
+
+//             case 'select':
+
+//                 $optionsHtml = '';
+
+//                 if (is_array($field['options'])) {
+//                     foreach ($field['options'] as $key => $opt) {
+
+//                         // support key => value OR flat array
+//                         $value = is_numeric($key) ? $opt : $key;
+//                         $labelOpt = $opt;
+
+//                         $optionsHtml .= "<option value=\"{$value}\">{$labelOpt}</option>\n";
+//                     }
+//                 }
+
+//                 $fieldHtml = <<<BLADE
+// <x-form.select
+//     name="{$name}"
+//     label="{$label}"
+//     wire:model="formData.{$name}"
+// >
+//     <option value="">-- Select {$label} --</option>
+//     {$optionsHtml}
+// </x-form.select>
+// BLADE;
+//                 break;
+
+//             case 'textarea':
+
+//                 $fieldHtml = <<<BLADE
+// <x-form.textarea
+//     name="{$name}"
+//     label="{$label}"
+//     wire:model="formData.{$name}"
+// />
+// BLADE;
+//                 break;
+
+//             case 'date':
+//             case 'number':
+//             case 'text':
+//             default:
+
+//                 $fieldHtml = <<<BLADE
+// <x-form.input
+//     type="{$type}"
+//     name="{$name}"
+//     label="{$label}"
+//     wire:model="formData.{$name}"
+// />
+// BLADE;
+//                 break;
+//         }
+
+//         // ================= FINAL RETURN =================
+//         return $alpineWrapperStart . $fieldHtml . $alpineWrapperEnd;
+//     }
+    // private static function renderField(array $field): string
+    // {
+    //     $label = $field['level_name'] ?? '';
+    //     $name = $field['field_name'] ?? uniqid();
+    //     $type = $field['field_type'] ?? 'text';
+
+    //     $ignore = false;
+    //     if ($field['field_class']) {
+    //         $ignore = true;
+    //     }
+    //     $wireIgnore = $ignore ? 'wire:ignore' : '';
+
+    //     switch ($type) {
+
+    //         case 'select':
+
+    //             $optionsHtml = '';
+    //             foreach (($field['options'] ?? []) as $key => $optionlabel) {
+    //                 $key = e($key);
+    //                 $optionlabel = e($optionlabel);
+    //                 $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
+    //             }
+    //             return <<<BLADE
+    //             <x-form.select
+    //                 name="{$name}"
+    //                 label="{$label}"
+    //                 wire:model="formData.{$name}"
+    //                 {$wireIgnore}
+    //             >
+    //                 <option value="">-- Select {$label} --</option>
+    //                 {$optionsHtml}
+    //             </x-form.select>
+    //             BLADE;
+
+    //         case 'text':
+    //         case 'number':
+    //         case 'date':
+    //             return <<<BLADE
+    //         <x-form.input
+    //             type="{$type}"
+    //             name="{$name}"
+    //             label="{$label}"
+    //             {$wireIgnore}
+    //             wire:model="formData.{$name}"
+    //         />
+    //         BLADE;
+
+    //         case 'textarea':
+    //             return <<<BLADE
+    //         <x-form.textarea
+    //             name="{$name}"
+    //             label="{$label}"
+    //             wire:model="formData.{$name}"
+    //             {$wireIgnore}
+    //         />
+    //         BLADE;
+
+    //         default:
+    //             return "<!-- unsupported {$type} -->";
+    //     }
+    // }
 }

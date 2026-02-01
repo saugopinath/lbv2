@@ -530,61 +530,93 @@ class MasterTabCreate extends Component
             $service->generate($this->tab_name, $this->fields, $this->is_append_multiple);
 
             /* ---------- BASE FIELD ---------- */
+
             foreach ($this->fields as $field) {
 
+                /* ================= RESET ================= */
+                $depValues = null;
+
+                /* ================= VALIDATION RULE ================= */
                 $validationRule = $field['validation_rule'] ?? '';
 
+                // Confirm field
                 if (($field['isconfirm'] ?? 'no') === 'yes') {
-                    $validationRule .= ($validationRule ? '|' : '') . 'same:formData.' . $field['confirm_of'];
+                    $validationRule .= ($validationRule ? '|' : '')
+                        . 'same:formData.' . $field['confirm_of'];
                 }
 
-                if (($field['isdependent'] ?? 'no') === 'yes') {
-                    if (str_contains($validationRule, 'required')) {
-                        if (($field['isdependentvalue'] ?? 'no') === 'yes' && !empty($field['dep_values'])) {
-                            $vals = is_array($field['dep_values']) ? $field['dep_values'] : [];
-                            $values = ',' . implode(',', $vals);
-                            $validationRule = str_replace(
-                                'required',
-                                'required_if:formData.' . $field['dependent_on'] . $values,
-                                $validationRule
-                            );
-                        }
+                /* ================= DEPENDENT VALUES NORMALIZE ================= */
+                if (
+                    ($field['isdependentvalue'] ?? 'no') === 'yes'
+                    && !empty($field['dep_values'])
+                ) {
+                    if (is_string($field['dep_values'])) {
+                        $decoded = json_decode($field['dep_values'], true);
+                        $depValues = is_array($decoded)
+                            ? array_values($decoded)
+                            : null;
+                    } elseif (is_array($field['dep_values'])) {
+                        $depValues = array_values($field['dep_values']);
                     }
                 }
 
+                /* ================= REQUIRED_IF LOGIC ================= */
+                if (
+                    ($field['isdependent'] ?? 'no') === 'yes'
+                    && str_contains($validationRule, 'required')
+                    && !empty($depValues)
+                ) {
+                    $values = ',' . implode(',', $depValues);
+
+                    $validationRule = str_replace(
+                        'required',
+                        'required_if:formData.' . $field['dependent_on'] . $values,
+                        $validationRule
+                    );
+                }
+
+                /* ================= SAVE FIELD ================= */
                 SchemeTabBasefield::create([
                     'scheme_id' => $this->scheme_id ?? 0,
                     'level_name' => $field['level_name'],
                     'field_name' => $field['field_name'],
                     'field_id'   => $field['field_id'],
                     'field_type' => $field['field_type'],
-                    'options' => $field['options'] ?? null, // JSON cast handles this
+
+                    // JSON cast fields
+                    'options' => $field['options'] ?? null,
+                    'dependent_on_values' => $depValues, // ✅ FIXED
+
                     'is_common' => true,
                     'db_colunm' => $field['column_name'],
                     'is_mendetory' => ($field['mendetory'] ?? 'no') === 'yes' ? 1 : 0,
                     'tab_code' => $this->tab_code,
                     'validation_rule' => $validationRule ?: null,
                     'regex' => $field['regex'] ?? null,
+
                     'is_multiple' => $field['field_type'] === 'select'
                         ? (($field['is_multiple'] ?? 'no') === 'yes')
                         : false,
+
                     'field_position' => $this->field_position + 1,
                     'is_active' => true,
+
                     'dependent_on' => ($field['isdependent'] ?? 'no') === 'yes'
                         ? $field['dependent_on']
                         : null,
-                    'dependent_on_values' => ($field['isdependentvalue'] ?? 'no') === 'yes'
-                        ? $field['dep_values']
-                        : null, // let cast handle json
+
                     'field_class' => $field['field_class'] ?? null,
+
                     'section_level_id' => ($field['is_under_section'] ?? 'no') === 'yes'
                         ? $field['section_id']
                         : null,
+
                     'section_level_type' => ($field['is_under_section'] ?? 'no') === 'yes'
                         ? 0
                         : null,
                 ]);
             }
+
 
             DB::commit();
 
