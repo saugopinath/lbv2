@@ -264,6 +264,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_name'      => 'district_id',
                     'level_name'      => 'District',
                     'field_type'      => 'select',
+                    'field_class'      => 'district_id',
                     // 'options'         => [
                     //     'source' => 'lgd_districts',
                     //     'label'  => 'name',
@@ -284,6 +285,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_name'      => 'rural_urban',
                     'level_name'      => 'Rural/Urbar',
                     'field_type'      => 'select',
+                    'field_class'      => 'rural_urban',
                     // 'options'         => [
                     //     'source' => 'config',
                     //     'key'    => 'constants.rural_urban',
@@ -304,6 +306,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_name'      => 'blockurban',
                     'level_name'      => 'Block/Municipality',
                     'field_type'      => 'select',
+                    'field_class'      => 'blockurban',
                     // 'options'         => [
                     //     'depends_on' => ['district_id', 'rural_urban'],
                     //     'source_map' => [
@@ -334,6 +337,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_name'      => 'gpWard',
                     'level_name'      => 'GP / Ward',
                     'field_type'      => 'select',
+                    'field_class'      => 'gpWard',
                     // 'options'         => [
                     //     'depends_on' => ['blockurban', 'rural_urban'],
                     //     'source_map' => [

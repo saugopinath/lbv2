@@ -24,11 +24,11 @@
     <x-form.input type="text" name="ffname" label="Father's Name" wire:model="formData.ffname" /><x-form.select
         name="mar_statu" label="Marital Status" wire:model="formData.mar_statu">
         <option value="">-- Select Marital Status --</option>
-        <option value="0">Un Married</option>
-        <option value="1">Married</option>
-        <option value="2">Widow</option>
-        <option value="3">Divorcee</option>
-        <option value="4">Widower</option>
+        <option value="1">Un Married</option>
+        <option value="2">Married</option>
+        <option value="3">Widow</option>
+        <option value="4">Divorcee</option>
+        <option value="5">Widower</option>
 
     </x-form.select><x-form.input type="text" name="sfname" label="Spouse's Name" wire:model="formData.sfname" />
 </div>
@@ -40,8 +40,6 @@
         <option value="3">OBC</option>
         <option value="4">General</option>
 
-    </x-form.select><x-form.input type="text" name="cas_cer_no" label="Caste Certificate Number"
+    </x-form.select><x-form.input type="text"  name="cas_cer_no" label="Caste Certificate Number"
         wire:model="formData.cas_cer_no" />
 </div>
-
-
