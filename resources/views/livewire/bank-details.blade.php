@@ -9,15 +9,15 @@
                 <x-form.input id="passbook_name" name="passbook_name" label="Name as in Bank Passbook"
                     placeholder="Enter Name as in Bank Passbook" x-model="passbookName"
                     x-on:input="
-        $el.value = $el.value.replace(/[^A-Za-z\s]/g, '');
-        error = '';
-        $wire.set('score', null);
-    "
-                    x-on:keydown="
-        if ($event.key === 'Backspace' || $event.key === 'Delete') {
-            $wire.set('score', null);
-        }
-    "
+                    $el.value = $el.value.replace(/[^A-Za-z\s]/g, '');
+                    error = '';
+                    $wire.set('score', null);
+                "
+                                x-on:keydown="
+                    if ($event.key === 'Backspace' || $event.key === 'Delete') {
+                        $wire.set('score', null);
+                    }
+                "
                     required />
             </div>
             <div class="flex items-center space-x-3 mt-6">
