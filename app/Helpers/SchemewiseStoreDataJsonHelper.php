@@ -255,27 +255,25 @@ class SchemewiseStoreDataJsonHelper
     $name  = $field['field_name'] ?? uniqid();
     $type  = $field['field_type'] ?? 'text';
 
-    /* ========= WIRE IGNORE CONDITION ========= */
-    $ignore = false;
-    if (!empty($field['field_class'])) {
-        $ignore = true;
-    }
+    /* ========= WIRE IGNORE ========= */
+    $ignore = !empty($field['field_class']);
     $wireIgnore = $ignore ? 'wire:ignore' : '';
 
-    /* ========= DEPENDENCY CONDITION ========= */
-    $hasDependency = false;
-    if (!empty($field['dependent_on']) && !empty($field['dependent_on_values']) && is_array($field['dependent_on_values'])) {
-        $hasDependency = true;
-    }
+    /* ========= DEPENDENCY FLAG ========= */
+    $hasDependency =
+        !empty($field['dependent_on']) &&
+        !empty($field['dependent_on_values']) &&
+        is_array($field['dependent_on_values']);
 
     $dependentOn     = $field['dependent_on'] ?? null;
     $dependentValues = $field['dependent_on_values'] ?? [];
 
-    // default alpine
-    $xData = 'x-data="{ formData: @entangle(\'formData\').live }"';
-    $xShow = '';
+    /* ========= ALPINE ATTRIBUTES (DEFAULT EMPTY) ========= */
+    $xData  = '';
+    $xShow  = '';
+    $xCloak = '';
 
-    /* ========= APPLY DEPENDENCY ONLY IF FLAG TRUE ========= */
+    /* ========= ONLY IF DEPENDENT ========= */
     if ($hasDependency) {
 
         $values = collect($dependentValues)
@@ -299,10 +297,11 @@ x-data="{
 }"
 HTML;
 
-        $xShow = 'x-show="visible"';
+        $xShow  = 'x-show="visible"';
+        $xCloak = 'x-cloak';
     }
 
-    /* ========= FIELD HTML ========= */
+    /* ========= FIELD ========= */
     if ($type === 'select') {
 
         $optionsHtml = '';
@@ -336,11 +335,105 @@ BLADE;
     }
 
     return <<<BLADE
-<div {$xData} {$xShow} x-cloak>
+<div {$xData} {$xShow} {$xCloak}>
     {$input}
 </div>
 BLADE;
 }
+
+
+//     private static function renderField(array $field): string
+// {
+//     $label = $field['level_name'] ?? '';
+//     $name  = $field['field_name'] ?? uniqid();
+//     $type  = $field['field_type'] ?? 'text';
+
+//     /* ========= WIRE IGNORE CONDITION ========= */
+//     $ignore = false;
+//     if (!empty($field['field_class'])) {
+//         $ignore = true;
+//     }
+//     $wireIgnore = $ignore ? 'wire:ignore' : '';
+
+//     /* ========= DEPENDENCY CONDITION ========= */
+//     $hasDependency = false;
+//     if (!empty($field['dependent_on']) && !empty($field['dependent_on_values']) && is_array($field['dependent_on_values'])) {
+//         $hasDependency = true;
+//     }
+
+//     $dependentOn     = $field['dependent_on'] ?? null;
+//     $dependentValues = $field['dependent_on_values'] ?? [];
+
+//     // default alpine
+//     $xData = 'x-data="{ formData: @entangle(\'formData\').live }"';
+//     $xShow = '';
+
+//     /* ========= APPLY DEPENDENCY ONLY IF FLAG TRUE ========= */
+//     if ($hasDependency) {
+
+//         $values = collect($dependentValues)
+//             ->map(fn ($v) => "'" . (string) $v . "'")
+//             ->implode(',');
+
+//         $xData = <<<HTML
+// x-data="{
+//     formData: @entangle('formData').live,
+//     visible: false,
+//     sync() {
+//         this.visible = [{$values}].includes(String(this.formData.{$dependentOn}));
+//         if (!this.visible) {
+//             this.formData.{$name} = null;
+//         }
+//     },
+//     init() {
+//         this.sync();
+//         this.\$watch('formData.{$dependentOn}', () => this.sync());
+//     }
+// }"
+// HTML;
+
+//         $xShow = 'x-show="visible"';
+//     }
+
+//     /* ========= FIELD HTML ========= */
+//     if ($type === 'select') {
+
+//         $optionsHtml = '';
+//         foreach ($field['options'] ?? [] as $key => $opt) {
+//             $optionsHtml .= "<option value=\"{$key}\">{$opt}</option>\n";
+//         }
+
+//         $input = <<<BLADE
+// <x-form.select
+//     name="{$name}"
+//     label="{$label}"
+//     {$wireIgnore}
+//     wire:model.live="formData.{$name}"
+// >
+//     <option value="">-- Select {$label} --</option>
+//     {$optionsHtml}
+// </x-form.select>
+// BLADE;
+
+//     } else {
+
+//         $input = <<<BLADE
+// <x-form.input
+//     type="{$type}"
+//     name="{$name}"
+//     label="{$label}"
+//     {$wireIgnore}
+//     wire:model.live="formData.{$name}"
+// />
+// BLADE;
+//     }
+
+//     return <<<BLADE
+// <div {$xData} {$xShow} x-cloak>
+//     {$input}
+// </div>
+// BLADE;
+// }
 
 //     private static function renderField(array $field): string
 //     {

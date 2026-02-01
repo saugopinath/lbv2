@@ -1,5 +1,5 @@
 <div class="grid md:grid-cols-3 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+<div   >
     <x-form.select
     name="app_type"
     label="Application Type"
@@ -11,7 +11,7 @@
 <option value="1">Duare Sarkar</option>
 
 </x-form.select>
-</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+</div><div   >
     <x-form.input
     type="date"
     name="app_date"
@@ -19,7 +19,7 @@
     
     wire:model.live="formData.app_date"
 />
-</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+</div><div   >
     <x-form.input
     type="date"
     name="ds_date"
@@ -29,7 +29,7 @@
 />
 </div></div>
 <div class="grid md:grid-cols-1 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+<div   >
     <x-form.input
     type="text"
     name="age"
@@ -39,7 +39,7 @@
 />
 </div></div>
 <div class="grid md:grid-cols-3 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+<div   >
     <x-form.input
     type="date"
     name="dob"
@@ -47,7 +47,7 @@
     
     wire:model.live="formData.dob"
 />
-</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+</div><div   >
     <x-form.input
     type="text"
     name="mfname"
@@ -55,7 +55,7 @@
     
     wire:model.live="formData.mfname"
 />
-</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+</div><div   >
     <x-form.input
     type="text"
     name="reg_no"
@@ -65,7 +65,7 @@
 />
 </div></div>
 <div class="grid md:grid-cols-2 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+<div   >
     <x-form.input
     type="text"
     name="full_name"
@@ -73,7 +73,7 @@
     
     wire:model.live="formData.full_name"
 />
-</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+</div><div   >
     <x-form.input
     type="text"
     name="email_id"
@@ -83,7 +83,7 @@
 />
 </div></div>
 <div class="grid md:grid-cols-3 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+<div   >
     <x-form.input
     type="text"
     name="ffname"
@@ -91,7 +91,7 @@
     
     wire:model.live="formData.ffname"
 />
-</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+</div><div   >
     <x-form.select
     name="caste"
     label="Caste"
@@ -128,7 +128,7 @@
 />
 </div></div>
 <div class="grid md:grid-cols-3 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+<div   >
     <x-form.select
     name="mar_statu"
     label="Marital Status"

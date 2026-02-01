@@ -1,5 +1,5 @@
 <div class="grid md:grid-cols-3 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+<div   >
     <x-form.select
     name="district_id"
     label="District"
@@ -9,7 +9,7 @@
     <option value="">-- Select District --</option>
     
 </x-form.select>
-</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+</div><div   >
     <x-form.select
     name="rural_urban"
     label="Rural/Urbar"
@@ -19,7 +19,7 @@
     <option value="">-- Select Rural/Urbar --</option>
     
 </x-form.select>
-</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+</div><div   >
     <x-form.select
     name="blockurban"
     label="Block/Municipality"
@@ -31,7 +31,7 @@
 </x-form.select>
 </div></div>
 <div class="grid md:grid-cols-1 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+<div   >
     <x-form.input
     type="text"
     name="state"
@@ -41,7 +41,7 @@
 />
 </div></div>
 <div class="grid md:grid-cols-3 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+<div   >
     <x-form.select
     name="gpWard"
     label="GP / Ward"
@@ -51,7 +51,7 @@
     <option value="">-- Select GP / Ward --</option>
     
 </x-form.select>
-</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+</div><div   >
     <x-form.input
     type="text"
     name="policestation"
@@ -59,7 +59,7 @@
     
     wire:model.live="formData.policestation"
 />
-</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+</div><div   >
     <x-form.input
     type="text"
     name="housepremiseno"
@@ -69,7 +69,7 @@
 />
 </div></div>
 <div class="grid md:grid-cols-3 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+<div   >
     <x-form.input
     type="text"
     name="pincode"
@@ -77,7 +77,7 @@
     
     wire:model.live="formData.pincode"
 />
-</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+</div><div   >
     <x-form.input
     type="text"
     name="villtowncity"
@@ -85,7 +85,7 @@
     
     wire:model.live="formData.villtowncity"
 />
-</div><div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+</div><div   >
     <x-form.input
     type="text"
     name="postoffice"
@@ -95,7 +95,7 @@
 />
 </div></div>
 <div class="grid md:grid-cols-3 gap-4 mt-4">
-<div x-data="{ formData: @entangle('formData').live }"  x-cloak>
+<div   >
     <x-form.input
     type="text"
     name="mobile_no"
