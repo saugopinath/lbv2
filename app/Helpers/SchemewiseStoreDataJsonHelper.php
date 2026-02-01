@@ -248,9 +248,6 @@ class SchemewiseStoreDataJsonHelper
 
         return $dir;
     }
-
-
-
     private static function renderField(array $field): string
     {
         $label = $field['level_name'] ?? '';
@@ -282,21 +279,18 @@ class SchemewiseStoreDataJsonHelper
                 ->implode(',');
 
             $xData = <<<HTML
-x-data="{
-    formData: @entangle('formData').live,
-    visible: false,
-    sync() {
-        this.visible = [{$values}].includes(String(this.formData.{$dependentOn}));
-        if (!this.visible) {
-            this.formData.{$name} = null;
-        }
-    },
-    init() {
-        this.sync();
-        this.\$watch('formData.{$dependentOn}', () => this.sync());
-    }
-}"
-HTML;
+            x-data="{formData: @entangle('formData').live,visible: false,
+                sync() {this.visible = [{$values}].includes(String(this.formData.{$dependentOn}));
+                    if (!this.visible) {
+                        this.formData.{$name} = null;
+                    }
+                },
+                init() {
+                    this.sync();
+                    this.\$watch('formData.{$dependentOn}', () => this.sync());
+                }
+            }"
+            HTML;
 
             $xShow  = 'x-show="visible"';
             $xCloak = 'x-cloak';
@@ -315,28 +309,28 @@ HTML;
                 }
 
                 $fieldHtml = <<<BLADE
-<x-form.select
-    name="{$name}"
-    label="{$label}"
-    {$wireIgnore}
-    wire:model.live="formData.{$name}"
->
-    <option value="">-- Select {$label} --</option>
-    {$optionsHtml}
-</x-form.select>
-BLADE;
+                <x-form.select
+                    name="{$name}"
+                    label="{$label}"
+                    {$wireIgnore}
+                    wire:model.live="formData.{$name}"
+                >
+                    <option value="">-- Select {$label} --</option>
+                    {$optionsHtml}
+                </x-form.select>
+                BLADE;
                 break;
 
             case 'textarea':
 
                 $fieldHtml = <<<BLADE
-<x-form.textarea
-    name="{$name}"
-    label="{$label}"
-    {$wireIgnore}
-    wire:model.live="formData.{$name}"
-/>
-BLADE;
+                <x-form.textarea
+                    name="{$name}"
+                    label="{$label}"
+                    {$wireIgnore}
+                    wire:model.live="formData.{$name}"
+                />
+                BLADE;
                 break;
 
             case 'text':
@@ -345,22 +339,22 @@ BLADE;
             default:
 
                 $fieldHtml = <<<BLADE
-<x-form.input
-    type="{$type}"
-    name="{$name}"
-    label="{$label}"
-    {$wireIgnore}
-    wire:model.live="formData.{$name}"
-/>
-BLADE;
+                <x-form.input
+                    type="{$type}"
+                    name="{$name}"
+                    label="{$label}"
+                    {$wireIgnore}
+                    wire:model.live="formData.{$name}"
+                />
+                BLADE;
                 break;
         }
 
         /* ========= FINAL OUTPUT ========= */
         return <<<BLADE
-<div {$xData} {$xShow} {$xCloak}>
-    {$fieldHtml}
-</div>
-BLADE;
+        <div {$xData} {$xShow} {$xCloak}>
+            {$fieldHtml}
+        </div>
+        BLADE;
     }
 }
