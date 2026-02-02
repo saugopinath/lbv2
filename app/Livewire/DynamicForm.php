@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
 use Livewire\Component;
 use Illuminate\Support\Facades\File;
@@ -151,7 +152,37 @@ class DynamicForm extends Component
             dd($e);
         }
     }
+   public function updatedFormDataIfscode($value)
+    {
+        $ifsc = strtoupper($value);
 
+        // normalize value
+        $this->formData['ifscode'] = $ifsc;
+
+        if (strlen($ifsc) !== 11) {
+            $this->formData['bankname'] = '';
+            $this->formData['bank_branch_name'] = '';
+            return;
+        }
+
+        $ifs = Ifsccodemaster::with('bankmaster')
+            ->where('code', $ifsc)
+            ->where('is_active', 1)
+            ->first();
+
+        if ($ifs) {
+            $this->formData['bankname'] = $ifs->bankmaster->name ?? '';
+            $this->formData['bank_branch_name'] = $ifs->branch ?? '';
+        } else {
+            $this->formData['bankname'] = '';
+            $this->formData['bank_branch_name'] = '';
+
+            $this->addError(
+                'formData.ifscode',
+                'This IFSC code is not registered.'
+            );
+        }
+    }
     /* ================= SCHEME LOAD ================= */
 
     private function loadScheme($schemeId)
