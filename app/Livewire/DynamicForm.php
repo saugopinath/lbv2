@@ -2,7 +2,9 @@
 
 namespace App\Livewire;
 
+use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
+use App\Models\UniqueAppBenId;
 use Livewire\Component;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +23,8 @@ class DynamicForm extends Component
     public $prevTab = null;
     public $nextTab = null;
     public $ram;
+    public $applicationId;
+    public $beneficiaryId;
 
     public array $formData = [];
 
@@ -31,9 +35,9 @@ class DynamicForm extends Component
 
     /* ================= MOUNT ================= */
 
-    public function mount($schemeId,$ram = null)
+    public function mount($schemeId, $ram = null, $applicationId = null, $beneficiaryId = null)
     {
-        
+
         $this->loadScheme($schemeId);
 
         if (!empty($this->views)) {
@@ -42,7 +46,8 @@ class DynamicForm extends Component
         }
         $this->schemeId = $schemeId;
         $this->ram = $ram;
-
+        $this->applicationId = $applicationId;
+        $this->beneficiaryId = $beneficiaryId;
         // dd($this->ram);
     }
 
@@ -58,22 +63,27 @@ class DynamicForm extends Component
 
     public function saveAndNext($nextTab)
     {
-        // 🔥 Document tab
+        // dump($this->activeTab);
+        // dump($nextTab);
+        // dd($this->formData);
+
+
         if ((string) $this->activeTab === '104') {
             $this->dispatch('check-documents-before-next');
             return;
         }
-
-        // ✅ JSON based validation
         $rules = $this->getValidationRulesForActiveTab();
+        // dd($rules);
         if (!empty($rules)) {
             $this->validate($rules);
         }
-
-        // ✅ Save data tab-wise
+        // dd($this->formData);
+        // dd('saveAndNext', $nextTab);
+        $this->ensureApplicationIds();
+        // dd($this->applicationId, $this->beneficiaryId);
+        // dd('ff');
         $this->saveCurrentTabData();
 
-        // 👉 Go next
         $this->setActiveTab($nextTab);
     }
 
@@ -81,7 +91,6 @@ class DynamicForm extends Component
 
     public function goToNextTab()
     {
-        // 🔥 save document tab model data
         $this->saveCurrentTabData();
 
         if ($this->nextTab) {
@@ -94,11 +103,9 @@ class DynamicForm extends Component
         // do nothing
     }
 
-    /* ================= FINAL SUBMIT ================= */
 
     public function finalSubmit()
     {
-        // optional: final validation / flag update
         dd('FINAL SUBMIT SUCCESS', $this->formData);
     }
 
@@ -118,9 +125,97 @@ class DynamicForm extends Component
 
     /* ================= DB SAVE LOGIC ================= */
 
+    // private function saveCurrentTabData(): void
+    // {
+    //     // get tab config from master_tabs
+    //     dd('saveCurrentTabData', $this->formData);
+    //     $tab = DB::table('master_tabs')
+    //         ->where('tab_code', $this->activeTab)
+    //         ->first();
+
+    //     if (!$tab || empty($tab->tab_model_name)) {
+    //         return;
+    //     }
+
+    //     // Build model class
+    //     $modelClass = "App\\Models\\{$tab->tab_model_name}";
+
+    //     if (!class_exists($modelClass)) {
+    //         return;
+    //     }
+
+    //     // application_id (adjust if your key is different)
+    //     $applicationId = $this->formData['application_id'] ?? null;
+    //     // dd('', $this->formData);
+    //     // insert or update
+    //     try {
+    //         $modelClass::updateOrCreate(
+    //             [
+    //                 'application_id' => $applicationId,
+    //             ],
+    //             $this->formData
+    //         );
+    //     } catch (\Exception $e) {
+    //         dd($e);
+    //     }
+    // }
+    // private function saveCurrentTabData(): void
+    // {
+    //     $tab = DB::table('master_tabs')
+    //         ->where('tab_code', $this->activeTab)
+    //         ->first();
+
+    //     if (!$tab || empty($tab->tab_model_name)) {
+    //         return;
+    //     }
+
+    //     $modelClass = "App\\Models\\{$tab->tab_model_name}";
+
+    //     if (!class_exists($modelClass)) {
+    //         return;
+    //     }
+
+    //     $json = $this->getSchemeJson();
+    //     $dbData = [];
+
+    //     foreach ($json['tabs'] ?? [] as $tabJson) {
+
+    //         if ((string)$tabJson['tab_code'] !== (string)$this->activeTab) {
+    //             continue;
+    //         }
+
+    //         foreach ($tabJson['fields'] ?? [] as $field) {
+
+    //             if (empty($field['db_column'])) {
+    //                 continue;
+    //             }
+
+    //             $fieldName = $field['field_name'];
+    //             $dbColumn  = $field['db_column'];
+
+    //             if (array_key_exists($fieldName, $this->formData)) {
+    //                 $dbData[$dbColumn] = $this->formData[$fieldName];
+    //             }
+    //         }
+    //     }
+
+    //     if (empty($dbData)) {
+    //         return;
+    //     }
+
+    //     $applicationId = $this->formData['application_id'] ?? null;
+
+    //     $modelClass::updateOrCreate(
+    //         ['application_id' => $applicationId],
+    //         $dbData
+    //     );
+    // }
     private function saveCurrentTabData(): void
     {
-        // get tab config from master_tabs
+        if (!$this->applicationId) {
+            return;
+        }
+
         $tab = DB::table('master_tabs')
             ->where('tab_code', $this->activeTab)
             ->first();
@@ -129,27 +224,86 @@ class DynamicForm extends Component
             return;
         }
 
-        // Build model class
         $modelClass = "App\\Models\\{$tab->tab_model_name}";
-
         if (!class_exists($modelClass)) {
             return;
         }
 
-        // application_id (adjust if your key is different)
-        $applicationId = $this->formData['application_id'] ?? null;
-        // dd('', $this->formData);
-        // insert or update
-        try {
-            $modelClass::updateOrCreate(
-                [
-                    'application_id' => $applicationId,
-                ],
-                $this->formData
-            );
-        } catch (\Exception $e) {
-            dd($e);
+        $json = $this->getSchemeJson();
+
+        $dbData = [
+            'scheme_id'      => $this->schemeId,
+            'application_id' => $this->applicationId,
+            'beneficiary_id' => $this->beneficiaryId,
+        ];
+
+        $otherDetails = []; // 🔥 JSON bucket
+
+        foreach ($json['tabs'] ?? [] as $tabJson) {
+
+            if ((string)$tabJson['tab_code'] !== (string)$this->activeTab) {
+                continue;
+            }
+
+            foreach ($tabJson['fields'] ?? [] as $field) {
+
+                $fieldName = $field['field_name'];
+
+                if (!array_key_exists($fieldName, $this->formData)) {
+                    continue;
+                }
+
+                // ✅ CASE-1: normal DB column
+                if (!empty($field['db_column'])) {
+
+                    $dbData[$field['db_column']] = $this->formData[$fieldName];
+                }
+                // ✅ CASE-2: save into other_details JSON
+                else {
+
+                    $otherDetails[$fieldName] = $this->formData[$fieldName];
+                }
+            }
         }
+        // 🔥 attach JSON if exists
+        if (!empty($otherDetails)) {
+            $dbData['other_details'] = $otherDetails;
+        }
+        $beneficiatDetails = $modelClass::updateOrCreate(
+            ['application_id' => $this->applicationId],
+            $dbData
+        );
+        if ($beneficiatDetails) {
+            $this->dispatch('toastr', [
+                'type' => 'success',
+                'message' => 'Data saved successfully.',
+            ]);
+        } else {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Data not saved. Please try again.',
+            ]);
+        }
+        // dd($beneficiatDetails);
+    }
+
+    private function ensureApplicationIds(): void
+    {
+        // dd($this->schemeId);
+        if ($this->applicationId && $this->beneficiaryId) {
+            return;
+        }
+        $row = UniqueAppBenId::create([
+            'scheme_id' => $this->schemeId,
+        ]);
+        $beneficiary_id_obj = UniqueAppBenId::where('application_id', $row->application_id)->first();
+        $this->applicationId = $row->application_id;
+        $this->beneficiaryId = $beneficiary_id_obj->beneficiary_id;
+        // dd($this->applicationId, $this->beneficiaryId);
+
+        $this->formData['scheme_id']      = $this->schemeId;
+        $this->formData['application_id'] = $this->applicationId;
+        $this->formData['beneficiary_id'] = $this->beneficiaryId;
     }
 
     /* ================= SCHEME LOAD ================= */
@@ -208,9 +362,9 @@ class DynamicForm extends Component
 
                 $fieldRules = explode('|', $field['validation_rule']);
 
-                if (!empty($field['regex'])) {
-                    $fieldRules[] = 'regex:/' . $field['regex'] . '/';
-                }
+                // if (!empty($field['regex'])) {
+                //     $fieldRules[] = 'regex:/' . $field['regex'] . '/';
+                // }
 
                 $rules["formData.{$field['field_name']}"] = $fieldRules;
             }
@@ -218,7 +372,37 @@ class DynamicForm extends Component
 
         return $rules;
     }
+    public function updatedFormDataIfscode($value)
+    {
+        $ifsc = strtoupper($value);
 
+        // normalize value
+        $this->formData['ifscode'] = $ifsc;
+
+        if (strlen($ifsc) !== 11) {
+            $this->formData['bankname'] = '';
+            $this->formData['bank_branch_name'] = '';
+            return;
+        }
+
+        $ifs = Ifsccodemaster::with('bankmaster')
+            ->where('code', $ifsc)
+            ->where('is_active', 1)
+            ->first();
+
+        if ($ifs) {
+            $this->formData['bankname'] = $ifs->bankmaster->name ?? '';
+            $this->formData['bank_branch_name'] = $ifs->branch ?? '';
+        } else {
+            $this->formData['bankname'] = '';
+            $this->formData['bank_branch_name'] = '';
+
+            $this->addError(
+                'formData.ifscode',
+                'This IFSC code is not registered.'
+            );
+        }
+    }
     /* ================= RENDER ================= */
 
     public function render()

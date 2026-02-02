@@ -1,6 +1,17 @@
 <div class="grid md:grid-cols-3 gap-4 mt-4">
 <div   >
     <x-form.select
+    name="state"
+    label="State"
+    
+    wire:model.live="formData.state"
+>
+    <option value="">-- Select State --</option>
+    <option value="19">West Bengal</option>
+
+</x-form.select>
+</div><div   >
+    <x-form.select
     name="district_id"
     label="District"
     wire:ignore
@@ -19,7 +30,9 @@
     <option value="">-- Select Rural/Urbar --</option>
     
 </x-form.select>
-</div><div   >
+</div></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div   >
     <x-form.select
     name="blockurban"
     label="Block/Municipality"
@@ -29,19 +42,7 @@
     <option value="">-- Select Block/Municipality --</option>
     
 </x-form.select>
-</div></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<div   >
-    <x-form.input
-    type="text"
-    name="state"
-    label="State"
-    
-    wire:model.live="formData.state"
-/>
-</div></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
-<div   >
+</div><div   >
     <x-form.select
     name="gpWard"
     label="GP / Ward"
@@ -54,42 +55,38 @@
 </div><div   >
     <x-form.input
     type="text"
-    name="policestation"
-    label="Police Station"
+    name="villtowncity"
+    label="Village / Town / City"
+    placeholder="Enter Village / Town / City"
     
-    wire:model.live="formData.policestation"
-/>
-</div><div   >
-    <x-form.input
-    type="text"
-    name="housepremiseno"
-    label="House / Premise No"
-    
-    wire:model.live="formData.housepremiseno"
+    wire:model.live="formData.villtowncity"
 />
 </div></div>
 <div class="grid md:grid-cols-3 gap-4 mt-4">
 <div   >
     <x-form.input
     type="text"
-    name="pincode"
-    label="Pin Code"
+    name="housepremiseno"
+    label="House / Premise No"
+    placeholder="Enter House / Premise No"
     
-    wire:model.live="formData.pincode"
+    wire:model.live="formData.housepremiseno"
 />
 </div><div   >
     <x-form.input
     type="text"
-    name="villtowncity"
-    label="Village / Town / City"
+    name="policestation"
+    label="Police Station"
+    placeholder="Enter Police Station"
     
-    wire:model.live="formData.villtowncity"
+    wire:model.live="formData.policestation"
 />
 </div><div   >
     <x-form.input
     type="text"
     name="postoffice"
     label="Post Office"
+    placeholder="Enter Post Office"
     
     wire:model.live="formData.postoffice"
 />
@@ -98,9 +95,10 @@
 <div   >
     <x-form.input
     type="text"
-    name="mobile_no"
-    label="Mobile Number"
+    name="pincode"
+    label="Pin Code"
+    placeholder="Enter Pin Code"
     
-    wire:model.live="formData.mobile_no"
+    wire:model.live="formData.pincode"
 />
 </div></div>

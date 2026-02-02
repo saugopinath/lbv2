@@ -161,7 +161,7 @@ class SchemewiseStoreDataJsonHelper
                     "{$dir}/104.blade.php",
                     <<<BLADE
                 {{-- DOCUMENT TAB --}}
-                <livewire:enclosure-list :scheme_id="\$schemeId" :tabCode="$tabCode" />
+                <livewire:enclosure-list :scheme_id="\$schemeId" :tabCode="$tabCode" :application_id="applicationId" />
                 BLADE
                 );
                 continue;
@@ -253,6 +253,7 @@ class SchemewiseStoreDataJsonHelper
         $label = $field['level_name'] ?? '';
         $name  = $field['field_name'] ?? uniqid();
         $type  = $field['field_type'] ?? 'text';
+        $placeholder = 'Enter ' . $field['level_name'] ?? '';
 
         /* ========= wire:ignore condition ========= */
         $ignore = !empty($field['field_class']);
@@ -327,6 +328,7 @@ class SchemewiseStoreDataJsonHelper
                 <x-form.textarea
                     name="{$name}"
                     label="{$label}"
+                    placeholder="{$placeholder}"
                     {$wireIgnore}
                     wire:model.live="formData.{$name}"
                 />
@@ -343,6 +345,7 @@ class SchemewiseStoreDataJsonHelper
                     type="{$type}"
                     name="{$name}"
                     label="{$label}"
+                    placeholder="{$placeholder}"
                     {$wireIgnore}
                     wire:model.live="formData.{$name}"
                 />
