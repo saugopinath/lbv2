@@ -36,11 +36,12 @@ class DupCheckSchemeConfigSettings extends Component
 
     public function save()
     {
+        dd( $this->selecteddupcheckOptions);
         $validated = $this->validate([
             'issame' => 'required',
             'iscross' => 'required',
             'selecteddupcheckOptions' => 'required|array|min:1',
-            'schemes' => 'required_if:iscross,yes|array|min:1',
+            'schemes' => 'required_if:iscross,yes',
         ]);
     }
 
