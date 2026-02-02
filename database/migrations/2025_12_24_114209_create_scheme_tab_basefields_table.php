@@ -28,7 +28,7 @@ return new class extends Migration
             $table->boolean('is_multiple')->default(false);
             $table->integer('field_position')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->bigInteger('confirm_of')->nullable();
+            $table->string('confirm_of')->nullable();
             $table->string('dependent_on',50)->nullable();
             $table->jsonb('dependent_on_values')->nullable();
             $table->string('field_class', 100)->nullable();
