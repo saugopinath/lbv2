@@ -248,13 +248,17 @@ class SchemewiseStoreDataJsonHelper
 
         return $dir;
     }
+
     private static function renderField(array $field): string
     {
         $label = $field['level_name'] ?? '';
-        $name  = $field['field_name'] ?? uniqid();
-        $type  = $field['field_type'] ?? 'text';
+        $name = $field['field_name'] ?? uniqid();
+        $type = $field['field_type'] ?? 'text';
         $placeholder = 'Enter ' . $field['level_name'] ?? '';
 
+        /* ========= READONLY CONDITION ========= */
+        $isReadonly = !empty($field['is_readonly']) && (int) $field['is_readonly'] === 1;
+        $readonlyAttr = $isReadonly ? 'readonly' : '';
         /* ========= wire:ignore condition ========= */
         $ignore = !empty($field['field_class']);
         $wireIgnore = $ignore ? 'wire:ignore' : '';
@@ -265,12 +269,12 @@ class SchemewiseStoreDataJsonHelper
             !empty($field['dependent_on_values']) &&
             is_array($field['dependent_on_values']);
 
-        $dependentOn     = $field['dependent_on'] ?? null;
+        $dependentOn = $field['dependent_on'] ?? null;
         $dependentValues = $field['dependent_on_values'] ?? [];
 
         /* ========= Alpine wrapper attrs (default empty) ========= */
-        $xData  = '';
-        $xShow  = '';
+        $xData = '';
+        $xShow = '';
         $xCloak = '';
 
         if ($hasDependency) {
@@ -293,7 +297,7 @@ class SchemewiseStoreDataJsonHelper
             }"
             HTML;
 
-            $xShow  = 'x-show="visible"';
+            $xShow = 'x-show="visible"';
             $xCloak = 'x-cloak';
         }
 
@@ -314,6 +318,7 @@ class SchemewiseStoreDataJsonHelper
                     name="{$name}"
                     label="{$label}"
                     {$wireIgnore}
+                     {$readonlyAttr}
                     wire:model.live="formData.{$name}"
                 >
                     <option value="">-- Select {$label} --</option>
@@ -330,6 +335,7 @@ class SchemewiseStoreDataJsonHelper
                     label="{$label}"
                     placeholder="{$placeholder}"
                     {$wireIgnore}
+                     {$readonlyAttr}
                     wire:model.live="formData.{$name}"
                 />
                 BLADE;
@@ -347,6 +353,7 @@ class SchemewiseStoreDataJsonHelper
                     label="{$label}"
                     placeholder="{$placeholder}"
                     {$wireIgnore}
+                     {$readonlyAttr}
                     wire:model.live="formData.{$name}"
                 />
                 BLADE;

@@ -397,7 +397,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_id' => 'state',
                     'field_name' => 'state',
                     'level_name' => 'State',
-                    'field_type' => 'text',
+                    'field_type' => 'select',
                     'options' => [
                         '19' => 'West Bengal'
                     ],
@@ -574,6 +574,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_active' => true,
                     'db_colunm' => 'bankname',
                     'is_mendetory' => 1,
+                    'is_readonly' => 1,
                 ],
 
                 /*
@@ -596,6 +597,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_active' => true,
                     'db_colunm' => 'bank_branch_name',
                     'is_mendetory' => 1,
+                    'is_readonly' => 1,
                 ],
                 /*
                 |--------------------------------------------------------------------------

@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -29,11 +28,12 @@ return new class extends Migration
             $table->integer('field_position')->nullable();
             $table->boolean('is_active')->default(true);
             $table->string('confirm_of')->nullable();
-            $table->string('dependent_on',50)->nullable();
+            $table->string('dependent_on', 50)->nullable();
             $table->jsonb('dependent_on_values')->nullable();
             $table->string('field_class', 100)->nullable();
             $table->integer('section_level_id')->nullable();
             $table->integer('section_level_type')->nullable();
+            $table->smallInteger('is_readonly')->nullable()->default(0);
             $table->timestamps();
             $table->unique(['tab_code', 'scheme_id', 'field_name', 'level_name']);
             $table->index(['tab_code', 'scheme_id']);
