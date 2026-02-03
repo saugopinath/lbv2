@@ -105,14 +105,15 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_name' => 'age',
                     'field_type' => 'text',
                     'is_common' => true,
-                    'validation_rule' => 'required|integer',
+                    'validation_rule' => 'required|integer|min:25|max:60',
                     'regex' => null,
                     'section_level_id' => null,
                     'is_multiple' => false,
                     'is_active' => true,
                     'tab_code' => 101,
                     'field_position' => 6,
-                    'db_colunm' => 'age'
+                    'db_colunm' => 'age',
+                    'is_readonly' => 1,
 
                 ],
 

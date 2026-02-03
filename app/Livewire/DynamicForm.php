@@ -8,6 +8,7 @@ use App\Models\UniqueAppBenId;
 use Livewire\Component;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DynamicForm extends Component
 {
@@ -35,7 +36,7 @@ class DynamicForm extends Component
     //     'document-validation-failed' => 'stayOnTab',
     // ];
 
-     protected $listeners = [
+    protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
         'document-validation-failed' => 'onDocumentTabFailed',
     ];
@@ -356,6 +357,14 @@ class DynamicForm extends Component
             }
         }
         return $attributes;
+    }
+    public function updatedFormDataDob($value)
+    {
+        if (!empty($value)) {
+            $this->formData['age'] = Carbon::parse($value)->age;
+        } else {
+            $this->formData['age'] = null;
+        }
     }
     /* ================= RENDER ================= */
 
