@@ -5,6 +5,7 @@
     label="District"
     wire:ignore
      
+      required
     wire:model.live="formData.district_id"
 >
     <option value="">-- Select District --</option>
@@ -16,6 +17,7 @@
     label="Rural/Urbar"
     wire:ignore
      
+      required
     wire:model.live="formData.rural_urban"
 >
     <option value="">-- Select Rural/Urbar --</option>
@@ -27,6 +29,7 @@
     label="Block/Municipality"
     wire:ignore
      
+      required
     wire:model.live="formData.blockurban"
 >
     <option value="">-- Select Block/Municipality --</option>
@@ -40,6 +43,7 @@
     label="GP / Ward"
     wire:ignore
      
+      required
     wire:model.live="formData.gpWard"
 >
     <option value="">-- Select GP / Ward --</option>
@@ -51,6 +55,7 @@
     label="State"
     
      
+      required
     wire:model.live="formData.state"
 >
     <option value="">-- Select State --</option>
@@ -65,22 +70,11 @@
     placeholder="Enter Police Station"
     
      
+      required
     wire:model.live="formData.policestation"
 />
 </div></div>
 <div class="grid md:grid-cols-1 gap-4 mt-4">
-<div   >
-    <x-form.input
-    type="text"
-    name="housepremiseno"
-    label="House / Premise No"
-    placeholder="Enter House / Premise No"
-    
-     
-    wire:model.live="formData.housepremiseno"
-/>
-</div></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
 <div   >
     <x-form.input
     type="text"
@@ -89,9 +83,12 @@
     placeholder="Enter Village / Town / City"
     
      
+      required
     wire:model.live="formData.villtowncity"
 />
-</div><div   >
+</div></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div   >
     <x-form.input
     type="text"
     name="postoffice"
@@ -99,7 +96,19 @@
     placeholder="Enter Post Office"
     
      
+      required
     wire:model.live="formData.postoffice"
+/>
+</div><div   >
+    <x-form.input
+    type="text"
+    name="housepremiseno"
+    label="House / Premise No"
+    placeholder="Enter House / Premise No"
+    
+     
+      
+    wire:model.live="formData.housepremiseno"
 />
 </div><div   >
     <x-form.input
@@ -109,6 +118,7 @@
     placeholder="Enter Pin Code"
     
      
+      required
     wire:model.live="formData.pincode"
 />
 </div></div>

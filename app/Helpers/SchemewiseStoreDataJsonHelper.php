@@ -256,6 +256,16 @@ class SchemewiseStoreDataJsonHelper
         $type = $field['field_type'] ?? 'text';
         $placeholder = 'Enter ' . $field['level_name'] ?? '';
 
+        /* ========= REQUIRED CONDITION (from validation_rule) ========= */
+        $isRequired = false;
+
+        if (!empty($field['validation_rule'])) {
+            $rules = explode('|', $field['validation_rule']);
+            $isRequired = in_array('required', $rules, true);
+        }
+
+        $requiredAttr = $isRequired ? 'required' : '';
+
         /* ========= READONLY CONDITION ========= */
         $isReadonly = !empty($field['is_readonly']) && (int) $field['is_readonly'] === 1;
         $readonlyAttr = $isReadonly ? 'readonly' : '';
@@ -319,6 +329,7 @@ class SchemewiseStoreDataJsonHelper
                     label="{$label}"
                     {$wireIgnore}
                      {$readonlyAttr}
+                      {$requiredAttr}
                     wire:model.live="formData.{$name}"
                 >
                     <option value="">-- Select {$label} --</option>
@@ -336,6 +347,7 @@ class SchemewiseStoreDataJsonHelper
                     placeholder="{$placeholder}"
                     {$wireIgnore}
                      {$readonlyAttr}
+                      {$requiredAttr}
                     wire:model.live="formData.{$name}"
                 />
                 BLADE;
@@ -354,6 +366,7 @@ class SchemewiseStoreDataJsonHelper
                     placeholder="{$placeholder}"
                     {$wireIgnore}
                      {$readonlyAttr}
+                      {$requiredAttr}
                     wire:model.live="formData.{$name}"
                 />
                 BLADE;

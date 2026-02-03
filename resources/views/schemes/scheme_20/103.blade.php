@@ -7,6 +7,7 @@
     placeholder="Enter IFSC Code"
     
      
+      required
     wire:model.live="formData.ifscode"
 />
 </div><div   >
@@ -17,6 +18,7 @@
     placeholder="Enter Bank Name"
     
      readonly
+      required
     wire:model.live="formData.bankname"
 />
 </div><div   >
@@ -27,6 +29,7 @@
     placeholder="Enter Bank Branch Name"
     
      readonly
+      required
     wire:model.live="formData.bank_branch_name"
 />
 </div></div>
@@ -39,6 +42,7 @@
     placeholder="Enter Bank Account Number"
     
      
+      required
     wire:model.live="formData.bankaccountnumber"
 />
 </div><div   >
@@ -49,6 +53,7 @@
     placeholder="Enter Confirm Bank Account Number"
     
      
+      required
     wire:model.live="formData.confirmbankaccountnumber"
 />
 </div></div>
