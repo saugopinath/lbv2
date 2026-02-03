@@ -1,11 +1,21 @@
 <div class="mt-4 space-y-3">
-
-<div class="flex items-start gap-2">
-    <x-form.checkbox name="test" value="1" label="test" wire:model="formData.test"
-    />
-</div>
-<div class="flex items-start gap-2">
-    <x-form.checkbox name="fgd" value="1" label="dfhd" wire:model="formData.fgd"
-    />
+<div   >
+    <x-form.input
+    type="text"
+    name="bankaccountnumber"
+    label="Bank Account Number"
+    placeholder="Enter Bank Account Number"
+    
+    wire:model.live="formData.bankaccountnumber"
+/>
+</div><div   >
+    <x-form.input
+    type="text"
+    name="confirmbankaccountnumber"
+    label="Confirm Bank Account Number"
+    placeholder="Enter Confirm Bank Account Number"
+    
+    wire:model.live="formData.confirmbankaccountnumber"
+/>
 </div>
 </div>
