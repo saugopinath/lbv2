@@ -303,23 +303,23 @@ class SchemewiseStoreDataJsonHelper
             case 'select':
 
                 $optionsHtml = '';
-                foreach (($field['options'] ?? []) as $key => $optionlabel) {
-                    $key = e($key);
-                    $optionlabel = e($optionlabel);
-                    $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
-                }
+                    foreach (($field['options'] ?? []) as $key => $optionlabel) {
+                        $key = e($key);
+                        $optionlabel = e($optionlabel);
+                        $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
+                    }
 
-                $fieldHtml = <<<BLADE
-                <x-form.select
-                    name="{$name}"
-                    label="{$label}"
-                    {$wireIgnore}
-                    wire:model.live="formData.{$name}"
-                >
-                    <option value="">-- Select {$label} --</option>
-                    {$optionsHtml}
-                </x-form.select>
-                BLADE;
+                    $fieldHtml = <<<BLADE
+                    <x-form.select
+                        name="{$name}"
+                        label="{$label}"
+                        {$wireIgnore}
+                        wire:model.live="formData.{$name}"
+                    >
+                        <option value="">-- Select {$label} --</option>
+                        {$optionsHtml}
+                    </x-form.select>
+                    BLADE;
                 break;
 
             case 'textarea':
