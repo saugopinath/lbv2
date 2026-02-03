@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Helpers\FormHelper;
 use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
 use App\Models\UniqueAppBenId;
@@ -28,13 +29,10 @@ class DynamicForm extends Component
     public bool $allTabsCompleted = false;
     public $applicationId;
     public $beneficiaryId;
-
+    public $navMessage = null;
+    public $navMessageType = 'success';
+    public $showFinalModal = false;
     public array $formData = [];
-
-    // protected $listeners = [
-    //     'document-validation-passed' => 'goToNextTab',
-    //     'document-validation-failed' => 'stayOnTab',
-    // ];
 
     protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
@@ -141,9 +139,53 @@ class DynamicForm extends Component
 
     public function finalSubmit()
     {
-        dd('FINAL SUBMIT SUCCESS', $this->formData);
+        if ((string) $this->activeTab === '104') {
+            $this->dispatch('check-documents-before-next');
+            return;
+        } else {
+            // dd($this->activeTab, $this->formData);
+            $rules = $this->getValidationRulesForActiveTab();
+            if (!empty($rules)) {
+                $this->validate($rules);
+            }
+            $this->ensureApplicationIds();
+            $this->saveCurrentTabData();
+            $tabsData = $this->prepareTabsReviewData();
+            $this->dispatch(
+                'openFinalModal',
+                applicationId: $this->applicationId,
+                tabsData: $tabsData
+            );
+        }
     }
+    private function prepareTabsReviewData()
+    {
+        $review = [];
+        $json = $this->getSchemeJson();
+        foreach ($json['tabs'] ?? [] as $tab) {
+            $tabName = $tab['tab_name'] ?? 'Tab';
+            foreach ($tab['fields'] ?? [] as $field) {
+                if (!isset($field['field_name'])) {
+                    continue;
+                }
+                $fieldName = $field['field_name'];
+                if (!array_key_exists($fieldName, $this->formData)) {
+                    continue;
+                }
+                $label = $field['level_name']
+                    ?? ucfirst(str_replace('_', ' ', $fieldName));
 
+                $value = FormHelper::resolveValue(
+                    $field,
+                    data_get($this->formData, $fieldName), // safer than []
+                    $this->formData // ⭐ PASS CONTEXT (VERY IMPORTANT)
+                );
+                $review[$tabName][$label] = $value;
+            }
+        }
+
+        return $review;
+    }
     private function updateTabNavigation(): void
     {
         $index = array_search((string) $this->activeTab, $this->views, true);
@@ -197,16 +239,12 @@ class DynamicForm extends Component
                 if (!array_key_exists($fieldName, $this->formData)) {
                     continue;
                 }
-
-                // ✅ CASE-1: normal DB column
-                if (!empty($field['db_column'])) {
-
+                if (!empty($field['db_column']) && $field['db_column'] !== 'other_details') {
                     $dbData[$field['db_column']] = $this->formData[$fieldName];
-                }
-                // ✅ CASE-2: save into other_details JSON
-                else {
-
+                } elseif (!empty($field['db_column']) && $field['db_column'] == 'other_details') {
                     $otherDetails[$fieldName] = $this->formData[$fieldName];
+                } else {
+                    continue;
                 }
             }
         }
@@ -219,14 +257,16 @@ class DynamicForm extends Component
             $dbData
         );
         if ($beneficiatDetails) {
+            $this->navMessage = 'Application saved successfully! ID: ' . $this->applicationId;
+            $this->navMessageType = 'success';
             $this->dispatch('toastr', [
                 'type' => 'success',
-                'message' => 'Data saved successfully.',
+                'message' => 'Application created successfully' . 'application_id: ' . $this->applicationId,
             ]);
         } else {
             $this->dispatch('toastr', [
                 'type' => 'error',
-                'message' => 'Data not saved. Please try again.',
+                'message' => 'Application not created. Please try again.',
             ]);
         }
         // dd($beneficiatDetails);

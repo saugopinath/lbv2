@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('field_name', 100);
             $table->string('field_id', 50);
             $table->jsonb('options')->nullable();
-            $table->string('db_colunm')->nullable();
+            $table->string('db_column')->nullable();
             $table->string('validation_rule', 255)->nullable();
             $table->string('regex', 255)->nullable();
             $table->boolean('is_multiple')->default(false);

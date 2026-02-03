@@ -112,7 +112,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_active' => true,
                     'tab_code' => 101,
                     'field_position' => 6,
-                    'db_colunm' => 'age',
+                    'db_colunm' => null,
                     'is_readonly' => 1,
 
                 ],
@@ -278,7 +278,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 1,
-                    'db_colunm' => null,
+                    'db_colunm' => 'other_details',
                     'is_mendetory' => 1,
                 ],
                 // contact Details
