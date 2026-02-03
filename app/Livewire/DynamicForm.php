@@ -25,6 +25,9 @@ class DynamicForm extends Component
     public $ram;
     public array $completedTabs = [];
     public bool $allTabsCompleted = false;
+    public $applicationId;
+    public $beneficiaryId;
+
     public array $formData = [];
 
     protected $listeners = [
@@ -75,8 +78,8 @@ class DynamicForm extends Component
             $this->dispatch('check-documents-before-next', 'enclosure-list');
             return;
         }
-
         $rules = $this->getValidationRulesForActiveTab();
+        // dd($rules);
         if (!empty($rules)) {
             $this->validate($rules);
         }
@@ -323,9 +326,9 @@ class DynamicForm extends Component
 
                 $fieldRules = explode('|', $field['validation_rule']);
 
-                if (!empty($field['regex'])) {
-                    $fieldRules[] = 'regex:/' . $field['regex'] . '/';
-                }
+                // if (!empty($field['regex'])) {
+                //     $fieldRules[] = 'regex:/' . $field['regex'] . '/';
+                // }
 
                 $rules["formData.{$field['field_name']}"] = $fieldRules;
             }

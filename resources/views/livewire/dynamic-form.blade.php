@@ -19,7 +19,7 @@
     @if($activeTab)
         <div class="p-4">
 
-            @includeIf("schemes.scheme_{$schemeId}.{$activeTab}", ['schemeId' => $schemeId])
+            @includeIf("schemes.scheme_{$schemeId}.{$activeTab}", ['schemeId' => $schemeId, 'applicationId' => $applicationId])
         </div>
         @if($ram == null)
             {{-- ACTION BUTTONS --}}

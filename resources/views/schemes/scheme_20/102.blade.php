@@ -9,6 +9,17 @@
 />
 </div><div   >
     <x-form.select
+    name="state"
+    label="State"
+    
+    wire:model.live="formData.state"
+>
+    <option value="">-- Select State --</option>
+    <option value="19">West Bengal</option>
+
+</x-form.select>
+</div><div   >
+    <x-form.select
     name="district_id"
     label="District"
     
@@ -73,24 +84,17 @@
     name="policestation"
     label="Police Station"
     
-    wire:model.live="formData.policestation"
-/>
-</div><div   >
-    <x-form.input
-    type="text"
-    name="housepremiseno"
-    label="House / Premise No"
-    
-    wire:model.live="formData.housepremiseno"
+    wire:model.live="formData.villtowncity"
 />
 </div></div>
 <div class="grid md:grid-cols-3 gap-4 mt-4">
 <div   >
     <x-form.input
     type="text"
-    name="pincode"
-    label="Pin Code"
+    name="housepremiseno"
+    label="House / Premise No"
+    placeholder="Enter House / Premise No"
     
-    wire:model.live="formData.pincode"
+    wire:model.live="formData.housepremiseno"
 />
 </div></div>
