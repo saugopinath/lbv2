@@ -53,7 +53,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
                 $motherRelationTypeId = Codemaster::where('code', 132)->value('id');
 
                 DB::beginTransaction();
-                $uniqueAppBenId = UniqueAppBenId::create([]);
+                $uniqueAppBenId = UniqueAppBenId::create(['scheme_id' => 20]);
                 $beneficiary_id_obj = UniqueAppBenId::where('application_id', $uniqueAppBenId->application_id)->first();
                 // dd($uniqueAppBenId);
                 // dd($beneficiary_id_obj->beneficiary_id);

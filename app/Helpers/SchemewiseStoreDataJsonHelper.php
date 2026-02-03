@@ -161,7 +161,7 @@ class SchemewiseStoreDataJsonHelper
                     "{$dir}/104.blade.php",
                     <<<BLADE
                 {{-- DOCUMENT TAB --}}
-                <livewire:enclosure-list :scheme_id="\$schemeId" :tabCode="$tabCode" :application_id="applicationId" />
+                <livewire:enclosure-list :scheme_id="\$schemeId" :tabCode="$tabCode" :application_id="\$applicationId" />
                 BLADE
                 );
                 continue;

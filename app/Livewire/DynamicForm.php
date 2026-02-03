@@ -30,9 +30,14 @@ class DynamicForm extends Component
 
     public array $formData = [];
 
-    protected $listeners = [
-        'document-validation-passed' => 'goToNextTab',
-        'document-validation-failed' => 'stayOnTab',
+    // protected $listeners = [
+    //     'document-validation-passed' => 'goToNextTab',
+    //     'document-validation-failed' => 'stayOnTab',
+    // ];
+
+     protected $listeners = [
+        'document-validation-passed' => 'onDocumentTabPassed',
+        'document-validation-failed' => 'onDocumentTabFailed',
     ];
 
     /* ================= MOUNT ================= */
@@ -74,19 +79,19 @@ class DynamicForm extends Component
     /* ================== SAVE & NEXT ================== */
     public function saveAndNext($nextTab)
     {
+        // 🔴 DOCUMENT TAB
         if ((string) $this->activeTab === '104') {
-            $this->dispatch('check-documents-before-next', 'enclosure-list');
+            $this->dispatch('check-documents-before-next');
             return;
         }
+
         $rules = $this->getValidationRulesForActiveTab();
-        // dd($rules);
         if (!empty($rules)) {
             $this->validate($rules);
         }
 
         $this->ensureApplicationIds();
         $this->saveCurrentTabData();
-
         $this->markTabCompleted($this->activeTab);
 
         if ($nextTab) {
@@ -95,17 +100,17 @@ class DynamicForm extends Component
         }
     }
 
-    public function goToNextTab()
-    {
-        $this->saveCurrentTabData();
+    // public function goToNextTab()
+    // {
+    //     $this->saveCurrentTabData();
 
-        if ($this->nextTab) {
-            $this->setActiveTab($this->nextTab);
-        }
-    }
-    public function stayOnTab()
-    {
-    }
+    //     if ($this->nextTab) {
+    //         $this->setActiveTab($this->nextTab);
+    //     }
+    // }
+    // public function stayOnTab()
+    // {
+    // }
 
     public function onDocumentTabPassed()
     {
@@ -335,6 +340,22 @@ class DynamicForm extends Component
         }
 
         return $rules;
+    }
+    protected function validationAttributes(): array
+    {
+        $json = $this->getSchemeJson();
+        $attributes = [];
+        foreach ($json['tabs'] ?? [] as $tab) {
+            if ((string) $tab['tab_code'] !== (string) $this->activeTab) {
+                continue;
+            }
+            foreach ($tab['fields'] ?? [] as $field) {
+                if (!empty($field['field_name']) && !empty($field['level_name'])) {
+                    $attributes["formData.{$field['field_name']}"] = $field['level_name'];
+                }
+            }
+        }
+        return $attributes;
     }
     /* ================= RENDER ================= */
 
