@@ -11,7 +11,7 @@
             @click.away="$wire.close()"
             class="bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[80vh] overflow-y-auto p-6
 ">
-            <h2 class="text-xl font-semibold mb-4">
+0            <h2 class="text-xl font-semibold mb-4">
                 Final Review Before Submit
             </h2>
             {{-- TAB DATA --}}
