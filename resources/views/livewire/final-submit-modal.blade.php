@@ -11,27 +11,22 @@
             @click.away="$wire.close()"
             class="bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[80vh] overflow-y-auto p-6
 ">
-
             <h2 class="text-xl font-semibold mb-4">
                 Final Review Before Submit
             </h2>
-
             {{-- TAB DATA --}}
             @foreach($tabsData ?? [] as $tabName => $fields)
 
-            <div class="border rounded-xl p-3 mb-3">
+            <div class="border border-gray-100 rounded-xl p-3 mb-3">
 
                 <h3 class="font-semibold text-indigo-600 mb-2">
                     {{ $tabName }}
                 </h3>
-
                 @foreach($fields as $label => $value)
-
-                <div class="flex justify-between text-sm border-b py-1">
+                <div class="flex justify-between text-sm py-1">
                     <span class="text-gray-600">
                         {{ $label }}
                     </span>
-
                     <span class="font-medium">
                         {{ $value ?: '-' }}
                     </span>
