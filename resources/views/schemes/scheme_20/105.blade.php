@@ -1,21 +1,20 @@
-<div class="mt-4 space-y-3">
-<div   >
+<div class='mt-4 space-y-4'><div   >
     <x-form.input
     type="text"
-    name="bankaccountnumber"
-    label="Bank Account Number"
-    placeholder="Enter Bank Account Number"
+    name="res"
+    label="rter"
+    placeholder="Enter rter"
     
-    wire:model.live="formData.bankaccountnumber"
+    
+    required
+    wire:model.live="formData.res"
 />
 </div><div   >
-    <x-form.input
-    type="text"
-    name="confirmbankaccountnumber"
-    label="Confirm Bank Account Number"
-    placeholder="Enter Confirm Bank Account Number"
-    
-    wire:model.live="formData.confirmbankaccountnumber"
-/>
-</div>
-</div>
+        <x-form.checkbox
+        name="zx"
+        value="1"
+        label="dvz"
+        wire:model.live="formData.zx"
+    />
+
+</div></div>

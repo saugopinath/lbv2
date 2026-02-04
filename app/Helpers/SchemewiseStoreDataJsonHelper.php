@@ -67,45 +67,6 @@ class SchemewiseStoreDataJsonHelper
                 'fields' => $fields,
                 'layout' => $layout,
             ];
-            // $fields = $model::where('scheme_id', $schemeId)
-            //     ->where('tab_code', $tab->tab_code)
-            //     ->where('is_active', true)
-            //     ->orderBy('field_position')
-            //     ->get()
-            //     ->map(fn ($field) => [
-            //         'id'                 => $field->id,
-            //         'tab_field_id'      => $field->tab_field_id ?? null,
-            //         'field_name'         => $field->field_name ?? null,
-            //         'level_name'         => $field->level_name,
-            //         'field_type'         => $field->field_type,
-            //         'validation_rule'    => $field->validation_rule,
-            //         'regex'              => $field->regex ?? null,
-            //         'is_mandatory'       => $field->is_mandatory ?? null,
-            //         'section_level_id'   => $field->section_level_id ?? null,
-            //         'section_level_type' => $field->section_level_type ?? null,
-            //         'options'            => $field->options ?? [],
-            //         'is_multiple'      => $field->is_multiple ?? false,
-            //         'db_column'        => $field->db_column ?? null,
-            //         'is_active'          => $field->is_active ?? null,
-            //         'field_position'     => $field->field_position ?? null,
-            //         'tab_code'           => $field->tab_code ?? null,
-            //         'scheme_id'          => $field->scheme_id ?? null,
-            //         'created_by'         => $field->created_by ?? null,
-            //         'updated_by'         => $field->updated_by ?? null,
-
-            //     ])
-            //     ->toArray();
-            // $fields = $model::where('scheme_id', $schemeId)
-            //     ->where('tab_code', $tab->tab_code)
-            //     ->where('is_active', true)
-            //     ->orderBy('field_position')
-            //     ->get()
-            //     ->toArray();
-            // $tabData[] = [
-            //     'tab_code' => $tab->tab_code,
-            //     'tab_name' => $tab->masterTab->tab_name ?? '',
-            //     'fields'   => $fields,
-            // ];
         }
         return [
             'scheme_id' => $schemeId,
@@ -161,44 +122,54 @@ class SchemewiseStoreDataJsonHelper
                     "{$dir}/104.blade.php",
                     <<<BLADE
                 {{-- DOCUMENT TAB --}}
-                <livewire:enclosure-list :scheme_id="\$schemeId" :tabCode="$tabCode" :application_id="applicationId" />
+                <livewire:enclosure-list :scheme_id="\$schemeId" :tabCode="$tabCode" :application_id="\$applicationId" />
                 BLADE
                 );
                 continue;
             }
 
             /* ================= TAB 105 : SELF DECLARATION ================= */
-            if ($tab['tab_code'] == 105) {
+            // if ($tab['tab_code'] == 105) {
 
-                $blade = "<div class=\"mt-4 space-y-3\">\n";
+            //     $blade = "<div class=\"mt-4 space-y-3\">\n";
 
-                // foreach ($tab['fields'] as $field) {
+            //     foreach ($tab['fields'] as $field) {
 
-                //     $label = $field['level_name'] ?? 'Declaration';
-                //     $name = $field['field_name'];
-                //     $value = $field['value'] ?? 1;
-                //     $blade .= <<<BLADE
+            //         $label = $field['level_name'] ?? 'Declaration';
+            //         $name = $field['field_name'];
+            //         $value = $field['value'] ?? 1;
+            //         $blade .= <<<BLADE
 
-                // <div class="flex items-start gap-2">
-                //     <x-form.checkbox name="{$name}" value="{$value}" label="{$label}" wire:model="formData.{$name}"
-                //     />
-                // </div>
-                // BLADE;
-                // }
-                 foreach ($rowFields as $field) {
-                        $blade .= self::renderField($field);
-                    }
+            //     <div class="flex items-start gap-2">
+            //         <x-form.checkbox name="{$name}" value="{$value}" label="{$label}" wire:model="formData.{$name}"
+            //         />
+            //     </div>
+            //     BLADE;
+            //     }
 
-                $blade .= "\n</div>";
+            //     $blade .= "\n</div>";
 
-                File::put(
-                    $dir . "/105.blade.php",
-                    $blade
-                );
+            //     File::put(
+            //         $dir . "/105.blade.php",
+            //         $blade
+            //     );
 
+            //     continue;
+            // }
+
+            if ($tabCode == 105) {
+
+                $blade = "<div class='mt-4 space-y-4'>";
+
+                foreach ($tab['fields'] as $field) {
+                    $blade .= self::renderField($field);
+                }
+
+                $blade .= "</div>";
+
+                File::put("{$dir}/105.blade.php", $blade);
                 continue;
             }
-
 
             /* ================= NORMAL FORM TABS ================= */
 
@@ -251,14 +222,28 @@ class SchemewiseStoreDataJsonHelper
 
         return $dir;
     }
+
     private static function renderField(array $field): string
     {
         $label = $field['level_name'] ?? '';
-        $name  = $field['field_name'] ?? uniqid();
-        $type  = $field['field_type'] ?? 'text';
+        $name = $field['field_name'] ?? uniqid();
+        $type = $field['field_type'] ?? 'text';
         $value = $field['value'] ?? 1;
         $placeholder = 'Enter ' . $field['level_name'] ?? '';
 
+        /* ========= REQUIRED CONDITION (from validation_rule) ========= */
+        $isRequired = false;
+
+        if (!empty($field['validation_rule'])) {
+            $rules = explode('|', $field['validation_rule']);
+            $isRequired = in_array('required', $rules, true);
+        }
+
+        $requiredAttr = $isRequired ? 'required' : '';
+
+        /* ========= READONLY CONDITION ========= */
+        $isReadonly = !empty($field['is_readonly']) && (int) $field['is_readonly'] === 1;
+        $readonlyAttr = $isReadonly ? 'readonly' : '';
         /* ========= wire:ignore condition ========= */
         $ignore = !empty($field['field_class']);
         $wireIgnore = $ignore ? 'wire:ignore' : '';
@@ -269,12 +254,12 @@ class SchemewiseStoreDataJsonHelper
             !empty($field['dependent_on_values']) &&
             is_array($field['dependent_on_values']);
 
-        $dependentOn     = $field['dependent_on'] ?? null;
+        $dependentOn = $field['dependent_on'] ?? null;
         $dependentValues = $field['dependent_on_values'] ?? [];
 
         /* ========= Alpine wrapper attrs (default empty) ========= */
-        $xData  = '';
-        $xShow  = '';
+        $xData = '';
+        $xShow = '';
         $xCloak = '';
 
         if ($hasDependency) {
@@ -297,7 +282,7 @@ class SchemewiseStoreDataJsonHelper
             }"
             HTML;
 
-            $xShow  = 'x-show="visible"';
+            $xShow = 'x-show="visible"';
             $xCloak = 'x-cloak';
         }
 
@@ -318,6 +303,8 @@ class SchemewiseStoreDataJsonHelper
                     name="{$name}"
                     label="{$label}"
                     {$wireIgnore}
+                     {$readonlyAttr}
+                      {$requiredAttr}
                     wire:model.live="formData.{$name}"
                 >
                     <option value="">-- Select {$label} --</option>
@@ -334,17 +321,24 @@ class SchemewiseStoreDataJsonHelper
                     label="{$label}"
                     placeholder="{$placeholder}"
                     {$wireIgnore}
+                     {$readonlyAttr}
+                      {$requiredAttr}
                     wire:model.live="formData.{$name}"
                 />
                 BLADE;
                 break;
-                case 'checkbox':
+
+            case 'checkbox':
                 $fieldHtml = <<<BLADE
-                <x-form.checkbox name="{$name}" value="{$value}" label="{$label}" wire:model="formData.{$name}"
+                    <x-form.checkbox
+                        name="{$name}"
+                        value="{$value}"
+                        label="{$label}"
+                        wire:model.live="formData.{$name}"
                     />
+
                 BLADE;
                 break;
-                
 
             case 'text':
             case 'number':
@@ -358,6 +352,8 @@ class SchemewiseStoreDataJsonHelper
                     label="{$label}"
                     placeholder="{$placeholder}"
                     {$wireIgnore}
+                    {$readonlyAttr}
+                    {$requiredAttr}
                     wire:model.live="formData.{$name}"
                 />
                 BLADE;

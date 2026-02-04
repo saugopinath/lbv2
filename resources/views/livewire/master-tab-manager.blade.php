@@ -146,10 +146,11 @@
             {{-- CONTENT --}}
             <div class="flex-1 overflow-y-auto p-6">
                 <div class="space-y-6">
-                    <livewire:dynamic-form
+                    <livewire:final-preview
                         :scheme-id="$selectedSchemeId"
                         :ram="1"
-                        :wire:key="'dynamic-form-'.$selectedSchemeId" />
+                        :form_preview="1"
+                        :wire:key="'final-preview-'.$selectedSchemeId" />
                 </div>
             </div>
 
