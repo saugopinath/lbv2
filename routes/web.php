@@ -271,3 +271,5 @@ Route::get('/master-tab-creation', [MasterTabCreationController::class, 'index']
 
 Route::get('/schemes-final-submitted', [SchemeController::class, 'finalSubmitted'])
     ->name('schemes.final-submitted');
+
+Route::get('/duplicate-checks', [SchemeController::class, 'finalSubmitted'])->name('duplicate-checks');

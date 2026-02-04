@@ -65,31 +65,25 @@
             </div>
             {{-- Body --}}
             <div x-show="open" x-collapse class="bg-white">
-                @if($tab->tab_code == 104)
+                 @if($tab->tab_code == 104)
                 @if(count($attachedDocuments))
                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
-                @if($isFinalSubmitted)
-                                            new Sortable($el, {
-                                                animation: 150,
-                                                handle: '.drag-handle',
-                                                onEnd() {
-                                                    let ordered = Array.from($el.children)
-                                                        .map(el => el.dataset.id);
-                                                    $wire.updateDocumentOrder(ordered);
-                                                }
-                                            })
-                @endif
-                                            ">
+                            new Sortable($el, {
+                                animation: 150,
+                                handle: '.drag-handle',
+                                onEnd() {
+                                    let ordered = Array.from($el.children)
+                                        .map(el => el.dataset.id);
+                                    $wire.updateDocumentOrder(ordered);
+                                }
+                            })
+                            ">
                     @foreach($attachedDocuments as $doc)
                     <div data-id="{{ $doc->id }}"
                         class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
                         {{-- LEFT --}}
                         <div class="flex items-center gap-3">
-                            <span
-                                class="drag-handle text-gray-400 text-lg
-                                 {{ $isFinalSubmitted ? 'opacity-40 cursor-not-allowed' : 'cursor-move' }}">
-                                ☰
-                            </span>
+                            <span class="drag-handle cursor-move text-gray-400 text-lg">☰</span>
                             <div>
                                 <div class="font-medium">
                                     {{ $loop->iteration }}. {{ $doc->docType->name }}
@@ -106,9 +100,7 @@
                         </div>
                         {{-- REMOVE --}}
                         <button wire:click="removeDocument({{ $doc->id }})"
-                            @if($isFinalSubmitted) disabled @endif
-                            class="text-red-500 font-bold text-lg mr-2
-                                {{ $isFinalSubmitted ? 'opacity-50 cursor-not-allowed' : 'hover:text-red-600' }}">
+                            class="text-red-500 font-bold text-lg hover:text-red-600">
                             ✕
                         </button>
                     </div>
@@ -600,16 +592,16 @@
                     <div>
                         @switch($field->field_type)
                         @case('text')
-                        <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" disabled />
+                        <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" placeholder="Enter {{ $field->level_name }}" disabled />
                         @break
                         @case('number')
-                        <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                        <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                         @break
                         @case('date')
-                        <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                        <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                         @break
                         @case('textarea')
-                        <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                        <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                         @break
                         @case('select')
                         <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
@@ -633,16 +625,16 @@
                         <div>
                             @switch($field->field_type)
                             @case('text')
-                            <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" disabled />
+                            <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('number')
-                            <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                            <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('date')
-                            <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                            <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('textarea')
-                            <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                            <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('select')
                             <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
@@ -673,13 +665,13 @@
                             <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" disabled />
                             @break
                             @case('number')
-                            <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                            <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('date')
-                            <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                            <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('textarea')
-                            <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                            <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('select')
                             <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
@@ -868,16 +860,16 @@
                     <div>
                         @switch($field->field_type)
                         @case('text')
-                        <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" disabled />
+                        <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" placeholder="Enter {{ $field->level_name }}" disabled />
                         @break
                         @case('number')
-                        <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                        <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                         @break
                         @case('date')
-                        <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                        <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                         @break
                         @case('textarea')
-                        <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                        <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                         @break
                         @case('select')
                         <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
@@ -901,16 +893,16 @@
                         <div>
                             @switch($field->field_type)
                             @case('text')
-                            <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" disabled />
+                            <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('number')
-                            <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                            <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('date')
-                            <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                            <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('textarea')
-                            <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                            <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('select')
                             <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>
@@ -938,16 +930,16 @@
                         <div>
                             @switch($field->field_type)
                             @case('text')
-                            <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" disabled />
+                            <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('number')
-                            <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                            <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('date')
-                            <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                            <x-form.input type="date" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('textarea')
-                            <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled />
+                            <x-form.textarea name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('select')
                             <x-form.select name="{{ $field->field_name }}" label="{{ $field->level_name }}" disabled>

@@ -2,10 +2,14 @@
 
 namespace App\Livewire;
 
+use App\Helpers\FormHelper;
+use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
+use App\Models\UniqueAppBenId;
 use Livewire\Component;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DynamicForm extends Component
 {
@@ -21,19 +25,24 @@ class DynamicForm extends Component
     public $prevTab = null;
     public $nextTab = null;
     public $ram;
-
+    public array $completedTabs = [];
+    public bool $allTabsCompleted = false;
+    public $applicationId;
+    public $beneficiaryId;
+    public $navMessage = null;
+    public $navMessageType = 'success';
+    public $showFinalModal = false;
     public array $formData = [];
 
     protected $listeners = [
-        'document-validation-passed' => 'goToNextTab',
-        'document-validation-failed' => 'stayOnTab',
+        'document-validation-passed' => 'onDocumentTabPassed',
+        'document-validation-failed' => 'onDocumentTabFailed',
     ];
 
     /* ================= MOUNT ================= */
 
-    public function mount($schemeId,$ram = null)
+    public function mount($schemeId, $ram = null, $applicationId = null, $beneficiaryId = null)
     {
-        
         $this->loadScheme($schemeId);
 
         if (!empty($this->views)) {
@@ -42,68 +51,141 @@ class DynamicForm extends Component
         }
         $this->schemeId = $schemeId;
         $this->ram = $ram;
-
+        $this->applicationId = $applicationId;
+        $this->beneficiaryId = $beneficiaryId;
         // dd($this->ram);
     }
-
-    /* ================= TAB CONTROL ================= */
-
     public function setActiveTab($tabCode)
     {
-        $this->activeTab = (string) $tabCode;
+        $tabCode = (string) $tabCode;
+
+        // 🔒 Block tab click until all completed
+        if (!$this->allTabsCompleted) {
+
+            // only allow current or completed tabs
+            if (
+                $tabCode !== $this->activeTab &&
+                !in_array($tabCode, $this->completedTabs, true)
+            ) {
+                return;
+            }
+        }
+
+        $this->activeTab = $tabCode;
         $this->updateTabNavigation();
     }
 
-    /* ================= SAVE & NEXT ================= */
-
+    /* ================== SAVE & NEXT ================== */
     public function saveAndNext($nextTab)
     {
-        // 🔥 Document tab
+        // 🔴 DOCUMENT TAB
         if ((string) $this->activeTab === '104') {
             $this->dispatch('check-documents-before-next');
             return;
         }
 
-        // ✅ JSON based validation
         $rules = $this->getValidationRulesForActiveTab();
         if (!empty($rules)) {
             $this->validate($rules);
         }
 
-        // ✅ Save data tab-wise
+        $this->ensureApplicationIds();
         $this->saveCurrentTabData();
+        $this->markTabCompleted($this->activeTab);
 
-        // 👉 Go next
-        $this->setActiveTab($nextTab);
-    }
-
-    /* ================= DOCUMENT CALLBACK ================= */
-
-    public function goToNextTab()
-    {
-        // 🔥 save document tab model data
-        $this->saveCurrentTabData();
-
-        if ($this->nextTab) {
-            $this->setActiveTab($this->nextTab);
+        if ($nextTab) {
+            $this->activeTab = (string) $nextTab;
+            $this->updateTabNavigation();
         }
     }
 
-    public function stayOnTab()
+    // public function goToNextTab()
+    // {
+    //     $this->saveCurrentTabData();
+
+    //     if ($this->nextTab) {
+    //         $this->setActiveTab($this->nextTab);
+    //     }
+    // }
+    // public function stayOnTab()
+    // {
+    // }
+
+    public function onDocumentTabPassed()
     {
-        // do nothing
+        $this->markTabCompleted($this->activeTab);
+
+        if ($this->nextTab) {
+            $this->activeTab = (string) $this->nextTab;
+            $this->updateTabNavigation();
+        }
     }
 
+    public function onDocumentTabFailed()
+    {
+    }
+    /* ================== HELPERS ================== */
+    private function markTabCompleted(string $tabCode): void
+    {
+        if (!in_array($tabCode, $this->completedTabs, true)) {
+            $this->completedTabs[] = $tabCode;
+        }
+
+        if (count($this->completedTabs) === count($this->views)) {
+            $this->allTabsCompleted = true;
+        }
+    }
     /* ================= FINAL SUBMIT ================= */
 
     public function finalSubmit()
     {
-        // optional: final validation / flag update
-        dd('FINAL SUBMIT SUCCESS', $this->formData);
+        if ((string) $this->activeTab === '104') {
+            $this->dispatch('check-documents-before-next');
+            return;
+        } else {
+            // dd($this->activeTab, $this->formData);
+            $rules = $this->getValidationRulesForActiveTab();
+            if (!empty($rules)) {
+                $this->validate($rules);
+            }
+            $this->ensureApplicationIds();
+            $this->saveCurrentTabData();
+            $tabsData = $this->prepareTabsReviewData();
+            $this->dispatch(
+                'openFinalModal',
+                applicationId: $this->applicationId,
+                tabsData: $tabsData
+            );
+        }
     }
+    private function prepareTabsReviewData()
+    {
+        $review = [];
+        $json = $this->getSchemeJson();
+        foreach ($json['tabs'] ?? [] as $tab) {
+            $tabName = $tab['tab_name'] ?? 'Tab';
+            foreach ($tab['fields'] ?? [] as $field) {
+                if (!isset($field['field_name'])) {
+                    continue;
+                }
+                $fieldName = $field['field_name'];
+                if (!array_key_exists($fieldName, $this->formData)) {
+                    continue;
+                }
+                $label = $field['level_name']
+                    ?? ucfirst(str_replace('_', ' ', $fieldName));
 
-    /* ================= TAB NAVIGATION ================= */
+                $value = FormHelper::resolveValue(
+                    $field,
+                    data_get($this->formData, $fieldName), // safer than []
+                    $this->formData // ⭐ PASS CONTEXT (VERY IMPORTANT)
+                );
+                $review[$tabName][$label] = $value;
+            }
+        }
 
+        return $review;
+    }
     private function updateTabNavigation(): void
     {
         $index = array_search((string) $this->activeTab, $this->views, true);
@@ -115,12 +197,12 @@ class DynamicForm extends Component
         $this->prevTab = $this->views[$index - 1] ?? null;
         $this->nextTab = $this->views[$index + 1] ?? null;
     }
-
-    /* ================= DB SAVE LOGIC ================= */
-
     private function saveCurrentTabData(): void
     {
-        // get tab config from master_tabs
+        if (!$this->applicationId) {
+            return;
+        }
+
         $tab = DB::table('master_tabs')
             ->where('tab_code', $this->activeTab)
             ->first();
@@ -129,31 +211,116 @@ class DynamicForm extends Component
             return;
         }
 
-        // Build model class
         $modelClass = "App\\Models\\{$tab->tab_model_name}";
-
         if (!class_exists($modelClass)) {
             return;
         }
 
-        // application_id (adjust if your key is different)
-        $applicationId = $this->formData['application_id'] ?? null;
-        // dd('', $this->formData);
-        // insert or update
-        try {
-            $modelClass::updateOrCreate(
-                [
-                    'application_id' => $applicationId,
-                ],
-                $this->formData
-            );
-        } catch (\Exception $e) {
-            dd($e);
+        $json = $this->getSchemeJson();
+
+        $dbData = [
+            'scheme_id' => $this->schemeId,
+            'application_id' => $this->applicationId,
+            'beneficiary_id' => $this->beneficiaryId,
+        ];
+
+        $otherDetails = []; // 🔥 JSON bucket
+
+        foreach ($json['tabs'] ?? [] as $tabJson) {
+
+            if ((string) $tabJson['tab_code'] !== (string) $this->activeTab) {
+                continue;
+            }
+
+            foreach ($tabJson['fields'] ?? [] as $field) {
+
+                $fieldName = $field['field_name'];
+
+                if (!array_key_exists($fieldName, $this->formData)) {
+                    continue;
+                }
+                if (!empty($field['db_column']) && $field['db_column'] !== 'other_details') {
+                    $dbData[$field['db_column']] = $this->formData[$fieldName];
+                } elseif (!empty($field['db_column']) && $field['db_column'] == 'other_details') {
+                    $otherDetails[$fieldName] = $this->formData[$fieldName];
+                } else {
+                    continue;
+                }
+            }
         }
+        // 🔥 attach JSON if exists
+        if (!empty($otherDetails)) {
+            $dbData['other_details'] = $otherDetails;
+        }
+        $beneficiatDetails = $modelClass::updateOrCreate(
+            ['application_id' => $this->applicationId],
+            $dbData
+        );
+        if ($beneficiatDetails) {
+            $this->navMessage = 'Application saved successfully! ID: ' . $this->applicationId;
+            $this->navMessageType = 'success';
+            $this->dispatch('toastr', [
+                'type' => 'success',
+                'message' => 'Application created successfully' . 'application_id: ' . $this->applicationId,
+            ]);
+        } else {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Application not created. Please try again.',
+            ]);
+        }
+        // dd($beneficiatDetails);
+    }
+    private function ensureApplicationIds(): void
+    {
+        // dd($this->schemeId);
+        if ($this->applicationId && $this->beneficiaryId) {
+            return;
+        }
+        $row = UniqueAppBenId::create([
+            'scheme_id' => $this->schemeId,
+        ]);
+        $beneficiary_id_obj = UniqueAppBenId::where('application_id', $row->application_id)->first();
+        $this->applicationId = $row->application_id;
+        $this->beneficiaryId = $beneficiary_id_obj->beneficiary_id;
+
+        $this->formData['scheme_id'] = $this->schemeId;
+        $this->formData['application_id'] = $this->applicationId;
+        $this->formData['beneficiary_id'] = $this->beneficiaryId;
     }
 
-    /* ================= SCHEME LOAD ================= */
+    public function updatedFormDataIfscode($value)
+    {
+        $ifsc = strtoupper($value);
 
+        // normalize value
+        $this->formData['ifscode'] = $ifsc;
+
+        if (strlen($ifsc) !== 11) {
+            $this->formData['bankname'] = '';
+            $this->formData['bank_branch_name'] = '';
+            return;
+        }
+
+        $ifs = Ifsccodemaster::with('bankmaster')
+            ->where('code', $ifsc)
+            ->where('is_active', 1)
+            ->first();
+
+        if ($ifs) {
+            $this->formData['bankname'] = $ifs->bankmaster->name ?? '';
+            $this->formData['bank_branch_name'] = $ifs->branch ?? '';
+        } else {
+            $this->formData['bankname'] = '';
+            $this->formData['bank_branch_name'] = '';
+
+            $this->addError(
+                'formData.ifscode',
+                'This IFSC code is not registered.'
+            );
+        }
+    }
+    /* ================= SCHEME LOAD ================= */
     private function loadScheme($schemeId)
     {
         $this->schemeId = $schemeId;
@@ -175,9 +342,7 @@ class DynamicForm extends Component
             ->get()
             ->keyBy('tab_code');
     }
-
     /* ================= JSON HELPERS ================= */
-
     private function getSchemeJson(): array
     {
         $path = storage_path("app/final_schemes_formdata/scheme_{$this->schemeId}.json");
@@ -188,7 +353,6 @@ class DynamicForm extends Component
 
         return json_decode(File::get($path), true);
     }
-
     private function getValidationRulesForActiveTab(): array
     {
         $json = $this->getSchemeJson();
@@ -208,9 +372,9 @@ class DynamicForm extends Component
 
                 $fieldRules = explode('|', $field['validation_rule']);
 
-                if (!empty($field['regex'])) {
-                    $fieldRules[] = 'regex:/' . $field['regex'] . '/';
-                }
+                // if (!empty($field['regex'])) {
+                //     $fieldRules[] = 'regex:/' . $field['regex'] . '/';
+                // }
 
                 $rules["formData.{$field['field_name']}"] = $fieldRules;
             }
@@ -218,7 +382,30 @@ class DynamicForm extends Component
 
         return $rules;
     }
-
+    protected function validationAttributes(): array
+    {
+        $json = $this->getSchemeJson();
+        $attributes = [];
+        foreach ($json['tabs'] ?? [] as $tab) {
+            if ((string) $tab['tab_code'] !== (string) $this->activeTab) {
+                continue;
+            }
+            foreach ($tab['fields'] ?? [] as $field) {
+                if (!empty($field['field_name']) && !empty($field['level_name'])) {
+                    $attributes["formData.{$field['field_name']}"] = $field['level_name'];
+                }
+            }
+        }
+        return $attributes;
+    }
+    public function updatedFormDataDob($value)
+    {
+        if (!empty($value)) {
+            $this->formData['age'] = Carbon::parse($value)->age;
+        } else {
+            $this->formData['age'] = null;
+        }
+    }
     /* ================= RENDER ================= */
 
     public function render()

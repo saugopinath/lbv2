@@ -145,6 +145,5 @@
             wire:model="validation_rule"
             :options="$validationRuleOptions" />
 
-
     </form>
 </div>

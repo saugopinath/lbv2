@@ -392,6 +392,7 @@ class SchemeTabFieldManager extends Component
                         'db_column'       => $base->db_colunm,
                         'is_mandatory'    => $base->is_mendetory,
                         'is_active'       => true,
+                        'is_readonly'       => $base->is_readonly,
                     ]
                 );
             }

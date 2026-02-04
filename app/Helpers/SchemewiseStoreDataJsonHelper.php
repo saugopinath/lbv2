@@ -161,7 +161,7 @@ class SchemewiseStoreDataJsonHelper
                     "{$dir}/104.blade.php",
                     <<<BLADE
                 {{-- DOCUMENT TAB --}}
-                <livewire:enclosure-list :scheme_id="\$schemeId" :tabCode="$tabCode" />
+                <livewire:enclosure-list :scheme_id="\$schemeId" :tabCode="$tabCode" :application_id="applicationId" />
                 BLADE
                 );
                 continue;
@@ -172,19 +172,22 @@ class SchemewiseStoreDataJsonHelper
 
                 $blade = "<div class=\"mt-4 space-y-3\">\n";
 
-                foreach ($tab['fields'] as $field) {
+                // foreach ($tab['fields'] as $field) {
 
-                    $label = $field['level_name'] ?? 'Declaration';
-                    $name = $field['field_name'];
-                    $value = $field['value'] ?? 1;
-                    $blade .= <<<BLADE
+                //     $label = $field['level_name'] ?? 'Declaration';
+                //     $name = $field['field_name'];
+                //     $value = $field['value'] ?? 1;
+                //     $blade .= <<<BLADE
 
-                <div class="flex items-start gap-2">
-                    <x-form.checkbox name="{$name}" value="{$value}" label="{$label}" wire:model="formData.{$name}"
-                    />
-                </div>
-                BLADE;
-                }
+                // <div class="flex items-start gap-2">
+                //     <x-form.checkbox name="{$name}" value="{$value}" label="{$label}" wire:model="formData.{$name}"
+                //     />
+                // </div>
+                // BLADE;
+                // }
+                 foreach ($rowFields as $field) {
+                        $blade .= self::renderField($field);
+                    }
 
                 $blade .= "\n</div>";
 
@@ -253,6 +256,8 @@ class SchemewiseStoreDataJsonHelper
         $label = $field['level_name'] ?? '';
         $name  = $field['field_name'] ?? uniqid();
         $type  = $field['field_type'] ?? 'text';
+        $value = $field['value'] ?? 1;
+        $placeholder = 'Enter ' . $field['level_name'] ?? '';
 
         /* ========= wire:ignore condition ========= */
         $ignore = !empty($field['field_class']);
@@ -327,11 +332,19 @@ class SchemewiseStoreDataJsonHelper
                 <x-form.textarea
                     name="{$name}"
                     label="{$label}"
+                    placeholder="{$placeholder}"
                     {$wireIgnore}
                     wire:model.live="formData.{$name}"
                 />
                 BLADE;
                 break;
+                case 'checkbox':
+                $fieldHtml = <<<BLADE
+                <x-form.checkbox name="{$name}" value="{$value}" label="{$label}" wire:model="formData.{$name}"
+                    />
+                BLADE;
+                break;
+                
 
             case 'text':
             case 'number':
@@ -343,6 +356,7 @@ class SchemewiseStoreDataJsonHelper
                     type="{$type}"
                     name="{$name}"
                     label="{$label}"
+                    placeholder="{$placeholder}"
                     {$wireIgnore}
                     wire:model.live="formData.{$name}"
                 />

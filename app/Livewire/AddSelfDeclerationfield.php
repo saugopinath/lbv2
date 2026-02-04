@@ -53,12 +53,8 @@ class AddSelfDeclerationField extends Component
     {
         $this->schemes = Scheme::where('is_active', true)->get();
         $this->fieldTypes = FromFieldType::all();
-
-        $this->validationRuleOptions = ValidationRule::all()
-            ->map(fn($rule) => [
-                'value' => $rule->rule,
-                'label' => $rule->description,
-            ])
+        $this->validationRuleOptions =  ValidationRule::all()
+            ->pluck('description', 'rule')
             ->toArray();
 
         if ($scheme_id && $tab_code) {
@@ -210,6 +206,7 @@ class AddSelfDeclerationField extends Component
 
             'field_position' => $nextPosition,
             'is_active'      => true,
+            'db_column'     => 'other_details',
         ]);
 
         $this->dispatch('self-declaration-saved');
