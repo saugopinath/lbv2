@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,7 +12,8 @@ return new class extends Migration
     {
         Schema::create('scheme_tab_form_fields', function (Blueprint $table) {
             $table->id();
-            $table->integer('tab_field_id')->references('id')->on('scheme_tab_basefields')->onDelete('cascade');;
+            $table->integer('tab_field_id')->references('id')->on('scheme_tab_basefields')->onDelete('cascade');
+            ;
             $table->integer('scheme_id');
             $table->string('level_name', 100)->nullable();
             $table->string('field_name', 100);
@@ -35,6 +35,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->integer('section_level_id')->nullable();
             $table->integer('section_level_type')->nullable();
+            $table->smallInteger('is_readonly')->nullable()->default(0);
             $table->timestamps();
             $table->foreign('tab_code')->references('tab_code')->on('master_tabs')->onDelete('cascade');
             $table->unique(['tab_code', 'scheme_id', 'tab_field_id', 'field_name', 'level_name']);

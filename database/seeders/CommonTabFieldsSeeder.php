@@ -28,6 +28,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 1,
+                    'db_colunm' => 'app_type',
                 ],
                 [
                     'field_id' => 'app_date',
@@ -42,8 +43,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 2,
-                    'is_mendetory' => 0,
-
+                    'db_colunm' => 'app_date'
 
                 ],
                 [
@@ -61,6 +61,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 3,
+                    'db_colunm' => 'reg_no'
 
                 ],
                 [
@@ -78,6 +79,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 4,
+                    'db_colunm' => 'ds_date'
 
                 ],
                 [
@@ -93,8 +95,8 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 5,
+                    'db_colunm' => 'full_name',
                     'is_mendetory' => 1,
-
                 ],
 
                 [
@@ -103,13 +105,15 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_name' => 'age',
                     'field_type' => 'text',
                     'is_common' => true,
-                    'validation_rule' => 'required|integer',
+                    'validation_rule' => 'required|integer|min:25|max:60',
                     'regex' => null,
                     'section_level_id' => null,
                     'is_multiple' => false,
                     'is_active' => true,
                     'tab_code' => 101,
                     'field_position' => 6,
+                    'db_colunm' => null,
+                    'is_readonly' => 1,
 
                 ],
 
@@ -127,6 +131,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 7,
+                    'db_colunm' => 'email_id'
 
                 ],
                 [
@@ -142,6 +147,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 8,
+                    'db_colunm' => 'dob'
 
                 ],
                 [
@@ -157,6 +163,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 9,
+                    'db_colunm' => 'ffname'
 
                 ],
                 [
@@ -172,6 +179,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 10,
+                    'db_colunm' => 'mfname'
 
                 ],
 
@@ -196,6 +204,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 11,
+                    'db_colunm' => 'mar_statu'
 
                 ],
                 [
@@ -213,7 +222,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 12,
-
+                    'db_colunm' => 'sfname'
                 ],
 
                 [
@@ -236,6 +245,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 13,
+                    'db_colunm' => 'caste'
 
                 ],
                 [
@@ -253,6 +263,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 14,
+                    'db_colunm' => 'cas_cer_no'
 
                 ],
                 [
@@ -267,8 +278,8 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 1,
+                    'db_colunm' => 'other_details',
                     'is_mendetory' => 1,
-
                 ],
                 // contact Details
                 [
@@ -291,6 +302,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'field_position' => 1,
                     'is_active' => true,
+                    'db_colunm' => 'district_id',
                     'is_mendetory' => 1,
                 ],
                 [
@@ -312,6 +324,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'field_position' => 2,
                     'is_active' => true,
+                    'db_colunm' => 'rural_urban',
                     'is_mendetory' => 1,
                 ],
 
@@ -339,6 +352,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'field_position' => 3,
                     'is_active' => true,
+                    'db_colunm' => 'blockurban',
                     'is_mendetory' => 1,
                 ],
 
@@ -371,6 +385,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'field_position' => 4,
                     'is_active' => true,
+                    'db_colunm' => 'gpWard',
                     'is_mendetory' => 1,
                 ],
 
@@ -395,6 +410,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'field_position' => 5,
                     'is_active' => true,
+                    'db_colunm' => 'state',
                     'is_mendetory' => 1,
                 ],
 
@@ -416,6 +432,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'field_position' => 6,
                     'is_active' => true,
+                    'db_colunm' => 'policestation'
                 ],
 
                 /*
@@ -436,6 +453,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'field_position' => 7,
                     'is_active' => true,
+                    'db_colunm' => 'villtowncity'
                 ],
 
                 /*
@@ -457,6 +475,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'field_position' => 8,
                     'is_active' => true,
+                    'db_colunm' => 'housepremiseno'
                 ],
 
                 /*
@@ -478,6 +497,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'field_position' => 9,
                     'is_active' => true,
+                    'db_colunm' => 'postoffice'
                 ],
 
                 /*
@@ -498,6 +518,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'field_position' => 10,
                     'is_active' => true,
+                    'db_colunm' => 'pincode'
                 ],
 
 
@@ -526,6 +547,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'field_position' => 1,
                     'is_active' => true,
+                    'db_colunm' => 'ifscode',
                     'is_mendetory' => 1,
                 ],
 
@@ -551,7 +573,9 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'field_position' => 2,
                     'is_active' => true,
+                    'db_colunm' => 'bankname',
                     'is_mendetory' => 1,
+                    'is_readonly' => 1,
                 ],
 
                 /*
@@ -572,7 +596,9 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'field_position' => 3,
                     'is_active' => true,
+                    'db_colunm' => 'bank_branch_name',
                     'is_mendetory' => 1,
+                    'is_readonly' => 1,
                 ],
                 /*
                 |--------------------------------------------------------------------------
@@ -596,6 +622,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'field_position' => 4,
                     'is_active' => true,
+                    'db_colunm' => 'bankaccountnumber',
                     'is_mendetory' => 1,
                 ],
 
@@ -615,12 +642,13 @@ class CommonTabFieldsSeeder extends Seeder
                     // ],
                     'is_common' => true,
                     'tab_code' => 103,
-                    'validation_rule' => 'required|same:bankaccountnumber',
+                    'validation_rule' => 'required|same:formData.bankaccountnumber',
                     'regex' => '^[0-9]{9,18}$',
                     'section_level_id' => null,
                     'is_multiple' => false,
                     'field_position' => 5,
                     'is_active' => true,
+                    'db_colunm' => null,
                     'is_mendetory' => 1,
                 ],
             ];

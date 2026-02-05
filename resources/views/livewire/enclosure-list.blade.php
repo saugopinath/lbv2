@@ -92,6 +92,5 @@
         @endforeach
 
         <x-upload-modal :currentDocExtensions="$currentDocExtensions" :currentDocMaxSize="$currentDocMaxSize" :formPreview="$form_preview" />
-    </div>
-
+    </div>    
 </div>

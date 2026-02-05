@@ -206,8 +206,7 @@ class AddSelfDeclerationField extends Component
 
             'field_position' => $nextPosition,
             'is_active'      => true,
-            'db_column'      => 'other_details',
-
+            'db_column'     => 'other_details',
         ]);
 
         $this->dispatch('self-declaration-saved');

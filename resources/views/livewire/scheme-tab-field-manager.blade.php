@@ -65,7 +65,7 @@
             </div>
             {{-- Body --}}
             <div x-show="open" x-collapse class="bg-white">
-                @if($tab->tab_code == 104)
+                 @if($tab->tab_code == 104)
                 @if(count($attachedDocuments))
                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
                             new Sortable($el, {

@@ -44,7 +44,8 @@ class EnclosureList extends Component
         // dd( $this->tabCode);
         $this->doc_type_id_array_list = $doc_type_id_array_list;
         $this->doc_type_id_array = $doc_type_id_array;
-
+        $this->loadDocumentList();
+        $this->loadExistingDocuments();
         $conditions = [
             ['scheme_id', '=', $this->scheme_id],
         ];
@@ -130,7 +131,53 @@ class EnclosureList extends Component
 
         $this->resetErrorBag('singleDocument');
     }
+    protected function loadDocumentList(): void
+    {
+        $query = SchemeAttachedDocMappings::with('codemaster')
+            ->where('scheme_id', $this->scheme_id);
 
+        if (!empty($this->tabCode)) {
+            $query->where('tab_code', $this->tabCode);
+        }
+
+        if (!empty($this->doc_type_id_array)) {
+            $query->whereIn('doc_type_id', $this->doc_type_id_array);
+        } elseif (!empty($this->doc_type_id_array_list)) {
+            $query->whereIn('doc_type_id', $this->doc_type_id_array_list);
+        }
+
+        $this->doc_lists = $query->get();
+    }
+    protected function loadExistingDocuments(): void
+    {
+        if (!$this->application_id) {
+            return;
+        }
+
+        $model = $this->enclosureModel();
+        $docTypes = $this->getDocTypeIds();
+
+        $docs = $model::where('application_id', $this->application_id)
+            ->whereIn('document_type', $docTypes)
+            ->get();
+
+        $this->existingDocuments = [];
+        foreach ($docs as $doc) {
+            $this->existingDocuments[$doc->document_type] = $doc;
+        }
+    }
+    protected function getDocTypeIds(): array
+    {
+        if (!empty($this->doc_type_id_array)) {
+            return $this->doc_type_id_array;
+        }
+
+        if (!empty($this->doc_type_id_array_list)) {
+            return $this->doc_type_id_array_list;
+        }
+
+        return $this->doc_lists?->pluck('doc_type_id')->toArray() ?? [];
+    }
     protected function rules()
     {
         if (!$this->currentDocId) {
@@ -254,6 +301,7 @@ class EnclosureList extends Component
 
         $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.', docId: $docId);
         $this->dispatch('$refresh');
+        $this->loadExistingDocuments();
     }
 
     public function downloadDocument($id)
@@ -269,28 +317,25 @@ class EnclosureList extends Component
             'Content-Type' => $document->document_mime_type,
         ]);
     }
+    /* =====================================================
+      | VALIDATE BEFORE NEXT TAB
+      * ===================================================== */
+
     public function validateBeforeNext()
     {
         $this->showErrors = false;
 
         foreach ($this->doc_lists as $doc) {
-
             $existing = $this->existingDocuments[$doc->doc_type_id] ?? null;
 
             if ($doc->is_required && empty($existing)) {
-
                 $this->showErrors = true;
-
-
-                $this->dispatch('$refresh');
-
-
                 $this->dispatch('document-validation-failed');
-
                 return;
             }
         }
 
+        // ✅ ALL REQUIRED DOCS PRESENT
         $this->dispatch('document-validation-passed');
     }
 

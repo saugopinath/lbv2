@@ -6,6 +6,8 @@
     label="IFSC Code"
     placeholder="Enter IFSC Code"
     
+    
+    required
     wire:model.live="formData.ifscode"
 />
 </div><div   >
@@ -15,6 +17,8 @@
     label="Bank Name"
     placeholder="Enter Bank Name"
     
+    readonly
+    required
     wire:model.live="formData.bankname"
 />
 </div><div   >
@@ -24,10 +28,12 @@
     label="Bank Branch Name"
     placeholder="Enter Bank Branch Name"
     
+    readonly
+    required
     wire:model.live="formData.bank_branch_name"
 />
 </div></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
+<div class="grid md:grid-cols-3 gap-4 mt-4">
 <div   >
     <x-form.input
     type="text"
@@ -35,6 +41,8 @@
     label="Bank Account Number"
     placeholder="Enter Bank Account Number"
     
+    
+    required
     wire:model.live="formData.bankaccountnumber"
 />
 </div><div   >
@@ -44,6 +52,8 @@
     label="Confirm Bank Account Number"
     placeholder="Enter Confirm Bank Account Number"
     
+    
+    required
     wire:model.live="formData.confirmbankaccountnumber"
 />
 </div></div>
