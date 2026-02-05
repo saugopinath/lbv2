@@ -123,6 +123,18 @@ function fillSelect(select, list) {
         opt.textContent = row.text;
         select.appendChild(opt);
     });
+    restoreSelected(select);
+}
+function restoreSelected(select) {
+    const root = select.closest("[wire\\:id]");
+    const key = select.dataset.wire;
+    if (!root || !key) return;
+
+    const component = Livewire.find(root.getAttribute("wire:id"));
+    if (!component) return;
+
+    const value = component.get("formData." + key);
+    if (value) select.value = value;
 }
 
 function syncLivewire(select) {

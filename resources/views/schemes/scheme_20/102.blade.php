@@ -4,7 +4,7 @@
     name="district_id"
     label="District"
     wire:ignore
-     
+     data-wire="district_id"
       required
     wire:model.live="formData.district_id"
 >
@@ -16,7 +16,7 @@
     name="rural_urban"
     label="Rural/Urbar"
     wire:ignore
-     
+     data-wire="rural_urban"
       required
     wire:model.live="formData.rural_urban"
 >
@@ -28,7 +28,7 @@
     name="blockurban"
     label="Block/Municipality"
     wire:ignore
-     
+     data-wire="blockurban"
       required
     wire:model.live="formData.blockurban"
 >
@@ -42,7 +42,7 @@
     name="gpWard"
     label="GP / Ward"
     wire:ignore
-     
+     data-wire="gpWard"
       required
     wire:model.live="formData.gpWard"
 >
