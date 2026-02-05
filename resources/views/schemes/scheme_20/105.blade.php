@@ -1,20 +1,12 @@
 <div class='mt-4 space-y-4'><div   >
     <x-form.input
     type="text"
-    name="res"
-    label="rter"
-    placeholder="Enter rter"
+    name="ram"
+    label="ram"
+    placeholder="Enter ram"
     
     
     required
-    wire:model.live="formData.res"
+    wire:model.live="formData.ram"
 />
-</div><div   >
-        <x-form.checkbox
-        name="zx"
-        value="1"
-        label="dvz"
-        wire:model.live="formData.zx"
-    />
-
 </div></div>

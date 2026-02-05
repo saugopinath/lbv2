@@ -8,16 +8,25 @@ class FinalSubmitModal extends Component
 {
     public $show = false;
     public $applicationId;
-    public $tabsData = [];
+    public array $tabsData = [];
+    public $previewTabCode = null;
+    public $schemeId;
 
+
+    // 🔥 LISTENER
     protected $listeners = ['openFinalModal'];
 
-    public function openFinalModal($applicationId, $tabsData)
+    /* ================= RECEIVE DATA ================= */
+
+    public function openFinalModal($applicationId, $tabsData, $schemeId = null)
     {
         $this->applicationId = $applicationId;
         $this->tabsData = $tabsData;
+        $this->schemeId = $schemeId;
         $this->show = true;
     }
+
+    /* ================= ACTIONS ================= */
 
     public function close()
     {
@@ -26,9 +35,7 @@ class FinalSubmitModal extends Component
 
     public function confirmSubmit()
     {
-        // Example:
-        // Application::find($this->applicationId)
-        //     ->update(['status' => 'submitted']);
+        // এখানে final submit logic বসাবে (DB update etc.)
 
         $this->show = false;
 

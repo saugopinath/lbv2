@@ -26,6 +26,19 @@
 </x-form.select>
 </div><div   >
     <x-form.input
+    type="date"
+    name="app_date"
+    label="Application Date"
+    placeholder="Enter Application Date"
+    
+    
+    required
+    wire:model.live="formData.app_date"
+/>
+</div></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div   >
+    <x-form.input
     type="text"
     name="mobile_no"
     label="Mobile Number"
@@ -35,9 +48,7 @@
     required
     wire:model.live="formData.mobile_no"
 />
-</div></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
-<div x-data="{formData: @entangle('formData').live,visible: false,
+</div><div x-data="{formData: @entangle('formData').live,visible: false,
     sync() {this.visible = ['2'].includes(String(this.formData.app_type));
         if (!this.visible) {
             this.formData.reg_no = null;
@@ -57,17 +68,6 @@
     
     
     wire:model.live="formData.reg_no"
-/>
-</div><div   >
-    <x-form.input
-    type="date"
-    name="app_date"
-    label="Application Date"
-    placeholder="Enter Application Date"
-    
-    
-    required
-    wire:model.live="formData.app_date"
 />
 </div><div x-data="{formData: @entangle('formData').live,visible: false,
     sync() {this.visible = ['2'].includes(String(this.formData.app_type));
@@ -116,19 +116,6 @@
 />
 </div><div   >
     <x-form.input
-    type="text"
-    name="ffname"
-    label="Father's Name"
-    placeholder="Enter Father's Name"
-    
-    
-    required
-    wire:model.live="formData.ffname"
-/>
-</div></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
-<div   >
-    <x-form.input
     type="date"
     name="dob"
     label="Date of Birth"
@@ -137,6 +124,19 @@
     
     required
     wire:model.live="formData.dob"
+/>
+</div></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div   >
+    <x-form.input
+    type="text"
+    name="ffname"
+    label="Father's Name"
+    placeholder="Enter Father's Name"
+    
+    
+    required
+    wire:model.live="formData.ffname"
 />
 </div><div   >
     <x-form.input
@@ -167,7 +167,7 @@
 
 </x-form.select>
 </div></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div class="grid md:grid-cols-2 gap-4 mt-4">
 <div x-data="{formData: @entangle('formData').live,visible: false,
     sync() {this.visible = ['2','3','5'].includes(String(this.formData.mar_statu));
         if (!this.visible) {
@@ -205,7 +205,9 @@
 <option value="4">General</option>
 
 </x-form.select>
-</div><div x-data="{formData: @entangle('formData').live,visible: false,
+</div></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div x-data="{formData: @entangle('formData').live,visible: false,
     sync() {this.visible = ['1','2','3'].includes(String(this.formData.caste));
         if (!this.visible) {
             this.formData.cas_cer_no = null;

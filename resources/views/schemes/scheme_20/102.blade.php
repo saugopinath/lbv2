@@ -89,17 +89,6 @@
 </div><div   >
     <x-form.input
     type="text"
-    name="housepremiseno"
-    label="House / Premise No"
-    placeholder="Enter House / Premise No"
-    
-    
-    
-    wire:model.live="formData.housepremiseno"
-/>
-</div><div   >
-    <x-form.input
-    type="text"
     name="postoffice"
     label="Post Office"
     placeholder="Enter Post Office"
@@ -107,6 +96,17 @@
     
     required
     wire:model.live="formData.postoffice"
+/>
+</div><div   >
+    <x-form.input
+    type="text"
+    name="housepremiseno"
+    label="House / Premise No"
+    placeholder="Enter House / Premise No"
+    
+    
+    
+    wire:model.live="formData.housepremiseno"
 />
 </div></div>
 <div class="grid md:grid-cols-3 gap-4 mt-4">

@@ -143,49 +143,110 @@ class DynamicForm extends Component
             $this->dispatch('check-documents-before-next');
             return;
         } else {
-            // dd($this->activeTab, $this->formData);
             $rules = $this->getValidationRulesForActiveTab();
             if (!empty($rules)) {
                 $this->validate($rules);
             }
             $this->ensureApplicationIds();
             $this->saveCurrentTabData();
-            $tabsData = $this->prepareTabsReviewData();
-            $this->dispatch(
-                'openFinalModal',
-                applicationId: $this->applicationId,
-                tabsData: $tabsData
-            );
         }
+        $tabsData = $this->prepareTabsReviewData();
+
+        $this->dispatch(
+            'openFinalModal',
+            applicationId: $this->applicationId,
+            tabsData: $tabsData,
+            schemeId: $this->schemeId
+        );
+
+
     }
+    // private function prepareTabsReviewData()
+    // {
+    //     $review = [];
+    //     $json = $this->getSchemeJson();
+    //     foreach ($json['tabs'] ?? [] as $tab) {
+    //         $tabName = $tab['tab_name'] ?? 'Tab';
+    //         foreach ($tab['fields'] ?? [] as $field) {
+    //             if (!isset($field['field_name'])) {
+    //                 continue;
+    //             }
+    //             $fieldName = $field['field_name'];
+    //             if (!array_key_exists($fieldName, $this->formData)) {
+    //                 continue;
+    //             }
+    //             $label = $field['level_name']
+    //                 ?? ucfirst(str_replace('_', ' ', $fieldName));
+
+    //             $value = FormHelper::resolveValue(
+    //                 $field,
+    //                 data_get($this->formData, $fieldName), // safer than []
+    //                 $this->formData // ⭐ PASS CONTEXT (VERY IMPORTANT)
+    //             );
+    //             $review[$tabName][$label] = $value;
+    //         }
+    //     }
+
+    //     return $review;
+    // }
+    /* ================= REVIEW DATA ================= */
+
     private function prepareTabsReviewData()
     {
         $review = [];
         $json = $this->getSchemeJson();
+
         foreach ($json['tabs'] ?? [] as $tab) {
+
+            $tabCode = (string) ($tab['tab_code'] ?? '');
             $tabName = $tab['tab_name'] ?? 'Tab';
+
+            if (!$tabCode) {
+                continue;
+            }
+
+            // 🔥 INIT TAB ALWAYS (EVEN IF NO formData)
+            if (!isset($review[$tabCode])) {
+                $review[$tabCode] = [
+                    'tab_code' => $tabCode,
+                    'tab_name' => $tabName,
+                    'fields' => [],
+                ];
+            }
+
+            // 🔥 DOCUMENT TAB (104) → NO FIELD LOOP
+            if ($tabCode === '104') {
+                continue;
+            }
+
             foreach ($tab['fields'] ?? [] as $field) {
-                if (!isset($field['field_name'])) {
+
+                if (empty($field['field_name'])) {
                     continue;
                 }
+
                 $fieldName = $field['field_name'];
+
                 if (!array_key_exists($fieldName, $this->formData)) {
                     continue;
                 }
+
                 $label = $field['level_name']
                     ?? ucfirst(str_replace('_', ' ', $fieldName));
 
                 $value = FormHelper::resolveValue(
                     $field,
-                    data_get($this->formData, $fieldName), // safer than []
-                    $this->formData // ⭐ PASS CONTEXT (VERY IMPORTANT)
+                    data_get($this->formData, $fieldName),
+                    $this->formData
                 );
-                $review[$tabName][$label] = $value;
+
+                $review[$tabCode]['fields'][$label] = $value;
             }
         }
 
         return $review;
     }
+
     private function updateTabNavigation(): void
     {
         $index = array_search((string) $this->activeTab, $this->views, true);
