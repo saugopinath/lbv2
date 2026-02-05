@@ -26,19 +26,6 @@
 </x-form.select>
 </div><div   >
     <x-form.input
-    type="date"
-    name="app_date"
-    label="Application Date"
-    placeholder="Enter Application Date"
-    
-    
-    required
-    wire:model.live="formData.app_date"
-/>
-</div></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
-<div   >
-    <x-form.input
     type="text"
     name="mobile_no"
     label="Mobile Number"
@@ -48,26 +35,18 @@
     required
     wire:model.live="formData.mobile_no"
 />
-</div><div x-data="{formData: @entangle('formData').live,visible: false,
-    sync() {this.visible = ['2'].includes(String(this.formData.app_type));
-        if (!this.visible) {
-            this.formData.reg_no = null;
-        }
-    },
-    init() {
-        this.sync();
-        this.$watch('formData.app_type', () => this.sync());
-    }
-}" x-show="visible" x-cloak>
+</div></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div   >
     <x-form.input
-    type="text"
-    name="reg_no"
-    label="Duare Sarkar Registration Number"
-    placeholder="Enter Duare Sarkar Registration Number"
+    type="date"
+    name="app_date"
+    label="Application Date"
+    placeholder="Enter Application Date"
     
     
-    
-    wire:model.live="formData.reg_no"
+    required
+    wire:model.live="formData.app_date"
 />
 </div><div x-data="{formData: @entangle('formData').live,visible: false,
     sync() {this.visible = ['2'].includes(String(this.formData.app_type));
@@ -90,9 +69,7 @@
     
     wire:model.live="formData.ds_date"
 />
-</div></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
-<div   >
+</div><div   >
     <x-form.input
     type="text"
     name="age"
@@ -102,6 +79,40 @@
     readonly
     required
     wire:model.live="formData.age"
+/>
+</div></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div x-data="{formData: @entangle('formData').live,visible: false,
+    sync() {this.visible = ['2'].includes(String(this.formData.app_type));
+        if (!this.visible) {
+            this.formData.reg_no = null;
+        }
+    },
+    init() {
+        this.sync();
+        this.$watch('formData.app_type', () => this.sync());
+    }
+}" x-show="visible" x-cloak>
+    <x-form.input
+    type="text"
+    name="reg_no"
+    label="Duare Sarkar Registration Number"
+    placeholder="Enter Duare Sarkar Registration Number"
+    
+    
+    
+    wire:model.live="formData.reg_no"
+/>
+</div><div   >
+    <x-form.input
+    type="date"
+    name="dob"
+    label="Date of Birth"
+    placeholder="Enter Date of Birth"
+    
+    
+    required
+    wire:model.live="formData.dob"
 />
 </div><div   >
     <x-form.input
@@ -114,16 +125,18 @@
     
     wire:model.live="formData.email_id"
 />
-</div><div   >
+</div></div>
+<div class="grid md:grid-cols-1 gap-4 mt-4">
+<div   >
     <x-form.input
-    type="date"
-    name="dob"
-    label="Date of Birth"
-    placeholder="Enter Date of Birth"
+    type="text"
+    name="mfname"
+    label="Mother's Name"
+    placeholder="Enter Mother's Name"
     
     
     required
-    wire:model.live="formData.dob"
+    wire:model.live="formData.mfname"
 />
 </div></div>
 <div class="grid md:grid-cols-3 gap-4 mt-4">
@@ -137,17 +150,6 @@
     
     required
     wire:model.live="formData.ffname"
-/>
-</div><div   >
-    <x-form.input
-    type="text"
-    name="mfname"
-    label="Mother's Name"
-    placeholder="Enter Mother's Name"
-    
-    
-    required
-    wire:model.live="formData.mfname"
 />
 </div><div   >
     <x-form.select
@@ -166,9 +168,7 @@
 <option value="5">Widower</option>
 
 </x-form.select>
-</div></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
-<div x-data="{formData: @entangle('formData').live,visible: false,
+</div><div x-data="{formData: @entangle('formData').live,visible: false,
     sync() {this.visible = ['2','3','5'].includes(String(this.formData.mar_statu));
         if (!this.visible) {
             this.formData.sfname = null;
@@ -189,7 +189,9 @@
     
     wire:model.live="formData.sfname"
 />
-</div><div   >
+</div></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div   >
     <x-form.select
     name="caste"
     label="Caste"
@@ -205,9 +207,7 @@
 <option value="4">General</option>
 
 </x-form.select>
-</div></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
-<div x-data="{formData: @entangle('formData').live,visible: false,
+</div><div x-data="{formData: @entangle('formData').live,visible: false,
     sync() {this.visible = ['1','2','3'].includes(String(this.formData.caste));
         if (!this.visible) {
             this.formData.cas_cer_no = null;

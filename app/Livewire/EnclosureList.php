@@ -248,6 +248,8 @@ class EnclosureList extends Component
         // dd($model);
         $existingDoc = $model::where('application_id', $this->application_id)
             ->where('document_type', $this->currentDocId)
+            ->where('scheme_id', $this->scheme_id)
+            ->where('tab_code', $this->tabCode)
             ->first();
         // dd($existingDoc);
         if ($existingDoc) {
@@ -257,6 +259,8 @@ class EnclosureList extends Component
                 'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
                 'document_mime_type' => $this->singleDocument->getMimeType(),
                 'created_by' => Auth::id(),
+                'scheme_id' => $this->scheme_id,   
+                'tab_code' => $this->tabCode,    
             ]);
         } else {
             $model::create([
@@ -267,6 +271,8 @@ class EnclosureList extends Component
                 'document_mime_type' => $this->singleDocument->getMimeType(),
                 'document_type' => $this->currentDocId,
                 'created_by' => Auth::id(),
+                'scheme_id' => $this->scheme_id,  
+                'tab_code' => $this->tabCode,    
             ]);
             // dd($is_upload);
         }
