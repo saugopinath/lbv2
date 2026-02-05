@@ -302,6 +302,7 @@ class SchemewiseStoreDataJsonHelper
                 <x-form.select
                     name="{$name}"
                     label="{$label}"
+                    data-wire="{$name}"
                     {$wireIgnore}
                      {$readonlyAttr}
                       {$requiredAttr}
