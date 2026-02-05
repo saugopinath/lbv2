@@ -37,6 +37,13 @@
 </div><div class='my-3'></div><div class="pl-0">
     <x-form.input
         type="text"
+        name="fjh j"
+        label="hjfhgjg"
+        wire:model.live="formData.fjh j"
+    />
+</div><div class="pl-0">
+    <x-form.input
+        type="text"
         name="ram"
         label="zdsfgh"
         wire:model.live="formData.ram"

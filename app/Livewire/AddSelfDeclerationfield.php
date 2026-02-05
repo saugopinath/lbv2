@@ -151,9 +151,9 @@ class AddSelfDeclerationField extends Component
     }
     public function updatedFieldName($value)
     {
-        if ($this->field_type === 'checkbox') {
-            $this->field_id = Str::slug($value, '_');
-        }
+        
+        $this->field_id = Str::slug($value, '_');
+        
     }
     public function addOption()
     {

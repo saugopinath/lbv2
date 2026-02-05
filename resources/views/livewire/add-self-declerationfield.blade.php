@@ -34,12 +34,12 @@
 
         {{-- Field Name --}}
         <x-form.input name="field_name" label="Field Name"
-            wire:model="field_name" required />
+            wire:model.live="field_name" required />
 
         {{-- Field ID --}}
         <x-form.input name="field_id" label="Field ID"
-            wire:model="field_id"
-            required />
+            wire:model.live="field_id"
+            required readonly/>
 
         <x-form.textarea name="level_name" label="Level Name"
             wire:model="level_name" required></x-form.textarea>

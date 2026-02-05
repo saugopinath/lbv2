@@ -59,10 +59,7 @@ class DynamicForm extends Component
     {
         $tabCode = (string) $tabCode;
 
-        // 🔒 Block tab click until all completed
         if (!$this->allTabsCompleted) {
-
-            // only allow current or completed tabs
             if (
                 $tabCode !== $this->activeTab &&
                 !in_array($tabCode, $this->completedTabs, true)
@@ -78,7 +75,6 @@ class DynamicForm extends Component
     /* ================== SAVE & NEXT ================== */
     public function saveAndNext($nextTab)
     {
-        // 🔴 DOCUMENT TAB
         if ((string) $this->activeTab === '104') {
             $this->dispatch('check-documents-before-next');
             return;
@@ -121,9 +117,7 @@ class DynamicForm extends Component
         }
     }
 
-    public function onDocumentTabFailed()
-    {
-    }
+    public function onDocumentTabFailed() {}
     /* ================== HELPERS ================== */
     private function markTabCompleted(string $tabCode): void
     {
@@ -147,21 +141,46 @@ class DynamicForm extends Component
             if (!empty($rules)) {
                 $this->validate($rules);
             }
+            // dd($rules);
             $this->ensureApplicationIds();
             $this->saveCurrentTabData();
         }
         $tabsData = $this->prepareTabsReviewData();
-
         $this->dispatch(
             'openFinalModal',
             applicationId: $this->applicationId,
             tabsData: $tabsData,
             schemeId: $this->schemeId
         );
-
-
     }
-    
+    // private function prepareTabsReviewData()
+    // {
+    //     $review = [];
+    //     $json = $this->getSchemeJson();
+    //     foreach ($json['tabs'] ?? [] as $tab) {
+    //         $tabName = $tab['tab_name'] ?? 'Tab';
+    //         foreach ($tab['fields'] ?? [] as $field) {
+    //             if (!isset($field['field_name'])) {
+    //                 continue;
+    //             }
+    //             $fieldName = $field['field_name'];
+    //             if (!array_key_exists($fieldName, $this->formData)) {
+    //                 continue;
+    //             }
+    //             $label = $field['level_name']
+    //                 ?? ucfirst(str_replace('_', ' ', $fieldName));
+
+    //             $value = FormHelper::resolveValue(
+    //                 $field,
+    //                 data_get($this->formData, $fieldName), // safer than []
+    //                 $this->formData // ⭐ PASS CONTEXT (VERY IMPORTANT)
+    //             );
+    //             $review[$tabName][$label] = $value;
+    //         }
+    //     }
+
+    //     return $review;
+    // }
     /* ================= REVIEW DATA ================= */
 
     private function prepareTabsReviewData()
@@ -178,7 +197,6 @@ class DynamicForm extends Component
                 continue;
             }
 
-            // 🔥 INIT TAB ALWAYS (EVEN IF NO formData)
             if (!isset($review[$tabCode])) {
                 $review[$tabCode] = [
                     'tab_code' => $tabCode,
@@ -186,18 +204,14 @@ class DynamicForm extends Component
                     'fields' => [],
                 ];
             }
-
-            // 🔥 DOCUMENT TAB (104) → NO FIELD LOOP
             if ($tabCode === '104') {
                 continue;
             }
-
             foreach ($tab['fields'] ?? [] as $field) {
 
                 if (empty($field['field_name'])) {
                     continue;
                 }
-
                 $fieldName = $field['field_name'];
 
                 if (!array_key_exists($fieldName, $this->formData)) {
@@ -212,7 +226,6 @@ class DynamicForm extends Component
                     data_get($this->formData, $fieldName),
                     $this->formData
                 );
-
                 $review[$tabCode]['fields'][$label] = $value;
             }
         }
@@ -405,6 +418,15 @@ class DynamicForm extends Component
                 }
 
                 $fieldRules = explode('|', $field['validation_rule']);
+                if ($field['field_type'] === 'checkbox') {
+
+                    $fieldRules = array_map(function ($rule) {
+
+                        return $rule === 'required'
+                            ? 'accepted'
+                            : $rule;
+                    }, $fieldRules);
+                }
 
                 // if (!empty($field['regex'])) {
                 //     $fieldRules[] = 'regex:/' . $field['regex'] . '/';
@@ -432,6 +454,21 @@ class DynamicForm extends Component
         }
         return $attributes;
     }
+    protected function messages(): array
+    {
+        return [
+
+            'formData.*.accepted' => 'Please confirm: :attribute.',
+            'formData.*.required' => ':attribute is required.',
+            'formData.*.regex' => 'Invalid format for :attribute.',
+            'formData.*.numeric' => ':attribute must be a number.',
+            'formData.*.date' => ':attribute must be a date.',
+            'formData.*.required_if' => ':attribute is required.',
+            'formData.*.required_unless' => ':attribute is required.',
+        ];
+    }
+
+
     public function updatedFormDataDob($value)
     {
         if (!empty($value)) {
