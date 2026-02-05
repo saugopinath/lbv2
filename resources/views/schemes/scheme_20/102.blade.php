@@ -65,19 +65,6 @@
 </div><div   >
     <x-form.input
     type="text"
-    name="policestation"
-    label="Police Station"
-    placeholder="Enter Police Station"
-    
-    
-    required
-    wire:model.live="formData.policestation"
-/>
-</div></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
-<div   >
-    <x-form.input
-    type="text"
     name="villtowncity"
     label="Village / Town / City"
     placeholder="Enter Village / Town / City"
@@ -86,7 +73,9 @@
     required
     wire:model.live="formData.villtowncity"
 />
-</div><div   >
+</div></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div   >
     <x-form.input
     type="text"
     name="housepremiseno"
@@ -96,6 +85,17 @@
     
     
     wire:model.live="formData.housepremiseno"
+/>
+</div><div   >
+    <x-form.input
+    type="text"
+    name="policestation"
+    label="Police Station"
+    placeholder="Enter Police Station"
+    
+    
+    required
+    wire:model.live="formData.policestation"
 />
 </div><div   >
     <x-form.input

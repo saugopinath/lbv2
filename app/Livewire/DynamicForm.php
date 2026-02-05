@@ -59,10 +59,7 @@ class DynamicForm extends Component
     {
         $tabCode = (string) $tabCode;
 
-        // 🔒 Block tab click until all completed
         if (!$this->allTabsCompleted) {
-
-            // only allow current or completed tabs
             if (
                 $tabCode !== $this->activeTab &&
                 !in_array($tabCode, $this->completedTabs, true)
@@ -78,7 +75,6 @@ class DynamicForm extends Component
     /* ================== SAVE & NEXT ================== */
     public function saveAndNext($nextTab)
     {
-        // 🔴 DOCUMENT TAB
         if ((string) $this->activeTab === '104') {
             $this->dispatch('check-documents-before-next');
             return;
@@ -121,9 +117,7 @@ class DynamicForm extends Component
         }
     }
 
-    public function onDocumentTabFailed()
-    {
-    }
+    public function onDocumentTabFailed() {}
     /* ================== HELPERS ================== */
     private function markTabCompleted(string $tabCode): void
     {
@@ -143,55 +137,110 @@ class DynamicForm extends Component
             $this->dispatch('check-documents-before-next');
             return;
         } else {
-            // dd($this->activeTab, $this->formData);
             $rules = $this->getValidationRulesForActiveTab();
             if (!empty($rules)) {
                 $this->validate($rules);
             }
+            // dd($rules);
             $this->ensureApplicationIds();
             $this->saveCurrentTabData();
-            $tabsData = $this->prepareTabsReviewData();
-            $this->dispatch(
-                'openFinalModal',
-                applicationId: $this->applicationId,
-                tabsData: $tabsData
-            );
         }
+        $tabsData = $this->prepareTabsReviewData();
+        $this->dispatch(
+            'openFinalModal',
+            applicationId: $this->applicationId,
+            tabsData: $tabsData,
+            schemeId: $this->schemeId
+        );
     }
+    // private function prepareTabsReviewData()
+    // {
+    //     $review = [];
+    //     $json = $this->getSchemeJson();
+    //     foreach ($json['tabs'] ?? [] as $tab) {
+    //         $tabName = $tab['tab_name'] ?? 'Tab';
+    //         foreach ($tab['fields'] ?? [] as $field) {
+    //             if (!isset($field['field_name'])) {
+    //                 continue;
+    //             }
+    //             $fieldName = $field['field_name'];
+    //             if (!array_key_exists($fieldName, $this->formData)) {
+    //                 continue;
+    //             }
+    //             $label = $field['level_name']
+    //                 ?? ucfirst(str_replace('_', ' ', $fieldName));
+
+    //             $value = FormHelper::resolveValue(
+    //                 $field,
+    //                 data_get($this->formData, $fieldName), // safer than []
+    //                 $this->formData // ⭐ PASS CONTEXT (VERY IMPORTANT)
+    //             );
+    //             $review[$tabName][$label] = $value;
+    //         }
+    //     }
+
+    //     return $review;
+    // }
+    /* ================= REVIEW DATA ================= */
+
     private function prepareTabsReviewData()
     {
         $review = [];
         $json = $this->getSchemeJson();
+
         foreach ($json['tabs'] ?? [] as $tab) {
+
+            $tabCode = (string) ($tab['tab_code'] ?? '');
             $tabName = $tab['tab_name'] ?? 'Tab';
+
+            if (!$tabCode) {
+                continue;
+            }
+
+            if (!isset($review[$tabCode])) {
+                $review[$tabCode] = [
+                    'tab_code' => $tabCode,
+                    'tab_name' => $tabName,
+                    'fields' => [],
+                ];
+            }
+            if ($tabCode === '104') {
+                continue;
+            }
             foreach ($tab['fields'] ?? [] as $field) {
-                if (!isset($field['field_name'])) {
+
+                if (empty($field['field_name'])) {
                     continue;
                 }
                 $fieldName = $field['field_name'];
+
                 if (!array_key_exists($fieldName, $this->formData)) {
                     continue;
                 }
+
                 $label = $field['level_name']
                     ?? ucfirst(str_replace('_', ' ', $fieldName));
 
                 $value = FormHelper::resolveValue(
                     $field,
-                    data_get($this->formData, $fieldName), // safer than []
-                    $this->formData // ⭐ PASS CONTEXT (VERY IMPORTANT)
+                    data_get($this->formData, $fieldName),
+                    $this->formData
                 );
-                $review[$tabName][$label] = $value;
+                $review[$tabCode]['fields'][$label] = $value;
             }
         }
 
         return $review;
     }
+
     private function updateTabNavigation(): void
     {
         $index = array_search((string) $this->activeTab, $this->views, true);
+
         $this->currentIndex = $index;
         $this->isFirst = ($index === 0);
         $this->isLast = ($index === count($this->views) - 1);
+
         $this->prevTab = $this->views[$index - 1] ?? null;
         $this->nextTab = $this->views[$index + 1] ?? null;
     }
@@ -200,30 +249,40 @@ class DynamicForm extends Component
         if (!$this->applicationId) {
             return;
         }
+
         $tab = DB::table('master_tabs')
             ->where('tab_code', $this->activeTab)
             ->first();
+
         if (!$tab || empty($tab->tab_model_name)) {
             return;
         }
+
         $modelClass = "App\\Models\\{$tab->tab_model_name}";
         if (!class_exists($modelClass)) {
             return;
         }
+
         $json = $this->getSchemeJson();
+
         $dbData = [
             'scheme_id' => $this->schemeId,
             'application_id' => $this->applicationId,
             'beneficiary_id' => $this->beneficiaryId,
         ];
-        $otherDetails = [];
+
+        $otherDetails = []; // 🔥 JSON bucket
+
         foreach ($json['tabs'] ?? [] as $tabJson) {
 
             if ((string) $tabJson['tab_code'] !== (string) $this->activeTab) {
                 continue;
             }
+
             foreach ($tabJson['fields'] ?? [] as $field) {
+
                 $fieldName = $field['field_name'];
+
                 if (!array_key_exists($fieldName, $this->formData)) {
                     continue;
                 }
@@ -236,6 +295,7 @@ class DynamicForm extends Component
                 }
             }
         }
+        // 🔥 attach JSON if exists
         if (!empty($otherDetails)) {
             $dbData['other_details'] = $otherDetails;
         }
@@ -358,6 +418,15 @@ class DynamicForm extends Component
                 }
 
                 $fieldRules = explode('|', $field['validation_rule']);
+                if ($field['field_type'] === 'checkbox') {
+
+                    $fieldRules = array_map(function ($rule) {
+
+                        return $rule === 'required'
+                            ? 'accepted'
+                            : $rule;
+                    }, $fieldRules);
+                }
 
                 // if (!empty($field['regex'])) {
                 //     $fieldRules[] = 'regex:/' . $field['regex'] . '/';
@@ -385,6 +454,21 @@ class DynamicForm extends Component
         }
         return $attributes;
     }
+    protected function messages(): array
+    {
+        return [
+
+            'formData.*.accepted' => 'Please confirm: :attribute.',
+            'formData.*.required' => ':attribute is required.',
+            'formData.*.regex' => 'Invalid format for :attribute.',
+            'formData.*.numeric' => ':attribute must be a number.',
+            'formData.*.date' => ':attribute must be a date.',
+            'formData.*.required_if' => ':attribute is required.',
+            'formData.*.required_unless' => ':attribute is required.',
+        ];
+    }
+
+
     public function updatedFormDataDob($value)
     {
         if (!empty($value)) {

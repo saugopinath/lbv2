@@ -12,4 +12,6 @@ class BeneficiaryPersonalDetail extends Model
     protected $casts = [
         'other_details' => 'array',
     ];
+
+    
 }
