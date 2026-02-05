@@ -53,13 +53,13 @@ class AddSelfDeclerationField extends Component
     {
         $this->schemes = Scheme::where('is_active', true)->get();
         $this->fieldTypes = FromFieldType::all();
-        $this->validationRuleOptions =  ValidationRule::all()
+        $this->validationRuleOptions = ValidationRule::all()
             ->pluck('description', 'rule')
             ->toArray();
 
         if ($scheme_id && $tab_code) {
             $this->scheme_id = $scheme_id;
-            $this->tab_code  = $tab_code;
+            $this->tab_code = $tab_code;
             $this->isContextLocked = true;
 
             $this->tabs = SchemeTabMapping::with('masterTab')
@@ -172,10 +172,10 @@ class AddSelfDeclerationField extends Component
         // dd($this->scheme_id, $this->tab_code, $this->field_type, $this->field_name, $this->field_id, $this->is_under_section, $this->section_level_type, $this->section_id, $this->is_multiple, $this->options, $this->validation_rule, $this->level_name);
         $this->validate([
             'scheme_id' => 'required',
-            'tab_code'  => 'required',
+            'tab_code' => 'required',
             'field_type' => 'required',
             'field_name' => 'required',
-            'field_id'  => 'required',
+            'field_id' => 'required',
             'level_name' => 'required',
             'validation_rule' => 'required',
             'is_multiple' => 'required_if:field_type,select',
@@ -187,26 +187,33 @@ class AddSelfDeclerationField extends Component
         $lastPosition = SelfDeclerationBasefield::where('scheme_id', $this->scheme_id)
             ->where('tab_code', $this->tab_code)
             ->max('field_position');
+            
+        $this->options = collect($this->options ?? [])
+            ->flatten()
+            ->filter(fn($v) => is_string($v) && $v !== '')
+            ->values()
+            ->mapWithKeys(fn($value, $index) => [$index + 1 => $value])
+            ->toArray();
 
         $nextPosition = ($lastPosition ?? 0) + 1;
         SelfDeclerationBasefield::create([
-            'scheme_id'      => $this->scheme_id,
-            'tab_code'       => $this->tab_code,
-            'field_name'     => $this->field_name,
-            'field_id'       => $this->field_id,
-            'level_name'     => $this->level_name,
-            'field_type'     => $this->field_type,
-            'section_level_id'     => $this->section_id,
+            'scheme_id' => $this->scheme_id,
+            'tab_code' => $this->tab_code,
+            'field_name' => $this->field_name,
+            'field_id' => $this->field_id,
+            'level_name' => $this->level_name,
+            'field_type' => $this->field_type,
+            'section_level_id' => $this->section_id,
             'section_level_type' => $this->section_level_type,
-            'is_multiple'    => $this->is_multiple,
-            'options'        => $this->options,
+            'is_multiple' => $this->is_multiple,
+            'options' => $this->options,
             'validation_rule' => empty($this->validation_rule)
                 ? null
                 : implode('|', array_unique($this->validation_rule)),
 
             'field_position' => $nextPosition,
-            'is_active'      => true,
-            'db_column'     => 'other_details',
+            'is_active' => true,
+            'db_column' => 'other_details',
         ]);
 
         $this->dispatch('self-declaration-saved');

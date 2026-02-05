@@ -6,6 +6,7 @@ use App\Models\SchemeAttachedDocMappings;
 use App\Models\SchemeTabBasefield;
 use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabFormField;
+use App\Models\SectionLevelMaster;
 use App\Models\SelfDeclerationBasefield;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
@@ -157,12 +158,76 @@ class SchemewiseStoreDataJsonHelper
             //     continue;
             // }
 
+            // if ($tabCode == 105) {
+
+            //     $blade = "<div class='mt-4 space-y-4'>";
+
+            //     foreach ($tab['fields'] as $field) {
+            //         $blade .= self::renderField($field);
+            //     }
+
+            //     $blade .= "</div>";
+
+            //     File::put("{$dir}/105.blade.php", $blade);
+            //     continue;
+            // }
             if ($tabCode == 105) {
 
-                $blade = "<div class='mt-4 space-y-4'>";
+                // 🔹 fetch ordered self-declaration fields
+                $fields = SelfDeclerationBasefield::where('scheme_id', $schemeId)
+                    ->where('tab_code', 105)
+                    ->where('is_active', true)
+                    ->orderBy('field_position')
+                    ->get()
+                    ->values();
 
-                foreach ($tab['fields'] as $field) {
-                    $blade .= self::renderField($field);
+                $sectionMap = SectionLevelMaster::pluck(
+                    'section_level_name',
+                    'id'
+                )->toArray();
+
+                $blade = "<div class='space-y-2'>";
+
+                $lastSectionKey = null;
+
+                foreach ($fields as $i => $field) {
+
+                    $hasSection = !empty($field->section_level_id);
+
+                    $currentKey = $hasSection
+                        ? $field->section_level_type . '-' . $field->section_level_id
+                        : null;
+
+                    $next = $fields[$i + 1] ?? null;
+
+                    $nextKey = (!empty($next?->section_level_id))
+                        ? $next->section_level_type . '-' . $next->section_level_id
+                        : null;
+
+                    /* ========= SECTION START ========= */
+                    if ($hasSection && $currentKey !== $lastSectionKey) {
+                        $title = $sectionMap[$field->section_level_id] ?? 'Section';
+
+                        $blade .= <<<BLADE
+            <div class="mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+                <span class="font-semibold text-indigo-700">
+                    {$title}
+                </span>
+            </div>
+            BLADE;
+                    }
+
+                    /* ========= FIELD ========= */
+                    $blade .= self::renderSelfDeclarationField($field);
+
+                    /* ========= SECTION END ========= */
+                    if ($hasSection && $currentKey !== $nextKey) {
+                        $blade .= "<div class='my-3'></div>";
+                    }
+
+                    if ($hasSection) {
+                        $lastSectionKey = $currentKey;
+                    }
                 }
 
                 $blade .= "</div>";
@@ -368,4 +433,191 @@ class SchemewiseStoreDataJsonHelper
         </div>
         BLADE;
     }
+    // private static function renderSelfDeclarationField($field): string
+    // {
+    //     $label = $field->level_name;
+    //     $name = $field->field_name;
+    //     $type = $field->field_type ?? 'text';
+
+    //     /* ========= OPTIONS NORMALIZE ========= */
+    //     $options = [];
+
+    //     if (!empty($field->options)) {
+
+    //         // DB theke string ashle decode
+    //         if (is_string($field->options)) {
+    //             $decoded = json_decode($field->options, true);
+    //             if (json_last_error() === JSON_ERROR_NONE) {
+    //                 $options = $decoded;
+    //             }
+    //         }
+    //         // already array/object
+    //         elseif (is_array($field->options)) {
+    //             $options = $field->options;
+    //         }
+    //     }
+
+    //     switch ($type) {
+
+    //         case 'number':
+    //             return <<<BLADE
+    //             <div class="pl-6">
+    //                 <x-form.input type="number" name="{$name}" label="{$label}"  wire:model.live="formData.{$name}"/>
+    //             </div>
+    //             BLADE;
+
+    //         case 'textarea':
+    //             return <<<BLADE
+    //         <div class="pl-6">
+    //             <x-form.textarea name="{$name}" label="{$label}" wire:model.live="formData.{$name}"/>
+    //         </div>
+    //         BLADE;
+
+    //         case 'select':
+
+    //             $optionsHtml = '';
+
+    //             foreach ($options as $key => $text) { 
+    //                 if (is_int($key)) {
+    //                     $key = $text;
+    //                 }
+
+    //                 $key = e($key);
+    //                 $text = e($text);
+
+    //                 $optionsHtml .= "<option value=\"{$key}\">{$text}</option>\n";
+    //             }
+
+    //             return <<<BLADE
+    //             <div class="pl-6">
+    //                 <x-form.select name="{$name}" label="{$label}" wire:model.live="formData.{$name}">
+    //                     <option value="">-- Select {$label} --</option>
+    //                     {$optionsHtml}
+    //                 </x-form.select>
+    //             </div>
+    //             BLADE;
+
+    //         case 'radio':
+
+    //             $radioHtml = '';
+
+    //             foreach ($options as $key => $text) {
+
+    //                 if (is_int($key)) {
+    //                     $key = $text;
+    //                 }
+
+    //                 $key = e($key);
+    //                 $text = e($text);
+
+    //                 $radioHtml .= <<<HTML
+    //                 <label class="flex items-center gap-2 mr-4">
+    //                     <x-form.input type="radio" name="{$name}" value="{$key}" wire:model.live="formData.{$name}"/>
+    //                     {$text}
+    //                 </label>
+    //                 HTML;
+    //             }
+
+    //             return <<<BLADE
+    //             <div class="pl-6">
+    //                 <div class="flex flex-wrap gap-4">
+    //                     {$radioHtml}
+    //                 </div>
+    //             </div>
+    //             BLADE;
+
+    //         case 'checkbox':
+    //             return <<<BLADE
+    //         <div class="pl-6">
+    //             <label class="flex items-center gap-2">
+    //                 <x-form.checkbox type="checkbox"  wire:model.live="formData.{$name}"/>
+    //                 {$label}
+    //             </label>
+    //         </div>
+    //         BLADE;
+
+    //         default:
+    //             return <<<BLADE
+    //             <div class="pl-6">
+    //                 <x-form.input type="text" name="{$name}" label="{$label}"  wire:model.live="formData.{$name}"/>
+    //             </div>
+    //             BLADE;
+    //     }
+    // }
+
+    private static function renderSelfDeclarationField($field): string
+    {
+        $label = $field->level_name;
+        $name = $field->field_name;
+        $type = $field->field_type ?? 'text';
+        $value = $field['value'] ?? 1;
+
+        switch ($type) {
+
+            case 'number':
+                return <<<BLADE
+            <div class="pl-6">
+                <x-form.input
+                    type="number"
+                    name="{$name}"
+                    label="{$label}"    
+                     wire:model.live="formData.{$name}"                
+                />
+            </div>
+            BLADE;
+
+            case 'textarea':
+                return <<<BLADE
+            <div class="pl-6">
+                <x-form.textarea
+                    name="{$name}"
+                    label="{$label}" 
+                    value="{$value}" 
+                     wire:model.live="formData.{$name}"                  
+                />
+            </div>
+            BLADE;
+            case 'select':
+
+                $optionsHtml = '';
+
+                foreach (($field['options'] ?? []) as $key => $optionlabel) {
+                    $key = e($key);
+                    $optionlabel = e($optionlabel);
+                    $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
+                }
+
+                return <<<BLADE
+                <div class="pl-6">
+                    <x-form.select name="{$name}" label="{$label}" wire:model.live="formData.{$name}">
+                        <option value="">-- Select {$label} --</option>
+                        {$optionsHtml}
+                    </x-form.select>
+                </div>
+                BLADE;
+
+
+            case 'checkbox':
+                return <<<BLADE
+            <div class="pl-6">
+                
+                    <x-form.checkbox type="checkbox"   label="{$label}" name="{$name}" wire:model.live="formData.{$name}" value="{$value}"/>
+                  
+            </div>
+            BLADE;
+
+            default:
+                return <<<BLADE
+            <div class="pl-6">
+                <x-form.input
+                    type="text"
+                    name="{$name}"
+                    label="{$label}"  
+                        wire:model.live="formData.{$name}"                  
+                />
+            </div>
+            BLADE;
+        }
+    }
+
 }

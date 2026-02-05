@@ -161,34 +161,7 @@ class DynamicForm extends Component
 
 
     }
-    // private function prepareTabsReviewData()
-    // {
-    //     $review = [];
-    //     $json = $this->getSchemeJson();
-    //     foreach ($json['tabs'] ?? [] as $tab) {
-    //         $tabName = $tab['tab_name'] ?? 'Tab';
-    //         foreach ($tab['fields'] ?? [] as $field) {
-    //             if (!isset($field['field_name'])) {
-    //                 continue;
-    //             }
-    //             $fieldName = $field['field_name'];
-    //             if (!array_key_exists($fieldName, $this->formData)) {
-    //                 continue;
-    //             }
-    //             $label = $field['level_name']
-    //                 ?? ucfirst(str_replace('_', ' ', $fieldName));
-
-    //             $value = FormHelper::resolveValue(
-    //                 $field,
-    //                 data_get($this->formData, $fieldName), // safer than []
-    //                 $this->formData // ⭐ PASS CONTEXT (VERY IMPORTANT)
-    //             );
-    //             $review[$tabName][$label] = $value;
-    //         }
-    //     }
-
-    //     return $review;
-    // }
+    
     /* ================= REVIEW DATA ================= */
 
     private function prepareTabsReviewData()
