@@ -194,10 +194,13 @@ class DynamicModelMigrationService
                     Schema::create('{$schema}.{$table}', function (Blueprint \$table) {
 
                     \$table->id();
+                    \$table->unsignedBigInteger('scheme_id');
                       {$appColumns}
                       {$columns}
-                        \$table->timestamps();
+                    \$table->jsonb('other_details')->nullable();
+                    \$table->timestamps();
                       {$foreignKeyBlock}
+
                     \$table->foreign('application_id', 'application_id_fk')
                             ->references('application_id')
                             ->on('lb_scheme.unique_app_ben_ids')
@@ -206,6 +209,10 @@ class DynamicModelMigrationService
                     \$table->foreign('beneficiary_id', 'beneficiary_id_fk')
                             ->references('beneficiary_id')
                             ->on('lb_scheme.unique_app_ben_ids')
+                            ->cascadeOnDelete();
+                    \$table->foreign('scheme_id', 'scheme_id_fk')
+                            ->references('id')
+                            ->on('public.schemes')
                             ->cascadeOnDelete();
                     {$indexBlock}
                     });
@@ -235,6 +242,7 @@ class DynamicModelMigrationService
         PHP;
 
         $tableBlock = "protected \$table = '{$schema}.{$table}';\n\n";
+        $castsBlock = "protected \$casts = ['other_details' => 'array'];\n\n";
 
         $content = File::get($modelPath);
 
@@ -267,6 +275,21 @@ class DynamicModelMigrationService
                 $content
             );
         }
+
+        /* ---------- CASTS ---------- */
+        if (preg_match('/protected \$casts\s*=/', $content)) {
+            $content = preg_replace(
+                '/protected \$casts\s*=\s*\[[\s\S]*?\];/m',
+                trim($castsBlock),
+                $content
+            );
+        } else {
+            $content = preg_replace(
+                '/class\s+\w+\s+extends\s+Model\s*\{/m',
+                "$0\n{$castsBlock}",
+                $content
+            );
+        }       
 
         File::put($modelPath, $content);
     }

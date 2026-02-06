@@ -11,14 +11,8 @@ use App\Helpers\WorkFlowPermissionHelper;
 
 class DupAadhaarCheck extends Component
 {
-    public $aadhaar, $grievanceId;
-    public $error = null;
-    public function mount()
-    {
-        if (request()->has('id')) {
-            $this->grievanceId = request()->query('id');
-        }
-    }
+    public $aadhaar;
+    public $error = null;  
 
     public function checkDuplicate()
     {
@@ -35,25 +29,11 @@ class DupAadhaarCheck extends Component
             $this->error = "Duplicate Aadhaar found!";
             $this->dispatch('hideLoader');
             return ['status' => 'duplicate', 'message' => $this->error];
-        }
-
-        // $user = Auth::user();
-        // if (!$user->can('Normal Entry Allow') && !$user->can('Duare Sarkar Entry Allow')) {
-        //     $this->error = "Not authorized to create entry.";
-        //     $this->dispatch('hideLoader');
-        //     return ['status' => 'unauthorized', 'message' => $this->error];
-        // }
-
-        if (!WorkFlowPermissionHelper::canCreateEntry()) {
-            $this->error = "Not authorized to create entry.";
-            $this->dispatch('hideLoader');
-            return ['status' => 'unauthorized', 'message' => $this->error];
-        }
+        }       
 
         $this->dispatch('aadhaarChecked', [
             'encoded' => $encoded_aadhar,
-            'hash' => $aadhaar_hash,
-            'grievance_id' => $this->grievanceId,
+            'hash' => $aadhaar_hash,           
         ]);
         $this->dispatch('hideLoader');
         return ['status' => 'success', 'message' => '✅ Aadhaar is valid and not duplicate.'];
