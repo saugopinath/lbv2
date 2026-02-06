@@ -3,6 +3,7 @@
         class="block p-3 bg-blue-50 border border-blue-200 text-2xl rounded-lg shadow-sm dark:bg-blue-900/30 dark:border-blue-800 text-blue-700 dark:text-blue-100 font-semibold mb-3">
         {{ $heading }}
     </h2>
+
     <livewire:dup-aadhaar-check />
     @if($aadhaarVerified)
 
