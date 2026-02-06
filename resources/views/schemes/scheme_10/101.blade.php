@@ -1,5 +1,40 @@
 <div class="grid md:grid-cols-3 gap-4 mt-4">
 <div   >
+    <x-form.input
+    type="text"
+    name="full_name"
+    label="Applicant Name"
+    placeholder="Enter Applicant Name"
+    
+    
+    required
+    wire:model.live="formData.full_name"
+/>
+</div><div   >
+    <x-form.input
+    type="text"
+    name="mobile_no"
+    label="Mobile Number"
+    placeholder="Enter Mobile Number"
+    
+    
+    required
+    wire:model.live="formData.mobile_no"
+/>
+</div><div   >
+    <x-form.input
+    type="date"
+    name="app_date"
+    label="Application Date"
+    placeholder="Enter Application Date"
+    
+    
+    required
+    wire:model.live="formData.app_date"
+/>
+</div></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div   >
     <x-form.select
     name="app_type"
     label="Application Type"
@@ -57,45 +92,8 @@
     wire:model.live="formData.reg_no"
 />
 </div></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
+<div class="grid md:grid-cols-3 gap-4 mt-4">
 <div   >
-    <x-form.input
-    type="date"
-    name="app_date"
-    label="Application Date"
-    placeholder="Enter Application Date"
-    
-    
-    required
-    wire:model.live="formData.app_date"
-/>
-</div></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<div   >
-    <x-form.input
-    type="text"
-    name="full_name"
-    label="Applicant Name"
-    placeholder="Enter Applicant Name"
-    
-    
-    required
-    wire:model.live="formData.full_name"
-/>
-</div></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
-<div   >
-    <x-form.input
-    type="date"
-    name="dob"
-    label="Date of Birth"
-    placeholder="Enter Date of Birth"
-    
-    
-    required
-    wire:model.live="formData.dob"
-/>
-</div><div   >
     <x-form.input
     type="text"
     name="age"
@@ -105,19 +103,6 @@
     readonly
     required
     wire:model.live="formData.age"
-/>
-</div></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
-<div   >
-    <x-form.input
-    type="text"
-    name="mobile_no"
-    label="Mobile Number"
-    placeholder="Enter Mobile Number"
-    
-    
-    required
-    wire:model.live="formData.mobile_no"
 />
 </div><div   >
     <x-form.input
@@ -130,8 +115,19 @@
     
     wire:model.live="formData.email_id"
 />
+</div><div   >
+    <x-form.input
+    type="date"
+    name="dob"
+    label="Date of Birth"
+    placeholder="Enter Date of Birth"
+    
+    
+    required
+    wire:model.live="formData.dob"
+/>
 </div></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
+<div class="grid md:grid-cols-3 gap-4 mt-4">
 <div   >
     <x-form.input
     type="text"
@@ -154,9 +150,7 @@
     required
     wire:model.live="formData.mfname"
 />
-</div></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
-<div   >
+</div><div   >
     <x-form.select
     name="mar_statu"
     label="Marital Status"
@@ -174,7 +168,9 @@
 <option value="5">Widower</option>
 
 </x-form.select>
-</div><div x-data="{formData: @entangle('formData').live,visible: false,
+</div></div>
+<div class="grid md:grid-cols-1 gap-4 mt-4">
+<div x-data="{formData: @entangle('formData').live,visible: false,
     sync() {this.visible = ['2','3','5'].includes(String(this.formData.mar_statu));
         if (!this.visible) {
             this.formData.sfname = null;
@@ -196,7 +192,7 @@
     wire:model.live="formData.sfname"
 />
 </div></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
+<div class="grid md:grid-cols-3 gap-4 mt-4">
 <div   >
     <x-form.select
     name="caste"

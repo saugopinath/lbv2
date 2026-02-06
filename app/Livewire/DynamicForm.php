@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Helpers\FormHelper;
 use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
+use App\Models\Scheme;
 use App\Models\UniqueAppBenId;
 use Livewire\Component;
 use Illuminate\Support\Facades\File;
@@ -33,10 +34,17 @@ class DynamicForm extends Component
     public $navMessageType = 'success';
     public $showFinalModal = false;
     public array $formData = [];
+    public bool $aadhaarVerified = false;
+    public $aadhaarPayload = [];
+    public $schemeName = '';
+    public $heading = '';
+
 
     protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
         'document-validation-failed' => 'onDocumentTabFailed',
+        'aadhaarChecked' => 'onAadhaarChecked',
+        'aadhaarCheckedReset' => 'onAadhaarCheckedReset',
     ];
 
     /* ================= MOUNT ================= */
@@ -50,11 +58,24 @@ class DynamicForm extends Component
             $this->updateTabNavigation();
         }
         $this->schemeId = $schemeId;
+        $this->schemeName = Scheme::where('id', $schemeId)
+            ->value('name');
+        $this->heading = 'Government Of West Bengal ' . $this->schemeName . ' Scheme';
         $this->ram = $ram;
         $this->applicationId = $applicationId;
         $this->beneficiaryId = $beneficiaryId;
-        // dd($this->ram);
     }
+    public function onAadhaarCheckedReset()
+    {
+        $this->aadhaarVerified = false;
+    }
+
+    public function onAadhaarChecked($data)
+    {
+        $this->aadhaarVerified = true;
+        $this->aadhaarPayload = $data;
+    }
+
     public function setActiveTab($tabCode)
     {
         $tabCode = (string) $tabCode;
@@ -117,7 +138,9 @@ class DynamicForm extends Component
         }
     }
 
-    public function onDocumentTabFailed() {}
+    public function onDocumentTabFailed()
+    {
+    }
     /* ================== HELPERS ================== */
     private function markTabCompleted(string $tabCode): void
     {
