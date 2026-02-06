@@ -674,8 +674,6 @@ class SchemeTabFieldManager extends Component
     //final submit form
     public function finalSubmit()
     {
-        // dd('final submit');
-        // dd($this->schemeId);
         if (!$this->schemeId) {
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -746,116 +744,6 @@ class SchemeTabFieldManager extends Component
             ->where('is_final_submitted', true)
             ->exists();
     }
-
-
-    // public function openLayoutModal($tabCode)
-    // {
-    //     $this->activeTabCode = $tabCode;
-
-    //     $this->totalFields = count(
-    //         $this->tabFields[$tabCode] ?? []
-    //     );
-
-    //     $saved = DB::table('scheme_tab_layouts')
-    //         ->where('scheme_id', $this->schemeId)
-    //         ->where('tab_code', $tabCode)
-    //         ->value('layout_json');
-
-    //     if ($saved) {
-    //         $layout = json_decode($saved, true);
-
-    //         $this->layoutMode = 'custom';
-    //         $this->rowConfig = array_map(
-    //             fn($row) => (int)($row['columns'] ?? 1),
-    //             $layout
-    //         );
-    //     } else {
-    //         $this->layoutMode = '1';
-    //         $this->buildDefaultLayout();
-    //     }
-
-    //     $this->showLayoutModal = true;
-    // }
-    // private function buildDefaultLayout(): void
-    // {
-    //     if ($this->layoutMode === 'custom') return;
-
-    //     $perRow = max(1, (int)$this->layoutMode);
-
-    //     $rows = ceil($this->totalFields / $perRow);
-
-    //     $this->rowConfig = array_fill(0, $rows, $perRow);
-
-    //     $used = array_sum($this->rowConfig);
-    //     $this->remainingFixFields = $this->totalFields - $used;
-    // }
-    // public function updatedRowConfig()
-    // {
-    //     // total selected columns
-    //     $used = array_sum($this->rowConfig);
-
-    //     // remaining fields
-    //     $remaining = $this->totalFields - $used;
-
-    //     // 🔹 add rows automatically if fields remain
-    //     while ($remaining > 0) {
-    //         $this->rowConfig[] = min(3, $remaining);
-    //         $remaining -= end($this->rowConfig);
-    //     }
-
-    //     // 🔹 trim extra rows if overflow
-    //     while ($remaining < 0 && count($this->rowConfig) > 0) {
-    //         $last = array_pop($this->rowConfig);
-    //         $remaining += $last;
-    //     }
-
-    //     $this->remainingFixFields = $remaining;
-    // }
-    // public function updatedLayoutMode()
-    // {
-    //     if ($this->layoutMode === 'custom') {
-
-    //         // 🟢 Each field in its own row initially
-    //         $this->rowConfig = array_fill(0, $this->totalFields, 1);
-
-    //         // 🟢 Nothing remaining
-    //         $this->remainingFixFields = 0;
-
-    //         return;
-    //     }
-
-    //     // non-custom (1 / 2 / 3)
-    //     $this->buildDefaultLayout();
-    // }
-    // public function applyLayout()
-    // {
-    //     $layout = [];
-
-    //     foreach ($this->rowConfig as $i => $count) {
-    //         $layout[] = [
-    //             'row'     => $i + 1,
-    //             'columns' => (int)$count,
-    //         ];
-    //     }
-
-    //     DB::table('scheme_tab_layouts')->updateOrInsert(
-    //         [
-    //             'scheme_id' => $this->schemeId,
-    //             'tab_code'  => $this->activeTabCode,
-    //         ],
-    //         [
-    //             'layout_json' => json_encode($layout),
-    //             'updated_at'  => now(),
-    //         ]
-    //     );
-
-    //     $this->showLayoutModal = false;
-    // }
-
-
-
-    //new 
-
     private function rebuildRowConfig(): void
     {
         $rows = [];
@@ -872,40 +760,23 @@ class SchemeTabFieldManager extends Component
             $used += $cols;
         }
 
-        // field remain thakle  → minimum 1 kore row add
+      
         while ($used < $this->totalFields) {
-            $rows[] = 1;          //  default = 1
+            $rows[] = 1;        
             $used += 1;
         }
 
         $this->rowConfig = $rows;
         $this->remainingFixFields = max(0, $this->totalFields - $used);
     }
-
-    // private function rebuildRowConfig(): void
-    // {
-    //     $rows = [];
-
-    //     foreach ($this->rowConfig as $cols) {
-    //         $rows[] = max(1, min(3, (int) $cols));
-    //     }
-
-    //     if (empty($rows)) {
-    //         $rows = [1];
-    //     }
-
-    //     $this->rowConfig = array_values($rows);
-    // }
     private function visibleRowCount(): int
     {
         $remainingFields = $this->totalFields;
 
         foreach ($this->rowConfig as $i => $cols) {
             $cols = max(1, min(3, (int) $cols));
-            // this row can host fields (even partially)
             $remainingFields -= $cols;
-            // if this row has extra capacity OR fields spill over,
-            // we MUST show next row
+           
             if ($remainingFields < 0) {
                 return $i + 2;
             }
@@ -975,22 +846,7 @@ class SchemeTabFieldManager extends Component
     public function updatedRowConfig()
     {
         $this->rebuildRowConfig();
-    }
-
-    // public function updatedLayoutMode()
-    // {
-    //     if ($this->layoutMode === 'custom') {
-    //         if (empty($this->rowConfig)) {
-    //             $this->rowConfig = array_fill(0, $this->totalFields, 1);
-    //         }
-    //         $this->rebuildRowConfig();
-    //         return;
-    //     }
-
-    //     $perRow = max(1, (int) $this->layoutMode);
-    //     $rows = ceil($this->totalFields / $perRow);
-    //     $this->rowConfig = array_fill(0, $rows, $perRow);
-    // }
+    }    
     public function updatedLayoutMode()
     {
         if ($this->layoutMode === 'custom') {

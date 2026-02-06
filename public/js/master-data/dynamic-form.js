@@ -1,143 +1,187 @@
+
 window.initMasterData = function () {
-    // 1. Check data
+
     if (!window.masterDataV2 || !window.masterDataV2.districts) return;
+    if (!window.Livewire) return;
 
     const md = window.masterDataV2;
 
-    // 2. Class chara sora-sori Select field khunje ber kora
     const districtSelect = document.querySelector('select[name="district_id"]');
+    const assemblie  = document.querySelector('select[name="assemblie"]');
+    const urban      = document.querySelector('select[name="rural_urban"]');
+    const localbody  = document.querySelector('select[name="blockurban"]');
+    const gpward     = document.querySelector('select[name="gpWard"]');
 
-    // Jodi district select-ti page-e thake (mane Contact Details tab active)
-    if (districtSelect) {
-        // Find other fields relative to this component or document
-        const root = districtSelect.closest("[wire\\:id]") || document;
-        const assemblie = root.querySelector('select[name="assemblie"]');
-        const urban = root.querySelector('select[name="rural_urban"]');
-        const localbody = root.querySelector('select[name="blockurban"]');
-        const gpward = root.querySelector('select[name="gpWard"]');
-        // District Fill (Jodi ekhono load na hoye thake)
-        if (
-            !districtSelect.dataset.loaded ||
-            districtSelect.options.length <= 1
-        ) {
-            fillSelect(districtSelect, md.districts);
-            districtSelect.dataset.loaded = "1";
+    if (!districtSelect) return;
+
+    const root = districtSelect.closest('[wire\\:id]');
+    if (!root) return;
+
+    const component = Livewire.find(root.getAttribute('wire:id'));
+    if (!component) return;
+
+    /* ================= DISTRICT ================= */
+    if (!districtSelect.dataset.loaded) {
+        fillSelect(districtSelect, md.districts);
+        districtSelect.dataset.loaded = "1";
+    }
+    restoreSelected(districtSelect, component);
+
+    /* ================= ASSEMBLIE ================= */
+    if (assemblie && districtSelect.value) {
+        if (!assemblie.dataset.loaded && md.assemblies) {
+            fillSelect(
+                assemblie,
+                md.assemblies.filter(
+                    a => a.district_code == districtSelect.value
+                )
+            );
+            assemblie.dataset.loaded = "1";
         }
+        restoreSelected(assemblie, component);
+    }
 
-        // Rural/Urban Fill
-        if (urban && (!urban.dataset.loaded || urban.options.length <= 1)) {
-            fillSelect(urban, [
-                { id: 1, text: "Urban" },
-                { id: 2, text: "Rural" },
-            ]);
-            urban.dataset.loaded = "1";
-        }
+    /* ================= RURAL / URBAN ================= */
+    if (urban && !urban.dataset.loaded) {
+        fillSelect(urban, [
+            { id: 1, text: "Urban" },
+            { id: 2, text: "Rural" }
+        ]);
+        urban.dataset.loaded = "1";
+    }
+    restoreSelected(urban, component);
 
-        // --- Change Events ---
-        districtSelect.onchange = () => {
-            if (urban) urban.value = "";
-            clearSelect(assemblie);
-            clearSelect(localbody);
-            clearSelect(gpward);
-            if (md.assemblies) {
+    /* ================= BLOCK ================= */
+    if (urban?.value && districtSelect.value) {
+        if (!localbody.dataset.loaded) {
+            if (urban.value == 2 && md.blocks) {
                 fillSelect(
-                    assemblie,
-                    md.assemblies.filter(
-                        (a) => a.district_code == districtSelect.value,
-                    ),
+                    localbody,
+                    md.blocks.filter(
+                        b => b.district_code == districtSelect.value
+                    )
                 );
             }
-            syncLivewire(districtSelect);
-        };
-        if (assemblie) {
-            assemblie.onchange = () => syncLivewire(assemblie);
+            if (urban.value == 1 && md.ulbs) {
+                fillSelect(
+                    localbody,
+                    md.ulbs.filter(
+                        u => u.district_code == districtSelect.value
+                    )
+                );
+            }
+            localbody.dataset.loaded = "1";
         }
-        if (urban) {
-            urban.onchange = () => {
-                clearSelect(localbody);
-                clearSelect(gpward);
-                if (urban.value == 2 && md.blocks) {
-                    fillSelect(
-                        localbody,
-                        md.blocks.filter(
-                            (b) => b.district_code == districtSelect.value,
-                        ),
-                    );
-                } else if (urban.value == 1 && md.ulbs) {
-                    fillSelect(
-                        localbody,
-                        md.ulbs.filter(
-                            (u) => u.district_code == districtSelect.value,
-                        ),
-                    );
-                }
-                syncLivewire(urban);
-            };
-        }
+        restoreSelected(localbody, component);
+    }
 
-        // Block & GP Change logic ager motoi thakbe...
-        if (localbody) {
-            localbody.onchange = () => {
-                clearSelect(gpward);
-                if (urban.value == 2 && md.gps) {
-                    fillSelect(
-                        gpward,
-                        md.gps.filter(
-                            (g) =>
-                                g.district_code == districtSelect.value &&
-                                g.block_code == localbody.value,
-                        ),
-                    );
-                } else if (urban.value == 1 && md.ulb_wards) {
-                    fillSelect(
-                        gpward,
-                        md.ulb_wards.filter(
-                            (w) => w.urban_body_code == localbody.value,
-                        ),
-                    );
-                }
-                syncLivewire(localbody);
-            };
+    /* ================= GP / WARD ================= */
+    if (localbody?.value) {
+        if (!gpward.dataset.loaded) {
+            if (urban.value == 2 && md.gps) {
+                fillSelect(
+                    gpward,
+                    md.gps.filter(
+                        g =>
+                            g.district_code == districtSelect.value &&
+                            g.block_code == localbody.value
+                    )
+                );
+            }
+            if (urban.value == 1 && md.ulb_wards) {
+                fillSelect(
+                    gpward,
+                    md.ulb_wards.filter(
+                        w => w.urban_body_code == localbody.value
+                    )
+                );
+            }
+            gpward.dataset.loaded = "1";
         }
-        if (gpward) {
-            gpward.onchange = () => syncLivewire(gpward);
-        }
+        restoreSelected(gpward, component);
+    }
+
+    /* ================= EVENTS ================= */
+    districtSelect.onchange = () => {
+        clearSelect(assemblie);
+        clearSelect(localbody);
+        clearSelect(gpward);
+        component.set('formData.district_id', districtSelect.value);
+    };
+
+    if (assemblie) {
+        assemblie.onchange = () => {
+            component.set('formData.assemblie', assemblie.value);
+        };
+    }
+
+    if (urban) {
+        urban.onchange = () => {
+            clearSelect(localbody);
+            clearSelect(gpward);
+            component.set('formData.rural_urban', urban.value);
+        };
+    }
+
+    if (localbody) {
+        localbody.onchange = () => {
+            clearSelect(gpward);
+            component.set('formData.blockurban', localbody.value);
+        };
+    }
+
+    if (gpward) {
+        gpward.onchange = () => {
+            component.set('formData.gpWard', gpward.value);
+        };
     }
 };
 
-// ... clearSelect, fillSelect, syncLivewire functions (ager motoi thakbe) ...
+/* ================= HELPERS ================= */
 
 function clearSelect(select) {
-    if (select) {
-        select.innerHTML = '<option value="">--Select--</option>';
-        delete select.dataset.loaded;
-    }
+    if (!select) return;
+    select.innerHTML = '<option value="">-- Select --</option>';
+    delete select.dataset.loaded;
 }
 
 function fillSelect(select, list) {
     if (!select) return;
     clearSelect(select);
-    list.forEach((row) => {
-        const opt = document.createElement("option");
+
+    list.forEach(row => {
+        const opt = document.createElement('option');
         opt.value = row.id;
         opt.textContent = row.text;
         select.appendChild(opt);
     });
 }
 
-function syncLivewire(select) {
-    const root = select.closest("[wire\\:id]");
-    const wireKey = select.dataset.wire;
-    if (root && wireKey) {
-        Livewire.find(root.getAttribute("wire:id"))?.set(
-            "formData." + wireKey,
-            select.value,
-        );
+function restoreSelected(select, component) {
+    if (!select || !component) return;
+
+    const key = select.dataset.wire;
+    if (!key) return;
+
+    const value = component.get('formData.' + key);
+    if (!value) return;
+
+    const exists = [...select.options].some(
+        opt => String(opt.value) === String(value)
+    );
+
+    if (exists) {
+        select.value = value;
     }
 }
 
-// Smart Observer jeta HTML poriborton holei check korbe
+/* ================= AUTO INIT ================= */
+document.addEventListener('livewire:load', () => {
+    window.initMasterData();
+});
+
 const observer = new MutationObserver(() => {
     window.initMasterData();
 });
 observer.observe(document.body, { childList: true, subtree: true });
+

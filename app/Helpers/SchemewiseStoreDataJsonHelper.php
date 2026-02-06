@@ -6,6 +6,7 @@ use App\Models\SchemeAttachedDocMappings;
 use App\Models\SchemeTabBasefield;
 use App\Models\SchemeTabMapping;
 use App\Models\SchemeTabFormField;
+use App\Models\SectionLevelMaster;
 use App\Models\SelfDeclerationBasefield;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
@@ -128,41 +129,63 @@ class SchemewiseStoreDataJsonHelper
                 continue;
             }
 
-            /* ================= TAB 105 : SELF DECLARATION ================= */
-            // if ($tab['tab_code'] == 105) {
-
-            //     $blade = "<div class=\"mt-4 space-y-3\">\n";
-
-            //     foreach ($tab['fields'] as $field) {
-
-            //         $label = $field['level_name'] ?? 'Declaration';
-            //         $name = $field['field_name'];
-            //         $value = $field['value'] ?? 1;
-            //         $blade .= <<<BLADE
-
-            //     <div class="flex items-start gap-2">
-            //         <x-form.checkbox name="{$name}" value="{$value}" label="{$label}" wire:model="formData.{$name}"
-            //         />
-            //     </div>
-            //     BLADE;
-            //     }
-
-            //     $blade .= "\n</div>";
-
-            //     File::put(
-            //         $dir . "/105.blade.php",
-            //         $blade
-            //     );
-
-            //     continue;
-            // }
-
             if ($tabCode == 105) {
 
-                $blade = "<div class='mt-4 space-y-4'>";
+                // 🔹 fetch ordered self-declaration fields
+                $fields = SelfDeclerationBasefield::where('scheme_id', $schemeId)
+                    ->where('tab_code', 105)
+                    ->where('is_active', true)
+                    ->orderBy('field_position')
+                    ->get()
+                    ->values();
 
-                foreach ($tab['fields'] as $field) {
-                    $blade .= self::renderField($field);
+                $sectionMap = SectionLevelMaster::pluck(
+                    'section_level_name',
+                    'id'
+                )->toArray();
+
+                $blade = "<div class='space-y-2'>";
+
+                $lastSectionKey = null;
+
+                foreach ($fields as $i => $field) {
+
+                    $hasSection = !empty($field->section_level_id);
+
+                    $currentKey = $hasSection
+                        ? $field->section_level_type . '-' . $field->section_level_id
+                        : null;
+
+                    $next = $fields[$i + 1] ?? null;
+
+                    $nextKey = (!empty($next?->section_level_id))
+                        ? $next->section_level_type . '-' . $next->section_level_id
+                        : null;
+
+                    /* ========= SECTION START ========= */
+                    if ($hasSection && $currentKey !== $lastSectionKey) {
+                        $title = $sectionMap[$field->section_level_id] ?? 'Section';
+
+                        $blade .= <<<BLADE
+                    <div class="mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+                        <span class="font-semibold text-indigo-700">
+                            {$title}
+                        </span>
+                    </div>
+                    BLADE;
+                    }
+
+                    /* ========= FIELD ========= */
+                    $blade .= self::renderSelfDeclarationField($field);
+
+                    /* ========= SECTION END ========= */
+                    if ($hasSection && $currentKey !== $nextKey) {
+                        $blade .= "<div class='my-3'></div>";
+                    }
+
+                    if ($hasSection) {
+                        $lastSectionKey = $currentKey;
+                    }
                 }
 
                 $blade .= "</div>";
@@ -302,6 +325,7 @@ class SchemewiseStoreDataJsonHelper
                 <x-form.select
                     name="{$name}"
                     label="{$label}"
+                    data-wire="{$name}"
                     {$wireIgnore}
                      {$readonlyAttr}
                       {$requiredAttr}
@@ -367,4 +391,147 @@ class SchemewiseStoreDataJsonHelper
         </div>
         BLADE;
     }
+
+
+    private static function renderSelfDeclarationField($field): string
+    {
+        $label = $field->level_name;
+        $name = $field->field_name;
+        $type = $field->field_type ?? 'text';
+        $value = $field->value ?? 1;
+
+
+        $paddingClass = $field->section_level_id ? 'pl-6' : 'pl-0';
+
+        /* ========= OPTIONS NORMALIZE ========= */
+        $options = [];
+
+        if (!empty($field->options)) {
+            if (is_string($field->options)) {
+                $decoded = json_decode($field->options, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $options = $decoded;
+                }
+            } elseif (is_array($field->options)) {
+                $options = $field->options;
+            }
+        }
+
+        switch ($type) {
+
+            /* ===== NUMBER ===== */
+            case 'number':
+                return <<<BLADE
+                <div class="{$paddingClass}">
+                    <x-form.input
+                        type="number"
+                        name="{$name}"
+                        label="{$label}"
+                        wire:model.live="formData.{$name}"
+                    />
+                </div>
+                BLADE;
+
+            /* ===== TEXTAREA ===== */
+            case 'textarea':
+                return <<<BLADE
+                <div class="{$paddingClass}">
+                    <x-form.textarea
+                        name="{$name}"
+                        label="{$label}"
+                        wire:model.live="formData.{$name}"
+                    />
+                </div>
+                BLADE;
+
+            /* ===== SELECT ===== */
+            case 'select':
+
+                $optionsHtml = '';
+                foreach ($options as $key => $text) {
+                    if (is_int($key)) {
+                        $key = $text;
+                    }
+                    $key = e($key);
+                    $text = e($text);
+
+                    $optionsHtml .= "<option value=\"{$key}\">{$text}</option>\n";
+                }
+
+                return <<<BLADE
+                <div class="{$paddingClass}">
+                    <x-form.select
+                        name="{$name}"
+                        label="{$label}"
+                        wire:model.live="formData.{$name}"
+                    >
+                        <option value="">-- Select {$label} --</option>
+                        {$optionsHtml}
+                    </x-form.select>
+                </div>
+                BLADE;
+
+            /* ===== RADIO ===== */
+            case 'radio':
+
+                $radioHtml = '';
+                foreach ($options as $key => $text) {
+                    if (is_int($key)) {
+                        $key = $text;
+                    }
+
+                    $key = e($key);
+                    $text = e($text);
+
+                    $radioHtml .= <<<HTML
+                    <label class="flex items-center gap-2">
+                        <input
+                            type="radio"
+                            name="{$name}"
+                            value="{$key}"
+                            wire:model.live="formData.{$name}"
+                        />
+                        {$text}
+                    </label>
+                    HTML;
+                }
+
+                return <<<BLADE
+                <div class="{$paddingClass}">
+                    <label class="block font-medium text-gray-700 mb-1">{$label}</label>
+                    <div class="flex flex-wrap gap-4">
+                        {$radioHtml}
+                    </div>
+                </div>
+                BLADE;
+
+            /* ===== CHECKBOX ===== */
+            case 'checkbox':
+                return <<<BLADE
+                <div class="{$paddingClass}">
+                    <x-form.checkbox
+                        name="{$name}"
+                        label="{$label}"
+                        value="{$value}"
+                        wire:model.live="formData.{$name}"
+                    />
+                </div>
+                BLADE;
+
+            /* ===== DEFAULT TEXT ===== */
+            default:
+                return <<<BLADE
+            <div class="{$paddingClass}">
+                <x-form.input
+                    type="text"
+                    name="{$name}"
+                    label="{$label}"
+                    wire:model.live="formData.{$name}"
+                />
+            </div>
+            BLADE;
+        }
+    }
+
+
 }
