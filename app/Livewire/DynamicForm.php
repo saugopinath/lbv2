@@ -36,10 +36,9 @@ class DynamicForm extends Component
     public array $formData = [];
     public bool $aadhaarVerified = false;
     public $aadhaarPayload = [];
-    public $schemeName = '';
+    public $schemeName;
     public $heading = '';
-
-
+   
     protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
         'document-validation-failed' => 'onDocumentTabFailed',
@@ -49,7 +48,7 @@ class DynamicForm extends Component
 
     /* ================= MOUNT ================= */
 
-    public function mount($schemeId, $ram = null, $applicationId = null, $beneficiaryId = null)
+    public function mount($schemeId,$schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null)
     {
         $this->loadScheme($schemeId);
 
@@ -58,8 +57,7 @@ class DynamicForm extends Component
             $this->updateTabNavigation();
         }
         $this->schemeId = $schemeId;
-        $this->schemeName = Scheme::where('id', $schemeId)
-            ->value('name');
+        $this->schemeName = $schemeName;
         $this->heading = 'Government Of West Bengal ' . $this->schemeName . ' Scheme';
         $this->ram = $ram;
         $this->applicationId = $applicationId;
