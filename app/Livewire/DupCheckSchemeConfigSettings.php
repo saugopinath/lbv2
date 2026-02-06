@@ -2,47 +2,91 @@
 
 namespace App\Livewire;
 
+use App\Models\DupcheckschemeconfigSetting;
+use App\Models\Scheme;
 use App\Models\SchemeFinalSubmitCheck;
 use Livewire\Component;
+use Illuminate\Support\Facades\DB;
+use Exception;
 
 class DupCheckSchemeConfigSettings extends Component
 {
-    public $dupcheckOptions = [], $selecteddupcheckOptions = [], $schemeOptions = [], $schemes = [], $issame = 'yes', $iscross = 'no', $schemeId;
+    public $dupcheckOptions = [], $selecteddupcheckOptions = [], $schemeOptions = [], $schemes = [], $iscross = 'no', $schemeId;
     public function mount($schemeId)
     {
         $this->schemeId = $schemeId;
         $this->dupcheckOptions = [
-            '1' => 'Aadhar',
-            '2' => 'Bank',
-            '3' => 'Mobile',
+            'Aadhar' => 'Aadhar',
+            'Bank' => 'Bank',
+            'Mobile' => 'Mobile',
         ];
-        $this->schemeOptions = SchemeFinalSubmitCheck::where('is_final_submitted', true)
-            ->where('scheme_id', '!=', $schemeId)
-            ->whereHas('scheme')
-            ->with('scheme')
-            ->get()
-            ->pluck('scheme.name', 'scheme.id')
+        $this->schemeOptions = Scheme::where('id', '!=', $schemeId)
+            ->pluck('name', 'id')
             ->toArray();
-    }
+        // SchemeFinalSubmitCheck::where('is_final_submitted', true)
+        // ->where('scheme_id', '!=', $schemeId)
+        // ->whereHas('scheme')
+        // ->with('scheme')
+        // ->get()
+        // ->pluck('scheme.name', 'scheme.id')
+        // ->toArray();
 
-    public function toggleAll()
-    {
-        if (count($this->selecteddupcheckOptions) === count($this->dupcheckOptions)) {
-            $this->selecteddupcheckOptions = [];
-        } else {
-            $this->selecteddupcheckOptions = array_keys($this->dupcheckOptions);
+        $existingSettings = DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)->get();
+        if ($existingSettings->isNotEmpty()) {
+            $first = $existingSettings->first();
+            $this->iscross = $first->is_cross ? 'yes' : 'no';
+            $this->schemes = $first->scheme_lists ?? [];
+            $this->selecteddupcheckOptions = $existingSettings->pluck('check_with')->toArray();
         }
     }
 
+    // public function toggleAll()
+    // {
+    //     if (count($this->selecteddupcheckOptions) === count($this->dupcheckOptions)) {
+    //         $this->selecteddupcheckOptions = [];
+    //     } else {
+    //         $this->selecteddupcheckOptions = array_keys($this->dupcheckOptions);
+    //     }
+    // }
+
     public function save()
     {
-        dd( $this->selecteddupcheckOptions);
         $validated = $this->validate([
-            'issame' => 'required',
             'iscross' => 'required',
             'selecteddupcheckOptions' => 'required|array|min:1',
             'schemes' => 'required_if:iscross,yes',
+        ], [
+            'selecteddupcheckOptions.*' => 'Minimum one value should be checked',
+            'schemes.*' => 'Minimum one value should be selected'
         ]);
+        DB::beginTransaction();
+        try {
+            $exists = DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)->exists();
+            $message = $exists
+                ? 'Dup Check Scheme Config updated successfully!'
+                : 'Dup Check Scheme Config saved successfully!';
+            DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)->delete();
+            foreach ($this->selecteddupcheckOptions as $option) {
+                DupcheckschemeconfigSetting::create([
+                    'scheme_id'    => $this->schemeId,
+                    'is_cross'     => $this->iscross,
+                    'check_with'   => $option,
+                    'scheme_lists' => ($this->iscross === 'yes') ? $this->schemes : null,
+                ]);
+            }
+            DB::commit();
+            $this->dispatch('toastr', [
+                'type' => 'success',
+                'message' => $message
+            ]);
+            return redirect()->route('duplicate-checks');
+        } catch (Exception $e) {
+            DB::rollBack();
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Something went wrong: ' . $e->getMessage()
+            ]);
+        }
     }
 
     public function render()
