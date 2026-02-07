@@ -749,7 +749,7 @@ class SchemeTabFieldManager extends Component
         $rows = [];
         $used = 0;
 
-        // existing rows respect replace kora hobe 
+        // existing rows respect replace kora hobe
         foreach ($this->rowConfig as $cols) {
             if ($used >= $this->totalFields) {
                 break;
@@ -760,9 +760,9 @@ class SchemeTabFieldManager extends Component
             $used += $cols;
         }
 
-      
+
         while ($used < $this->totalFields) {
-            $rows[] = 1;        
+            $rows[] = 1;
             $used += 1;
         }
 
@@ -776,7 +776,7 @@ class SchemeTabFieldManager extends Component
         foreach ($this->rowConfig as $i => $cols) {
             $cols = max(1, min(3, (int) $cols));
             $remainingFields -= $cols;
-           
+
             if ($remainingFields < 0) {
                 return $i + 2;
             }
@@ -788,15 +788,19 @@ class SchemeTabFieldManager extends Component
 
         return count($this->rowConfig);
     }
-
-
-    public function openLayoutModal($tabCode)
+public function openLayoutModal($tabCode)
     {
         $this->activeTabCode = $tabCode;
-
-        $this->totalFields = count(
-            $this->tabFields[$tabCode] ?? []
-        );
+        if ($this->activeTabCode == 105) {
+            $this->totalFields = SelfDeclerationBasefield::where('scheme_id', $this->schemeId)
+                ->where('tab_code', 105)
+                ->where('is_active', true)
+                ->count();
+        }else{
+            $this->totalFields = count(
+                $this->tabFields[$tabCode] ?? []
+            );
+        }
 
         $saved = DB::table('scheme_tab_layouts')
             ->where('scheme_id', $this->schemeId)
@@ -828,6 +832,44 @@ class SchemeTabFieldManager extends Component
         $this->showLayoutModal = true;
     }
 
+    // public function openLayoutModal($tabCode)
+    // {
+    //     $this->activeTabCode = $tabCode;
+
+    //     $this->totalFields = count(
+    //         $this->tabFields[$tabCode] ?? []
+    //     );
+
+    //     $saved = DB::table('scheme_tab_layouts')
+    //         ->where('scheme_id', $this->schemeId)
+    //         ->where('tab_code', $tabCode)
+    //         ->value('layout_json');
+
+    //     if ($saved) {
+    //         // DB layout load
+    //         $layout = json_decode($saved, true);
+
+    //         $this->layoutMode = 'custom';
+
+    //         $this->rowConfig = array_map(
+    //             fn($row) => max(1, min(3, (int) ($row['columns'] ?? 1))),
+    //             $layout
+    //         );
+
+    //         //FIELD COUNT wise row ensure
+    //         $this->rebuildRowConfig();
+    //     } else {
+    //         // 🔹 First time custom
+    //         $this->layoutMode = 'custom';
+
+    //         // field count = row count, each row = 1
+    //         $this->rowConfig = array_fill(0, $this->totalFields, 1);
+    //         $this->remainingFixFields = 0;
+    //     }
+
+    //     $this->showLayoutModal = true;
+    // }
+
 
     private function buildDefaultLayout(): void
     {
@@ -846,7 +888,7 @@ class SchemeTabFieldManager extends Component
     public function updatedRowConfig()
     {
         $this->rebuildRowConfig();
-    }    
+    }
     public function updatedLayoutMode()
     {
         if ($this->layoutMode === 'custom') {

@@ -31,7 +31,7 @@
                         Manage Fields
                     </x-button.primary>
                     @endif
-                    @if(!in_array($tab->tab_code, [104, 105]) && !$isFinalSubmitted)
+                    @if(!in_array($tab->tab_code, [104]) && !$isFinalSubmitted)
                     <x-button.primary wire:click="openLayoutModal({{ $tab->tab_code }})"
                         class="bg-green-600 hover:bg-green-700 rounded-xl text-sm">
                         Fix Form Layout
