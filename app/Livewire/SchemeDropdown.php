@@ -19,6 +19,8 @@ class SchemeDropdown extends Component
         $route = Route::currentRouteName();
         if ($route == 'schemes.final-submitted') {
             $this->option = 1;
+        } elseif ($route == 'age-management') {
+            $this->option = 2;
         }
     }
     public function updatedSchemeId($value)

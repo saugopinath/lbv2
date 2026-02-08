@@ -27,6 +27,8 @@
                 <livewire:dynamic-form :scheme-id="$schemeId" :schemeName="$schemeName" :wire:key="'dynamic-form-'.$schemeId" />
 
             </div>
+        @elseif($option == 2)
+         <livewire:age-management :scheme-id="$schemeId" :wire:key="'age-management-'.$schemeId" />
         @else
             <livewire:dup-check-scheme-config-settings :scheme-id="$schemeId" :wire:key="'duplicate-'.$schemeId" />
         @endif
