@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use App\Models\AgeManagements;
 
 class AgeManagement extends Component
 {
@@ -77,9 +78,25 @@ class AgeManagement extends Component
             'selectedSpecialCases.*.max.*' => 'Special Max Age is Required',
         ];
         $this->validate($rules, $customMessages);
-
         DB::beginTransaction();
         try {
+            $jsonContent = null;
+            if ($this->isspecial === 'yes') {
+                $jsonContent = collect($this->selectedSpecialCases)->map(function ($item) {
+                    return [
+                        'case' => $item['case_id'],
+                        'min'  => $item['min'],
+                        'max'  => $item['max'],
+                    ];
+                })->toArray();
+            }
+            AgeManagements::create([
+                'scheme_id'    => $this->schemeId,
+                'min_age'    => $this->minage,
+                'max_age'    => $this->maxage,
+                'is_special'    => $this->isspecial,
+                'special_case' => $jsonContent ? json_encode($jsonContent) : null,
+            ]);
             DB::commit();
             $this->dispatch('toastr', ['type' => 'success', 'message' => 'Saved Successfully!']);
         } catch (Exception $e) {
