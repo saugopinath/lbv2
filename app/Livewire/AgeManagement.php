@@ -24,6 +24,29 @@ class AgeManagement extends Component
         ])->map(function ($name, $id) {
             return (object) ['id' => $id, 'name' => $name];
         });
+        $record = AgeManagements::where('scheme_id', $this->schemeId)->first();
+
+        if ($record) {
+            $this->minage = $record->min_age;
+            $this->maxage = $record->max_age;
+            $this->isspecial = $record->is_special ? 'yes' : 'no';
+
+            // JSON ডাটা রিড করা
+            if ($record->special_case) {
+                // যদি মডেলে Cast করা না থাকে তবে json_decode ব্যবহার করুন
+                $data = is_array($record->special_case)
+                    ? $record->special_case
+                    : json_decode($record->special_case, true);
+
+                foreach ($data as $id => $values) {
+                    $this->selectedSpecialCases[] = [
+                        'case_id' => (string)$id, // Key টি এখানে আইডি হিসেবে আসবে
+                        'min'     => $values['min'],
+                        'max'     => $values['max'],
+                    ];
+                }
+            }
+        }
     }
 
     public function getAvailableOptions($currentIndex)
@@ -82,14 +105,15 @@ class AgeManagement extends Component
         try {
             $jsonContent = null;
             if ($this->isspecial === 'yes') {
-                $jsonContent = collect($this->selectedSpecialCases)->map(function ($item) {
-                    return [
-                        'case' => $item['case_id'],
-                        'min'  => $item['min'],
-                        'max'  => $item['max'],
+                $jsonContent = [];
+                foreach ($this->selectedSpecialCases as $item) {
+                    $jsonContent[$item['case_id']] = [
+                        'min' => $item['min'],
+                        'max' => $item['max'],
                     ];
-                })->toArray();
+                }
             }
+            AgeManagements::where('scheme_id', $this->schemeId)->delete();
             AgeManagements::create([
                 'scheme_id'    => $this->schemeId,
                 'min_age'    => $this->minage,
