@@ -1,6 +1,4 @@
 @switch($field->field_type)
-
-{{-- TEXT --}}
 @case('text')
 <div>
     <x-form.input
@@ -11,7 +9,6 @@
     />
 </div>
 @break
-
 @case('number')
 <div>
     <x-form.input
