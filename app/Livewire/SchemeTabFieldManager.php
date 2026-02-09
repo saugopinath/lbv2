@@ -455,36 +455,73 @@ class SchemeTabFieldManager extends Component
         });
         $this->syncLayoutAfterFieldChange();
     }
+    // public function openPreview($tabCode)
+    // {
+    //     $this->activeTabCode = $tabCode;
+    //     $tab = collect($this->tabs)
+    //         ->firstWhere('tab_code', $tabCode);
+    //     $this->previewTabName = $tab?->masterTab?->tab_name ?? 'Preview';
+    //     $this->previewTabCode = $tab?->masterTab?->tab_code ?? 'Preview';
+
+    //     $this->showPreviewModal = true;
+    //     if ($this->activeTabCode == 104) {
+    //         $this->loadAttachedDocuments();
+    //     }
+
+    //     if (!$this->previewTabCode) {
+    //         $this->PreviewFields = collect();
+    //         return;
+    //     }
+    //     $fieldIds = array_keys($this->tabFields[$this->previewTabCode] ?? []);
+    //     if (empty($fieldIds)) {
+    //         $this->PreviewFields = collect();
+    //         return;
+    //     }
+    //     $this->PreviewFields = SchemeTabBasefield::whereIn('id', $fieldIds)
+    //         ->whereIn('scheme_id', [0, $this->schemeId])
+    //         ->whereIn('tab_code', [0, $this->previewTabCode])
+    //         ->where('is_active', true)
+    //         ->get()
+    //         ->sortBy(fn($f) => array_search($f->id, $fieldIds))
+    //         ->values();
+    // }
+
+
     public function openPreview($tabCode)
     {
         $this->activeTabCode = $tabCode;
+        $this->previewTabCode = (int) $tabCode; // ✅ FIX
         $tab = collect($this->tabs)
             ->firstWhere('tab_code', $tabCode);
+
         $this->previewTabName = $tab?->masterTab?->tab_name ?? 'Preview';
-        $this->previewTabCode = $tab?->masterTab?->tab_code ?? 'Preview';
 
         $this->showPreviewModal = true;
-        if ($this->activeTabCode == 104) {
-            $this->loadAttachedDocuments();
-        }
 
-        if (!$this->previewTabCode) {
-            $this->PreviewFields = collect();
+        // Load tab-specific data
+        if ($tabCode == 104) {
+            $this->loadAttachedDocuments();
             return;
         }
-        $fieldIds = array_keys($this->tabFields[$this->previewTabCode] ?? []);
+
+        if ($tabCode == 105) {
+            $this->selfDeclarationPreviewRows = $this->buildSelfDeclarationPreview();
+            return;
+        }
+        $fieldIds = array_keys($this->tabFields[$tabCode] ?? []);
         if (empty($fieldIds)) {
             $this->PreviewFields = collect();
             return;
         }
         $this->PreviewFields = SchemeTabBasefield::whereIn('id', $fieldIds)
             ->whereIn('scheme_id', [0, $this->schemeId])
-            ->whereIn('tab_code', [0, $this->previewTabCode])
+            ->whereIn('tab_code', [0, $tabCode])
             ->where('is_active', true)
             ->get()
             ->sortBy(fn($f) => array_search($f->id, $fieldIds))
             ->values();
     }
+
     public function closePreview()
     {
         $this->showPreviewModal = false;

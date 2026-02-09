@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
             OpTypeSeeder::class,
             CasteRequestIdSeeder::class,
             CasteRequestOpTypeSeeder::class,
-            BeneficiaryApprovedListSeeder::class,
+            // BeneficiaryApprovedListSeeder::class,
             ApplicantIncompletDetailsSeeder::class,
         ]);
     }
