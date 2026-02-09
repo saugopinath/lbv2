@@ -455,6 +455,15 @@ class SchemewiseStoreDataJsonHelper
 
         $dependentOn = $field['dependent_on'] ?? null;
         $dependentValues = $field['dependent_on_values'] ?? [];
+        $minAttr = '';
+        $maxAttr = '';
+        if ($name === 'dob') {
+            $minAttr = ':min="$minDOB"';
+            $maxAttr = ':max="$maxDOB"';
+        } elseif ($name === 'app_date' || $name === 'ds_date') {
+            $minAttr = ':min="$minDate"';
+            $maxAttr = ':max="$maxDate"';
+        }
 
         $xData = '';
         $xShow = '';
@@ -541,6 +550,8 @@ class SchemewiseStoreDataJsonHelper
                     {$wireIgnore}
                     {$readonlyAttr}
                     {$requiredAttr}
+                    {$minAttr}
+                    {$maxAttr}
                     wire:model.live="formData.{$name}"
                 />
                 BLADE;
@@ -587,6 +598,7 @@ class SchemewiseStoreDataJsonHelper
                         type="number"
                         name="{$name}"
                         label="{$label}"
+                        placeholder="{$placeholder}"
                         wire:model.live="formData.{$name}"
                     />
                 </div>
@@ -599,6 +611,7 @@ class SchemewiseStoreDataJsonHelper
                     <x-form.textarea
                         name="{$name}"
                         label="{$label}"
+                        placeholder="{$placeholder}"
                         wire:model.live="formData.{$name}"
                     />
                 </div>
@@ -686,6 +699,7 @@ class SchemewiseStoreDataJsonHelper
                     type="text"
                     name="{$name}"
                     label="{$label}"
+                    placeholder="{$placeholder}"
                     wire:model.live="formData.{$name}"
                 />
             </div>

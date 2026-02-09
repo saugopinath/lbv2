@@ -1,4 +1,4 @@
-<div class="grid md:grid-cols-1 gap-4 mt-4">
+<div class="grid md:grid-cols-3 gap-4 mt-4">
 <div   >
     <x-form.input
     type="text"
@@ -8,11 +8,11 @@
     
     
     required
+    
+    
     wire:model.live="formData.ifscode"
 />
-</div></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<div   >
+</div><div   >
     <x-form.input
     type="text"
     name="bankname"
@@ -21,11 +21,11 @@
     
     readonly
     required
+    
+    
     wire:model.live="formData.bankname"
 />
-</div></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<div   >
+</div><div   >
     <x-form.input
     type="text"
     name="bank_branch_name"
@@ -34,10 +34,12 @@
     
     readonly
     required
+    
+    
     wire:model.live="formData.bank_branch_name"
 />
 </div></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
+<div class="grid md:grid-cols-2 gap-4 mt-4">
 <div   >
     <x-form.input
     type="text"
@@ -47,11 +49,11 @@
     
     
     required
+    
+    
     wire:model.live="formData.bankaccountnumber"
 />
-</div></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<div   >
+</div><div   >
     <x-form.input
     type="text"
     name="confirmbankaccountnumber"
@@ -60,6 +62,8 @@
     
     
     required
+    
+    
     wire:model.live="formData.confirmbankaccountnumber"
 />
 </div></div>
