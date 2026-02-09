@@ -12,7 +12,6 @@
 </div>
 @break
 
-{{-- NUMBER --}}
 @case('number')
 <div>
     <x-form.input
@@ -24,8 +23,6 @@
     />
 </div>
 @break
-
-{{-- DATE --}}
 @case('date')
 <div>
     <x-form.input
@@ -36,8 +33,6 @@
     />
 </div>
 @break
-
-{{-- TEXTAREA --}}
 @case('textarea')
 <div>
     <x-form.textarea
@@ -48,8 +43,6 @@
     />
 </div>
 @break
-
-{{-- SELECT --}}
 @case('select')
 <div>
     <x-form.select
@@ -64,8 +57,6 @@
     </x-form.select>
 </div>
 @break
-
-{{-- RADIO --}}
 @case('radio')
 <div>
     <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -81,8 +72,6 @@
     </div>
 </div>
 @break
-
-{{-- CHECKBOX --}}
 @case('checkbox')
 <div class="flex items-center gap-2 mt-2">
     <input type="checkbox" disabled />
@@ -92,7 +81,6 @@
 </div>
 @break
 
-{{-- FALLBACK --}}
 @default
 <div class="text-sm text-red-500">
     Unsupported field type: {{ $field->field_type }}
