@@ -19,106 +19,11 @@ class SchemewiseStoreDataJsonHelper
 
 
 
-    public static function generateSchemeJson(int $schemeId): array
-    {
-        // 🔹 Fetch age config once
-        $ageConfig = AgeManagements::where('scheme_id', $schemeId)->first();
-
-        $tabs = SchemeTabMapping::with('masterTab')
-            ->where('scheme_id', $schemeId)
-            ->where('is_active', true)
-            ->orderBy('position')
-            ->get();
-
-        $tabData = [];
-
-        foreach ($tabs as $tab) {
-
-            $model = match ($tab->tab_code) {
-                105 => SelfDeclerationBasefield::class,
-                104 => SchemeAttachedDocMappings::class,
-                default => SchemeTabFormField::class,
-            };
-
-            if ($tab->tab_code == 104) {
-
-                $fields = $model::with('docType')
-                    ->where('scheme_id', $schemeId)
-                    ->where('tab_code', $tab->tab_code)
-                    ->where('is_active', true)
-                    ->orderBy('field_position')
-                    ->get()
-                    ->map(function ($field) {
-                        $data = $field->toArray();
-                        $data['doc_type_name'] = $field->docType?->name;
-                        $data['doc_type_code'] = $field->docType?->code ?? null;
-                        return $data;
-                    })
-                    ->toArray();
-            } else {
-
-                $fields = $model::where('scheme_id', $schemeId)
-                    ->where('tab_code', $tab->tab_code)
-                    ->where('is_active', true)
-                    ->orderBy('field_position')
-                    ->get()
-                    ->map(function ($field) use ($ageConfig) {
-
-                        $data = $field->toArray();
-
-                        // 🔥 AGE FIELD ONLY
-                        if ($data['field_name'] === 'age' && $ageConfig) {
-
-                            $data['validation_rule'] = $ageConfig->getAgeValidationRule();
-                            $data['age_limit']       = $ageConfig->getAgeLimit();
-                            $data['is_special']      = $ageConfig->hasSpecialCase();
-                        }
-
-                        return $data;
-                    })
-                    ->toArray();
-            }
-
-            /** ================= LAYOUT ================= */
-
-            $schemeTabLayout = SchemeTabLayout::where('scheme_id', $schemeId)
-                ->where('tab_code', $tab->tab_code)
-                ->first();
-
-            $layout = $schemeTabLayout?->layout_json;
-
-            $tabData[] = [
-                'tab_code' => $tab->tab_code,
-                'tab_name' => $tab->masterTab->tab_name ?? '',
-                'tab_icon' => $tab->masterTab->tab_icon ?? '',
-                'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
-                'fields' => $fields,
-                'layout' => $layout,
-            ];
-        }
-
-        return [
-            'scheme_id' => $schemeId,
-            'generated_at' => now()->toDateTimeString(),
-            'tabs' => $tabData,
-        ];
-    }
-
-    public static function storeSchemeJson(int $schemeId, array $data): string
-    {
-        $path = "final_schemes_formdata/scheme_{$schemeId}.json";
-
-        Storage::disk('local')->put(
-            $path,
-            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-        );
-
-        return $path;
-    }
-
-
     // public static function generateSchemeJson(int $schemeId): array
     // {
+    //     // 🔹 Fetch age config once
+    //     $ageConfig = AgeManagements::where('scheme_id', $schemeId)->first();
+
     //     $tabs = SchemeTabMapping::with('masterTab')
     //         ->where('scheme_id', $schemeId)
     //         ->where('is_active', true)
@@ -126,13 +31,17 @@ class SchemewiseStoreDataJsonHelper
     //         ->get();
 
     //     $tabData = [];
+
     //     foreach ($tabs as $tab) {
+
     //         $model = match ($tab->tab_code) {
     //             105 => SelfDeclerationBasefield::class,
     //             104 => SchemeAttachedDocMappings::class,
     //             default => SchemeTabFormField::class,
     //         };
+
     //         if ($tab->tab_code == 104) {
+
     //             $fields = $model::with('docType')
     //                 ->where('scheme_id', $schemeId)
     //                 ->where('tab_code', $tab->tab_code)
@@ -147,13 +56,29 @@ class SchemewiseStoreDataJsonHelper
     //                 })
     //                 ->toArray();
     //         } else {
+
     //             $fields = $model::where('scheme_id', $schemeId)
     //                 ->where('tab_code', $tab->tab_code)
     //                 ->where('is_active', true)
     //                 ->orderBy('field_position')
     //                 ->get()
+    //                 ->map(function ($field) use ($ageConfig) {
+
+    //                     $data = $field->toArray();
+
+    //                     // 🔥 AGE FIELD ONLY
+    //                     if ($data['field_name'] === 'age' && $ageConfig) {
+
+    //                         $data['validation_rule'] = $ageConfig->getAgeValidationRule();
+    //                         $data['age_limit']       = $ageConfig->getAgeLimit();
+    //                         $data['is_special']      = $ageConfig->hasSpecialCase();
+    //                     }
+
+    //                     return $data;
+    //                 })
     //                 ->toArray();
     //         }
+
     //         /** ================= LAYOUT ================= */
 
     //         $schemeTabLayout = SchemeTabLayout::where('scheme_id', $schemeId)
@@ -171,6 +96,7 @@ class SchemewiseStoreDataJsonHelper
     //             'layout' => $layout,
     //         ];
     //     }
+
     //     return [
     //         'scheme_id' => $schemeId,
     //         'generated_at' => now()->toDateTimeString(),
@@ -181,12 +107,86 @@ class SchemewiseStoreDataJsonHelper
     // public static function storeSchemeJson(int $schemeId, array $data): string
     // {
     //     $path = "final_schemes_formdata/scheme_{$schemeId}.json";
+
     //     Storage::disk('local')->put(
     //         $path,
     //         json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
     //     );
+
     //     return $path;
     // }
+
+
+    public static function generateSchemeJson(int $schemeId): array
+    {
+        $tabs = SchemeTabMapping::with('masterTab')
+            ->where('scheme_id', $schemeId)
+            ->where('is_active', true)
+            ->orderBy('position')
+            ->get();
+
+        $tabData = [];
+        foreach ($tabs as $tab) {
+            $model = match ($tab->tab_code) {
+                105 => SelfDeclerationBasefield::class,
+                104 => SchemeAttachedDocMappings::class,
+                default => SchemeTabFormField::class,
+            };
+            if ($tab->tab_code == 104) {
+                $fields = $model::with('docType')
+                    ->where('scheme_id', $schemeId)
+                    ->where('tab_code', $tab->tab_code)
+                    ->where('is_active', true)
+                    ->orderBy('field_position')
+                    ->get()
+                    ->map(function ($field) {
+                        $data = $field->toArray();
+                        $data['doc_type_name'] = $field->docType?->name;
+                        $data['doc_type_code'] = $field->docType?->code ?? null;
+                        return $data;
+                    })
+                    ->toArray();
+            } else {
+                $fields = $model::where('scheme_id', $schemeId)
+                    ->where('tab_code', $tab->tab_code)
+                    ->where('is_active', true)
+                    ->orderBy('field_position')
+                    ->get()
+                    ->toArray();
+            }
+            /** ================= LAYOUT ================= */
+
+            $schemeTabLayout = SchemeTabLayout::where('scheme_id', $schemeId)
+                ->where('tab_code', $tab->tab_code)
+                ->first();
+
+            $layout = $schemeTabLayout?->layout_json;
+
+            $tabData[] = [
+                'tab_code' => $tab->tab_code,
+                'tab_name' => $tab->masterTab->tab_name ?? '',
+                'tab_icon' => $tab->masterTab->tab_icon ?? '',
+                'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
+                'fields' => $fields,
+                'layout' => $layout,
+            ];
+        }
+        return [
+            'scheme_id' => $schemeId,
+            'generated_at' => now()->toDateTimeString(),
+            'tabs' => $tabData,
+        ];
+    }
+
+    public static function storeSchemeJson(int $schemeId, array $data): string
+    {
+        $path = "final_schemes_formdata/scheme_{$schemeId}.json";
+        Storage::disk('local')->put(
+            $path,
+            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+        );
+        return $path;
+    }
 
     public static function checkMandatoryBaseFields(int $schemeId): array
     {
