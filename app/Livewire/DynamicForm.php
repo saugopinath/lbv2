@@ -66,8 +66,10 @@ class DynamicForm extends Component
         $this->maxDate = Carbon::now()->format('Y-m-d');
         $this->minDate = Carbon::now()->subYears(2)->format('Y-m-d');
         $ageConfig = AgeManagements::where('scheme_id', $schemeId)->first();
-        if ($ageConfig) {
+        if ($ageConfig['max_age']) {
             $this->minDOB = now()->subYears($ageConfig['max_age'])->format('Y-m-d');
+        }
+        if ($ageConfig['min_age']) {
             $this->maxDOB = now()->subYears($ageConfig['min_age'])->format('Y-m-d');
         }
     }
@@ -450,31 +452,47 @@ class DynamicForm extends Component
         $json = $this->getSchemeJson();
         $rules = [];
         $ageConfig = AgeManagements::where('scheme_id', $this->schemeId)->first();
+
         foreach ($json['tabs'] ?? [] as $tab) {
             if ((string) $tab['tab_code'] !== (string) $this->activeTab) continue;
+
             foreach ($tab['fields'] ?? [] as $field) {
                 $fieldName = $field['field_name'];
-                $fieldRules = explode('|', $field['validation_rule']);
+                $fieldRules = explode('|', $field['validation_rule'] ?? '');
                 if ($fieldName === 'age' && $ageConfig) {
-                    $fieldRules = array_filter(
-                        $fieldRules,
-                        fn($rule) =>
-                        !str_contains($rule, 'min:') &&
-                            !str_contains($rule, 'max:') &&
-                            $rule !== 'integer' &&
-                            $rule !== 'numeric'
-                    );
+                    $fieldRules = array_filter($fieldRules, function ($rule) {
+                        $r = trim($rule);
+                        return !str_starts_with($r, 'min:') &&
+                            !str_starts_with($r, 'max:') &&
+                            $r !== 'integer' &&
+                            $r !== 'numeric';
+                    });
+
                     $fieldRules[] = "integer";
-                    $fieldRules[] = "min:{$ageConfig->min_age}";
-                    $fieldRules[] = "max:{$ageConfig->max_age}";
+                    if (!is_null($ageConfig->min_age)) {
+                        $fieldRules[] = "min:{$ageConfig->min_age}";
+                    }
+                    if (!is_null($ageConfig->max_age)) {
+                        $fieldRules[] = "max:{$ageConfig->max_age}";
+                    }
                 }
                 if ($fieldName === 'dob' && $ageConfig) {
-                    $minDate = now()->subYears($ageConfig->max_age)->format('Y-m-d');
-                    $maxDate = now()->subYears($ageConfig->min_age)->format('Y-m-d');
-                    $fieldRules[] = "after_or_equal:{$minDate}";
-                    $fieldRules[] = "before_or_equal:{$maxDate}";
+                    $fieldRules = array_filter($fieldRules, function ($rule) {
+                        $r = trim($rule);
+                        return !str_starts_with($r, 'after_or_equal:') &&
+                            !str_starts_with($r, 'before_or_equal:');
+                    });
+                    if (!is_null($ageConfig->max_age)) {
+                        $minDate = now()->subYears($ageConfig->max_age)->format('Y-m-d');
+                        $fieldRules[] = "after_or_equal:{$minDate}";
+                    }
+                    if (!is_null($ageConfig->min_age)) {
+                        $maxDate = now()->subYears($ageConfig->min_age)->format('Y-m-d');
+                        $fieldRules[] = "before_or_equal:{$maxDate}";
+                    }
                 }
-                $rules["formData.{$fieldName}"] = $fieldRules;
+
+                $rules["formData.{$fieldName}"] = array_values(array_filter($fieldRules));
             }
         }
         return $rules;
