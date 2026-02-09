@@ -3,9 +3,10 @@
 namespace App\Livewire;
 
 use App\Helpers\FormHelper;
+use App\Models\BeneficiaryAadhaar;
 use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
-use App\Models\Scheme;
+use Illuminate\Support\Facades\Auth;
 use App\Models\UniqueAppBenId;
 use Livewire\Component;
 use Illuminate\Support\Facades\File;
@@ -36,9 +37,8 @@ class DynamicForm extends Component
     public array $formData = [];
     public bool $aadhaarVerified = false;
     public $aadhaarPayload = [];
-    public $schemeName = '';
+    public $schemeName;
     public $heading = '';
-
 
     protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
@@ -46,10 +46,9 @@ class DynamicForm extends Component
         'aadhaarChecked' => 'onAadhaarChecked',
         'aadhaarCheckedReset' => 'onAadhaarCheckedReset',
     ];
-
     /* ================= MOUNT ================= */
 
-    public function mount($schemeId, $ram = null, $applicationId = null, $beneficiaryId = null)
+    public function mount($schemeId, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null)
     {
         $this->loadScheme($schemeId);
 
@@ -58,8 +57,7 @@ class DynamicForm extends Component
             $this->updateTabNavigation();
         }
         $this->schemeId = $schemeId;
-        $this->schemeName = Scheme::where('id', $schemeId)
-            ->value('name');
+        $this->schemeName = $schemeName;
         $this->heading = 'Government Of West Bengal ' . $this->schemeName . ' Scheme';
         $this->ram = $ram;
         $this->applicationId = $applicationId;
@@ -73,7 +71,10 @@ class DynamicForm extends Component
     public function onAadhaarChecked($data)
     {
         $this->aadhaarVerified = true;
-        $this->aadhaarPayload = $data;
+        $this->aadhaarPayload = [
+            'encoded' => $data['encoded'],
+            'hash' => $data['hash'],
+        ];
     }
 
     public function setActiveTab($tabCode)
@@ -116,18 +117,6 @@ class DynamicForm extends Component
         }
     }
 
-    // public function goToNextTab()
-    // {
-    //     $this->saveCurrentTabData();
-
-    //     if ($this->nextTab) {
-    //         $this->setActiveTab($this->nextTab);
-    //     }
-    // }
-    // public function stayOnTab()
-    // {
-    // }
-
     public function onDocumentTabPassed()
     {
         $this->markTabCompleted($this->activeTab);
@@ -153,7 +142,6 @@ class DynamicForm extends Component
         }
     }
     /* ================= FINAL SUBMIT ================= */
-
     public function finalSubmit()
     {
         if ((string) $this->activeTab === '104') {
@@ -176,34 +164,6 @@ class DynamicForm extends Component
             schemeId: $this->schemeId
         );
     }
-    // private function prepareTabsReviewData()
-    // {
-    //     $review = [];
-    //     $json = $this->getSchemeJson();
-    //     foreach ($json['tabs'] ?? [] as $tab) {
-    //         $tabName = $tab['tab_name'] ?? 'Tab';
-    //         foreach ($tab['fields'] ?? [] as $field) {
-    //             if (!isset($field['field_name'])) {
-    //                 continue;
-    //             }
-    //             $fieldName = $field['field_name'];
-    //             if (!array_key_exists($fieldName, $this->formData)) {
-    //                 continue;
-    //             }
-    //             $label = $field['level_name']
-    //                 ?? ucfirst(str_replace('_', ' ', $fieldName));
-
-    //             $value = FormHelper::resolveValue(
-    //                 $field,
-    //                 data_get($this->formData, $fieldName), // safer than []
-    //                 $this->formData // ⭐ PASS CONTEXT (VERY IMPORTANT)
-    //             );
-    //             $review[$tabName][$label] = $value;
-    //         }
-    //     }
-
-    //     return $review;
-    // }
     /* ================= REVIEW DATA ================= */
 
     private function prepareTabsReviewData()
@@ -339,7 +299,25 @@ class DynamicForm extends Component
                 'message' => 'Application not created. Please try again.',
             ]);
         }
-        // dd($beneficiatDetails);
+        // ================= Aadhaar Save =================
+        if ($this->aadhaarVerified && !empty($this->aadhaarPayload)) {
+
+            BeneficiaryAadhaar::updateOrCreate(
+                [
+                    'application_id' => $this->applicationId,
+                ],
+                [
+                    'beneficiary_id' => $this->beneficiaryId,
+                    'scheme_id' => $this->schemeId,
+                    'aadhar_hash' => $this->aadhaarPayload['hash'],
+                    'encoded_aadhar' => $this->aadhaarPayload['encoded'],
+                    'created_by' => Auth::id(),
+                    'encode_key' => null,
+                    'aadhaar_vault' => $this->aadhaarPayload['hash'],
+                ]
+            );
+        }
+
     }
     private function ensureApplicationIds(): void
     {

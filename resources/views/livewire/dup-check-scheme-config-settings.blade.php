@@ -4,7 +4,7 @@
     </div>
     <form wire:submit.prevent="save" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-            <x-form.label label="Duplicate Check With" name="duplicate_check_with" />
+            <x-form.label label="Duplicate Check With" name="selecteddupcheckOptions" />
             <div class="grid grid-cols-3">
                 @foreach ($dupcheckOptions as $key => $label)
                     <div wire:key="dup-opt-{{ $key }}">

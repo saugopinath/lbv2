@@ -273,3 +273,4 @@ Route::get('/schemes-final-submitted', [SchemeController::class, 'finalSubmitted
     ->name('schemes.final-submitted');
 
 Route::get('/duplicate-checks', [SchemeController::class, 'finalSubmitted'])->name('duplicate-checks');
+Route::get('/age-management', [SchemeController::class, 'finalSubmitted'])->name('age-management');

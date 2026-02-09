@@ -11,80 +11,183 @@ use App\Models\SelfDeclerationBasefield;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use App\Models\SchemeTabLayout;
+use App\Models\AgeManagements;
 use Illuminate\Support\Facades\Storage;
 
 class SchemewiseStoreDataJsonHelper
 {
-    public static function generateSchemeJson(int $schemeId): array
-    {
-        $tabs = SchemeTabMapping::with('masterTab')
-            ->where('scheme_id', $schemeId)
-            ->where('is_active', true)
-            ->orderBy('position')
-            ->get();
 
-        $tabData = [];
-        foreach ($tabs as $tab) {
-            $model = match ($tab->tab_code) {
-                105 => SelfDeclerationBasefield::class,
-                104 => SchemeAttachedDocMappings::class,
-                default => SchemeTabFormField::class,
-            };
-            if ($tab->tab_code == 104) {
-                $fields = $model::with('docType')
-                    ->where('scheme_id', $schemeId)
-                    ->where('tab_code', $tab->tab_code)
-                    ->where('is_active', true)
-                    ->orderBy('field_position')
-                    ->get()
-                    ->map(function ($field) {
-                        $data = $field->toArray();
-                        $data['doc_type_name'] = $field->docType?->name;
-                        $data['doc_type_code'] = $field->docType?->code ?? null;
-                        return $data;
-                    })
-                    ->toArray();
-            } else {
-                $fields = $model::where('scheme_id', $schemeId)
-                    ->where('tab_code', $tab->tab_code)
-                    ->where('is_active', true)
-                    ->orderBy('field_position')
-                    ->get()
-                    ->toArray();
-            }
-            /** ================= LAYOUT ================= */
 
-            $schemeTabLayout = SchemeTabLayout::where('scheme_id', $schemeId)
+
+public static function generateSchemeJson(int $schemeId): array
+{
+    // 🔹 Fetch age config once
+    $ageConfig = AgeManagements::where('scheme_id', $schemeId)->first();
+
+    $tabs = SchemeTabMapping::with('masterTab')
+        ->where('scheme_id', $schemeId)
+        ->where('is_active', true)
+        ->orderBy('position')
+        ->get();
+
+    $tabData = [];
+
+    foreach ($tabs as $tab) {
+
+        $model = match ($tab->tab_code) {
+            105 => SelfDeclerationBasefield::class,
+            104 => SchemeAttachedDocMappings::class,
+            default => SchemeTabFormField::class,
+        };
+
+        if ($tab->tab_code == 104) {
+
+            $fields = $model::with('docType')
+                ->where('scheme_id', $schemeId)
                 ->where('tab_code', $tab->tab_code)
-                ->first();
+                ->where('is_active', true)
+                ->orderBy('field_position')
+                ->get()
+                ->map(function ($field) {
+                    $data = $field->toArray();
+                    $data['doc_type_name'] = $field->docType?->name;
+                    $data['doc_type_code'] = $field->docType?->code ?? null;
+                    return $data;
+                })
+                ->toArray();
 
-            $layout = $schemeTabLayout?->layout_json;
+        } else {
 
-            $tabData[] = [
-                'tab_code' => $tab->tab_code,
-                'tab_name' => $tab->masterTab->tab_name ?? '',
-                'tab_icon' => $tab->masterTab->tab_icon ?? '',
-                'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
-                'fields' => $fields,
-                'layout' => $layout,
-            ];
+            $fields = $model::where('scheme_id', $schemeId)
+                ->where('tab_code', $tab->tab_code)
+                ->where('is_active', true)
+                ->orderBy('field_position')
+                ->get()
+                ->map(function ($field) use ($ageConfig) {
+
+                    $data = $field->toArray();
+
+                    // 🔥 AGE FIELD ONLY
+                    if ($data['field_name'] === 'age' && $ageConfig) {
+
+                        $data['validation_rule'] = $ageConfig->getAgeValidationRule();
+                        $data['age_limit']       = $ageConfig->getAgeLimit();
+                        $data['is_special']      = $ageConfig->hasSpecialCase();
+                    }
+
+                    return $data;
+                })
+                ->toArray();
         }
-        return [
-            'scheme_id' => $schemeId,
-            'generated_at' => now()->toDateTimeString(),
-            'tabs' => $tabData,
+
+        /** ================= LAYOUT ================= */
+
+        $schemeTabLayout = SchemeTabLayout::where('scheme_id', $schemeId)
+            ->where('tab_code', $tab->tab_code)
+            ->first();
+
+        $layout = $schemeTabLayout?->layout_json;
+
+        $tabData[] = [
+            'tab_code' => $tab->tab_code,
+            'tab_name' => $tab->masterTab->tab_name ?? '',
+            'tab_icon' => $tab->masterTab->tab_icon ?? '',
+            'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
+            'fields' => $fields,
+            'layout' => $layout,
         ];
     }
 
-    public static function storeSchemeJson(int $schemeId, array $data): string
-    {
-        $path = "final_schemes_formdata/scheme_{$schemeId}.json";
-        Storage::disk('local')->put(
-            $path,
-            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-        );
-        return $path;
-    }
+    return [
+        'scheme_id' => $schemeId,
+        'generated_at' => now()->toDateTimeString(),
+        'tabs' => $tabData,
+    ];
+}
+
+public static function storeSchemeJson(int $schemeId, array $data): string
+{
+    $path = "final_schemes_formdata/scheme_{$schemeId}.json";
+
+    Storage::disk('local')->put(
+        $path,
+        json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+    );
+
+    return $path;
+}
+
+
+    // public static function generateSchemeJson(int $schemeId): array
+    // {
+    //     $tabs = SchemeTabMapping::with('masterTab')
+    //         ->where('scheme_id', $schemeId)
+    //         ->where('is_active', true)
+    //         ->orderBy('position')
+    //         ->get();
+
+    //     $tabData = [];
+    //     foreach ($tabs as $tab) {
+    //         $model = match ($tab->tab_code) {
+    //             105 => SelfDeclerationBasefield::class,
+    //             104 => SchemeAttachedDocMappings::class,
+    //             default => SchemeTabFormField::class,
+    //         };
+    //         if ($tab->tab_code == 104) {
+    //             $fields = $model::with('docType')
+    //                 ->where('scheme_id', $schemeId)
+    //                 ->where('tab_code', $tab->tab_code)
+    //                 ->where('is_active', true)
+    //                 ->orderBy('field_position')
+    //                 ->get()
+    //                 ->map(function ($field) {
+    //                     $data = $field->toArray();
+    //                     $data['doc_type_name'] = $field->docType?->name;
+    //                     $data['doc_type_code'] = $field->docType?->code ?? null;
+    //                     return $data;
+    //                 })
+    //                 ->toArray();
+    //         } else {
+    //             $fields = $model::where('scheme_id', $schemeId)
+    //                 ->where('tab_code', $tab->tab_code)
+    //                 ->where('is_active', true)
+    //                 ->orderBy('field_position')
+    //                 ->get()
+    //                 ->toArray();
+    //         }
+    //         /** ================= LAYOUT ================= */
+
+    //         $schemeTabLayout = SchemeTabLayout::where('scheme_id', $schemeId)
+    //             ->where('tab_code', $tab->tab_code)
+    //             ->first();
+
+    //         $layout = $schemeTabLayout?->layout_json;
+
+    //         $tabData[] = [
+    //             'tab_code' => $tab->tab_code,
+    //             'tab_name' => $tab->masterTab->tab_name ?? '',
+    //             'tab_icon' => $tab->masterTab->tab_icon ?? '',
+    //             'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
+    //             'fields' => $fields,
+    //             'layout' => $layout,
+    //         ];
+    //     }
+    //     return [
+    //         'scheme_id' => $schemeId,
+    //         'generated_at' => now()->toDateTimeString(),
+    //         'tabs' => $tabData,
+    //     ];
+    // }
+
+    // public static function storeSchemeJson(int $schemeId, array $data): string
+    // {
+    //     $path = "final_schemes_formdata/scheme_{$schemeId}.json";
+    //     Storage::disk('local')->put(
+    //         $path,
+    //         json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+    //     );
+    //     return $path;
+    // }
 
     public static function checkMandatoryBaseFields(int $schemeId): array
     {
@@ -129,9 +232,74 @@ class SchemewiseStoreDataJsonHelper
                 continue;
             }
 
+            // if ($tabCode == 105) {
+
+            //     // 🔹 fetch ordered self-declaration fields
+            //     $fields = SelfDeclerationBasefield::where('scheme_id', $schemeId)
+            //         ->where('tab_code', 105)
+            //         ->where('is_active', true)
+            //         ->orderBy('field_position')
+            //         ->get()
+            //         ->values();
+
+            //     $sectionMap = SectionLevelMaster::pluck(
+            //         'section_level_name',
+            //         'id'
+            //     )->toArray();
+
+            //     $blade = "<div class='space-y-2'>";
+
+            //     $lastSectionKey = null;
+
+            //     foreach ($fields as $i => $field) {
+
+            //         $hasSection = !empty($field->section_level_id);
+
+            //         $currentKey = $hasSection
+            //             ? $field->section_level_type . '-' . $field->section_level_id
+            //             : null;
+
+            //         $next = $fields[$i + 1] ?? null;
+
+            //         $nextKey = (!empty($next?->section_level_id))
+            //             ? $next->section_level_type . '-' . $next->section_level_id
+            //             : null;
+
+            //         /* ========= SECTION START ========= */
+            //         if ($hasSection && $currentKey !== $lastSectionKey) {
+            //             $title = $sectionMap[$field->section_level_id] ?? 'Section';
+
+            //             $blade .= <<<BLADE
+            //         <div class="mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+            //             <span class="font-semibold text-indigo-700">
+            //                 {$title}
+            //             </span>
+            //         </div>
+            //         BLADE;
+            //         }
+
+            //         /* ========= FIELD ========= */
+            //         $blade .= self::renderSelfDeclarationField($field);
+
+            //         /* ========= SECTION END ========= */
+            //         if ($hasSection && $currentKey !== $nextKey) {
+            //             $blade .= "<div class='my-3'></div>";
+            //         }
+
+            //         if ($hasSection) {
+            //             $lastSectionKey = $currentKey;
+            //         }
+            //     }
+
+            //     $blade .= "</div>";
+
+            //     File::put("{$dir}/105.blade.php", $blade);
+            //     continue;
+            // }
+
+            /* ================= NORMAL FORM TABS ================= */
             if ($tabCode == 105) {
 
-                // 🔹 fetch ordered self-declaration fields
                 $fields = SelfDeclerationBasefield::where('scheme_id', $schemeId)
                     ->where('tab_code', 105)
                     ->where('is_active', true)
@@ -144,48 +312,98 @@ class SchemewiseStoreDataJsonHelper
                     'id'
                 )->toArray();
 
-                $blade = "<div class='space-y-2'>";
+                $layout = DB::table('scheme_tab_layouts')
+                    ->where('scheme_id', $schemeId)
+                    ->where('tab_code', 105)
+                    ->value('layout_json');
 
-                $lastSectionKey = null;
+                $layout = $layout ? json_decode($layout, true) : [];
 
-                foreach ($fields as $i => $field) {
+                // যদি layout wrapper থাকে
+                if (isset($layout['layout'])) {
+                    $layout = $layout['layout'];
+                }
 
-                    $hasSection = !empty($field->section_level_id);
+                $blade = "<div class='space-y-6'>";
 
-                    $currentKey = $hasSection
+                $cursor = 0;
+                $total  = $fields->count();
+                $layoutIndex = 0;
+
+                $lastPrintedSection = null;
+
+                while ($cursor < $total) {
+
+                    $field = $fields[$cursor];
+
+                    /* ===== Detect Section ===== */
+
+                    $currentSectionKey = $field->section_level_id
                         ? $field->section_level_type . '-' . $field->section_level_id
-                        : null;
+                        : 'no_section';
 
-                    $next = $fields[$i + 1] ?? null;
+                    /* ===== Print Section Header ===== */
 
-                    $nextKey = (!empty($next?->section_level_id))
-                        ? $next->section_level_type . '-' . $next->section_level_id
-                        : null;
+                    if ($lastPrintedSection !== $currentSectionKey) {
 
-                    /* ========= SECTION START ========= */
-                    if ($hasSection && $currentKey !== $lastSectionKey) {
-                        $title = $sectionMap[$field->section_level_id] ?? 'Section';
+                        if ($currentSectionKey !== 'no_section') {
 
-                        $blade .= <<<BLADE
-                    <div class="mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
-                        <span class="font-semibold text-indigo-700">
-                            {$title}
-                        </span>
-                    </div>
-                    BLADE;
+                            [, $sectionId] = explode('-', $currentSectionKey);
+                            $title = $sectionMap[$sectionId] ?? 'Section';
+
+                            $blade .= <<<HTML
+<div class="mt-6 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+    <span class="font-semibold text-indigo-700">{$title}</span>
+</div>
+HTML;
+                        }
+
+                        $lastPrintedSection = $currentSectionKey;
                     }
 
-                    /* ========= FIELD ========= */
-                    $blade .= self::renderSelfDeclarationField($field);
+                    /* ===== Get Layout Column ===== */
 
-                    /* ========= SECTION END ========= */
-                    if ($hasSection && $currentKey !== $nextKey) {
-                        $blade .= "<div class='my-3'></div>";
+                    $requestedCols = $layout[$layoutIndex]['columns'] ?? 1;
+                    $layoutIndex++;
+
+                    // layout শেষ হয়ে গেলে repeat করাও যেতে পারে
+                    if ($layoutIndex >= count($layout)) {
+                        $layoutIndex = 0;
                     }
 
-                    if ($hasSection) {
-                        $lastSectionKey = $currentKey;
+                    $rowFields = [];
+
+                    /* ===== Build Row WITHOUT crossing section ===== */
+
+                    while (
+                        $cursor < $total &&
+                        count($rowFields) < $requestedCols
+                    ) {
+
+                        $nextField = $fields[$cursor];
+
+                        $nextSectionKey = $nextField->section_level_id
+                            ? $nextField->section_level_type . '-' . $nextField->section_level_id
+                            : 'no_section';
+
+                        // 🔥 সবচেয়ে গুরুত্বপূর্ণ line
+                        if ($nextSectionKey !== $currentSectionKey) {
+                            break;
+                        }
+
+                        $rowFields[] = $nextField;
+                        $cursor++;
                     }
+
+                    $cols = max(1, count($rowFields));
+
+                    $blade .= "<div class='grid grid-cols-1 md:grid-cols-{$cols} gap-5'>";
+
+                    foreach ($rowFields as $rf) {
+                        $blade .= self::renderSelfDeclarationField($rf);
+                    }
+
+                    $blade .= "</div>";
                 }
 
                 $blade .= "</div>";
@@ -193,9 +411,6 @@ class SchemewiseStoreDataJsonHelper
                 File::put("{$dir}/105.blade.php", $blade);
                 continue;
             }
-
-            /* ================= NORMAL FORM TABS ================= */
-
             // 🔥 load saved layout
             $layout = DB::table('scheme_tab_layouts')
                 ->where('scheme_id', $schemeId)
@@ -432,7 +647,7 @@ class SchemewiseStoreDataJsonHelper
                 </div>
                 BLADE;
 
-            /* ===== TEXTAREA ===== */
+                /* ===== TEXTAREA ===== */
             case 'textarea':
                 return <<<BLADE
                 <div class="{$paddingClass}">
@@ -444,7 +659,7 @@ class SchemewiseStoreDataJsonHelper
                 </div>
                 BLADE;
 
-            /* ===== SELECT ===== */
+                /* ===== SELECT ===== */
             case 'select':
 
                 $optionsHtml = '';
@@ -471,7 +686,7 @@ class SchemewiseStoreDataJsonHelper
                 </div>
                 BLADE;
 
-            /* ===== RADIO ===== */
+                /* ===== RADIO ===== */
             case 'radio':
 
                 $radioHtml = '';
@@ -505,7 +720,7 @@ class SchemewiseStoreDataJsonHelper
                 </div>
                 BLADE;
 
-            /* ===== CHECKBOX ===== */
+                /* ===== CHECKBOX ===== */
             case 'checkbox':
                 return <<<BLADE
                 <div class="{$paddingClass}">
@@ -518,7 +733,7 @@ class SchemewiseStoreDataJsonHelper
                 </div>
                 BLADE;
 
-            /* ===== DEFAULT TEXT ===== */
+                /* ===== DEFAULT TEXT ===== */
             default:
                 return <<<BLADE
             <div class="{$paddingClass}">
@@ -532,6 +747,4 @@ class SchemewiseStoreDataJsonHelper
             BLADE;
         }
     }
-
-
 }

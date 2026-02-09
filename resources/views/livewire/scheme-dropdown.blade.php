@@ -24,8 +24,11 @@
     @if ($schemeId)
         @if ($option == 1)
             <div class="max-w-auto mx-auto bg-white rounded-xl shadow-sm p-6">
-                <livewire:dynamic-form :scheme-id="$schemeId" :wire:key="'dynamic-form-'.$schemeId" />
+                <livewire:dynamic-form :scheme-id="$schemeId" :schemeName="$schemeName" :wire:key="'dynamic-form-'.$schemeId" />
+
             </div>
+        @elseif($option == 2)
+         <livewire:age-management :scheme-id="$schemeId" :wire:key="'age-management-'.$schemeId" />
         @else
             <livewire:dup-check-scheme-config-settings :scheme-id="$schemeId" :wire:key="'duplicate-'.$schemeId" />
         @endif
