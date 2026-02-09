@@ -19,175 +19,175 @@ class SchemewiseStoreDataJsonHelper
 
 
 
-public static function generateSchemeJson(int $schemeId): array
-{
-    // 🔹 Fetch age config once
-    $ageConfig = AgeManagements::where('scheme_id', $schemeId)->first();
-
-    $tabs = SchemeTabMapping::with('masterTab')
-        ->where('scheme_id', $schemeId)
-        ->where('is_active', true)
-        ->orderBy('position')
-        ->get();
-
-    $tabData = [];
-
-    foreach ($tabs as $tab) {
-
-        $model = match ($tab->tab_code) {
-            105 => SelfDeclerationBasefield::class,
-            104 => SchemeAttachedDocMappings::class,
-            default => SchemeTabFormField::class,
-        };
-
-        if ($tab->tab_code == 104) {
-
-            $fields = $model::with('docType')
-                ->where('scheme_id', $schemeId)
-                ->where('tab_code', $tab->tab_code)
-                ->where('is_active', true)
-                ->orderBy('field_position')
-                ->get()
-                ->map(function ($field) {
-                    $data = $field->toArray();
-                    $data['doc_type_name'] = $field->docType?->name;
-                    $data['doc_type_code'] = $field->docType?->code ?? null;
-                    return $data;
-                })
-                ->toArray();
-
-        } else {
-
-            $fields = $model::where('scheme_id', $schemeId)
-                ->where('tab_code', $tab->tab_code)
-                ->where('is_active', true)
-                ->orderBy('field_position')
-                ->get()
-                ->map(function ($field) use ($ageConfig) {
-
-                    $data = $field->toArray();
-
-                    // 🔥 AGE FIELD ONLY
-                    if ($data['field_name'] === 'age' && $ageConfig) {
-
-                        $data['validation_rule'] = $ageConfig->getAgeValidationRule();
-                        $data['age_limit']       = $ageConfig->getAgeLimit();
-                        $data['is_special']      = $ageConfig->hasSpecialCase();
-                    }
-
-                    return $data;
-                })
-                ->toArray();
-        }
-
-        /** ================= LAYOUT ================= */
-
-        $schemeTabLayout = SchemeTabLayout::where('scheme_id', $schemeId)
-            ->where('tab_code', $tab->tab_code)
-            ->first();
-
-        $layout = $schemeTabLayout?->layout_json;
-
-        $tabData[] = [
-            'tab_code' => $tab->tab_code,
-            'tab_name' => $tab->masterTab->tab_name ?? '',
-            'tab_icon' => $tab->masterTab->tab_icon ?? '',
-            'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
-            'fields' => $fields,
-            'layout' => $layout,
-        ];
-    }
-
-    return [
-        'scheme_id' => $schemeId,
-        'generated_at' => now()->toDateTimeString(),
-        'tabs' => $tabData,
-    ];
-}
-
-public static function storeSchemeJson(int $schemeId, array $data): string
-{
-    $path = "final_schemes_formdata/scheme_{$schemeId}.json";
-
-    Storage::disk('local')->put(
-        $path,
-        json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-    );
-
-    return $path;
-}
-
-
     // public static function generateSchemeJson(int $schemeId): array
-    // {
+// {
+//     // 🔹 Fetch age config once
+//     $ageConfig = AgeManagements::where('scheme_id', $schemeId)->first();
+
     //     $tabs = SchemeTabMapping::with('masterTab')
-    //         ->where('scheme_id', $schemeId)
-    //         ->where('is_active', true)
-    //         ->orderBy('position')
-    //         ->get();
+//         ->where('scheme_id', $schemeId)
+//         ->where('is_active', true)
+//         ->orderBy('position')
+//         ->get();
 
     //     $tabData = [];
+
     //     foreach ($tabs as $tab) {
+
     //         $model = match ($tab->tab_code) {
-    //             105 => SelfDeclerationBasefield::class,
-    //             104 => SchemeAttachedDocMappings::class,
-    //             default => SchemeTabFormField::class,
-    //         };
+//             105 => SelfDeclerationBasefield::class,
+//             104 => SchemeAttachedDocMappings::class,
+//             default => SchemeTabFormField::class,
+//         };
+
     //         if ($tab->tab_code == 104) {
+
     //             $fields = $model::with('docType')
-    //                 ->where('scheme_id', $schemeId)
-    //                 ->where('tab_code', $tab->tab_code)
-    //                 ->where('is_active', true)
-    //                 ->orderBy('field_position')
-    //                 ->get()
-    //                 ->map(function ($field) {
-    //                     $data = $field->toArray();
-    //                     $data['doc_type_name'] = $field->docType?->name;
-    //                     $data['doc_type_code'] = $field->docType?->code ?? null;
-    //                     return $data;
-    //                 })
-    //                 ->toArray();
+//                 ->where('scheme_id', $schemeId)
+//                 ->where('tab_code', $tab->tab_code)
+//                 ->where('is_active', true)
+//                 ->orderBy('field_position')
+//                 ->get()
+//                 ->map(function ($field) {
+//                     $data = $field->toArray();
+//                     $data['doc_type_name'] = $field->docType?->name;
+//                     $data['doc_type_code'] = $field->docType?->code ?? null;
+//                     return $data;
+//                 })
+//                 ->toArray();
+
     //         } else {
+
     //             $fields = $model::where('scheme_id', $schemeId)
-    //                 ->where('tab_code', $tab->tab_code)
-    //                 ->where('is_active', true)
-    //                 ->orderBy('field_position')
-    //                 ->get()
-    //                 ->toArray();
-    //         }
+//                 ->where('tab_code', $tab->tab_code)
+//                 ->where('is_active', true)
+//                 ->orderBy('field_position')
+//                 ->get()
+//                 ->map(function ($field) use ($ageConfig) {
+
+    //                     $data = $field->toArray();
+
+    //                     // 🔥 AGE FIELD ONLY
+//                     if ($data['field_name'] === 'age' && $ageConfig) {
+
+    //                         $data['validation_rule'] = $ageConfig->getAgeValidationRule();
+//                         $data['age_limit']       = $ageConfig->getAgeLimit();
+//                         $data['is_special']      = $ageConfig->hasSpecialCase();
+//                     }
+
+    //                     return $data;
+//                 })
+//                 ->toArray();
+//         }
+
     //         /** ================= LAYOUT ================= */
 
     //         $schemeTabLayout = SchemeTabLayout::where('scheme_id', $schemeId)
-    //             ->where('tab_code', $tab->tab_code)
-    //             ->first();
+//             ->where('tab_code', $tab->tab_code)
+//             ->first();
 
     //         $layout = $schemeTabLayout?->layout_json;
 
     //         $tabData[] = [
-    //             'tab_code' => $tab->tab_code,
-    //             'tab_name' => $tab->masterTab->tab_name ?? '',
-    //             'tab_icon' => $tab->masterTab->tab_icon ?? '',
-    //             'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
-    //             'fields' => $fields,
-    //             'layout' => $layout,
-    //         ];
-    //     }
+//             'tab_code' => $tab->tab_code,
+//             'tab_name' => $tab->masterTab->tab_name ?? '',
+//             'tab_icon' => $tab->masterTab->tab_icon ?? '',
+//             'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
+//             'fields' => $fields,
+//             'layout' => $layout,
+//         ];
+//     }
+
     //     return [
-    //         'scheme_id' => $schemeId,
-    //         'generated_at' => now()->toDateTimeString(),
-    //         'tabs' => $tabData,
-    //     ];
-    // }
+//         'scheme_id' => $schemeId,
+//         'generated_at' => now()->toDateTimeString(),
+//         'tabs' => $tabData,
+//     ];
+// }
 
     // public static function storeSchemeJson(int $schemeId, array $data): string
-    // {
-    //     $path = "final_schemes_formdata/scheme_{$schemeId}.json";
+// {
+//     $path = "final_schemes_formdata/scheme_{$schemeId}.json";
+
     //     Storage::disk('local')->put(
-    //         $path,
-    //         json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-    //     );
+//         $path,
+//         json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+//     );
+
     //     return $path;
-    // }
+// }
+
+
+    public static function generateSchemeJson(int $schemeId): array
+    {
+        $tabs = SchemeTabMapping::with('masterTab')
+            ->where('scheme_id', $schemeId)
+            ->where('is_active', true)
+            ->orderBy('position')
+            ->get();
+
+        $tabData = [];
+        foreach ($tabs as $tab) {
+            $model = match ($tab->tab_code) {
+                105 => SelfDeclerationBasefield::class,
+                104 => SchemeAttachedDocMappings::class,
+                default => SchemeTabFormField::class,
+            };
+            if ($tab->tab_code == 104) {
+                $fields = $model::with('docType')
+                    ->where('scheme_id', $schemeId)
+                    ->where('tab_code', $tab->tab_code)
+                    ->where('is_active', true)
+                    ->orderBy('field_position')
+                    ->get()
+                    ->map(function ($field) {
+                        $data = $field->toArray();
+                        $data['doc_type_name'] = $field->docType?->name;
+                        $data['doc_type_code'] = $field->docType?->code ?? null;
+                        return $data;
+                    })
+                    ->toArray();
+            } else {
+                $fields = $model::where('scheme_id', $schemeId)
+                    ->where('tab_code', $tab->tab_code)
+                    ->where('is_active', true)
+                    ->orderBy('field_position')
+                    ->get()
+                    ->toArray();
+            }
+            /** ================= LAYOUT ================= */
+
+            $schemeTabLayout = SchemeTabLayout::where('scheme_id', $schemeId)
+                ->where('tab_code', $tab->tab_code)
+                ->first();
+
+            $layout = $schemeTabLayout?->layout_json;
+
+            $tabData[] = [
+                'tab_code' => $tab->tab_code,
+                'tab_name' => $tab->masterTab->tab_name ?? '',
+                'tab_icon' => $tab->masterTab->tab_icon ?? '',
+                'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
+                'fields' => $fields,
+                'layout' => $layout,
+            ];
+        }
+        return [
+            'scheme_id' => $schemeId,
+            'generated_at' => now()->toDateTimeString(),
+            'tabs' => $tabData,
+        ];
+    }
+
+    public static function storeSchemeJson(int $schemeId, array $data): string
+    {
+        $path = "final_schemes_formdata/scheme_{$schemeId}.json";
+        Storage::disk('local')->put(
+            $path,
+            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+        );
+        return $path;
+    }
 
     public static function checkMandatoryBaseFields(int $schemeId): array
     {
@@ -312,98 +312,117 @@ public static function storeSchemeJson(int $schemeId, array $data): string
                     'id'
                 )->toArray();
 
-                $layout = DB::table('scheme_tab_layouts')
+                $layoutJson = DB::table('scheme_tab_layouts')
                     ->where('scheme_id', $schemeId)
                     ->where('tab_code', 105)
                     ->value('layout_json');
 
-                $layout = $layout ? json_decode($layout, true) : [];
-
-                // যদি layout wrapper থাকে
+                $layout = $layoutJson ? json_decode($layoutJson, true) : [];
                 if (isset($layout['layout'])) {
                     $layout = $layout['layout'];
                 }
 
+                $nonLayoutTypes = ['label', 'section', 'heading'];
+
                 $blade = "<div class='space-y-6'>";
 
                 $cursor = 0;
-                $total  = $fields->count();
+                $total = $fields->count();
                 $layoutIndex = 0;
-
-                $lastPrintedSection = null;
+                $lastSectionKey = null;
+                $lastGridCols = 1; // 🔥 remember previous grid context
 
                 while ($cursor < $total) {
 
                     $field = $fields[$cursor];
 
-                    /* ===== Detect Section ===== */
-
-                    $currentSectionKey = $field->section_level_id
+                    /* ========= SECTION HEADER ========= */
+                    $sectionKey = $field->section_level_id
                         ? $field->section_level_type . '-' . $field->section_level_id
                         : 'no_section';
 
-                    /* ===== Print Section Header ===== */
+                    if ($lastSectionKey !== $sectionKey) {
 
-                    if ($lastPrintedSection !== $currentSectionKey) {
-
-                        if ($currentSectionKey !== 'no_section') {
-
-                            [, $sectionId] = explode('-', $currentSectionKey);
-                            $title = $sectionMap[$sectionId] ?? 'Section';
+                        if ($sectionKey !== 'no_section') {
+                            [, $sid] = explode('-', $sectionKey);
+                            $title = $sectionMap[$sid] ?? 'Section';
 
                             $blade .= <<<HTML
-<div class="mt-6 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
-    <span class="font-semibold text-indigo-700">{$title}</span>
-</div>
-HTML;
+                            <div class="mt-6 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+                                <span class="font-semibold text-indigo-700">{$title}</span>
+                            </div>
+                            HTML;
                         }
 
-                        $lastPrintedSection = $currentSectionKey;
+                        $lastSectionKey = $sectionKey;
                     }
 
-                    /* ===== Get Layout Column ===== */
+                    /* ========= NON-LAYOUT FIELD ========= */
+                    if (in_array($field->field_type, $nonLayoutTypes)) {
 
+                        $blade .= "<div class='w-full'>";
+                        $blade .= self::renderSelfDeclarationField($field);
+                        $blade .= "</div>";
+
+                        $cursor++;
+                        continue;
+                    }
+
+                    /* ========= GRID ROW ========= */
                     $requestedCols = $layout[$layoutIndex]['columns'] ?? 1;
-                    $layoutIndex++;
-
-                    // layout শেষ হয়ে গেলে repeat করাও যেতে পারে
-                    if ($layoutIndex >= count($layout)) {
-                        $layoutIndex = 0;
-                    }
 
                     $rowFields = [];
+                    $baseSectionId = $field->section_level_id;
 
-                    /* ===== Build Row WITHOUT crossing section ===== */
+                    while ($cursor < $total && count($rowFields) < $requestedCols) {
 
-                    while (
-                        $cursor < $total &&
-                        count($rowFields) < $requestedCols
-                    ) {
+                        $next = $fields[$cursor];
 
-                        $nextField = $fields[$cursor];
-
-                        $nextSectionKey = $nextField->section_level_id
-                            ? $nextField->section_level_type . '-' . $nextField->section_level_id
-                            : 'no_section';
-
-                        // 🔥 সবচেয়ে গুরুত্বপূর্ণ line
-                        if ($nextSectionKey !== $currentSectionKey) {
+                        if ($next->section_level_id !== $baseSectionId)
                             break;
-                        }
+                        if (in_array($next->field_type, $nonLayoutTypes))
+                            break;
 
-                        $rowFields[] = $nextField;
+                        $rowFields[] = $next;
                         $cursor++;
                     }
 
-                    $cols = max(1, count($rowFields));
+                    $cols = count($rowFields);
 
-                    $blade .= "<div class='grid grid-cols-1 md:grid-cols-{$cols} gap-5'>";
+                    /* ========= SINGLE FIELD (context-aware width) ========= */
+                    if ($cols === 1) {
 
-                    foreach ($rowFields as $rf) {
-                        $blade .= self::renderSelfDeclarationField($rf);
+                        $widthClass = match ($lastGridCols) {
+                            1 => 'w-full',
+                            2 => 'md:w-1/2',
+                            3 => 'md:w-1/3',
+                            4 => 'md:w-1/4',
+                            default => 'md:w-1/3',
+                        };
+
+                        $blade .= "<div class='{$widthClass}'>";
+                        $blade .= self::renderSelfDeclarationField($rowFields[0]);
+                        $blade .= "</div>";
                     }
 
-                    $blade .= "</div>";
+                    /* ========= MULTI FIELD GRID ========= */ elseif ($cols > 1) {
+
+                        $blade .= "<div class='grid grid-cols-1 md:grid-cols-{$cols} gap-5'>";
+
+                        foreach ($rowFields as $rf) {
+                            $blade .= self::renderSelfDeclarationField($rf);
+                        }
+
+                        $blade .= "</div>";
+
+                        // 🔥 remember grid context
+                        $lastGridCols = $cols;
+                    }
+
+                    // layoutIndex moves ONLY after real row
+                    if ($cols > 0) {
+                        $layoutIndex = ($layoutIndex + 1) % count($layout);
+                    }
                 }
 
                 $blade .= "</div>";
@@ -411,6 +430,7 @@ HTML;
                 File::put("{$dir}/105.blade.php", $blade);
                 continue;
             }
+
             // 🔥 load saved layout
             $layout = DB::table('scheme_tab_layouts')
                 ->where('scheme_id', $schemeId)
@@ -607,18 +627,13 @@ HTML;
         BLADE;
     }
 
-
     private static function renderSelfDeclarationField($field): string
     {
-        $label = $field->level_name;
-        $name = $field->field_name;
+        $label = e($field->level_name);
+        $name = e($field->field_name);
         $type = $field->field_type ?? 'text';
         $value = $field->value ?? 1;
 
-
-        $paddingClass = $field->section_level_id ? 'pl-6' : 'pl-0';
-
-        /* ========= OPTIONS NORMALIZE ========= */
         $options = [];
 
         if (!empty($field->options)) {
@@ -634,117 +649,210 @@ HTML;
 
         switch ($type) {
 
-            /* ===== NUMBER ===== */
             case 'number':
-                return <<<BLADE
-                <div class="{$paddingClass}">
-                    <x-form.input
-                        type="number"
-                        name="{$name}"
-                        label="{$label}"
-                        wire:model.live="formData.{$name}"
-                    />
-                </div>
-                BLADE;
+                return <<<HTML
+<div class="w-full">
+    <x-form.input type="number" name="{$name}" label="{$label}" wire:model.live="formData.{$name}" />
+</div>
+HTML;
 
-                /* ===== TEXTAREA ===== */
             case 'textarea':
-                return <<<BLADE
-                <div class="{$paddingClass}">
-                    <x-form.textarea
-                        name="{$name}"
-                        label="{$label}"
-                        wire:model.live="formData.{$name}"
-                    />
-                </div>
-                BLADE;
+                return <<<HTML
+<div class="w-full">
+    <x-form.textarea name="{$name}" label="{$label}" wire:model.live="formData.{$name}" />
+</div>
+HTML;
 
-                /* ===== SELECT ===== */
             case 'select':
-
                 $optionsHtml = '';
                 foreach ($options as $key => $text) {
-                    if (is_int($key)) {
+                    if (is_int($key))
                         $key = $text;
-                    }
-                    $key = e($key);
-                    $text = e($text);
-
-                    $optionsHtml .= "<option value=\"{$key}\">{$text}</option>\n";
+                    $optionsHtml .= "<option value=\"" . e($key) . "\">" . e($text) . "</option>\n";
                 }
 
-                return <<<BLADE
-                <div class="{$paddingClass}">
-                    <x-form.select
-                        name="{$name}"
-                        label="{$label}"
-                        wire:model.live="formData.{$name}"
-                    >
-                        <option value="">-- Select {$label} --</option>
-                        {$optionsHtml}
-                    </x-form.select>
-                </div>
-                BLADE;
+                return <<<HTML
+<div class="w-full">
+    <x-form.select name="{$name}" label="{$label}" wire:model.live="formData.{$name}">
+        <option value="">-- Select {$label} --</option>
+        {$optionsHtml}
+    </x-form.select>
+</div>
+HTML;
 
-                /* ===== RADIO ===== */
             case 'radio':
-
                 $radioHtml = '';
                 foreach ($options as $key => $text) {
-                    if (is_int($key)) {
+                    if (is_int($key))
                         $key = $text;
-                    }
-
-                    $key = e($key);
-                    $text = e($text);
-
-                    $radioHtml .= <<<HTML
-                    <label class="flex items-center gap-2">
-                        <input
-                            type="radio"
-                            name="{$name}"
-                            value="{$key}"
-                            wire:model.live="formData.{$name}"
-                        />
-                        {$text}
-                    </label>
-                    HTML;
+                    $radioHtml .= <<<RADIO
+<label class="flex items-center gap-2 cursor-pointer">
+    <input type="radio" name="{$name}" value="{$key}" wire:model.live="formData.{$name}" />
+    {$text}
+</label>
+RADIO;
                 }
 
-                return <<<BLADE
-                <div class="{$paddingClass}">
-                    <label class="block font-medium text-gray-700 mb-1">{$label}</label>
-                    <div class="flex flex-wrap gap-4">
-                        {$radioHtml}
-                    </div>
-                </div>
-                BLADE;
+                return <<<HTML
+<div class="w-full">
+    <label class="block font-medium text-gray-700 mb-1">{$label}</label>
+    <div class="flex flex-wrap gap-4">{$radioHtml}</div>
+</div>
+HTML;
 
-                /* ===== CHECKBOX ===== */
             case 'checkbox':
-                return <<<BLADE
-                <div class="{$paddingClass}">
-                    <x-form.checkbox
-                        name="{$name}"
-                        label="{$label}"
-                        value="{$value}"
-                        wire:model.live="formData.{$name}"
-                    />
-                </div>
-                BLADE;
+                return <<<HTML
+<div class="w-full">
+    <x-form.checkbox name="{$name}" label="{$label}" value="{$value}" wire:model.live="formData.{$name}" />
+</div>
+HTML;
 
-                /* ===== DEFAULT TEXT ===== */
             default:
-                return <<<BLADE
-            <div class="{$paddingClass}">
-                <x-form.input
-                    type="text"
-                    name="{$name}"
-                    label="{$label}"
-                    wire:model.live="formData.{$name}"
-                />
-            </div>
-            BLADE;
+                return <<<HTML
+<div class="w-full">
+    <x-form.input type="text" name="{$name}" label="{$label}" wire:model.live="formData.{$name}" />
+</div>
+HTML;
         }
     }
+
+    // private static function renderSelfDeclarationField($field): string
+    // {
+    //     $label = $field->level_name;
+    //     $name = $field->field_name;
+    //     $type = $field->field_type ?? 'text';
+    //     $value = $field->value ?? 1;
+
+
+    //     $paddingClass = $field->section_level_id ? 'pl-6' : 'pl-0';
+
+    //     /* ========= OPTIONS NORMALIZE ========= */
+    //     $options = [];
+
+    //     if (!empty($field->options)) {
+    //         if (is_string($field->options)) {
+    //             $decoded = json_decode($field->options, true);
+    //             if (json_last_error() === JSON_ERROR_NONE) {
+    //                 $options = $decoded;
+    //             }
+    //         } elseif (is_array($field->options)) {
+    //             $options = $field->options;
+    //         }
+    //     }
+
+    //     switch ($type) {
+
+    //         /* ===== NUMBER ===== */
+    //         case 'number':
+    //             return <<<BLADE
+    //             <div class="{$paddingClass}">
+    //                 <x-form.input
+    //                     type="number"
+    //                     name="{$name}"
+    //                     label="{$label}"
+    //                     wire:model.live="formData.{$name}"
+    //                 />
+    //             </div>
+    //             BLADE;
+
+    //             /* ===== TEXTAREA ===== */
+    //         case 'textarea':
+    //             return <<<BLADE
+    //             <div class="{$paddingClass}">
+    //                 <x-form.textarea
+    //                     name="{$name}"
+    //                     label="{$label}"
+    //                     wire:model.live="formData.{$name}"
+    //                 />
+    //             </div>
+    //             BLADE;
+
+    //             /* ===== SELECT ===== */
+    //         case 'select':
+
+    //             $optionsHtml = '';
+    //             foreach ($options as $key => $text) {
+    //                 if (is_int($key)) {
+    //                     $key = $text;
+    //                 }
+    //                 $key = e($key);
+    //                 $text = e($text);
+
+    //                 $optionsHtml .= "<option value=\"{$key}\">{$text}</option>\n";
+    //             }
+
+    //             return <<<BLADE
+    //             <div class="{$paddingClass}">
+    //                 <x-form.select
+    //                     name="{$name}"
+    //                     label="{$label}"
+    //                     wire:model.live="formData.{$name}"
+    //                 >
+    //                     <option value="">-- Select {$label} --</option>
+    //                     {$optionsHtml}
+    //                 </x-form.select>
+    //             </div>
+    //             BLADE;
+
+    //             /* ===== RADIO ===== */
+    //         case 'radio':
+
+    //             $radioHtml = '';
+    //             foreach ($options as $key => $text) {
+    //                 if (is_int($key)) {
+    //                     $key = $text;
+    //                 }
+
+    //                 $key = e($key);
+    //                 $text = e($text);
+
+    //                 $radioHtml .= <<<HTML
+    //                 <label class="flex items-center gap-2">
+    //                     <input
+    //                         type="radio"
+    //                         name="{$name}"
+    //                         value="{$key}"
+    //                         wire:model.live="formData.{$name}"
+    //                     />
+    //                     {$text}
+    //                 </label>
+    //                 HTML;
+    //             }
+
+    //             return <<<BLADE
+    //             <div class="{$paddingClass}">
+    //                 <label class="block font-medium text-gray-700 mb-1">{$label}</label>
+    //                 <div class="flex flex-wrap gap-4">
+    //                     {$radioHtml}
+    //                 </div>
+    //             </div>
+    //             BLADE;
+
+    //             /* ===== CHECKBOX ===== */
+    //         case 'checkbox':
+    //             return <<<BLADE
+    //             <div class="{$paddingClass}">
+    //                 <x-form.checkbox
+    //                     name="{$name}"
+    //                     label="{$label}"
+    //                     value="{$value}"
+    //                     wire:model.live="formData.{$name}"
+    //                 />
+    //             </div>
+    //             BLADE;
+
+    //             /* ===== DEFAULT TEXT ===== */
+    //         default:
+    //             return <<<BLADE
+    //         <div class="{$paddingClass}">
+    //             <x-form.input
+    //                 type="text"
+    //                 name="{$name}"
+    //                 label="{$label}"
+    //                 wire:model.live="formData.{$name}"
+    //             />
+    //         </div>
+    //         BLADE;
+    //     }
+    // }
 }
