@@ -756,27 +756,24 @@ class SchemeTabFieldManager extends Component
 
             $cols = count($rowFields);
 
-            if ($cols === 1) {
-                $widthClass = match ($lastGridCols) {
-                    1 => 'w-full',
-                    2 => 'md:w-1/2',
-                    3 => 'md:w-1/3',
-                    4 => 'md:w-1/4',
-                    default => 'md:w-1/3',
-                };
-
-                $rows[] = [
-                    'type' => 'field',
-                    'width_class' => $widthClass,
-                    'field' => $rowFields[0]
-                ];
-            } elseif ($cols > 1) {
+            // 🔥 STRICT LAYOUT: If layout implies > 1 col, use Grid.
+            if ($requestedCols > 1) {
+                // Determine responsive classes based on $requestedCols
+                // e.g. for 3 cols -> md:grid-cols-3
+                // If only 1 field is present, it will take 1/3 width naturally in grid
                 $rows[] = [
                     'type' => 'grid',
-                    'cols' => $cols,
+                    'cols' => $requestedCols,
                     'fields' => $rowFields
                 ];
-                $lastGridCols = $cols;
+            }
+            // Otherwise, full width single field
+            else {
+                $rows[] = [
+                    'type' => 'field',
+                    'width_class' => 'w-full',
+                    'field' => $rowFields[0]
+                ];
             }
 
             if ($cols > 0) {
