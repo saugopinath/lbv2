@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Helpers\FormHelper;
+use App\Models\AgeManagements;
 use App\Models\BeneficiaryAadhaar;
 use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
@@ -39,7 +40,7 @@ class DynamicForm extends Component
     public $aadhaarPayload = [];
     public $schemeName;
     public $heading = '';
-
+    public $maxDate, $minDate, $minDOB, $maxDOB;
     protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
         'document-validation-failed' => 'onDocumentTabFailed',
@@ -62,6 +63,13 @@ class DynamicForm extends Component
         $this->ram = $ram;
         $this->applicationId = $applicationId;
         $this->beneficiaryId = $beneficiaryId;
+        $this->maxDate = Carbon::now()->format('Y-m-d');
+        $this->minDate = Carbon::now()->subYears(2)->format('Y-m-d');
+        $ageConfig = AgeManagements::where('scheme_id', $schemeId)->first();
+        if ($ageConfig) {
+            $this->minDOB = now()->subYears($ageConfig['max_age'])->format('Y-m-d');
+            $this->maxDOB = now()->subYears($ageConfig['min_age'])->format('Y-m-d');
+        }
     }
     public function onAadhaarCheckedReset()
     {
@@ -127,9 +135,7 @@ class DynamicForm extends Component
         }
     }
 
-    public function onDocumentTabFailed()
-    {
-    }
+    public function onDocumentTabFailed() {}
     /* ================== HELPERS ================== */
     private function markTabCompleted(string $tabCode): void
     {
@@ -317,7 +323,6 @@ class DynamicForm extends Component
                 ]
             );
         }
-
     }
     private function ensureApplicationIds(): void
     {
@@ -401,7 +406,7 @@ class DynamicForm extends Component
 
         return json_decode(File::get($path), true);
     }
-    private function getValidationRulesForActiveTab(): array
+    /*private function getValidationRulesForActiveTab(): array
     {
         $json = $this->getSchemeJson();
         $rules = [];
@@ -438,7 +443,43 @@ class DynamicForm extends Component
         }
 
         return $rules;
+    }*/
+
+    private function getValidationRulesForActiveTab(): array
+    {
+        $json = $this->getSchemeJson();
+        $rules = [];
+        $ageConfig = AgeManagements::where('scheme_id', $this->schemeId)->first();
+        foreach ($json['tabs'] ?? [] as $tab) {
+            if ((string) $tab['tab_code'] !== (string) $this->activeTab) continue;
+            foreach ($tab['fields'] ?? [] as $field) {
+                $fieldName = $field['field_name'];
+                $fieldRules = explode('|', $field['validation_rule']);
+                if ($fieldName === 'age' && $ageConfig) {
+                    $fieldRules = array_filter(
+                        $fieldRules,
+                        fn($rule) =>
+                        !str_contains($rule, 'min:') &&
+                            !str_contains($rule, 'max:') &&
+                            $rule !== 'integer' &&
+                            $rule !== 'numeric'
+                    );
+                    $fieldRules[] = "integer";
+                    $fieldRules[] = "min:{$ageConfig->min_age}";
+                    $fieldRules[] = "max:{$ageConfig->max_age}";
+                }
+                if ($fieldName === 'dob' && $ageConfig) {
+                    $minDate = now()->subYears($ageConfig->max_age)->format('Y-m-d');
+                    $maxDate = now()->subYears($ageConfig->min_age)->format('Y-m-d');
+                    $fieldRules[] = "after_or_equal:{$minDate}";
+                    $fieldRules[] = "before_or_equal:{$maxDate}";
+                }
+                $rules["formData.{$fieldName}"] = $fieldRules;
+            }
+        }
+        return $rules;
     }
+
     protected function validationAttributes(): array
     {
         $json = $this->getSchemeJson();
