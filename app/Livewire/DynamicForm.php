@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Helpers\FormHelper;
+use App\Models\AgeManagements;
 use App\Models\BeneficiaryAadhaar;
 use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
@@ -39,7 +40,7 @@ class DynamicForm extends Component
     public $aadhaarPayload = [];
     public $schemeName;
     public $heading = '';
-
+    public $maxDate, $minDate, $minDOB, $maxDOB;
     protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
         'document-validation-failed' => 'onDocumentTabFailed',
@@ -62,6 +63,11 @@ class DynamicForm extends Component
         $this->ram = $ram;
         $this->applicationId = $applicationId;
         $this->beneficiaryId = $beneficiaryId;
+        $this->maxDate = Carbon::now()->format('Y-m-d');
+        $this->minDate = Carbon::now()->subYears(2)->format('Y-m-d');
+        $ageConfig = AgeManagements::where('scheme_id', $schemeId)->first();
+        $this->minDOB = now()->subYears($ageConfig['max_age'])->format('Y-m-d');
+        $this->maxDOB = now()->subYears($ageConfig['min_age'])->format('Y-m-d');
     }
     public function onAadhaarCheckedReset()
     {
@@ -127,9 +133,7 @@ class DynamicForm extends Component
         }
     }
 
-    public function onDocumentTabFailed()
-    {
-    }
+    public function onDocumentTabFailed() {}
     /* ================== HELPERS ================== */
     private function markTabCompleted(string $tabCode): void
     {
@@ -317,7 +321,6 @@ class DynamicForm extends Component
                 ]
             );
         }
-
     }
     private function ensureApplicationIds(): void
     {
