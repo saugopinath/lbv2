@@ -404,7 +404,7 @@ class DynamicForm extends Component
 
         return json_decode(File::get($path), true);
     }
-    private function getValidationRulesForActiveTab(): array
+    /*private function getValidationRulesForActiveTab(): array
     {
         $json = $this->getSchemeJson();
         $rules = [];
@@ -437,6 +437,58 @@ class DynamicForm extends Component
                 // }
 
                 $rules["formData.{$field['field_name']}"] = $fieldRules;
+            }
+        }
+
+        return $rules;
+    }*/
+    private function getValidationRulesForActiveTab(): array
+    {
+        $json = $this->getSchemeJson();
+        $rules = [];
+        $ageLimit = null;
+
+        // ১. প্রথমে এই ট্যাবে কোনো age_limit আছে কি না খুঁজে বের করা
+        foreach ($json['tabs'] ?? [] as $tab) {
+            if ((string) $tab['tab_code'] !== (string) $this->activeTab) continue;
+
+            foreach ($tab['fields'] ?? [] as $field) {
+                if ($field['field_name'] === 'age' && isset($field['age_limit'])) {
+                    $ageLimit = $field['age_limit'];
+                    break 2; // age_limit পেয়ে গেলে লুপ থেকে বেরিয়ে আসা
+                }
+            }
+        }
+
+        // ২. রুলস জেনারেট করা
+        foreach ($json['tabs'] ?? [] as $tab) {
+            if ((string) $tab['tab_code'] !== (string) $this->activeTab) continue;
+
+            foreach ($tab['fields'] ?? [] as $field) {
+                if (empty($field['field_name']) || empty($field['validation_rule'])) continue;
+
+                $fieldName = $field['field_name'];
+                $fieldRules = explode('|', $field['validation_rule']);
+
+                // 🔥 DOB ফিল্ডের জন্য ডায়নামিক রুল অ্যাড করা
+                if ($fieldName === 'dob' && $ageLimit) {
+                    $minAge = $ageLimit['min'];
+                    $maxAge = $ageLimit['max'];
+
+                    // ডেট ক্যালকুলেশন
+                    $minDate = now()->subYears($maxAge)->format('Y-m-d');
+                    $maxDate = now()->subYears($minAge)->format('Y-m-d');
+
+                    $fieldRules[] = "after_or_equal:{$minDate}";
+                    $fieldRules[] = "before_or_equal:{$maxDate}";
+                }
+
+                // Checkbox handling
+                if ($field['field_type'] === 'checkbox') {
+                    $fieldRules = array_map(fn($rule) => $rule === 'required' ? 'accepted' : $rule, $fieldRules);
+                }
+
+                $rules["formData.{$fieldName}"] = $fieldRules;
             }
         }
 
