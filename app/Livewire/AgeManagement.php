@@ -30,17 +30,14 @@ class AgeManagement extends Component
             $this->minage = $record->min_age;
             $this->maxage = $record->max_age;
             $this->isspecial = $record->is_special ? 'yes' : 'no';
-
-            // JSON ডাটা রিড করা
             if ($record->special_case) {
-                // যদি মডেলে Cast করা না থাকে তবে json_decode ব্যবহার করুন
                 $data = is_array($record->special_case)
                     ? $record->special_case
                     : json_decode($record->special_case, true);
 
                 foreach ($data as $id => $values) {
                     $this->selectedSpecialCases[] = [
-                        'case_id' => (string)$id, // Key টি এখানে আইডি হিসেবে আসবে
+                        'case_id' => (string)$id,
                         'min'     => $values['min'],
                         'max'     => $values['max'],
                     ];
@@ -103,6 +100,10 @@ class AgeManagement extends Component
         $this->validate($rules, $customMessages);
         DB::beginTransaction();
         try {
+            $exists = AgeManagements::where('scheme_id', $this->schemeId)->exists();
+            $message = $exists
+                ? 'Age updated successfully!'
+                : 'Age saved successfully!';
             $jsonContent = null;
             if ($this->isspecial === 'yes') {
                 $jsonContent = [];
@@ -113,19 +114,20 @@ class AgeManagement extends Component
                     ];
                 }
             }
-            AgeManagements::where('scheme_id', $this->schemeId)->delete();
-            AgeManagements::create([
-                'scheme_id'    => $this->schemeId,
-                'min_age'    => $this->minage,
-                'max_age'    => $this->maxage,
-                'is_special'    => $this->isspecial,
-                'special_case' => $jsonContent ? json_encode($jsonContent) : null,
-            ]);
+            AgeManagements::updateOrCreate(
+                ['scheme_id' => $this->schemeId],
+                [
+                    'min_age'      => $this->minage,
+                    'max_age'      => $this->maxage,
+                    'is_special'   => $this->isspecial,
+                    'special_case' => $jsonContent ? json_encode($jsonContent) : null,
+                ]
+            );
             DB::commit();
-            $this->dispatch('toastr', ['type' => 'success', 'message' => 'Saved Successfully!']);
+            $this->dispatch('toastr', ['type' => 'success', 'message' => $message]);
         } catch (Exception $e) {
             DB::rollBack();
-            $this->dispatch('toastr', ['type' => 'error', 'message' => $e->getMessage()]);
+            $this->dispatch('toastr', ['type' => 'error', 'message' => 'Something went wrong: ' . $e->getMessage()]);
         }
     }
 
