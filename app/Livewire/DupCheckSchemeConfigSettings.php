@@ -74,9 +74,9 @@ class DupCheckSchemeConfigSettings extends Component
             //         'scheme_lists' => ($this->iscross === 'yes') ? $this->schemes : null,
             //     ]);
             // }
-            $existingOptions = DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
-                ->pluck('check_with')
-                ->toArray();
+            // $existingOptions = DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
+            //     ->pluck('check_with')
+            //     ->toArray();
             DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
                 ->whereNotIn('check_with', $this->selecteddupcheckOptions)
                 ->delete();
