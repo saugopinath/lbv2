@@ -65,14 +65,32 @@ class DupCheckSchemeConfigSettings extends Component
             $message = $exists
                 ? 'Dup Check Scheme Config updated successfully!'
                 : 'Dup Check Scheme Config saved successfully!';
-            DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)->delete();
+            // DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)->delete();
+            // foreach ($this->selecteddupcheckOptions as $option) {
+            //     DupcheckschemeconfigSetting::create([
+            //         'scheme_id'    => $this->schemeId,
+            //         'is_cross'     => $this->iscross,
+            //         'check_with'   => $option,
+            //         'scheme_lists' => ($this->iscross === 'yes') ? $this->schemes : null,
+            //     ]);
+            // }
+            $existingOptions = DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
+                ->pluck('check_with')
+                ->toArray();
+            DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
+                ->whereNotIn('check_with', $this->selecteddupcheckOptions)
+                ->delete();
             foreach ($this->selecteddupcheckOptions as $option) {
-                DupcheckschemeconfigSetting::create([
-                    'scheme_id'    => $this->schemeId,
-                    'is_cross'     => $this->iscross,
-                    'check_with'   => $option,
-                    'scheme_lists' => ($this->iscross === 'yes') ? $this->schemes : null,
-                ]);
+                DupcheckschemeconfigSetting::updateOrCreate(
+                    [
+                        'scheme_id' => $this->schemeId,
+                        'check_with' => $option,
+                    ],
+                    [
+                        'is_cross'     => $this->iscross,
+                        'scheme_lists' => ($this->iscross === 'yes') ? $this->schemes : null,
+                    ]
+                );
             }
             DB::commit();
             $this->dispatch('toastr', [
