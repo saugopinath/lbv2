@@ -775,7 +775,6 @@ class SchemeTabFieldManager extends Component
                     'field' => $rowFields[0]
                 ];
             }
-
             if ($cols > 0) {
                 $layoutIndex = ($layoutIndex + 1) % (count($layout) ?: 1);
             }
