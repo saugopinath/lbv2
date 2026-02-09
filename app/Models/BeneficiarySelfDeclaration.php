@@ -4,14 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BeneficiaryPersonalDetail extends Model
+class BeneficiarySelfDeclaration extends Model
 {
     protected $guarded = [];
-    protected $table = 'lb_scheme.beneficiary_personal_details';
+    protected $table = 'lb_scheme.beneficiary_self_declarations';
 
     protected $casts = [
         'other_details' => 'array',
     ];
-
-    
 }
