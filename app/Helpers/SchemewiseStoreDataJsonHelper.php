@@ -550,11 +550,11 @@ class SchemewiseStoreDataJsonHelper
             case 'select':
 
                 $optionsHtml = '';
-                    foreach (($field['options'] ?? []) as $key => $optionlabel) {
-                        $key = e($key);
-                        $optionlabel = e($optionlabel);
-                        $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
-                    }
+                foreach (($field['options'] ?? []) as $key => $optionlabel) {
+                    $key = e($key);
+                    $optionlabel = e($optionlabel);
+                    $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
+                }
 
                 $fieldHtml = <<<BLADE
                 <x-form.select
@@ -633,6 +633,7 @@ class SchemewiseStoreDataJsonHelper
         $name = e($field->field_name);
         $type = $field->field_type ?? 'text';
         $value = $field->value ?? 1;
+        $placeholder = 'Enter ' . $field->level_name ?? '';
 
         $options = [];
 
@@ -652,7 +653,7 @@ class SchemewiseStoreDataJsonHelper
             case 'number':
                 return <<<HTML
 <div class="w-full">
-    <x-form.input type="number" name="{$name}" label="{$label}" wire:model.live="formData.{$name}" />
+    <x-form.input type="number" name="{$name}" label="{$label}"  placeholder="{$placeholder}" wire:model.live="formData.{$name}" />
 </div>
 HTML;
 
@@ -710,7 +711,7 @@ HTML;
             default:
                 return <<<HTML
 <div class="w-full">
-    <x-form.input type="text" name="{$name}" label="{$label}" wire:model.live="formData.{$name}" />
+    <x-form.input type="text" name="{$name}"  placeholder="{$placeholder}" label="{$label}" wire:model.live="formData.{$name}" />
 </div>
 HTML;
         }
