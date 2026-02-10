@@ -124,7 +124,6 @@ class SchemewiseStoreDataJsonHelper
             ->where('is_active', true)
             ->orderBy('position')
             ->get();
-
         $tabData = [];
         foreach ($tabs as $tab) {
             $model = match ($tab->tab_code) {
@@ -161,7 +160,6 @@ class SchemewiseStoreDataJsonHelper
                 ->first();
 
             $layout = $schemeTabLayout?->layout_json;
-
             $tabData[] = [
                 'tab_code' => $tab->tab_code,
                 'tab_name' => $tab->masterTab->tab_name ?? '',
@@ -193,12 +191,10 @@ class SchemewiseStoreDataJsonHelper
         $mandatoryBaseFields = SchemeTabBasefield::where('is_mendetory', 1)
             ->pluck('id')
             ->toArray();
-
         $configuredFields = SchemeTabFormField::where('scheme_id', $schemeId)
             ->where('is_active', true)
             ->pluck('tab_field_id')
             ->toArray();
-
         $missingFields = array_diff($mandatoryBaseFields, $configuredFields);
         $missingFieldNames = SchemeTabBasefield::whereIn('id', $missingFields)
             ->pluck('level_name')
@@ -209,18 +205,13 @@ class SchemewiseStoreDataJsonHelper
     public static function store(int $schemeId, array $tabs): string
     {
         $dir = resource_path("views/schemes/scheme_{$schemeId}");
-
         if (!File::exists($dir)) {
             File::makeDirectory($dir, 0755, true);
         }
-
         foreach ($tabs as $tab) {
-
             $tabCode = $tab['tab_code'];
-
             /* ================= TAB 104 : DOCUMENT ================= */
             if ($tabCode == 104) {
-
                 File::put(
                     "{$dir}/104.blade.php",
                     <<<BLADE
