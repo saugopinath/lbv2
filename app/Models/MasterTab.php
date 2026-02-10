@@ -14,4 +14,21 @@ class MasterTab extends Model
     'tab_icon',
     'is_active',
   ];
+  public function fields()
+  {
+    $model = match ($this->tab_code) {
+      105 => SelfDeclerationBasefield::class,
+      default => SchemeTabFormField::class,
+    };
+
+    return $this->hasMany(
+      $model,
+      'tab_code',
+      'tab_code'
+    );
+  }
+  public function getFields()
+  {
+    return $this->fields()->get();
+  }
 }

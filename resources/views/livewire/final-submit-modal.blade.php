@@ -38,6 +38,8 @@
                 </div>
 
 
+
+                
                 @if($applicationId)
                     <p
                         class="px-4 py-1.5 mb-4 text-center rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 shadow-sm">

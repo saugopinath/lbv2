@@ -11,4 +11,13 @@ class BeneficiaryContactDetail extends Model
     protected $casts = [
         'other_details' => 'array',
     ];
+    public function municipality()
+    {
+        return $this->belongsTo(Municipality::class, 'municipality_id');
+    }
+
+    public function panchayat()
+    {
+        return $this->belongsTo(Panchayat::class, 'panchayat_id');
+    }
 }

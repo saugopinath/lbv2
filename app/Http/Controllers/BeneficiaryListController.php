@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\CheckAuthHelper;
 use App\Helpers\WorkFlowPermissionHelper;
+use App\Models\Scheme;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
 
@@ -28,7 +29,8 @@ class BeneficiaryListController extends Controller
     {
         // if (Auth::user()->can('view beneficiaries')) {
         if (WorkFlowPermissionHelper::canViewBeneficiaries()) {
-            return view('beneficiaries.index');
+            $scheme = Scheme::get();
+            return view('beneficiaries.index', compact('scheme'));
         }
 
         $header = 'Oops! You do not have permission to view beneficiaries.';
@@ -42,16 +44,20 @@ class BeneficiaryListController extends Controller
         // Backend validation
         $validated = $request->validate([
             'report_type' => 'required|in:1,2,3,4,5,6',
+            'scheme_id' => 'required|exists:schemes,id',
         ], [
             'report_type.required' => 'Please select a report type before proceeding.',
             'report_type.in' => 'Invalid report type selected.',
+            'scheme_id.required' => 'Please select a scheme before proceeding.',
+            'scheme_id.exists' => 'Invalid scheme selected.',
         ]);
 
         // Permission check
         if (WorkFlowPermissionHelper::canViewReport()) {
             // if (Auth::user()->can('view reports')) {
             $reportType = $validated['report_type'];
-            return view('beneficiaries.report', compact('reportType'));
+            $schemeId = $validated['scheme_id'];
+            return view('beneficiaries.report', compact('reportType', 'schemeId'));
         }
 
         $header = 'Oops! You do not have permission to view reports.';

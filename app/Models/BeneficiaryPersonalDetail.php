@@ -13,5 +13,9 @@ class BeneficiaryPersonalDetail extends Model
         'other_details' => 'array',
     ];
 
-    
+
+    public function contact()
+    {
+        return $this->hasOne(BeneficiaryContactDetail::class, 'beneficiary_id', 'beneficiary_id');
+    }
 }
