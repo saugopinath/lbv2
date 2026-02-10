@@ -9,11 +9,10 @@ use App\Models\Scheme;
 use App\Models\FromFieldType;
 use App\Models\ValidationRule;
 use App\Models\SchemeTabBasefield;
-use App\Models\MasterSection;
+use Illuminate\Support\Str;
 use App\Models\MasterTab;
 use App\Models\SchemeAttachedDocMappings;
 use Illuminate\Contracts\Encryption\DecryptException;
-use Illuminate\Support\Facades\Storage;
 
 class CreateOtherfromAttribute extends Component
 {
@@ -401,6 +400,10 @@ class CreateOtherfromAttribute extends Component
         } catch (\Exception $e) {
             dd($e);
         }
+    }
+    public function updatedFieldName ($value)
+    {        
+        $this->field_id = Str::slug($value, '_');        
     }
     public function render()
     {
