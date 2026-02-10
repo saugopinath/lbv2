@@ -29,6 +29,8 @@ class MasterTab extends Model
   }
   public function getFields()
   {
-    return $this->fields()->get();
+    return $this->fields()
+      ->orderBy('field_position')
+      ->get();
   }
 }

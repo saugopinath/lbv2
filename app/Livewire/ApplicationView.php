@@ -20,6 +20,7 @@ class ApplicationView extends Component
     public $is_duplicate;
     public $SchemeRelatedTab;
     public $tabs = [];
+    protected ApplicationTabService $tabService;
     public function mount($id, $is_duplicate = 0, $schemeId = null)
     {
         // dd('ok');
@@ -49,9 +50,6 @@ class ApplicationView extends Component
         $this->tabs = $this->tabService
             ->getTabs($this->schemeId, $this->applicationId);
     }
-    protected ApplicationTabService $tabService;
-
-    // 🔥 Dependency Injection (Senior Pattern)
     public function boot(ApplicationTabService $tabService)
     {
         $this->tabService = $tabService;
