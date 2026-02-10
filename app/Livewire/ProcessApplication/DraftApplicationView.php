@@ -15,9 +15,9 @@ class DraftApplicationView extends Component
     public function mount($id)
     {
         // dump($id);
-        $this->applicationId = Crypt::decryptString($id);
+        $this->applicationId = Crypt::decrypt($id);
 
-        $this->application = DraftBeneficiaryPersonal::with('relationships')->findOrFail($this->applicationId);
+        // $this->application = DraftBeneficiaryPersonal::with('relationships')->findOrFail($this->applicationId);
         // dd($this->application, $this->application->toSql());
         // dd($this->application, json_encode($this->application));
         // $jsondata = json_encode($this->application);
@@ -29,7 +29,7 @@ class DraftApplicationView extends Component
     {
         $this->dispatch('hideLoader');
         // $this->dispatch('openBulkActionModal', selectedIds: [$this->application->application_id]);
-        
+
         $this->dispatch('openBulkActionModal', [
             'selectedIds' => [
                 'application_id' => $this->application->application_id,

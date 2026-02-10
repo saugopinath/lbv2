@@ -39,7 +39,7 @@
             null @endif
         }">
             {{-- @canany(['submit lb form', 'view draft list', 'view lb applications']) --}}
-            @if (\App\Helpers\WorkFlowPermissionHelper::canAnyLbMenu())
+            
             <div>
                 <button @click="activeMenu === 'LBFrom' ? activeMenu = null : activeMenu = 'LBFrom'"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -63,8 +63,7 @@
                 <!-- Sub-menu -->
                 <div id="list_menu" x-show="activeMenu === 'LBFrom'" x-collapse x-transition class="pl-4">
                     <ul>
-                        {{-- @can('submit lb form') --}}
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canEntry())
+                       
                         <li>
                             <a href="{{ route('lbform') }}"
                                 class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white @if (request()->routeIs('lbform')) bg-slate-700 text-white @endif">
@@ -81,10 +80,7 @@
                             </a>
                         </li>
                         {{-- @endcan --}}
-                        @endif
-
-                        {{-- @can('view draft list') --}}
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canDraftList())
+                        
                         <li>
                             <a href="{{ route('draftlist') }}"
                                 class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white @if (request()->routeIs('draftlist')) bg-slate-700 text-white @endif">
@@ -101,10 +97,10 @@
                             </a>
                         </li>
                         {{-- @endcan --}}
-                        @endif
+                      
 
                         {{-- @can('view lb applications') --}}
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canViewLbApplications())
+
                         <li>
                             <a href="{{ route('lb-application-list') }}"
                                 class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white @if (request()->routeIs('lb-application-list')) bg-slate-700 text-white @endif">
@@ -120,13 +116,13 @@
                                 <span x-show="sidebar" class="truncate">Workflow</span>
                             </a>
                         </li>
-                        {{-- @endcan --}}
-                        @endif
+                        
+                      
                     </ul>
                 </div>
             </div>
-            {{-- @endcanany --}}
-            @endif
+            
+           
         </div>
 
         <!-- Menu Item: Beneficiary List -->

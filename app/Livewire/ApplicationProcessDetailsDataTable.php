@@ -23,6 +23,7 @@ use Illuminate\Support\HtmlString;
 use App\Models\DraftBeneficiaryPersonal;
 use App\Models\AcceptRejectInfo;
 use App\Models\BeneficiaryAadhaar;
+use App\Models\BeneficiaryPersonalDetail;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Log;
 use App\Models\BenRejectDetails;
@@ -163,109 +164,143 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $this->setPerPage((int)$value);
         $this->resetPage();
     }
-    public function filters(): array
-    {
-        return [
-            TextFilter::make('Application ID')
-                ->filter(function ($query, $value) {
-                    $query->whereHas('sourceable', function ($q) use ($value) {
-                        $q->where('application_id', 'ILIKE', "%{$value}%");
-                    });
-                }),
+    // public function filters(): array
+    // {
+    //     return [
+    //         TextFilter::make('Application ID')
+    //             ->filter(function ($query, $value) {
+    //                 $query->whereHas('sourceable', function ($q) use ($value) {
+    //                     $q->where('application_id', 'ILIKE', "%{$value}%");
+    //                 });
+    //             }),
 
-            TextFilter::make('Applicant Name')
-                ->filter(function ($query, $value) {
-                    $query->whereHas('sourceable', function ($q) use ($value) {
-                        $q->where('full_name', 'ILIKE', "%{$value}%");
-                    });
-                }),
-        ];
-    }
+    //         TextFilter::make('Applicant Name')
+    //             ->filter(function ($query, $value) {
+    //                 $query->whereHas('sourceable', function ($q) use ($value) {
+    //                     $q->where('full_name', 'ILIKE', "%{$value}%");
+    //                 });
+    //             }),
+    //     ];
+    // }
+
+    // public function columns(): array
+    // {
+    //     return [
+    //         Column::make("Application ID", "application_id")
+    //             ->label(fn($row) => $row->sourceable->application_id ?? 'N/A')
+    //             ->sortable()
+    //             ->searchable(function ($query, $searchTerm) {
+    //                 $query->whereHas('sourceable', function ($q) use ($searchTerm) {
+    //                     $q->where('application_id', 'ILIKE', "%{$searchTerm}%");
+    //                 });
+    //             }),
+
+    //         Column::make("Applicant Name", "full_name")
+    //             ->label(fn($row) => $row->sourceable->full_name ?? 'N/A'),
+
+    //         Column::make("Father's Name", "fullname")
+    //             ->label(function ($row) {
+    //                 return optional(
+    //                     $row->sourceable->relationships->firstWhere(
+    //                         'relation_type_id',
+    //                         Codemaster::getIdByCode(131)
+    //                     )
+    //                 )->full_name ?? 'N/A';
+    //             }),
+
+    //         Column::make("Age", "age")
+    //             ->label(fn($row) => Carbon::parse($row->sourceable->dob)->age
+    //                 ?? 'N/A'),
+
+    //         $columns[] = Column::make("Actions")
+    //             ->label(function ($row) {
+    //                 return view('coulmn_button.view', [
+    //                     'link' => route('draft-application.view', Crypt::encryptString($row->sourceable->application_id)),
+    //                     'tooltip' => 'View Application',
+    //                 ])->render();
+    //             })
+    //             ->html(),
+    //     ];
+    // }
+
 
     public function columns(): array
     {
         return [
             Column::make("Application ID", "application_id")
-                ->label(fn($row) => $row->sourceable->application_id ?? 'N/A')
-                ->sortable()
-                ->searchable(function ($query, $searchTerm) {
-                    $query->whereHas('sourceable', function ($q) use ($searchTerm) {
-                        $q->where('application_id', 'ILIKE', "%{$searchTerm}%");
-                    });
-                }),
+                ->label(fn($row) => $row->application_id ?? 'N/A'),
 
-            Column::make("Applicant Name", "full_name")
-                ->label(fn($row) => $row->sourceable->full_name ?? 'N/A'),
+            Column::make("Applicant Name")
+                ->label(fn($row) => $row->full_name ?? 'N/A'),
 
-            Column::make("Father's Name", "fullname")
-                ->label(function ($row) {
-                    return optional(
-                        $row->sourceable->relationships->firstWhere(
-                            'relation_type_id',
-                            Codemaster::getIdByCode(131)
-                        )
-                    )->full_name ?? 'N/A';
-                }),
+            Column::make("Father's Name")
+                ->label(fn($row) => $row->ffname ?? 'N/A'),
 
+            Column::make("Date of Birth")
+                ->label(fn($row) => $row->dob ?? 'N/A'),
+
+            Column::make("Mobile No")
+                ->label(fn($row) => $row->other_details['mobile_no'] ?? 'N/A'),
             Column::make("Age", "age")
-                ->label(fn($row) => Carbon::parse($row->sourceable->dob)->age
+                ->label(fn($row) => Carbon::parse($row->dob)->age
                     ?? 'N/A'),
-
-            $columns[] = Column::make("Actions")
+            Column::make("Actions")
                 ->label(function ($row) {
                     return view('coulmn_button.view', [
-                        'link' => route('draft-application.view', Crypt::encryptString($row->sourceable->application_id)),
+                        'link' => route('draft-application.view', encrypt($row->application_id)),
                         'tooltip' => 'View Application',
                     ])->render();
                 })
                 ->html(),
         ];
     }
+
     public function builder(): Builder
     {
-        $query = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact');
-        if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->sub_div) {
-            $query = EncryptionArray::applyLocationFilters(
-                $query,
-                $this->district_id ? (int) $this->district_id : null,
-                $this->rural_urban ? (int) $this->rural_urban : null,
-                $this->blockurban ? (int) $this->blockurban : null,
-                $this->gp_ward ? (int) $this->gp_ward : null,
-                $this->sub_div ? (int) $this->sub_div : null
-            );
-        }
-        // $user = auth()->user();
-        $next_level_role_id = null;
+        // $query = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact');
+        // if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->sub_div) {
+        //     $query = EncryptionArray::applyLocationFilters(
+        //         $query,
+        //         $this->district_id ? (int) $this->district_id : null,
+        //         $this->rural_urban ? (int) $this->rural_urban : null,
+        //         $this->blockurban ? (int) $this->blockurban : null,
+        //         $this->gp_ward ? (int) $this->gp_ward : null,
+        //         $this->sub_div ? (int) $this->sub_div : null
+        //     );
+        // }
+        // // $user = auth()->user();
+        // $next_level_role_id = null;
 
-        if (CheckAuthHelper::isCommonApprover()) {
-            // if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
-            $next_level_role_id = Codemaster::getIdByCode(23);
-        }
-        if (CheckAuthHelper::isCommmonVerifier()) {
-            // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
-            $next_level_role_id = Codemaster::getIdByCode(22);
-        }
-        if (CheckAuthHelper::isOperator()) {
-            // if ($user->hasRole('Operator')) {
-            $next_level_role_id = Codemaster::getIdByCode(21);
-        }
+        // if (CheckAuthHelper::isCommonApprover()) {
+        //     // if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+        //     $next_level_role_id = Codemaster::getIdByCode(23);
+        // }
+        // if (CheckAuthHelper::isCommmonVerifier()) {
+        //     // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+        //     $next_level_role_id = Codemaster::getIdByCode(22);
+        // }
+        // if (CheckAuthHelper::isOperator()) {
+        //     // if ($user->hasRole('Operator')) {
+        //     $next_level_role_id = Codemaster::getIdByCode(21);
+        // }
 
-        $sourceableClass = DraftBeneficiaryPersonal::class;
+        // $sourceableClass = DraftBeneficiaryPersonal::class;
 
-        if ($next_level_role_id) {
-            $query->whereHasMorph(
-                'sourceable',
-                $sourceableClass,
-                function ($q) use ($next_level_role_id) {
-                    $q->where('next_level_role_id', $next_level_role_id);
-                }
-            );
-        }
+        // if ($next_level_role_id) {
+        //     $query->whereHasMorph(
+        //         'sourceable',
+        //         $sourceableClass,
+        //         function ($q) use ($next_level_role_id) {
+        //             $q->where('next_level_role_id', $next_level_role_id);
+        //         }
+        //     );
+        // }
 
-        if (!empty($this->filter_condition)) {
-            $query->where($this->filter_condition);
-        }
-        $this->dispatch('hideLoader');
+        // if (!empty($this->filter_condition)) {
+        //     $query->where($this->filter_condition);
+        // }
+        // $this->dispatch('hideLoader');
+        $query = BeneficiaryPersonalDetail::where('next_level_role_id', 1);
         return $query;
     }
 

@@ -129,7 +129,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('draftedit');
 
     Route::get('lb-application-list', [WorkFlowController::class, 'index'])
-        ->middleware('permission.redirect:canViewLbApplications')
+        // ->middleware('permission.redirect:canViewLbApplications')
         ->name('lb-application-list');
 
     Route::get('/application/{id}', DraftApplicationView::class)
