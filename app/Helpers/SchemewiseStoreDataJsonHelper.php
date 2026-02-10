@@ -509,24 +509,30 @@ HTML;
         $xCloak = '';
 
         if ($hasDependency) {
-
             $values = collect($dependentValues)
                 ->map(fn($v) => "'" . (string) $v . "'")
                 ->implode(',');
 
+            // এখানে sync() এবং watch লজিককে আরও স্ট্যাবল করা হয়েছে
             $xData = <<<HTML
-            x-data="{formData: @entangle('formData').live,visible: false,
-                sync() {this.visible = [{$values}].includes(String(this.formData.{$dependentOn}));
-                    if (!this.visible) {
-                        this.formData.{$name} = null;
-                    }
-                },
-                init() {
-                    this.sync();
-                    this.\$watch('formData.{$dependentOn}', () => this.sync());
-                }
-            }"
-            HTML;
+    x-data="{
+        formData: @entangle('formData').live,
+        visible: false,
+        sync() {
+            if (!this.formData) return;
+            this.visible = [{$values}].includes(String(this.formData.{$dependentOn}));
+            if (!this.visible && this.formData.hasOwnProperty('{$name}')) {
+                this.formData.{$name} = null;
+            }
+        },
+        init() {
+            this.sync();
+            this.\$watch('formData.{$dependentOn}', () => {
+                this.sync();
+            });
+        }
+    }"
+    HTML;
 
             $xShow = 'x-show="visible"';
             $xCloak = 'x-cloak';
