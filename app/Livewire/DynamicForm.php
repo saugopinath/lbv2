@@ -13,6 +13,7 @@ use Livewire\Component;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Helpers\DuplicateChecker;
 
 class DynamicForm extends Component
 {
@@ -558,66 +559,19 @@ class DynamicForm extends Component
         if (!$this->applicationId) {
             $this->ensureApplicationIds();
         }
-        $configs = DB::table('public.dupcheckschemeconfig_settings')
-            ->where('scheme_id', $this->schemeId)
-            ->get();
-        foreach ($configs as $config) {
-            $type = $config->check_with;
-            $inputValue = null;
-            $table = '';
-            $column = '';
-            $formFieldName = '';
-            if ($type === 'Aadhar') {
-                $table = 'lb_scheme.beneficiary_aadhaars';
-                $column = 'encoded_aadhar';
-                $inputValue = $this->aadhaarPayload['encoded'] ?? null;
-                $formFieldName = 'aadhar_no';
-            } elseif ($type === 'Mobile') {
-                $table = 'lb_scheme.beneficiary_personal_details';
-                $inputValue = trim($this->formData['mobile_no'] ?? '');
-                $formFieldName = 'mobile_no';
-            } elseif ($type === 'Bank') {
-                $table = 'lb_scheme.beneficiary_bank_details';
-                $column = 'bankaccountnumber';
-                $inputValue = trim($this->formData['bankaccountnumber'] ?? '');
-                $formFieldName = 'bankaccountnumber';
-            }
-            if (empty($inputValue)) continue;
-            if ($config->is_same) {
-                $existsSame = DB::table($table)
-                    ->where('scheme_id', $this->schemeId)
-                    ->where(function ($query) use ($type, $column, $inputValue) {
-                        if ($type === 'Mobile') {
-                            $query->whereRaw("other_details->>'mobile_no' = ?", [$inputValue]);
-                        } else {
-                            $query->whereRaw("TRIM(CAST($column AS TEXT)) = ?", [trim($inputValue)]);
-                        }
-                    })
-                    ->where('application_id', '!=', (int)$this->applicationId)
-                    ->exists();
-
-                if ($existsSame) {
-                    $this->addError("formData.{$formFieldName}", "This $type is already registered in this scheme.");
-                    return false;
-                }
-            }
-            if ($config->is_cross && !empty($config->scheme_lists)) {
-                $otherSchemes = json_decode($config->scheme_lists, true);
-                $existsCross = DB::table($table)
-                    ->whereIn('scheme_id', $otherSchemes)
-                    ->where(function ($query) use ($type, $column, $inputValue) {
-                        if ($type === 'Mobile') {
-                            $query->whereRaw("other_details->>'mobile_no' = ?", [$inputValue]);
-                        } else {
-                            $query->whereRaw("TRIM(CAST($column AS TEXT)) = ?", [trim($inputValue)]);
-                        }
-                    })
-                    ->exists();
-                if ($existsCross) {
-                    $this->addError("formData.{$formFieldName}", "This $type is already registered in another scheme.");
-                    return false;
-                }
-            }
+        $result = DuplicateChecker::check(
+            $this->schemeId,
+            $this->applicationId,
+            $this->formData,
+            $this->aadhaarPayload
+        );
+        if (is_array($result)) {
+            $this->addError($result['field'], $result['message']);
+            // $this->dispatch('toastr', [
+            //     'type' => 'error',
+            //     'message' => $result['message']
+            // ]);
+            return false;
         }
         return true;
     }
