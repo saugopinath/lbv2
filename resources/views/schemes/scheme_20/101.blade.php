@@ -178,6 +178,23 @@
 <div class="grid md:grid-cols-2 gap-4 mt-4">
 <div   >
     <x-form.select
+    name="caste"
+    label="Caste"
+    data-wire="caste"
+    
+     
+      required
+    wire:model.live="formData.caste"
+>
+    <option value="">-- Select Caste --</option>
+    <option value="1">SC</option>
+<option value="2">ST</option>
+<option value="3">OBC</option>
+<option value="4">General</option>
+
+</x-form.select>
+</div><div   >
+    <x-form.select
     name="mar_statu"
     label="Marital Status"
     data-wire="mar_statu"
@@ -194,7 +211,9 @@
 <option value="5">Widower</option>
 
 </x-form.select>
-</div><div x-data="{formData: @entangle('formData').live,visible: false,
+</div></div>
+<div class="grid md:grid-cols-2 gap-4 mt-4">
+<div x-data="{formData: @entangle('formData').live,visible: false,
     sync() {this.visible = ['2','3','5'].includes(String(this.formData.mar_statu));
         if (!this.visible) {
             this.formData.sfname = null;
@@ -217,25 +236,6 @@
     
     wire:model.live="formData.sfname"
 />
-</div></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
-<div   >
-    <x-form.select
-    name="caste"
-    label="Caste"
-    data-wire="caste"
-    
-     
-      required
-    wire:model.live="formData.caste"
->
-    <option value="">-- Select Caste --</option>
-    <option value="1">SC</option>
-<option value="2">ST</option>
-<option value="3">OBC</option>
-<option value="4">General</option>
-
-</x-form.select>
 </div><div x-data="{formData: @entangle('formData').live,visible: false,
     sync() {this.visible = ['1','2','3'].includes(String(this.formData.caste));
         if (!this.visible) {

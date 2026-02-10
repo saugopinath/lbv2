@@ -11,11 +11,19 @@ class DraftApplicationView extends Component
 {
     public $applicationId;
     public $application;
+    public $schemeId;
+    public $schemeName;
 
     public function mount($id)
     {
         // dump($id);
-        $this->applicationId = Crypt::decrypt($id);
+        $decrypted = Crypt::decryptString($id);
+
+        $this->applicationId = is_numeric($decrypted)
+            ? (int) $decrypted
+            : unserialize($decrypted);
+        $this->schemeName = 'Lakshmir Bhandar';
+        // dd($this->applicationId);
 
         // $this->application = DraftBeneficiaryPersonal::with('relationships')->findOrFail($this->applicationId);
         // dd($this->application, $this->application->toSql());

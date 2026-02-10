@@ -24,9 +24,11 @@ class ApplicationView extends Component
     public function mount($id, $is_duplicate = 0, $schemeId = null)
     {
         // dd('ok');
-        $this->applicationId = Crypt::decrypt($id);
-        $this->schemeId = request()->query('schemeId');
-        $this->reportType = request()->query('reportType');
+        $this->applicationId = $id;
+        $this->schemeId = $schemeId;
+        // $decrypted = Crypt::decryptString($id);
+        // $this->schemeId = request()->query('schemeId');
+        // $this->reportType = request()->query('reportType');
         $this->is_duplicate   = $is_duplicate;
         // dd($realId, $this->schemeId, $this->reportType, $this->is_duplicate);
         // dd( $this->reportType);
