@@ -13,8 +13,6 @@ class DupCheckSchemeConfigSettings extends Component
     public $schemeId;
     public $dupcheckOptions = [];
     public $schemeOptions = [];
-
-    // মেইন কনফিগারেশন হোল্ডার
     public $config = [];
 
     public function mount($schemeId)
@@ -24,13 +22,12 @@ class DupCheckSchemeConfigSettings extends Component
             'Aadhar' => 'Aadhar',
             'Bank'   => 'Bank',
             'Mobile' => 'Mobile',
+            'CS' => 'Caste Certificate Number',
         ];
 
         $this->schemeOptions = Scheme::where('id', '!=', $schemeId)
             ->pluck('name', 'id')
             ->toArray();
-
-        // ডিফল্ট স্ট্রাকচার তৈরি করা
         foreach ($this->dupcheckOptions as $key => $label) {
             $this->config[$key] = [
                 'selected' => false,
@@ -39,8 +36,6 @@ class DupCheckSchemeConfigSettings extends Component
                 'schemes'  => []
             ];
         }
-
-        // ডাটাবেস থেকে এক্সিস্টিং ডাটা লোড করা
         $existingSettings = DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)->get();
         foreach ($existingSettings as $setting) {
             if (isset($this->config[$setting->check_with])) {
@@ -56,16 +51,10 @@ class DupCheckSchemeConfigSettings extends Component
 
     public function save()
     {
-        // ভ্যালিডেশন: কমপক্ষে একটি অপশন সিলেক্ট করতে হবে
-        $selectedCount = collect($this->config)->where('selected', true)->count();
-        if ($selectedCount === 0) {
-            $this->addError('selected_error', 'Minimum one field must be selected.');
-            return;
-        }
+        
 
         DB::beginTransaction();
         try {
-            // পুরনো সেটিংস মুছে নতুনগুলো সেভ করা (Clean approach)
             DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)->delete();
 
             foreach ($this->config as $optionName => $data) {

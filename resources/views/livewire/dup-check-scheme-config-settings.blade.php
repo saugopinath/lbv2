@@ -2,11 +2,6 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-xl font-bold text-indigo-700">Dup Check Scheme Config (Scheme ID: {{ $schemeId }})</h1>
     </div>
-
-    @error('selected_error')
-        <div class="mb-4 text-red-600 font-semibold">{{ $message }}</div>
-    @enderror
-
     <form wire:submit.prevent="save" class="space-y-4">
         @foreach ($dupcheckOptions as $key => $label)
             <div
