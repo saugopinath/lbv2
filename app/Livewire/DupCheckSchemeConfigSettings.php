@@ -4,105 +4,94 @@ namespace App\Livewire;
 
 use App\Models\DupcheckschemeconfigSetting;
 use App\Models\Scheme;
-use App\Models\SchemeFinalSubmitCheck;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
 class DupCheckSchemeConfigSettings extends Component
 {
-    public $dupcheckOptions = [], $selecteddupcheckOptions = [], $schemeOptions = [], $schemes = [], $iscross = 'no', $schemeId;
+    public $schemeId;
+    public $dupcheckOptions = [];
+    public $schemeOptions = [];
+
+    // মেইন কনফিগারেশন হোল্ডার
+    public $config = [];
+
     public function mount($schemeId)
     {
         $this->schemeId = $schemeId;
         $this->dupcheckOptions = [
             'Aadhar' => 'Aadhar',
-            'Bank' => 'Bank',
+            'Bank'   => 'Bank',
             'Mobile' => 'Mobile',
         ];
+
         $this->schemeOptions = Scheme::where('id', '!=', $schemeId)
             ->pluck('name', 'id')
             ->toArray();
-        // SchemeFinalSubmitCheck::where('is_final_submitted', true)
-        // ->where('scheme_id', '!=', $schemeId)
-        // ->whereHas('scheme')
-        // ->with('scheme')
-        // ->get()
-        // ->pluck('scheme.name', 'scheme.id')
-        // ->toArray();
 
+        // ডিফল্ট স্ট্রাকচার তৈরি করা
+        foreach ($this->dupcheckOptions as $key => $label) {
+            $this->config[$key] = [
+                'selected' => false,
+                'issame'  => 'no',
+                'iscross'  => 'no',
+                'schemes'  => []
+            ];
+        }
+
+        // ডাটাবেস থেকে এক্সিস্টিং ডাটা লোড করা
         $existingSettings = DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)->get();
-        if ($existingSettings->isNotEmpty()) {
-            $first = $existingSettings->first();
-            $this->iscross = $first->is_cross ? 'yes' : 'no';
-            $this->schemes = $first->scheme_lists ?? [];
-            $this->selecteddupcheckOptions = $existingSettings->pluck('check_with')->toArray();
+        foreach ($existingSettings as $setting) {
+            if (isset($this->config[$setting->check_with])) {
+                $this->config[$setting->check_with] = [
+                    'selected' => true,
+                    'issame'  => $setting->is_same ? 'yes' : 'no',
+                    'iscross'  => $setting->is_cross ? 'yes' : 'no',
+                    'schemes'  => $setting->scheme_lists ?? []
+                ];
+            }
         }
     }
 
-    // public function toggleAll()
-    // {
-    //     if (count($this->selecteddupcheckOptions) === count($this->dupcheckOptions)) {
-    //         $this->selecteddupcheckOptions = [];
-    //     } else {
-    //         $this->selecteddupcheckOptions = array_keys($this->dupcheckOptions);
-    //     }
-    // }
-
     public function save()
     {
-        $validated = $this->validate([
-            'iscross' => 'required',
-            'selecteddupcheckOptions' => 'required|array|min:1',
-            'schemes' => 'required_if:iscross,yes',
-        ], [
-            'selecteddupcheckOptions.*' => 'Minimum one value should be checked',
-            'schemes.*' => 'Minimum one value should be selected'
-        ]);
+        // ভ্যালিডেশন: কমপক্ষে একটি অপশন সিলেক্ট করতে হবে
+        $selectedCount = collect($this->config)->where('selected', true)->count();
+        if ($selectedCount === 0) {
+            $this->addError('selected_error', 'Minimum one field must be selected.');
+            return;
+        }
+
         DB::beginTransaction();
         try {
-            $exists = DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)->exists();
-            $message = $exists
-                ? 'Dup Check Scheme Config updated successfully!'
-                : 'Dup Check Scheme Config saved successfully!';
-            // DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)->delete();
-            // foreach ($this->selecteddupcheckOptions as $option) {
-            //     DupcheckschemeconfigSetting::create([
-            //         'scheme_id'    => $this->schemeId,
-            //         'is_cross'     => $this->iscross,
-            //         'check_with'   => $option,
-            //         'scheme_lists' => ($this->iscross === 'yes') ? $this->schemes : null,
-            //     ]);
-            // }
-            // $existingOptions = DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
-            //     ->pluck('check_with')
-            //     ->toArray();
-            DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
-                ->whereNotIn('check_with', $this->selecteddupcheckOptions)
-                ->delete();
-            foreach ($this->selecteddupcheckOptions as $option) {
-                DupcheckschemeconfigSetting::updateOrCreate(
-                    [
-                        'scheme_id' => $this->schemeId,
-                        'check_with' => $option,
-                    ],
-                    [
-                        'is_cross'     => $this->iscross,
-                        'scheme_lists' => ($this->iscross === 'yes') ? $this->schemes : null,
-                    ]
-                );
+            // পুরনো সেটিংস মুছে নতুনগুলো সেভ করা (Clean approach)
+            DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)->delete();
+
+            foreach ($this->config as $optionName => $data) {
+                if ($data['selected']) {
+                    DupcheckschemeconfigSetting::create([
+                        'scheme_id'    => $this->schemeId,
+                        'check_with'   => $optionName,
+                        'is_same'     => $data['issame'] === 'yes' ? true : false,
+                        'is_cross'     => $data['iscross'] === 'yes' ? true : false,
+                        'scheme_lists' => ($data['iscross'] === 'yes') ? $data['schemes'] : null,
+                    ]);
+                }
             }
+
             DB::commit();
             $this->dispatch('toastr', [
                 'type' => 'success',
-                'message' => $message
+                'message' => 'Config saved successfully!'
             ]);
+
             return redirect()->route('duplicate-checks');
         } catch (Exception $e) {
             DB::rollBack();
             $this->dispatch('toastr', [
                 'type' => 'error',
-                'message' => 'Something went wrong: ' . $e->getMessage()
+                'message' => 'Error: ' . $e->getMessage()
             ]);
         }
     }

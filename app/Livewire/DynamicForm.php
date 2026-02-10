@@ -67,11 +67,13 @@ class DynamicForm extends Component
         $this->maxDate = Carbon::now()->format('Y-m-d');
         $this->minDate = Carbon::now()->subYears(2)->format('Y-m-d');
         $ageConfig = AgeManagements::where('scheme_id', $schemeId)->first();
-        if ($ageConfig['max_age']) {
-            $this->minDOB = now()->subYears($ageConfig['max_age'])->format('Y-m-d');
-        }
-        if ($ageConfig['min_age']) {
-            $this->maxDOB = now()->subYears($ageConfig['min_age'])->format('Y-m-d');
+        if ($ageConfig) {
+            if ($ageConfig['max_age']) {
+                $this->minDOB = now()->subYears($ageConfig['max_age'])->format('Y-m-d');
+            }
+            if ($ageConfig['min_age']) {
+                $this->maxDOB = now()->subYears($ageConfig['min_age'])->format('Y-m-d');
+            }
         }
     }
     public function onAadhaarCheckedReset()

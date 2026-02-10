@@ -9,5 +9,7 @@ class DupcheckschemeconfigSetting extends Model
     protected $guarded = ['id'];
     protected $casts = [
         'scheme_lists' => 'array',
+        'is_same' => 'boolean',
+        'is_cross' => 'boolean',
     ];
 }

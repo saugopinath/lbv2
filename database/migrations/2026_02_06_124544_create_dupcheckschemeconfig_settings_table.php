@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('dupcheckschemeconfig_settings', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('scheme_id');
-            $table->boolean('is_same')->default(true);
+            $table->boolean('is_same')->default(false);
             $table->boolean('is_cross')->default(false);
             $table->jsonb('scheme_lists')->nullable();
             $table->string('check_with', 20);
