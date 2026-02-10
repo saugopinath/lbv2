@@ -18,7 +18,7 @@
                 <div class="flex gap-2 items-center">
                     @if(!in_array($tab->tab_code, [104, 105]) && !$isFinalSubmitted)
                     <a href="{{ route('create-dynamicformfield', [
-                    'ref' => Crypt::encryptString($tab->scheme_id . '|' . $tab->tab_code)
+                      'scheme_id' => Crypt::encryptString($tab->scheme_id), 'tab_code' => Crypt::encryptString($tab->tab_code)
                 ]) }}">
                         <x-button.primary class="bg-indigo-600 hover:bg-indigo-700 rounded-xl text-sm">
                             Add Another Fields
