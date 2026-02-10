@@ -39,7 +39,7 @@
     wire:model.live="formData.bank_branch_name"
 />
 </div></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
+<div class="grid md:grid-cols-3 gap-4 mt-4">
 <div   >
     <x-form.input
     type="text"

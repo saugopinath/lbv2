@@ -53,11 +53,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-         User::observe(UserObserver::class);
-         AcceptRejectInfo::observe(AcceptRejectInfoObserver::class);
-         BenRejectDetails::observe(BenRejectDetailsObserver::class);
-         DraftBeneficiaryPersonal::observe(DraftBeneficiaryPersonalObserver::class);
-         BeneficiaryPersonal::observe(BeneficiaryPersonalObserver::class);
-         
+         User::observe(UserObserver::class);         
     }
 }

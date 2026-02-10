@@ -1,20 +1,5 @@
 <div class="grid md:grid-cols-1 gap-4 mt-4">
 <div   >
-    <x-form.input
-    type="date"
-    name="app_date"
-    label="Application Date"
-    placeholder="Enter Application Date"
-    
-    
-    required
-    :min="$minDate"
-    :max="$maxDate"
-    wire:model.live="formData.app_date"
-/>
-</div></div>
-<div class="grid md:grid-cols-3 gap-4 mt-4">
-<div   >
     <x-form.select
     name="app_type"
     label="Application Type"
@@ -29,7 +14,9 @@
 <option value="2">Duare Sarkar Entry</option>
 
 </x-form.select>
-</div><div x-data="{formData: @entangle('formData').live,visible: false,
+</div></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div x-data="{formData: @entangle('formData').live,visible: false,
     sync() {this.visible = ['2'].includes(String(this.formData.app_type));
         if (!this.visible) {
             this.formData.reg_no = null;
@@ -75,9 +62,7 @@
     :max="$maxDate"
     wire:model.live="formData.ds_date"
 />
-</div></div>
-<div class="grid md:grid-cols-1 gap-4 mt-4">
-<div   >
+</div><div   >
     <x-form.input
     type="text"
     name="full_name"
@@ -91,35 +76,7 @@
     wire:model.live="formData.full_name"
 />
 </div></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
-<div   >
-    <x-form.input
-    type="date"
-    name="dob"
-    label="Date of Birth"
-    placeholder="Enter Date of Birth"
-    
-    
-    required
-    :min="$minDOB"
-    :max="$maxDOB"
-    wire:model.live="formData.dob"
-/>
-</div><div   >
-    <x-form.input
-    type="text"
-    name="age"
-    label="Age"
-    placeholder="Enter Age"
-    
-    readonly
-    required
-    
-    
-    wire:model.live="formData.age"
-/>
-</div></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
+<div class="grid md:grid-cols-3 gap-4 mt-4">
 <div   >
     <x-form.input
     type="text"
@@ -135,6 +92,47 @@
 />
 </div><div   >
     <x-form.input
+    type="date"
+    name="app_date"
+    label="Application Date"
+    placeholder="Enter Application Date"
+    
+    
+    required
+    :min="$minDate"
+    :max="$maxDate"
+    wire:model.live="formData.app_date"
+/>
+</div><div   >
+    <x-form.input
+    type="date"
+    name="dob"
+    label="Date of Birth"
+    placeholder="Enter Date of Birth"
+    
+    
+    required
+    :min="$minDOB"
+    :max="$maxDOB"
+    wire:model.live="formData.dob"
+/>
+</div></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div   >
+    <x-form.input
+    type="text"
+    name="age"
+    label="Age"
+    placeholder="Enter Age"
+    
+    readonly
+    required
+    
+    
+    wire:model.live="formData.age"
+/>
+</div><div   >
+    <x-form.input
     type="text"
     name="email_id"
     label="Email Address"
@@ -146,9 +144,7 @@
     
     wire:model.live="formData.email_id"
 />
-</div></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
-<div   >
+</div><div   >
     <x-form.input
     type="text"
     name="ffname"
@@ -161,7 +157,9 @@
     
     wire:model.live="formData.ffname"
 />
-</div><div   >
+</div></div>
+<div class="grid md:grid-cols-3 gap-4 mt-4">
+<div   >
     <x-form.input
     type="text"
     name="mfname"
@@ -174,9 +172,7 @@
     
     wire:model.live="formData.mfname"
 />
-</div></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
-<div   >
+</div><div   >
     <x-form.select
     name="mar_statu"
     label="Marital Status"
@@ -218,7 +214,7 @@
     wire:model.live="formData.sfname"
 />
 </div></div>
-<div class="grid md:grid-cols-2 gap-4 mt-4">
+<div class="grid md:grid-cols-3 gap-4 mt-4">
 <div   >
     <x-form.select
     name="caste"

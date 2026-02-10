@@ -76,19 +76,54 @@ class DynamicForm extends Component
             }
         }
     }
+
     public function onAadhaarCheckedReset()
     {
         $this->aadhaarVerified = false;
-    }
+        $this->aadhaarPayload = [];
 
+        // 🔥 FULL RESET
+        $this->applicationId = null;
+        $this->beneficiaryId = null;
+        $this->formData = [];
+        $this->completedTabs = [];
+        $this->allTabsCompleted = false;
+
+        if (!empty($this->views)) {
+            $this->activeTab = (string) $this->views[0];
+            $this->updateTabNavigation();
+        }
+    }
     public function onAadhaarChecked($data)
     {
+        // 🔥 NEW APPLICANT SESSION
         $this->aadhaarVerified = true;
         $this->aadhaarPayload = [
             'encoded' => $data['encoded'],
             'hash' => $data['hash'],
         ];
+
+        // 🔥 CLEAR OLD SUCCESS / ERROR MESSAGE
+        $this->navMessage = null;
+        $this->navMessageType = 'success';
+        // 🔥 RESET APPLICATION CONTEXT
+        $this->applicationId = null;
+        $this->beneficiaryId = null;
+
+        // 🔥 CLEAR OLD FORM DATA
+        $this->formData = [];
+
+        // 🔥 RESET NAVIGATION
+        $this->completedTabs = [];
+        $this->allTabsCompleted = false;
+
+        // 🔥 ALWAYS START FROM FIRST TAB
+        if (!empty($this->views)) {
+            $this->activeTab = (string) $this->views[0];
+            $this->updateTabNavigation();
+        }
     }
+
 
     public function setActiveTab($tabCode)
     {
@@ -140,7 +175,9 @@ class DynamicForm extends Component
         }
     }
 
-    public function onDocumentTabFailed() {}
+    public function onDocumentTabFailed()
+    {
+    }
     /* ================== HELPERS ================== */
     private function markTabCompleted(string $tabCode): void
     {
@@ -455,7 +492,8 @@ class DynamicForm extends Component
         $rules = [];
         $ageConfig = AgeManagements::where('scheme_id', $this->schemeId)->first();
         foreach ($json['tabs'] ?? [] as $tab) {
-            if ((string) $tab['tab_code'] !== (string) $this->activeTab) continue;
+            if ((string) $tab['tab_code'] !== (string) $this->activeTab)
+                continue;
             foreach ($tab['fields'] ?? [] as $field) {
                 $fieldName = $field['field_name'];
                 $fieldRules = explode('|', $field['validation_rule'] ?? '');
