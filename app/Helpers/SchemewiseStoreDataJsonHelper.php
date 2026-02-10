@@ -507,37 +507,34 @@ HTML;
         $xData = '';
         $xShow = '';
         $xCloak = '';
-
         if ($hasDependency) {
             $values = collect($dependentValues)
                 ->map(fn($v) => "'" . (string) $v . "'")
                 ->implode(',');
-
-            // এখানে sync() এবং watch লজিককে আরও স্ট্যাবল করা হয়েছে
             $xData = <<<HTML
     x-data="{
         formData: @entangle('formData').live,
-        visible: false,
+        get isVisible() {
+            if (!this.formData) return false;
+            return [{$values}].includes(String(this.formData.{$dependentOn}));
+        },
         sync() {
-            if (!this.formData) return;
-            this.visible = [{$values}].includes(String(this.formData.{$dependentOn}));
-            if (!this.visible && this.formData.hasOwnProperty('{$name}')) {
+            if (!this.isVisible && this.formData.hasOwnProperty('{$name}')) {
                 this.formData.{$name} = null;
             }
         },
         init() {
             this.sync();
-            this.\$watch('formData.{$dependentOn}', () => {
-                this.sync();
-            });
+            this.\$watch('formData.{$dependentOn}', () => this.sync());
         }
     }"
     HTML;
-
-            $xShow = 'x-show="visible"';
+            $xShow = 'x-show="isVisible"';
             $xCloak = 'x-cloak';
+            $wireKey = 'wire:key="field-dep-' . $name . '"';
+        } else {
+            $wireKey = 'wire:key="field-norm-' . $name . '"';
         }
-
         /* ========= FIELD HTML (switch based) ========= */
         switch ($type) {
 
@@ -617,7 +614,7 @@ HTML;
 
         /* ========= FINAL OUTPUT ========= */
         return <<<BLADE
-        <div {$xData} {$xShow} {$xCloak}>
+        <div {$xData} {$xShow} {$xCloak} {$wireKey}>
             {$fieldHtml}
         </div>
         BLADE;
