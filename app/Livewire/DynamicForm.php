@@ -76,7 +76,6 @@ class DynamicForm extends Component
             }
         }
     }
-
     public function onAadhaarCheckedReset()
     {
         $this->aadhaarVerified = false;
@@ -123,8 +122,6 @@ class DynamicForm extends Component
             $this->updateTabNavigation();
         }
     }
-
-
     public function setActiveTab($tabCode)
     {
         $tabCode = (string) $tabCode;
@@ -141,7 +138,6 @@ class DynamicForm extends Component
         $this->activeTab = $tabCode;
         $this->updateTabNavigation();
     }
-
     /* ================== SAVE & NEXT ================== */
     public function saveAndNext($nextTab)
     {
@@ -156,6 +152,9 @@ class DynamicForm extends Component
         }
 
         $this->ensureApplicationIds();
+        if (!$this->checkDuplicateEntries()) {
+            return;
+        }
         $this->saveCurrentTabData();
         $this->markTabCompleted($this->activeTab);
 
@@ -164,7 +163,6 @@ class DynamicForm extends Component
             $this->updateTabNavigation();
         }
     }
-
     public function onDocumentTabPassed()
     {
         $this->markTabCompleted($this->activeTab);
@@ -174,7 +172,6 @@ class DynamicForm extends Component
             $this->updateTabNavigation();
         }
     }
-
     public function onDocumentTabFailed()
     {
     }
@@ -205,6 +202,9 @@ class DynamicForm extends Component
             $this->saveCurrentTabData();
         }
         $tabsData = $this->prepareTabsReviewData();
+        if (!$this->checkDuplicateEntries()) {
+            return;
+        }
         $this->dispatch(
             'openFinalModal',
             applicationId: $this->applicationId,
@@ -213,7 +213,6 @@ class DynamicForm extends Component
         );
     }
     /* ================= REVIEW DATA ================= */
-
     private function prepareTabsReviewData()
     {
         $review = [];
@@ -330,6 +329,9 @@ class DynamicForm extends Component
         if (!empty($otherDetails)) {
             $dbData['other_details'] = $otherDetails;
         }
+        if (!$this->checkDuplicateEntries()) {
+            return;
+        }
         $beneficiatDetails = $modelClass::updateOrCreate(
             ['application_id' => $this->applicationId],
             $dbData
@@ -383,7 +385,6 @@ class DynamicForm extends Component
         $this->formData['application_id'] = $this->applicationId;
         $this->formData['beneficiary_id'] = $this->beneficiaryId;
     }
-
     public function updatedFormDataIfscode($value)
     {
         $ifsc = strtoupper($value);
@@ -448,44 +449,6 @@ class DynamicForm extends Component
 
         return json_decode(File::get($path), true);
     }
-    // private function getValidationRulesForActiveTab(): array
-    // {
-    //     $json = $this->getSchemeJson();
-    //     $rules = [];
-
-    //     foreach ($json['tabs'] ?? [] as $tab) {
-
-    //         if ((string) $tab['tab_code'] !== (string) $this->activeTab) {
-    //             continue;
-    //         }
-
-    //         foreach ($tab['fields'] ?? [] as $field) {
-
-    //             if (empty($field['field_name']) || empty($field['validation_rule'])) {
-    //                 continue;
-    //             }
-
-    //             $fieldRules = explode('|', $field['validation_rule']);
-    //             if ($field['field_type'] === 'checkbox') {
-
-    //                 $fieldRules = array_map(function ($rule) {
-
-    //                     return $rule === 'required'
-    //                         ? 'accepted'
-    //                         : $rule;
-    //                 }, $fieldRules);
-    //             }
-
-    //             // if (!empty($field['regex'])) {
-    //             //     $fieldRules[] = 'regex:/' . $field['regex'] . '/';
-    //             // }
-
-    //             $rules["formData.{$field['field_name']}"] = $fieldRules;
-    //         }
-    //     }
-
-    //     return $rules;
-    // }
     private function getValidationRulesForActiveTab(): array
     {
         $json = $this->getSchemeJson();
@@ -535,7 +498,6 @@ class DynamicForm extends Component
         }
         return $rules;
     }
-
     protected function validationAttributes(): array
     {
         $json = $this->getSchemeJson();
@@ -565,8 +527,6 @@ class DynamicForm extends Component
             'formData.*.required_unless' => ':attribute is required.',
         ];
     }
-
-
     public function updatedFormDataDob($value)
     {
         if (!empty($value)) {
@@ -574,6 +534,75 @@ class DynamicForm extends Component
         } else {
             $this->formData['age'] = null;
         }
+    }
+    private function checkDuplicateEntries(): bool
+    {
+        if (!$this->applicationId) {
+            $this->ensureApplicationIds();
+        }
+        $configs = DB::table('public.dupcheckschemeconfig_settings')
+            ->where('scheme_id', $this->schemeId)
+            ->get();
+        foreach ($configs as $config) {
+            $type = $config->check_with;
+            $inputValue = null;
+            $table = '';
+            $column = '';
+            $formFieldName = '';
+            if ($type === 'Aadhar') {
+                $table = 'lb_scheme.beneficiary_aadhaars';
+                $column = 'encoded_aadhar';
+                $inputValue = $this->aadhaarPayload['encoded'] ?? null;
+                $formFieldName = 'aadhar_no';
+            } elseif ($type === 'Mobile') {
+                $table = 'lb_scheme.beneficiary_personal_details';
+                $inputValue = trim($this->formData['mobile_no'] ?? '');
+                $formFieldName = 'mobile_no';
+            } elseif ($type === 'Bank') {
+                $table = 'lb_scheme.beneficiary_bank_details';
+                $column = 'bankaccountnumber';
+                $inputValue = trim($this->formData['bankaccountnumber'] ?? '');
+                $formFieldName = 'bankaccountnumber';
+            }
+            if (empty($inputValue))
+                continue;
+            if ($config->is_same) {
+                $existsSame = DB::table($table)
+                    ->where('scheme_id', $this->schemeId)
+                    ->where(function ($query) use ($type, $column, $inputValue) {
+                        if ($type === 'Mobile') {
+                            $query->whereRaw("other_details->>'mobile_no' = ?", [$inputValue]);
+                        } else {
+                            $query->whereRaw("TRIM(CAST($column AS TEXT)) = ?", [trim($inputValue)]);
+                        }
+                    })
+                    ->where('application_id', '!=', (int) $this->applicationId)
+                    ->exists();
+
+                if ($existsSame) {
+                    $this->addError("formData.{$formFieldName}", "This $type is already registered in this scheme.");
+                    return false;
+                }
+            }
+            if ($config->is_cross && !empty($config->scheme_lists)) {
+                $otherSchemes = json_decode($config->scheme_lists, true);
+                $existsCross = DB::table($table)
+                    ->whereIn('scheme_id', $otherSchemes)
+                    ->where(function ($query) use ($type, $column, $inputValue) {
+                        if ($type === 'Mobile') {
+                            $query->whereRaw("other_details->>'mobile_no' = ?", [$inputValue]);
+                        } else {
+                            $query->whereRaw("TRIM(CAST($column AS TEXT)) = ?", [trim($inputValue)]);
+                        }
+                    })
+                    ->exists();
+                if ($existsCross) {
+                    $this->addError("formData.{$formFieldName}", "This $type is already registered in another scheme.");
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     /* ================= RENDER ================= */
 

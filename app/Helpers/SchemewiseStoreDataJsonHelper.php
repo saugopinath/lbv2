@@ -16,107 +16,6 @@ use Illuminate\Support\Facades\Storage;
 
 class SchemewiseStoreDataJsonHelper
 {
-
-
-
-    // public static function generateSchemeJson(int $schemeId): array
-    // {
-    //     // 🔹 Fetch age config once
-    //     $ageConfig = AgeManagements::where('scheme_id', $schemeId)->first();
-
-    //     $tabs = SchemeTabMapping::with('masterTab')
-    //         ->where('scheme_id', $schemeId)
-    //         ->where('is_active', true)
-    //         ->orderBy('position')
-    //         ->get();
-
-    //     $tabData = [];
-
-    //     foreach ($tabs as $tab) {
-
-    //         $model = match ($tab->tab_code) {
-    //             105 => SelfDeclerationBasefield::class,
-    //             104 => SchemeAttachedDocMappings::class,
-    //             default => SchemeTabFormField::class,
-    //         };
-
-    //         if ($tab->tab_code == 104) {
-
-    //             $fields = $model::with('docType')
-    //                 ->where('scheme_id', $schemeId)
-    //                 ->where('tab_code', $tab->tab_code)
-    //                 ->where('is_active', true)
-    //                 ->orderBy('field_position')
-    //                 ->get()
-    //                 ->map(function ($field) {
-    //                     $data = $field->toArray();
-    //                     $data['doc_type_name'] = $field->docType?->name;
-    //                     $data['doc_type_code'] = $field->docType?->code ?? null;
-    //                     return $data;
-    //                 })
-    //                 ->toArray();
-    //         } else {
-
-    //             $fields = $model::where('scheme_id', $schemeId)
-    //                 ->where('tab_code', $tab->tab_code)
-    //                 ->where('is_active', true)
-    //                 ->orderBy('field_position')
-    //                 ->get()
-    //                 ->map(function ($field) use ($ageConfig) {
-
-    //                     $data = $field->toArray();
-
-    //                     // 🔥 AGE FIELD ONLY
-    //                     if ($data['field_name'] === 'age' && $ageConfig) {
-
-    //                         $data['validation_rule'] = $ageConfig->getAgeValidationRule();
-    //                         $data['age_limit']       = $ageConfig->getAgeLimit();
-    //                         $data['is_special']      = $ageConfig->hasSpecialCase();
-    //                     }
-
-    //                     return $data;
-    //                 })
-    //                 ->toArray();
-    //         }
-
-    //         /** ================= LAYOUT ================= */
-
-    //         $schemeTabLayout = SchemeTabLayout::where('scheme_id', $schemeId)
-    //             ->where('tab_code', $tab->tab_code)
-    //             ->first();
-
-    //         $layout = $schemeTabLayout?->layout_json;
-
-    //         $tabData[] = [
-    //             'tab_code' => $tab->tab_code,
-    //             'tab_name' => $tab->masterTab->tab_name ?? '',
-    //             'tab_icon' => $tab->masterTab->tab_icon ?? '',
-    //             'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
-    //             'fields' => $fields,
-    //             'layout' => $layout,
-    //         ];
-    //     }
-
-    //     return [
-    //         'scheme_id' => $schemeId,
-    //         'generated_at' => now()->toDateTimeString(),
-    //         'tabs' => $tabData,
-    //     ];
-    // }
-
-    // public static function storeSchemeJson(int $schemeId, array $data): string
-    // {
-    //     $path = "final_schemes_formdata/scheme_{$schemeId}.json";
-
-    //     Storage::disk('local')->put(
-    //         $path,
-    //         json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-    //     );
-
-    //     return $path;
-    // }
-
-
     public static function generateSchemeJson(int $schemeId): array
     {
         $tabs = SchemeTabMapping::with('masterTab')
@@ -222,71 +121,6 @@ class SchemewiseStoreDataJsonHelper
                 continue;
             }
 
-            // if ($tabCode == 105) {
-
-            //     // 🔹 fetch ordered self-declaration fields
-            //     $fields = SelfDeclerationBasefield::where('scheme_id', $schemeId)
-            //         ->where('tab_code', 105)
-            //         ->where('is_active', true)
-            //         ->orderBy('field_position')
-            //         ->get()
-            //         ->values();
-
-            //     $sectionMap = SectionLevelMaster::pluck(
-            //         'section_level_name',
-            //         'id'
-            //     )->toArray();
-
-            //     $blade = "<div class='space-y-2'>";
-
-            //     $lastSectionKey = null;
-
-            //     foreach ($fields as $i => $field) {
-
-            //         $hasSection = !empty($field->section_level_id);
-
-            //         $currentKey = $hasSection
-            //             ? $field->section_level_type . '-' . $field->section_level_id
-            //             : null;
-
-            //         $next = $fields[$i + 1] ?? null;
-
-            //         $nextKey = (!empty($next?->section_level_id))
-            //             ? $next->section_level_type . '-' . $next->section_level_id
-            //             : null;
-
-            //         /* ========= SECTION START ========= */
-            //         if ($hasSection && $currentKey !== $lastSectionKey) {
-            //             $title = $sectionMap[$field->section_level_id] ?? 'Section';
-
-            //             $blade .= <<<BLADE
-            //         <div class="mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
-            //             <span class="font-semibold text-indigo-700">
-            //                 {$title}
-            //             </span>
-            //         </div>
-            //         BLADE;
-            //         }
-
-            //         /* ========= FIELD ========= */
-            //         $blade .= self::renderSelfDeclarationField($field);
-
-            //         /* ========= SECTION END ========= */
-            //         if ($hasSection && $currentKey !== $nextKey) {
-            //             $blade .= "<div class='my-3'></div>";
-            //         }
-
-            //         if ($hasSection) {
-            //             $lastSectionKey = $currentKey;
-            //         }
-            //     }
-
-            //     $blade .= "</div>";
-
-            //     File::put("{$dir}/105.blade.php", $blade);
-            //     continue;
-            // }
-
             /* ================= NORMAL FORM TABS ================= */
             if ($tabCode == 105) {
 
@@ -316,7 +150,7 @@ class SchemewiseStoreDataJsonHelper
                 $blade = "<div class='space-y-6'>";
 
                 $cursor = 0;
-                $total  = $fields->count();
+                $total = $fields->count();
                 $layoutIndex = 0;
 
                 $lastPrintedSection = null;
@@ -465,21 +299,30 @@ class SchemewiseStoreDataJsonHelper
                 ->map(fn($v) => "'" . (string) $v . "'")
                 ->implode(',');
             $xData = <<<HTML
-            x-data="{formData: @entangle('formData').live,visible: false,
-                sync() {this.visible = [{$values}].includes(String(this.formData.{$dependentOn}));
-                    if (!this.visible) {
-                        this.formData.{$name} = null;
-                    }
-                },
-                init() {
-                    this.sync();
-                    this.\$watch('formData.{$dependentOn}', () => this.sync());
-                }
-            }"
-            HTML;
-            $xShow = 'x-show="visible"';
-            $xCloak = 'x-cloak';
+    x-data="{
+        formData: @entangle('formData').live,
+        get isVisible() {
+            if (!this.formData) return false;
+            return [{$values}].includes(String(this.formData.{$dependentOn}));
+        },
+        sync() {
+            if (!this.isVisible && this.formData.hasOwnProperty('{$name}')) {
+                this.formData.{$name} = null;
+            }
+        },
+        init() {
+            this.sync();
+            this.\$watch('formData.{$dependentOn}', () => this.sync());
         }
+    }"
+    HTML;
+            $xShow = 'x-show="isVisible"';
+            $xCloak = 'x-cloak';
+            $wireKey = 'wire:key="field-dep-' . $name . '"';
+        } else {
+            $wireKey = 'wire:key="field-norm-' . $name . '"';
+        }
+
         switch ($type) {
             case 'select':
                 $optionsHtml = '';
@@ -551,7 +394,7 @@ class SchemewiseStoreDataJsonHelper
 
         /* ========= FINAL OUTPUT ========= */
         return <<<BLADE
-        <div {$xData} {$xShow} {$xCloak}>
+        <div {$xData} {$xShow} {$xCloak} {$wireKey}>
             {$fieldHtml}
         </div>
         BLADE;
@@ -595,7 +438,7 @@ class SchemewiseStoreDataJsonHelper
                 </div>
                 BLADE;
 
-                /* ===== TEXTAREA ===== */
+            /* ===== TEXTAREA ===== */
             case 'textarea':
                 return <<<BLADE
                 <div class="{$paddingClass}">
@@ -608,7 +451,7 @@ class SchemewiseStoreDataJsonHelper
                 </div>
                 BLADE;
 
-                /* ===== SELECT ===== */
+            /* ===== SELECT ===== */
             case 'select':
 
                 $optionsHtml = '';
@@ -635,7 +478,7 @@ class SchemewiseStoreDataJsonHelper
                 </div>
                 BLADE;
 
-                /* ===== RADIO ===== */
+            /* ===== RADIO ===== */
             case 'radio':
 
                 $radioHtml = '';
@@ -669,7 +512,7 @@ class SchemewiseStoreDataJsonHelper
                 </div>
                 BLADE;
 
-                /* ===== CHECKBOX ===== */
+            /* ===== CHECKBOX ===== */
             case 'checkbox':
                 return <<<BLADE
                 <div class="{$paddingClass}">
@@ -682,7 +525,7 @@ class SchemewiseStoreDataJsonHelper
                 </div>
                 BLADE;
 
-                /* ===== DEFAULT TEXT ===== */
+            /* ===== DEFAULT TEXT ===== */
             default:
                 return <<<BLADE
             <div class="{$paddingClass}">
