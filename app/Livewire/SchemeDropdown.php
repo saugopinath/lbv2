@@ -12,15 +12,19 @@ class SchemeDropdown extends Component
     public $schemeName;
     public $schemeId = null;
     public $option = null;
+     public $button_show;
     public function mount($schemes)
     {
         $this->schemes = $schemes;
+        $this->button_show = 1;
 
         $route = Route::currentRouteName();
         if ($route == 'schemes.final-submitted') {
             $this->option = 1;
         } elseif ($route == 'age-management') {
             $this->option = 2;
+        }elseif ($route == 'lb-application-list') {
+            $this->option = 3;
         }
     }
     public function updatedSchemeId($value)

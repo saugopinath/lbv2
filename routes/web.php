@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\RejectApprovedBeneficiaryController;
 use App\Http\Controllers\SchemeController;
+use App\Http\Controllers\workflowmanagementController;
 use App\Livewire\ApplicationView;
 use App\Livewire\IncompletTypePage;
 use Illuminate\Support\Facades\Route;
@@ -65,6 +66,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+
+    // Route::get('lb-application-list', [WorkFlowController::class, 'index'])
+    //     // ->middleware('permission.redirect:canViewLbApplications')
+    //     ->name('lb-application-list');
+
+        Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])
+        // ->middleware('permission.redirect:canViewLbApplications')
+        ->name('lb-application-list');        
+        
+    Route::get('/application/{id}', DraftApplicationView::class)
+        ->name('draft-application.view');
     // User Management
     Route::get('/user-managements', [UsersController::class, 'index'])
         ->middleware('permission.redirect:canViewUser')
@@ -112,7 +124,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission.redirect:manage user duties')
         ->name('userDutymanagement.index');
 
-   
+
     // Design Pages (Dev Only – Remove in Prod)
     Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
     Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
@@ -122,7 +134,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::controller(CreateAssignOtherFormFieldController::class)->group(function () {
-    Route::get('/create-dynamicformfield',  'createdynamicformfield')
+    Route::get('/create-dynamicformfield', 'createdynamicformfield')
         ->name('create-dynamicformfield');
 });
 
@@ -146,3 +158,8 @@ Route::get('/schemes-final-submitted', [SchemeController::class, 'finalSubmitted
 
 Route::get('/duplicate-checks', [SchemeController::class, 'finalSubmitted'])->name('duplicate-checks');
 Route::get('/age-management', [SchemeController::class, 'finalSubmitted'])->name('age-management');
+
+Route::controller(workflowmanagementController::class)->group(function () {
+    Route::any('/create-steps',  'createSteps')->name('create-steps');
+    Route::any('/assign-workflow',  'assignWorkflow')->name('assign-workflow');
+});

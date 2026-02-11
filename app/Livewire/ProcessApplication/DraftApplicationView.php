@@ -4,36 +4,41 @@ namespace App\Livewire\ProcessApplication;
 
 use Livewire\Component;
 use Livewire\Attributes\On;
-use App\Models\DraftBeneficiaryPersonal;
+use App\Models\BeneficiaryPersonalDetail;
 use Illuminate\Support\Facades\Crypt;
 
 class DraftApplicationView extends Component
 {
     public $applicationId;
     public $application;
+    public $schemeId;
+    public $schemeName;
 
     public function mount($id)
     {
-        // dump($id);
-        $this->applicationId = Crypt::decryptString($id);
+        try {
+            $this->applicationId = (int) Crypt::decryptString($id);
 
-        $this->application = DraftBeneficiaryPersonal::with('relationships')->findOrFail($this->applicationId);
-        // dd($this->application, $this->application->toSql());
-        // dd($this->application, json_encode($this->application));
-        // $jsondata = json_encode($this->application);
-        // dump($jsondata);
-        // dd(json_decode($jsondata));
+            $this->application = BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->first();
+
+            $this->schemeId = $this->application->scheme_id;
+            $this->schemeName = 'Lakshmir Bhandar';
+
+        } catch (\Exception $e) {
+            dd($e->getMessage());
+        }
     }
 
     public function openActionModal()
     {
         $this->dispatch('hideLoader');
         // $this->dispatch('openBulkActionModal', selectedIds: [$this->application->application_id]);
-        
+
         $this->dispatch('openBulkActionModal', [
             'selectedIds' => [
-                'application_id' => $this->application->application_id,
-                'entry_type' => $this->application->entry_type,
+                'application_id' => $this->application,
+                  'schemeId' => $this->application->scheme_id,
+                'entry_type' => $this->application->app_type,
             ]
         ]);
     }

@@ -28,7 +28,17 @@
 
             </div>
         @elseif($option == 2)
-         <livewire:age-management :scheme-id="$schemeId" :wire:key="'age-management-'.$schemeId" />
+            <livewire:age-management :scheme-id="$schemeId" :wire:key="'age-management-'.$schemeId" />
+        @elseif($option == 3)
+            <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
+                <livewire:filter-lgd-master :button_show="$button_show" />
+            </div>
+            <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
+
+                <livewire:application-process-details-data-table :scheme-id="$schemeId"
+                    :wire:key="'lb-application-list-'.$schemeId" />
+                <livewire:revert-reject-modal />
+            </div>
         @else
             <livewire:dup-check-scheme-config-settings :scheme-id="$schemeId" :wire:key="'duplicate-'.$schemeId" />
         @endif

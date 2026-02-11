@@ -1,9 +1,5 @@
 <x-modal wire:model="bulkActionModal">
 
-
-
-
-
     <x-slot name="body">
         <div class="space-y-4">
             <x-form.select wire:model.live="bulkActionType" class="w-full border rounded p-2" label="Select Operation" name="bulkActionType" required>

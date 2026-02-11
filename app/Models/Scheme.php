@@ -18,6 +18,9 @@ class Scheme extends Model
     {
         return $this->belongsTo(Department::class);
     } 
-  
     
+     public function workflowSteps()
+    {
+        return $this->hasMany(WorkflowStep::class, 'scheme_id');
+    }    
 }

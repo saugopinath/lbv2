@@ -15,18 +15,15 @@ class SchemeTabMapping extends Model
             'tab_code'    // PK in master_tabs
         );
     }
-    /**
-     * (Optional but useful)
-     * Relation with Scheme
-     */
+   
+
     public function scheme()
     {
         return $this->belongsTo(Scheme::class, 'scheme_id');
     }
     public function showValidationButton(): bool
-{
-    $hiddenTabs = [104]; // add more if needed
-    return !in_array($this->tab_code, $hiddenTabs, true);
-}
-
+    {
+        $hiddenTabs = [104];
+        return !in_array($this->tab_code, $hiddenTabs, true);
+    }
 }
