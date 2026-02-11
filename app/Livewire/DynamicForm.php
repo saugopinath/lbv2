@@ -79,17 +79,49 @@ class DynamicForm extends Component
     public function onAadhaarCheckedReset()
     {
         $this->aadhaarVerified = false;
-    }
+        $this->aadhaarPayload = [];
 
+        // 🔥 FULL RESET
+        $this->applicationId = null;
+        $this->beneficiaryId = null;
+        $this->formData = [];
+        $this->completedTabs = [];
+        $this->allTabsCompleted = false;
+
+        if (!empty($this->views)) {
+            $this->activeTab = (string) $this->views[0];
+            $this->updateTabNavigation();
+        }
+    }
     public function onAadhaarChecked($data)
     {
+        // 🔥 NEW APPLICANT SESSION
         $this->aadhaarVerified = true;
         $this->aadhaarPayload = [
             'encoded' => $data['encoded'],
             'hash' => $data['hash'],
         ];
-    }
 
+        // 🔥 CLEAR OLD SUCCESS / ERROR MESSAGE
+        $this->navMessage = null;
+        $this->navMessageType = 'success';
+        // 🔥 RESET APPLICATION CONTEXT
+        $this->applicationId = null;
+        $this->beneficiaryId = null;
+
+        // 🔥 CLEAR OLD FORM DATA
+        $this->formData = [];
+
+        // 🔥 RESET NAVIGATION
+        $this->completedTabs = [];
+        $this->allTabsCompleted = false;
+
+        // 🔥 ALWAYS START FROM FIRST TAB
+        if (!empty($this->views)) {
+            $this->activeTab = (string) $this->views[0];
+            $this->updateTabNavigation();
+        }
+    }
     public function setActiveTab($tabCode)
     {
         $tabCode = (string) $tabCode;
@@ -106,7 +138,6 @@ class DynamicForm extends Component
         $this->activeTab = $tabCode;
         $this->updateTabNavigation();
     }
-
     /* ================== SAVE & NEXT ================== */
     public function saveAndNext($nextTab)
     {
@@ -132,7 +163,6 @@ class DynamicForm extends Component
             $this->updateTabNavigation();
         }
     }
-
     public function onDocumentTabPassed()
     {
         $this->markTabCompleted($this->activeTab);
@@ -182,7 +212,6 @@ class DynamicForm extends Component
         );
     }
     /* ================= REVIEW DATA ================= */
-
     private function prepareTabsReviewData()
     {
         $review = [];
@@ -355,7 +384,6 @@ class DynamicForm extends Component
         $this->formData['application_id'] = $this->applicationId;
         $this->formData['beneficiary_id'] = $this->beneficiaryId;
     }
-
     public function updatedFormDataIfscode($value)
     {
         $ifsc = strtoupper($value);
@@ -424,38 +452,49 @@ class DynamicForm extends Component
     {
         $json = $this->getSchemeJson();
         $rules = [];
-
+        $ageConfig = AgeManagements::where('scheme_id', $this->schemeId)->first();
         foreach ($json['tabs'] ?? [] as $tab) {
-
-            if ((string) $tab['tab_code'] !== (string) $this->activeTab) {
+            if ((string) $tab['tab_code'] !== (string) $this->activeTab)
                 continue;
-            }
-
             foreach ($tab['fields'] ?? [] as $field) {
-
-                if (empty($field['field_name']) || empty($field['validation_rule'])) {
-                    continue;
+                $fieldName = $field['field_name'];
+                $fieldRules = explode('|', $field['validation_rule'] ?? '');
+                if ($fieldName === 'age' && $ageConfig) {
+                    $fieldRules = array_filter($fieldRules, function ($rule) {
+                        $r = trim($rule);
+                        return !str_starts_with($r, 'min:') &&
+                            !str_starts_with($r, 'max:') &&
+                            $r !== 'integer' &&
+                            $r !== 'numeric';
+                    });
+                    $fieldRules[] = "integer";
+                    if (!is_null($ageConfig->min_age)) {
+                        $fieldRules[] = "min:{$ageConfig->min_age}";
+                    }
+                    if (!is_null($ageConfig->max_age)) {
+                        $fieldRules[] = "max:{$ageConfig->max_age}";
+                    }
+                }
+                if ($fieldName === 'dob' && $ageConfig) {
+                    $fieldRules = array_filter($fieldRules, function ($rule) {
+                        $r = trim($rule);
+                        return !str_starts_with($r, 'after_or_equal:') &&
+                            !str_starts_with($r, 'before_or_equal:');
+                    });
+                    if (!is_null($ageConfig->max_age)) {
+                        $minDate = now()->subYears($ageConfig->max_age)->format('Y-m-d');
+                        $fieldRules[] = "after_or_equal:{$minDate}";
+                    }
+                    if (!is_null($ageConfig->min_age)) {
+                        $maxDate = now()->subYears($ageConfig->min_age)->format('Y-m-d');
+                        $fieldRules[] = "before_or_equal:{$maxDate}";
+                    }
                 }
 
-                $fieldRules = explode('|', $field['validation_rule']);
-                if ($field['field_type'] === 'checkbox') {
 
-                    $fieldRules = array_map(function ($rule) {
-
-                        return $rule === 'required'
-                            ? 'accepted'
-                            : $rule;
-                    }, $fieldRules);
-                }
-
-                // if (!empty($field['regex'])) {
-                //     $fieldRules[] = 'regex:/' . $field['regex'] . '/';
-                // }
-
-                $rules["formData.{$field['field_name']}"] = $fieldRules;
+                $rules["formData.{$fieldName}"] = array_values(array_filter($fieldRules));
             }
         }
-
         return $rules;
     }*/
 
@@ -539,8 +578,6 @@ class DynamicForm extends Component
             'formData.*.required_unless' => ':attribute is required.',
         ];
     }
-
-
     public function updatedFormDataDob($value)
     {
         if (!empty($value)) {
@@ -549,6 +586,7 @@ class DynamicForm extends Component
             $this->formData['age'] = null;
         }
     }
+  
     /* ================= RENDER ================= */
 
     public function render()

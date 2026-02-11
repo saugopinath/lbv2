@@ -42,6 +42,7 @@ class SchemeTabFieldManager extends Component
     public $editingSelfDeclId = null;
     public $editingLevelName = '';
     public $isFinalSubmitted = false;
+    public $selfDeclarationPreviewRows = [];
 
     protected $listeners = [
         'openSectionLevelModal' => 'open',
@@ -80,12 +81,21 @@ class SchemeTabFieldManager extends Component
         $this->showFinalPreview = true;
         $firstTab = collect($this->tabs)->first();
         $this->finalActiveTabCode = $firstTab?->tab_code;
-        $this->loadFinalPreviewFields();
+
+        if ($this->finalActiveTabCode == 105) {
+            $this->selfDeclarationPreviewRows = $this->buildSelfDeclarationPreview();
+        } else {
+            $this->loadFinalPreviewFields();
+        }
     }
     public function setFinalPreviewTab($tabCode)
     {
         $this->finalActiveTabCode = $tabCode;
-        $this->loadFinalPreviewFields();
+        if ($tabCode == 105) {
+            $this->selfDeclarationPreviewRows = $this->buildSelfDeclarationPreview();
+        } else {
+            $this->loadFinalPreviewFields();
+        }
     }
     public function closeFinalPreview()
     {
@@ -445,36 +455,73 @@ class SchemeTabFieldManager extends Component
         });
         $this->syncLayoutAfterFieldChange();
     }
+    // public function openPreview($tabCode)
+    // {
+    //     $this->activeTabCode = $tabCode;
+    //     $tab = collect($this->tabs)
+    //         ->firstWhere('tab_code', $tabCode);
+    //     $this->previewTabName = $tab?->masterTab?->tab_name ?? 'Preview';
+    //     $this->previewTabCode = $tab?->masterTab?->tab_code ?? 'Preview';
+
+    //     $this->showPreviewModal = true;
+    //     if ($this->activeTabCode == 104) {
+    //         $this->loadAttachedDocuments();
+    //     }
+
+    //     if (!$this->previewTabCode) {
+    //         $this->PreviewFields = collect();
+    //         return;
+    //     }
+    //     $fieldIds = array_keys($this->tabFields[$this->previewTabCode] ?? []);
+    //     if (empty($fieldIds)) {
+    //         $this->PreviewFields = collect();
+    //         return;
+    //     }
+    //     $this->PreviewFields = SchemeTabBasefield::whereIn('id', $fieldIds)
+    //         ->whereIn('scheme_id', [0, $this->schemeId])
+    //         ->whereIn('tab_code', [0, $this->previewTabCode])
+    //         ->where('is_active', true)
+    //         ->get()
+    //         ->sortBy(fn($f) => array_search($f->id, $fieldIds))
+    //         ->values();
+    // }
+
+
     public function openPreview($tabCode)
     {
         $this->activeTabCode = $tabCode;
+        $this->previewTabCode = (int) $tabCode; // ✅ FIX
         $tab = collect($this->tabs)
             ->firstWhere('tab_code', $tabCode);
+
         $this->previewTabName = $tab?->masterTab?->tab_name ?? 'Preview';
-        $this->previewTabCode = $tab?->masterTab?->tab_code ?? 'Preview';
 
         $this->showPreviewModal = true;
-        if ($this->activeTabCode == 104) {
-            $this->loadAttachedDocuments();
-        }
 
-        if (!$this->previewTabCode) {
-            $this->PreviewFields = collect();
+        // Load tab-specific data
+        if ($tabCode == 104) {
+            $this->loadAttachedDocuments();
             return;
         }
-        $fieldIds = array_keys($this->tabFields[$this->previewTabCode] ?? []);
+
+        if ($tabCode == 105) {
+            $this->selfDeclarationPreviewRows = $this->buildSelfDeclarationPreview();
+            return;
+        }
+        $fieldIds = array_keys($this->tabFields[$tabCode] ?? []);
         if (empty($fieldIds)) {
             $this->PreviewFields = collect();
             return;
         }
         $this->PreviewFields = SchemeTabBasefield::whereIn('id', $fieldIds)
             ->whereIn('scheme_id', [0, $this->schemeId])
-            ->whereIn('tab_code', [0, $this->previewTabCode])
+            ->whereIn('tab_code', [0, $tabCode])
             ->where('is_active', true)
             ->get()
             ->sortBy(fn($f) => array_search($f->id, $fieldIds))
             ->values();
     }
+
     public function closePreview()
     {
         $this->showPreviewModal = false;
@@ -671,6 +718,107 @@ class SchemeTabFieldManager extends Component
         $this->selfDeclarationDisplay = $result;
     }
 
+    private function buildSelfDeclarationPreview()
+    {
+        $fields = SelfDeclerationBasefield::where('scheme_id', $this->schemeId)
+            ->where('tab_code', 105)
+            ->where('is_active', true)
+            ->orderBy('field_position')
+            ->get()
+            ->values();
+
+        $sectionMap = SectionLevelMaster::pluck('section_level_name', 'id')->toArray();
+
+        $layoutJson = $this->getTabLayout(105);
+        $layout = $layoutJson ? json_decode($layoutJson, true) : [];
+        if (isset($layout['layout'])) {
+            $layout = $layout['layout'];
+        }
+
+        $nonLayoutTypes = ['label', 'section', 'heading'];
+        $rows = [];
+
+        $cursor = 0;
+        $total = $fields->count();
+        $layoutIndex = 0;
+        $lastSectionKey = null;
+        $lastGridCols = 1;
+
+        while ($cursor < $total) {
+            $field = $fields[$cursor];
+
+            // ========= SECTION HEADER =========
+            $sectionKey = $field->section_level_id
+                ? $field->section_level_type . '-' . $field->section_level_id
+                : 'no_section';
+
+            if ($lastSectionKey !== $sectionKey) {
+                if ($sectionKey !== 'no_section') {
+                    [, $sid] = explode('-', $sectionKey);
+                    $title = $sectionMap[$sid] ?? 'Section';
+                    $rows[] = [
+                        'type' => 'header',
+                        'title' => $title
+                    ];
+                }
+                $lastSectionKey = $sectionKey;
+            }
+
+            // ========= NON-LAYOUT FIELD =========
+            if (in_array($field->field_type, $nonLayoutTypes)) {
+                $rows[] = [
+                    'type' => 'field',
+                    'width_class' => 'w-full',
+                    'field' => $field
+                ];
+                $cursor++;
+                continue;
+            }
+
+            // ========= GRID ROW =========
+            $requestedCols = $layout[$layoutIndex]['columns'] ?? 1;
+
+            $rowFields = [];
+            $baseSectionId = $field->section_level_id;
+
+            while ($cursor < $total && count($rowFields) < $requestedCols) {
+                $next = $fields[$cursor];
+
+                if ($next->section_level_id !== $baseSectionId) break;
+                if (in_array($next->field_type, $nonLayoutTypes)) break;
+
+                $rowFields[] = $next;
+                $cursor++;
+            }
+
+            $cols = count($rowFields);
+
+            // 🔥 STRICT LAYOUT: If layout implies > 1 col, use Grid.
+            if ($requestedCols > 1) {
+                // Determine responsive classes based on $requestedCols
+                // e.g. for 3 cols -> md:grid-cols-3
+                // If only 1 field is present, it will take 1/3 width naturally in grid
+                $rows[] = [
+                    'type' => 'grid',
+                    'cols' => $requestedCols,
+                    'fields' => $rowFields
+                ];
+            }
+            // Otherwise, full width single field
+            else {
+                $rows[] = [
+                    'type' => 'field',
+                    'width_class' => 'w-full',
+                    'field' => $rowFields[0]
+                ];
+            }
+            if ($cols > 0) {
+                $layoutIndex = ($layoutIndex + 1) % (count($layout) ?: 1);
+            }
+        }
+
+        return $rows;
+    }
     //final submit form
     public function finalSubmit()
     {
@@ -788,7 +936,7 @@ class SchemeTabFieldManager extends Component
 
         return count($this->rowConfig);
     }
-public function openLayoutModal($tabCode)
+    public function openLayoutModal($tabCode)
     {
         $this->activeTabCode = $tabCode;
         if ($this->activeTabCode == 105) {
@@ -796,7 +944,7 @@ public function openLayoutModal($tabCode)
                 ->where('tab_code', 105)
                 ->where('is_active', true)
                 ->count();
-        }else{
+        } else {
             $this->totalFields = count(
                 $this->tabFields[$tabCode] ?? []
             );

@@ -7,7 +7,7 @@ use Livewire\WithFileUploads;
 use App\Models\BeneficiaryEnclosure;
 use Illuminate\Support\Facades\Auth;
 use App\Models\BeneficiaryTemEnclosure;
-use App\Models\DraftBeneficiaryPersonal;
+use App\Models\BeneficiaryPersonalDetail;
 use App\Models\SchemeAttachedDocMappings;
 
 class EnclosureList extends Component
@@ -295,7 +295,7 @@ class EnclosureList extends Component
                     $this->existingDocuments[$doc->document_type] = $doc;
                 }
             } else {
-                $app = DraftBeneficiaryPersonal::with('documents')->where('application_id', $this->application_id)->first();
+                $app = BeneficiaryPersonalDetail::with('documents')->where('application_id', $this->application_id)->first();
                 if ($app) {
                     $this->existingDocuments = [];
                     foreach ($app->documents as $doc) {

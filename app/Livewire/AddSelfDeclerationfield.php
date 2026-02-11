@@ -5,8 +5,6 @@ namespace App\Livewire;
 use App\Models\FromFieldType;
 use Livewire\Component;
 use App\Models\Scheme;
-use App\Models\MasterTab;
-use App\Models\MasterSectionLevel;
 use App\Models\SchemeTabMapping;
 use App\Models\SectionLevelMaster;
 use App\Models\SelfDeclerationBasefield;

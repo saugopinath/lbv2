@@ -8,7 +8,7 @@ class BeneficiaryBankDetail extends Model
 {
     protected $table = "lb_scheme.beneficiary_bank_details";
     protected $guarded = [];
-    protected  $casts = [
+    protected $casts = [
         'other_details' => 'array',
     ];
 }

@@ -18,7 +18,7 @@
                 <div class="flex gap-2 items-center">
                     @if(!in_array($tab->tab_code, [104, 105]) && !$isFinalSubmitted)
                     <a href="{{ route('create-dynamicformfield', [
-                    'ref' => Crypt::encryptString($tab->scheme_id . '|' . $tab->tab_code)
+                      'scheme_id' => Crypt::encryptString($tab->scheme_id), 'tab_code' => Crypt::encryptString($tab->tab_code)
                 ]) }}">
                         <x-button.primary class="bg-indigo-600 hover:bg-indigo-700 rounded-xl text-sm">
                             Add Another Fields
@@ -65,7 +65,7 @@
             </div>
             {{-- Body --}}
             <div x-show="open" x-collapse class="bg-white">
-                 @if($tab->tab_code == 104)
+                @if($tab->tab_code == 104)
                 @if(count($attachedDocuments))
                 <div class="grid grid-cols-2 gap-3 p-4" x-data x-init="
                             new Sortable($el, {
@@ -473,91 +473,48 @@
 
                 {{-- ================= TAB 105 : SELF DECLARATION ================= --}}
                 @elseif($previewTabCode == 105)
-                @if(empty($selfDeclarationDisplay))
-                <div class="text-center text-gray-400">
+
+                @if(empty($selfDeclarationPreviewRows))
+                <div class="text-center text-gray-400 py-10">
                     No self declaration fields configured
                 </div>
                 @else
-                <div class="space-y-2">
-                    @foreach($selfDeclarationDisplay as $row)
+                <div class="space-y-6">
 
-                    {{-- SECTION START --}}
-                    @if($row['show_section_start'])
-                    <div class="mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+                    @foreach($selfDeclarationPreviewRows as $row)
+
+                    {{-- SECTION HEADER --}}
+                    @if($row['type'] === 'header')
+                    <div class="mt-6 mb-2 px-3 py-2 bg-indigo-50
+                                            border-l-4 border-indigo-600 rounded">
                         <span class="font-semibold text-indigo-700">
-                            {{ $row['section_title'] }}
+                            {{ $row['title'] }}
                         </span>
                     </div>
-                    @endif
 
-                    {{-- FIELD --}}
-                    <div class="py-2 bg-white {{ $row['field']->section_level_id ? 'pl-6 bg-gray-50' : 'pl-0' }}">
-                        {{-- FIELD TYPE RENDER --}}
-                        @switch($row['field']->field_type)
-                        {{-- TEXT --}}
-                        @case('text')
-                        <x-form.input name="{{ $row['field']->level_name }}"
-                            placeholder="Enter {{ $row['field']->level_name }}"
-                            disabled />
-                        @break
-                        @case('number')
-                        <x-form.input type="number" name="{{ $row['field']->level_name }}"
-                            placeholder="Enter {{ $row['field']->level_name }}"
-                            disabled />
-                        @break
-                        {{-- DATE --}}
-                        @case('date')
-                        <x-form.input type="date" name="{{ $row['field']->level_name }}" disabled />
-                        @break
-
-                        {{-- TEXTAREA --}}
-                        @case('textarea')
-                        <x-form.textarea name="{{ $row['field']->level_name }}"
-                            placeholder="Enter {{ $row['field']->level_name }}"
-                            disabled />
-                        @break
-                        {{-- SELECT --}}
-                        @case('select')
-                        <x-form.select name="{{ $row['field']->level_name }}" disabled>
-                            <option value="">
-                                -- Select {{ $row['field']->level_name }} --
-                            </option>
-                            @foreach($row['field']->options ?? [] as $opt)
-                            <option>{{ $opt }}</option>
-                            @endforeach
-                        </x-form.select>
-                        @break
-                        {{-- RADIO --}}
-                        @case('radio')
-                        <div class="flex flex-wrap gap-4 mt-1">
-                            @foreach($row['field']->options ?? [] as $opt)
-                            <label class="flex items-center gap-2 text-gray-700">
-                                <input type="radio" disabled />
-                                {{ $opt }}
-                            </label>
-                            @endforeach
-                        </div>
-                        @break
-                        {{-- CHECKBOX --}}
-                        @case('checkbox')
-                        <label class="flex items-center gap-2 text-gray-700">
-                            <input type="checkbox" disabled />
-                            {{ $row['field']->level_name }}
-                        </label>
-                        @break
-                        {{-- FALLBACK --}}
-                        @default
-                        <div class="text-sm text-red-500">
-                            Unsupported field type: {{ $row['field']->field_type }}
-                        </div>
-                        @endswitch
+                    {{-- SINGLE FIELD --}}
+                    @elseif($row['type'] === 'field')
+                    <div class="{{ $row['width_class'] }}">
+                        @include('partials.preview-field', [
+                        'field' => $row['field']
+                        ])
                     </div>
 
-                    {{-- SECTION END --}}
-                    @if($row['show_section_end'])
-                    <div class="my-3"></div>
+                    {{-- GRID ROW --}}
+                    @elseif($row['type'] === 'grid')
+                    <div class="grid grid-cols-1 md:grid-cols-{{ $row['cols'] }} gap-5">
+                        @foreach($row['fields'] as $field)
+                        <div>
+                            @include('partials.preview-field', [
+                            'field' => $field
+                            ])
+                        </div>
+                        @endforeach
+                    </div>
                     @endif
+
                     @endforeach
+
                 </div>
                 @endif
 
@@ -618,7 +575,6 @@
                 @endif
                 @endforeach
 
-                {{-- ===== REMAINING FIELDS (AUTO ROWS) ===== --}}
                 @if($cursor < $total)
                     @foreach($orderedFields->slice($cursor) as $field)
                     <div class="grid md:grid-cols-1 gap-4 mb-4">
@@ -744,94 +700,42 @@
 
                 {{-- ================= TAB 105 : SELF DECLARATION ================= --}}
                 @elseif($finalActiveTabCode == 105)
-                @if(empty($selfDeclarationDisplay))
+                @if(empty($selfDeclarationPreviewRows))
                 <div class="text-center text-gray-400">
                     No self declaration fields configured
                 </div>
                 @else
-                <div class="space-y-2">
-                    @foreach($selfDeclarationDisplay as $row)
+                <div class="space-y-6">
+                    @foreach($selfDeclarationPreviewRows as $row)
 
-                    {{-- SECTION START --}}
-                    @if($row['show_section_start'])
-                    <div class="mt-4 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+                    {{-- HEADER --}}
+                    @if($row['type'] === 'header')
+                    <div class="mt-6 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
                         <span class="font-semibold text-indigo-700">
-                            {{ $row['section_title'] }}
+                            {{ $row['title'] }}
                         </span>
                     </div>
-                    @endif
 
-                    {{-- FIELD --}}
-                    <div class="py-2 bg-white {{ $row['field']->section_level_id ? 'pl-6 bg-gray-50' : 'pl-0' }}">
-                        {{-- FIELD TYPE RENDER --}}
-                        @switch($row['field']->field_type)
-                        {{-- TEXT --}}
-                        @case('text')
-                        <x-form.input name="{{ $row['field']->level_name }}"
-                            placeholder="Enter {{ $row['field']->level_name }}"
-                            disabled />
-                        @break
-                        @case('number')
-                        <x-form.input type="number" name="{{ $row['field']->level_name }}"
-                            placeholder="Enter {{ $row['field']->level_name }}"
-                            disabled />
-                        @break
-                        {{-- DATE --}}
-                        @case('date')
-                        <x-form.input type="date" name="{{ $row['field']->level_name }}" disabled />
-                        @break
-
-                        {{-- TEXTAREA --}}
-                        @case('textarea')
-                        <x-form.textarea name="{{ $row['field']->level_name }}"
-                            placeholder="Enter {{ $row['field']->level_name }}"
-                            disabled />
-                        @break
-                        {{-- SELECT --}}
-                        @case('select')
-                        <x-form.select name="{{ $row['field']->level_name }}" disabled>
-                            <option value="">
-                                -- Select {{ $row['field']->level_name }} --
-                            </option>
-                            @foreach($row['field']->options ?? [] as $opt)
-                            <option>{{ $opt }}</option>
-                            @endforeach
-                        </x-form.select>
-                        @break
-                        {{-- RADIO --}}
-                        @case('radio')
-                        <div class="flex flex-wrap gap-4 mt-1">
-                            @foreach($row['field']->options ?? [] as $opt)
-                            <label class="flex items-center gap-2 text-gray-700">
-                                <input type="radio" disabled />
-                                {{ $opt }}
-                            </label>
-                            @endforeach
-                        </div>
-                        @break
-                        {{-- CHECKBOX --}}
-                        @case('checkbox')
-                        <label class="flex items-center gap-2 text-gray-700">
-                            <input type="checkbox" disabled />
-                            {{ $row['field']->level_name }}
-                        </label>
-                        @break
-                        {{-- FALLBACK --}}
-                        @default
-                        <div class="text-sm text-red-500">
-                            Unsupported field type: {{ $row['field']->field_type }}
-                        </div>
-                        @endswitch
+                    {{-- SINGLE FIELD --}}
+                    @elseif($row['type'] === 'field')
+                    <div class="{{ $row['width_class'] }}">
+                        @include('partials.preview-field', ['field' => $row['field']])
                     </div>
 
-                    {{-- SECTION END --}}
-                    @if($row['show_section_end'])
-                    <div class="my-3"></div>
+                    {{-- GRID ROW --}}
+                    @elseif($row['type'] === 'grid')
+                    <div class="grid grid-cols-1 md:grid-cols-{{ $row['cols'] }} gap-5">
+                        @foreach($row['fields'] as $field)
+                        <div>
+                            @include('partials.preview-field', ['field' => $field])
+                        </div>
+                        @endforeach
+                    </div>
                     @endif
+
                     @endforeach
                 </div>
                 @endif
-
                 {{-- ================= OTHER TABS (LAYOUT AWARE) ================= --}}
                 @else
                 @php

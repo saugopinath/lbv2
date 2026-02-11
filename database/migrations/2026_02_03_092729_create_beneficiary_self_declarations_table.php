@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('incomplet_type_model_mappings', function (Blueprint $table) {
+        Schema::create('lb_scheme.beneficiary_self_declarations', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('incomplet_type_code')->unique();
-            $table->string('table_column');
-            $table->string('model_name');
+            $table->bigInteger('scheme_id');
+            $table->bigInteger('application_id')->unique();
+            $table->bigInteger('beneficiary_id')->nullable();
+
+            $table->jsonb('other_details')->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('incomplet_type_model_mappings');
+        Schema::dropIfExists('lb_scheme.beneficiary_self_declarations');
     }
 };

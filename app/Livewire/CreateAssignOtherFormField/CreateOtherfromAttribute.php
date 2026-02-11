@@ -9,11 +9,10 @@ use App\Models\Scheme;
 use App\Models\FromFieldType;
 use App\Models\ValidationRule;
 use App\Models\SchemeTabBasefield;
-use App\Models\MasterSection;
+use Illuminate\Support\Str;
 use App\Models\MasterTab;
 use App\Models\SchemeAttachedDocMappings;
 use Illuminate\Contracts\Encryption\DecryptException;
-use Illuminate\Support\Facades\Storage;
 
 class CreateOtherfromAttribute extends Component
 {
@@ -61,7 +60,6 @@ class CreateOtherfromAttribute extends Component
     public $extensionTypes = [];
     public function mount($data = null)
     {
-
         if ($data) {
             try {
                 $this->scheme_id = $data['scheme_id'];
@@ -87,11 +85,7 @@ class CreateOtherfromAttribute extends Component
         $this->docTypes = Codemaster::where('parent_id', 16)
             ->orderBy('name')
             ->get();
-        // dd($this->docTypes);
     }
-
-
-
     public function updatedSchemeId()
     {
         $this->resetSection();
@@ -117,7 +111,6 @@ class CreateOtherfromAttribute extends Component
         }
         $this->isdependent = 'no';
     }
-
     protected function loadSections()
     {
         $this->sections = SectionLevelMaster::where('is_active', true)->where('section_level_code', 0)->get();
@@ -128,7 +121,6 @@ class CreateOtherfromAttribute extends Component
         $this->sections = [];
         $this->section_id = null;
     }
-
     public function updatedIsChooseDefault($value)
     {
         $this->is_choose_default = $value;
@@ -140,7 +132,6 @@ class CreateOtherfromAttribute extends Component
 
         $this->default_value = null;
     }
-
     public function updatedDefaultValue($value)
     {
         $this->defaultOptions = [];
@@ -182,7 +173,6 @@ class CreateOtherfromAttribute extends Component
             $this->depvalues = [];
         }
     }
-
     public function updatedIsdependentValue($value)
     {
         if ($value === 'yes') {
@@ -199,11 +189,10 @@ class CreateOtherfromAttribute extends Component
             $this->depvalues = [];
         }
     }
-
     public function updatedDepvalues()
     {
         $selectedValues = collect($this->depvalues)
-            ->map(fn($v) => is_array($v) ? (string)$v['value'] : (string)$v)
+            ->map(fn($v) => is_array($v) ? (string) $v['value'] : (string) $v)
             ->toArray();
 
         // ALL = "1"
@@ -222,7 +211,6 @@ class CreateOtherfromAttribute extends Component
             }
         }
     }
-
     protected function rules()
     {
         if ($this->field_type === 'file') {
@@ -270,13 +258,9 @@ class CreateOtherfromAttribute extends Component
     public function save()
     {
         try {
-
-
-            // $values = json_encode($this->depvalues);
-            // dd($values);
             $this->validate();
             if ($this->field_type === 'file') {
-                // dd($this->selectedDocType,$this->isRequired,$this->maxFileSize,$this->extensionTypes);
+
                 SchemeAttachedDocMappings::updateOrCreate([
                     'scheme_id' => $this->scheme_id,
                     'tab_code' => $this->tabId,
@@ -294,22 +278,6 @@ class CreateOtherfromAttribute extends Component
                     'extensionTypes'
                 ]);
             } else {
-
-
-
-                // $validationRules = collect($this->validation_rule)
-                //     ->flatten()
-                //     ->filter(fn($v) => is_string($v))
-                //     ->values()
-                //     ->toArray();
-
-                // $options = collect($this->options)
-                //     ->flatten()
-                //     ->filter(fn($v) => is_string($v))
-                //     ->values()
-                //     ->toArray();
-
-
                 $currentRules = is_array($this->validation_rule)
                     ? implode('|', collect($this->validation_rule)->flatten()->toArray())
                     : $this->validation_rule;
@@ -375,6 +343,7 @@ class CreateOtherfromAttribute extends Component
                     'dependent_on' => $this->isdependent === 'yes' ? SchemeTabBasefield::find($this->depenent_on)->field_name : null,
                     'dependent_on_values' => $this->isdependentvalue === 'yes' ? $this->depvalues : null,
                     'confirm_of' => $this->isconfirm === 'yes' ? SchemeTabBasefield::find($this->confirm_of)->field_name : null,
+                    'db_colunm' => 'other_details',
                 ]);
                 $this->reset([
                     'level_name',
@@ -401,6 +370,10 @@ class CreateOtherfromAttribute extends Component
         } catch (\Exception $e) {
             dd($e);
         }
+    }
+    public function updatedFieldName($value)
+    {
+        $this->field_id = Str::slug($value, '_');
     }
     public function render()
     {

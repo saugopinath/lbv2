@@ -289,7 +289,7 @@ class DynamicModelMigrationService
                 "$0\n{$castsBlock}",
                 $content
             );
-        }       
+        }
 
         File::put($modelPath, $content);
     }
