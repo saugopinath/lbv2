@@ -7,7 +7,7 @@ use App\Models\BeneficiaryPersonalDetail;
 use App\Models\Scheme;
 use Exception;
 use Livewire\Component;
-
+use App\Services\WorkflowService;
 class FinalSubmitModal extends Component
 {
     public $show = false;
@@ -17,12 +17,12 @@ class FinalSubmitModal extends Component
     public $schemeId;
     public $schemeName;
     public $applicantPhoto;
-
     protected $listeners = ['openFinalModal'];
+
     public function openFinalModal($applicationId, $tabsData, $schemeId = null)
     {
         $this->applicationId = $applicationId;
-        $this->tabsData = $tabsData;       
+        $this->tabsData = $tabsData;
         $this->schemeId = $schemeId;
         $this->loadimage();
         $this->loadSchemeName();
@@ -57,11 +57,12 @@ class FinalSubmitModal extends Component
         $this->show = false;
     }
 
-    public function confirmSubmit()
+    public function confirmSubmit(WorkflowService $workflowService)
     {
+        $labelRoles = $workflowService->getLabelRoles();
         try {
             BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->update([
-                'next_level_role_id' => 1,
+                'next_level_role_id' => $labelRoles->next_label_role_id,
             ]);
             // $this->show = false;
             session()->flash('success', "Application ID: " . $this->applicationId . " Submitted successfully");

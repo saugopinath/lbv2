@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Helpers\DuplicateChecker;
 
+
 class DynamicForm extends Component
 {
     public $schemeId;
@@ -42,6 +43,7 @@ class DynamicForm extends Component
     public $schemeName;
     public $heading = '';
     public $maxDate, $minDate, $minDOB, $maxDOB;
+    
     protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
         'document-validation-failed' => 'onDocumentTabFailed',
