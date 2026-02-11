@@ -31,6 +31,9 @@ class LogSuccessfulLogout
         activity('auth')
             ->causedBy($user)
             ->event('logout')
+            ->tap(function ($activity) use ($sessionId) {
+                $activity->session_id = $sessionId;
+            })
             ->withProperties([
                 'ip_address' => request()->ip(),
                 'browser' => $agent->browser(),

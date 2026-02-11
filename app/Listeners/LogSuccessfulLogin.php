@@ -15,7 +15,7 @@ class LogSuccessfulLogin
             return;
         }
         $sessionId = session()->getId();
-        $exists = Activity::where('properties->session_id', $sessionId)
+        $exists = Activity::where('session_id', $sessionId)
             ->where('event', 'login')
             ->exists();
         if ($exists) {
@@ -27,6 +27,9 @@ class LogSuccessfulLogin
         activity('auth')
             ->causedBy($user)
             ->event('login')
+            ->tap(function ($activity) use ($sessionId) {
+                $activity->session_id = $sessionId;
+            })
             ->withProperties([
                 'ip_address' => request()->ip(),
                 'browser' => $agent->browser(),

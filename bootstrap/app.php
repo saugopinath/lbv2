@@ -24,6 +24,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission.redirect' => PermissionRedirectMiddleware::class,
         ]);
     })
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->web(append: [
+            \App\Http\Middleware\PageVisitlog::class,
+        ]);
+    })
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

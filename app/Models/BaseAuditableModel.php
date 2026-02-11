@@ -4,25 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class BeneficiaryPersonalDetail extends BaseAuditableModel
+abstract class BaseAuditableModel extends Model implements Auditable
 {
-    protected $guarded = [];
-    protected $table = 'lb_scheme.beneficiary_personal_details';
+    use \OwenIt\Auditing\Auditable;
 
-    protected $casts = [
-        'other_details' => 'array',
-    ];
+    protected $guarded = ['id'];
 
-
-    public function contact()
-    {
-        return $this->hasOne(BeneficiaryContactDetail::class, 'beneficiary_id', 'beneficiary_id');
-    }
-
+    /**
+     * Global audit transformation
+     */
     public function transformAudit(array $data): array
     {
-        $data['new_values']['updated_by_role'] = Auth::user()->role_id;
+        $userId = Auth::id();
+        $userRole = UserRoleSchemeOfficeMapping::where('user_id', $userId)->first()->role_id;
+        $data['tags'] = class_basename($this) . '_' . $data['event'];
+        $data['new_values']['updated_by_role'] = $userRole;
         $data['new_values']['session_id'] = session()->getId();
         $data['new_values']['user_agent'] = \Illuminate\Support\Facades\Request::userAgent();
         $data['new_values']['url'] = \Illuminate\Support\Facades\Request::fullUrl();
