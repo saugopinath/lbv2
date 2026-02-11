@@ -3,12 +3,17 @@
 namespace App\Livewire;
 
 use App\Helpers\FormHelper;
+use App\Models\AgeManagements;
+use App\Models\BeneficiaryAadhaar;
 use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
+use Illuminate\Support\Facades\Auth;
+use App\Helpers\DuplicateChecker;
 use App\Models\UniqueAppBenId;
 use Livewire\Component;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class FinalPreview extends Component
 {
@@ -23,7 +28,7 @@ class FinalPreview extends Component
     public bool $isLast = false;
     public $prevTab = null;
     public $nextTab = null;
-    public $ram;
+    public $ram,$form_preview;
     public $applicationId;
     public $beneficiaryId;
 
@@ -31,6 +36,7 @@ class FinalPreview extends Component
     public $navMessage = null;
     public $navMessageType = 'success';
     public $showFinalModal = false;
+    public $maxDate, $minDate, $minDOB, $maxDOB;
 
     protected $listeners = [
         'document-validation-passed' => 'goToNextTab',
@@ -39,7 +45,7 @@ class FinalPreview extends Component
 
     /* ================= MOUNT ================= */
 
-    public function mount($schemeId, $ram = null, $applicationId = null, $beneficiaryId = null)
+    public function mount($schemeId, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null)
     {
 
         $this->loadScheme($schemeId);
@@ -50,9 +56,20 @@ class FinalPreview extends Component
         }
         $this->schemeId = $schemeId;
         $this->ram = $ram;
+        $this->form_preview = $form_preview;
         $this->applicationId = $applicationId;
         $this->beneficiaryId = $beneficiaryId;
-        // dd($this->ram);
+        $this->maxDate = Carbon::now()->format('Y-m-d');
+        $this->minDate = Carbon::now()->subYears(2)->format('Y-m-d');
+        $ageConfig = AgeManagements::where('scheme_id', $schemeId)->first();
+        if ($ageConfig) {
+            if ($ageConfig['max_age']) {
+                $this->minDOB = now()->subYears($ageConfig['max_age'])->format('Y-m-d');
+            }
+            if ($ageConfig['min_age']) {
+                $this->maxDOB = now()->subYears($ageConfig['min_age'])->format('Y-m-d');
+            }
+        }
     }
 
     /* ================= TAB CONTROL ================= */
@@ -83,6 +100,9 @@ class FinalPreview extends Component
         // dd($this->formData);
         // dd('saveAndNext', $nextTab);
         $this->ensureApplicationIds();
+        if (!$this->checkDuplicateEntries()) {
+            return;
+        }
         // dd($this->applicationId, $this->beneficiaryId);
         // dd('ff');
         $this->saveCurrentTabData();
@@ -121,6 +141,9 @@ class FinalPreview extends Component
             $this->ensureApplicationIds();
             $this->saveCurrentTabData();
             $tabsData = $this->prepareTabsReviewData();
+            if (!$this->checkDuplicateEntries()) {
+                return;
+            }
             $this->dispatch(
                 'openFinalModal',
                 applicationId: $this->applicationId,
@@ -129,41 +152,6 @@ class FinalPreview extends Component
         }
     }
 
-    /* ================= Final Submit Modal Details ================= */
-
-    // private function prepareTabsReviewData(): array
-    // {
-    //     $tabsData = [];
-
-    //     foreach ($this->views as $tabCode) {
-
-    //         $tabConfig = $this->getTabConfig($tabCode);
-    //         if (!$tabConfig) {
-    //             continue;
-    //         }
-
-    //         $tabName = $tabConfig['tab_name'] ?? 'Tab ' . $tabCode;
-    //         $fieldsData = [];
-
-    //         foreach ($tabConfig['fields'] ?? [] as $field) {
-
-    //             $fieldName = $field['field_name'] ?? null;
-    //             $label = $field['label'] ?? $fieldName;
-
-    //             if (!$fieldName) {
-    //                 continue;
-    //             }
-
-    //             $value = $this->formData[$fieldName] ?? null;
-
-    //             $fieldsData[$label] = $value;
-    //         }
-
-    //         $tabsData[$tabName] = $fieldsData;
-    //     }
-
-    //     return $tabsData;
-    // }
     private function prepareTabsReviewData()
     {
         $review = [];
@@ -204,93 +192,6 @@ class FinalPreview extends Component
         $this->nextTab = $this->views[$index + 1] ?? null;
     }
 
-    /* ================= DB SAVE LOGIC ================= */
-
-    // private function saveCurrentTabData(): void
-    // {
-    //     // get tab config from master_tabs
-    //     dd('saveCurrentTabData', $this->formData);
-    //     $tab = DB::table('master_tabs')
-    //         ->where('tab_code', $this->activeTab)
-    //         ->first();
-
-    //     if (!$tab || empty($tab->tab_model_name)) {
-    //         return;
-    //     }
-
-    //     // Build model class
-    //     $modelClass = "App\\Models\\{$tab->tab_model_name}";
-
-    //     if (!class_exists($modelClass)) {
-    //         return;
-    //     }
-
-    //     // application_id (adjust if your key is different)
-    //     $applicationId = $this->formData['application_id'] ?? null;
-    //     // dd('', $this->formData);
-    //     // insert or update
-    //     try {
-    //         $modelClass::updateOrCreate(
-    //             [
-    //                 'application_id' => $applicationId,
-    //             ],
-    //             $this->formData
-    //         );
-    //     } catch (\Exception $e) {
-    //         dd($e);
-    //     }
-    // }
-    // private function saveCurrentTabData(): void
-    // {
-    //     $tab = DB::table('master_tabs')
-    //         ->where('tab_code', $this->activeTab)
-    //         ->first();
-
-    //     if (!$tab || empty($tab->tab_model_name)) {
-    //         return;
-    //     }
-
-    //     $modelClass = "App\\Models\\{$tab->tab_model_name}";
-
-    //     if (!class_exists($modelClass)) {
-    //         return;
-    //     }
-
-    //     $json = $this->getSchemeJson();
-    //     $dbData = [];
-
-    //     foreach ($json['tabs'] ?? [] as $tabJson) {
-
-    //         if ((string)$tabJson['tab_code'] !== (string)$this->activeTab) {
-    //             continue;
-    //         }
-
-    //         foreach ($tabJson['fields'] ?? [] as $field) {
-
-    //             if (empty($field['db_column'])) {
-    //                 continue;
-    //             }
-
-    //             $fieldName = $field['field_name'];
-    //             $dbColumn  = $field['db_column'];
-
-    //             if (array_key_exists($fieldName, $this->formData)) {
-    //                 $dbData[$dbColumn] = $this->formData[$fieldName];
-    //             }
-    //         }
-    //     }
-
-    //     if (empty($dbData)) {
-    //         return;
-    //     }
-
-    //     $applicationId = $this->formData['application_id'] ?? null;
-
-    //     $modelClass::updateOrCreate(
-    //         ['application_id' => $applicationId],
-    //         $dbData
-    //     );
-    // }
     private function saveCurrentTabData(): void
     {
         if (!$this->applicationId) {
@@ -308,14 +209,14 @@ class FinalPreview extends Component
         }
         $json = $this->getSchemeJson();
         $dbData = [
-            'scheme_id'      => $this->schemeId,
+            'scheme_id' => $this->schemeId,
             'application_id' => $this->applicationId,
             'beneficiary_id' => $this->beneficiaryId,
         ];
         $otherDetails = [];
         foreach ($json['tabs'] ?? [] as $tabJson) {
 
-            if ((string)$tabJson['tab_code'] !== (string)$this->activeTab) {
+            if ((string) $tabJson['tab_code'] !== (string) $this->activeTab) {
                 continue;
             }
             foreach ($tabJson['fields'] ?? [] as $field) {
@@ -369,7 +270,7 @@ class FinalPreview extends Component
         $this->beneficiaryId = $beneficiary_id_obj->beneficiary_id;
         // dd($this->applicationId, $this->beneficiaryId);
 
-        $this->formData['scheme_id']      = $this->schemeId;
+        $this->formData['scheme_id'] = $this->schemeId;
         $this->formData['application_id'] = $this->applicationId;
         $this->formData['beneficiary_id'] = $this->beneficiaryId;
     }
@@ -490,6 +391,27 @@ class FinalPreview extends Component
                 'This IFSC code is not registered.'
             );
         }
+    }
+    private function checkDuplicateEntries(): bool
+    {
+        if (!$this->applicationId) {
+            $this->ensureApplicationIds();
+        }
+        $result = DuplicateChecker::check(
+            $this->schemeId,
+            $this->applicationId,
+            $this->formData,
+            $this->aadhaarPayload
+        );
+        if (is_array($result)) {
+            $this->addError($result['field'], $result['message']);
+            // $this->dispatch('toastr', [
+            //     'type' => 'error',
+            //     'message' => $result['message']
+            // ]);
+            return false;
+        }
+        return true;
     }
     /* ================= RENDER ================= */
 
