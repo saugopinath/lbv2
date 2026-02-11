@@ -238,9 +238,6 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
             Column::make("Date of Birth")
                 ->label(fn($row) => $row->dob ?? 'N/A'),
-
-            Column::make("Mobile No")
-                ->label(fn($row) => $row->other_details['mobile_no'] ?? 'N/A'),
             Column::make("Age", "age")
                 ->label(fn($row) => Carbon::parse($row->dob)->age
                     ?? 'N/A'),
