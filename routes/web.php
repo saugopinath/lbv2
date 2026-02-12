@@ -46,6 +46,9 @@ use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
 use App\Livewire\CsvSplitter;
 
+
+
+require __DIR__ . '/home.php';
 // Guest Routes
 Route::get('/session-expired', function () {
     return view('auth.session-expired', [
@@ -141,7 +144,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Route::get('/custom_application/{id}', ApplicationView::class)->name('custom_application.view');
     Route::get('/getelsticsearchIndex', [ElasticSearchController::class, 'index'])->name('getelsticsearchIndex');
 });
-
 Route::controller(CreateAssignOtherFormFieldController::class)->group(function () {
     Route::get('/create-dynamicformfield', 'createdynamicformfield')
         ->name('create-dynamicformfield');
