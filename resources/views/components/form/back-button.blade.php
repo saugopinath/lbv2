@@ -1,7 +1,7 @@
 <a href="{{ $url }}"
     class="inline-flex items-center px-4 py-2 
-    bg-gradient-to-r from-indigo-500 to-purple-600 
-    hover:from-indigo-600 hover:to-purple-700
+    bg-gradient-to-r from-teal-500 to-cyan-600 
+    hover:from-teal-600 hover:to-cyan-700
     text-white text-sm font-medium 
     rounded-lg transition-all duration-200 
     shadow-md hover:shadow-xl">
