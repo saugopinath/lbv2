@@ -3,37 +3,31 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
+// use Illuminate\Support\Facades\Auth;
 
-class BeneficiaryPersonalDetail extends Model implements Auditable
+class BeneficiaryPersonalDetail extends BaseAuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
-     protected $guarded = [];
+    protected $guarded = [];
     protected $table = 'lb_scheme.beneficiary_personal_details';
 
     protected $casts = [
         'other_details' => 'array',
     ];
 
-    public function casteName()
-    {
-        return $this->belongsTo(CodeMaster::class, 'caste', 'id');
-    }    
 
-    public function documents()
+    public function contact()
     {
-        return $this->hasMany(BeneficiaryEnclosure::class, 'application_id');
+        return $this->hasOne(BeneficiaryContactDetail::class, 'beneficiary_id', 'beneficiary_id');
     }
 
-   
-    public function getStatusText(): string
-    {
-        if ($this->next_level_role_id == Codemaster::getIdByCode(22)) {
-            return 'Submitted but Verification Pending';
-        } elseif ($this->next_level_role_id == Codemaster::getIdByCode(23)) {
-            return 'Verified but Approval Pending';
-        } else {
-            return 'Partially Submitted';
-        }
-    }   
+    // public function transformAudit(array $data): array
+    // {
+    //     $data['new_values']['updated_by_role'] = Auth::user()->role_id;
+    //     $data['new_values']['session_id'] = session()->getId();
+    //     $data['new_values']['user_agent'] = \Illuminate\Support\Facades\Request::userAgent();
+    //     $data['new_values']['url'] = \Illuminate\Support\Facades\Request::fullUrl();
+    //     $data['new_values']['method'] = \Illuminate\Support\Facades\Request::method();
+    //     $data['new_values']['referrer'] = \Illuminate\Support\Facades\Request::header('referer');
+    //     return $data;
+    // }
 }
