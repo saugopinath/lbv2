@@ -18,30 +18,47 @@ class RolerankManagement extends Component
     }
 
     public function loadRoles()
-    {
-        $this->roles = Role::orderBy('rank', 'asc')
-            ->get()
-            ->mapWithKeys(function ($role) {
-                return [
-                    $role->id => [
-                        'id' => $role->id,
-                        'name' => $role->name,
-                        'rank' => $role->rank,
-                        'same_as_prev' => false,
-                    ]
-                ];
-            })
-            ->toArray();
+{
+    $roles = Role::orderBy('rank', 'asc')->get();
+
+    $previousRank = null;
+    $formattedRoles = [];
+
+    foreach ($roles as $index => $role) {
+
+        $sameAsPrev = false;
+
+        if (
+            $index > 0 &&
+            !is_null($role->rank) &&
+            !is_null($previousRank) &&
+            $role->rank === $previousRank
+        ) {
+            $sameAsPrev = true;
+        }
+
+        $formattedRoles[$role->id] = [
+            'id' => $role->id,
+            'name' => $role->name,
+            'rank' => $role->rank,
+            'same_as_prev' => $sameAsPrev,
+        ];
+
+        $previousRank = $role->rank;
     }
+
+    $this->roles = $formattedRoles;
+}
+
 
     public function updateOrder($orderedIds)
     {
         $newOrder = [];
 
         foreach ($orderedIds as $position => $id) {
+
             if (isset($this->roles[$id])) {
 
-                // First item can never be same as previous
                 if ($position === 0) {
                     $this->roles[$id]['same_as_prev'] = false;
                 }

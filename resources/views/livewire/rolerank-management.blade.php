@@ -67,13 +67,6 @@
                     @endif
 
                 </div>
-
-                @if($role['same_as_prev'] ?? false)
-                    <div class="absolute -top-3 right-6 bg-blue-600 text-white text-[9px] px-3 py-1.5 rounded-md uppercase font-black tracking-widest shadow-md">
-                        LINKED RANK
-                    </div>
-                @endif
-
             </li>
         @endforeach
 
