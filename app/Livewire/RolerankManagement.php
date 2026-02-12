@@ -8,12 +8,10 @@ use Illuminate\Support\Facades\DB;
 
 class RolerankManagement extends Component
 {
-    public $schemeId;
     public $roles = [];
 
-    public function mount($schemeId)
+    public function mount()
     {
-        $this->schemeId = $schemeId;
         $this->loadRoles();
     }
 
