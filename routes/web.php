@@ -64,44 +64,44 @@ Route::controller(AuthenticationController::class)->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');    
 
-
-    // Route::get('lb-application-list', [WorkFlowController::class, 'index'])
-    //     // ->middleware('permission.redirect:canViewLbApplications')
-    //     ->name('lb-application-list');
-
-        Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])
+    Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])
         // ->middleware('permission.redirect:canViewLbApplications')
-        ->name('lb-application-list');        
-        
+        ->name('lb-application-list');
+
     Route::get('/application/{id}', DraftApplicationView::class)
         ->name('draft-application.view');
+
     // User Management
     Route::get('/user-managements', [UsersController::class, 'index'])
-        ->middleware('permission.redirect:canViewUser')
+        // ->middleware('permission.redirect:canViewUser')
         ->name('user-managements.index');
 
     Route::get('/users/create', UsersCreate::class)
-        ->middleware('permission.redirect:canCreateUsers')
+        // ->middleware('permission.redirect:canCreateUsers')
         ->name('users.create');
 
     // Role & Office Mappings
-    Route::get('/role-office-master-mappings', [RoleOfficeTypeMappingsController::class, 'index'])
-        ->middleware('permission.redirect:canRoleMapping')
-        ->name('role-office-master-mappings.index');
+    Route::get('role-office-master-mappings', [SchemeController::class, 'finalSubmitted'])
+        // ->middleware('permission.redirect:canRoleMapping')
+        ->name('role-office-master-mappings');
+
+        //  Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])
+        // // ->middleware('permission.redirect:canViewLbApplications')
+        // ->name('lb-application-list');
 
     Route::get('/role-office-type-mappings/create', Create::class)
-        ->middleware('permission.redirect:canRoleMappings')
+        // ->middleware('permission.redirect:canRoleMappings')
         ->name('role-office-type-mappings.create');
 
     // Office Masters
     Route::get('/officemasters', [OfficeMastersController::class, 'index'])
-        ->middleware('permission.redirect:canViewOffices')
+        // ->middleware('permission.redirect:canViewOffices')
         ->name('officemasters.index');
 
     Route::get('/office-masters/create', OfficeMasterCreate::class)
-        ->middleware('permission.redirect:canCreateOffices')
+        // ->middleware('permission.redirect:canCreateOffices')
         ->name('office-masters.create');
 
     // Permissions Management
@@ -160,6 +160,6 @@ Route::get('/duplicate-checks', [SchemeController::class, 'finalSubmitted'])->na
 Route::get('/age-management', [SchemeController::class, 'finalSubmitted'])->name('age-management');
 
 Route::controller(workflowmanagementController::class)->group(function () {
-    Route::any('/create-steps',  'createSteps')->name('create-steps');
-    Route::any('/assign-workflow',  'assignWorkflow')->name('assign-workflow');
+    Route::any('/create-steps', 'createSteps')->name('create-steps');
+    Route::any('/assign-workflow', 'assignWorkflow')->name('assign-workflow');
 });
