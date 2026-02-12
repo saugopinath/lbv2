@@ -1,14 +1,37 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
 
-@import 'tailwindcss';
+@theme {
+    --font-sans:
+        "Figtree", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+        "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+    /* Ensure fuchsia colors are available */
+    --color-fuchsia-50: oklch(0.977 0.017 320.6);
+    --color-fuchsia-100: oklch(0.952 0.041 321.4);
+    --color-fuchsia-200: oklch(0.903 0.08 322.6);
+    --color-fuchsia-300: oklch(0.833 0.153 323.3);
+    --color-fuchsia-400: oklch(0.738 0.238 323.9);
+    --color-fuchsia-500: oklch(0.667 0.295 326.5);
+    --color-fuchsia-600: oklch(0.591 0.293 327.7);
+    --color-fuchsia-700: oklch(0.512 0.252 327.8);
+    --color-fuchsia-800: oklch(0.444 0.214 327.2);
+    --color-fuchsia-900: oklch(0.384 0.179 326.3);
+}
+
+@plugin "@tailwindcss/forms";
+
+@variant dark (&:where(.dark, .dark *));
+
+@source '../views/**/*.blade.php';
+@source '../js/**/*.js';
+@source '../../vendor/masmerise/livewire-toaster/resources/views/*.blade.php';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
-@source '..//*.blade.php';
-@source '..//*.js';
 
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
 .bg-login-cover {
-    background-image: url('/images/background-cover.jpg');
+    background-image: url("/images/background-cover.jpg");
     /* filter: brightness(0.5); */
 }
 [x-cloak] {

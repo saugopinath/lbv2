@@ -40,8 +40,11 @@ use App\Http\Controllers\MisReportController;
 use App\Http\Controllers\ValidationManagerController;
 use App\Livewire\SchemeTabFieldManager;
 
+
+
+require __DIR__ . '/home.php';
 // Guest Routes
-Route::get('/', fn() => view('welcome'));
+// Route::get('/', fn() => view('welcome'));
 Route::get('refresh-captcha', [App\Http\Controllers\CaptchaController::class, 'refreshCaptcha'])
     ->name('refresh-captcha');
 
@@ -225,7 +228,7 @@ Route::controller(CmoController::class)->group(function () {
 });
 //reject approved beneficiary
 Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
-    Route::get('/reject-approved-beneficiary',  'index')
+    Route::get('/reject-approved-beneficiary', 'index')
         ->middleware('permission.redirect:canRejectApprovedBeneficiary')
         ->name('reject-approved-beneficiary');
     Route::get('/reject-approved-beneficiary/de-activate', 'editview')->middleware('permission.redirect:canViewDetailsToReject')->name('reject-approved-beneficiary.de-activate');
@@ -233,7 +236,7 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
 });
 
 Route::controller(MarkedUpdateBeneficiaryController::class)->group(function () {
-    Route::get('/marked-beneficiary',  'index')
+    Route::get('/marked-beneficiary', 'index')
         ->name('marked-beneficiary');
     Route::get('/mark-beneficiary', 'editview')
         ->name('mark-beneficiary');
@@ -249,7 +252,7 @@ Route::controller(MarkedUpdateBeneficiaryController::class)->group(function () {
 
 
 Route::controller(CreateAssignOtherFormFieldController::class)->group(function () {
-    Route::get('/create-dynamicformfield',  'createdynamicformfield')
+    Route::get('/create-dynamicformfield', 'createdynamicformfield')
         ->name('create-dynamicformfield');
 });
 
