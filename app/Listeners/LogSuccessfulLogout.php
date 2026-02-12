@@ -6,6 +6,7 @@ use Illuminate\Auth\Events\Logout;
 use App\Models\User;
 use Spatie\Activitylog\Models\Activity;
 use Jenssegers\Agent\Agent;
+use Stevebauman\Location\Facades\Location;
 
 class LogSuccessfulLogout
 {
@@ -27,6 +28,8 @@ class LogSuccessfulLogout
 
         $user = $event->user;
         $agent = new Agent();
+        $ip = app()->environment('local') ? '122.187.159.230' : request()->ip();
+        $position = Location::get($ip);
 
         activity('auth')
             ->causedBy($user)
@@ -35,7 +38,7 @@ class LogSuccessfulLogout
                 $activity->session_id = $sessionId;
             })
             ->withProperties([
-                'ip_address' => request()->ip(),
+                'ip_address' => $ip,
                 'browser' => $agent->browser(),
                 'platform' => $agent->platform(),
                 'device' => $agent->device(),
@@ -43,6 +46,14 @@ class LogSuccessfulLogout
                 'is_desktop' => $agent->isDesktop(),
                 'session_id' => $sessionId,
                 'logout_time' => now(),
+                'user_location' => [
+                    'ip' => $ip,
+                    'city' => $position->cityName ?? null,
+                    'region' => $position->regionName ?? null,
+                    'country' => $position->countryName ?? null,
+                    'latitude' => $position->latitude ?? null,
+                    'longitude' => $position->longitude ?? null,
+                ],
             ])
             ->log("{$user->name} logged out");
     }
