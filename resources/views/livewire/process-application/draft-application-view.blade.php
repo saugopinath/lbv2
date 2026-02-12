@@ -26,7 +26,7 @@
         </div>
     </div>
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-8 space-y-4">
-        <livewire:application-view :id="$applicationId" :schemeId="20" />
+        <livewire:application-view :id="$applicationId" :schemeId="$schemeId" />
          <div class="flex space-x-2">
 
             <x-button.primary wire:click="openActionModal" wire-target="openActionModal"  x-on:click="Livewire.dispatch('showLoader')">
