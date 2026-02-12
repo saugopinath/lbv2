@@ -46,8 +46,8 @@ class Users extends DataTableComponent
     }
     public function updatedPerPage($value): void
     {
-        $this->perPage = (int)$value;
-        $this->setPerPage((int)$value);
+        $this->perPage = (int) $value;
+        $this->setPerPage((int) $value);
         $this->resetPage();
     }
 
@@ -91,7 +91,7 @@ class Users extends DataTableComponent
             })
             ->with(['mappedRoles', 'mappedPermissions'])
             ->orderBy('id', 'asc');
-
+  
         return $query;
     }
 
