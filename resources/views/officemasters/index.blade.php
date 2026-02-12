@@ -6,7 +6,7 @@
                 OfficeMasters
             </h2>
            
-                <a href="{{ route('office-masters.create') }}"
+                <a href="{{ route('office-masters') }}"
                     class="bg-blue-500 text-white px-4 py-2 rounded-2xl shadow-md hover:bg-blue-600 whitespace-nowrap cursor-pointer">
                     New OfficeMaster
                 </a>

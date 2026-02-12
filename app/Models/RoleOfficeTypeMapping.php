@@ -12,7 +12,7 @@ class RoleOfficeTypeMapping extends Model implements Auditable
     protected $table = 'role_office_type_mappings';
     protected $fillable = [
         'office_type_id',
-        'role_id'
+        'role_id',    
     ];
 
     public function role()

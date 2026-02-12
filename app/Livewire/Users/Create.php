@@ -28,13 +28,13 @@ class Create extends Component
     public $roles = [], $schemes = [], $offices = [], $states = [], $mapping_levels = [], $districts = [];
 
     protected $rules = [
-        'name'     => 'required|string|max:255',
+        'name' => 'required|string|max:255',
         'mobile' => 'required|digits:10|unique:users,mobile_no',
-        'email'    => 'required|email|unique:users,email',
+        'email' => 'required|email|unique:users,email',
         'password' => 'required|min:6',
-        'role'     => 'required|exists:roles,id',
+        'role' => 'required|exists:roles,id',
         'selectscheme' => 'required|exists:schemes,id',
-        'office'   => 'required|exists:office_masters,id',
+        'office' => 'required|exists:office_masters,id',
     ];
 
     public function mount()
@@ -42,7 +42,7 @@ class Create extends Component
         $this->roles = Role::all();
         $this->schemes = Scheme::all();
         // $this->states = State::orderBy('name', 'asc')->get();
-        $this->states = State::where('is_active', 1)->where('lgd_code',  19)->get();
+        $this->states = State::where('is_active', 1)->where('lgd_code', 19)->get();
         $this->districts = District::orderBy('name', 'asc')->get();
     }
     public function updatedRole($value)
@@ -152,6 +152,10 @@ class Create extends Component
 
             return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
         }
+    }
+    public function updateReset()
+    {
+        $this->reset(['name', 'mobile', 'email', 'password', 'role', 'mapping_level', 'selectscheme', 'office', 'selectedMappingLevel', 'selectedState', 'scheme', 'selectedDistrict']);
     }
     public function render()
     {

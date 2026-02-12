@@ -76,33 +76,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // User Management
     Route::get('/user-managements', [UsersController::class, 'index'])
         // ->middleware('permission.redirect:canViewUser')
-        ->name('user-managements.index');
+        ->name('user-managements');
 
     Route::get('/users/create', UsersCreate::class)
         // ->middleware('permission.redirect:canCreateUsers')
-        ->name('users.create');
+        ->name('users');
 
     // Role & Office Mappings
-    Route::get('role-office-master-mappings', [SchemeController::class, 'finalSubmitted'])
+    Route::get('role-office-master-mappings', [RoleOfficeTypeMappingsController::class, 'index'])
         // ->middleware('permission.redirect:canRoleMapping')
         ->name('role-office-master-mappings');
 
-        //  Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])
-        // // ->middleware('permission.redirect:canViewLbApplications')
-        // ->name('lb-application-list');
-
     Route::get('/role-office-type-mappings/create', Create::class)
         // ->middleware('permission.redirect:canRoleMappings')
-        ->name('role-office-type-mappings.create');
+        ->name('role-office-type-mappings');
 
     // Office Masters
-    Route::get('/officemasters', [OfficeMastersController::class, 'index'])
+    Route::get('officemasters', [OfficeMastersController::class, 'index'])
         // ->middleware('permission.redirect:canViewOffices')
-        ->name('officemasters.index');
+        ->name('officemasters');
 
     Route::get('/office-masters/create', OfficeMasterCreate::class)
         // ->middleware('permission.redirect:canCreateOffices')
-        ->name('office-masters.create');
+        ->name('office-masters');
 
     // Permissions Management
     Route::get('/permission', [PermissionController::class, 'index'])

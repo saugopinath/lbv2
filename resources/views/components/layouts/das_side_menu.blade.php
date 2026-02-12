@@ -116,7 +116,7 @@
                     </li>
 
                     <li>
-                        <a href="{{ route('officemasters.index') }}"
+                        <a href="{{ route('officemasters') }}"
                             class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white">
                             <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
@@ -128,7 +128,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('user-managements.index') }}"
+                        <a href="{{ route('user-managements') }}"
                             class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white">
                             <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">

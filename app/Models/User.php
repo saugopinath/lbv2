@@ -24,7 +24,7 @@ class User extends Authenticatable implements Auditable
      */
     protected $fillable = [
         'name',
-        'email',
+        'email','scheme_id',
         'password','two_factor_code', 'two_factor_expires_at','flag_sent_otp','password_set_time','password_expires_at','updated_at','mobile_no'
     ];
 

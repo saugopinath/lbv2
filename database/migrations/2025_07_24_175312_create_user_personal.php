@@ -12,7 +12,6 @@ return new class extends Migration {
     {
         Schema::create('user_personals', function (Blueprint $table) {
             $table->id();
-            $table->integer('scheme_id')->nullable();
             $table->bigInteger('user_id');
             $table->foreign('user_id', 'user_id_fk')->references('id')->on('users');
             $table->string('name');
