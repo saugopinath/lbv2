@@ -59,7 +59,7 @@ class FinalSubmitModal extends Component
 
     public function confirmSubmit(WorkflowService $workflowService)
     {
-        $labelRoles = $workflowService->getLabelRoles();
+        $labelRoles = $workflowService->getLabelRoles($this->schemeId);
         try {
             BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->update([
                 'next_level_role_id' => $labelRoles->next_label_role_id,
