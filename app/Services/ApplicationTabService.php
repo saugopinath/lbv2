@@ -58,12 +58,9 @@ class ApplicationTabService
                         $column = $field->db_column;
                         $value  = $record->$column ?? null;
                     }
-                    
-                    // Skip if value is null or empty - don't show this field at all
                     if ($value === null || $value === '') {
                         continue;
                     }
-                    
                     $ruralUrban = $record->rural_urban ?? null;
                     $value = LocationHelper::resolve(
                         $field->db_column ?? $field->field_name,

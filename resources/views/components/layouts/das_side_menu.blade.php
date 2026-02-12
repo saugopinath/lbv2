@@ -39,7 +39,7 @@
             null @endif
         }">
             {{-- @canany(['submit lb form', 'view draft list', 'view lb applications']) --}}
-            
+
             <div>
                 <button @click="activeMenu === 'LBFrom' ? activeMenu = null : activeMenu = 'LBFrom'"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -63,7 +63,7 @@
                 <!-- Sub-menu -->
                 <div id="list_menu" x-show="activeMenu === 'LBFrom'" x-collapse x-transition class="pl-4">
                     <ul>
-                       
+
                         <li>
                             <a href="{{ route('lbform') }}"
                                 class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white @if (request()->routeIs('lbform')) bg-slate-700 text-white @endif">
@@ -80,7 +80,7 @@
                             </a>
                         </li>
                         {{-- @endcan --}}
-                        
+
                         <li>
                             <a href="{{ route('draftlist') }}"
                                 class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white @if (request()->routeIs('draftlist')) bg-slate-700 text-white @endif">
@@ -97,7 +97,7 @@
                             </a>
                         </li>
                         {{-- @endcan --}}
-                      
+
 
                         {{-- @can('view lb applications') --}}
 
@@ -116,13 +116,13 @@
                                 <span x-show="sidebar" class="truncate">Workflow</span>
                             </a>
                         </li>
-                        
-                      
+
+
                     </ul>
                 </div>
             </div>
-            
-           
+
+
         </div>
 
         <!-- Menu Item: Beneficiary List -->

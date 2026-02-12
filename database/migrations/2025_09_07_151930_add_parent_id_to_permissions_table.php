@@ -6,20 +6,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('permissions', function (Blueprint $table) {
-              $table->unsignedBigInteger('parent_id')->nullable()->after('id');
-
+            $table->unsignedBigInteger('parent_id')->nullable()->after('id');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('permissions', function (Blueprint $table) {

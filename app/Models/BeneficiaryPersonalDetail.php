@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
+// use Illuminate\Support\Facades\Auth;
 
 class BeneficiaryPersonalDetail extends BaseAuditableModel
 {
@@ -20,14 +20,14 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
         return $this->hasOne(BeneficiaryContactDetail::class, 'beneficiary_id', 'beneficiary_id');
     }
 
-    public function transformAudit(array $data): array
-    {
-        $data['new_values']['updated_by_role'] = Auth::user()->role_id;
-        $data['new_values']['session_id'] = session()->getId();
-        $data['new_values']['user_agent'] = \Illuminate\Support\Facades\Request::userAgent();
-        $data['new_values']['url'] = \Illuminate\Support\Facades\Request::fullUrl();
-        $data['new_values']['method'] = \Illuminate\Support\Facades\Request::method();
-        $data['new_values']['referrer'] = \Illuminate\Support\Facades\Request::header('referer');
-        return $data;
-    }
+    // public function transformAudit(array $data): array
+    // {
+    //     $data['new_values']['updated_by_role'] = Auth::user()->role_id;
+    //     $data['new_values']['session_id'] = session()->getId();
+    //     $data['new_values']['user_agent'] = \Illuminate\Support\Facades\Request::userAgent();
+    //     $data['new_values']['url'] = \Illuminate\Support\Facades\Request::fullUrl();
+    //     $data['new_values']['method'] = \Illuminate\Support\Facades\Request::method();
+    //     $data['new_values']['referrer'] = \Illuminate\Support\Facades\Request::header('referer');
+    //     return $data;
+    // }
 }

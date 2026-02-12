@@ -229,67 +229,115 @@ class DynamicModelMigrationService
     }
 
 
+    // private function updateModel(string $modelPath, string $table, array $fields): void
+    // {
+    //     if (!File::exists($modelPath)) {
+    //         return;
+    //     }
+
+    //     $schema = $this->getSchema();
+
+    //     $guardedBlock = <<<PHP
+    //         protected \$guarded = [];
+    //     PHP;
+
+    //     $tableBlock = "protected \$table = '{$schema}.{$table}';\n\n";
+    //     $castsBlock = "protected \$casts = ['other_details' => 'array'];\n\n";
+
+    //     $content = File::get($modelPath);
+
+    //     /* ---------- TABLE ---------- */
+    //     if (preg_match('/protected \$table\s*=/', $content)) {
+    //         $content = preg_replace(
+    //             '/protected \$table\s*=\s*[\'"][^\'"]+[\'"]\s*;/m',
+    //             trim($tableBlock),
+    //             $content
+    //         );
+    //     } else {
+    //         $content = preg_replace(
+    //             '/class\s+\w+\s+extends\s+Model\s*\{/m',
+    //             "$0\n{$tableBlock}",
+    //             $content
+    //         );
+    //     }
+
+    //     /* ---------- GUARDED ONLY ---------- */
+    //     if (preg_match('/protected \$guarded\s*=\s*\[[\s\S]*?\];/m', $content)) {
+    //         $content = preg_replace(
+    //             '/protected \$guarded\s*=\s*\[[\s\S]*?\];/m',
+    //             trim($guardedBlock),
+    //             $content
+    //         );
+    //     } else {
+    //         $content = preg_replace(
+    //             '/class\s+\w+\s+extends\s+Model\s*\{/m',
+    //             "$0\n{$guardedBlock}",
+    //             $content
+    //         );
+    //     }
+
+    //     /* ---------- CASTS ---------- */
+    //     if (preg_match('/protected \$casts\s*=/', $content)) {
+    //         $content = preg_replace(
+    //             '/protected \$casts\s*=\s*\[[\s\S]*?\];/m',
+    //             trim($castsBlock),
+    //             $content
+    //         );
+    //     } else {
+    //         $content = preg_replace(
+    //             '/class\s+\w+\s+extends\s+Model\s*\{/m',
+    //             "$0\n{$castsBlock}",
+    //             $content
+    //         );
+    //     }
+
+    //     File::put($modelPath, $content);
+    // }
+
     private function updateModel(string $modelPath, string $table, array $fields): void
     {
         if (!File::exists($modelPath)) {
             return;
         }
-
         $schema = $this->getSchema();
-
-        $guardedBlock = <<<PHP
-            protected \$guarded = [];
-        PHP;
-
-        $tableBlock = "protected \$table = '{$schema}.{$table}';\n\n";
-        $castsBlock = "protected \$casts = ['other_details' => 'array'];\n\n";
-
         $content = File::get($modelPath);
-
-        /* ---------- TABLE ---------- */
-        if (preg_match('/protected \$table\s*=/', $content)) {
+        if (!Str::contains($content, 'BaseAuditableModel')) {
             $content = preg_replace(
-                '/protected \$table\s*=\s*[\'"][^\'"]+[\'"]\s*;/m',
-                trim($tableBlock),
+                '/use Illuminate\\\\Database\\\\Eloquent\\\\Model;/',
+                'use App\Models\BaseAuditableModel;',
                 $content
             );
-        } else {
-            $content = preg_replace(
-                '/class\s+\w+\s+extends\s+Model\s*\{/m',
-                "$0\n{$tableBlock}",
-                $content
-            );
+            if (!Str::contains($content, 'use App\Models\BaseAuditableModel;')) {
+                $content = preg_replace(
+                    '/namespace\s+[^;]+;/',
+                    "$0\n\nuse App\Models\BaseAuditableModel;",
+                    $content
+                );
+            }
         }
-
-        /* ---------- GUARDED ONLY ---------- */
-        if (preg_match('/protected \$guarded\s*=\s*\[[\s\S]*?\];/m', $content)) {
-            $content = preg_replace(
-                '/protected \$guarded\s*=\s*\[[\s\S]*?\];/m',
-                trim($guardedBlock),
-                $content
-            );
-        } else {
-            $content = preg_replace(
-                '/class\s+\w+\s+extends\s+Model\s*\{/m',
-                "$0\n{$guardedBlock}",
-                $content
-            );
+        $content = preg_replace(
+            '/class\s+(\w+)\s+extends\s+Model/',
+            'class $1 extends BaseAuditableModel',
+            $content
+        );
+        $tableBlock = "protected \$table = '{$schema}.{$table}';";
+        $guardedBlock = "protected \$guarded = [];";
+        $castsBlock = "protected \$casts = [\n        'other_details' => 'array',\n    ];";
+        preg_match('/class\s+\w+\s+extends\s+\w+\s*\{/', $content, $match);
+        if (!$match) {
+            File::put($modelPath, $content);
+            return;
         }
-
-        /* ---------- CASTS ---------- */
-        if (preg_match('/protected \$casts\s*=/', $content)) {
-            $content = preg_replace(
-                '/protected \$casts\s*=\s*\[[\s\S]*?\];/m',
-                trim($castsBlock),
-                $content
-            );
-        } else {
-            $content = preg_replace(
-                '/class\s+\w+\s+extends\s+Model\s*\{/m',
-                "$0\n{$castsBlock}",
-                $content
-            );
-        }
+        $classLine = $match[0];
+        $propertyBlock = "\n\n    {$tableBlock}\n\n    {$guardedBlock}\n\n    {$castsBlock}\n";
+        $content = preg_replace('/protected \$table\s*=.*?;/', '', $content);
+        $content = preg_replace('/protected \$guarded\s*=.*?;/', '', $content);
+        $content = preg_replace('/protected \$casts\s*=\s*\[[\s\S]*?\];/', '', $content);
+        $content = str_replace(
+            $classLine,
+            $classLine . $propertyBlock,
+            $content
+        );
 
         File::put($modelPath, $content);
     }
