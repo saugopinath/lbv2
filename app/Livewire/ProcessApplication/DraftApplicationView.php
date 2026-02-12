@@ -36,8 +36,8 @@ class DraftApplicationView extends Component
 
         $this->dispatch('openBulkActionModal', [
             'selectedIds' => [
-                'application_id' => $this->application,
-                  'schemeId' => $this->application->scheme_id,
+                'application_id' => $this->application->application_id,
+                'schemeId' => $this->application->scheme_id,
                 'entry_type' => $this->application->app_type,
             ]
         ]);

@@ -37,11 +37,11 @@ class BulkActionModal extends Component
     public array $availableActions = [];
     public int $currentUserId;
     public $applicationId, $entryType;
-    public $sameLabelRoleId, $nextLabelRoleId,$schemeId;
+    public $sameLabelRoleId, $nextLabelRoleId, $schemeId;
     public string $bulkActionTypeLabel = 'Select Operation';
 
     #[On('openBulkActionModal')]
-    public function openModal(array $selectedIds = [])
+    public function openModal(array $selectedIds = [], WorkflowService $workflowService)
     {
         $this->reset(['bulkActionType', 'reason', 'remark', 'availableActions', 'bulkActionTypeLabel']);
         $this->selectedRows = $selectedIds;
@@ -49,9 +49,13 @@ class BulkActionModal extends Component
         $this->applicationId = $this->selectedRows['selectedIds']['application_id'];
         $this->entryType = $this->selectedRows['selectedIds']['entry_type'];
         $this->schemeId = $this->selectedRows['selectedIds']['schemeId'];
-        // dd($this->schemeId);
+        // dd($this->applicationId);
+        $labelRoles = $workflowService->getLabelRoles($this->schemeId);
+        if ($labelRoles) {
+            $this->sameLabelRoleId = $labelRoles->same_label_role_id;
+            $this->nextLabelRoleId = $labelRoles->next_label_role_id;
+        }
 
-        
 
         if ($this->entryType == 1) {
             // if ($this->entryType == Codemaster::getIdByCode(41)) {
@@ -64,13 +68,13 @@ class BulkActionModal extends Component
         }
 
         if ($entryType) {
-            // if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'verification') && CheckAuthHelper::isCommmonVerifier()) {
-            //     $this->availableActions['V'] = 'Verify';
-            // }
+            if (CheckAuthHelper::isCommmonVerifier()) {
+                $this->availableActions['V'] = 'Verify';
+            }
 
-            // if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'approver') &&CheckAuthHelper::isCommonApprover()) {
-            //     $this->availableActions['A'] = 'Approve';
-            // }
+            if (CheckAuthHelper::isCommonApprover()) {
+                $this->availableActions['A'] = 'Approve';
+            }
 
             // if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'reject') && CheckAuthHelper::isCommonWorkFlow2ndStep()) {
             //     $this->availableActions['R'] = 'Reject';
@@ -79,10 +83,10 @@ class BulkActionModal extends Component
             // if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'revert') && CheckAuthHelper::isCommonWorkFlow2ndStep()) {
             //     $this->availableActions['T'] = 'Revert';
             // }
-            $this->availableActions['V'] = 'Verify';
-            $this->availableActions['A'] = 'Approve';
-            $this->availableActions['R'] = 'Reject';
-            $this->availableActions['T'] = 'Revert';
+            // $this->availableActions['V'] = 'Verify';
+            // $this->availableActions['A'] = 'Approve';
+            // $this->availableActions['R'] = 'Reject';
+            // $this->availableActions['T'] = 'Revert';
         }
         $this->bulkActionModal = true;
     }
@@ -101,14 +105,10 @@ class BulkActionModal extends Component
         }
     }
 
-    public function performBulkAction( WorkflowService $workflowService)
+    public function performBulkAction()
     {
 
-    $labelRoles = $workflowService->getLabelRoles($this->schemeId);
-        if ($labelRoles) {
-            $this->sameLabelRoleId = $labelRoles->same_label_role_id;
-            $this->nextLabelRoleId = $labelRoles->next_label_role_id;
-        }
+
         $validated = $this->validate([
             'bulkActionType' => 'required|in:V,A,R,T',
             'reason' => in_array($this->bulkActionType, ['R', 'T']) ? 'required' : 'nullable',
@@ -126,17 +126,18 @@ class BulkActionModal extends Component
         // DB::transaction(function () use (&$successMessage, $approverRoleId, $operatorRoleId, $currentUserId) {
         // $ids = $this->applicationId;
         $ids = (array) $this->applicationId;
-
+        // dd($ids);
         if ($this->bulkActionType === 'V') {
             foreach ($ids as $id) {
+                // dd($id);
                 DB::beginTransaction();
                 try {
                     // dd($this->nextLabelRoleId);
-                    $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
+                    //$DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
                     // dd($DraftBeneficiaryPersonal);
-                    $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
+                    //$DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
                     // dd($DraftBeneficiaryPersonal);
-                    $DraftBeneficiaryPersonal->save();
+                    //$DraftBeneficiaryPersonal->save();
                     // $AcceptRejectInfo = new AcceptRejectInfo;
                     // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
                     // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
@@ -151,6 +152,9 @@ class BulkActionModal extends Component
                     //     ->latest('id')
                     //     ->value('id') ?? null;
                     // $AcceptRejectInfo->save();
+                    BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                        'next_level_role_id' => $this->nextLabelRoleId,
+                    ]);
                     DB::commit();
                     $this->dispatch('toastr', [
                         'type' => 'success',
@@ -165,9 +169,12 @@ class BulkActionModal extends Component
             foreach ($ids as $id) {
                 DB::beginTransaction();
                 try {
-                    $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
-                    $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
-                    $DraftBeneficiaryPersonal->save();
+                     BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                        'next_level_role_id' => $this->nextLabelRoleId,
+                    ]);
+                    // $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
+                    // $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId
+                    // $DraftBeneficiaryPersonal->save();
                     // $AcceptRejectInfo = new AcceptRejectInfo;
                     // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
                     // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
@@ -192,79 +199,80 @@ class BulkActionModal extends Component
                     throw $e;
                 }
             }
-        } elseif ($this->bulkActionType === 'T') {
-
-            // $user = auth()->user();
-            if (CheckAuthHelper::isCommonApprover()) {
-                // if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
-                $next_level_role_id = Codemaster::getIdByCode(22);
-            }
-            if (CheckAuthHelper::isCommmonVerifier()) {
-                // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
-                $next_level_role_id = Codemaster::getIdByCode(21);
-            }
-            foreach ($ids as $id) {
-                DB::beginTransaction();
-                try {
-                    $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
-                    $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
-                    $DraftBeneficiaryPersonal->save();
-                    // $AcceptRejectInfo = new AcceptRejectInfo;
-                    // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                    // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
-                    // $AcceptRejectInfo->ip_address = request()->ip();
-                    // $AcceptRejectInfo->user_id = Auth::id();
-                    // $AcceptRejectInfo->browser = request()->header('User-Agent');
-                    // $AcceptRejectInfo->model_name = null;
-                    // $AcceptRejectInfo->op_type = $next_level_role_id;
-                    // $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
-                    // $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
-                    // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                    //     ->latest('id')
-                    //     ->value('id') ?? null;
-                    // $AcceptRejectInfo->save();
-                    DB::commit();
-                    $this->dispatch('toastr', [
-                        'type' => 'warning',
-                        'message' => 'Application reverted successfully!'
-                    ]);
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    throw $e;
-                }
-            }
-        } elseif ($this->bulkActionType === 'R') {
-            foreach ($ids as $id) {
-                DB::beginTransaction();
-                try {
-                    $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
-                    $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
-                    $DraftBeneficiaryPersonal->save();
-                    // $AcceptRejectInfo = new AcceptRejectInfo;
-                    // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                    // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
-                    // $AcceptRejectInfo->ip_address = request()->ip();
-                    // $AcceptRejectInfo->user_id = Auth::id();
-                    // $AcceptRejectInfo->browser = request()->header('User-Agent');
-                    // $AcceptRejectInfo->model_name = null;
-                    // $AcceptRejectInfo->op_type = Codemaster::getIdByCode(-1);
-                    // $AcceptRejectInfo->revert_reason_cause_id = null;
-                    // $AcceptRejectInfo->revert_reason_remarks = null;
-                    // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                    //     ->latest('id')
-                    //     ->value('id') ?? null;
-                    // $AcceptRejectInfo->save();
-                    DB::commit();
-                    $this->dispatch('toastr', [
-                        'type' => 'error',
-                        'message' => 'Application rejected successfully!'
-                    ]);
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    throw $e;
-                }
-            }
         }
+        // elseif ($this->bulkActionType === 'T') {
+
+        //     // $user = auth()->user();
+        //     if (CheckAuthHelper::isCommonApprover()) {
+        //         // if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+        //         $next_level_role_id = Codemaster::getIdByCode(22);
+        //     }
+        //     if (CheckAuthHelper::isCommmonVerifier()) {
+        //         // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+        //         $next_level_role_id = Codemaster::getIdByCode(21);
+        //     }
+        //     foreach ($ids as $id) {
+        //         DB::beginTransaction();
+        //         try {
+        //             $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
+        //             $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
+        //             $DraftBeneficiaryPersonal->save();
+        //             // $AcceptRejectInfo = new AcceptRejectInfo;
+        //             // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+        //             // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+        //             // $AcceptRejectInfo->ip_address = request()->ip();
+        //             // $AcceptRejectInfo->user_id = Auth::id();
+        //             // $AcceptRejectInfo->browser = request()->header('User-Agent');
+        //             // $AcceptRejectInfo->model_name = null;
+        //             // $AcceptRejectInfo->op_type = $next_level_role_id;
+        //             // $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
+        //             // $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
+        //             // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+        //             //     ->latest('id')
+        //             //     ->value('id') ?? null;
+        //             // $AcceptRejectInfo->save();
+        //             DB::commit();
+        //             $this->dispatch('toastr', [
+        //                 'type' => 'warning',
+        //                 'message' => 'Application reverted successfully!'
+        //             ]);
+        //         } catch (\Exception $e) {
+        //             DB::rollBack();
+        //             throw $e;
+        //         }
+        //     }
+        // } elseif ($this->bulkActionType === 'R') {
+        //     foreach ($ids as $id) {
+        //         DB::beginTransaction();
+        //         try {
+        //             $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
+        //             $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
+        //             $DraftBeneficiaryPersonal->save();
+        //             // $AcceptRejectInfo = new AcceptRejectInfo;
+        //             // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+        //             // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+        //             // $AcceptRejectInfo->ip_address = request()->ip();
+        //             // $AcceptRejectInfo->user_id = Auth::id();
+        //             // $AcceptRejectInfo->browser = request()->header('User-Agent');
+        //             // $AcceptRejectInfo->model_name = null;
+        //             // $AcceptRejectInfo->op_type = Codemaster::getIdByCode(-1);
+        //             // $AcceptRejectInfo->revert_reason_cause_id = null;
+        //             // $AcceptRejectInfo->revert_reason_remarks = null;
+        //             // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+        //             //     ->latest('id')
+        //             //     ->value('id') ?? null;
+        //             // $AcceptRejectInfo->save();
+        //             DB::commit();
+        //             $this->dispatch('toastr', [
+        //                 'type' => 'error',
+        //                 'message' => 'Application rejected successfully!'
+        //             ]);
+        //         } catch (\Exception $e) {
+        //             DB::rollBack();
+        //             throw $e;
+        //         }
+        //     }
+        // }
         // });
         // Toaster::success($successMessage);
 
