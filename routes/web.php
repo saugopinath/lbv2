@@ -64,7 +64,7 @@ Route::controller(AuthenticationController::class)->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');    
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])
         // ->middleware('permission.redirect:canViewLbApplications')
@@ -87,9 +87,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // ->middleware('permission.redirect:canRoleMapping')
         ->name('role-office-master-mappings');
 
-        //  Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])
-        // // ->middleware('permission.redirect:canViewLbApplications')
-        // ->name('lb-application-list');
+    //  Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])
+    // // ->middleware('permission.redirect:canViewLbApplications')
+    // ->name('lb-application-list');
 
     Route::get('/role-office-type-mappings/create', Create::class)
         // ->middleware('permission.redirect:canRoleMappings')
@@ -145,9 +145,7 @@ Route::get(
 
 Route::get('/master-tab', App\Livewire\MasterTabManager::class)->name('master-tab');
 // Route::get('/tab-filed-manage', App\Livewire\SchemeTabFieldManager::class)->name('tab-filed-manage');
-Route::get('/tab-field-manager', SchemeTabFieldManager::class)
-    ->name('tab-field-manager');
-
+Route::get('/tab-field-manager', SchemeTabFieldManager::class)->name('tab-field-manager');
 // Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name(name: 'menu-tab');
 
 Route::get('/edit-validation', [ValidationManagerController::class, 'index'])->name('edit-validation');
