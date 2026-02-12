@@ -83,7 +83,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     }
     public function configure(): void
     {
-        $this->setPrimaryKey('sourceable_id')
+        $this->setPrimaryKey('application_id')
             ->setPaginationEnabled()
             ->setPerPageAccepted([5, 10])
             ->setPerPage($this->perPage)
@@ -132,39 +132,37 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         ];
 
         // Bulk Verify
-        if (
-            (WorkFlowPermissionHelper::canBulkActionAllow(1, 'verification', true) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true)) && CheckAuthHelper::isCommmonVerifier()
-        ) {
+        if (CheckAuthHelper::isCommmonVerifier()) 
+        {
             $actions['bulkverify'] = 'Verify';
         }
 
         // Bulk Approve
         if (
-            (WorkFlowPermissionHelper::canBulkActionAllow(1, 'approver', true) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'approver', true)) && CheckAuthHelper::isCommonApprover()
+            CheckAuthHelper::isCommonApprover()
         ) {
             $actions['bulkapprove'] = 'Approve';
         }
 
         // Bulk Reject
-        if (
-            (WorkFlowPermissionHelper::canBulkActionAllow(1, 'reject', true) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'reject', true)) && CheckAuthHelper::isCommonWorkFlow2ndStep()
-        ) {
-            $actions['bulkreject'] = 'Reject';
-        }
+        // if (
+        //     (WorkFlowPermissionHelper::canBulkActionAllow(1, 'reject', true) ||
+        //         WorkFlowPermissionHelper::canBulkActionAllow(2, 'reject', true)) && CheckAuthHelper::isCommonWorkFlow2ndStep()
+        // ) {
+        //     $actions['bulkreject'] = 'Reject';
+        // }
 
-        // Bulk Revert
-        if (
-            (WorkFlowPermissionHelper::canBulkActionAllow(1, 'revert', true) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'revert', true)) && CheckAuthHelper::isCommonWorkFlow2ndStep()
-        ) {
-            $actions['bulkrevert'] = 'Revert';
-        }
+        // // Bulk Revert
+        // if (
+        //     (WorkFlowPermissionHelper::canBulkActionAllow(1, 'revert', true) ||
+        //         WorkFlowPermissionHelper::canBulkActionAllow(2, 'revert', true)) && CheckAuthHelper::isCommonWorkFlow2ndStep()
+        // ) {
+        //     $actions['bulkrevert'] = 'Revert';
+        // }
 
         return $actions;
     }
+    
 
 
     public function updatedSearch($value): void
@@ -319,29 +317,30 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public function bulkverify()
     {
         $ids = $this->getSelected();
+        // dd($ids);
         $approverRoleId = Codemaster::getIdByCode(23);
         $select_lgd = session('lgd_session');
         $user_id = Crypt::decryptString($select_lgd['role_id']);
         foreach ($ids as $id) {
             DB::beginTransaction();
             try {
-                $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                $DraftBeneficiaryPersonal->next_level_role_id = $approverRoleId;
-                $DraftBeneficiaryPersonal->save();
-                $AcceptRejectInfo = new AcceptRejectInfo;
-                $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
-                $AcceptRejectInfo->ip_address = request()->ip();
-                $AcceptRejectInfo->user_id = Auth::id();
-                $AcceptRejectInfo->browser = request()->header('User-Agent');
-                $AcceptRejectInfo->model_name = null;
-                $AcceptRejectInfo->op_type = $approverRoleId;
-                $AcceptRejectInfo->revert_reason_cause_id = null;
-                $AcceptRejectInfo->revert_reason_remarks = null;
-                $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                    ->latest('id')
-                    ->value('id') ?? null;
-                $AcceptRejectInfo->save();
+                 BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                        'next_level_role_id' => $this->nextLabelRoleId,
+                    ]);
+                // $AcceptRejectInfo = new AcceptRejectInfo;
+                // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+                // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                // $AcceptRejectInfo->ip_address = request()->ip();
+                // $AcceptRejectInfo->user_id = Auth::id();
+                // $AcceptRejectInfo->browser = request()->header('User-Agent');
+                // $AcceptRejectInfo->model_name = null;
+                // $AcceptRejectInfo->op_type = $approverRoleId;
+                // $AcceptRejectInfo->revert_reason_cause_id = null;
+                // $AcceptRejectInfo->revert_reason_remarks = null;
+                // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                //     ->latest('id')
+                //     ->value('id') ?? null;
+                // $AcceptRejectInfo->save();
                 DB::commit();
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -368,23 +367,23 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         foreach ($ids as $id) {
             DB::beginTransaction();
             try {
-                $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(0);
-                $DraftBeneficiaryPersonal->save();
-                $AcceptRejectInfo = new AcceptRejectInfo;
-                $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
-                $AcceptRejectInfo->ip_address = request()->ip();
-                $AcceptRejectInfo->user_id = Auth::id();
-                $AcceptRejectInfo->browser = request()->header('User-Agent');
-                $AcceptRejectInfo->model_name = null;
-                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(0);
-                $AcceptRejectInfo->revert_reason_cause_id = null;
-                $AcceptRejectInfo->revert_reason_remarks = null;
-                $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                    ->latest('id')
-                    ->value('id') ?? null;
-                $AcceptRejectInfo->save();
+                BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                        'next_level_role_id' => $this->nextLabelRoleId,
+                    ]);
+                // $AcceptRejectInfo = new AcceptRejectInfo;
+                // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+                // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                // $AcceptRejectInfo->ip_address = request()->ip();
+                // $AcceptRejectInfo->user_id = Auth::id();
+                // $AcceptRejectInfo->browser = request()->header('User-Agent');
+                // $AcceptRejectInfo->model_name = null;
+                // $AcceptRejectInfo->op_type = Codemaster::getIdByCode(0);
+                // $AcceptRejectInfo->revert_reason_cause_id = null;
+                // $AcceptRejectInfo->revert_reason_remarks = null;
+                // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                //     ->latest('id')
+                //     ->value('id') ?? null;
+                // $AcceptRejectInfo->save();
                 DB::commit();
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -397,15 +396,15 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         ]);
         $this->clearSelected();
     }
-    public function bulkrevert()
-    {
-        $this->handleBulkAction('revert');
-    }
+    // public function bulkrevert()
+    // {
+    //     $this->handleBulkAction('revert');
+    // }
 
-    public function bulkreject()
-    {
-        $this->handleBulkAction('reject');
-    }
+    // public function bulkreject()
+    // {
+    //     $this->handleBulkAction('reject');
+    // }
     public function handleBulkAction($action)
     {
         $this->revertrejectCauses = Codemaster::where('code', 12)->first()->children()->get();
@@ -413,86 +412,86 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $this->dispatch('open-bulk-revert-modal', action: $action, revertrejectCauses: $this->revertrejectCauses);
     }
     #[On('confirm-bulk-revert')]
-    public function confirmBulkRevert($validated)
-    {
-        $ids = $this->getSelected();
-        $select_lgd = session('lgd_session');
-        $user_id = Crypt::decryptString($select_lgd['role_id']);
-        if ($this->revertrejectAction === 'revert') {
-            // $user = auth()->user();
-            /*  if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
-                $next_level_role_id = Codemaster::getIdByCode(22);
-            }
-            if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
-                $next_level_role_id = Codemaster::getIdByCode(21);
-            } */
-            $next_level_role_id = Codemaster::getIdByCode(21);
-            foreach ($ids as $id) {
-                DB::beginTransaction();
-                try {
-                    $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                    $DraftBeneficiaryPersonal->next_level_role_id = $next_level_role_id;
-                    $DraftBeneficiaryPersonal->save();
-                    $AcceptRejectInfo = new AcceptRejectInfo;
-                    $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                    $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
-                    $AcceptRejectInfo->ip_address = request()->ip();
-                    $AcceptRejectInfo->user_id = Auth::id();
-                    $AcceptRejectInfo->browser = request()->header('User-Agent');
-                    $AcceptRejectInfo->model_name = null;
-                    $AcceptRejectInfo->op_type = $next_level_role_id;
-                    $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
-                    $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
-                    $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                        ->latest('id')
-                        ->value('id') ?? null;
-                    $AcceptRejectInfo->save();
-                    DB::commit();
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    throw $e;
-                }
-            }
-            $this->dispatch('toastr', [
-                'type' => 'warning',
-                'message' => 'All applications reverted successfully!'
-            ]);
-            $this->clearSelected();
-        } elseif ($this->revertrejectAction === 'reject') {
-            $ids = $this->getSelected();
-            foreach ($ids as $id) {
-                DB::beginTransaction();
-                try {
-                    $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                    $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(-1);
-                    $DraftBeneficiaryPersonal->save();
-                    $AcceptRejectInfo = new AcceptRejectInfo;
-                    $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                    $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
-                    $AcceptRejectInfo->ip_address = request()->ip();
-                    $AcceptRejectInfo->user_id = Auth::id();
-                    $AcceptRejectInfo->browser = request()->header('User-Agent');
-                    $AcceptRejectInfo->model_name = null;
-                    $AcceptRejectInfo->op_type = Codemaster::getIdByCode(-1);
-                    $AcceptRejectInfo->revert_reason_cause_id = null;
-                    $AcceptRejectInfo->revert_reason_remarks = null;
-                    $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                        ->latest('id')
-                        ->value('id') ?? null;
-                    $AcceptRejectInfo->save();
-                    DB::commit();
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    throw $e;
-                }
-            }
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => 'All applications rejected successfully!'
-            ]);
-            $this->clearSelected();
-        }
-    }
+    // public function confirmBulkRevert($validated)
+    // {
+    //     $ids = $this->getSelected();
+    //     $select_lgd = session('lgd_session');
+    //     $user_id = Crypt::decryptString($select_lgd['role_id']);
+    //     if ($this->revertrejectAction === 'revert') {
+    //         // $user = auth()->user();
+    //         /*  if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+    //             $next_level_role_id = Codemaster::getIdByCode(22);
+    //         }
+    //         if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+    //             $next_level_role_id = Codemaster::getIdByCode(21);
+    //         } */
+    //         $next_level_role_id = Codemaster::getIdByCode(21);
+    //         foreach ($ids as $id) {
+    //             DB::beginTransaction();
+    //             try {
+    //                 $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
+    //                 $DraftBeneficiaryPersonal->next_level_role_id = $next_level_role_id;
+    //                 $DraftBeneficiaryPersonal->save();
+    //                 $AcceptRejectInfo = new AcceptRejectInfo;
+    //                 $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+    //                 $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+    //                 $AcceptRejectInfo->ip_address = request()->ip();
+    //                 $AcceptRejectInfo->user_id = Auth::id();
+    //                 $AcceptRejectInfo->browser = request()->header('User-Agent');
+    //                 $AcceptRejectInfo->model_name = null;
+    //                 $AcceptRejectInfo->op_type = $next_level_role_id;
+    //                 $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
+    //                 $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
+    //                 $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+    //                     ->latest('id')
+    //                     ->value('id') ?? null;
+    //                 $AcceptRejectInfo->save();
+    //                 DB::commit();
+    //             } catch (\Exception $e) {
+    //                 DB::rollBack();
+    //                 throw $e;
+    //             }
+    //         }
+    //         $this->dispatch('toastr', [
+    //             'type' => 'warning',
+    //             'message' => 'All applications reverted successfully!'
+    //         ]);
+    //         $this->clearSelected();
+    //     } elseif ($this->revertrejectAction === 'reject') {
+    //         $ids = $this->getSelected();
+    //         foreach ($ids as $id) {
+    //             DB::beginTransaction();
+    //             try {
+    //                 $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
+    //                 $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(-1);
+    //                 $DraftBeneficiaryPersonal->save();
+    //                 $AcceptRejectInfo = new AcceptRejectInfo;
+    //                 $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+    //                 $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+    //                 $AcceptRejectInfo->ip_address = request()->ip();
+    //                 $AcceptRejectInfo->user_id = Auth::id();
+    //                 $AcceptRejectInfo->browser = request()->header('User-Agent');
+    //                 $AcceptRejectInfo->model_name = null;
+    //                 $AcceptRejectInfo->op_type = Codemaster::getIdByCode(-1);
+    //                 $AcceptRejectInfo->revert_reason_cause_id = null;
+    //                 $AcceptRejectInfo->revert_reason_remarks = null;
+    //                 $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+    //                     ->latest('id')
+    //                     ->value('id') ?? null;
+    //                 $AcceptRejectInfo->save();
+    //                 DB::commit();
+    //             } catch (\Exception $e) {
+    //                 DB::rollBack();
+    //                 throw $e;
+    //             }
+    //         }
+    //         $this->dispatch('toastr', [
+    //             'type' => 'error',
+    //             'message' => 'All applications rejected successfully!'
+    //         ]);
+    //         $this->clearSelected();
+    //     }
+    // }
 
     public function exportExcel()
     {

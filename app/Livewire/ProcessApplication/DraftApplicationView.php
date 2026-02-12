@@ -2,6 +2,7 @@
 
 namespace App\Livewire\ProcessApplication;
 
+use App\Models\Scheme;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Models\BeneficiaryPersonalDetail;
@@ -22,7 +23,8 @@ class DraftApplicationView extends Component
             $this->application = BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->first();
 
             $this->schemeId = $this->application->scheme_id;
-            $this->schemeName = 'Lakshmir Bhandar';
+          
+            $this->schemeName = Scheme::where('id', $this->schemeId)->value('name');          
 
         } catch (\Exception $e) {
             dd($e->getMessage());
