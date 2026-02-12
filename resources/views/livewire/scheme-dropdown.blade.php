@@ -39,6 +39,8 @@
                     :wire:key="'lb-application-list-'.$schemeId" />
                 <livewire:revert-reject-modal />
             </div>
+        @elseif($option == 4)
+            <livewire:rolerank-management :scheme-id="$schemeId" />
         @else
             <livewire:dup-check-scheme-config-settings :scheme-id="$schemeId" :wire:key="'duplicate-'.$schemeId" />
         @endif

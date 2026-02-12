@@ -158,6 +158,7 @@ Route::get('/schemes-final-submitted', [SchemeController::class, 'finalSubmitted
 
 Route::get('/duplicate-checks', [SchemeController::class, 'finalSubmitted'])->name('duplicate-checks');
 Route::get('/age-management', [SchemeController::class, 'finalSubmitted'])->name('age-management');
+Route::get('/role-rank-management', [SchemeController::class, 'finalSubmitted'])->name('role-rank-management');
 
 Route::controller(workflowmanagementController::class)->group(function () {
     Route::any('/create-steps',  'createSteps')->name('create-steps');
