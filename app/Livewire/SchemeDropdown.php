@@ -25,12 +25,6 @@ class SchemeDropdown extends Component
             $this->option = 2;
         }elseif ($route == 'lb-application-list') {
             $this->option = 3;
-        }elseif ($route == 'role-office-master-mappings') {
-            $this->option = 4;
-        }elseif ($route == 'officemasters') {
-            $this->option = 5;
-        }elseif ($route == 'user-managements') {
-            $this->option = 6;
         }
 
     }
