@@ -50,7 +50,7 @@ class OpenassignworkflowModal extends Component
     public function save()
     {
         $this->validate([
-            'selectedRoles' => 'required|array|size:1',
+            'selectedRoles' => 'required|array',
         ]);
 
         $sameLabelRoleId = 0;

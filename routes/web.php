@@ -40,6 +40,7 @@ use App\Http\Controllers\MasterTabCreationController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
 use App\Http\Controllers\ValidationManagerController;
+use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
 
 // Guest Routes
@@ -156,6 +157,10 @@ Route::get('/duplicate-checks', [SchemeController::class, 'finalSubmitted'])->na
 Route::get('/age-management', [SchemeController::class, 'finalSubmitted'])->name('age-management');
 
 Route::controller(workflowmanagementController::class)->group(function () {
-    Route::any('/create-steps', 'createSteps')->name('create-steps');
-    Route::any('/assign-workflow', 'assignWorkflow')->name('assign-workflow');
+    Route::any('/create-steps',  'createSteps')->name('create-steps');
+    Route::any('/assign-workflow',  'assignWorkflow')->name('assign-workflow');
 });
+
+Route::get('/role-rank-management', RolerankManagement::class)->name('role-rank-management');
+
+Route::get('/define-workflow', [SchemeController::class, 'defineWorkflow'])->name('define-workflow');
