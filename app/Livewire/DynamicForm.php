@@ -14,6 +14,9 @@ use Livewire\Component;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 
 
 class DynamicForm extends Component
@@ -40,6 +43,7 @@ class DynamicForm extends Component
     public array $formData = [];
     public bool $aadhaarVerified = false;
     public $aadhaarPayload = [];
+    public $filter_data = [];
     public $schemeName;
     public $heading = '';
     public $maxDate, $minDate, $minDOB, $maxDOB;
@@ -77,6 +81,19 @@ class DynamicForm extends Component
             if ($ageConfig['min_age']) {
                 $this->maxDOB = now()->subYears($ageConfig['min_age'])->format('Y-m-d');
             }
+        }
+        $select_lgd = session('lgd_session');
+        // dd($select_lgd);
+        if (!empty($select_lgd['district_id'])) {
+            $this->filter_data['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
+        }
+
+        if (!empty($select_lgd['block_id'])) {
+            $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
+        }
+
+        if (!empty($select_lgd['subdivision_id'])) {
+            $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
     public function onAadhaarCheckedReset()
@@ -165,7 +182,9 @@ class DynamicForm extends Component
             $this->updateTabNavigation();
         }
     }
-    public function onDocumentTabFailed() {}
+    public function onDocumentTabFailed()
+    {
+    }
     /* ================== HELPERS ================== */
     private function markTabCompleted(string $tabCode): void
     {
@@ -265,6 +284,99 @@ class DynamicForm extends Component
         $this->prevTab = $this->views[$index - 1] ?? null;
         $this->nextTab = $this->views[$index + 1] ?? null;
     }
+
+
+    // private function saveCurrentTabData(): void
+    // {
+    //     if (!$this->applicationId) {
+    //         return;
+    //     }
+
+    //     $tab = DB::table('master_tabs')
+    //         ->where('tab_code', $this->activeTab)
+    //         ->first();
+
+    //     if (!$tab || empty($tab->tab_model_name)) {
+    //         return;
+    //     }
+
+    //     $modelClass = "App\\Models\\{$tab->tab_model_name}";
+    //     if (!class_exists($modelClass)) {
+    //         return;
+    //     }
+
+    //     $json = $this->getSchemeJson();
+
+    //     $dbData = [
+    //         'scheme_id' => $this->schemeId,
+    //         'application_id' => $this->applicationId,
+    //         'beneficiary_id' => $this->beneficiaryId,
+    //     ];
+    //     $otherDetails = [];
+
+    //     foreach ($json['tabs'] ?? [] as $tabJson) {
+    //         if ((string) $tabJson['tab_code'] !== (string) $this->activeTab) {
+    //             continue;
+    //         }
+    //         foreach ($tabJson['fields'] ?? [] as $field) {
+
+    //             $fieldName = $field['field_name'];
+
+    //             if (!array_key_exists($fieldName, $this->formData)) {
+    //                 continue;
+    //             }
+    //             if (!empty($field['db_column']) && $field['db_column'] !== 'other_details') {
+    //                 $dbData[$field['db_column']] = $this->formData[$fieldName];
+    //             } elseif (!empty($field['db_column']) && $field['db_column'] == 'other_details') {
+    //                 $otherDetails[$fieldName] = $this->formData[$fieldName];
+    //             } else {
+    //                 continue;
+    //             }
+    //         }
+    //     }
+    //     if (!empty($otherDetails)) {
+    //         $dbData['other_details'] = $otherDetails;
+    //     }
+    //     if (!$this->checkDuplicateEntries()) {
+    //         return;
+    //     }
+    //     $beneficiatDetails = $modelClass::updateOrCreate(
+    //         ['application_id' => $this->applicationId],
+    //         $dbData
+    //     );
+    //     if ($beneficiatDetails) {
+    //         $this->navMessage = 'Application saved successfully! ID: ' . $this->applicationId;
+    //         $this->navMessageType = 'success';
+    //         $this->dispatch('toastr', [
+    //             'type' => 'success',
+    //             'message' => 'Application created successfully' . 'application_id: ' . $this->applicationId,
+    //         ]);
+    //     } else {
+    //         $this->dispatch('toastr', [
+    //             'type' => 'error',
+    //             'message' => 'Application not created. Please try again.',
+    //         ]);
+    //     }
+    //     if ($this->aadhaarVerified && !empty($this->aadhaarPayload)) {
+
+    //         BeneficiaryAadhaar::updateOrCreate(
+    //             [
+    //                 'application_id' => $this->applicationId,
+    //             ],
+    //             [
+    //                 'beneficiary_id' => $this->beneficiaryId,
+    //                 'scheme_id' => $this->schemeId,
+    //                 'aadhar_hash' => $this->aadhaarPayload['hash'],
+    //                 'encoded_aadhar' => $this->aadhaarPayload['encoded'],
+    //                 'created_by' => Auth::id(),
+    //                 'encode_key' => null,
+    //                 'aadhaar_vault' => $this->aadhaarPayload['hash'],
+    //             ]
+    //         );
+    //     }
+    // }
+
+
     private function saveCurrentTabData(): void
     {
         if (!$this->applicationId) {
@@ -316,6 +428,40 @@ class DynamicForm extends Component
         if (!empty($otherDetails)) {
             $dbData['other_details'] = $otherDetails;
         }
+
+        // if (Schema::hasColumn($modelClass::getTableName(), 'created_by_dist_code')) {
+        //     $dbData['created_by_dist_code'] = $this->filter_condition['created_by_dist_code'] ?? null;
+        // }
+
+        // if (Schema::hasColumn($modelClass::getTableName(), 'created_by_local_body_code')) {
+        //     $dbData['created_by_local_body_code'] = $this->filter_condition['created_by_local_body_code'] ?? null;
+        // }
+        $model = new $modelClass;
+        $tableName = $model->getTable();
+        $columns = Cache::remember(
+            "Schema_columns_$tableName",
+            86400,
+            fn() => Schema::getColumnListing($tableName)
+        );
+        // dd(Cache::get("Schema_columns_$tableName"));
+        $extraFields = [
+            'created_by_dist_code' => $this->filter_condition['created_by_dist_code'] ?? null,
+            'created_by_local_body_code' => $this->filter_condition['created_by_local_body_code'] ?? null,
+            'created_by' => Auth::id(),
+            'updated_by' => Auth::id(),
+        ];
+        // dd($extraFields);
+        foreach ($extraFields as $column => $value) {
+
+            if (in_array($column, $columns)) {
+                $dbData[$column] = $value;
+            }
+        }
+
+        $dbData = array_intersect_key(
+            $dbData,
+            array_flip($columns)
+        );
         if (!$this->checkDuplicateEntries()) {
             return;
         }
@@ -346,10 +492,9 @@ class DynamicForm extends Component
                     'beneficiary_id' => $this->beneficiaryId,
                     'scheme_id' => $this->schemeId,
                     'aadhar_hash' => $this->aadhaarPayload['hash'],
-                    'encoded_aadhar' => $this->aadhaarPayload['encoded'],
-                    'created_by' => Auth::id(),
+                    'encoded_aadhar' => $this->aadhaarPayload['encoded'],                   
                     'encode_key' => null,
-                    'aadhaar_vault' => $this->aadhaarPayload['hash'],
+                    'aadhar_vault' => $this->aadhaarPayload['hash'],
                 ]
             );
         }
