@@ -1,5 +1,7 @@
 <div class="bg-white shadow-xl rounded-2xl p-6 space-y-4">
-
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-xl font-bold text-indigo-700">Define Workflow for {{$this->schemeName}}</h1>
+    </div>
     {{-- Step Navigation --}}
     @foreach ($steps as $index => $step)
         <div wire:click="$set('currentStep', {{ $index }})"

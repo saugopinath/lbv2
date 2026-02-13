@@ -1,9 +1,11 @@
 <?php
+
 namespace App\Livewire;
+
+use App\Models\Role;
 use App\Models\WorkflowStep;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
-use PhpOffice\PhpSpreadsheet\Calculation\Logical\Boolean;
 
 class CreateworkflowSteps extends Component
 {
@@ -11,12 +13,17 @@ class CreateworkflowSteps extends Component
     public $noofSteps;
     public $labels = [];
     public bool $already = false;
+    public bool $originalrolerank = false;
     public function mount($schemeId)
     {
         $this->schemeId = $schemeId;
         $steps = WorkflowStep::where('scheme_id', $schemeId)
-                    ->orderBy('rank')
-                    ->get();
+            ->orderBy('rank')
+            ->get();
+        $exists = Role::whereNotNull('rank')->exists();
+        if($exists){
+            $this->originalrolerank = true;
+        }
         if ($steps->isNotEmpty()) {
             $this->noofSteps = $steps->count();
             $this->labels = $steps->pluck('label')->toArray();
