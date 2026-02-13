@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Home;
+namespace App\Http\Controllers;
 
 use App\Models\BenDocs;
 use App\Models\Beneficiary;
+use App\Models\BeneficiaryJBLB;
 use App\Models\BenEntry;
 use App\Models\District;
 use App\Models\GP;
@@ -14,97 +15,143 @@ use App\Models\Ward;
 use App\Models\DocumentType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
 
 class BeneficiaryTrackController extends Controller
 {
     public function trackBeneficiary(Request $request)
     {
+
+
+        // Initial Page Load
         $schemes = Scheme::where('is_active', 1)->get();
         $districts = District::all();
+
+        // Count total accessible records via Scout
         $results = Beneficiary::search('*')->get()->count();
 
-        if ($request->ajax()) {
+        // Fetch Location Data for Scripts
+        $blocks = DB::table('m_block')
+            ->select('block_code as id', 'block_name as text', 'district_code')
+            ->get();
 
-            $limit = 100;
-            $offset = (int) $request->get('offset', 0);
+        $subDistricts = DB::table('m_sub_district')
+            ->select('sub_district_code as id', 'sub_district_name as text', 'district_code')
+            ->get();
 
-            $query = Beneficiary::query();
+        $ulbs = DB::table('m_urban_body')
+            ->select('urban_body_code as id', 'urban_body_name as text', 'district_code', 'sub_district_code')
+            ->get();
 
-            // 🔍 Search
-            if ($search = $request->search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('ben_fname', 'ILIKE', "%$search%")
-                        ->orWhere('ben_lname', 'ILIKE', "%$search%")
-                        ->orWhere('mobile_no', 'ILIKE', "%$search%")
-                        ->orWhere('id', 'ILIKE', "%$search%")
-                        ->orWhere('aadhar_no', 'ILIKE', "%$search%")
-                        ->orWhere('bank_code', 'ILIKE', "%$search%");
-                });
-            }
+        $gps = DB::table('m_gp')
+            ->select('gram_panchyat_code as id', 'gram_panchyat_name as text', 'district_code', 'block_code')
+            ->get();
 
-            // 🎯 Filters
-            if ($request->scheme) {
-                $query->where('scheme_id', $request->scheme);
-            }
+        $ulb_wards = DB::table('m_urban_body_ward')
+            ->select('urban_body_ward_code as id', 'urban_body_ward_name as text', 'urban_body_code')
+            ->get();
 
-            if ($request->district) {
-                $query->where('created_by_dist_code', $request->district);
-            }
+        return view('track-ben.ben-track', compact(
+            'schemes',
+            'districts',
+            'results',
+            'blocks',
+            'subDistricts',
+            'ulbs',
+            'gps',
+            'ulb_wards'
+        ));
+    }
 
-            if ($request->urban_code) {
-                $query->where('rural_urban_id', $request->urban_code);
-            }
+    public function trackBeneficiaryData(Request $request)
+    {
+        try {
 
-            $total = $query->count();
+            if ($request->wantsJson()) {
 
-            $beneficiaries = $query
-                ->offset($offset)
-                ->limit($limit)
-                ->orderBy('id', 'desc')
-                ->get();
+                $limit = 100;
+                $offset = (int) $request->get('offset', 0);
+                $page = ($offset / $limit) + 1;
 
-            $html = '';
+                $search = $request->search;
 
-            foreach ($beneficiaries as $b) {
+                // 🔥 Meilisearch query
+                $scout = BeneficiaryJBLB::search($search ?: '');
 
-                $districtName = District::where('district_code', $b->created_by_dist_code)
-                    ->value('district_name') ?? 'Unknown';
+                // ✅ Filters (must match filterableAttributes exactly)
 
-                $schemeName = Scheme::where('id', $b->scheme_id)
-                    ->value('scheme_name') ?? 'Unknown';
-
-
-                $status = '';
-                $statusClass = '';
-                if ($b->next_level_role_id == 0) {
-                    $status = 'Approved';
-                    $statusClass = 'status-active';
-                } else {
-                    $status = 'Approval Pending';
-                    $statusClass = 'status-pending';
+                if ($request->scheme) {
+                    $scout->where('scheme_id', (int) $request->scheme);
                 }
 
-                $html .= view('track-ben.beneficiary-card', [
-                    'status' => $status,
-                    'statusClass' => $statusClass,
-                    'beneficiaryId' => $b->id,
-                    'name' => trim($b->ben_fname . ' ' . $b->ben_lname),
-                    'relation' => 'Father',
-                    'relationName' => $b->father_name ?? 'N/A',
-                    'schemeName' => $schemeName,
-                    'location' => $districtName . ', West Bengal',
-                    'mobile' => $b->mobile_no ?? 'N/A'
-                ])->render();
+                if ($request->district) {
+                    $scout->where('district_id', (int) $request->district);
+                }
+
+                if ($request->urban_code) {
+                    $scout->where('rural_urban', $request->urban_code);
+                }
+
+                if ($request->block) {
+                    $scout->where('blockurban', (int) $request->block);
+                }
+
+                if ($request->muncid) {
+                    $scout->where('blockurban', (int) $request->muncid);
+                }
+
+                if ($request->gp_ward) {
+                    $scout->where('gpward', (int) $request->gp_ward);
+                }
+
+                // ✅ Sort by application_id (must be sortable attribute)
+                $beneficiaries = $scout
+                    ->orderBy('application_id', 'desc')
+                    ->paginate($limit, 'page', $page);
+
+                $total = $beneficiaries->total();
+                // dd($total);
+                $html = '';
+
+                foreach ($beneficiaries as $b) {
+
+                    // 🔥 No more DB queries if you include names in index
+                    $districtName = $b->district_name ?? 'Unknown';
+                    $schemeName = $b->scheme_name ?? 'Unknown';
+
+                    $status = $b->next_level_role_id == 0 ? 'Approved' : 'Approval Pending';
+                    $statusClass = $b->next_level_role_id == 0
+                        ? 'status-active'
+                        : 'status-pending';
+
+                    $html .= view('track-ben.beneficiary-card', [
+                        'status' => $status,
+                        'statusClass' => $statusClass,
+                        'beneficiaryId' => $b->application_id,
+                        'name' => $b->beneficiary_name ?? 'N/A',
+                        'relation' => 'N/A',
+                        'relationName' => 'N/A',
+                        'schemeName' => $schemeName,
+                        'location' => $districtName . ', West Bengal',
+                        'mobile' => $b->mobile ?? 'N/A'
+                    ])->render();
+                }
+
+                return response()->json([
+                    'html' => $html,
+                    'total' => $total,
+                    'loaded' => $offset + $beneficiaries->count()
+                ]);
             }
 
+        } catch (\Exception $e) {
+
             return response()->json([
-                'html' => $html,
-                'total' => $total,
-                'loaded' => $offset + $beneficiaries->count()
+                'html' => '',
+                'total' => 0,
+                'loaded' => 0,
+                'error' => $e->getMessage()
             ]);
         }
-
-        return view('track-ben.ben-track', compact('schemes', 'districts', 'results'));
     }
+
 }
