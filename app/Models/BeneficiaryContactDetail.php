@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BeneficiaryContactDetail extends Model
+class BeneficiaryContactDetail extends BaseAuditableModel
 {
-    protected $table = "lb_scheme.beneficiary_contact_details";
+    protected $table = "pension.beneficiary_contacts";
+    protected $primaryKey = 'application_id';
+    public $incrementing = false;
     protected $guarded = [];
     protected $casts = [
         'other_details' => 'array',

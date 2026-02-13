@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-// use Illuminate\Support\Facades\Auth;
 
 class BeneficiaryPersonalDetail extends BaseAuditableModel
 {
     protected $guarded = [];
-    protected $table = 'lb_scheme.beneficiary_personal_details';
+    protected $table = 'pension.beneficiary_personals';
+    protected $primaryKey = 'application_id';
+    public $incrementing = false;
 
     protected $casts = [
         'other_details' => 'array',
@@ -18,6 +18,10 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     public function contact()
     {
         return $this->hasOne(BeneficiaryContactDetail::class, 'beneficiary_id', 'beneficiary_id');
+    }
+    public function documents()
+    {
+        return $this->hasMany(BeneficiaryEnclosure::class, 'application_id');
     }
 
     // public function transformAudit(array $data): array

@@ -64,12 +64,14 @@ class FinalSubmitModal extends Component
         try {
             BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->update([
                 'next_level_role_id' => $labelRoles->next_label_role_id,
+                'is_final' => 1,
             ]);
             // $this->show = false;
             session()->flash('success', "Application ID: " . $this->applicationId . " Submitted successfully");
             return redirect()->route('schemes.final-submitted');
             $this->show = false;
         } catch (Exception $e) {
+            dd($e);
             session()->flash('error', "Application ID: " . $this->applicationId . " Submitted failed!");
         }
     }

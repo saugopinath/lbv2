@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
-class BeneficiaryEnclosure extends Model implements Auditable
+class BeneficiaryEnclosure extends BaseAuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
-    protected $table = 'lb_scheme.beneficiary_enclosures';
+    protected $table = 'pension.beneficiary_documents';
+    protected $primaryKey = 'application_id';
+    public $incrementing = false;
     protected $guarded = [];
     public function personal()
     {
-        return $this->belongsTo(DraftBeneficiaryPersonal::class, 'application_id');
+        return $this->belongsTo(BeneficiaryPersonalDetail::class, 'application_id');
     }
 
     // public function documentType()

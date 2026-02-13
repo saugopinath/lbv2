@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 
-class BeneficiarySelfDeclaration extends Model
+class BeneficiarySelfDeclaration extends BaseAuditableModel
 {
     protected $guarded = [];
-    protected $table = 'lb_scheme.beneficiary_self_declarations';
-
+    protected $table = 'pension.beneficiary_self_declarations';
+    protected $primaryKey = 'application_id';
+    public $incrementing = false;
     protected $casts = [
         'other_details' => 'array',
     ];

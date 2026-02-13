@@ -13,9 +13,9 @@ class CommonTabFieldsSeeder extends Seeder
         DB::transaction(function () {
             $fields = [
                 [
-                    'field_id' => 'app_type',
+                    'field_id' => 'application_type',
                     'level_name' => 'Application Type',
-                    'field_name' => 'app_type',
+                    'field_name' => 'application_type',
                     'field_type' => 'select',
                     'options' => [
                         "1" => "Normal Entry",
@@ -28,12 +28,12 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 1,
-                    'db_colunm' => 'app_type',
+                    'db_colunm' => 'application_type',
                 ],
                 [
-                    'field_id' => 'app_date',
+                    'field_id' => 'application_date',
                     'level_name' => 'Application Date',
-                    'field_name' => 'app_date',
+                    'field_name' => 'application_date',
                     'field_type' => 'date',
                     'is_common' => true,
                     'tab_code' => 101,
@@ -43,25 +43,25 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 2,
-                    'db_colunm' => 'app_date'
+                    'db_colunm' => 'application_date'
 
                 ],
                 [
-                    'field_id' => 'reg_no',
+                    'field_id' => 'ds_registration_no',
                     'level_name' => 'Duare Sarkar Registration Number',
-                    'field_name' => 'reg_no',
+                    'field_name' => 'ds_registration_no',
                     'field_type' => 'text',
                     'is_common' => true,
                     'tab_code' => 101,
-                    'validation_rule' => 'required_if:formData.app_type,2',
-                    'dependent_on' => 'app_type',
+                    'validation_rule' => 'required_if:formData.application_type,2',
+                    'dependent_on' => 'application_type',
                     'dependent_on_values' => ["2"],
                     'regex' => '^[A-Za-z0-9\-\/]+$',
                     'section_level_id' => null,
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 3,
-                    'db_colunm' => 'reg_no'
+                    'db_colunm' => 'ds_registration_no'
 
                 ],
                 [
@@ -84,8 +84,8 @@ class CommonTabFieldsSeeder extends Seeder
                 ],
                 [
                     'level_name' => 'Applicant Name',
-                    'field_id' => 'full_name',
-                    'field_name' => 'full_name',
+                    'field_id' => 'beneficiary_name',
+                    'field_name' => 'beneficiary_name',
                     'field_type' => 'text',
                     'is_common' => true,
                     'tab_code' => 101,
@@ -95,7 +95,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 5,
-                    'db_colunm' => 'full_name',
+                    'db_colunm' => 'beneficiary_name',
                     'is_mendetory' => 1,
                 ],
 
@@ -112,15 +112,15 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_active' => true,
                     'tab_code' => 101,
                     'field_position' => 6,
-                    'db_colunm' => null,
+                    'db_colunm' => 'age',
                     'is_readonly' => 1,
 
                 ],
 
                 [
-                    'field_id' => 'email_id',
+                    'field_id' => 'email',
                     'level_name' => 'Email Address',
-                    'field_name' => 'email_id',
+                    'field_name' => 'email',
                     'field_type' => 'text',
                     'options' => null,
                     'is_common' => true,
@@ -131,7 +131,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 7,
-                    'db_colunm' => 'email_id'
+                    'db_colunm' => 'email'
 
                 ],
                 [
@@ -151,9 +151,9 @@ class CommonTabFieldsSeeder extends Seeder
 
                 ],
                 [
-                    'field_id' => 'ffname',
+                    'field_id' => 'ben_father_name',
                     'level_name' => "Father's Name",
-                    'field_name' => 'ffname',
+                    'field_name' => 'ben_father_name',
                     'field_type' => 'text',
                     'is_common' => true,
                     'tab_code' => 101,
@@ -163,13 +163,13 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 9,
-                    'db_colunm' => 'ffname'
+                    'db_colunm' => 'ben_father_name'
 
                 ],
                 [
-                    'field_id' => 'mfname',
+                    'field_id' => 'ben_mother_name',
                     'level_name' => "Mother's Name",
-                    'field_name' => 'mfname',
+                    'field_name' => 'ben_mother_name',
                     'field_type' => 'text',
                     'is_common' => true,
                     'tab_code' => 101,
@@ -179,7 +179,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 10,
-                    'db_colunm' => 'mfname'
+                    'db_colunm' => 'ben_mother_name'
 
                 ],
 
@@ -208,9 +208,9 @@ class CommonTabFieldsSeeder extends Seeder
 
                 ],
                 [
-                    'field_id' => 'sfname',
+                    'field_id' => 'ben_spouse_name',
                     'level_name' => "Spouse's Name",
-                    'field_name' => 'sfname',
+                    'field_name' => 'ben_spouse_name',
                     'field_type' => 'text',
                     'is_common' => true,
                     'tab_code' => 101,
@@ -222,7 +222,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 12,
-                    'db_colunm' => 'sfname'
+                    'db_colunm' => 'ben_spouse_name'
                 ],
 
                 [
@@ -249,9 +249,9 @@ class CommonTabFieldsSeeder extends Seeder
 
                 ],
                 [
-                    'field_id' => 'cas_cer_no',
+                    'field_id' => 'caste_cer_no',
                     'level_name' => 'Caste Certificate Number',
-                    'field_name' => 'cas_cer_no',
+                    'field_name' => 'caste_cer_no',
                     'field_type' => 'text',
                     'is_common' => true,
                     'tab_code' => 101,
@@ -263,7 +263,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 14,
-                    'db_colunm' => 'cas_cer_no'
+                    'db_colunm' => 'caste_cer_no'
 
                 ],
                 [
