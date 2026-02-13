@@ -6,6 +6,7 @@ use App\Models\OfficeMaster;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Illuminate\Support\Facades\DB;
 
 class OfficeMasters extends DataTableComponent
 {
@@ -20,7 +21,37 @@ class OfficeMasters extends DataTableComponent
             ->setPerPage($this->perPage)
             ->setPerPageVisibilityEnabled()
             ->setSearchEnabled()
-            ->setSearchLive();
+            ->setSearchLive()
+            ->setBulkActionsEnabled();
+
+        $this->setHideBulkActionsWhenEmptyEnabled();
+
+        $this->setTableWrapperAttributes([
+            'class' => 'overflow-x-auto overflow-y-auto max-h-[500px] border rounded-lg shadow-sm',
+        ]);
+
+        $this->setTableAttributes([
+            'class' => 'min-w-full text-sm text-gray-700 text-center overflow-x-auto',
+        ]);
+
+        $this->setTheadAttributes([
+            'class' => 'bg-violet-800 text-xs uppercase py-3 px-4 text-white',
+        ]);
+        $this->setThAttributes(function ($column) {
+            return [
+                'class' => 'px-4 py-3 text-white bg-violet-800 text-xs',
+            ];
+        });
+
+        $this->setTdAttributes(function ($row) {
+            return [
+                'class' => 'px-4 py-3 text-gray-700 text-center',
+            ];
+        });
+
+        $this->setTbodyAttributes([
+            'class' => 'px-4 py-3 divide-y divide-gray-200 bg-white overflow-y-auto',
+        ]);
     }
 
     public function updatedSearch($value): void
@@ -30,26 +61,33 @@ class OfficeMasters extends DataTableComponent
     }
     public function updatedPerPage($value): void
     {
-        $this->perPage = (int)$value;
-        $this->setPerPage((int)$value);
+        $this->perPage = (int) $value;
+        $this->setPerPage((int) $value);
         $this->resetPage();
     }
 
     public function columns(): array
     {
         return [
+            Column::make("ID", "id")->hideIf(true),
             Column::make("Name", "name")
-                ->sortable()
                 ->searchable(),
             Column::make("Address", "address")
-                ->sortable()
                 ->searchable(),
             Column::make("Zip", "zip")
-                ->sortable()
                 ->searchable(),
             Column::make("Office Type", "officeType.name")
-                ->sortable()
                 ->searchable(),
+            Column::make('Actions')
+                ->label(fn($row) => view('coulmn_button.ConfirmDeleteButton', [
+                    'itemId' => $row->id,
+                    'action' => 'delete',
+                    'title' => 'Delete OfficeMaster',
+                    'message' => "This is $row->name , are you want to delete this OfficeMaster?",
+                    'tooltip' => 'Delete OfficeMaster',
+
+                ])->render())
+                ->html(),
         ];
     }
 
@@ -57,11 +95,12 @@ class OfficeMasters extends DataTableComponent
     {
         return OfficeMaster::with(['officeType']);
     }
-
-    public function render(): \Illuminate\View\View
+    public function delete($id)
     {
-        return view('livewire.office-masters-table', [
-            'rows' => $this->getRows(),
-        ]);
+        DB::transaction(function () use ($id) {
+            OfficeMaster::where('id', $id)->delete();
+        });
+
+        $this->dispatch('notify', message: 'OfficeMaster deleted successfully!', type: 'success');
     }
 }

@@ -13,7 +13,7 @@
         </div>
     </div>
     <livewire:user-permission-filter.filter-user-permission />
-    <div class="bg-white shadow-xl rounded-2xl ">
+    <div class="bg-white shadow-xl rounded-2xl mt-4 p-4">
         <div>
             <livewire:Users />
         </div>
