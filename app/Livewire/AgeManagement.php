@@ -6,13 +6,12 @@ use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use App\Models\AgeManagements;
-
 class AgeManagement extends Component
 {
     public $schemeId;
     public $minage, $maxage;
     public $isspecial = 'no';
-    public $specialcaseOptions = [];
+    public $specialcaseOptions;
     public $selectedSpecialCases = [];
 
     public function mount($schemeId)
@@ -84,8 +83,8 @@ class AgeManagement extends Component
     public function save()
     {
         $rules = [
-            'minage' => 'required|integer',
-            'maxage' => 'required|integer',
+            'minage' => 'nullable|integer',
+            'maxage' => 'nullable|integer',
         ];
 
         if ($this->isspecial === 'yes') {
@@ -116,14 +115,15 @@ class AgeManagement extends Component
             AgeManagements::where('scheme_id', $this->schemeId)->delete();
             AgeManagements::create([
                 'scheme_id'    => $this->schemeId,
-                'min_age'    => $this->minage,
-                'max_age'    => $this->maxage,
-                'is_special'    => $this->isspecial,
+                'min_age'      => ($this->minage !== '' && $this->minage !== null) ? (int)$this->minage : null,
+                'max_age'      => ($this->maxage !== '' && $this->maxage !== null) ? (int)$this->maxage : null,
+                'is_special'   => $this->isspecial === 'yes',
                 'special_case' => $jsonContent ? json_encode($jsonContent) : null,
             ]);
             DB::commit();
             $this->dispatch('toastr', ['type' => 'success', 'message' => 'Saved Successfully!']);
         } catch (Exception $e) {
+            // dd($e->getMessage());
             DB::rollBack();
             $this->dispatch('toastr', ['type' => 'error', 'message' => $e->getMessage()]);
         }

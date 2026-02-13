@@ -16,37 +16,37 @@ class RolerankManagement extends Component
     }
 
     public function loadRoles()
-{
-    $roles = Role::orderBy('rank', 'asc')->get();
+    {
+        $roles = Role::orderBy('rank', 'asc')->get();
 
-    $previousRank = null;
-    $formattedRoles = [];
+        $previousRank = null;
+        $formattedRoles = [];
 
-    foreach ($roles as $index => $role) {
+        foreach ($roles as $index => $role) {
 
-        $sameAsPrev = false;
+            $sameAsPrev = false;
 
-        if (
-            $index > 0 &&
-            !is_null($role->rank) &&
-            !is_null($previousRank) &&
-            $role->rank === $previousRank
-        ) {
-            $sameAsPrev = true;
+            if (
+                $index > 0 &&
+                !is_null($role->rank) &&
+                !is_null($previousRank) &&
+                $role->rank === $previousRank
+            ) {
+                $sameAsPrev = true;
+            }
+
+            $formattedRoles[$role->id] = [
+                'id' => $role->id,
+                'name' => $role->name,
+                'rank' => $role->rank,
+                'same_as_prev' => $sameAsPrev,
+            ];
+
+            $previousRank = $role->rank;
         }
 
-        $formattedRoles[$role->id] = [
-            'id' => $role->id,
-            'name' => $role->name,
-            'rank' => $role->rank,
-            'same_as_prev' => $sameAsPrev,
-        ];
-
-        $previousRank = $role->rank;
+        $this->roles = $formattedRoles;
     }
-
-    $this->roles = $formattedRoles;
-}
 
 
     public function updateOrder($orderedIds)

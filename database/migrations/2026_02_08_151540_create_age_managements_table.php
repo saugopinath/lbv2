@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('age_managements', function (Blueprint $table) {
             $table->id();
             $table->integer('scheme_id');
-            $table->integer('min_age');
-            $table->integer('max_age');
+            $table->integer('min_age')->nullable();
+            $table->integer('max_age')->nullable();
             $table->boolean('is_special')->default(false);
             $table->jsonb('special_case')->nullable();
             $table->timestamps();

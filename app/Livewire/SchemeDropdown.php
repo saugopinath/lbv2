@@ -21,7 +21,7 @@ class SchemeDropdown extends Component
         $route = Route::currentRouteName();
         if ($route == 'schemes.final-submitted') {
             $this->option = 1;
-        } elseif ($route == 'age-management') {
+        } elseif ($route == 'define-workflow') {
             $this->option = 2;
         }elseif ($route == 'lb-application-list') {
             $this->option = 3;

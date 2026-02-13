@@ -1,6 +1,6 @@
 <div class="bg-white shadow rounded-xl p-6">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-xl font-bold text-indigo-700">Dup Check Scheme Config (Scheme ID: {{ $schemeId }})</h1>
+        <h1 class="text-xl font-bold text-indigo-700">Dup Check Scheme Config</h1>
     </div>
     <form wire:submit.prevent="save" class="space-y-4">
         @foreach ($dupcheckOptions as $key => $label)
