@@ -43,8 +43,11 @@ use App\Http\Controllers\ValidationManagerController;
 use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
 
+
+
+require __DIR__ . '/home.php';
 // Guest Routes
-Route::get('/', fn() => view('welcome'));
+// Route::get('/', fn() => view('welcome'));
 Route::get('refresh-captcha', [App\Http\Controllers\CaptchaController::class, 'refreshCaptcha'])
     ->name('refresh-captcha');
 

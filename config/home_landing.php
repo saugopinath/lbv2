@@ -1,0 +1,203 @@
+<?php
+return [
+    'contact' => [
+        'phone' => '1234567890',
+        'email' => 'rj4mY@example.com',
+        'address' => '123 Main Street, City, State, Country',
+    ],
+
+    'gender' => [
+        'Male' => 'Male',
+        'Female' => 'Female',
+        'Other' => 'Other',
+    ],
+
+    'departments' => [
+        '1' => [
+            'slug' => 'green',
+            'name' => 'Department of Tribal Welfare',
+            'about' => 'Works for the socio-economic development, protection, and welfare of tribal communities across the state.',
+        ],
+        '2' => [
+            'slug' => 'amber',
+            'name' => 'Backward Class Welfare Department',
+            'about' => 'Focuses on the welfare, upliftment, and development of Scheduled Castes, Other Backward Classes, and economically weaker sections.',
+        ],
+        '3' => [
+            'slug' => 'rose',
+            'name' => 'Department of Finance',
+            'about' => 'Responsible for managing state finances, budgeting, taxation, and expenditure control.',
+        ],
+        '4' => [
+            'slug' => 'violet',
+            'name' => 'Disaster Management and Civil Defence Department',
+            'about' => 'Handles disaster preparedness, response, mitigation, and rehabilitation efforts for natural and man-made disasters.',
+        ],
+        '5' => [
+            'slug' => 'lime',
+            'name' => 'West Bengal SC, ST, OBC Development & Finance Corporation',
+            'about' => 'Provides financial support, loans, and development schemes for SC, ST, and OBC communities.',
+        ],
+        '6' => [
+            'slug' => 'sky',
+            'name' => 'Fisheries Department',
+            'about' => 'Promotes fisheries development, fish production, and welfare of fisherfolk.',
+        ],
+        '7' => [
+            'slug' => 'emerald',
+            'name' => 'Department of Micro, Small and Medium Enterprises',
+            'about' => 'Supports MSMEs through financial schemes, industrial promotion, and entrepreneurship development.',
+        ],
+        '8' => [
+            'slug' => 'indigo',
+            'name' => 'Information and Cultural Affairs Department',
+            'about' => 'Handles state communication, media relations, cultural promotion, and preservation of heritage.',
+        ],
+        '9' => [
+            'slug' => 'fuchsia',
+            'name' => 'Women and Child Development Department',
+            'about' => 'Ensures policy planning and welfare programs for women, children, and vulnerable groups.',
+        ],
+        '10' => [
+            'slug' => 'orange',
+            'name' => 'Department of Agriculture',
+            'about' => 'Responsible for agricultural growth, farmer welfare, crop development, and food security.',
+        ],
+    ],
+
+    'schemes' => [
+        '1' => [
+            'id' => 1,
+            'name' => 'Jai Johar (for ST)',
+            'icon' => 'fa-solid fa-feather',
+            'slug' => 'jai-johar-st',
+            'color' => 'green',
+        ],
+
+        '2' => [
+            'id' => 2,
+            'name' => 'WCD Manabik',
+            'icon' => 'fa-solid fa-hand-holding-heart',
+            'slug' => 'wcd-manabik',
+            'color' => 'pink',
+        ],
+
+        '3' => [
+            'id' => 3,
+            'name' => 'Taposili Bandhu (for SC)',
+            'icon' => 'fa-solid fa-people-group',
+            'slug' => 'taposili-bandhu-sc',
+            'color' => 'indigo',
+        ],
+
+        '5' => [
+            'id' => 5,
+            'name' => 'Old Age Pension for Fishermen',
+            'icon' => 'fa-solid fa-fish',
+            'slug' => 'fisherman-old-age-pension',
+            'color' => 'sky',
+        ],
+
+        '6' => [
+            'id' => 6,
+            'name' => 'MSME Pension',
+            'icon' => 'fa-solid fa-industry',
+            'slug' => 'msme-pension',
+            'color' => 'amber',
+        ],
+
+        '7' => [
+            'id' => 7,
+            'name' => 'Textile Pension',
+            'icon' => 'fa-solid fa-scissors',
+            'slug' => 'textile-pension',
+            'color' => 'violet',
+        ],
+
+        '8' => [
+            'id' => 8,
+            'name' => 'LPP Retainer',
+            'icon' => 'fa-solid fa-user-shield',
+            'slug' => 'lpp-retainer',
+            'color' => 'emerald',
+        ],
+
+        '9' => [
+            'id' => 9,
+            'name' => 'LPP Pensioner',
+            'icon' => 'fa-solid fa-user-tie',
+            'slug' => 'lpp-pensioner',
+            'color' => 'blue',
+        ],
+
+        '10' => [
+            'id' => 10,
+            'name' => 'WCD Old Age Pension',
+            'icon' => 'fa-solid fa-house-chimney-user',
+            'slug' => 'wcd-old-age',
+            'color' => 'rose',
+        ],
+
+        '11' => [
+            'id' => 11,
+            'name' => 'WCD Widow Pension',
+            'icon' => 'fa-solid fa-person-dress',
+            'slug' => 'wcd-widow',
+            'color' => 'fuchsia',
+        ],
+
+        '13' => [
+            'id' => 13,
+            'name' => 'Old Age Pension for Farmers',
+            'icon' => 'fa-solid fa-tractor',
+            'slug' => 'farmer-old-age',
+            'color' => 'lime',
+        ],
+
+        '17' => [
+            'id' => 17,
+            'name' => 'State Welfare Scheme for Purohits',
+            'icon' => 'fa-solid fa-hands-praying',
+            'slug' => 'purohit-welfare',
+            'color' => 'orange',
+        ],
+
+        '19' => [
+            'id' => 19,
+            'name' => 'Legacy Old Age Pension for ST',
+            'icon' => 'fa-solid fa-person-cane',
+            'slug' => 'legacy-st-old-age',
+            'color' => 'teal',
+        ],
+    ]
+
+    ,
+    'home_image' => [
+        '1' => [
+            'image' => 'images/home/home/image_1.jpg',
+            'title' => ' Empowering citizens of West Bengal under one umbrella scheme',
+            'header' => 'Jai Bangla',
+        ],
+        '2' => [
+            'image' => 'images/home/home/image_2.jpg',
+            'title' => 'Promoting education and growth for every child across Bengal.',
+            'header' => '',
+        ],
+        '3' => [
+            'image' => 'images/home/home/image_3.jpeg',
+            'title' => 'Advancing healthcare and social welfare for every citizen.',
+            'header' => '',
+        ],
+        '4' => [
+            'image' => 'images/home/home/image_4.jpeg',
+            'title' => 'Strengthening rural livelihoods through inclusive development.',
+            'header' => '',
+        ],
+
+
+    ]
+
+
+
+
+];
