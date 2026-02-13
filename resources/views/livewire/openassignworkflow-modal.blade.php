@@ -14,9 +14,7 @@
                                 name="selectedRoles.{{$loop->index}}"
                                 wire:model.live="selectedRoles"
                                 :value="$role->id"
-                                :label="$role->name"
-                                :disabled="count($selectedRoles) == 1
-            && !in_array($role->id, $selectedRoles)" />
+                                :label="$role->name" />
                         </label>
                         @endforeach
                     </div>

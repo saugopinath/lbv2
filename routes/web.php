@@ -40,6 +40,7 @@ use App\Http\Controllers\MasterTabCreationController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
 use App\Http\Controllers\ValidationManagerController;
+use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
 
 // Guest Routes
@@ -76,14 +77,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // User Management
     Route::get('/user-managements', [UsersController::class, 'index'])
         // ->middleware('permission.redirect:canViewUser')
-        ->name('user-managements.index');
+        ->name('user-managements');
 
     Route::get('/users/create', UsersCreate::class)
         // ->middleware('permission.redirect:canCreateUsers')
-        ->name('users.create');
+        ->name('users');
 
     // Role & Office Mappings
-    Route::get('role-office-master-mappings', [SchemeController::class, 'finalSubmitted'])
+    Route::get('role-office-master-mappings', [RoleOfficeTypeMappingsController::class, 'index'])
         // ->middleware('permission.redirect:canRoleMapping')
         ->name('role-office-master-mappings');
 
@@ -93,16 +94,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/role-office-type-mappings/create', Create::class)
         // ->middleware('permission.redirect:canRoleMappings')
-        ->name('role-office-type-mappings.create');
+        ->name('role-office-type-mappings');
 
     // Office Masters
-    Route::get('/officemasters', [OfficeMastersController::class, 'index'])
+    Route::get('officemasters', [OfficeMastersController::class, 'index'])
         // ->middleware('permission.redirect:canViewOffices')
-        ->name('officemasters.index');
+        ->name('officemasters');
 
     Route::get('/office-masters/create', OfficeMasterCreate::class)
         // ->middleware('permission.redirect:canCreateOffices')
-        ->name('office-masters.create');
+        ->name('office-masters');
 
     // Permissions Management
     Route::get('/permission', [PermissionController::class, 'index'])
@@ -158,6 +159,10 @@ Route::get('/duplicate-checks', [SchemeController::class, 'finalSubmitted'])->na
 Route::get('/age-management', [SchemeController::class, 'finalSubmitted'])->name('age-management');
 
 Route::controller(workflowmanagementController::class)->group(function () {
-    Route::any('/create-steps', 'createSteps')->name('create-steps');
-    Route::any('/assign-workflow', 'assignWorkflow')->name('assign-workflow');
+    Route::any('/create-steps',  'createSteps')->name('create-steps');
+    Route::any('/assign-workflow',  'assignWorkflow')->name('assign-workflow');
 });
+
+Route::get('/role-rank-management', RolerankManagement::class)->name('role-rank-management');
+
+Route::get('/define-workflow', [SchemeController::class, 'defineWorkflow'])->name('define-workflow');

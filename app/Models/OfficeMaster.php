@@ -24,6 +24,7 @@ class OfficeMaster extends Model implements Auditable
         'block_id',
         'panchayat_id',
         'is_active',
+        'scheme_id',
     ];
 
     public function officeType()

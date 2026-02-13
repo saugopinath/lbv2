@@ -45,14 +45,17 @@ class Create extends Component
             DB::commit();
 
             session()->flash('success', 'Role Office Type Mapping created successfully!');
-            return redirect()->route('role-office-master-mappings.index');
+            return redirect()->route('role-office-master-mappings');
 
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
         }
     }
-
+    public function updateReset()
+    {
+        $this->reset(['role', 'selectedMappingLevel']);
+    }
     public function render()
     {
         return view('livewire.role-office-type-mappings.create');

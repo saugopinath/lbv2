@@ -82,6 +82,7 @@ class FilterUserPermission extends Component
     public function applyFilters()
     {
         $this->dispatch('userFilter', [
+            'scheme' => $this->selectscheme,
             'role' => $this->role,
             'mapping_level' => $this->selectedMappingLevel,
             'state' => $this->selectedState,
@@ -92,6 +93,7 @@ class FilterUserPermission extends Component
 
     public function resetFilters()
     {
+         $this->selectscheme = null;
         $this->role = null;
         $this->selectedMappingLevel = null;
         $this->selectedState = null;

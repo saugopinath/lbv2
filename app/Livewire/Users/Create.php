@@ -23,26 +23,31 @@ use Illuminate\Support\Facades\DB;
 class Create extends Component
 {
     public $name, $email, $password, $mobile;
-    public $role, $mapping_level, $selectscheme, $office, $selectedMappingLevel, $selectedState, $scheme, $selectedDistrict, $Role, $role_id;
+    public $role, $mapping_level, $selectscheme, $office, $selectedMappingLevel, $selectedState, $selectedDistrict, $Role, $role_id;
 
-    public $roles = [], $schemes = [], $offices = [], $states = [], $mapping_levels = [], $districts = [];
+    public $roles = [], $offices = [], $states = [], $mapping_levels = [], $districts = [];
+    public $scheme = [], $schemes = [];
 
     protected $rules = [
-        'name'     => 'required|string|max:255',
+        'name' => 'required|string|max:255',
         'mobile' => 'required|digits:10|unique:users,mobile_no',
-        'email'    => 'required|email|unique:users,email',
+        'email' => 'required|email|unique:users,email',
         'password' => 'required|min:6',
-        'role'     => 'required|exists:roles,id',
-        'selectscheme' => 'required|exists:schemes,id',
-        'office'   => 'required|exists:office_masters,id',
+        'role' => 'required|exists:roles,id',
+        'scheme' => 'required|array|min:1',
+        'scheme.*' => 'exists:schemes,id',
+        'selectedMappingLevel' => 'required|exists:codemasters,code',
+        'selectedState' => 'required|exists:states,id',
+        'office' => 'required|exists:office_masters,id',
     ];
 
     public function mount()
     {
         $this->roles = Role::all();
-        $this->schemes = Scheme::all();
-        // $this->states = State::orderBy('name', 'asc')->get();
-        $this->states = State::where('is_active', 1)->where('lgd_code',  19)->get();
+        $this->schemes = Scheme::pluck('name', 'id')->toArray();
+        $this->states = State::where('is_active', 1)
+            ->where('lgd_code', 19)
+            ->get();
         $this->districts = District::orderBy('name', 'asc')->get();
     }
     public function updatedRole($value)
@@ -96,12 +101,15 @@ class Create extends Component
 
     public function submit()
     {
-        $this->validate();
+        $rules = $this->rules;
 
-        // $c_time = Carbon::now()->format('Y-m-d H:i:s');
-        // $password_expires_at = Carbon::now()
-        //     ->addDays(intval(Config::get('app.password_expire_day')))
-        //     ->format('Y/m/d H:i:s');
+        // Conditionally require district
+        if (in_array($this->selectedMappingLevel, [153, 154])) {
+            $rules['selectedDistrict'] = 'required|exists:districts,id';
+        }
+
+        $this->validate($rules);
+
         $c_time = Carbon::now()->format('Y/m/d H:i:s');
 
         $password_expires_at = Carbon::now()
@@ -136,23 +144,47 @@ class Create extends Component
                 }
             }
 
-            UserRoleSchemeOfficeMapping::create([
-                'user_id' => $user->id,
-                'scheme_id' => $this->selectscheme,
-                'role_id' => $this->role,
-                'office_id' => $this->office,
-            ]);
+            foreach ($this->scheme as $schemeId) {
+                UserRoleSchemeOfficeMapping::create([
+                    'user_id' => $user->id,
+                    'scheme_id' => $schemeId,
+                    'role_id' => $this->role,
+                    'office_id' => $this->office,
+                ]);
+            }
+
 
             DB::commit();
 
             session()->flash('success', 'User created successfully!');
-            return redirect()->route('user-managements.index');
+            return redirect()->route('user-managements');
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
         }
     }
+
+
+    public function updateReset()
+    {
+        $this->reset([
+            'name',
+            'mobile',
+            'email',
+            'password',
+            'role',
+            'mapping_level',
+            'office',
+            'selectedMappingLevel',
+            'selectedState',
+            'scheme',
+            'selectedDistrict'
+        ]);
+
+        $this->resetValidation();
+    }
+
     public function render()
     {
         return view('livewire.users.create');
