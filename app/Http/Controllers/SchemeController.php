@@ -26,7 +26,7 @@ class SchemeController extends Controller
         return view('schemesblade.dropdown', compact('schemes'));
     }
 
-    public function masterConfiguration()
+    public function defineWorkflow()
     {
         $steps = [
             [
