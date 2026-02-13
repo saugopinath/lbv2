@@ -14,7 +14,9 @@ use Livewire\Component;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Cache;
 
 class DynamicForm extends Component
 {
@@ -41,6 +43,7 @@ class DynamicForm extends Component
     public bool $aadhaarVerified = false;
     public $aadhaarPayload = [];
     public $schemeName;
+    public $filter_condition = [];
     public $heading = '';
     public $maxDate, $minDate, $minDOB, $maxDOB;
 
@@ -77,6 +80,19 @@ class DynamicForm extends Component
             if ($ageConfig['min_age']) {
                 $this->maxDOB = now()->subYears($ageConfig['min_age'])->format('Y-m-d');
             }
+        }
+        $select_lgd = session('lgd_session');
+        // dd($select_lgd);
+        if (!empty($select_lgd['district_id'])) {
+            $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
+        }
+
+        if (!empty($select_lgd['block_id'])) {
+            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
+        }
+
+        if (!empty($select_lgd['subdivision_id'])) {
+            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
     public function onAadhaarCheckedReset()
@@ -316,6 +332,40 @@ class DynamicForm extends Component
         if (!empty($otherDetails)) {
             $dbData['other_details'] = $otherDetails;
         }
+
+        // if (Schema::hasColumn($modelClass::getTableName(), 'created_by_dist_code')) {
+        //     $dbData['created_by_dist_code'] = $this->filter_condition['created_by_dist_code'] ?? null;
+        // }
+
+        // if (Schema::hasColumn($modelClass::getTableName(), 'created_by_local_body_code')) {
+        //     $dbData['created_by_local_body_code'] = $this->filter_condition['created_by_local_body_code'] ?? null;
+        // }
+        $model = new $modelClass;
+        $tableName = $model->getTable();
+        $columns = Cache::remember(
+            "Schema_columns_$tableName",
+            86400,
+            fn() => Schema::getColumnListing($tableName)
+        );
+        // dd(Cache::get("Schema_columns_$tableName"));
+        $extraFields = [
+            'created_by_dist_code' => $this->filter_condition['created_by_dist_code'] ?? null,
+            'created_by_local_body_code' => $this->filter_condition['created_by_local_body_code'] ?? null,
+            'created_by' => Auth::id(),
+            'updated_by' => Auth::id(),
+        ];
+        // dd($extraFields);
+        foreach ($extraFields as $column => $value) {
+
+            if (in_array($column, $columns)) {
+                $dbData[$column] = $value;
+            }
+        }
+
+        $dbData = array_intersect_key(
+            $dbData,
+            array_flip($columns)
+        );
         if (!$this->checkDuplicateEntries()) {
             return;
         }
