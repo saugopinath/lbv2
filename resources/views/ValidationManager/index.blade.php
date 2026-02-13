@@ -19,6 +19,8 @@
                     </span>
                 </div>
             </div>
+            <x-form.back-button :url="url()->previous()" />
+
             @endif
         </div>
     </div>

@@ -67,12 +67,12 @@
                                     </div>
                                 </x-dropdown-link>
                                 @endif
-
                                 @if(!in_array($tab->tab_code, [104, 105]) && !$isFinalSubmitted)
-                                <x-dropdown-link href="{{ route('create-dynamicformfield', [
-                                            'scheme_id' => Crypt::encryptString($tab->scheme_id), 
-                                            'tab_code' => Crypt::encryptString($tab->tab_code)
-                                        ]) }}">
+                                <x-dropdown-link
+                                    :href="route('create-dynamicformfield', [
+        'scheme_id' => Crypt::encryptString($tab->scheme_id),
+        'tab_code' => Crypt::encryptString($tab->tab_code)
+    ])">
                                     <div class="flex items-center">
                                         <div class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center mr-3 group-hover:bg-indigo-200 dark:group-hover:bg-indigo-800/60 transition-colors">
                                             <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,7 +98,8 @@
                                 @endif
 
                                 @if($tab->showValidationButton() && !$isFinalSubmitted)
-                                <x-dropdown-link href="{{ route('edit-validation', ['ref' => Crypt::encryptString($tab->scheme_id.'|'.$tab->tab_code)]) }}">
+                                <x-dropdown-link
+                                    :href="route('edit-validation', ['ref' => Crypt::encryptString($tab->scheme_id.'|'.$tab->tab_code)])">
                                     <div class="flex items-center">
                                         <div class="w-7 h-7 rounded-lg bg-cyan-100 dark:bg-cyan-900/40 flex items-center justify-center mr-3 group-hover:bg-cyan-200 dark:group-hover:bg-cyan-800/60 transition-colors">
                                             <svg class="w-4 h-4 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
