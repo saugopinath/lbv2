@@ -6,13 +6,12 @@ use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use App\Models\AgeManagements;
-
 class AgeManagement extends Component
 {
     public $schemeId;
     public $minage, $maxage;
     public $isspecial = 'no';
-    public $specialcaseOptions = [];
+    public $specialcaseOptions;
     public $selectedSpecialCases = [];
 
     public function mount($schemeId)
