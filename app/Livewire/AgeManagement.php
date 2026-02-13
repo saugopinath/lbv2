@@ -84,8 +84,8 @@ class AgeManagement extends Component
     public function save()
     {
         $rules = [
-            'minage' => 'required|integer',
-            'maxage' => 'required|integer',
+            'minage' => 'nullable|integer',
+            'maxage' => 'nullable|integer',
         ];
 
         if ($this->isspecial === 'yes') {
