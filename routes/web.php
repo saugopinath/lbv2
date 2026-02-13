@@ -167,6 +167,4 @@ Route::controller(workflowmanagementController::class)->group(function () {
 
 Route::get('/role-rank-management', RolerankManagement::class)->name('role-rank-management');
 
-Route::get('/workflow-setup', function () {
-    return view('workflow.setup');
-})->name('workflow.setup');
+Route::get('/master-configuration', [SchemeController::class, 'masterConfiguration'])->name('master-configuration');
