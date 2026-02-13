@@ -74,8 +74,6 @@ class DupCheckSchemeConfigSettings extends Component
                 'type' => 'success',
                 'message' => 'Config saved successfully!'
             ]);
-
-            return redirect()->route('duplicate-checks');
         } catch (Exception $e) {
             DB::rollBack();
             $this->dispatch('toastr', [

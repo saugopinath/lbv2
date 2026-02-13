@@ -21,7 +21,7 @@ class CreateworkflowSteps extends Component
             ->orderBy('rank')
             ->get();
         $exists = Role::whereNotNull('rank')->exists();
-        if($exists){
+        if ($exists) {
             $this->originalrolerank = true;
         }
         if ($steps->isNotEmpty()) {
@@ -59,8 +59,8 @@ class CreateworkflowSteps extends Component
     }
     public function save()
     {
-        $this->validate();
-        DB::transaction(function () {
+        try {
+            DB::beginTransaction();
             $parentId = null;
             $totalSteps = count($this->labels);
             for ($i = 0; $i < $totalSteps; $i++) {
@@ -74,7 +74,18 @@ class CreateworkflowSteps extends Component
                 $step->save();
                 $parentId = $step->id;
             }
-        });
+            DB::commit();
+            $this->dispatch('toastr', [
+                'type' => 'success',
+                'message' => 'Workflow steps created successfully!'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Something went wrong. Please try again.'
+            ]);
+        }
     }
     public function render()
     {
