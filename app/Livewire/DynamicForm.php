@@ -45,7 +45,7 @@ class DynamicForm extends Component
     public $aadhaarPayload = [];
     public $filter_data = [];
     public $schemeName;
-    public $filter_condition = [];
+
     public $heading = '';
     public $maxDate, $minDate, $minDOB, $maxDOB;
 
@@ -183,9 +183,7 @@ class DynamicForm extends Component
             $this->updateTabNavigation();
         }
     }
-    public function onDocumentTabFailed()
-    {
-    }
+    public function onDocumentTabFailed() {}
     /* ================== HELPERS ================== */
     private function markTabCompleted(string $tabCode): void
     {
@@ -446,8 +444,8 @@ class DynamicForm extends Component
         );
         // dd(Cache::get("Schema_columns_$tableName"));
         $extraFields = [
-            'created_by_dist_code' => $this->filter_condition['created_by_dist_code'] ?? null,
-            'created_by_local_body_code' => $this->filter_condition['created_by_local_body_code'] ?? null,
+            'created_by_dist_code' => $this->filter_data['created_by_dist_code'] ?? null,
+            'created_by_local_body_code' => $this->filter_data['created_by_local_body_code'] ?? null,
             'created_by' => Auth::id(),
             'updated_by' => Auth::id(),
         ];
@@ -493,7 +491,7 @@ class DynamicForm extends Component
                     'beneficiary_id' => $this->beneficiaryId,
                     'scheme_id' => $this->schemeId,
                     'aadhar_hash' => $this->aadhaarPayload['hash'],
-                    'encoded_aadhar' => $this->aadhaarPayload['encoded'],                   
+                    'encoded_aadhar' => $this->aadhaarPayload['encoded'],
                     'encode_key' => null,
                     'aadhar_vault' => $this->aadhaarPayload['hash'],
                 ]

@@ -285,7 +285,7 @@ class SchemewiseStoreDataJsonHelper
         if ($name === 'dob') {
             $minAttr = ':min="$minDOB"';
             $maxAttr = ':max="$maxDOB"';
-        } elseif ($name === 'app_date' || $name === 'ds_date') {
+        } elseif ($name === 'application_date' || $name === 'ds_date') {
             $minAttr = ':min="$minDate"';
             $maxAttr = ':max="$maxDate"';
         }
@@ -438,7 +438,7 @@ class SchemewiseStoreDataJsonHelper
                 </div>
                 BLADE;
 
-            /* ===== TEXTAREA ===== */
+                /* ===== TEXTAREA ===== */
             case 'textarea':
                 return <<<BLADE
                 <div class="{$paddingClass}">
@@ -451,7 +451,7 @@ class SchemewiseStoreDataJsonHelper
                 </div>
                 BLADE;
 
-            /* ===== SELECT ===== */
+                /* ===== SELECT ===== */
             case 'select':
 
                 $optionsHtml = '';
@@ -478,7 +478,7 @@ class SchemewiseStoreDataJsonHelper
                 </div>
                 BLADE;
 
-            /* ===== RADIO ===== */
+                /* ===== RADIO ===== */
             case 'radio':
 
                 $radioHtml = '';
@@ -512,7 +512,7 @@ class SchemewiseStoreDataJsonHelper
                 </div>
                 BLADE;
 
-            /* ===== CHECKBOX ===== */
+                /* ===== CHECKBOX ===== */
             case 'checkbox':
                 return <<<BLADE
                 <div class="{$paddingClass}">
@@ -525,7 +525,7 @@ class SchemewiseStoreDataJsonHelper
                 </div>
                 BLADE;
 
-            /* ===== DEFAULT TEXT ===== */
+                /* ===== DEFAULT TEXT ===== */
             default:
                 return <<<BLADE
             <div class="{$paddingClass}">
