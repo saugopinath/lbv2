@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -17,13 +18,22 @@ abstract class BaseAuditableModel extends Model implements Auditable
             ->value('role_id');
         $data['tags'] = class_basename($this) . '_' . $data['event'];
         $data['session_id'] = session()->getId();
-        $data['other_details'] = [
+        // $data['other_details'] = [
+        //     'updated_by_role' => $userRole,
+        //     'user_agent' => \Illuminate\Support\Facades\Request::userAgent(),
+        //     'url' => \Illuminate\Support\Facades\Request::fullUrl(),
+        //     'method' => \Illuminate\Support\Facades\Request::method(),
+        //     'referrer' => \Illuminate\Support\Facades\Request::header('referer'),
+        // ];
+        $data['other_details'] = json_encode([
             'updated_by_role' => $userRole,
-            'user_agent' => \Illuminate\Support\Facades\Request::userAgent(),
-            'url' => \Illuminate\Support\Facades\Request::fullUrl(),
-            'method' => \Illuminate\Support\Facades\Request::method(),
-            'referrer' => \Illuminate\Support\Facades\Request::header('referer'),
-        ];
+            'user_agent' => request()->userAgent(),
+            'url' => request()->fullUrl(),
+            'method' => request()->method(),
+            'referrer' => request()->header('referer'),
+        ]);
+
+
         return $data;
     }
 }
