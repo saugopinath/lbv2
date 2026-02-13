@@ -9,6 +9,7 @@
                 @click="$dispatch('open-modal')">
                 Create new Section
             </button>
+            
         </div>
     </div>
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-2 space-y-4">

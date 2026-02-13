@@ -14,7 +14,7 @@ class CreateAssignOtherFormFieldController extends Controller
             'scheme_id' => null,
             'tab_code'  => null,
         ];
-
+        // dd($request->all());
         $header = 'Create Other Form-field Attribute';
 
         try {
@@ -26,11 +26,12 @@ class CreateAssignOtherFormFieldController extends Controller
                 $data['tab_code'] = Crypt::decryptString($request->tab_code);
             }
         } catch (DecryptException $e) {
-            // Just ignore invalid payload and continue opening the same page
+            // dd($e);
             $data['scheme_id'] = null;
             $data['tab_code']  = null;
         }
 
+        // dd($data);
         return view(
             'CreateAssignOtherFormField.create_other_fromfields_attribute_index',
             compact('header', 'data')

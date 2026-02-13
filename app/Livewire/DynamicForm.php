@@ -29,7 +29,7 @@ class DynamicForm extends Component
     public bool $isLast = false;
     public $prevTab = null;
     public $nextTab = null;
-    public $ram,$form_preview;
+    public $ram, $form_preview;
     public array $completedTabs = [];
     public bool $allTabsCompleted = false;
     public $applicationId;
@@ -98,28 +98,19 @@ class DynamicForm extends Component
     }
     public function onAadhaarChecked($data)
     {
-        // 🔥 NEW APPLICANT SESSION
         $this->aadhaarVerified = true;
         $this->aadhaarPayload = [
             'encoded' => $data['encoded'],
             'hash' => $data['hash'],
         ];
 
-        // 🔥 CLEAR OLD SUCCESS / ERROR MESSAGE
         $this->navMessage = null;
         $this->navMessageType = 'success';
-        // 🔥 RESET APPLICATION CONTEXT
         $this->applicationId = null;
         $this->beneficiaryId = null;
-
-        // 🔥 CLEAR OLD FORM DATA
         $this->formData = [];
-
-        // 🔥 RESET NAVIGATION
         $this->completedTabs = [];
         $this->allTabsCompleted = false;
-
-        // 🔥 ALWAYS START FROM FIRST TAB
         if (!empty($this->views)) {
             $this->activeTab = (string) $this->views[0];
             $this->updateTabNavigation();
@@ -141,7 +132,6 @@ class DynamicForm extends Component
         $this->activeTab = $tabCode;
         $this->updateTabNavigation();
     }
-    /* ================== SAVE & NEXT ================== */
     public function saveAndNext($nextTab)
     {
         if ((string) $this->activeTab === '104') {
@@ -175,9 +165,7 @@ class DynamicForm extends Component
             $this->updateTabNavigation();
         }
     }
-    public function onDocumentTabFailed()
-    {
-    }
+    public function onDocumentTabFailed() {}
     /* ================== HELPERS ================== */
     private function markTabCompleted(string $tabCode): void
     {
@@ -303,15 +291,12 @@ class DynamicForm extends Component
             'application_id' => $this->applicationId,
             'beneficiary_id' => $this->beneficiaryId,
         ];
-
-        $otherDetails = []; // 🔥 JSON bucket
+        $otherDetails = [];
 
         foreach ($json['tabs'] ?? [] as $tabJson) {
-
             if ((string) $tabJson['tab_code'] !== (string) $this->activeTab) {
                 continue;
             }
-
             foreach ($tabJson['fields'] ?? [] as $field) {
 
                 $fieldName = $field['field_name'];
@@ -328,7 +313,6 @@ class DynamicForm extends Component
                 }
             }
         }
-        // 🔥 attach JSON if exists
         if (!empty($otherDetails)) {
             $dbData['other_details'] = $otherDetails;
         }
@@ -352,7 +336,6 @@ class DynamicForm extends Component
                 'message' => 'Application not created. Please try again.',
             ]);
         }
-        // ================= Aadhaar Save =================
         if ($this->aadhaarVerified && !empty($this->aadhaarPayload)) {
 
             BeneficiaryAadhaar::updateOrCreate(
@@ -373,7 +356,6 @@ class DynamicForm extends Component
     }
     private function ensureApplicationIds(): void
     {
-        // dd($this->schemeId);
         if ($this->applicationId && $this->beneficiaryId) {
             return;
         }
@@ -390,22 +372,18 @@ class DynamicForm extends Component
     }
     public function updatedFormDataIfscode($value)
     {
-        $ifsc = strtoupper($value);
-
-        // normalize value
-        $this->formData['ifscode'] = $ifsc;
-
-        if (strlen($ifsc) !== 11) {
+        if (strlen($value) !== 11) {
             $this->formData['bankname'] = '';
             $this->formData['bank_branch_name'] = '';
             return;
+        } else {
+            $ifsc = strtoupper($value);
+            $this->formData['ifscode'] = $ifsc;
+            $ifs = Ifsccodemaster::with('bankmaster')
+                ->where('code', $ifsc)
+                ->where('is_active', 1)
+                ->first();
         }
-
-        $ifs = Ifsccodemaster::with('bankmaster')
-            ->where('code', $ifsc)
-            ->where('is_active', 1)
-            ->first();
-
         if ($ifs) {
             $this->formData['bankname'] = $ifs->bankmaster->name ?? '';
             $this->formData['bank_branch_name'] = $ifs->branch ?? '';
