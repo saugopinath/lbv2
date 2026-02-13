@@ -199,80 +199,79 @@ class BulkActionModal extends Component
                     throw $e;
                 }
             }
-        }
-        // elseif ($this->bulkActionType === 'T') {
+        }elseif ($this->bulkActionType === 'T') {
 
-        //     // $user = auth()->user();
-        //     if (CheckAuthHelper::isCommonApprover()) {
-        //         // if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
-        //         $next_level_role_id = Codemaster::getIdByCode(22);
-        //     }
-        //     if (CheckAuthHelper::isCommmonVerifier()) {
-        //         // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
-        //         $next_level_role_id = Codemaster::getIdByCode(21);
-        //     }
-        //     foreach ($ids as $id) {
-        //         DB::beginTransaction();
-        //         try {
-        //             $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
-        //             $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
-        //             $DraftBeneficiaryPersonal->save();
-        //             // $AcceptRejectInfo = new AcceptRejectInfo;
-        //             // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-        //             // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
-        //             // $AcceptRejectInfo->ip_address = request()->ip();
-        //             // $AcceptRejectInfo->user_id = Auth::id();
-        //             // $AcceptRejectInfo->browser = request()->header('User-Agent');
-        //             // $AcceptRejectInfo->model_name = null;
-        //             // $AcceptRejectInfo->op_type = $next_level_role_id;
-        //             // $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
-        //             // $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
-        //             // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-        //             //     ->latest('id')
-        //             //     ->value('id') ?? null;
-        //             // $AcceptRejectInfo->save();
-        //             DB::commit();
-        //             $this->dispatch('toastr', [
-        //                 'type' => 'warning',
-        //                 'message' => 'Application reverted successfully!'
-        //             ]);
-        //         } catch (\Exception $e) {
-        //             DB::rollBack();
-        //             throw $e;
-        //         }
-        //     }
-        // } elseif ($this->bulkActionType === 'R') {
-        //     foreach ($ids as $id) {
-        //         DB::beginTransaction();
-        //         try {
-        //             $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
-        //             $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
-        //             $DraftBeneficiaryPersonal->save();
-        //             // $AcceptRejectInfo = new AcceptRejectInfo;
-        //             // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-        //             // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
-        //             // $AcceptRejectInfo->ip_address = request()->ip();
-        //             // $AcceptRejectInfo->user_id = Auth::id();
-        //             // $AcceptRejectInfo->browser = request()->header('User-Agent');
-        //             // $AcceptRejectInfo->model_name = null;
-        //             // $AcceptRejectInfo->op_type = Codemaster::getIdByCode(-1);
-        //             // $AcceptRejectInfo->revert_reason_cause_id = null;
-        //             // $AcceptRejectInfo->revert_reason_remarks = null;
-        //             // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-        //             //     ->latest('id')
-        //             //     ->value('id') ?? null;
-        //             // $AcceptRejectInfo->save();
-        //             DB::commit();
-        //             $this->dispatch('toastr', [
-        //                 'type' => 'error',
-        //                 'message' => 'Application rejected successfully!'
-        //             ]);
-        //         } catch (\Exception $e) {
-        //             DB::rollBack();
-        //             throw $e;
-        //         }
-        //     }
-        // }
+            // $user = auth()->user();
+            if (CheckAuthHelper::isCommonApprover()) {
+                // if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+                $next_level_role_id = Codemaster::getIdByCode(22);
+            }
+            if (CheckAuthHelper::isCommmonVerifier()) {
+                // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+                $next_level_role_id = Codemaster::getIdByCode(21);
+            }
+            foreach ($ids as $id) {
+                DB::beginTransaction();
+                try {
+                    $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
+                    $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
+                    $DraftBeneficiaryPersonal->save();
+                    // $AcceptRejectInfo = new AcceptRejectInfo;
+                    // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+                    // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                    // $AcceptRejectInfo->ip_address = request()->ip();
+                    // $AcceptRejectInfo->user_id = Auth::id();
+                    // $AcceptRejectInfo->browser = request()->header('User-Agent');
+                    // $AcceptRejectInfo->model_name = null;
+                    // $AcceptRejectInfo->op_type = $next_level_role_id;
+                    // $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
+                    // $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
+                    // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                    //     ->latest('id')
+                    //     ->value('id') ?? null;
+                    // $AcceptRejectInfo->save();
+                    DB::commit();
+                    $this->dispatch('toastr', [
+                        'type' => 'warning',
+                        'message' => 'Application reverted successfully!'
+                    ]);
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    throw $e;
+                }
+            }
+        }elseif ($this->bulkActionType === 'R') {
+            foreach ($ids as $id) {
+                DB::beginTransaction();
+                try {
+                    $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
+                    $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
+                    $DraftBeneficiaryPersonal->save();
+                    // $AcceptRejectInfo = new AcceptRejectInfo;
+                    // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+                    // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                    // $AcceptRejectInfo->ip_address = request()->ip();
+                    // $AcceptRejectInfo->user_id = Auth::id();
+                    // $AcceptRejectInfo->browser = request()->header('User-Agent');
+                    // $AcceptRejectInfo->model_name = null;
+                    // $AcceptRejectInfo->op_type = Codemaster::getIdByCode(-1);
+                    // $AcceptRejectInfo->revert_reason_cause_id = null;
+                    // $AcceptRejectInfo->revert_reason_remarks = null;
+                    // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                    //     ->latest('id')
+                    //     ->value('id') ?? null;
+                    // $AcceptRejectInfo->save();
+                    DB::commit();
+                    $this->dispatch('toastr', [
+                        'type' => 'error',
+                        'message' => 'Application rejected successfully!'
+                    ]);
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    throw $e;
+                }
+            }
+        }
         // });
         // Toaster::success($successMessage);
 

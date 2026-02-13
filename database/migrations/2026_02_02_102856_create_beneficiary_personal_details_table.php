@@ -39,6 +39,11 @@ return new class extends Migration
             $table->integer('mar_statu')->nullable();
             $table->integer('caste')->nullable();
             $table->string('cas_cer_no', 100)->nullable();
+            $table->smallInteger('is_final')->default(0);
+            $table->integer('created_by_dist_code')->nullable();
+            $table->integer('created_by_local_body_code')->nullable();
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
             // JSONB extra data
             $table->jsonb('other_details')->nullable();
             // Audit
