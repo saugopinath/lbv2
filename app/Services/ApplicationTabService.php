@@ -33,6 +33,7 @@ class ApplicationTabService
             $fields = $tab->getFields()
                 ->where('scheme_id', $schemeId)
                 ->values();
+            // dd($fields);
             if (!$tab->tab_model_name) {
                 continue;
             }
@@ -41,6 +42,7 @@ class ApplicationTabService
                 continue;
             }
             $record = $modelClass::where('application_id', $applicationId)->first();
+            // dd($record);
             $rows = [];
             if ($record) {
                 foreach ($fields as $field) {

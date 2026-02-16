@@ -32,7 +32,7 @@ class LocationHelper
                     ??= Block::where('id', $value)->value('name') ?? '-')
                 : ($municipalityCache[$value]
                     ??= Municipality::where('id', $value)->value('name') ?? '-'),
-            'gpWard' => $ruralUrban == 2
+            'gpward' => $ruralUrban == 2
                 ? ($gpCache[$value]
                     ??= Panchayat::where('id', $value)->value('name') ?? '-')
                 : ($wardCache[$value]

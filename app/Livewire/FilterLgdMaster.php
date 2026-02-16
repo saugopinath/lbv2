@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Crypt;
 class FilterLgdMaster extends Component
 {
     public $districts = [], $blocks = [], $urbanbodys = [], $gps = [], $wards = [], $subdivisions = [];
-    public $selectedDistrict, $selectedRuralurban, $selectedBlockurban, $selectedGpWard, $selectedSubdivision;
+    public $selectedDistrict, $selectedRuralurban, $selectedBlockurban, $selectedGpward, $selectedSubdivision;
     public array $filter_condition = [];
     public $button_show;
     public $visible = [
@@ -125,7 +125,7 @@ class FilterLgdMaster extends Component
         $this->selectedRuralurban = null;
         $this->selectedSubdivision = null;
         $this->selectedBlockurban = null;
-        $this->selectedGpWard = null;
+        $this->selectedGpward = null;
         $this->blocks = [];
         $this->urbanbodys = [];
         $this->subdivisions = [];
@@ -143,7 +143,7 @@ class FilterLgdMaster extends Component
     {
         $this->selectedSubdivision = null;
         $this->selectedBlockurban = null;
-        $this->selectedGpWard = null;
+        $this->selectedGpward = null;
         $this->blocks = [];
         $this->urbanbodys = [];
         $this->subdivisions = [];
@@ -169,7 +169,7 @@ class FilterLgdMaster extends Component
     public function updatedSelectedSubdivision()
     {
         $this->selectedBlockurban = null;
-        $this->selectedGpWard = null;
+        $this->selectedGpward = null;
         $this->urbanbodys = [];
         $this->gps = [];
         $this->wards = [];
@@ -186,7 +186,7 @@ class FilterLgdMaster extends Component
 
     public function updatedSelectedBlockurban()
     {
-        $this->selectedGpWard = null;
+        $this->selectedGpward = null;
         $this->gps = [];
         $this->wards = [];
         $this->loadGpOrWard();
@@ -206,7 +206,7 @@ class FilterLgdMaster extends Component
         $this->selectedRuralurban = null;
         $this->selectedSubdivision = null;
         $this->selectedBlockurban = null;
-        $this->selectedGpWard = null;
+        $this->selectedGpward = null;
         $this->blocks = [];
         $this->urbanbodys = [];
         $this->subdivisions = [];

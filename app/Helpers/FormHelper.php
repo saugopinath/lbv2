@@ -5,7 +5,6 @@ namespace App\Helpers;
 use App\Models\District;
 use App\Models\Block;
 use App\Models\Municipality;
-use App\Models\GpWard;
 use App\Models\Panchayat;
 use App\Models\Ward;
 use App\Models\State;
@@ -43,7 +42,7 @@ class FormHelper
                 : ($municipalityCache[$value]
                     ??= Municipality::where('id', $value)->value('name') ?? '-'),
 
-            'gpWard' =>
+            'gpward' =>
             $ruralUrban == 2
                 ? ($gpCache[$value]
                     ??= Panchayat::where('id', $value)->value('name') ?? '-')
