@@ -25,9 +25,10 @@ class GivePermissionToAdminSeeder extends Seeder
             'create users',
             'view user permission',
             'view permission',
-            'master-tab',           
+            'master-tab',
             'role-rank-management',
-            'define-workflow'            
+            'define-workflow',
+            'role-permission-management'
         ];
         // 1) find role
         try {
@@ -81,5 +82,3 @@ class GivePermissionToAdminSeeder extends Seeder
         $this->command->info('GivePermissionToAdminSeeder finished.');
     }
 }
-
-

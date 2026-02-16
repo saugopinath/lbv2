@@ -16,7 +16,6 @@ class ApproverPermissionSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            'view permission',
             'viewlb applications',
             'Normal Entry Approver Allow',
             'Normal Entry Reject Allow',
