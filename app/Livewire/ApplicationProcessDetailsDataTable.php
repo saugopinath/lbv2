@@ -61,15 +61,15 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $select_lgd = session('lgd_session');
 
         if (!empty($select_lgd['district_id'])) {
-            $this->filter_condition['district_id'] = Crypt::decryptString($select_lgd['district_id']);
+            $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
         }
 
         if (!empty($select_lgd['block_id'])) {
-            $this->filter_condition['block_id'] = Crypt::decryptString($select_lgd['block_id']);
+            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
         }
 
         if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
     public function filtersApplied($filters)
@@ -132,8 +132,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         ];
 
         // Bulk Verify
-        if (CheckAuthHelper::isCommmonVerifier()) 
-        {
+        if (CheckAuthHelper::isCommmonVerifier()) {
             $actions['bulkverify'] = 'Verify';
         }
 
@@ -162,8 +161,6 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
         return $actions;
     }
-    
-
 
     public function updatedSearch($value): void
     {
@@ -243,10 +240,10 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 ->label(fn($row) => $row->application_id ?? 'N/A'),
 
             Column::make("Applicant Name")
-                ->label(fn($row) => $row->full_name ?? 'N/A'),
+                ->label(fn($row) => $row->beneficiary_name ?? 'N/A'),
 
             Column::make("Father's Name")
-                ->label(fn($row) => $row->ffname ?? 'N/A'),
+                ->label(fn($row) => $row->ben_father_name ?? 'N/A'),
 
             Column::make("Date of Birth")
                 ->label(fn($row) => $row->dob ?? 'N/A'),
@@ -266,51 +263,22 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        // $query = BeneficiaryCommonList::with('sourceable.relationships', 'sourceable.contact');
-        // if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->sub_div) {
-        //     $query = EncryptionArray::applyLocationFilters(
-        //         $query,
-        //         $this->district_id ? (int) $this->district_id : null,
-        //         $this->rural_urban ? (int) $this->rural_urban : null,
-        //         $this->blockurban ? (int) $this->blockurban : null,
-        //         $this->gp_ward ? (int) $this->gp_ward : null,
-        //         $this->sub_div ? (int) $this->sub_div : null
-        //     );
-        // }
-        // // $user = auth()->user();
-        // $next_level_role_id = null;
-
-        // if (CheckAuthHelper::isCommonApprover()) {
-        //     // if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
-        //     $next_level_role_id = Codemaster::getIdByCode(23);
-        // }
-        // if (CheckAuthHelper::isCommmonVerifier()) {
-        //     // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
-        //     $next_level_role_id = Codemaster::getIdByCode(22);
-        // }
-        // if (CheckAuthHelper::isOperator()) {
-        //     // if ($user->hasRole('Operator')) {
-        //     $next_level_role_id = Codemaster::getIdByCode(21);
-        // }
-
-        // $sourceableClass = DraftBeneficiaryPersonal::class;
-
-        // if ($next_level_role_id) {
-        //     $query->whereHasMorph(
-        //         'sourceable',
-        //         $sourceableClass,
-        //         function ($q) use ($next_level_role_id) {
-        //             $q->where('next_level_role_id', $next_level_role_id);
-        //         }
-        //     );
-        // }
-
-        // if (!empty($this->filter_condition)) {
-        //     $query->where($this->filter_condition);
-        // }
-        // $this->dispatch('hideLoader');
-
         $query = BeneficiaryPersonalDetail::where('next_level_role_id', $this->sameLabelRoleId)->where('scheme_id', $this->schemeId);
+        if (!empty($this->filter_condition)) {
+            $query->where($this->filter_condition);
+        }
+        if ($this->district_id || $this->sub_div || $this->rural_urban || $this->blockurban || $this->gp_ward) {
+            $query = EncryptionArray::applyLocationFilters(
+                $query,
+                $this->district_id ? (int) $this->district_id : null,
+                $this->rural_urban ? (int) $this->rural_urban : null,
+                $this->blockurban ? (int) $this->blockurban : null,
+                $this->gp_ward ? (int) $this->gp_ward : null,
+                $this->sub_div ? (int) $this->sub_div : null
+            );
+        }
+        $this->dispatch('hideLoader');
+        // dd($query->get());
         return $query;
     }
 
@@ -324,9 +292,9 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         foreach ($ids as $id) {
             DB::beginTransaction();
             try {
-                 BeneficiaryPersonalDetail::where('application_id', $id)->update([
-                        'next_level_role_id' => $this->nextLabelRoleId,
-                    ]);
+                BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                    'next_level_role_id' => $this->nextLabelRoleId,
+                ]);
                 // $AcceptRejectInfo = new AcceptRejectInfo;
                 // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
                 // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
@@ -368,8 +336,8 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             DB::beginTransaction();
             try {
                 BeneficiaryPersonalDetail::where('application_id', $id)->update([
-                        'next_level_role_id' => $this->nextLabelRoleId,
-                    ]);
+                    'next_level_role_id' => $this->nextLabelRoleId,
+                ]);
                 // $AcceptRejectInfo = new AcceptRejectInfo;
                 // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
                 // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;

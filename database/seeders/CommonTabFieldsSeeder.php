@@ -385,7 +385,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'field_position' => 4,
                     'is_active' => true,
-                    'db_colunm' => 'gpward',
+                    'db_colunm' => 'gpWard',
                     'is_mendetory' => 1,
                 ],
 

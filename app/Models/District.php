@@ -39,10 +39,10 @@ class District extends Model
         return $this->hasManyThrough(
             Municipality::class,
             Subdivision::class,
-            'district_id',     // subdivisions টেবিলে district_id আছে
-            'subdivision_id',  // municipalities টেবিলে subdivision_id আছে
-            'id',              // districts টেবিলের primary key
-            'id'               // subdivisions টেবিলের primary key
+            'district_id',
+            'subdivision_id',
+            'id',
+            'id'
         );
     }
 }

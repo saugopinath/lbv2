@@ -84,7 +84,7 @@ return new class extends Migration {
                 district_id integer,
                 rural_urban smallint,
                 blockurban integer,
-                gpward integer,
+                gpWard integer,
                 policestation varchar(100),
                 villtowncity varchar(100),
                 housepremiseno varchar(100),

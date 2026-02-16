@@ -17,7 +17,7 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
 
     public function contact()
     {
-        return $this->hasOne(BeneficiaryContactDetail::class, 'beneficiary_id', 'beneficiary_id');
+        return $this->hasOne(BeneficiaryContactDetail::class, 'application_id', 'application_id');
     }
     public function documents()
     {
