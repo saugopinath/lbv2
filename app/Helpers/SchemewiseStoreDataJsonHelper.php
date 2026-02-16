@@ -324,28 +324,79 @@ class SchemewiseStoreDataJsonHelper
         }
 
         switch ($type) {
-            case 'select':
-                $optionsHtml = '';
-                foreach (($field['options'] ?? []) as $key => $optionlabel) {
-                    $key = e($key);
-                    $optionlabel = e($optionlabel);
-                    $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
-                }
-                $fieldHtml = <<<BLADE
-                <x-form.select
-                    name="{$name}"
-                    label="{$label}"
-                    data-wire="{$name}"
-                    {$wireIgnore}
-                     {$readonlyAttr}
-                      {$requiredAttr}
-                    wire:model.live="formData.{$name}"
-                >
-                    <option value="">-- Select {$label} --</option>
-                    {$optionsHtml}
-                </x-form.select>
-                BLADE;
-                break;
+            // case 'select':
+            //     $optionsHtml = '';
+            //     foreach (($field['options'] ?? []) as $key => $optionlabel) {
+            //         $key = e($key);
+            //         $optionlabel = e($optionlabel);
+            //         $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
+            //     }
+            //     $fieldHtml = <<<BLADE
+            //     <x-form.select
+            //         name="{$name}"
+            //         label="{$label}"
+            //         data-wire="{$name}"
+            //         {$wireIgnore}
+            //          {$readonlyAttr}
+            //           {$requiredAttr}
+            //         wire:model.live="formData.{$name}"
+            //     >
+            //         <option value="">-- Select {$label} --</option>
+            //         {$optionsHtml}
+            //     </x-form.select>
+            //     BLADE;
+            //     break;
+case 'select':
+
+    // ✅ SPECIAL RENDER FOR app_type ONLY
+    if ($name === 'application_type') {
+
+        $fieldHtml = <<<BLADE
+        <div wire:key="field-norm-application_type">
+            <x-form.select
+                name="application_type"
+                label="Application Type"
+                data-wire="application_type"
+                required
+                wire:model.live="formData.application_type"
+            >
+                <option value="">-- Select Application Type --</option>
+
+                @foreach(\$appTypeOptions as \$value => \$label)
+                    <option value="{{ \$value }}">{{ \$label }}</option>
+                @endforeach
+
+            </x-form.select>
+        </div>
+        BLADE;
+
+        break;
+    }
+
+    // 🔹 NORMAL SELECT FOR OTHER FIELDS
+    $optionsHtml = '';
+    foreach (($field['options'] ?? []) as $key => $optionlabel) {
+        $key = e($key);
+        $optionlabel = e($optionlabel);
+        $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
+    }
+
+    $fieldHtml = <<<BLADE
+    <x-form.select
+        name="{$name}"
+        label="{$label}"
+        data-wire="{$name}"
+        {$wireIgnore}
+        {$readonlyAttr}
+        {$requiredAttr}
+        wire:model.live="formData.{$name}"
+    >
+        <option value="">-- Select {$label} --</option>
+        {$optionsHtml}
+    </x-form.select>
+    BLADE;
+
+    break;
 
             case 'textarea':
                 $fieldHtml = <<<BLADE

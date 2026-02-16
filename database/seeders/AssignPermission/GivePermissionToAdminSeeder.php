@@ -25,8 +25,9 @@ class GivePermissionToAdminSeeder extends Seeder
             'create users',
             'view user permission',
             'view permission',
-
-            
+            'master-tab',           
+            'role-rank-management',
+            'define-workflow'            
         ];
         // 1) find role
         try {

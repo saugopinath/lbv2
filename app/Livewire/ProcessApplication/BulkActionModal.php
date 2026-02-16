@@ -49,7 +49,7 @@ class BulkActionModal extends Component
         $this->applicationId = $this->selectedRows['selectedIds']['application_id'];
         $this->entryType = $this->selectedRows['selectedIds']['entry_type'];
         $this->schemeId = $this->selectedRows['selectedIds']['schemeId'];
-        // dd($this->applicationId);
+        // dd($this->entryType);
         $labelRoles = $workflowService->getLabelRoles($this->schemeId);
         if ($labelRoles) {
             $this->sameLabelRoleId = $labelRoles->same_label_role_id;
@@ -67,33 +67,32 @@ class BulkActionModal extends Component
             $entryType = null;
         }
 
-        if ($entryType) {
-            if (CheckAuthHelper::isCommmonVerifier()) {
+         if ($entryType) {
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'verification') && CheckAuthHelper::isCommmonVerifier()) {
                 $this->availableActions['V'] = 'Verify';
             }
 
-            if (CheckAuthHelper::isCommonApprover()) {
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'approver') &&CheckAuthHelper::isCommonApprover()) {
                 $this->availableActions['A'] = 'Approve';
             }
 
-            // if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'reject') && CheckAuthHelper::isCommonWorkFlow2ndStep()) {
-            //     $this->availableActions['R'] = 'Reject';
-            // }
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'reject') && CheckAuthHelper::isCommonWorkFlow2ndStep()) {
+                $this->availableActions['R'] = 'Reject';
+            }
 
-            // if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'revert') && CheckAuthHelper::isCommonWorkFlow2ndStep()) {
-            //     $this->availableActions['T'] = 'Revert';
-            // }
-            // $this->availableActions['V'] = 'Verify';
-            // $this->availableActions['A'] = 'Approve';
-            // $this->availableActions['R'] = 'Reject';
-            // $this->availableActions['T'] = 'Revert';
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'revert') && CheckAuthHelper::isCommonWorkFlow2ndStep()) {
+                $this->availableActions['T'] = 'Revert';
+            }
         }
         $this->bulkActionModal = true;
     }
 
-    public function updatedBulkActionType($value)
+    public function updatedBulkActionType($value, WorkflowService $workflowService)
     {
         if (in_array($value, ['R', 'T'])) {
+            if ($value == 'T') {
+                $this->nextLabelRoleId = $workflowService->getLabelRoles($this->schemeId, 1)->same_label_role_id;
+            }
             $this->reasons = Codemaster::where('parent_id', 12)
                 ->orderBy('id', 'asc')
                 ->pluck('name', 'id')
@@ -202,20 +201,23 @@ class BulkActionModal extends Component
         }elseif ($this->bulkActionType === 'T') {
 
             // $user = auth()->user();
-            if (CheckAuthHelper::isCommonApprover()) {
-                // if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
-                $next_level_role_id = Codemaster::getIdByCode(22);
-            }
-            if (CheckAuthHelper::isCommmonVerifier()) {
-                // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
-                $next_level_role_id = Codemaster::getIdByCode(21);
-            }
+            // if (CheckAuthHelper::isCommonApprover()) {
+            //     // if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+            //     $next_level_role_id = Codemaster::getIdByCode(22);
+            // }
+            // if (CheckAuthHelper::isCommmonVerifier()) {
+            //     // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+            //     $next_level_role_id = Codemaster::getIdByCode(21);
+            // }
             foreach ($ids as $id) {
                 DB::beginTransaction();
                 try {
-                    $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
-                    $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
-                    $DraftBeneficiaryPersonal->save();
+                    BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                        'next_level_role_id' => $this->nextLabelRoleId,
+                    ]);
+                    // $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
+                    // $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
+                    // $DraftBeneficiaryPersonal->save();
                     // $AcceptRejectInfo = new AcceptRejectInfo;
                     // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
                     // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
@@ -230,6 +232,9 @@ class BulkActionModal extends Component
                     //     ->latest('id')
                     //     ->value('id') ?? null;
                     // $AcceptRejectInfo->save();
+                    BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                        'next_level_role_id' => $this->nextLabelRoleId,
+                    ]);
                     DB::commit();
                     $this->dispatch('toastr', [
                         'type' => 'warning',
@@ -244,9 +249,9 @@ class BulkActionModal extends Component
             foreach ($ids as $id) {
                 DB::beginTransaction();
                 try {
-                    $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
-                    $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
-                    $DraftBeneficiaryPersonal->save();
+                    // $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
+                    // $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
+                    // $DraftBeneficiaryPersonal->save();
                     // $AcceptRejectInfo = new AcceptRejectInfo;
                     // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
                     // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
@@ -261,6 +266,9 @@ class BulkActionModal extends Component
                     //     ->latest('id')
                     //     ->value('id') ?? null;
                     // $AcceptRejectInfo->save();
+                    BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                        'is_reject' => 1,
+                    ]);
                     DB::commit();
                     $this->dispatch('toastr', [
                         'type' => 'error',

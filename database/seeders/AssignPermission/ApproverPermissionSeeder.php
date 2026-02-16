@@ -39,6 +39,7 @@ class ApproverPermissionSeeder extends Seeder
             'Filter Applicant To Reject',
             'View Details To Reject',
             'Reject Beneficiary',
+            'lb-application-list',
 
 
 

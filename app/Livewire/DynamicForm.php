@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Helpers\FormHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use App\Models\AgeManagements;
 use App\Models\BeneficiaryAadhaar;
 use App\Models\Ifsccodemaster;
@@ -45,6 +46,7 @@ class DynamicForm extends Component
     public $aadhaarPayload = [];
     public $filter_data = [];
     public $schemeName;
+    public array $appTypeOptions = [];
 
     public $heading = '';
     public $maxDate, $minDate, $minDOB, $maxDOB;
@@ -59,6 +61,11 @@ class DynamicForm extends Component
 
     public function mount($schemeId, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null)
     {
+
+        if (!WorkFlowPermissionHelper::canCreateEntry()) {
+            abort(403, 'You are not authorized to create entry.');
+        }
+        $this->loadAppTypeOptions();
         $this->loadScheme($schemeId);
 
         if (!empty($this->views)) {
@@ -97,6 +104,72 @@ class DynamicForm extends Component
             $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
+    private function loadAppTypeOptions(): void
+    {
+        $json = $this->getSchemeJson();
+
+        $options = [];
+
+        foreach ($json['tabs'] ?? [] as $tab) {
+            foreach ($tab['fields'] ?? [] as $field) {
+
+                if (($field['field_name'] ?? '') === 'application_type') {
+                    $options = $field['options'] ?? [];
+                    break 2; // stop loop
+                }
+            }
+        }
+
+        // 🔐 Permission Filter
+        if (!WorkFlowPermissionHelper::canNormalEntryAllow()) {
+            unset($options[1]);
+        }
+
+        if (!WorkFlowPermissionHelper::canDuareSarkarEntryAllow()) {
+            unset($options[2]);
+        }
+
+        $this->appTypeOptions = $options;
+    }
+
+
+    // private function loadAppTypeOptions(): void
+    // {
+    //     $row = DB::table('scheme_tab_basefields')
+    //         ->where('field_name', 'application_type')
+    //         ->first();
+
+    //     if (!$row || empty($row->options)) {
+    //         $this->appTypeOptions = [];
+    //         return;
+    //     }
+
+    //     $options = json_decode($row->options, true);
+
+    //     // Permission filter
+    //     foreach ($options as $key => $label) {
+
+    //         if ($key == 1 && !WorkFlowPermissionHelper::canNormalEntryAllow()) {
+    //             unset($options[$key]);
+    //         }
+
+    //         if ($key == 2 && !WorkFlowPermissionHelper::canDuareSarkarEntryAllow()) {
+    //             unset($options[$key]);
+    //         }
+    //     }
+
+    //     $this->appTypeOptions = $options;
+    // }
+
+
+    public function updatedFormDataAppType($value)
+    {
+        if (!array_key_exists($value, $this->appTypeOptions)) {
+            $this->addError('formData.app_type', 'Unauthorized application type.');
+            $this->formData['app_type'] = null;
+        }
+    }
+
     public function onAadhaarCheckedReset()
     {
         $this->aadhaarVerified = false;
@@ -183,7 +256,9 @@ class DynamicForm extends Component
             $this->updateTabNavigation();
         }
     }
-    public function onDocumentTabFailed() {}
+    public function onDocumentTabFailed()
+    {
+    }
     /* ================== HELPERS ================== */
     private function markTabCompleted(string $tabCode): void
     {

@@ -18,9 +18,10 @@ class OperatorPermissionSeeder extends Seeder
             'edit draft',
             'view beneficiaries',
             'view reports',
-            'Normal Entry Permission',
-            'Normal Entry Allow',
-            'modify caste'
+            'Duare Sarkar Entry',
+            'Normal Entry',
+            'modify caste',
+            'submit-lb-form'
         ];
 
         // 1) find role

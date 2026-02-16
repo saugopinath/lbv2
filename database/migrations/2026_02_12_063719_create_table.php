@@ -58,6 +58,7 @@ return new class extends Migration {
                 caste_cer_no varchar(250),
                 next_level_role_id smallint,
                 is_final smallint default 0,
+                is_reject smallint default 0,
                 created_by_dist_code integer,
                 created_by_local_body_code integer,
                 other_details jsonb,

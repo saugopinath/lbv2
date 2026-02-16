@@ -25,7 +25,8 @@ class VerifierPermissionSeeder extends Seeder
             'view beneficiary details',
             'TakeActionForCaste',
             'VerifyCasteApplication',
-            'RevertCasteApplication'
+            'RevertCasteApplication',
+            'lb-application-list'
 
         ];
 

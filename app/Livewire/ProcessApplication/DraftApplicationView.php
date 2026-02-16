@@ -33,14 +33,15 @@ class DraftApplicationView extends Component
 
     public function openActionModal()
     {
+     
         $this->dispatch('hideLoader');
         // $this->dispatch('openBulkActionModal', selectedIds: [$this->application->application_id]);
-
+// dd($this->application);
         $this->dispatch('openBulkActionModal', [
             'selectedIds' => [
                 'application_id' => $this->application->application_id,
                 'schemeId' => $this->application->scheme_id,
-                'entry_type' => $this->application->app_type,
+                'entry_type' => $this->application->application_type,
             ]
         ]);
     }

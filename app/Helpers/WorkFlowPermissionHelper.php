@@ -19,7 +19,7 @@ class WorkFlowPermissionHelper
 
     public static function canEntry(): bool
     {
-        return Auth::user()->can('submit lb form');
+        return Auth::user()->can('submit-lb-form');
     }
     public static function canViewUser(): bool
     {
@@ -59,16 +59,16 @@ class WorkFlowPermissionHelper
     }
     public static function canNormalEntryAllow(): bool
     {
-        return Auth::user()->can('Normal Entry Allow');
+        return Auth::user()->can('Normal Entry');
+    }
+    public static function canDuareSarkarEntryAllow(): bool
+    {
+        return Auth::user()->can('Duare Sarkar Entry');
     }
     public static function canEntryAllow(): bool
     {
         return Auth::user()->can('Entry Allow');
-    }
-    public static function canDuareSarkarEntryAllow(): bool
-    {
-        return Auth::user()->can('Duare Sarkar Entry Allow');
-    }
+    }    
     public static function canCreateEntry(): bool
     {
         return self::canNormalEntryAllow() || self::canDuareSarkarEntryAllow();
@@ -157,9 +157,13 @@ class WorkFlowPermissionHelper
     {
         return Auth::user()->can('view user permission');
     }
+    public static function canRolePermissionManagement(): bool
+    {
+        return Auth::user()->can('role-permission-management');
+    }
     public static function canViewLbApplications(): bool
     {
-        return Auth::user()->can('view lb applications');
+        return Auth::user()->can('lb-application-list');
     }
     public static function canViewApplication(): bool
     {
@@ -203,9 +207,7 @@ class WorkFlowPermissionHelper
     }
     public static function canAnyLbMenu(): bool
     {
-        return Auth::user()->can('submit lb form')
-            || Auth::user()->can('view draft list')
-            || Auth::user()->can('view lb applications');
+        return Auth::user()->can('lb-application-list');
     }
     public static function canIncomplete(): bool
     {
@@ -301,12 +303,29 @@ class WorkFlowPermissionHelper
     }
     public static function canViewDetailsToReject(): bool
     {
-        return Auth::user()->can('View Details To Reject'); 
+        return Auth::user()->can('View Details To Reject');
     }
     public static function canRejectBeneficiary(): bool
     {
-        return Auth::user()->can('Reject Beneficiary'); 
+        return Auth::user()->can('Reject Beneficiary');
     }
 
+    public static function canMasterTab(): bool
+    {
+        return Auth::user()->can('master-tab');
+    }
+    public static function canRoleRankManagement(): bool
+    {
+        return Auth::user()->can('role-rank-management');
+    }
+    public static function canDefineWorkflow(): bool
+    {
+        return Auth::user()->can('define-workflow');
+    }
 
+     public static function canSchemeOnboard(): bool
+    {
+        return Auth::user()->can('master-tab')
+            || Auth::user()->can('submit-lb-form') || Auth::user()->can('role-rank-management') || Auth::user()->can('define-workflow');
+    }
 }
