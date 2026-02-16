@@ -28,10 +28,10 @@ class FinalPreview extends Component
     public bool $isLast = false;
     public $prevTab = null;
     public $nextTab = null;
-    public $ram,$form_preview;
+    public $ram, $form_preview;
     public $applicationId;
     public $beneficiaryId;
-
+    public array $appTypeOptions = [];
     public array $formData = [];
     public $navMessage = null;
     public $navMessageType = 'success';
@@ -47,7 +47,7 @@ class FinalPreview extends Component
 
     public function mount($schemeId, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null)
     {
-
+        $this->loadAppTypeOptions();
         $this->loadScheme($schemeId);
 
         if (!empty($this->views)) {
@@ -71,7 +71,26 @@ class FinalPreview extends Component
             }
         }
     }
+    private function loadAppTypeOptions(): void
+    {
+        $json = $this->getSchemeJson();
 
+        $options = [];
+
+        foreach ($json['tabs'] ?? [] as $tab) {
+            foreach ($tab['fields'] ?? [] as $field) {
+
+                if (($field['field_name'] ?? '') === 'application_type') {
+                    $options = $field['options'] ?? [];
+                    break 2; // stop loop
+                }
+            }
+        }
+
+
+
+        $this->appTypeOptions = $options;
+    }
     /* ================= TAB CONTROL ================= */
 
     public function setActiveTab($tabCode)

@@ -388,6 +388,8 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     {
         if ($this->revertrejectAction === 'revert') {
             $this->nextLabelRoleId = $workflowService->getLabelRoles($this->schemeId, 1)->same_label_role_id;
+        } elseif ($this->revertrejectAction === 'reject') {
+            $this->nextLabelRoleId = -100;
         }
         $ids = $this->getSelected();
         $select_lgd = session('lgd_session');
@@ -441,7 +443,8 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 DB::beginTransaction();
                 try {
                     BeneficiaryPersonalDetail::where('application_id', $id)->update([
-                        'is_reject' => 1,
+                        'next_level_role_id' => $this->nextLabelRoleId,
+                        'is_clean' => 10,
                     ]);
                     // $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
                     // $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(-1);

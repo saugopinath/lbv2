@@ -67,12 +67,12 @@ class BulkActionModal extends Component
             $entryType = null;
         }
 
-         if ($entryType) {
+        if ($entryType) {
             if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'verification') && CheckAuthHelper::isCommmonVerifier()) {
                 $this->availableActions['V'] = 'Verify';
             }
 
-            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'approver') &&CheckAuthHelper::isCommonApprover()) {
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'approver') && CheckAuthHelper::isCommonApprover()) {
                 $this->availableActions['A'] = 'Approve';
             }
 
@@ -92,6 +92,8 @@ class BulkActionModal extends Component
         if (in_array($value, ['R', 'T'])) {
             if ($value == 'T') {
                 $this->nextLabelRoleId = $workflowService->getLabelRoles($this->schemeId, 1)->same_label_role_id;
+            } elseif ($value == 'R') {
+                $this->nextLabelRoleId = -100;
             }
             $this->reasons = Codemaster::where('parent_id', 12)
                 ->orderBy('id', 'asc')
@@ -168,7 +170,7 @@ class BulkActionModal extends Component
             foreach ($ids as $id) {
                 DB::beginTransaction();
                 try {
-                     BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                    BeneficiaryPersonalDetail::where('application_id', $id)->update([
                         'next_level_role_id' => $this->nextLabelRoleId,
                     ]);
                     // $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
@@ -198,7 +200,7 @@ class BulkActionModal extends Component
                     throw $e;
                 }
             }
-        }elseif ($this->bulkActionType === 'T') {
+        } elseif ($this->bulkActionType === 'T') {
 
             // $user = auth()->user();
             // if (CheckAuthHelper::isCommonApprover()) {
@@ -245,7 +247,7 @@ class BulkActionModal extends Component
                     throw $e;
                 }
             }
-        }elseif ($this->bulkActionType === 'R') {
+        } elseif ($this->bulkActionType === 'R') {
             foreach ($ids as $id) {
                 DB::beginTransaction();
                 try {
@@ -267,7 +269,8 @@ class BulkActionModal extends Component
                     //     ->value('id') ?? null;
                     // $AcceptRejectInfo->save();
                     BeneficiaryPersonalDetail::where('application_id', $id)->update([
-                        'is_reject' => 1,
+                        'next_level_role_id' => $this->nextLabelRoleId,
+                        'is_clean' => 10,
                     ]);
                     DB::commit();
                     $this->dispatch('toastr', [
