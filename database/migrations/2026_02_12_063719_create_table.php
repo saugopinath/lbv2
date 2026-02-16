@@ -112,7 +112,7 @@ return new class extends Migration {
                 ifscode varchar(25),
                 bankname varchar(150),
                 bank_branch_name varchar(100),
-                bankaccountnumber char(30),
+                bankaccountnumber varchar(30),
                 other_details jsonb,
                 is_clean smallint NOT NULL DEFAULT 1,
                 created_at timestamp without time zone,

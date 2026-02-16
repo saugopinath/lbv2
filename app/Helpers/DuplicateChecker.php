@@ -30,16 +30,16 @@ class DuplicateChecker
             $column = '';
             $formFieldName = '';
             if ($type === 'Aadhar') {
-                $table = 'pension.beneficiary_aadhaars';
+                $table = 'pension.beneficiary_aadhars';
                 $column = 'encoded_aadhar';
                 $inputValue = $aadhaarPayload['encoded'] ?? null;
                 $formFieldName = 'aadhar_no';
             } elseif ($type === 'Mobile') {
-                $table = 'pension.beneficiary_personal_details';
+                $table = 'pension.beneficiary_personals';
                 $inputValue = trim($formData['mobile_no'] ?? '');
                 $formFieldName = 'mobile_no';
             } elseif ($type === 'Bank') {
-                $table = 'pension.beneficiary_bank_details';
+                $table = 'pension.beneficiary_banks';
                 $column = 'bankaccountnumber';
                 $inputValue = trim($formData['bankaccountnumber'] ?? '');
                 $formFieldName = 'bankaccountnumber';

@@ -10,7 +10,7 @@ window.initMasterData = function () {
     const assemblie  = document.querySelector('select[name="assemblie"]');
     const urban      = document.querySelector('select[name="rural_urban"]');
     const localbody  = document.querySelector('select[name="blockurban"]');
-    const gpward     = document.querySelector('select[name="gpWard"]');
+    const gpward     = document.querySelector('select[name="gpward"]');
 
     if (!districtSelect) return;
 
@@ -132,7 +132,7 @@ window.initMasterData = function () {
 
     if (gpward) {
         gpward.onchange = () => {
-            component.set('formData.gpWard', gpward.value);
+            component.set('formData.gpward', gpward.value);
         };
     }
 };

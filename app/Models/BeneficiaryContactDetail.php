@@ -13,4 +13,14 @@ class BeneficiaryContactDetail extends BaseAuditableModel
     protected $casts = [
         'other_details' => 'array',
     ];
+
+    public function personal()
+    {
+        return $this->belongsTo(BeneficiaryPersonalDetail::class, 'application_id', 'application_id');
+    }
+
+    public function municipality()
+    {
+        return $this->belongsTo(Municipality::class, 'blockurban', 'id');
+    }
 }

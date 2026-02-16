@@ -362,11 +362,11 @@ class CommonTabFieldsSeeder extends Seeder
                 |--------------------------------------------------------------------------
                 */
                 [
-                    'field_id' => 'gpWard',
-                    'field_name' => 'gpWard',
+                    'field_id' => 'gpward',
+                    'field_name' => 'gpward',
                     'level_name' => 'GP / Ward',
                     'field_type' => 'select',
-                    'field_class' => 'gpWard',
+                    'field_class' => 'gpward',
                     // 'options'         => [
                     //     'depends_on' => ['blockurban', 'rural_urban'],
                     //     'source_map' => [
