@@ -267,7 +267,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $query = BeneficiaryPersonalDetail::where('next_level_role_id', $this->sameLabelRoleId)->where('scheme_id', $this->schemeId)->where('is_final', $this->isFinal)->whereNot('is_reject', 1);
+        $query = BeneficiaryPersonalDetail::where('next_level_role_id', $this->sameLabelRoleId)->where('scheme_id', $this->schemeId)->where('is_final', $this->isFinal);
         if (!empty($this->filter_condition)) {
             $query->where($this->filter_condition);
         }
