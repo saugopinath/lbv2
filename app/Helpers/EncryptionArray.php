@@ -431,7 +431,7 @@ class EncryptionArray
                 $q->where('blockurban', $blockurban);
             }
             if ($gp_ward) {
-                $q->where('gpWard', $gp_ward);
+                $q->where('gpward', $gp_ward);
             }
         });
         return $query;

@@ -49,9 +49,11 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
     public array $filter_condition = [];
     public $sameLabelRoleId, $nextLabelRoleId;
+    public $isFinal;
     public function mount($schemeId = null, WorkflowService $workflowService): void
     {
         $this->schemeId = $schemeId;
+        $this->isFinal = 1;
         $labelRoles = $workflowService->getLabelRoles($schemeId);
         if ($labelRoles) {
             $this->sameLabelRoleId = $labelRoles->same_label_role_id;
@@ -263,7 +265,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $query = BeneficiaryPersonalDetail::where('next_level_role_id', $this->sameLabelRoleId)->where('scheme_id', $this->schemeId);
+        $query = BeneficiaryPersonalDetail::where('next_level_role_id', $this->sameLabelRoleId)->where('scheme_id', $this->schemeId)->where('is_final', $this->isFinal);
         if (!empty($this->filter_condition)) {
             $query->where($this->filter_condition);
         }

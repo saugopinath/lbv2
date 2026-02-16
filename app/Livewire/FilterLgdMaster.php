@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Crypt;
 class FilterLgdMaster extends Component
 {
     public $districts = [], $blocks = [], $urbanbodys = [], $gps = [], $wards = [], $subdivisions = [];
-    public $selectedDistrict, $selectedRuralurban, $selectedBlockurban, $selectedGpward, $selectedSubdivision;
+    public $selectedDistrict, $selectedRuralurban, $selectedBlockurban, $selectedGpWard, $selectedSubdivision;
     public array $filter_condition = [];
     public $button_show;
     public $visible = [
@@ -125,7 +125,7 @@ class FilterLgdMaster extends Component
         $this->selectedRuralurban = null;
         $this->selectedSubdivision = null;
         $this->selectedBlockurban = null;
-        $this->selectedGpward = null;
+        $this->selectedGpWard = null;
         $this->blocks = [];
         $this->urbanbodys = [];
         $this->subdivisions = [];
@@ -143,7 +143,7 @@ class FilterLgdMaster extends Component
     {
         $this->selectedSubdivision = null;
         $this->selectedBlockurban = null;
-        $this->selectedGpward = null;
+        $this->selectedGpWard = null;
         $this->blocks = [];
         $this->urbanbodys = [];
         $this->subdivisions = [];
@@ -169,7 +169,7 @@ class FilterLgdMaster extends Component
     public function updatedSelectedSubdivision()
     {
         $this->selectedBlockurban = null;
-        $this->selectedGpward = null;
+        $this->selectedGpWard = null;
         $this->urbanbodys = [];
         $this->gps = [];
         $this->wards = [];
@@ -186,7 +186,7 @@ class FilterLgdMaster extends Component
 
     public function updatedSelectedBlockurban()
     {
-        $this->selectedGpward = null;
+        $this->selectedGpWard = null;
         $this->gps = [];
         $this->wards = [];
         $this->loadGpOrWard();
@@ -206,7 +206,7 @@ class FilterLgdMaster extends Component
         $this->selectedRuralurban = null;
         $this->selectedSubdivision = null;
         $this->selectedBlockurban = null;
-        $this->selectedGpward = null;
+        $this->selectedGpWard = null;
         $this->blocks = [];
         $this->urbanbodys = [];
         $this->subdivisions = [];
@@ -250,6 +250,8 @@ class FilterLgdMaster extends Component
 
     public function updatedSelectedGpWard()
     {
+        // Auto-search logic removed as per user request to rely on manual search button
+        /*
         $user = auth()->user();
 
         $stage = $this->stage ?? null;
@@ -271,6 +273,7 @@ class FilterLgdMaster extends Component
                 'gp_ward'        => $this->selectedGpWard,
             ]);
         }
+        */
     }
 
 
