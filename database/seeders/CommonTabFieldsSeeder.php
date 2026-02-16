@@ -28,6 +28,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 1,
+                    'is_mendetory' => 1,
                     'db_colunm' => 'application_type',
                 ],
                 [
