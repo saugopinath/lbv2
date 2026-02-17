@@ -4,8 +4,8 @@
         {{ $heading }}
     </h2>
 
-    <livewire:dup-aadhaar-check />
-    @if($aadhaarVerified)
+    {{-- <livewire:dup-aadhaar-check />
+    @if($aadhaarVerified) --}}
 
         <nav class="flex space-x-6 pl-6 pr-6 border-b border-gray-100">
             @foreach($views as $view)
@@ -95,5 +95,5 @@
             @endif
         @endif
         <livewire:final-submit-modal />
-    @endif
+    {{-- @endif --}}
 </div>
