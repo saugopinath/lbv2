@@ -829,6 +829,15 @@ class DynamicForm extends Component
             foreach ($tab['fields'] ?? [] as $field) {
                 $fieldName = $field['field_name'];
                 $fieldRules = explode('|', $field['validation_rule'] ?? '');
+                if ($field['field_type'] === 'checkbox') {
+
+                    $fieldRules = array_map(function ($rule) {
+
+                        return $rule === 'required'
+                            ? 'accepted'
+                            : $rule;
+                    }, $fieldRules);
+                }
                 if ($fieldName === 'age' && $ageConfig) {
                     $fieldRules = array_filter($fieldRules, function ($rule) {
                         $r = trim($rule);
