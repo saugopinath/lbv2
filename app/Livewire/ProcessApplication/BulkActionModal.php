@@ -35,7 +35,6 @@ class BulkActionModal extends Component
     public string $remark = '';
     public array $reasons = [];
     public array $availableActions = [];
-    public $filter_data = [];
     public int $currentUserId;
     public $applicationId, $entryType;
     public $sameLabelRoleId, $nextLabelRoleId, $schemeId;
@@ -44,18 +43,6 @@ class BulkActionModal extends Component
     #[On('openBulkActionModal')]
     public function openModal(array $selectedIds = [], WorkflowService $workflowService)
     {
-        $select_lgd = session('lgd_session');
-        // dd($select_lgd);
-        if (!empty($select_lgd['district_id'])) {
-            $this->filter_data['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
-        }
-        if (!empty($select_lgd['block_id'])) {
-            $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
-        }
-        if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
-        }
-
         $this->reset(['bulkActionType', 'reason', 'remark', 'availableActions', 'bulkActionTypeLabel']);
         $this->selectedRows = $selectedIds;
         // dd($this->selectedRows);
@@ -121,39 +108,54 @@ class BulkActionModal extends Component
 
     public function performBulkAction()
     {
+
+
         $validated = $this->validate([
             'bulkActionType' => 'required|in:V,A,R,T',
             'reason' => in_array($this->bulkActionType, ['R', 'T']) ? 'required' : 'nullable',
             'remark' => in_array($this->bulkActionType, ['R', 'T']) ? 'required|string|max:255' : 'nullable',
         ]);
 
+        $successMessage = 'Action performed successfully!';
         $approverRoleId = Codemaster::getIdByCode(23);
+        $operatorRoleId = Codemaster::getIdByCode(21);
+        $currentUserId = Auth::id();
+        $select_lgd = session('lgd_session');
+        $user_id = Crypt::decryptString($select_lgd['role_id']);
 
+
+        // DB::transaction(function () use (&$successMessage, $approverRoleId, $operatorRoleId, $currentUserId) {
+        // $ids = $this->applicationId;
         $ids = (array) $this->applicationId;
+        // dd($ids);
         if ($this->bulkActionType === 'V') {
             foreach ($ids as $id) {
-
+                // dd($id);
                 DB::beginTransaction();
                 try {
-                    BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->update([
+                    // dd($this->nextLabelRoleId);
+                    //$DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
+                    // dd($DraftBeneficiaryPersonal);
+                    //$DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
+                    // dd($DraftBeneficiaryPersonal);
+                    //$DraftBeneficiaryPersonal->save();
+                    // $AcceptRejectInfo = new AcceptRejectInfo;
+                    // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+                    // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                    // $AcceptRejectInfo->ip_address = request()->ip();
+                    // $AcceptRejectInfo->user_id = Auth::id();
+                    // $AcceptRejectInfo->browser = request()->header('User-Agent');
+                    // $AcceptRejectInfo->model_name = null;
+                    // $AcceptRejectInfo->op_type = $approverRoleId;
+                    // $AcceptRejectInfo->revert_reason_cause_id = null;
+                    // $AcceptRejectInfo->revert_reason_remarks = null;
+                    // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                    //     ->latest('id')
+                    //     ->value('id') ?? null;
+                    // $AcceptRejectInfo->save();
+                    BeneficiaryPersonalDetail::where('application_id', $id)->update([
                         'next_level_role_id' => $this->nextLabelRoleId,
                     ]);
-                    $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
-                    $AcceptRejectInfo = new AcceptRejectInfo;
-                    $AcceptRejectInfo->application_id = $id;
-                    $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
-                    $AcceptRejectInfo->ip_address = request()->ip();
-                    $AcceptRejectInfo->scheme_id = $this->schemeId;
-                    $AcceptRejectInfo->user_id = Auth::id();
-                    $AcceptRejectInfo->browser = request()->header('User-Agent');
-                    $AcceptRejectInfo->model_name = null;
-                    $AcceptRejectInfo->op_type = $approverRoleId;
-                    $AcceptRejectInfo->revert_reason_cause_id = null;
-                    $AcceptRejectInfo->revert_reason_remarks = null;
-                    $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                        ->latest('id')
-                        ->value('id') ?? null;
-                    $AcceptRejectInfo->save();
                     DB::commit();
                     $this->dispatch('toastr', [
                         'type' => 'success',
@@ -168,26 +170,26 @@ class BulkActionModal extends Component
             foreach ($ids as $id) {
                 DB::beginTransaction();
                 try {
-                    BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->update([
+                    BeneficiaryPersonalDetail::where('application_id', $id)->update([
                         'next_level_role_id' => $this->nextLabelRoleId,
-                        'is_clean' => 1,
                     ]);
-                    $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
-                    $AcceptRejectInfo = new AcceptRejectInfo;
-                    $AcceptRejectInfo->application_id = $id;
-                    $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
-                    $AcceptRejectInfo->ip_address = request()->ip();
-                    $AcceptRejectInfo->scheme_id = $this->schemeId;
-                    $AcceptRejectInfo->user_id = Auth::id();
-                    $AcceptRejectInfo->browser = request()->header('User-Agent');
-                    $AcceptRejectInfo->model_name = null;
-                    $AcceptRejectInfo->op_type = Codemaster::getIdByCode(0);
-                    $AcceptRejectInfo->revert_reason_cause_id = null;
-                    $AcceptRejectInfo->revert_reason_remarks = null;
-                    $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                        ->latest('id')
-                        ->value('id') ?? null;
-                    $AcceptRejectInfo->save();
+                    // $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
+                    // $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId
+                    // $DraftBeneficiaryPersonal->save();
+                    // $AcceptRejectInfo = new AcceptRejectInfo;
+                    // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+                    // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                    // $AcceptRejectInfo->ip_address = request()->ip();
+                    // $AcceptRejectInfo->user_id = Auth::id();
+                    // $AcceptRejectInfo->browser = request()->header('User-Agent');
+                    // $AcceptRejectInfo->model_name = null;
+                    // $AcceptRejectInfo->op_type = Codemaster::getIdByCode(0);
+                    // $AcceptRejectInfo->revert_reason_cause_id = null;
+                    // $AcceptRejectInfo->revert_reason_remarks = null;
+                    // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                    //     ->latest('id')
+                    //     ->value('id') ?? null;
+                    // $AcceptRejectInfo->save();
                     DB::commit();
                     $this->dispatch('toastr', [
                         'type' => 'success',
@@ -200,34 +202,38 @@ class BulkActionModal extends Component
             }
         } elseif ($this->bulkActionType === 'T') {
 
-            if (CheckAuthHelper::isCommonApprover()) {
-                $next_level_role_id = Codemaster::getIdByCode(22);
-            }
-            if (CheckAuthHelper::isCommmonVerifier()) {
-                $next_level_role_id = Codemaster::getIdByCode(21);
-            }
+            // $user = auth()->user();
+            // if (CheckAuthHelper::isCommonApprover()) {
+            //     // if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+            //     $next_level_role_id = Codemaster::getIdByCode(22);
+            // }
+            // if (CheckAuthHelper::isCommmonVerifier()) {
+            //     // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+            //     $next_level_role_id = Codemaster::getIdByCode(21);
+            // }
             foreach ($ids as $id) {
                 DB::beginTransaction();
                 try {
-                    BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->update([
+                    BeneficiaryPersonalDetail::where('application_id', $id)->update([
                         'next_level_role_id' => $this->nextLabelRoleId,
                     ]);
-                    $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
-                    $AcceptRejectInfo = new AcceptRejectInfo;
-                    $AcceptRejectInfo->application_id = $id;
-                    $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
-                    $AcceptRejectInfo->ip_address = request()->ip();
-                    $AcceptRejectInfo->scheme_id = $this->schemeId;
-                    $AcceptRejectInfo->user_id = Auth::id();
-                    $AcceptRejectInfo->browser = request()->header('User-Agent');
-                    $AcceptRejectInfo->model_name = null;
-                    $AcceptRejectInfo->op_type = $next_level_role_id;
-                    $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
-                    $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
-                    $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                        ->latest('id')
-                        ->value('id') ?? null;
-                    $AcceptRejectInfo->save();
+                    // $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
+                    // $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
+                    // $DraftBeneficiaryPersonal->save();
+                    // $AcceptRejectInfo = new AcceptRejectInfo;
+                    // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+                    // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                    // $AcceptRejectInfo->ip_address = request()->ip();
+                    // $AcceptRejectInfo->user_id = Auth::id();
+                    // $AcceptRejectInfo->browser = request()->header('User-Agent');
+                    // $AcceptRejectInfo->model_name = null;
+                    // $AcceptRejectInfo->op_type = $next_level_role_id;
+                    // $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
+                    // $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
+                    // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                    //     ->latest('id')
+                    //     ->value('id') ?? null;
+                    // $AcceptRejectInfo->save();
                     BeneficiaryPersonalDetail::where('application_id', $id)->update([
                         'next_level_role_id' => $this->nextLabelRoleId,
                     ]);
@@ -245,26 +251,27 @@ class BulkActionModal extends Component
             foreach ($ids as $id) {
                 DB::beginTransaction();
                 try {
-                    BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->update([
+                    // $DraftBeneficiaryPersonal = BeneficiaryPersonalDetail::find($id);
+                    // $DraftBeneficiaryPersonal->next_level_role_id = $this->nextLabelRoleId;
+                    // $DraftBeneficiaryPersonal->save();
+                    // $AcceptRejectInfo = new AcceptRejectInfo;
+                    // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
+                    // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                    // $AcceptRejectInfo->ip_address = request()->ip();
+                    // $AcceptRejectInfo->user_id = Auth::id();
+                    // $AcceptRejectInfo->browser = request()->header('User-Agent');
+                    // $AcceptRejectInfo->model_name = null;
+                    // $AcceptRejectInfo->op_type = Codemaster::getIdByCode(-1);
+                    // $AcceptRejectInfo->revert_reason_cause_id = null;
+                    // $AcceptRejectInfo->revert_reason_remarks = null;
+                    // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                    //     ->latest('id')
+                    //     ->value('id') ?? null;
+                    // $AcceptRejectInfo->save();
+                    BeneficiaryPersonalDetail::where('application_id', $id)->update([
                         'next_level_role_id' => $this->nextLabelRoleId,
                         'is_clean' => 10,
                     ]);
-                    $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
-                    $AcceptRejectInfo = new AcceptRejectInfo;
-                    $AcceptRejectInfo->application_id = $id;
-                    $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
-                    $AcceptRejectInfo->ip_address = request()->ip();
-                    $AcceptRejectInfo->scheme_id = $this->schemeId;
-                    $AcceptRejectInfo->user_id = Auth::id();
-                    $AcceptRejectInfo->browser = request()->header('User-Agent');
-                    $AcceptRejectInfo->model_name = null;
-                    $AcceptRejectInfo->op_type = Codemaster::getIdByCode(-1);
-                    $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
-                    $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
-                    $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                        ->latest('id')
-                        ->value('id') ?? null;
-                    $AcceptRejectInfo->save();
                     DB::commit();
                     $this->dispatch('toastr', [
                         'type' => 'error',
@@ -276,13 +283,16 @@ class BulkActionModal extends Component
                 }
             }
         }
+        // });
+        // Toaster::success($successMessage);
 
         $this->bulkActionModal = false;
 
         $this->reset(['bulkActionType', 'reason', 'remark', 'selectedRows', 'bulkActionTypeLabel']);
 
         return redirect()->route('lb-application-list');
-
+        // $this->dispatch('toaster-success', $successMessage);
+        // $this->dispatch('actionPerformedAndRedirect');
     }
 
     public function render()
