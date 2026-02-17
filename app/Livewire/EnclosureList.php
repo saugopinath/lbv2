@@ -341,7 +341,6 @@ class EnclosureList extends Component
             }
         }
 
-        // ✅ ALL REQUIRED DOCS PRESENT
         $this->dispatch('document-validation-passed');
     }
 
