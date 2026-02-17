@@ -116,7 +116,6 @@ class DynamicForm extends Component
         }
     }
 
-
     private function loadExistingApplication(): void
     {
         foreach ($this->views as $tabCode) {
@@ -135,30 +134,90 @@ class DynamicForm extends Component
 
             $record = $modelClass::where('application_id', $this->applicationId)->first();
 
-            if ($record) {
+            if (!$record) {
+                continue;
+            }
 
-                $this->completedTabs[] = (string)$tabCode;
+            $this->completedTabs[] = (string) $tabCode;
 
-                $data = $record->toArray();
+            $data = $record->toArray();
 
-                foreach ($data as $key => $value) {
+            /**
+             * ----------------------------------------------------
+             * Build Confirm Mapping (Based On SAME Rule)
+             * ----------------------------------------------------
+             */
 
-                    if ($key === 'other_details') {
+            $confirmMap = [];
 
-                        if (is_string($value)) {
-                            $value = json_decode($value, true);
-                        }
+            // IMPORTANT: Set correct tab context
+            $this->activeTab = $tabCode;
 
-                        if (is_array($value)) {
-                            foreach ($value as $jsonKey => $jsonValue) {
-                                $this->formData[$jsonKey] = $jsonValue;
-                            }
-                        }
+            $rules = $this->getValidationRulesForActiveTab();
 
+            foreach ($rules as $fieldKey => $ruleSet) {
+
+                $ruleParts = is_array($ruleSet)
+                    ? $ruleSet
+                    : explode('|', $ruleSet);
+
+                foreach ($ruleParts as $rule) {
+
+                    if (!is_string($rule)) {
                         continue;
                     }
 
-                    $this->formData[$key] = $value;
+                    if (str_starts_with($rule, 'same:')) {
+
+                        $originalField = str_replace(
+                            'formData.',
+                            '',
+                            substr($rule, 5)
+                        );
+
+                        $confirmField = str_replace(
+                            'formData.',
+                            '',
+                            $fieldKey
+                        );
+
+                        $confirmMap[$originalField] = $confirmField;
+                    }
+                }
+            }
+
+            /**
+             * ----------------------------------------------------
+             * Populate Form Data
+             * ----------------------------------------------------
+             */
+
+            foreach ($data as $key => $value) {
+
+                if ($key === 'other_details') {
+
+                    if (is_string($value)) {
+                        $value = json_decode($value, true);
+                    }
+
+                    if (is_array($value)) {
+                        foreach ($value as $jsonKey => $jsonValue) {
+
+                            $this->formData[$jsonKey] = $jsonValue;
+
+                            if (isset($confirmMap[$jsonKey])) {
+                                $this->formData[$confirmMap[$jsonKey]] = $jsonValue;
+                            }
+                        }
+                    }
+
+                    continue;
+                }
+
+                $this->formData[$key] = $value;
+
+                if (isset($confirmMap[$key])) {
+                    $this->formData[$confirmMap[$key]] = $value;
                 }
             }
         }
@@ -167,7 +226,6 @@ class DynamicForm extends Component
             $this->allTabsCompleted = true;
         }
     }
-
 
     private function setInitialActiveTab(): void
     {
