@@ -6,6 +6,7 @@ use App\Models\BeneficiaryAadhaar;
 use App\Models\BeneficiaryCommonList;
 use App\Models\CasteModificationInfo;
 use App\Models\Codemaster;
+use App\Models\Scheme;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Component;
 
@@ -21,6 +22,7 @@ class SearchBeneficiary extends Component
     public $verified_code = null;
     public $aproved_code = null;
     public $revert_code = null;
+    public $schemeOptions = [];
 
     public $searchOptions = [
         1 => 'Application ID',
@@ -49,6 +51,12 @@ class SearchBeneficiary extends Component
         if (!empty($select_lgd['subdivision_id'])) {
             $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
+
+        // $formOptions = json_decode(file_get_contents(public_path('js/form-options.json')), true);
+        // $this->schemeOptions = $formOptions['Caste'] ?? [];
+        // dd($this->schemeOptions);
+        $this->schemeOptions = Scheme::where('is_active', true)->pluck('name', 'id')->toArray();
+        // dd($this->schemeOptions);
         $this->verified_code = Codemaster::getIdByCode(2202);
         $this->aproved_code = Codemaster::getIdByCode(2203);
         $this->revert_code = Codemaster::getIdByCode(2204);
@@ -61,14 +69,13 @@ class SearchBeneficiary extends Component
             $this->searchValue = '';
             return;
         }
-
         $this->currentLabel = $this->searchOptions[$value];
         $this->reset('searchValue');
     }
-
     protected function rules()
     {
         return [
+            'selectScheme' => 'required',
             'searchType'  => 'required|in:1,2,3,4',
             'searchValue' => ['required', function ($attribute, $value, $fail) {
                 switch ($this->searchType) {
@@ -96,6 +103,7 @@ class SearchBeneficiary extends Component
     }
 
     protected $messages = [
+        'selectScheme.required' => 'Please select a scheme.',
         'searchType.required' => 'Please select a search type.',
         'searchType.in'       => 'Invalid search type selected.',
         'searchValue.required' => 'Please enter a value to search.',

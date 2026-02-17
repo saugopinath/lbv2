@@ -67,7 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted']) 
+    Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])
         ->name('lb-application-list');
 
     Route::get('/application/{id}', DraftApplicationView::class)
@@ -85,7 +85,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Role & Office Mappings
     Route::get('role-office-master-mappings', [RoleOfficeTypeMappingsController::class, 'index'])
         ->middleware('permission.redirect:canRoleMapping')
-        ->name('role-office-master-mappings');   
+        ->name('role-office-master-mappings');
 
     Route::get('/role-office-type-mappings/create', Create::class)
         ->middleware('permission.redirect:canRoleMappings')
@@ -113,7 +113,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('assign-users-permissions');
 
     Route::get('/role-permission-management', [RolePermisssionManagementController::class, 'index'])
-     ->middleware('permission.redirect:canRolePermissionManagement')
+        ->middleware('permission.redirect:canRolePermissionManagement')
         ->name('role-permission-management');
 
     // Duty Management
@@ -141,8 +141,8 @@ Route::get(
 )->name('dynamic-form-page');
 
 Route::get('/master-tab', App\Livewire\MasterTabManager::class)
- ->middleware('permission.redirect:canMasterTab')
-->name('master-tab');
+    ->middleware('permission.redirect:canMasterTab')
+    ->name('master-tab');
 // Route::get('/tab-filed-manage', App\Livewire\SchemeTabFieldManager::class)->name('tab-filed-manage');
 Route::get('/tab-field-manager', SchemeTabFieldManager::class)->name('tab-field-manager');
 // Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name(name: 'menu-tab');
@@ -151,7 +151,7 @@ Route::get('/edit-validation', [ValidationManagerController::class, 'index'])->n
 Route::get('/master-tab-creation', [MasterTabCreationController::class, 'index'])->name('master-tab-creation');
 
 Route::get('/schemes-final-submitted', [SchemeController::class, 'finalSubmitted'])
- ->middleware('permission.redirect:canEntry')
+    ->middleware('permission.redirect:canEntry')
     ->name('schemes.final-submitted');
 
 Route::get('/duplicate-checks', [SchemeController::class, 'finalSubmitted'])->name('duplicate-checks');
@@ -163,9 +163,31 @@ Route::controller(workflowmanagementController::class)->group(function () {
 });
 
 Route::get('/role-rank-management', RolerankManagement::class)
- ->middleware('permission.redirect:canRoleRankManagement')
- ->name('role-rank-management');
+    ->middleware('permission.redirect:canRoleRankManagement')
+    ->name('role-rank-management');
 
 Route::get('/define-workflow', [SchemeController::class, 'finalSubmitted'])
- ->middleware('permission.redirect:canDefineWorkflow')
- ->name('define-workflow');
+    ->middleware('permission.redirect:canDefineWorkflow')
+    ->name('define-workflow');
+
+
+// Caste Update
+Route::get('/Caste-modification-info', [CasteModificationController::class, 'index'])
+    ->middleware('permission.redirect:canModifyCaste')
+    ->name('Caste-modification-info');
+
+Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])
+    // ->middleware('permission.redirect:canEditCaste')
+    ->name('caste-modification.edit');
+
+Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
+    // ->middleware('permission.redirect:canUpdateCaste')
+    ->name('beneficiary.updateCaste');
+
+Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])
+    ->middleware('permission.redirect:canCasteModification')
+    ->name('caste-modification-list');
+
+Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
+    // ->middleware('permission.redirect:canBeneficiaryDetails')
+    ->name('view-beneficiary-details');

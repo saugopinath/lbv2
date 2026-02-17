@@ -4,8 +4,17 @@
     @endphp
     <h2 class="text-xl font-bold mb-4">Search Beneficiary</h2>
 
-    <div class="grid grid-cols-2 gap-4 mb-4">
+    <div class="grid grid-cols-3 gap-4 mb-4">
         <!-- Select search type -->
+        <div>
+            <x-form.select
+                name="selectScheme" id="selectScheme" label="Select Scheme" wire:model.live="selectScheme" placeholder="--Select Scheme --" required>
+                <option value="">--Select Scheme --</option>
+                @foreach($schemeOptions as $key => $label)
+                <option value="{{ $key }}">{{ $label }}</option>
+                @endforeach
+            </x-form.select>
+        </div>
         <div>
             <x-form.select
                 name="searchType" id="searchType" label="Search Applicant By" wire:model.live="searchType" placeholder="--Select Search Type--" required>
@@ -21,8 +30,7 @@
                 label="{{ $this->currentLabel }}" placeholder="Enter {{ $this->currentLabel }}" required
                 type="text"
                 oninput="this.value = this.value.replace(/[^0-9]/g);"
-                maxlength="{{ ($searchType == '3') ? 12 : (($searchType == '4') ? 10 : '') }}"
-            />
+                maxlength="{{ ($searchType == '3') ? 12 : (($searchType == '4') ? 10 : '') }}" />
         </div>
     </div>
     <x-button.loading-button action="search" text="Search"></x-button.loading-button>
