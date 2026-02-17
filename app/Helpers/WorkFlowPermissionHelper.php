@@ -68,7 +68,7 @@ class WorkFlowPermissionHelper
     public static function canEntryAllow(): bool
     {
         return Auth::user()->can('Entry Allow');
-    }    
+    }
     public static function canCreateEntry(): bool
     {
         return self::canNormalEntryAllow() || self::canDuareSarkarEntryAllow();
@@ -207,7 +207,8 @@ class WorkFlowPermissionHelper
     }
     public static function canAnyLbMenu(): bool
     {
-        return Auth::user()->can('lb-application-list');
+        return Auth::user()->can('lb-application-list') || Auth::user()->can('submit-lb-form');
+
     }
     public static function canIncomplete(): bool
     {
@@ -323,9 +324,9 @@ class WorkFlowPermissionHelper
         return Auth::user()->can('define-workflow');
     }
 
-     public static function canSchemeOnboard(): bool
+    public static function canSchemeOnboard(): bool
     {
         return Auth::user()->can('master-tab')
-            || Auth::user()->can('submit-lb-form') || Auth::user()->can('role-rank-management') || Auth::user()->can('define-workflow');
+            || Auth::user()->can('role-rank-management') || Auth::user()->can('define-workflow');
     }
 }
