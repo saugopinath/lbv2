@@ -21,7 +21,7 @@ class OpTypeSeeder extends Seeder
             ),
         );
         foreach ($codemasterParents as $codemasterParent_item) {
-            Codemaster::create([
+            Codemaster::updateOrCreate([
                 'name'     => strtoupper($codemasterParent_item['name']),
                 'code'     => $codemasterParent_item['code'],
                 'short_name'     => $codemasterParent_item['short_name'],
@@ -58,9 +58,15 @@ class OpTypeSeeder extends Seeder
                 "parent_short_code" => "op_type",
                 "code" => "2105",
             ),
+             array(
+                "name" => "Application Partial",
+                "short_name" => "application_partial",
+                "parent_short_code" => "op_type",
+                "code" => "2106",
+            ),
         );
         foreach ($codemasterChilds as $codemasterChild_item) {
-            Codemaster::create([
+            Codemaster::updateOrCreate([
                 'name' => strtoupper($codemasterChild_item['name']),
                 'code' => $codemasterChild_item['code'],
                 'parent_short_code' => $codemasterChild_item['parent_short_code'],

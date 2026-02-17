@@ -177,66 +177,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $this->setPerPage((int) $value);
         $this->resetPage();
     }
-    // public function filters(): array
-    // {
-    //     return [
-    //         TextFilter::make('Application ID')
-    //             ->filter(function ($query, $value) {
-    //                 $query->whereHas('sourceable', function ($q) use ($value) {
-    //                     $q->where('application_id', 'ILIKE', "%{$value}%");
-    //                 });
-    //             }),
-
-    //         TextFilter::make('Applicant Name')
-    //             ->filter(function ($query, $value) {
-    //                 $query->whereHas('sourceable', function ($q) use ($value) {
-    //                     $q->where('full_name', 'ILIKE', "%{$value}%");
-    //                 });
-    //             }),
-    //     ];
-    // }
-
-    // public function columns(): array
-    // {
-    //     return [
-    //         Column::make("Application ID", "application_id")
-    //             ->label(fn($row) => $row->sourceable->application_id ?? 'N/A')
-    //             ->sortable()
-    //             ->searchable(function ($query, $searchTerm) {
-    //                 $query->whereHas('sourceable', function ($q) use ($searchTerm) {
-    //                     $q->where('application_id', 'ILIKE', "%{$searchTerm}%");
-    //                 });
-    //             }),
-
-    //         Column::make("Applicant Name", "full_name")
-    //             ->label(fn($row) => $row->sourceable->full_name ?? 'N/A'),
-
-    //         Column::make("Father's Name", "fullname")
-    //             ->label(function ($row) {
-    //                 return optional(
-    //                     $row->sourceable->relationships->firstWhere(
-    //                         'relation_type_id',
-    //                         Codemaster::getIdByCode(131)
-    //                     )
-    //                 )->full_name ?? 'N/A';
-    //             }),
-
-    //         Column::make("Age", "age")
-    //             ->label(fn($row) => Carbon::parse($row->sourceable->dob)->age
-    //                 ?? 'N/A'),
-
-    //         $columns[] = Column::make("Actions")
-    //             ->label(function ($row) {
-    //                 return view('coulmn_button.view', [
-    //                     'link' => route('draft-application.view', Crypt::encryptString($row->sourceable->application_id)),
-    //                     'tooltip' => 'View Application',
-    //                 ])->render();
-    //             })
-    //             ->html(),
-    //     ];
-    // }
-
-
+ 
     public function columns(): array
     {
         return [

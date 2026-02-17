@@ -5,12 +5,14 @@ namespace App\Livewire;
 use App\Models\AcceptRejectInfo;
 use App\Models\BeneficiaryEnclosure;
 use App\Models\BeneficiaryPersonalDetail;
+use App\Models\Codemaster;
 use App\Models\Scheme;
 use Exception;
 use App\Services\WorkflowService;
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Livewire\Component;
+
 
 class FinalSubmitModal extends Component
 {
@@ -27,7 +29,7 @@ class FinalSubmitModal extends Component
     public function openFinalModal($applicationId, $tabsData, $schemeId = null)
     {
         $this->applicationId = $applicationId;
-        $this->tabsData = $tabsData;       
+        $this->tabsData = $tabsData;
         $this->schemeId = $schemeId;
         $this->loadimage();
         $this->loadSchemeName();
@@ -110,7 +112,7 @@ class FinalSubmitModal extends Component
             $AcceptRejectInfo->user_id = Auth::id();
             $AcceptRejectInfo->browser = request()->header('User-Agent');
             $AcceptRejectInfo->model_name = null;
-            $AcceptRejectInfo->op_type = 1;
+            $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2101);
             $AcceptRejectInfo->revert_reason_cause_id = null;
             $AcceptRejectInfo->revert_reason_remarks = null;
             $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $this->applicationId)
