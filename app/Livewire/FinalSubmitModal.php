@@ -8,6 +8,8 @@ use App\Models\BeneficiaryPersonalDetail;
 use App\Models\Scheme;
 use Exception;
 use App\Services\WorkflowService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -27,7 +29,7 @@ class FinalSubmitModal extends Component
     public function openFinalModal($applicationId, $tabsData, $schemeId = null)
     {
         $this->applicationId = $applicationId;
-        $this->tabsData = $tabsData;       
+        $this->tabsData = $tabsData;
         $this->schemeId = $schemeId;
         $this->loadimage();
         $this->loadSchemeName();

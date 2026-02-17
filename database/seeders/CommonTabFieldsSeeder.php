@@ -27,7 +27,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'regex' => null,
                     'is_multiple' => false,
                     'is_active' => true,
-                    'field_position' => 1,
+                    'field_position' => 1,                   
                     'db_colunm' => 'application_type',
                     'is_mendetory' => 1,
                 ],

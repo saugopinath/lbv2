@@ -12,6 +12,7 @@ use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\DuplicateChecker;
+use App\Models\BeneficiaryPersonalDetail;
 use App\Models\UniqueAppBenId;
 use Livewire\Component;
 use Illuminate\Support\Facades\File;
@@ -109,9 +110,7 @@ class DynamicForm extends Component
     private function loadAppTypeOptions(): void
     {
         $json = $this->getSchemeJson();
-
         $options = [];
-
         foreach ($json['tabs'] ?? [] as $tab) {
             foreach ($tab['fields'] ?? [] as $field) {
 
@@ -121,48 +120,35 @@ class DynamicForm extends Component
                 }
             }
         }
-
-        // 🔐 Permission Filter
         if (!WorkFlowPermissionHelper::canNormalEntryAllow()) {
             unset($options[1]);
         }
-
         if (!WorkFlowPermissionHelper::canDuareSarkarEntryAllow()) {
             unset($options[2]);
         }
-
         $this->appTypeOptions = $options;
     }
-
-
     // private function loadAppTypeOptions(): void
     // {
     //     $row = DB::table('scheme_tab_basefields')
     //         ->where('field_name', 'application_type')
     //         ->first();
-
     //     if (!$row || empty($row->options)) {
     //         $this->appTypeOptions = [];
     //         return;
     //     }
-
     //     $options = json_decode($row->options, true);
-
     //     // Permission filter
     //     foreach ($options as $key => $label) {
-
     //         if ($key == 1 && !WorkFlowPermissionHelper::canNormalEntryAllow()) {
     //             unset($options[$key]);
     //         }
-
     //         if ($key == 2 && !WorkFlowPermissionHelper::canDuareSarkarEntryAllow()) {
     //             unset($options[$key]);
     //         }
     //     }
-
     //     $this->appTypeOptions = $options;
     // }
-
 
     public function updatedFormDataAppType($value)
     {
@@ -176,14 +162,11 @@ class DynamicForm extends Component
     {
         $this->aadhaarVerified = false;
         $this->aadhaarPayload = [];
-
-        // 🔥 FULL RESET
         $this->applicationId = null;
         $this->beneficiaryId = null;
         $this->formData = [];
         $this->completedTabs = [];
         $this->allTabsCompleted = false;
-
         if (!empty($this->views)) {
             $this->activeTab = (string) $this->views[0];
             $this->updateTabNavigation();
@@ -257,7 +240,6 @@ class DynamicForm extends Component
         if (!empty($rules)) {
             $this->validate($rules);
         }
-
         $this->ensureApplicationIds();
 
         if (!$this->checkDuplicateEntries()) {
@@ -294,16 +276,14 @@ class DynamicForm extends Component
         // Final modal open
         $this->openFinalReviewModal();
     }
-    public function onDocumentTabFailed()
-    {
-    }
+    public function onDocumentTabFailed() {}
+
     /* ================== HELPERS ================== */
     private function markTabCompleted(string $tabCode): void
     {
         if (!in_array($tabCode, $this->completedTabs, true)) {
             $this->completedTabs[] = $tabCode;
         }
-
         if (count($this->completedTabs) === count($this->views)) {
             $this->allTabsCompleted = true;
         }
@@ -401,7 +381,6 @@ class DynamicForm extends Component
         $this->currentIndex = $index;
         $this->isFirst = ($index === 0);
         $this->isLast = ($index === count($this->views) - 1);
-
         $this->prevTab = $this->views[$index - 1] ?? null;
         $this->nextTab = $this->views[$index + 1] ?? null;
     }
@@ -473,20 +452,17 @@ class DynamicForm extends Component
             86400,
             fn() => Schema::getColumnListing($tableName)
         );
-
         $extraFields = [
             'created_by_dist_code' => $this->filter_data['created_by_dist_code'] ?? null,
             'created_by_local_body_code' => $this->filter_data['created_by_local_body_code'] ?? null,
             'created_by' => Auth::id(),
             'updated_by' => Auth::id(),
         ];
-
         foreach ($extraFields as $column => $value) {
             if (in_array($column, $columns)) {
                 $dbData[$column] = $value;
             }
         }
-
         $dbData = array_intersect_key(
             $dbData,
             array_flip($columns)
@@ -581,9 +557,9 @@ class DynamicForm extends Component
                 'type' => 'error',
                 'message' => 'Something went wrong while saving data. Please try again.',
             ]);
-
             return false;
         }
+        return false;
     }
 
     private function ensureApplicationIds(): void
