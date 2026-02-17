@@ -23,6 +23,7 @@ class DuplicateChecker
                 WHEN check_with = 'Bank' THEN 3 
                 ELSE 4 END ASC")
             ->get();
+        $configExists = $configs->isNotEmpty();
         foreach ($configs as $config) {
             $type = $config->check_with;
             $inputValue = null;
@@ -59,8 +60,10 @@ class DuplicateChecker
                     ->exists();
                 if ($existsSame) {
                     return [
+                        'has_duplicate' => true,
+                        'should_block'  => $configExists,
                         'field' => "formData.{$formFieldName}",
-                        'message' => "This $type is already registered in this scheme."
+                        'message' => "This {$type} is already registered in this scheme."
                     ];
                 }
             }
@@ -78,12 +81,17 @@ class DuplicateChecker
                     ->exists();
                 if ($existsCross) {
                     return [
+                        'has_duplicate' => true,
+                        'should_block'  => $configExists,
                         'field' => "formData.{$formFieldName}",
-                        'message' => "This $type is already registered in another scheme."
+                        'message' => "This {$type} is already registered in another scheme."
                     ];
                 }
             }
         }
-        return true;
+        return [
+            'has_duplicate' => false,
+            'should_block'  => false,
+        ];
     }
 }
