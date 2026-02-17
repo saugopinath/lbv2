@@ -87,7 +87,7 @@
                                             d="M21.446 7.06899C20.6342 5.0083 18.9917 3.36577 16.931 2.55397C15.3895 1.94668 14 3.34315 14 5V9C14 9.55229 14.4477 10 15 10H19C20.6569 10 22.0533 8.61054 21.446 7.06899Z"
                                             fill="currentColor" />
                                     </svg>
-                                    <span x-show="sidebar" class="truncate">Workflow</span>
+                                    <span x-show="sidebar" class="truncate">Process Application</span>
                                 </a>
                             </li>
                         @endif
