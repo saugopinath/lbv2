@@ -249,12 +249,19 @@ class DynamicForm extends Component
     }
     public function onDocumentTabPassed()
     {
-        $this->markTabCompleted($this->activeTab);
+        // $this->markTabCompleted($this->activeTab);
 
-        if ($this->nextTab) {
-            $this->activeTab = (string) $this->nextTab;
-            $this->updateTabNavigation();
-        }
+        // if ($this->nextTab) {
+        //     $this->activeTab = (string) $this->nextTab;
+        //     $this->updateTabNavigation();
+        // }
+
+        if (!$this->checkDuplicateEntries()) {
+        return;
+    }
+
+    // Final modal open
+    $this->openFinalReviewModal();
     }
     public function onDocumentTabFailed()
     {
@@ -271,24 +278,62 @@ class DynamicForm extends Component
         }
     }
     /* ================= FINAL SUBMIT ================= */
+    // public function finalSubmit()
+    // {
+    //     if ((string) $this->activeTab === '104') {
+    //         $this->dispatch('check-documents-before-next');
+    //     } else {
+    //         $rules = $this->getValidationRulesForActiveTab();
+    //         if (!empty($rules)) {
+    //             $this->validate($rules);
+    //         }
+    //         // dd($rules);
+    //         $this->ensureApplicationIds();
+    //         $this->saveCurrentTabData();
+    //     }
+    //     $tabsData = $this->prepareTabsReviewData();
+    //     if (!$this->checkDuplicateEntries()) {
+    //         return;
+    //     }
+    //     $this->dispatch(
+    //         'openFinalModal',
+    //         applicationId: $this->applicationId,
+    //         tabsData: $tabsData,
+    //         schemeId: $this->schemeId
+    //     );
+    // }
     public function finalSubmit()
     {
+        // 104 tab হলে document check trigger করবে
         if ((string) $this->activeTab === '104') {
+
             $this->dispatch('check-documents-before-next');
+
+            // এখানেই return করবো
+            // modal এখনই খুলবে না
             return;
-        } else {
-            $rules = $this->getValidationRulesForActiveTab();
-            if (!empty($rules)) {
-                $this->validate($rules);
-            }
-            // dd($rules);
-            $this->ensureApplicationIds();
-            $this->saveCurrentTabData();
         }
-        $tabsData = $this->prepareTabsReviewData();
+
+        // Other tabs validation
+        $rules = $this->getValidationRulesForActiveTab();
+
+        if (!empty($rules)) {
+            $this->validate($rules);
+        }
+
+        $this->ensureApplicationIds();
+        $this->saveCurrentTabData();
+
         if (!$this->checkDuplicateEntries()) {
             return;
         }
+
+        $this->openFinalReviewModal();
+    }
+    private function openFinalReviewModal(): void
+    {
+        $tabsData = $this->prepareTabsReviewData();
+
         $this->dispatch(
             'openFinalModal',
             applicationId: $this->applicationId,
@@ -296,6 +341,7 @@ class DynamicForm extends Component
             schemeId: $this->schemeId
         );
     }
+
     /* ================= REVIEW DATA ================= */
     private function prepareTabsReviewData()
     {
