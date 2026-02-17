@@ -289,30 +289,30 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public function bulkverify()
     {
         $ids = $this->getSelected();
-        // dd($ids);
         $approverRoleId = Codemaster::getIdByCode(23);
-        $select_lgd = session('lgd_session');
-        $user_id = Crypt::decryptString($select_lgd['role_id']);
         foreach ($ids as $id) {
+
             DB::beginTransaction();
             try {
-                BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_condition)->update([
                     'next_level_role_id' => $this->nextLabelRoleId,
                 ]);
-                // $AcceptRejectInfo = new AcceptRejectInfo;
-                // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
-                // $AcceptRejectInfo->ip_address = request()->ip();
-                // $AcceptRejectInfo->user_id = Auth::id();
-                // $AcceptRejectInfo->browser = request()->header('User-Agent');
-                // $AcceptRejectInfo->model_name = null;
-                // $AcceptRejectInfo->op_type = $approverRoleId;
-                // $AcceptRejectInfo->revert_reason_cause_id = null;
-                // $AcceptRejectInfo->revert_reason_remarks = null;
-                // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                //     ->latest('id')
-                //     ->value('id') ?? null;
-                // $AcceptRejectInfo->save();
+                $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
+                $AcceptRejectInfo = new AcceptRejectInfo;
+                $AcceptRejectInfo->application_id = $id;
+                $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
+                $AcceptRejectInfo->ip_address = request()->ip();
+                $AcceptRejectInfo->scheme_id = $this->schemeId;
+                $AcceptRejectInfo->user_id = Auth::id();
+                $AcceptRejectInfo->browser = request()->header('User-Agent');
+                $AcceptRejectInfo->model_name = null;
+                $AcceptRejectInfo->op_type = $approverRoleId;
+                $AcceptRejectInfo->revert_reason_cause_id = null;
+                $AcceptRejectInfo->revert_reason_remarks = null;
+                $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                    ->latest('id')
+                    ->value('id') ?? null;
+                $AcceptRejectInfo->save();
                 DB::commit();
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -331,31 +331,30 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     {
 
         $ids = $this->getSelected();
-        // $drafts = DraftBeneficiaryPersonal::whereIn('application_id', $ids)->get();
-        // foreach ($drafts as $draft) {
-        //     $draft->delete();
-        // }
 
         foreach ($ids as $id) {
             DB::beginTransaction();
             try {
-                BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_condition)->update([
                     'next_level_role_id' => $this->nextLabelRoleId,
+                    'is_clean' => 1,
                 ]);
-                // $AcceptRejectInfo = new AcceptRejectInfo;
-                // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
-                // $AcceptRejectInfo->ip_address = request()->ip();
-                // $AcceptRejectInfo->user_id = Auth::id();
-                // $AcceptRejectInfo->browser = request()->header('User-Agent');
-                // $AcceptRejectInfo->model_name = null;
-                // $AcceptRejectInfo->op_type = Codemaster::getIdByCode(0);
-                // $AcceptRejectInfo->revert_reason_cause_id = null;
-                // $AcceptRejectInfo->revert_reason_remarks = null;
-                // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                //     ->latest('id')
-                //     ->value('id') ?? null;
-                // $AcceptRejectInfo->save();
+                $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
+                $AcceptRejectInfo = new AcceptRejectInfo;
+                $AcceptRejectInfo->application_id = $id;
+                $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
+                $AcceptRejectInfo->ip_address = request()->ip();
+                $AcceptRejectInfo->scheme_id = $this->schemeId;
+                $AcceptRejectInfo->user_id = Auth::id();
+                $AcceptRejectInfo->browser = request()->header('User-Agent');
+                $AcceptRejectInfo->model_name = null;
+                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(0);
+                $AcceptRejectInfo->revert_reason_cause_id = null;
+                $AcceptRejectInfo->revert_reason_remarks = null;
+                $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                    ->latest('id')
+                    ->value('id') ?? null;
+                $AcceptRejectInfo->save();
                 DB::commit();
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -406,26 +405,25 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             foreach ($ids as $id) {
                 DB::beginTransaction();
                 try {
-                    BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                    BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_condition)->update([
                         'next_level_role_id' => $this->nextLabelRoleId,
                     ]);
-                    // $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                    // $DraftBeneficiaryPersonal->next_level_role_id = $next_level_role_id;
-                    // $DraftBeneficiaryPersonal->save();
-                    // $AcceptRejectInfo = new AcceptRejectInfo;
-                    // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                    // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
-                    // $AcceptRejectInfo->ip_address = request()->ip();
-                    // $AcceptRejectInfo->user_id = Auth::id();
-                    // $AcceptRejectInfo->browser = request()->header('User-Agent');
-                    // $AcceptRejectInfo->model_name = null;
-                    // $AcceptRejectInfo->op_type = $next_level_role_id;
-                    // $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
-                    // $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
-                    // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                    //     ->latest('id')
-                    //     ->value('id') ?? null;
-                    // $AcceptRejectInfo->save();
+                    $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
+                    $AcceptRejectInfo = new AcceptRejectInfo;
+                    $AcceptRejectInfo->application_id = $id;
+                    $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
+                    $AcceptRejectInfo->ip_address = request()->ip();
+                    $AcceptRejectInfo->scheme_id = $this->schemeId;
+                    $AcceptRejectInfo->user_id = Auth::id();
+                    $AcceptRejectInfo->browser = request()->header('User-Agent');
+                    $AcceptRejectInfo->model_name = null;
+                    $AcceptRejectInfo->op_type = $next_level_role_id;
+                    $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
+                    $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
+                    $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                        ->latest('id')
+                        ->value('id') ?? null;
+                    $AcceptRejectInfo->save();
                     DB::commit();
                 } catch (\Exception $e) {
                     DB::rollBack();
@@ -442,27 +440,26 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             foreach ($ids as $id) {
                 DB::beginTransaction();
                 try {
-                    BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                    BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_condition)->update([
                         'next_level_role_id' => $this->nextLabelRoleId,
                         'is_clean' => 10,
                     ]);
-                    // $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                    // $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(-1);
-                    // $DraftBeneficiaryPersonal->save();
-                    // $AcceptRejectInfo = new AcceptRejectInfo;
-                    // $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                    // $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
-                    // $AcceptRejectInfo->ip_address = request()->ip();
-                    // $AcceptRejectInfo->user_id = Auth::id();
-                    // $AcceptRejectInfo->browser = request()->header('User-Agent');
-                    // $AcceptRejectInfo->model_name = null;
-                    // $AcceptRejectInfo->op_type = Codemaster::getIdByCode(-1);
-                    // $AcceptRejectInfo->revert_reason_cause_id = null;
-                    // $AcceptRejectInfo->revert_reason_remarks = null;
-                    // $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                    //     ->latest('id')
-                    //     ->value('id') ?? null;
-                    // $AcceptRejectInfo->save();
+                    $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
+                    $AcceptRejectInfo = new AcceptRejectInfo;
+                    $AcceptRejectInfo->application_id = $id;
+                    $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
+                    $AcceptRejectInfo->ip_address = request()->ip();
+                    $AcceptRejectInfo->scheme_id = $this->schemeId;
+                    $AcceptRejectInfo->user_id = Auth::id();
+                    $AcceptRejectInfo->browser = request()->header('User-Agent');
+                    $AcceptRejectInfo->model_name = null;
+                    $AcceptRejectInfo->op_type = Codemaster::getIdByCode(-1);
+                    $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
+                    $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
+                    $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                        ->latest('id')
+                        ->value('id') ?? null;
+                    $AcceptRejectInfo->save();
                     DB::commit();
                 } catch (\Exception $e) {
                     DB::rollBack();
@@ -476,7 +473,6 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $this->clearSelected();
         }
     }
-
     public function exportExcel()
     {
         $data = $this->builder()->get()->map(function ($row) {
