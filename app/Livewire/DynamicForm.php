@@ -231,26 +231,78 @@ class DynamicForm extends Component
     //         $this->updateTabNavigation();
     //     }
     // }
+    // public function saveAndNext($nextTab)
+    // {
+    //     $rules = $this->getValidationRulesForActiveTab();
 
+    //     if (!empty($rules)) {
+    //         $this->validate($rules);
+    //     }
+    //     $this->ensureApplicationIds();
+
+    //     if (!$this->checkDuplicateEntries()) {
+    //         return;
+    //     }
+
+    //     $saved = $this->saveCurrentTabData();
+
+    //     if ($saved !== true) {
+    //         return;
+    //     }
+
+    //     $this->markTabCompleted($this->activeTab);
+
+    //     if ($nextTab) {
+    //         $this->activeTab = (string) $nextTab;
+    //         $this->updateTabNavigation();
+    //     }
+    // }
+
+    // public function saveAndNext($nextTab)
+    // {
+    //     $rules = $this->getValidationRulesForActiveTab();
+
+    //     if (!empty($rules)) {
+    //         $this->validate($rules);
+    //     }
+    //     $this->ensureApplicationIds();
+
+    //     if (!$this->checkDuplicateEntries()) {
+    //         return;
+    //     }
+
+    //     $saved = $this->saveCurrentTabData();
+
+    //     if ($saved !== true) {
+    //         return;
+    //     }
+
+    //     $this->markTabCompleted($this->activeTab);
+
+    //     if ($nextTab) {
+    //         $this->activeTab = (string) $nextTab;
+    //         $this->updateTabNavigation();
+    //     }
+    // }
     public function saveAndNext($nextTab)
     {
+        if ((string) $this->activeTab === '104') {
+            $this->dispatch('check-documents-before-next');
+            return;
+        }
         $rules = $this->getValidationRulesForActiveTab();
-
         if (!empty($rules)) {
             $this->validate($rules);
         }
         $this->ensureApplicationIds();
-
         if (!$this->checkDuplicateEntries()) {
             return;
         }
-
         $saved = $this->saveCurrentTabData();
 
         if ($saved !== true) {
             return;
         }
-
         $this->markTabCompleted($this->activeTab);
 
         if ($nextTab) {
@@ -258,26 +310,34 @@ class DynamicForm extends Component
             $this->updateTabNavigation();
         }
     }
-
     public function onDocumentTabPassed()
     {
-        // $this->markTabCompleted($this->activeTab);
-
-        // if ($this->nextTab) {
-        //     $this->activeTab = (string) $this->nextTab;
-        //     $this->updateTabNavigation();
-        // }
-
-        if (!$this->checkDuplicateEntries()) {
-            return;
+        $this->markTabCompleted($this->activeTab);
+        if ($this->nextTab) {
+            $this->activeTab = (string) $this->nextTab;
+            $this->updateTabNavigation();
         }
-
-        // Final modal open
-        $this->openFinalReviewModal();
     }
     public function onDocumentTabFailed() {}
 
-    /* ================== HELPERS ================== */
+    // public function onDocumentTabPassed()
+    // {
+    //     // $this->markTabCompleted($this->activeTab);
+
+    //     // if ($this->nextTab) {
+    //     //     $this->activeTab = (string) $this->nextTab;
+    //     //     $this->updateTabNavigation();
+    //     // }
+
+    //     if (!$this->checkDuplicateEntries()) {
+    //         return;
+    //     }
+
+    // Final modal open
+    //     $this->openFinalReviewModal();
+    // }
+    // public function onDocumentTabFailed() {}
+
     private function markTabCompleted(string $tabCode): void
     {
         if (!in_array($tabCode, $this->completedTabs, true)) {
@@ -286,24 +346,19 @@ class DynamicForm extends Component
         if (count($this->completedTabs) === count($this->views)) {
             $this->allTabsCompleted = true;
         }
-    }   
+    }
     public function finalSubmit()
     {
         if ((string) $this->activeTab === '104') {
-
             $this->dispatch('check-documents-before-next');
             return;
         }
-
         $rules = $this->getValidationRulesForActiveTab();
-
         if (!empty($rules)) {
             $this->validate($rules);
         }
-
         $this->ensureApplicationIds();
         $this->saveCurrentTabData();
-
         if (!$this->checkDuplicateEntries()) {
             return;
         }
@@ -804,7 +859,6 @@ class DynamicForm extends Component
                         $fieldRules[] = "before_or_equal:{$maxDate}";
                     }
                 }
-
 
                 $rules["formData.{$fieldName}"] = array_values(array_filter($fieldRules));
             }

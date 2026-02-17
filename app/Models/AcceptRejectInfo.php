@@ -22,22 +22,14 @@ class AcceptRejectInfo extends Model implements Auditable
         'revert_reason_remarks',
         'parent_id'
     ];
-
     public function revertReason()
     {
         return $this->belongsTo(Codemaster::class, 'revert_reason_cause_id');
     }
-
-    public function application()
-    {
-        return $this->belongsTo(BeneficiaryCommonList::class, 'application_id', 'sourceable_id');
-    }
-
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-
     public function opType()
     {
         return $this->belongsTo(Codemaster::class, 'op_type');
