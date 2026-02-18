@@ -18,4 +18,12 @@ class WorkflowsteproleMapping extends Model
         return $query->where('scheme_id', $schemeId)
             ->first(['same_label_role_id', 'next_label_role_id']);
     }
+
+     public static function getMinMaxWorkflowStep(int $schemeId): array
+    {
+        return [
+            'min' => self::where('scheme_id', $schemeId)->min('workflow_step_id'),
+            'max' => self::where('scheme_id', $schemeId)->max('workflow_step_id'),
+        ];
+    }
 }

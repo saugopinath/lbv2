@@ -2,17 +2,23 @@
 
 namespace App\Livewire\CasteModification;
 
+use App\Helpers\FormOptionHelper;
 use App\Models\BeneficiaryAadhaar;
 use App\Models\BeneficiaryCommonList;
+use App\Models\BeneficiaryPersonalDetail;
 use App\Models\CasteModificationInfo;
 use App\Models\Codemaster;
 use App\Models\Scheme;
+use App\Models\SchemeTabFormField;
+use App\Models\WorkflowsteproleMapping;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Component;
+use App\Services\WorkflowService;
 
 class SearchBeneficiary extends Component
 {
     public $searchType = '';
+    public $selectScheme = '';
     public $searchValue = '';
     public $searchBy = '';
     public $results = null;
@@ -23,6 +29,10 @@ class SearchBeneficiary extends Component
     public $aproved_code = null;
     public $revert_code = null;
     public $schemeOptions = [];
+    public $getMinMaxWorkflowStep;
+    public $nextLabelRoleId;
+    public $filterRoleId;
+    public $CasteOptions = [];
 
     public $searchOptions = [
         1 => 'Application ID',
@@ -30,31 +40,29 @@ class SearchBeneficiary extends Component
         3 => 'Aadhar Number',
         4 => 'Mobile No',
     ];
-
     protected $searchTypeMap = [
-        1 => 'sourceable_id',
+        1 => 'application_id',
         2 => 'beneficiary_id',
-        3 => 'encoded_aadhar',
+        3 => 'aadhar_vault',
         4 => 'mobile_no',
     ];
 
     public function mount(): void
     {
         $select_lgd = session('lgd_session');
-
         if (!empty($select_lgd['district_id'])) {
-            $this->filter_condition['district_id'] = Crypt::decryptString($select_lgd['district_id']);
+            $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
         }
         if (!empty($select_lgd['block_id'])) {
-            $this->filter_condition['block_id'] = Crypt::decryptString($select_lgd['block_id']);
+            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
         }
         if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
-
-        // $formOptions = json_decode(file_get_contents(public_path('js/form-options.json')), true);
-        // $this->schemeOptions = $formOptions['Caste'] ?? [];
-        // dd($this->schemeOptions);
+        // $formOptions  = json_decode(file_get_contents(public_path('js/form-options.json')), true);
+        // $this->CasteOptions = $formOptions['Caste'] ?? [];
+        // dd($this->CasteOptions);
+        $this->CasteOptions = FormOptionHelper::get('Caste');
         $this->schemeOptions = Scheme::where('is_active', true)->pluck('name', 'id')->toArray();
         // dd($this->schemeOptions);
         $this->verified_code = Codemaster::getIdByCode(2202);
@@ -109,79 +117,170 @@ class SearchBeneficiary extends Component
         'searchValue.required' => 'Please enter a value to search.',
     ];
 
-    public function search()
+    public function search(WorkflowService $workflowService)
     {
-        // dd('ok');
         $this->validate();
+
+
         $column = $this->searchTypeMap[$this->searchType];
-        if ($column == 'encoded_aadhar') {
-            $this->searchBy = md5($this->searchValue);
+        $modelClass   = null;
+        $searchValue  = $this->searchValue;
+        $query        = null;
+        if (in_array($column, ['application_id', 'beneficiary_id'])) {
+            $modelClass   = BeneficiaryPersonalDetail::class;
+            $searchColumn = $column;
+        } elseif ($column === 'aadhar_vault') {
+            $modelClass   = BeneficiaryAadhaar::class;
+            $searchColumn = 'aadhar_vault';
+            $searchValue  = md5($this->searchValue);
         } else {
-            $this->searchBy = $this->searchValue;
-        }
-        $application_id = BeneficiaryCommonList::where($column, $this->searchBy)->first();
-        // dd($application_id->sourceable_id);
-        $existingRecord = null;
-        if ($application_id) {
-            $existingRecord = CasteModificationInfo::where('application_id',  $application_id->sourceable_id)->where('is_active', true)->first();
-        }
-        // dd($existingRecord);
-        if ($existingRecord) {
-            // dd($existingRecord);
-            if ($existingRecord->next_level_requested_id == $this->verified_code) {
-                $message = "Request already Verified by the Verifier.";
-            } elseif ($existingRecord->next_level_requested_id == $this->aproved_code) {
-                $message = "Request already Approved By the Approver.";
-            } elseif ($existingRecord->next_level_requested_id == $this->revert_code) {
-                $message = "Request is reverted.";
-            } else {
-                $message = "Caste modification already requested.";
-            }
-            // dd($message);
-            session()->flash('xwarning', $message);
-            $this->items = [];
-            return;
-        } else {
-            // if($column == 'encoded_aadhar'){
-            //     // dump('encoded_aadhar');
-            // $this->searchValue =md5($this->searchValue);
-            // // dump($this->searchValue);
-            // }
-            $query = BeneficiaryCommonList::query()->with('sourceable');
-            $query->where($column, $this->searchBy);
-            // dd($query->toSql(), $query->getBindings());
-            if (!empty($this->filter_condition)) {
-                $query->where($this->filter_condition);
-            }
-
-            $this->results = $query->get();
-
-            if ($this->results->isEmpty()) {
-                $this->items = [];
-                $message = "No matching beneficiary found.";
-                session()->flash('xerror', $message);
+            $fieldManager = SchemeTabFormField::with('tabMaster')
+                ->where('field_name', $column)
+                ->where('scheme_id', $this->selectScheme)
+                ->first();
+            if (!$fieldManager || !$fieldManager->tabMaster) {
+                $this->dispatch(
+                    'toaster',
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Search configuration not found.'
+                );
                 return;
             }
+            $modelClass   = "App\\Models\\" . $fieldManager->tabMaster->tab_model_name;
+            $dbColumn     = $fieldManager->db_column;
+            $fieldName    = $fieldManager->field_name;
+            // dd($dbColumn, $fieldName);
+            if ($dbColumn == 'other_details') {
+                $searchColumn = 'other_details';
+            } else {
+                $searchColumn = $dbColumn;
+            }
+        }
+        // dd($searchColumn, $modelClass);
+        $query = $modelClass::query()
+            ->select('application_id')
+            ->where('scheme_id', $this->selectScheme);
 
-            $approvedItems = $this->results->filter(function ($item) {
-                return $item->sourceable_type == 'App\Models\BeneficiaryPersonal';
-            });
-
-            if ($approvedItems->isEmpty()) {
-                $message = "These Beneficiary is not approved Yet.";
+        if ($searchColumn == 'other_details') {
+            // dd('query');
+            $query->whereRaw(
+                "other_details ->> ? = ?",
+                [$fieldName, $searchValue]
+            );
+        } else {
+            $query->where($searchColumn, $searchValue);
+        }
+        // $sql = vsprintf(
+        //     str_replace('?', "'%s'", $query->toSql()),
+        //     $query->getBindings()
+        // );
+        // dd($sql);
+        $applicationId = $query->value('application_id');
+        // dd($applicationId);
+        if (!$applicationId) {
+            $this->dispatch(
+                'toaster',
+                type: 'warning',
+                title: 'Not Found',
+                message: 'No matching beneficiary found.'
+            );
+            return;
+        } else {
+            $existingRecord = null;
+            $existingRecord = CasteModificationInfo::where('application_id',  $applicationId)->where('scheme_id', $this->selectScheme)->where('is_active', true);
+            if (!empty($this->filter_condition)) {
+                // dd($this->filter_condition);
+                $existingRecord->where($this->filter_condition);
+            }
+            $existingRecord = $existingRecord->first();
+            if ($existingRecord) {
+                // dd($existingRecord);
+                if ($existingRecord->next_level_requested_id == $this->verified_code) {
+                    $message = "Request already Verified by the Verifier.";
+                } elseif ($existingRecord->next_level_requested_id == $this->aproved_code) {
+                    $message = "Request already Approved By the Approver.";
+                } elseif ($existingRecord->next_level_requested_id == $this->revert_code) {
+                    $message = "Request is reverted.";
+                } else {
+                    $message = "Caste modification already requested.";
+                }
+                // dd($message);
                 session()->flash('xwarning', $message);
                 $this->items = [];
                 return;
             } else {
-                $this->items = $approvedItems->map(function ($item) {
-                    return [
-                        'application_id' => $item->sourceable->application_id ?? '-',
-                        'beneficiary_id' => $item->sourceable->beneficiary_id ?? '-',
-                        'mobile_no'      => $item->sourceable->mobile_no ?? '-',
-                        'applicant_name' => $item->sourceable->full_name ?? '-',
-                        'Caste_name'     => $item->sourceable->casteName->name ?? '-',
-                    ];
-                })->values();
+                $this->getMinMaxWorkflowStep = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->selectScheme);
+                $this->nextLabelRoleId = $workflowService->getLabelRoles($this->selectScheme, $this->getMinMaxWorkflowStep['max']);
+                $this->filterRoleId = $this->nextLabelRoleId->next_label_role_id;
+                // dd($this->filterRoleId);
+                // dd($this->getMinMaxWorkflowStep);
+                // $query = BeneficiaryPersonalDetail::select('application_id', 'beneficiary_id', 'scheme_id', 'beneficiary_name', 'caste', 'caste_cer_no', 'other_details', 'next_level_role_id')->where('application_id', $applicationId)->where('scheme_id', $this->selectScheme)->where('is_clean', 1)->where('is_final', 1);
+                // // dd($query->toSql(), $query->getBindings());
+                // // $this->getMinMaxWorkflowStep = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->selectScheme);
+                // // dd($query->toSql(), $query->getBindings());
+                // if (!empty($this->filter_condition)) {
+                //     $query->where($this->filter_condition);
+                // }
+                // $this->results = $query->get();
+                $query = BeneficiaryPersonalDetail::query()
+                    ->select([
+                        'application_id',
+                        'beneficiary_id',
+                        'scheme_id',
+                        'beneficiary_name',
+                        'caste',
+                        'caste_cer_no',
+                        'other_details',
+                        'next_level_role_id',
+                    ])
+                    ->where('application_id', $applicationId)
+                    ->where('scheme_id', $this->selectScheme)
+                    ->where('is_clean', 1)
+                    ->where('is_final', 1);
+                if (!empty($this->filter_condition)) {
+                    foreach ($this->filter_condition as $key => $value) {
+                        $query->where($key, $value);
+                    }
+                }
+                $this->results = $query->get();
+                // dd($this->results);
+                if ($this->results->isEmpty()) {
+                    $this->items = [];
+                    $message = "No matching beneficiary found.";
+                    session()->flash('xerror', $message);
+                    return;
+                }
+                // dd($this->results->filter(function ($item) {
+                //     return $item->next_level_role_id == $this->filterRoleId;
+                // }));
+                // if ($this->results->next_level_role_id != $this->filterRoleId) {
+                //     session()->flash('xwarning', 'These Beneficiary is not approved Yet.');
+                //     $this->items = [];
+                //     return;
+                // }
+                $approvedItems = $this->results->filter(function ($item) {
+                    return $item->next_level_role_id == $this->filterRoleId;
+                });
+                if ($approvedItems->isEmpty()) {
+                    $message = "These Beneficiary is not approved Yet.";
+                    session()->flash('xwarning', $message);
+                    $this->items = [];
+                    return;
+                } else {
+                    // dd($approvedItems->toArray());
+                    $this->items = $approvedItems->map(function ($item) {
+                        return [
+                            'application_id' => $item->application_id ?? '-',
+                            'beneficiary_id' => $item->beneficiary_id ?? '-',
+                            'mobile_no'      => $item->other_details['mobile_no'] ?? '-',
+                            'applicant_name' => $item->beneficiary_name ?? '-',
+                            'Caste_name' => FormOptionHelper::label('Caste', $item->caste) ?? 'Unknown',
+                            'scheme_id' => $item->scheme_id ?? '-',
+
+                        ];
+                    })->values();
+                }
             }
         }
     }

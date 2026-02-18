@@ -61,6 +61,7 @@
                             <form action="{{ route('caste-modification.edit') }}" method="GET" class="flex justify-center">
                                 <input type="hidden" name="application_id" value="{{ Crypt::encryptString($row['application_id']) }}">
                                 <input type="hidden" name="beneficiary_id" value="{{ Crypt::encryptString($row['beneficiary_id']) }}">
+                                <input type="hidden" name="scheme_id" value="{{ Crypt::encryptString($row['scheme_id']) }}">
                                 <x-button.loading-button type="submit" text="change">
                                 </x-button.loading-button>
                             </form>

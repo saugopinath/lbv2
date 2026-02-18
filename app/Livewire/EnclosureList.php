@@ -249,31 +249,42 @@ class EnclosureList extends Component
         $existingDoc = $model::where('application_id', $this->application_id)
             ->where('document_type', $this->currentDocId)
             ->where('scheme_id', $this->scheme_id)
-            ->where('tab_code', $this->tabCode)
+            ->when(
+                $this->enclosureSource != 5,
+                fn($q) => $q->where('tab_code', $this->tabCode)
+            )
             ->first();
         // dd($existingDoc);
         if ($existingDoc) {
-            $existingDoc->update([
-                'attched_document' => $base64,
-                'ip_address' => request()->ip(),
+            $updateData = [
+                'attched_document'   => $base64,
+                'ip_address'         => request()->ip(),
                 'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
                 'document_mime_type' => $this->singleDocument->getMimeType(),
-                'created_by' => Auth::id(),
-                'scheme_id' => $this->scheme_id,   
-                'tab_code' => $this->tabCode,    
-            ]);
+                'created_by'         => Auth::id(),
+                'scheme_id'          => $this->scheme_id,
+            ];
+            if ($this->enclosureSource != 5) {
+                $updateData['tab_code'] = $this->tabCode;
+            }
+            $existingDoc->update($updateData);
         } else {
-            $model::create([
-                'application_id' => $this->application_id,
-                'attched_document' => $base64,
-                'ip_address' => request()->ip(),
+            $createData = [
+                'application_id'     => $this->application_id,
+                'beneficiary_id'     => $this->application_id,
+                'attched_document'   => $base64,
+                'ip_address'         => request()->ip(),
                 'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
                 'document_mime_type' => $this->singleDocument->getMimeType(),
-                'document_type' => $this->currentDocId,
-                'created_by' => Auth::id(),
-                'scheme_id' => $this->scheme_id,  
-                'tab_code' => $this->tabCode,    
-            ]);
+                'document_type'      => $this->currentDocId,
+                'created_by'         => Auth::id(),
+                'scheme_id'          => $this->scheme_id,
+            ];
+            if ($this->enclosureSource != 5) {
+                $createData['tab_code'] = $this->tabCode;
+            }
+            $model::create($createData);
+
             // dd($is_upload);
         }
 
