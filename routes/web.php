@@ -130,7 +130,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
     Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
     Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
-    Route::get('/custom_application/{id}', ApplicationView::class)->name('custom_application.view');
+    // Route::get('/custom_application/{id}', ApplicationView::class)->name('custom_application.view');
     Route::get('/getelsticsearchIndex', [ElasticSearchController::class, 'index'])->name('getelsticsearchIndex');
 });
 
@@ -173,3 +173,14 @@ Route::get('/role-rank-management', RolerankManagement::class)
 Route::get('/define-workflow', [SchemeController::class, 'finalSubmitted'])
     ->middleware('permission.redirect:canDefineWorkflow')
     ->name('define-workflow');
+
+Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])
+    ->name('beneficiaries_selection.index');
+
+Route::get('/report', [BeneficiaryListController::class, 'show'])
+    ->name('report.show');
+
+Route::any('draftedit', [SchemeController::class, 'draftedit'])
+    ->name('draftedit');
+
+Route::any('/custom_application', [SchemeController::class, 'applicationView'])->name('custom_application.view');
