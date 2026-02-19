@@ -72,4 +72,20 @@ class SchemeController extends Controller
         $header = 'Oops! You do not have permission to edit draft.';
         return view('CommonRestictedpage.index', compact('header'));
     }
+
+    public function applicationView(Request $request)
+    {
+        // dd($request->all());
+        // if (WorkFlowPermissionHelper::canEditDraft()) {
+        // if (Auth::user()->can('edit draft')) {
+            $app_id = Crypt::decryptString($request['id']);
+            $scheme_id = Crypt::decryptString($request['scheme_id']);
+            $schemeName = Scheme::find($scheme_id)->name;
+            // dd( $app_id,$scheme_id,$schemeName);
+            return view('schemesblade.applicationview', compact('app_id','scheme_id', 'schemeName'));
+        // }
+
+        $header = 'Oops! You do not have permission to edit draft.';
+        return view('CommonRestictedpage.index', compact('header'));
+    }
 }

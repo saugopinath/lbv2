@@ -120,36 +120,36 @@ class BeneficiaryTable extends DataTableComponent
     }
     public function columns(): array
     {
-        if ($this->reportType == '4') {
-            $columns = [
-                Column::make("Application ID", "application_id")
-                    ->label(fn($row) => $row->application_id ?? 'N/A'),
+        // if ($this->reportType == '4') {
+        //     $columns = [
+        //         Column::make("Application ID", "application_id")
+        //             ->label(fn($row) => $row->application_id ?? 'N/A'),
 
-                Column::make("Applicant Name")
-                    ->label(function ($row) {
-                        return $row->personal_details[0]['full_name'] ?? 'N/A';
-                    }),
+        //         Column::make("Applicant Name")
+        //             ->label(function ($row) {
+        //                 return $row->personal_details[0]['full_name'] ?? 'N/A';
+        //             }),
 
-                Column::make("Father's Name")
-                    ->label(function ($row) {
-                        return collect($row->relationship_details)
-                            ->firstWhere('relation_type_id', $this->relationFather)['full_name'] ?? 'N/A';
-                    }),
+        //         Column::make("Father's Name")
+        //             ->label(function ($row) {
+        //                 return collect($row->relationship_details)
+        //                     ->firstWhere('relation_type_id', $this->relationFather)['full_name'] ?? 'N/A';
+        //             }),
 
-                Column::make("Age")
-                    ->label(function ($row) {
-                        $dob = $row->personal_details[0]['dob'] ?? null;
-                        return $dob ? Carbon::parse($dob)->age : 'N/A';
-                    }),
+        //         Column::make("Age")
+        //             ->label(function ($row) {
+        //                 $dob = $row->personal_details[0]['dob'] ?? null;
+        //                 return $dob ? Carbon::parse($dob)->age : 'N/A';
+        //             }),
 
-                Column::make("Mobile No.")
-                    ->label(function ($row) {
-                        return $row->personal_details[0]['mobile_no'] ?? 'N/A';
-                    }),
-            ];
+        //         Column::make("Mobile No.")
+        //             ->label(function ($row) {
+        //                 return $row->personal_details[0]['mobile_no'] ?? 'N/A';
+        //             }),
+        //     ];
 
-            return $columns;
-        }
+        //     return $columns;
+        // }
         $columns = [
             Column::make("Application ID", "application_id")
                 ->label(fn($row) => $row->application_id ?? 'N/A'),
@@ -168,22 +168,22 @@ class BeneficiaryTable extends DataTableComponent
 
         if (in_array($this->reportType, ['1', '5', '4'])) {
             $columns[] = Column::make("Applicant Mobile No.", "mobile_no")
-                ->label(fn($row) => $row->sourceable->mobile_no ?? 'N/A');
+                ->label(fn($row) => $row->mobile_no ?? 'N/A');
         }
 
 
         if ($this->reportType == '3') {
             $beneficiaryColumn = Column::make("Beneficiary ID", "beneficiary_id")
-                ->label(fn($row) => $row->sourceable->beneficiary_id ?? 'N/A');
+                ->label(fn($row) => $row->beneficiary_id ?? 'N/A');
 
             array_unshift($columns, $beneficiaryColumn);
         }
 
 
-        if ($this->reportType == '4') {
-            $columns[2] = Column::make("Father's Name", "father_full_name");
-            $columns[] = Column::make("Rejected Reason", "rejected_reason");
-        }
+        // if ($this->reportType == '4') {
+        //     $columns[2] = Column::make("Father's Name", "father_full_name");
+        //     $columns[] = Column::make("Rejected Reason", "rejected_reason");
+        // }
 
 
 
@@ -191,10 +191,10 @@ class BeneficiaryTable extends DataTableComponent
             ->label(function ($row) {
                 if (($this->reportType == '3') || ($this->reportType == '2')) {
                     return view('coulmn_button.view', [
-                        // 'link' => route('custom_application.view', [
-                        //     'id' => $this->reportType == '3' ? encrypt($row->sourceable->application_id) : encrypt($row->sourceable->application_id),
-                        //     'reportType' => $this->reportType,
-                        // ]),
+                        'link' => route('custom_application.view', [
+                            'id'        => Crypt::encryptString($row->application_id),
+                            'scheme_id' => Crypt::encryptString($row->scheme_id)
+                        ]),
                         'tooltip' => 'View Application',
                     ])->render();
                 } elseif ((($this->reportType == '1') || ($this->reportType == '6') || ($this->reportType == '5')) && (CheckAuthHelper::isCommonOperator())) {
@@ -369,9 +369,8 @@ class BeneficiaryTable extends DataTableComponent
          * --- LOCATION FILTER ---
          */
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
-            $query = EncryptionArray::applyLocationFilter(
+            $query = EncryptionArray::applyLocationFilters(
                 $query,
-                $this->reportType,
                 $this->district_id ?: null,
                 $this->rural_urban ?: null,
                 $this->blockurban ?: null,
