@@ -26,6 +26,7 @@ class Filterlgdmasternew extends Component
     public function filterData()
     {
         $payload = $this->formData;
+        unset($payload['rural_urban']);
         if (!$this->showAssembly) {
             unset($payload['assemblie']);
         }
