@@ -88,4 +88,10 @@ class SchemeController extends Controller
         $header = 'Oops! You do not have permission to edit draft.';
         return view('CommonRestictedpage.index', compact('header'));
     }
+
+    public function lgd()
+    {
+        return view('schemesblade.lgd');
+    }
+
 }

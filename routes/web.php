@@ -40,6 +40,7 @@ use App\Http\Controllers\MasterTabCreationController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
 use App\Http\Controllers\ValidationManagerController;
+use App\Livewire\Filterlgdmasternew;
 use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
 
@@ -180,3 +181,6 @@ Route::any('draftedit', [SchemeController::class, 'draftedit'])
     ->name('draftedit');
 
 Route::any('/custom_application', [SchemeController::class, 'applicationView'])->name('custom_application.view');
+
+Route::any('lgd', [SchemeController::class, 'lgd'])
+        ->name('lgd');
