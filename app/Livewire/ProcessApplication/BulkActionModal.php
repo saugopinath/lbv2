@@ -121,11 +121,25 @@ class BulkActionModal extends Component
 
     public function performBulkAction()
     {
+        // $validated = $this->validate([
+        //     'bulkActionType' => 'required|in:V,A,R,T',
+        //     'reason' => in_array($this->bulkActionType, ['R', 'T']) ? 'required' : 'nullable',
+        //     'remark' => in_array($this->bulkActionType, ['R', 'T']) ? 'required|string|max:255' : 'nullable',
+        // ]);
+
+
         $validated = $this->validate([
             'bulkActionType' => 'required|in:V,A,R,T',
-            'reason' => in_array($this->bulkActionType, ['R', 'T']) ? 'required' : 'nullable',
-            'remark' => in_array($this->bulkActionType, ['R', 'T']) ? 'required|string|max:255' : 'nullable',
+
+            'reason' => in_array($this->bulkActionType, ['R', 'T'])
+                ? 'required'
+                : 'nullable',
+
+            'remark' => in_array($this->bulkActionType, ['R', 'T', 'A', 'V'])
+                ? 'required|string|max:255'
+                : 'nullable',
         ]);
+
 
         $approverRoleId = Codemaster::getIdByCode(23);
 
@@ -149,7 +163,7 @@ class BulkActionModal extends Component
                     $AcceptRejectInfo->model_name = null;
                     $AcceptRejectInfo->op_type = $approverRoleId;
                     $AcceptRejectInfo->revert_reason_cause_id = null;
-                    $AcceptRejectInfo->revert_reason_remarks = null;
+                    $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
                     $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
                         ->latest('id')
                         ->value('id') ?? null;
@@ -183,7 +197,7 @@ class BulkActionModal extends Component
                     $AcceptRejectInfo->model_name = null;
                     $AcceptRejectInfo->op_type = Codemaster::getIdByCode(0);
                     $AcceptRejectInfo->revert_reason_cause_id = null;
-                    $AcceptRejectInfo->revert_reason_remarks = null;
+                    $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
                     $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
                         ->latest('id')
                         ->value('id') ?? null;
@@ -277,11 +291,20 @@ class BulkActionModal extends Component
             }
         }
 
+        // $this->bulkActionModal = false;
+
+        // $this->reset(['bulkActionType', 'reason', 'remark', 'selectedRows', 'bulkActionTypeLabel']);
+
+        // return redirect()->route('lb-application-list');
         $this->bulkActionModal = false;
 
         $this->reset(['bulkActionType', 'reason', 'remark', 'selectedRows', 'bulkActionTypeLabel']);
 
-        return redirect()->route('lb-application-list');
+        return redirect()->route('lb-application-list', [
+            'scheme_id' => Crypt::encryptString($this->schemeId)
+        ]);
+
+
 
     }
 

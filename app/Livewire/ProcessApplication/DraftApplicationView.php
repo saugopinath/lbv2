@@ -23,8 +23,8 @@ class DraftApplicationView extends Component
             $this->application = BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->first();
 
             $this->schemeId = $this->application->scheme_id;
-          
-            $this->schemeName = Scheme::where('id', $this->schemeId)->value('name');          
+
+            $this->schemeName = Scheme::where('id', $this->schemeId)->value('name');
 
         } catch (\Exception $e) {
             dd($e->getMessage());
@@ -33,7 +33,7 @@ class DraftApplicationView extends Component
 
     public function openActionModal()
     {
-     
+
         $this->dispatch('hideLoader');
         // $this->dispatch('openBulkActionModal', selectedIds: [$this->application->application_id]);
 // dd($this->application);
@@ -46,13 +46,23 @@ class DraftApplicationView extends Component
         ]);
     }
 
+    // #[On('actionPerformedAndRedirect')]
+    // public function navigateToTablePage()
+    // {
+
+    //     session()->flash('success', 'The application has been successfully processed.');
+    //     return redirect()->route('submitted-list');
+    // }
     #[On('actionPerformedAndRedirect')]
     public function navigateToTablePage()
     {
-
         session()->flash('success', 'The application has been successfully processed.');
-        return redirect()->route('submitted-list');
+
+        return redirect()->route('lb-application-list', [
+            'scheme_id' => Crypt::encryptString($this->schemeId)
+        ]);
     }
+
 
     public function render()
     {

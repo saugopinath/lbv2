@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Models\Scheme;
 use Livewire\Component;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Http\Request;
 
 class SchemeDropdown extends Component
 {
@@ -12,8 +14,8 @@ class SchemeDropdown extends Component
     public $schemeName;
     public $schemeId = null;
     public $option = null;
-     public $button_show;
-    public function mount($schemes)
+    public $button_show;
+    public function mount($schemes, $scheme_id = null)
     {
         $this->schemes = $schemes;
         $this->button_show = 1;
@@ -23,8 +25,17 @@ class SchemeDropdown extends Component
             $this->option = 1;
         } elseif ($route == 'define-workflow') {
             $this->option = 2;
-        }elseif ($route == 'lb-application-list') {
+        } elseif ($route == 'lb-application-list') {
             $this->option = 3;
+        }
+
+        if ($scheme_id) {
+            try {
+                $this->schemeId = Crypt::decryptString($scheme_id);
+                $this->schemeName = Scheme::where('id', $this->schemeId)->value('name');
+            } catch (\Exception $e) {
+                $this->schemeId = null;
+            }
         }
 
     }

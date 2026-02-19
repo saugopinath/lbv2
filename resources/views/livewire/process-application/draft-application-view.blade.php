@@ -26,9 +26,9 @@
                 </svg>
                 Application ID: {{ $applicationId }}
             </span>
-            
+
         </div>
-        <x-form.back-button :url="route('lb-application-list')" />
+        <x-form.back-button :url="route('lb-application-list', ['scheme_id' => Crypt::encryptString($schemeId)])" />
     </div>
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-8 space-y-4">
         <livewire:application-view :id="$applicationId" :schemeId="$schemeId" />
