@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Filters\TextFilter;
-
+use Livewire\Attributes\On;
 class BeneficiaryTable extends DataTableComponent
 {
     public ?int $perPage = 5;
@@ -53,17 +53,37 @@ class BeneficiaryTable extends DataTableComponent
             $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
+
+    // public function filtersApplied($filters)
+    // {
+    //     // dd($filters['gp_ward']);
+    //     $this->district_id = $filters['district_id'];
+    //     // dd($this->district_id );
+    //     $this->rural_urban = $filters['rural_urban'] ?? null;
+    //     $this->blockurban = $filters['blockurban'];
+    //     $this->gp_ward = $filters['gp_ward'];
+    //     $this->sub_div = $filters['subdivision_id'];
+    //     // dd($this->gp_ward );
+    // }
+
+    #[On('filter-applied')]
     public function filtersApplied($filters)
     {
-        // dd($filters['gp_ward']);
         $this->district_id = $filters['district_id'];
-        // dd($this->district_id );
-        $this->rural_urban = $filters['rural_urban'] ?? null;
+        $this->rural_urban = $filters['rural_urban'];
         $this->blockurban = $filters['blockurban'];
-        $this->gp_ward = $filters['gp_ward'];
-        $this->sub_div = $filters['subdivision_id'];
-        // dd($this->gp_ward );
+        $this->gp_ward = $filters['gpward'];
     }
+
+    #[On('filter-cleared')]
+    public function filterCleared() {
+        $this->district_id = '';
+        $this->rural_urban ='';
+        $this->blockurban = '';
+        $this->gp_ward = '';
+
+    }
+
     public function configure(): void
     {
         $this->setPrimaryKey('sourceable_id')

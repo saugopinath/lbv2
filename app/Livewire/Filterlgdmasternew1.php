@@ -7,8 +7,8 @@ use Livewire\Attributes\On;
 class Filterlgdmasternew1 extends Component
 {
     #[On('filter-applied')]
-    public function filterApplied($data) {
-        dd($data);
+    public function filterApplied($filters) {
+        dd($filters);
     }
     #[On('filter-cleared')]
     public function filterCleared() {

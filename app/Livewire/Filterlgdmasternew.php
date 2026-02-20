@@ -96,7 +96,7 @@ class Filterlgdmasternew extends Component
     }
     public function filterData()
     {
-        $this->dispatch('filter-applied', data: $this->formData);
+        $this->dispatch('filter-applied', filters: $this->formData);
     }
     public function render()
     {
