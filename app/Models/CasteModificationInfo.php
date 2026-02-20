@@ -16,10 +16,10 @@ class CasteModificationInfo extends Model implements Auditable
         'old_data' => 'array',
         'new_data' => 'array',
     ];
-    // public function beneficiaryCommonList()
-    // {
-    //     return $this->hasOne(BeneficiaryCommonList::class, 'sourceable_id', 'application_id');
-    // }
+    public function beneficiaryPersonal()
+    {
+        return $this->hasOne(BeneficiaryPersonalDetail::class, 'application_id', 'application_id');
+    }
     public function casteRequestType()
     {
         return $this->belongsTo(Codemaster::class, 'caste_request_type', 'id');

@@ -11,21 +11,10 @@
 
         </div>
     </div>
-
     <!-- Accordion Section -->
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-4 mb-6">
-        <div
-            x-data="{
-                openSection: 'personal-details',
-                toggleSection(section) {
-                    this.openSection = this.openSection === section ? '' : section;
-                }
-            }"
-            class="space-y-2">
-            <x-accordion-section title="Personal Details" sectionId="personal-details" color="pink-500">
-                <x-apllicant-modal.personal-details :id=$application_id :reportType="$reportType" mode="page" />
-            </x-accordion-section>
-        </div>
+        <livewire:application-details.tab-wise-application-view :id="$application_id" :schemeId="$scheme_id"
+            :allowedTabCodes="[101]" />
     </div>
 
     <!-- Modification Details -->
@@ -64,11 +53,11 @@
                         <span class="ml-2 text-gray-900 dark:text-gray-100">{{ $oldCasteNumber ?? 'N/A' }}</span>
                     </li>
                     <li>
-                           <div class="mt-2">
+                        <div class="mt-2">
                             <span class="font-medium text-gray-600 dark:text-gray-300"> previous Uploaded Documents:</span>
                         </div>
                         <div class="mt-2">
-                        <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="[104]" :is_page="1" />
+                            <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="[104]" :is_page="1" :scheme_id="$scheme_id" />
                         </div>
                     </li>
                 </ul>
@@ -98,7 +87,7 @@
                             <span class="font-medium text-gray-600 dark:text-gray-300">New Uploaded Documents:</span>
                         </div>
                         <div class="mt-2">
-                            <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="[104]" enclosureSource="5" :is_page="1" />
+                            <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="[104]" enclosureSource="5" :is_page="1" :scheme_id="$scheme_id" />
                         </div>
                     </li>
             </div>
@@ -106,7 +95,7 @@
         </div>
         <div class="rounded-xl p-4 mt-4">
             {{-- @if(\App\Helpers\WorkFlowPermissionHelper::canTakeActionForCaste())  --}}
-            <livewire:caste-modification.caste-modification-action :applicationId="$application_id" />
+            <livewire:caste-modification.caste-modification-action :applicationId="$application_id" :scheme_id="$scheme_id" />
             {{-- @endif  --}}
         </div>
 

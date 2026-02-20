@@ -185,7 +185,7 @@ Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'u
     ->name('beneficiary.updateCaste');
 
 Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])
-    ->middleware('permission.redirect:canCasteModification')
+    // ->middleware('permission.redirect:canCasteModification')
     ->name('caste-modification-list');
 
 Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])

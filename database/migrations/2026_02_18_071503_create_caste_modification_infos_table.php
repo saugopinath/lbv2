@@ -23,7 +23,7 @@ return new class extends Migration
             $table->unsignedBigInteger('request_id')->nullable();
             $table->boolean('is_active')->default(1);
             $table->unsignedInteger('created_by');
-            $table->unsignedInteger('updated_by');
+            $table->unsignedInteger('updated_by')->nullable();
             $table->Integer('created_by_dist_code');
             $table->Integer('created_by_local_body_code');
             $table->timestamps();

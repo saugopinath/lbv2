@@ -11,6 +11,7 @@ use App\Models\Codemaster;
 use Illuminate\Support\Facades\Crypt;
 use App\Helpers\CheckAuthHelper;
 use App\Helpers\WorkFlowPermissionHelper;
+use App\Models\BeneficiaryPersonalDetail;
 use App\Models\BeneficiaryTemEnclosure;
 use App\Models\CriticalChangeMaster;
 use Illuminate\Support\Facades\DB;
@@ -26,12 +27,13 @@ class CasteModificationAction extends Component
     public $availableActions = [];
     public $heading = '';
     public $doc_type;
+    public $scheme_id;
     protected $rules = [
         'action' => 'required|string',
     ];
-    
-    public function mount($applicationId)
+    public function mount($applicationId,$scheme_id)
     {
+        $this->scheme_id = $scheme_id;
         $this->applicationId = $applicationId;
         $this->roleId = CheckAuthHelper::getRoleId();
         $this->doc_type = Codemaster::getIdByCode(162); // Caste Certificate Document Type
@@ -139,9 +141,9 @@ class CasteModificationAction extends Component
             '2204' => Codemaster::getIdByCode(2204),
         ];
         $opTypeMapping = [
-            '2202' => Codemaster::getIdByCode(2107), // Verify op_type
+            '2202' => Codemaster::getIdByCode(2108), // Verify op_type
             '2203' => Codemaster::getIdByCode(2108), // Approve op_type
-            '2204' => Codemaster::getIdByCode(2109), // Revert op_type
+            '2204' => Codemaster::getIdByCode(2110), // Revert op_type
         ];
         if (!isset($mapping[$this->action])) {
             session()->flash('error', 'Invalid action selected!');
@@ -159,13 +161,12 @@ class CasteModificationAction extends Component
             $acceptSaved = false;
             $beneficiarySaved = true;
             $casteUpdated = true;
-
             $casteModification->next_level_requested_id = $mapping[$this->action];
             $casteModification->updated_by = Auth::id();
             $casteSaved = $casteModification->save(); // boolean
-
             $acceptReject = new AcceptRejectInfo();
             $acceptReject->application_id = $this->applicationId;
+            $acceptReject->scheme_id = $this->scheme_id;
             $acceptReject->beneficiary_id = $casteModification->beneficiary_id;
             $acceptReject->ip_address = request()->ip();
             $acceptReject->user_id = Auth::id();
@@ -193,7 +194,7 @@ class CasteModificationAction extends Component
 
             if ($this->action == '2203') {
                 // Update BeneficiaryPersonal
-                $beneficiary = BeneficiaryPersonal::where('application_id', $this->applicationId)->first();
+                $beneficiary = BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->first();
 
                 if ($beneficiary) {
                     $beneficiary->caste = $casteModification->new_data['caste'] ?? $beneficiary->caste;

@@ -26,14 +26,10 @@ class TabWiseApplicationView extends Component
         $this->applicationId = $id;
         $this->schemeId = $schemeId;
 
-        // blade থেকে string এ এলে array বানানো
         if (is_string($allowedTabCodes)) {
             $allowedTabCodes = explode(',', $allowedTabCodes);
         }
-
         $this->allowedTabCodes = array_map('intval', $allowedTabCodes);
-
-        // 🔥 only tab meta load
         $this->tabs = $this->tabService->getTabsMeta(
             $this->schemeId,
             $this->allowedTabCodes

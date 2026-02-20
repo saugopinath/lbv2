@@ -239,11 +239,9 @@ class EnclosureList extends Component
             $this->addError('singleDocument', "{$docName} is required.");
             return;
         }
-
+        
         $this->validate();
-
         $base64 = base64_encode(file_get_contents($this->singleDocument->getRealPath()));
-
         $model = $this->enclosureModel();
         // dd($model);
         $existingDoc = $model::where('application_id', $this->application_id)
@@ -284,12 +282,9 @@ class EnclosureList extends Component
                 $createData['tab_code'] = $this->tabCode;
             }
             $model::create($createData);
-
             // dd($is_upload);
         }
-
         $docId = $this->currentDocId;
-
         $this->singleDocument = null;
         $this->currentDocId = null;
         $this->currentDocMaxSize = '';
@@ -315,7 +310,6 @@ class EnclosureList extends Component
                 }
             }
         }
-
         $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.', docId: $docId);
         $this->dispatch('$refresh');
         $this->loadExistingDocuments();
@@ -327,7 +321,6 @@ class EnclosureList extends Component
         $document = $model::findOrFail($id);
         $decoded = base64_decode($document->attched_document);
         $filename = 'document_' . $document->document_type . '.' . $document->document_extension;
-
         return response()->streamDownload(function () use ($decoded) {
             echo $decoded;
         }, $filename, [
@@ -341,7 +334,6 @@ class EnclosureList extends Component
     public function validateBeforeNext()
     {
         $this->showErrors = false;
-
         foreach ($this->doc_lists as $doc) {
             $existing = $this->existingDocuments[$doc->doc_type_id] ?? null;
 
@@ -351,7 +343,6 @@ class EnclosureList extends Component
                 return;
             }
         }
-
         $this->dispatch('document-validation-passed');
     }
 
