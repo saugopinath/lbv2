@@ -17,11 +17,15 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
 
     public function contact()
     {
-        return $this->hasOne(BeneficiaryContactDetail::class, 'application_id', 'application_id');
+        return $this->hasOne(BeneficiaryContactDetail::class, 'application_id');
     }
     public function documents()
     {
         return $this->hasMany(BeneficiaryEnclosure::class, 'application_id');
+    }
+    public function aadhaar()
+    {
+        return $this->hasOne(BeneficiaryAadhaar::class, 'application_id');
     }
 
     // public function transformAudit(array $data): array

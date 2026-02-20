@@ -14,9 +14,10 @@ class SchemeDropdown extends Component
     public $schemeName;
     public $schemeId = null;
     public $option = null;
-    public $button_show;
-    public function mount($schemes, $scheme_id = null)
+    public $button_show, $stage;
+    public function mount($schemes, $scheme_id = null, $stage = null)
     {
+        $this->stage = $stage;      
         $this->schemes = $schemes;
         $this->button_show = 1;
 
@@ -27,6 +28,8 @@ class SchemeDropdown extends Component
             $this->option = 2;
         } elseif ($route == 'lb-application-list') {
             $this->option = 3;
+        }elseif ($route == 'incomplete.types') {
+            $this->option = 4;
         }
 
         if ($scheme_id) {

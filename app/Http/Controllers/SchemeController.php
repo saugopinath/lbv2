@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Route;
 
 class SchemeController extends Controller
 {
-    public function finalSubmitted()
-    {
+    public function finalSubmitted($stage=null)
+    {       
         $schemes = '';
         $route = Route::currentRouteName();
         if ($route == 'schemes.final-submitted') {
@@ -25,7 +25,7 @@ class SchemeController extends Controller
         } else {
             $schemes = Scheme::all();
         }
-        return view('schemesblade.dropdown', compact('schemes'));
+        return view('schemesblade.dropdown', compact('schemes','stage'));
     }
 
     public function defineWorkflow()

@@ -46,6 +46,9 @@
                     :wire:key="'lb-application-list-'.$schemeId" />
                 <livewire:revert-reject-modal />
             </div>
+        @elseif($option == 4)
+            <livewire:incomplete-search-wrapper :schemeId="$schemeId" :stage="$stage ?? null"
+                :wire:key="'incomplete.types-'.$schemeId" />
         @endif
     @endif
 
