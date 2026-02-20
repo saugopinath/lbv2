@@ -97,7 +97,7 @@
             </div>
         @endif
         {{-- Incomplete Menu --}}
-        <!-- @if (\App\Helpers\WorkFlowPermissionHelper::canIncomplete())             -->
+        @if (\App\Helpers\WorkFlowPermissionHelper::canIncomplete())            
             <div>
                 <button @click="activeMenu === 'Incomplete' ? activeMenu = null : activeMenu = 'Incomplete'"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 text-slate-200 hover:text-white rounded">

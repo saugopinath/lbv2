@@ -14,17 +14,8 @@
 
     <!-- Accordion Section -->
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-4 mb-6">
-        <div x-data="{
-            openSection: 'personal-details',
-            toggleSection(section) {
-                this.openSection = this.openSection === section ? '' : section;
-            }
-        }" class="space-y-2">
-
-            <x-accordion-section title="Personal Details" sectionId="personal-details" color="pink-500">
-                <x-apllicant-modal.personal-details :id=$id :reportType="3" mode="page" />
-            </x-accordion-section>
-        </div>
+        <livewire:application-details.tab-wise-application-view :id="$id" :schemeId="$schemeId"
+            :allowedTabCodes="[101]" />
     </div>
 
     @if ($errors->has('duplicate_check'))

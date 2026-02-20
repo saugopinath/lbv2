@@ -132,7 +132,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/incomplete-types/{stage?}', [SchemeController::class, 'finalSubmitted'])
         ->name('incomplete.types');
 
-    Route::get('/incomplet-type/{id}', IncompletTypePage::class)
+    Route::get('/incomplet-type/{id}/{stage}/{schemeId}', IncompletTypePage::class)
         ->name('incomplet-type.view');
 
     Route::post('/incomplete/update/{id}', [IncompleteTypeController::class, 'fullUpdate'])

@@ -15,19 +15,22 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
 use App\Models\BeneficiaryTemEnclosure;
 use App\Models\ApplicantIncompletDeatil;
+use Request;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Illuminate\Support\Facades\Route;
 
 class IncompletTypePage extends Component
 {
-    public $id, $page, $stage, $applicantInfo, $formData = [], $revertReasons = [], $user_id, $revert_reason_cause_id, $revert_reason_remarks, $aadhaarIssues = [], $mobileIssues = [], $sortedBankIssues = [], $ifscode, $bank_account_number, $bank_action, $confirmbankaccountnumber;
-
+    public $page, $applicantInfo, $formData = [], $revertReasons = [], $user_id, $revert_reason_cause_id, $revert_reason_remarks, $aadhaarIssues = [], $mobileIssues = [], $sortedBankIssues = [], $ifscode, $bank_account_number, $bank_action, $confirmbankaccountnumber;
+    public $id,$stage,$schemeId;  
     protected $listeners = ['trigger-update' => 'recivedupdateddata', 'validate-revert' => 'validateRevert', 'do-revert' => 'revert'];
 
-    public function mount($id)
+    public function mount($id, $stage, $schemeId)
     {
         $this->id = Crypt::decryptString($id);
-        $this->stage = decrypt(request()->query('stage'));
+        $this->stage = Crypt::decryptString($stage);
+        $this->schemeId = Crypt::decryptString($schemeId);
+
         $select_lgd = session('lgd_session');
         $this->user_id = Crypt::decryptString($select_lgd['role_id']);
 
@@ -89,46 +92,47 @@ class IncompletTypePage extends Component
 
             // Create new approve request
             $request = AcceptRejectInfo::create([
-                'application_id'         => $this->id,
-                'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
-                'ip_address'             => request()->ip(),
-                'user_id'                => $this->user_id,
-                'browser'                => request()->header('User-Agent'),
-                'model_name'             => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
-                'op_type'                => Codemaster::where('code', 2104)->value('id'),
+                'application_id' => $this->id,
+                'beneficiary_id' => $this->applicantInfo->beneficiary_id ?? null,
+                'ip_address' => request()->ip(),
+                'user_id' => $this->user_id,
+                'browser' => request()->header('User-Agent'),
+                'model_name' => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
+                'op_type' => Codemaster::where('code', 2104)->value('id'),
                 'revert_reason_cause_id' => null,
-                'revert_reason_remarks'  => null,
-                'parent_id'              => $previousId,
+                'revert_reason_remarks' => null,
+                'parent_id' => $previousId,
             ]);
 
             foreach ($this->page as $item) {
                 $typeId = $item->incomplet_type;
-                if (!$typeId) continue;
+                if (!$typeId)
+                    continue;
 
                 $jsonValue = [];
 
                 // Aadhaar related
                 if (in_array($typeId, ['141', '149', '1414'])) {
                     $jsonValue = [
-                        'aadhaar_no'     => $this->formData['aadhar_modification'][$item->application_id] ?? null,
+                        'aadhaar_no' => $this->formData['aadhar_modification'][$item->application_id] ?? null,
                         'application_id' => $this->id,
                     ];
                 }
                 // Mobile related
                 elseif (in_array($typeId, ['142', '1410'])) {
                     $jsonValue = [
-                        'mobile_no'      => $this->formData['dup_mobile'][$item->application_id] ?? null,
+                        'mobile_no' => $this->formData['dup_mobile'][$item->application_id] ?? null,
                         'application_id' => $this->id,
                     ];
                 }
                 // Bank related
                 elseif (in_array($typeId, ['145', '146', '1411', '1412', '1413'])) {
                     $jsonValue = [
-                        'ifscode'                 => $this->ifscode,
-                        'bank_account_number'     => $this->bank_account_number,
+                        'ifscode' => $this->ifscode,
+                        'bank_account_number' => $this->bank_account_number,
                         'confirmbankaccountnumber' => $this->confirmbankaccountnumber,
-                        'bank_action'             => $this->bank_action,
-                        'application_id'          => $this->id,
+                        'bank_action' => $this->bank_action,
+                        'application_id' => $this->id,
                     ];
                 }
 
@@ -137,13 +141,13 @@ class IncompletTypePage extends Component
                     if ($item->is_active == 1) {
                         $item->update([
                             'next_level_request_id' => 2,
-                            'request_id'            => $request->id,
-                            'is_active'             => -1,
+                            'request_id' => $request->id,
+                            'is_active' => -1,
                         ]);
                     } elseif ($item->is_active == 0) {
                         $item->update([
                             'next_level_request_id' => 2,
-                            'request_id'            => $request->id,
+                            'request_id' => $request->id,
                         ]);
                     }
                 }
@@ -201,8 +205,8 @@ class IncompletTypePage extends Component
                     ['application_id' => $this->id],
                     [
                         'encoded_aadhar' => Crypt::encryptString($newAadhaar),
-                        'aadhar_hash'    => md5($newAadhaar),
-                        'created_by'     => Auth::id(),
+                        'aadhar_hash' => md5($newAadhaar),
+                        'created_by' => Auth::id(),
                     ]
                 );
 
@@ -211,13 +215,13 @@ class IncompletTypePage extends Component
                     $beneficiary->sourceable->enclosers()->updateOrCreate(
                         ['application_id' => $this->id],
                         [
-                            'attched_document'   => $temp->attched_document,
-                            'document_type'      => $temp->document_type,
+                            'attched_document' => $temp->attched_document,
+                            'document_type' => $temp->document_type,
                             'document_extension' => $temp->document_extension,
                             'document_mime_type' => $temp->document_mime_type,
-                            'ip_address'         => request()->ip(),
-                            'created_by'         => Auth::id(),
-                            'updated_at'         => now(),
+                            'ip_address' => request()->ip(),
+                            'created_by' => Auth::id(),
+                            'updated_at' => now(),
                         ]
                     );
 
@@ -235,9 +239,9 @@ class IncompletTypePage extends Component
                 $beneficiary->sourceable()->updateOrCreate(
                     ['application_id' => $this->id],
                     [
-                        'mobile_no'  => $newMobile,
+                        'mobile_no' => $newMobile,
                         'created_by' => Auth::id(),
-                        'is_faulty'  => true,
+                        'is_faulty' => true,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]
@@ -258,9 +262,9 @@ class IncompletTypePage extends Component
             case 145: // NAME VALIDATION FAILED IN BANK
                 $beneficiary->sourceable->failedPaymentDetails()->updateOrCreate([
                     'edited_status' => 2,
-                    'failed_type'   => 3,
-                    'accno'         => $newBankAccountNumber,
-                    'ifsc'          => $newifscode,
+                    'failed_type' => 3,
+                    'accno' => $newBankAccountNumber,
+                    'ifsc' => $newifscode,
                 ]);
 
                 if ($bank_action == 2 || $bank_action == 3) {
@@ -270,13 +274,13 @@ class IncompletTypePage extends Component
                         $beneficiary->sourceable->enclosers()->updateOrCreate(
                             ['application_id' => $this->id],
                             [
-                                'attched_document'   => $temp->attched_document,
-                                'document_type'      => $temp->document_type,
+                                'attched_document' => $temp->attched_document,
+                                'document_type' => $temp->document_type,
                                 'document_extension' => $temp->document_extension,
                                 'document_mime_type' => $temp->document_mime_type,
-                                'ip_address'         => request()->ip(),
-                                'created_by'         => Auth::id(),
-                                'updated_at'         => now(),
+                                'ip_address' => request()->ip(),
+                                'created_by' => Auth::id(),
+                                'updated_at' => now(),
                             ]
                         );
 
@@ -296,8 +300,8 @@ class IncompletTypePage extends Component
                     ['application_id' => $this->id],
                     [
                         'bank_account_number' => $newBankAccountNumber,
-                        'ifsc'               => $newifscode,
-                        'created_by'         => Auth::id(),
+                        'ifsc' => $newifscode,
+                        'created_by' => Auth::id(),
                     ]
                 );
 
@@ -308,13 +312,13 @@ class IncompletTypePage extends Component
                         $beneficiary->sourceable->enclosers()->updateOrCreate(
                             ['application_id' => $this->id],
                             [
-                                'attched_document'   => $temp->attched_document,
-                                'document_type'      => $temp->document_type,
+                                'attched_document' => $temp->attched_document,
+                                'document_type' => $temp->document_type,
                                 'document_extension' => $temp->document_extension,
                                 'document_mime_type' => $temp->document_mime_type,
-                                'ip_address'         => request()->ip(),
-                                'created_by'         => Auth::id(),
-                                'updated_at'         => now(),
+                                'ip_address' => request()->ip(),
+                                'created_by' => Auth::id(),
+                                'updated_at' => now(),
                             ]
                         );
 
@@ -322,8 +326,8 @@ class IncompletTypePage extends Component
                     }
                     $beneficiary->sourceable->benPaymentDetails()->update([
                         'acc_validated' => 0,
-                        'last_accno'    => $newBankAccountNumber,
-                        'last_ifsc'     => $newifscode,
+                        'last_accno' => $newBankAccountNumber,
+                        'last_ifsc' => $newifscode,
                     ]);
                 } else {
                     $beneficiary->sourceable->benPaymentDetails()->update([
@@ -347,10 +351,10 @@ class IncompletTypePage extends Component
             case 1413: // Minor Mismatch(90% - 100%)
                 $beneficiary->sourceable->failedPaymentDetails()->updateOrCreate([
                     'edited_status' => 2,
-                    'failed_type'   => 3,
-                    'accno'         => $newBankAccountNumber,
-                    'ifsc'          => $newifscode,
-                    'updated_at'    => now(),
+                    'failed_type' => 3,
+                    'accno' => $newBankAccountNumber,
+                    'ifsc' => $newifscode,
+                    'updated_at' => now(),
                 ]);
                 BeneficiaryCommonList::where('sourceable_id', $this->id)
                     ->update([
@@ -367,12 +371,12 @@ class IncompletTypePage extends Component
     {
         $this->validate([
             'revert_reason_cause_id' => 'required|exists:codemasters,id',
-            'revert_reason_remarks'  => 'required|string|max:255',
+            'revert_reason_remarks' => 'required|string|max:255',
         ], [
             'revert_reason_cause_id.required' => 'Please select a revert reason.',
-            'revert_reason_cause_id.exists'   => 'Invalid revert reason selected.',
-            'revert_reason_remarks.required'  => 'Remarks are required.',
-            'revert_reason_remarks.max'       => 'Remarks cannot exceed 255 characters.',
+            'revert_reason_cause_id.exists' => 'Invalid revert reason selected.',
+            'revert_reason_remarks.required' => 'Remarks are required.',
+            'revert_reason_remarks.max' => 'Remarks cannot exceed 255 characters.',
         ]);
 
         $this->dispatch('confirm-revert');
@@ -399,25 +403,25 @@ class IncompletTypePage extends Component
                 ->value('id');
 
             $request = AcceptRejectInfo::create([
-                'application_id'         => $this->id,
-                'beneficiary_id'         => $this->applicantInfo->beneficiary_id ?? null,
-                'ip_address'             => request()->ip(),
-                'user_id'                => $this->user_id,
-                'browser'                => request()->header('User-Agent'),
-                'model_name'             => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
-                'op_type'                => Codemaster::where('code', 2105)->value('id'),
+                'application_id' => $this->id,
+                'beneficiary_id' => $this->applicantInfo->beneficiary_id ?? null,
+                'ip_address' => request()->ip(),
+                'user_id' => $this->user_id,
+                'browser' => request()->header('User-Agent'),
+                'model_name' => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
+                'op_type' => Codemaster::where('code', 2105)->value('id'),
                 'revert_reason_cause_id' => $this->revert_reason_cause_id,
-                'revert_reason_remarks'  => $this->revert_reason_remarks,
-                'parent_id'              => $previousId,
+                'revert_reason_remarks' => $this->revert_reason_remarks,
+                'parent_id' => $previousId,
             ]);
 
             foreach ($this->page as $item) {
                 $item->update([
-                    'is_active'             => 1,
-                    'new_value'             => null,
+                    'is_active' => 1,
+                    'new_value' => null,
                     'next_level_request_id' => -50,
-                    'request_id'            => $request->id,
-                    'change_type'           => null,
+                    'request_id' => $request->id,
+                    'change_type' => null,
                 ]);
             }
 

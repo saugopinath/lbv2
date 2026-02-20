@@ -39,10 +39,10 @@ class ApplicantIncompletDeatil extends Model implements Auditable
         return $this->belongsTo(Codemaster::class, 'incomplet_type', 'code');
     }
 
-    // public function incompleteType()
-    // {
-    //     return $this->belongsTo(IncompletTypeModelMapping::class, 'incomplet_type', 'incomplet_type_code');
-    // }
+    public function incompleteType()
+    {
+        return $this->belongsTo(IncompletTypeModelMapping::class, 'incomplet_type', 'incomplet_type_code');
+    }
     public function scopeApplicationWise($query, $schemeId = null)
     {
         if ($schemeId) {
@@ -85,8 +85,8 @@ class ApplicantIncompletDeatil extends Model implements Auditable
     // {
     //     return $this->hasOne(AcceptRejectInfo::class, 'application_id', 'application_id');
     // }
-    // public function banks()
-    // {
-    //     return $this->hasOne(BeneficiaryBank::class, 'application_id', 'application_id');
-    // }
+    public function banks()
+    {
+        return $this->hasOne(BeneficiaryBankDetail::class,  'application_id');
+    }
 }

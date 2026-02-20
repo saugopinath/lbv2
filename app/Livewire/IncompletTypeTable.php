@@ -173,6 +173,7 @@ class IncompletTypeTable extends DataTableComponent
                 $link = route('incomplet-type.view', [
                     'id' => Crypt::encryptString($row->application_id),
                     'stage' => Crypt::encryptString($stage),
+                    'schemeId' => Crypt::encryptString( $this->schemeId),
                 ]);
 
                 return view('coulmn_button.view', [
