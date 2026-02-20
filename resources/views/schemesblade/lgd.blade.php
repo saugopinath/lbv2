@@ -1,4 +1,4 @@
 <x-layouts.app>
-    <livewire:filterlgdmasternew />
+    <livewire:filterlgdmasternew :showAssembly="true" />
     <livewire:filterlgdmasternew1 />
 </x-layouts.app>
