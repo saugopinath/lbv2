@@ -12,7 +12,7 @@ class Filterlgdmasternew1 extends Component
     }
     #[On('filter-cleared')]
     public function filterCleared() {
-        dd('ok');
+        // dd('ok');
     }
     public function render()
     {
