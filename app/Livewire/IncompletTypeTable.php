@@ -163,7 +163,7 @@ class IncompletTypeTable extends DataTableComponent
 
         $columns[] = Column::make("Actions")
             ->label(function ($row) {
-                $stage = request()->get('stage');
+                $stage = request()->get('stage');               
 
                 $buttonText = match ($stage) {
                     'approver', 'revert' => 'View',
@@ -172,7 +172,7 @@ class IncompletTypeTable extends DataTableComponent
 
                 $link = route('incomplet-type.view', [
                     'id' => Crypt::encryptString($row->application_id),
-                    'stage' => Crypt::encryptString($stage),
+                    'stage' => Crypt::encryptString($this->stage),
                     'schemeId' => Crypt::encryptString( $this->schemeId),
                 ]);
 
