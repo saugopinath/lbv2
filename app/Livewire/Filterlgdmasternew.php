@@ -1,12 +1,16 @@
 <?php
+
 namespace App\Livewire;
+
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Component;
+
 class Filterlgdmasternew extends Component
 {
     public $formData = [];
     public $visible = [];
     public $showAssembly = false;
+    public $buttonShow = true;
     protected $defaultVisible = [
         'district_dropdown' => 0,
         'rural_urban_dropdown' => 0,
@@ -30,10 +34,14 @@ class Filterlgdmasternew extends Component
         if ($key === 'blockurban') {
             $this->formData['gpward'] = '';
         }
+        if (!$this->buttonShow) {
+            $this->filterData();
+        }
     }
-    public function mount($showAssembly = false)
+    public function mount($showAssembly = false, $buttonShow = true)
     {
         $this->showAssembly = $showAssembly;
+        $this->buttonShow = $buttonShow;
         $this->resetFilters();
     }
     private function applySessionLogic()
