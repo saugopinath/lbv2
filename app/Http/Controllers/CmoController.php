@@ -88,6 +88,7 @@ class CmoController extends Controller
                 return $datas;
             });
             if (!empty($datas)) {
+                $municipalities = Municipality::pluck('subdivision_id', 'lgd_code');
                 $redressedStatusDefault = Codemaster::getIdByCode(3301);
                 $redressedStatusFallback = Codemaster::getIdByCode(3306);
                 foreach ($datas as $data) {
@@ -95,7 +96,7 @@ class CmoController extends Controller
                     $cmoData->fill($data);
                     $cmoData->lb_dist_code = $data['lgd_dist'];
                     if (isset($data['lgd_muni'])) {
-                        $cmoData->lb_local_body_code = Municipality::where('lgd_code', $data['lgd_muni'])->first()->subdivision_id;
+                        $cmoData->lb_local_body_code = $municipalities[$data['lgd_muni']] ?? null;
                     } else {
                         $cmoData->lb_local_body_code = $data['lgd_block'];
                     }
