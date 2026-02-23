@@ -88,6 +88,8 @@ class CmoController extends Controller
                 return $datas;
             });
             if (!empty($datas)) {
+                $redressedStatusDefault = Codemaster::getIdByCode(3301);
+                $redressedStatusFallback = Codemaster::getIdByCode(3306);
                 foreach ($datas as $data) {
                     $cmoData = new CmoSmData();
                     $cmoData->fill($data);
@@ -98,7 +100,11 @@ class CmoController extends Controller
                         $cmoData->lb_local_body_code = $data['lgd_block'];
                     }
                     $cmoData->lb_gp_ward_code = $data['ward_id'] ?? $data['gp_id'];
-                    $cmoData->redressed_status = Codemaster::getIdByCode(3301);
+                    if (empty($data['lgd_muni']) && empty($data['lgd_block'])) {
+                        $cmoData->redressed_status = $redressedStatusFallback;
+                    } else {
+                        $cmoData->redressed_status = $redressedStatusDefault;
+                    }
                     $cmoData->save();
                 }
                 $record->is_fetched = 1;
