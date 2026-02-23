@@ -11,6 +11,7 @@ use App\Models\ApplicantIncompletDeatil;
 class MismatchLow extends Component
 {
     public $ifscode, $bankname, $bankbranchname, $bank_account_number, $old, $dupAction = null, $item, $bank_action = '', $confirmbankaccountnumber;
+    public $schemeId;
     protected $listeners = [
         'dup-bank-action-changed' => 'setDupAction'
     ];
@@ -31,11 +32,12 @@ class MismatchLow extends Component
         }
     }
 
-    public function mount($item,$dupAction = null)
+    public function mount($item, $dupAction = null, $schemeId = null)
     {
         $this->item = $item;
+        $this->schemeId = $schemeId;
         $this->dupAction = $dupAction;
-// dd($this->dupAction);
+        // dd($this->dupAction);
 // dd($this->dupAction);
         $old_value = $item->old_value ?? [];
         $new_value = $item->new_value ?? [];
@@ -115,11 +117,11 @@ class MismatchLow extends Component
 
         // }
         if (!$stage) {
-             if (CheckAuthHelper::isCommmonVerifier()) {
-            // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+            if (CheckAuthHelper::isCommmonVerifier()) {
+                // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
                 $stage = 'verifier';
 
-            // } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+                // } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
             } elseif (CheckAuthHelper::isCommonApprover()) {
                 $stage = 'approver';
             }

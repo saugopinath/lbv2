@@ -226,7 +226,8 @@ class EnclosureList extends Component
     }
     protected function enclosureModel()
     {
-        return $this->enclosureSource === '5'
+        // dd($this->enclosureSource);
+        return $this->enclosureSource == '5'
             ? new BeneficiaryTemEnclosure
             : new BeneficiaryEnclosure;
     }
@@ -245,11 +246,11 @@ class EnclosureList extends Component
         $base64 = base64_encode(file_get_contents($this->singleDocument->getRealPath()));
 
         $model = $this->enclosureModel();
-        // dd($model);
+
         $existingDoc = $model::where('application_id', $this->application_id)
             ->where('document_type', $this->currentDocId)
             ->where('scheme_id', $this->scheme_id)
-            ->where('tab_code', $this->tabCode)
+            // ->where('tab_code', $this->tabCode)
             ->first();
         // dd($existingDoc);
         if ($existingDoc) {
@@ -260,7 +261,7 @@ class EnclosureList extends Component
                 'document_mime_type' => $this->singleDocument->getMimeType(),
                 'created_by' => Auth::id(),
                 'scheme_id' => $this->scheme_id,   
-                'tab_code' => $this->tabCode,    
+                // 'tab_code' => $this->tabCode,    
             ]);
         } else {
             $model::create([
@@ -272,7 +273,7 @@ class EnclosureList extends Component
                 'document_type' => $this->currentDocId,
                 'created_by' => Auth::id(),
                 'scheme_id' => $this->scheme_id,  
-                'tab_code' => $this->tabCode,    
+                // 'tab_code' => $this->tabCode,    
             ]);
             // dd($is_upload);
         }

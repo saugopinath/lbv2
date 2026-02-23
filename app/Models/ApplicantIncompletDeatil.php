@@ -34,15 +34,52 @@ class ApplicantIncompletDeatil extends Model implements Auditable
     {
         return $this->belongsTo(BeneficiaryContactDetail::class, 'application_id');
     }
+    public function bankdetails()
+    {
+        return $this->belongsTo(BeneficiaryBankDetail::class, 'application_id');
+    }
+    // public function aadhar()
+    // {
+    //     return $this->belongsTo(BeneficiaryAadhaar::class, 'application_id');
+    // }
     public function incompletType()
     {
         return $this->belongsTo(Codemaster::class, 'incomplet_type', 'code');
     }
-
+    public function enclosers()
+    {
+        return $this->hasMany(BeneficiaryEnclosure::class, 'application_id', 'application_id');
+    }
     public function incompleteType()
     {
         return $this->belongsTo(IncompletTypeModelMapping::class, 'incomplet_type', 'incomplet_type_code');
     }
+
+    // public function contact()
+    // {
+    //     return $this->hasOne(BeneficiaryContactDetail::class, 'application_id');
+    // }
+    // public function documents()
+    // {
+    //     return $this->hasMany(BeneficiaryEnclosure::class, 'application_id');
+    // }
+    public function aadhaar()
+    {
+        return $this->hasOne(BeneficiaryAadhaar::class, 'application_id');
+    }
+    // public function bank()
+    // {
+    //     return $this->hasOne(BeneficiaryBankDetail::class, 'application_id', 'application_id');
+    // }
+      public function failedPaymentDetails()
+    {
+        return $this->hasOne(FailedPaymentDetails::class, 'ben_id', 'beneficiary_id');
+    }
+     public function benPaymentDetails()
+    {
+        return $this->hasOne(BenPaymentDetails::class, 'ben_id', 'beneficiary_id');
+    }
+
     public function scopeApplicationWise($query, $schemeId = null)
     {
         if ($schemeId) {
@@ -75,18 +112,12 @@ class ApplicantIncompletDeatil extends Model implements Auditable
             })
             ->implode('<br>');
     }
-
-    // public function beneficiaryCommonList()
-    // {
-    //     return $this->hasOne(BeneficiaryCommonList::class, 'sourceable_id', 'application_id');
-    // }
-
-    // public function acceptRejectInfo()
-    // {
-    //     return $this->hasOne(AcceptRejectInfo::class, 'application_id', 'application_id');
-    // }
+    public function acceptRejectInfo()
+    {
+        return $this->hasOne(AcceptRejectInfo::class, 'application_id', 'application_id');
+    }
     public function banks()
     {
-        return $this->hasOne(BeneficiaryBankDetail::class,  'application_id');
+        return $this->hasOne(BeneficiaryBankDetail::class, 'application_id', 'application_id');
     }
 }

@@ -10,7 +10,7 @@ use App\Models\ApplicantIncompletDeatil;
 class DupBank extends Component
 {
     public $ifscode, $bankname, $bankbranchname, $bank_account_number, $old, $dupAction = null, $item, $bank_action = '', $confirmbankaccountnumber;
-
+    public $schemeId;
     public function updatedIfscode()
     {
         $ifs = Ifsccodemaster::with('bank')
@@ -27,9 +27,10 @@ class DupBank extends Component
         }
     }
 
-    public function mount($item)
+    public function mount($item, $schemeId = null)
     {
         $this->item = $item;
+        $this->schemeId = $schemeId;
 
         $old_value = $item->old_value ?? [];
         $new_value = $item->new_value ?? [];
@@ -98,7 +99,7 @@ class DupBank extends Component
     public function updatedBankAction($value)
     {
         if ($value == 2) {
-             $this->dispatch('hideLoader');
+            $this->dispatch('hideLoader');
         }
         $this->dispatch('dup-bank-action-changed', $value);
     }
@@ -120,11 +121,11 @@ class DupBank extends Component
 
         // }
         if (!$stage) {
-             if (CheckAuthHelper::isCommmonVerifier()) {
-            // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+            if (CheckAuthHelper::isCommmonVerifier()) {
+                // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
                 $stage = 'verifier';
 
-            // } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+                // } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
             } elseif (CheckAuthHelper::isCommonApprover()) {
                 $stage = 'approver';
             }

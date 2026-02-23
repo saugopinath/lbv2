@@ -11,15 +11,7 @@ class BeneficiaryTemEnclosure extends Model implements Auditable
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
 
-    protected $table = 'beneficiary_tem_enclosures';
+    protected $table = 'public.beneficiary_tem_enclosures';
 
-    protected $fillable = [
-        'application_id',
-        'document_type',
-        'attched_document',
-        'document_extension',
-        'document_mime_type',
-        'ip_address',
-        'created_by',
-    ];
+    protected $guarded = [];
 }

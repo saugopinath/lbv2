@@ -11,6 +11,7 @@ class AcceptRejectInfo extends Model implements Auditable
     protected $table = 'accept_reject_infos';
 
     protected $fillable = [
+        'scheme_id',
         'application_id',
         'beneficiary_id',
         'ip_address',
@@ -27,7 +28,7 @@ class AcceptRejectInfo extends Model implements Auditable
     {
         return $this->belongsTo(Codemaster::class, 'revert_reason_cause_id');
     }
-   
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

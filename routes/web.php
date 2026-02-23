@@ -135,13 +135,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/incomplet-type/{id}/{stage}/{schemeId}', IncompletTypePage::class)
         ->name('incomplet-type.view');
 
-    Route::post('/incomplete/update/{id}', [IncompleteTypeController::class, 'fullUpdate'])
+    Route::post('/incomplete/update/{id}/{schemeId}', [IncompleteTypeController::class, 'fullUpdate'])
         // ->middleware('permission.redirect:canUpdateIncomplet')
         ->name('incomplete-full-deatils-update');
 
-    // Route::post('/incomplete/revert/{id}', [IncompleteTypeController::class, 'revertVerify'])
-    //     // ->middleware('permission.redirect:canRevertIncomplet')
-    //     ->name('incomplete-revert-update');
+    Route::post('/incomplete/revert/{id}/{schemeId}', [IncompleteTypeController::class, 'revertVerify'])
+        // ->middleware('permission.redirect:canRevertIncomplet')
+        ->name('incomplete-revert-update');
     // Route::get('/incomplete-details-mis-report', [IncompleteTypeController::class, 'incompleteDetails'])
     //     ->name('incomplete.details.mis.report');
 

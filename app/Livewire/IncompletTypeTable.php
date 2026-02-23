@@ -163,7 +163,7 @@ class IncompletTypeTable extends DataTableComponent
 
         $columns[] = Column::make("Actions")
             ->label(function ($row) {
-                $stage = request()->get('stage');               
+                $stage = request()->get('stage');
 
                 $buttonText = match ($stage) {
                     'approver', 'revert' => 'View',
@@ -173,7 +173,7 @@ class IncompletTypeTable extends DataTableComponent
                 $link = route('incomplet-type.view', [
                     'id' => Crypt::encryptString($row->application_id),
                     'stage' => Crypt::encryptString($this->stage),
-                    'schemeId' => Crypt::encryptString( $this->schemeId),
+                    'schemeId' => Crypt::encryptString($this->schemeId),
                 ]);
 
                 return view('coulmn_button.view', [
@@ -223,9 +223,11 @@ class IncompletTypeTable extends DataTableComponent
         }
 
         // Location filter apply
-
+        // if (!empty($this->filter_condition)) {
+        //     $query->where($this->filter_condition);
+        // }
         // if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->filterCode) {
-        //     $query = EncryptionArray::applyIncompletLocationFilter(
+        //     $query = EncryptionArray::applyLocationFilters(
         //         $query,
         //         $this->district_id ? (int) $this->district_id : null,
         //         $this->rural_urban ? (int) $this->rural_urban : null,
@@ -234,6 +236,7 @@ class IncompletTypeTable extends DataTableComponent
         //         $this->filterCode ? (int) $this->filterCode : null,
         //     );
         // }
+        $this->dispatch('hideLoader');
         // dd($query->first());
         return $query;
     }

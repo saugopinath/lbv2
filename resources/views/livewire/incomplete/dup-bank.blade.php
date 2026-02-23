@@ -134,7 +134,7 @@
                     <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
                         <div class="w-1/3">
                             <h3 class="font-semibold mb-2">Newly Temp Document</h3>
-                            <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[111]" enclosureSource="5" />
+                            <livewire:enclosure-list :application_id="$item->application_id" :scheme_id="$schemeId" :doc_type_id_array_list="[111]" enclosureSource="5" />
                             @error('document_upload')
                                 <span class="text-red-600 text-sm">{{ $message }}</span>
                             @enderror
@@ -168,7 +168,7 @@
             <div class="w-1/3">
                 <h3 class="font-semibold mb-2">Newly Temp Document</h3>
 
-                <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[111]" :is_page="1" enclosureSource="5" />
+                <livewire:enclosure-list :application_id="$item->application_id" :scheme_id="$schemeId" :doc_type_id_array_list="[111]" :is_page="1" enclosureSource="5" />
             </div>
         @endif
 

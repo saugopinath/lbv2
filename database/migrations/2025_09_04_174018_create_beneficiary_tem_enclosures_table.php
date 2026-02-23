@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -15,6 +14,7 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->unsignedInteger('application_id');
+            $table->integer('scheme_id');
             $table->text('attched_document');
             $table->string('ip_address');
             $table->string('document_extension');
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->smallInteger('document_type');
             $table->Integer('created_by');
             $table->unique(['application_id', 'document_type']);
-            $table->index('application_id','beneficiary_tem_enclosures_application_id_index');
+            $table->index('application_id', 'beneficiary_tem_enclosures_application_id_index');
         });
     }
 

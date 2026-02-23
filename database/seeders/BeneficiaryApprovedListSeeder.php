@@ -125,9 +125,9 @@ class BeneficiaryApprovedListSeeder extends Seeder
                     'scheme_id' => $schemeId,
                     'application_id' => $applicationId,
                     'beneficiary_id' => $beneficiaryId,
-                    'ifscode' => Ifsccodemaster::where('id', 6712)->value('code'),
-                    'bankname' => 'State Bank of India',
-                    'bank_branch_name' => 'Main Branch',
+                    'ifscode' => 'BKID0004264',
+                    'bankname' => 'BANK OF INDIA',
+                    'bank_branch_name' => 'PANCHAL',
                     'bankaccountnumber' => rand(1000000000, 9999999999),
                 ]);
                 $docs = [
