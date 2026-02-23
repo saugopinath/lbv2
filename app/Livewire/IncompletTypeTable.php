@@ -42,15 +42,15 @@ class IncompletTypeTable extends DataTableComponent
         $select_lgd = session('lgd_session');
 
         if (!empty($select_lgd['district_id'])) {
-            $this->filter_condition['district_id'] = Crypt::decryptString($select_lgd['district_id']);
+            $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
         }
 
         if (!empty($select_lgd['block_id'])) {
-            $this->filter_condition['block_id'] = Crypt::decryptString($select_lgd['block_id']);
+            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
         }
 
         if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
 
@@ -221,7 +221,11 @@ class IncompletTypeTable extends DataTableComponent
                     ]);
                 break;
         }
-
+        if (!empty($this->filter_condition)) {
+            $query->whereHas('personaldetails', function ($q) {
+                $q->where($this->filter_condition);
+            });
+        }
         // Location filter apply
         // if (!empty($this->filter_condition)) {
         //     $query->where($this->filter_condition);
