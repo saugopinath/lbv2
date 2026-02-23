@@ -6,7 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Codemaster;
 
-class RedressedStatusSeeder extends Seeder
+class CmoRedressedStatusSeeder extends Seeder
 {
     /**
      * Run the database seeds.

@@ -43,7 +43,6 @@ use App\Http\Controllers\ValidationManagerController;
 use App\Livewire\Filterlgdmasternew;
 use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
-
 // Guest Routes
 Route::get('/', fn() => view('welcome'));
 Route::get('refresh-captcha', [App\Http\Controllers\CaptchaController::class, 'refreshCaptcha'])
@@ -183,4 +182,16 @@ Route::any('draftedit', [SchemeController::class, 'draftedit'])
 Route::any('/custom_application', [SchemeController::class, 'applicationView'])->name('custom_application.view');
 
 Route::any('lgd', [SchemeController::class, 'lgd'])
-        ->name('lgd');
+    ->name('lgd');
+
+Route::controller(CmoController::class)->group(function () {
+    Route::any('/pullnewcmo', 'pullnewcmo')->name('pullnewcmo');
+    Route::any('/populatelbportal', 'populatelbportal')->name('populatelbportal');
+    Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')->name('cmo-grievance-workflow');
+    // Route::any('/cmo-grievance-find/{id}', 'cmogrievancefind')->name('cmo-grievance-find');
+    Route::any('/cmo-grievance-find', 'cmogrievancefind')->name('cmo-grievance-find');
+    Route::post('/cmo-grievance-action', 'cmodetailsaction')->name('cmo-grievance-action');
+    Route::post('/cmo-grievance-search', 'cmogrievancesearch')->name('cmo-grievance-search');
+    Route::post('/map-applicant', 'mapapplicant')->name('map-applicant');
+    Route::post('/cmo-add-actions', 'addactions')->name('cmo-add-actions');
+});
