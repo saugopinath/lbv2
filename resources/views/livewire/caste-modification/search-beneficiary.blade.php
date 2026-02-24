@@ -26,7 +26,7 @@
         </div>
 
         <div>
-            <x-form.input name="searchValue" id="searchValue" wire:model.defer="searchValue"
+            <x-form.input name="searchValue" id="searchValue" wire:model="searchValue"
                 label="{{ $this->currentLabel }}" placeholder="Enter {{ $this->currentLabel }}" required
                 type="text"
                 oninput="this.value = this.value.replace(/[^0-9]/g);"

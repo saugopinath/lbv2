@@ -13,6 +13,7 @@ use App\Helpers\CheckAuthHelper;
 use App\Models\Scheme;
 use Illuminate\Support\Facades\Crypt;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Rappasoft\LaravelLivewireTables\Views\Filters\TextFilter;
 
 class CasteModificationListTable extends DataTableComponent
 {
@@ -33,6 +34,7 @@ class CasteModificationListTable extends DataTableComponent
     // public int $nextLevelRequestId = 0;
     public string $applicantStatus = '';
     public string $casteId = '';
+    public  $schemeId = null;
     public int $roleId = 0;
     public bool $showTable = false;
     public int $action_visible = 0;
@@ -69,11 +71,25 @@ class CasteModificationListTable extends DataTableComponent
         $this->setConfigurableAreas([
             'toolbar-left-start' => 'livewire.export_excel_buttons',
         ]);
+        $this->setSearchDisabled(); // Disable the global search box
     }
-    public function mount($applicantStatus = '', $casteId = '')
+    public function mount($applicantStatus = '', $casteId = '', $schemeId = '')
     {
-        $this->applicantStatus = $applicantStatus;
-        $this->casteId = $casteId;
+        if (request()->query('retain_filters') == 1) {
+            $filters = session('caste_mod_filters', []);
+            $this->applicantStatus = $applicantStatus ?: ($filters['status'] ?? '');
+            $this->casteId = $casteId ?: ($filters['caste'] ?? '');
+            $this->schemeId = $schemeId ?: ($filters['scheme'] ?? '');
+        } else {
+            $this->applicantStatus = $applicantStatus;
+            $this->casteId = $casteId;
+            $this->schemeId = $schemeId;
+        }
+
+        if (!empty($this->applicantStatus)) {
+            $this->showTable = true;
+            $this->action_visible = ($this->applicantStatus == 'PL') ? 1 : 0;
+        }
 
         $select_lgd = session('lgd_session');
         if (!empty($select_lgd['district_id'])) {
@@ -135,6 +151,7 @@ class CasteModificationListTable extends DataTableComponent
         // dd('bhbhbjhb');
         $this->applicantStatus = $filters['status'] ?? '';
         $this->casteId         = $filters['caste'] ?? '';
+        $this->schemeId        = $filters['scheme'] ?? '';
         $this->action_visible = ($this->applicantStatus == 'PL') ? 1 : 0;
         if (!empty($this->applicantStatus)) {
             $this->showTable = true;
@@ -183,6 +200,7 @@ class CasteModificationListTable extends DataTableComponent
             ->whereHas('beneficiaryPersonal', function ($q) {
                 $q->where($this->filter_condition);
             })
+            ->where('scheme_id', $this->schemeId)
             ->when(
                 $this->casteId,
                 fn($q) =>
@@ -398,8 +416,7 @@ class CasteModificationListTable extends DataTableComponent
     {
         return [
             Column::make("ID", "id"),
-            Column::make("Application Id", "application_id")
-                ->searchable(),
+            Column::make("Application Id", "application_id"),
             Column::make('Name')
                 ->label(
                     fn($row) =>
@@ -443,7 +460,8 @@ class CasteModificationListTable extends DataTableComponent
                         return view('coulmn_button.actions', [
                             'link' => route('caste-modification.edit', [
                                 'application_id' => Crypt::encryptstring($row->application_id),
-                                'beneficiary_id' => Crypt::encryptstring($row->beneficiary_id)
+                                'beneficiary_id' => Crypt::encryptstring($row->beneficiary_id),
+                                'scheme_id' => Crypt::encryptstring($row->beneficiaryPersonal->scheme_id)
                             ]),
                             'tooltip' => 'Edit Application',
                         ])->render();
@@ -465,6 +483,21 @@ class CasteModificationListTable extends DataTableComponent
                 })
                 ->html(),
 
+        ];
+    }
+
+    public function filters(): array
+    {
+        return [
+            TextFilter::make('Application ID')
+                ->filter(function ($query, $value) {
+                    $query->where('application_id', 'ILIKE', "%{$value}%");
+                }),
+
+            TextFilter::make('Beneficiary ID')
+                ->filter(function ($query, $value) {
+                    $query->where('beneficiary_id', 'ILIKE', "%{$value}%");
+                }),
         ];
     }
 

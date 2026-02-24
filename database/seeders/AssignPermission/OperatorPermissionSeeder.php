@@ -21,7 +21,11 @@ class OperatorPermissionSeeder extends Seeder
             'Duare Sarkar Entry',
             'Normal Entry',
             'modify caste',
-            'submit-lb-form'
+            'submit-lb-form',
+            'view caste modification list',
+            'edit caste',
+            'update caste',
+
         ];
 
         // 1) find role

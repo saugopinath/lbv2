@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\BeneficiaryTemEnclosure;
 use App\Models\BeneficiaryPersonalDetail;
 use App\Models\SchemeAttachedDocMappings;
+use App\Models\UniqueAppBenId;
 
 class EnclosureList extends Component
 {
@@ -239,10 +240,11 @@ class EnclosureList extends Component
             $this->addError('singleDocument', "{$docName} is required.");
             return;
         }
-        
+
         $this->validate();
         $base64 = base64_encode(file_get_contents($this->singleDocument->getRealPath()));
         $model = $this->enclosureModel();
+        $beneficiaryId = BeneficiaryPersonalDetail::where('application_id', $this->application_id)->value('beneficiary_id');
         // dd($model);
         $existingDoc = $model::where('application_id', $this->application_id)
             ->where('document_type', $this->currentDocId)
@@ -269,7 +271,7 @@ class EnclosureList extends Component
         } else {
             $createData = [
                 'application_id'     => $this->application_id,
-                'beneficiary_id'     => $this->application_id,
+                'beneficiary_id'     => $beneficiaryId,
                 'attched_document'   => $base64,
                 'ip_address'         => request()->ip(),
                 'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),

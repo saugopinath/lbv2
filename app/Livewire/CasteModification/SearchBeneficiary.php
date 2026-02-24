@@ -70,16 +70,47 @@ class SearchBeneficiary extends Component
         $this->revert_code = Codemaster::getIdByCode(2204);
     }
 
+    // public function updatedSearchType($value)
+    // {
+    //     if (empty($value) || !isset($this->searchOptions[$value])) {
+    //         $this->currentLabel = 'Select Search Applicant By First';
+    //         $this->searchValue = '';
+    //         return;
+    //     }
+    //     $this->currentLabel = $this->searchOptions[$value];
+    //     $this->reset('searchValue');
+    // }
+
     public function updatedSearchType($value)
     {
         if (empty($value) || !isset($this->searchOptions[$value])) {
             $this->currentLabel = 'Select Search Applicant By First';
-            $this->searchValue = '';
+            $this->reset([
+                'searchType',
+                'searchValue',
+                'results',
+                'items',
+                'getMinMaxWorkflowStep',
+                'nextLabelRoleId',
+                'filterRoleId',
+            ]);
+            $this->resetValidation();
             return;
         }
         $this->currentLabel = $this->searchOptions[$value];
-        $this->reset('searchValue');
+        $this->reset([
+            'searchValue',
+            'results',
+            'items',
+            'getMinMaxWorkflowStep',
+            'nextLabelRoleId',
+            'filterRoleId',
+        ]);
+        $this->resetValidation();
     }
+
+
+
     protected function rules()
     {
         return [
@@ -119,9 +150,8 @@ class SearchBeneficiary extends Component
 
     public function search(WorkflowService $workflowService)
     {
+        // dd($this->selectScheme);
         $this->validate();
-
-
         $column = $this->searchTypeMap[$this->searchType];
         $modelClass   = null;
         $searchValue  = $this->searchValue;
@@ -139,12 +169,8 @@ class SearchBeneficiary extends Component
                 ->where('scheme_id', $this->selectScheme)
                 ->first();
             if (!$fieldManager || !$fieldManager->tabMaster) {
-                $this->dispatch(
-                    'toaster',
-                    type: 'error',
-                    title: 'Error',
-                    message: 'Search configuration not found.'
-                );
+                $message = "No Beneficiary found in this Scheme.";
+                session()->flash('xwarning', $message);
                 return;
             }
             $modelClass   = "App\\Models\\" . $fieldManager->tabMaster->tab_model_name;
@@ -157,7 +183,6 @@ class SearchBeneficiary extends Component
                 $searchColumn = $dbColumn;
             }
         }
-        // dd($searchColumn, $modelClass);
         $query = $modelClass::query()
             ->select('application_id')
             ->where('scheme_id', $this->selectScheme);
@@ -179,20 +204,24 @@ class SearchBeneficiary extends Component
         $applicationId = $query->value('application_id');
         // dd($applicationId);
         if (!$applicationId) {
-            $this->dispatch(
-                'toaster',
-                type: 'warning',
-                title: 'Not Found',
-                message: 'No matching beneficiary found.'
-            );
+            // dd('fdfd');
+            $message = "No matching beneficiary found.";
+            session()->flash('xwarning', $message);
+            $this->items = [];
+            // $this->dispatch(
+            //     'toaster',
+            //     type: 'warning',
+            //     title: 'Not Found',
+            //     message: 'No matching beneficiary found.'
+            // );
             return;
         } else {
             $existingRecord = null;
             $existingRecord = CasteModificationInfo::where('application_id',  $applicationId)->where('scheme_id', $this->selectScheme)->where('is_active', true);
-            if (!empty($this->filter_condition)) {
-                // dd($this->filter_condition);
-                $existingRecord->where($this->filter_condition);
-            }
+            // if (!empty($this->filter_condition)) {
+            //     // dd($this->filter_condition);
+            //     $existingRecord->where($this->filter_condition);
+            // }
             $existingRecord = $existingRecord->first();
             if ($existingRecord) {
                 // dd($existingRecord);
@@ -277,7 +306,6 @@ class SearchBeneficiary extends Component
                             'applicant_name' => $item->beneficiary_name ?? '-',
                             'Caste_name' => FormOptionHelper::label('Caste', $item->caste) ?? 'Unknown',
                             'scheme_id' => $item->scheme_id ?? '-',
-
                         ];
                     })->values();
                 }

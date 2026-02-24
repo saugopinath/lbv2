@@ -33,7 +33,7 @@
     </div>
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-4 mb-6">
         <livewire:application-details.tab-wise-application-view :id="$application_id" :schemeId="$scheme_id"
-            :allowedTabCodes="[101,102]" />
+            :allowedTabCodes="[101]" />
         <div x-data="{
         selectedCaste: '{{ old('caste', $oldData['caste'] ?? '') }}',
         showCasteDetails() {

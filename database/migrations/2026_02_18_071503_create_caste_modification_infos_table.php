@@ -24,8 +24,8 @@ return new class extends Migration
             $table->boolean('is_active')->default(1);
             $table->unsignedInteger('created_by');
             $table->unsignedInteger('updated_by')->nullable();
-            $table->Integer('created_by_dist_code');
-            $table->Integer('created_by_local_body_code');
+            // $table->Integer('created_by_dist_code');
+            // $table->Integer('created_by_local_body_code');
             $table->timestamps();
             // $table->foreign('application_id', 'application_id_fk')->references('application_id')
             //     ->on('pension.beneficiary_personals')->onDelete('cascade');

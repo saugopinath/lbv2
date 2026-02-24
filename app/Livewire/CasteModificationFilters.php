@@ -13,16 +13,30 @@ class CasteModificationFilters extends Component
 {
     public string $applicantStatus = '';
     public string $casteId = '';
+    public  $schemeId = null;
     public array $statusOptions = [];
     public $casteOptions;
-    public $SchemeOptions;
+    public $schemeOptions;
 
     protected $rules = [
         'applicantStatus' => 'required|string',
+        'schemeId'        => 'required',
     ];
     public function mount(): void
     {
-        $this->SchemeOptions = Scheme::all();
+        if (request()->query('retain_filters') == 1) {
+            $filters = session('caste_mod_filters', []);
+            $this->applicantStatus = $filters['status'] ?? '';
+            $this->casteId = $filters['caste'] ?? '';
+            $this->schemeId = $filters['scheme'] ?? '';
+        } else {
+            session()->forget('caste_mod_filters');
+            $this->applicantStatus = '';
+            $this->casteId = '';
+            $this->schemeId = '';
+        }
+
+        $this->schemeOptions = Scheme::where('is_active', true)->pluck('name', 'id')->toArray();
         $this->casteOptions = FormOptionHelper::get('Caste');
         $roleId = session('lgd_session') ? Crypt::decryptString(session('lgd_session.role_id')) : null;
         if (CheckAuthHelper::isVerifier()) {
@@ -52,9 +66,15 @@ class CasteModificationFilters extends Component
     {
         try {
             $this->validate();
+            session(['caste_mod_filters' => [
+                'status' => $this->applicantStatus,
+                'caste'  => $this->casteId,
+                'scheme' => $this->schemeId,
+            ]]);
             $this->dispatch('filtersApplied', [
                 'status' => $this->applicantStatus,
                 'caste'  => $this->casteId,
+                'scheme' => $this->schemeId,
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->resettable();
@@ -66,6 +86,8 @@ class CasteModificationFilters extends Component
         $this->resetValidation();
         $this->applicantStatus = '';
         $this->casteId = '';
+        $this->schemeId = '';
+        session()->forget('caste_mod_filters');
         $this->dispatch('resetFilters');
     }
     public function resettable()
