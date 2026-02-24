@@ -2,6 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Models\BeneficiaryAadhaar;
+use App\Models\BeneficiaryBankDetail;
+use App\Models\BeneficiaryPersonalDetail;
+use App\Models\SchemeTabFormField;
+use Illuminate\Support\Str;
 use Livewire\Component;
 
 class BeneficiarySearch extends Component
@@ -69,7 +74,7 @@ class BeneficiarySearch extends Component
 
         $fieldLabel = $this->fields[$key]['label'] ?? 'Value';
 
-        $data = $this->validate([
+        $this->validate([
             'inputValue' => $this->getValidationRules($key),
         ], [
             'inputValue.required' => "The $fieldLabel is required.",
@@ -77,7 +82,41 @@ class BeneficiarySearch extends Component
             'inputValue.digits'   => "The $fieldLabel must be :digits digits.",
             'inputValue.regex'    => "The $fieldLabel should only contain characters (A-Z, a-z).",
         ]);
-        dd($key, $this->inputValue);
+        $payload = [
+            'searchKey'   => $key,
+            'searchValue' => $this->inputValue,
+        ];
+        $modelClass = BeneficiaryPersonalDetail::class;
+        $searchValue = $this->inputValue;
+        $query = $modelClass::query();
+        switch ($key) {
+            case 'application_id':
+            case 'beneficiary_name':
+                $query->where($key, $searchValue);
+                break;
+            case 'mobile_number':
+                $query->where('other_details->mobile_no', $searchValue);
+                break;
+            case 'aadhaar_number':
+                $query->whereHas('aadhar', function ($q) use ($searchValue) {
+                    $q->where('aadhar_vault', md5($searchValue));
+                })->with('aadhar');
+                break;
+            case 'bank_account_number':
+                $query->whereHas('bank', function ($q) use ($searchValue) {
+                    $q->where('bankaccountnumber', $searchValue);
+                })->with('bank');
+                break;
+        }
+        $result = $query->first(['application_id', 'beneficiary_id', 'next_level_role_id', 'is_final', 'is_clean', 'scheme_id']);
+        if ($result) {
+            $attributes = $result->attributesToArray();
+            $camelData = collect($attributes)->mapWithKeys(function ($value, $attr) {
+                return [Str::camel($attr) => $value];
+            })->toArray();
+            $payload = array_merge($payload, $camelData);
+        }
+        $this->dispatch('beneficiary-search', data: $payload);
     }
 
     public function render()

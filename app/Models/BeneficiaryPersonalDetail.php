@@ -38,6 +38,12 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     {
         return $this->hasOne(BeneficiaryBankDetail::class, 'beneficiary_id', 'beneficiary_id');
     }
+
+    public function aadhar()
+    {
+        return $this->hasOne(BeneficiaryAadhaar::class, 'beneficiary_id', 'beneficiary_id');
+    }
+
     public function getStatusText()
     {
         return 'Approved';
