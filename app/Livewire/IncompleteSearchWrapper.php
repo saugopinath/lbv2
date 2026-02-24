@@ -11,26 +11,24 @@ class IncompleteSearchWrapper extends Component
         'rural_urban' => null,
         'subdivision_id' => null,
         'blockurban' => null,
-        'gp_ward' => null,
+        'gpward' => null,
         'incomplete_type' => null,
     ];
 
-    public $revert = 'no'; // default
+    public $revert = 'no';
     public ?string $stage = null;
     public ?int $schemeId = null;
-    protected $listeners = [
-        'filtersApplied' => 'updateGeoFilters',
-        'filterIncompleteType' => 'updateIncompleteType',
-    ];
+
 
     #[On('filter-applied')]
-    public function filterApplied($filters) {
-        dd($filters);
+    public function filterApplied($filters)
+    {
+        $this->filters = array_merge($this->filters, $filters);
     }
 
     public function mount(?int $schemeId = null, ?string $stage = null)
     {
-        $this->schemeId = $schemeId;       
+        $this->schemeId = $schemeId;
         $this->stage = $stage;
     }
 
@@ -39,9 +37,9 @@ class IncompleteSearchWrapper extends Component
         $this->filters = array_merge($this->filters, $data);
     }
 
-    public function updateIncompleteType($code)
+    #[On('filterIncompleteType')]
+    public function filterIncompleteType($code)
     {
-        // dd($code);
         $this->filters['incomplete_type'] = $code;
     }
 
@@ -67,7 +65,7 @@ class IncompleteSearchWrapper extends Component
             'rural_urban' => null,
             'subdivision_id' => null,
             'blockurban' => null,
-            'gp_ward' => null,
+            'gpward' => null,
             'incomplete_type' => null,
         ];
 

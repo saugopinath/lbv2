@@ -149,22 +149,36 @@
                         </p>
                     </div>
 
-                    <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
-                        {{--  <div class="w-1/3">
-                        <h3 class="font-semibold mb-2">Previous Approved Document</h3>
-                        <livewire:enclosure-list :application_id="$item->application_id" :doc_type_id_array_list="[112]" :is_page="1" />
-                    </div>  --}}
-                        <div class="w-1/3">
-                            <h3 class="font-semibold mb-2">Newly Temp Document</h3>
+                   <div class="grid gap-6 mb-4 md:grid-cols-2 px-4">
 
-                            <livewire:enclosure-list :application_id="$item->application_id" :scheme_id="$schemeId" :doc_type_id_array_list="[111]" enclosureSource="5" />
+                    {{-- Newly Temp Document --}}
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-4">Newly Temp Document</h3>
 
-                            {{-- Error --}}
-                            @error('document_upload')
-                                <span class="text-red-600 text-sm">{{ $message }}</span>
-                            @enderror
-                        </div>
+                        <livewire:enclosure-list
+                            :application_id="$item->application_id"
+                            :scheme_id="$schemeId"
+                            :doc_type_id_array_list="[111]"
+                            :enclosureSource="5"
+                                :wire:key="'bank-new-'.$item->application_id" />
+                        @error('document_upload')
+                            <span class="text-red-600 text-sm">{{ $message }}</span>
+                        @enderror
                     </div>
+
+                    {{-- Previous Approved Document --}}
+                    <div>
+                        <h3 class="font-semibold mb-2">Previous Approved Document</h3>
+
+                        <livewire:enclosure-list
+                            :application_id="$item->application_id"
+                            :scheme_id="$schemeId"
+                            :doc_type_id_array_list="[111]"
+                            :is_page="1"
+                            :key="'bank-old-'.$item->application_id" />
+                    </div>
+               
+                </div>
 
                 </div>
             @endif

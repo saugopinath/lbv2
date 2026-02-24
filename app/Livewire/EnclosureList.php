@@ -33,11 +33,11 @@ class EnclosureList extends Component
 
     public function mount($scheme_id, $application_id = null, $is_page = null, $doc_type_id_array_list = [], $doc_type_id_array = [], $enclosureSource = null, $form_preview = null, $tabCode = null)
     {
-        $this->scheme_id = $scheme_id;
+        $this->scheme_id = $scheme_id;        
         $this->application_id = $application_id;
         // dd($this->application_id);
         $this->is_page = $is_page;
-        $this->enclosureSource = $enclosureSource;
+        $this->enclosureSource = $enclosureSource;     
         $this->form_preview = $form_preview;
 
         $this->tabCode = $tabCode;
@@ -227,7 +227,7 @@ class EnclosureList extends Component
     protected function enclosureModel()
     {
         // dd($this->enclosureSource);
-        return $this->enclosureSource == '5'
+        return $this->enclosureSource === 5
             ? new BeneficiaryTemEnclosure
             : new BeneficiaryEnclosure;
     }
@@ -286,7 +286,7 @@ class EnclosureList extends Component
         $this->currentDocExtensions = '';
         $this->showUploadModal = false;
         if ($this->application_id) {
-            if ($this->enclosureSource === '5') {
+            if ($this->enclosureSource === 5) {
                 // dd( 'here');
                 $docs = BeneficiaryTemEnclosure::where('application_id', $this->application_id)
                     ->whereIn('document_type', $this->doc_type_id_array_list)

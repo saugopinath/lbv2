@@ -23,9 +23,8 @@ class IncompletTypeTable extends DataTableComponent
     public ?int $perPage = 5;
     public string $search = '';
     public string $stage = '';
-    public ?string $filterCode = null;
     public ?int $schemeId = null;
-    public $district_id, $rural_urban, $blockurban, $gp_ward, $selectedSubdivision;
+    public $district_id, $rural_urban, $blockurban, $gpward, $selectedSubdivision, $filterCode;
 
     // protected $listeners = ['doSearch' => 'doSearch'];
     protected $listeners = [
@@ -56,16 +55,15 @@ class IncompletTypeTable extends DataTableComponent
 
     public function updateFilters($filters)
     {
-        // dd($filters);
         $this->district_id = $filters['district_id'] ?? null;
         $this->rural_urban = $filters['rural_urban'] ?? null;
         $this->selectedSubdivision = $filters['subdivision_id'] ?? null;
         $this->blockurban = $filters['blockurban'] ?? null;
-        $this->gp_ward = $filters['gp_ward'] ?? null;
+        $this->gpward = $filters['gpward'] ?? null;
         $this->filterCode = $filters['incomplete_type'] ?? null;
+
         $this->resetPage();
     }
-
     public function configure(): void
     {
         $this->setPrimaryKey('application_id')
@@ -226,22 +224,19 @@ class IncompletTypeTable extends DataTableComponent
                 $q->where($this->filter_condition);
             });
         }
-        // Location filter apply
-        // if (!empty($this->filter_condition)) {
-        //     $query->where($this->filter_condition);
-        // }
-        // if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->filterCode) {
-        //     $query = EncryptionArray::applyLocationFilters(
-        //         $query,
-        //         $this->district_id ? (int) $this->district_id : null,
-        //         $this->rural_urban ? (int) $this->rural_urban : null,
-        //         $this->blockurban ? (int) $this->blockurban : null,
-        //         $this->gp_ward ? (int) $this->gp_ward : null,
-        //         $this->filterCode ? (int) $this->filterCode : null,
-        //     );
-        // }
+
+        if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gpward || $this->filterCode) {
+            $query = EncryptionArray::applyIncompletLocationFilter(
+                $query,
+                $this->district_id ? (int) $this->district_id : null,
+                $this->rural_urban ? (int) $this->rural_urban : null,
+                $this->blockurban ? (int) $this->blockurban : null,
+                $this->gpward ? (int) $this->gpward : null,
+                $this->selectedSubdivision ? (int) $this->selectedSubdivision : null,
+                $this->filterCode ? (int) $this->filterCode : null,
+            );
+        }
         $this->dispatch('hideLoader');
-        // dd($query->first());
         return $query;
     }
 }

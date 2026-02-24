@@ -55,22 +55,22 @@ class ApplicantIncompletDeatil extends Model implements Auditable
         return $this->belongsTo(IncompletTypeModelMapping::class, 'incomplet_type', 'incomplet_type_code');
     }
 
-    // public function contact()
-    // {
-    //     return $this->hasOne(BeneficiaryContactDetail::class, 'application_id');
-    // }
-    // public function documents()
-    // {
-    //     return $this->hasMany(BeneficiaryEnclosure::class, 'application_id');
-    // }
+    public function contact()
+    {
+        return $this->hasOne(BeneficiaryContactDetail::class, 'application_id','application_id');
+    }
+    public function documents()
+    {
+        return $this->hasMany(BeneficiaryEnclosure::class, 'application_id');
+    }
     public function aadhaar()
     {
         return $this->hasOne(BeneficiaryAadhaar::class, 'application_id');
     }
-    // public function bank()
-    // {
-    //     return $this->hasOne(BeneficiaryBankDetail::class, 'application_id', 'application_id');
-    // }
+    public function bank()
+    {
+        return $this->hasOne(BeneficiaryBankDetail::class, 'application_id', 'application_id');
+    }
       public function failedPaymentDetails()
     {
         return $this->hasOne(FailedPaymentDetails::class, 'ben_id', 'beneficiary_id');

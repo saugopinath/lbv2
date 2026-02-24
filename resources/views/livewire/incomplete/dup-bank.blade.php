@@ -3,21 +3,7 @@
         @if (!empty($stage) && $stage == 'verifier')
             <div class="p-4 mb-2 border rounded-lg bg-gray-50 shadow-sm">
 
-                <h2>Select Opertion Type</h2>
-                {{--  <div class="flex gap-6 pl-4 pr-4 mt-2">
-                <label class="flex items-center space-x-2">
-                    <input type="radio" class="form-radio text-blue-600" name="bank_action" wire:model.lazy="bank_action"
-                        value="1" />
-                    <span>KEEP SAME</span>
-                </label>
-                <label class="flex items-center space-x-2">
-                    <input type="radio" class="form-radio text-blue-600" name="bank_action"
-                        wire:model.lazy="bank_action" value="2"
-                        {{ old('bank_action', $bank_action) == '2' ? 'checked' : '' }}
-                        x-on:change="Livewire.dispatch('showLoader')" />
-                    <span>CHANGE</span>
-                </label>
-            </div>  --}}
+                <h2>Select Opertion Type</h2>                
                 <div class="flex gap-6 pl-4 pr-4 mt-2">
                     <label class="flex items-center space-x-2">
                         <input type="radio" class="form-radio text-blue-600" name="bank_action"
@@ -131,14 +117,36 @@
                         </p>
                     </div>
 
-                    <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
-                        <div class="w-1/3">
-                            <h3 class="font-semibold mb-2">Newly Temp Document</h3>
-                            <livewire:enclosure-list :application_id="$item->application_id" :scheme_id="$schemeId" :doc_type_id_array_list="[111]" enclosureSource="5" />
+                   <div class="grid gap-6 mb-4 md:grid-cols-2 px-4">
+
+                        {{-- Newly Temp Document --}}
+                        <div>
+                            <h3 class="font-semibold text-gray-800 mb-4">Newly Temp Document</h3>
+
+                            <livewire:enclosure-list
+                                :application_id="$item->application_id"
+                                :scheme_id="$schemeId"
+                                :doc_type_id_array_list="[111]"
+                                :enclosureSource="5"
+                                :wire:key="'bank-new-'.$item->application_id" />
+
                             @error('document_upload')
                                 <span class="text-red-600 text-sm">{{ $message }}</span>
                             @enderror
                         </div>
+
+                        {{-- Previous Approved Document --}}
+                        <div>
+                            <h3 class="font-semibold mb-2">Previous Approved Document</h3>
+
+                            <livewire:enclosure-list
+                                :application_id="$item->application_id"
+                                :scheme_id="$schemeId"
+                                :doc_type_id_array_list="[111]"
+                                :is_page="1"
+                                :key="'bank-old-'.$item->application_id" />
+                        </div>
+
                     </div>
 
                 </div>
@@ -148,7 +156,7 @@
             {{-- ✅ Approver view (read-only labels only) --}}
             <div class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
                 <div>
-                    <label class="font-semibold">IFS Code:</label>
+                    <label class="font-semibold">IFSC Code:</label>
                     <p>{{ $ifscode ?? 'N/A' }}</p>
                 </div>
                 <div>

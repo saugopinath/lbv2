@@ -40,11 +40,11 @@
 
     <div class="grid gap-6 mb-4 md:grid-cols-2 px-4">
         {{-- Previous Approved Document --}}
-        {{-- <div class="w-1/3">
+       <div class="w-1/3">
             <h3 class="font-semibold mb-2">Previous Approved Document</h3>
-            <livewire:enclosure-list :application_id="$aadhaarIssues[0]->application_id" :doc_type_id_array_list="[108]"
-                :is_page="1" :key="'previous-' . $aadhaarIssues[0]->application_id" />
-        </div> --}}
+            <livewire:enclosure-list :application_id="$aadhaarIssues[0]->application_id" :scheme_id="$schemeId" :doc_type_id_array_list="[107]"
+                 :is_page="1" :key="'previous-' . $aadhaarIssues[0]->application_id" />
+        </div> 
         <div class="w-1/3">
             <h3 class="font-semibold text-gray-800 mb-4">
                 Newly Temp Document

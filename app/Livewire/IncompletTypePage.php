@@ -433,7 +433,10 @@ class IncompletTypePage extends Component
         $hasDuplicate = $sorted->contains(fn($item) => $item->incompletType->name === 'DUPLICATE BANK ACCOUNT NUMBER');
 
         // ✅ যদি duplicate থাকে তাহলে dupAction = 1, না থাকলে null
-        $item->dupAction = $hasDuplicate ? 1 : null;
+        // $item->dupAction = $hasDuplicate ? 1 : null;
+        foreach ($sorted as $item) {
+            $item->dupAction = $hasDuplicate ? 1 : null;
+        }
 
         // ✅ Assign to component properties
         $this->aadhaarIssues = $aadhaarIssues;

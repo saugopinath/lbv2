@@ -1,23 +1,24 @@
-<div x-show="showUploadModal" x-cloak x-transition class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
-    @click.outside="closeModal()">
+<div x-show="showUploadModal" x-cloak x-transition
+    class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center" @click.outside="closeModal()">
 
     <div class="bg-white rounded shadow p-6 w-full max-w-md" @click.stop>
         <!-- Header -->
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold text-gray-800" x-text="'Upload ' + currentDocName"></h2>
-            <button @click="closeModal()" class="text-gray-500 hover:text-red-500 text-xl">×</button>
+            <button type="button" @click="closeModal()" class="text-gray-500 hover:text-red-500 text-xl">×</button>
         </div>
 
         <!-- File Input -->
         <div class="flex w-full border border-gray-300 rounded overflow-hidden">
-            <label for="fileInput"
+            <!-- use x-ref click instead of for/id so each modal instance is independent -->
+            <label @click="$refs.fileInput.click()"
                 class="bg-blue-600 text-white px-4 py-2 cursor-pointer hover:bg-blue-700 text-sm flex items-center">
                 Choose File
             </label>
             <span class="flex items-center px-4 text-gray-600 text-sm truncate flex-1 bg-white">
                 <span x-text="currentFileName || 'No file chosen'"></span>
             </span>
-            <input id="fileInput" type="file" class="hidden" x-ref="fileInput" wire:model="singleDocument"
+            <input type="file" class="hidden" x-ref="fileInput" wire:model="singleDocument"
                 @change="handleFileChange($event)">
         </div>
 
@@ -29,7 +30,7 @@
             <p>Max file size: <strong>{{ $currentDocMaxSize }}</strong></p>
         </div>
         @error('singleDocument')
-        <div class="mt-2 text-sm text-red-600">{{ $message }}</div>
+            <div class="mt-2 text-sm text-red-600">{{ $message }}</div>
         @enderror
         <div x-show="errorMessage" x-text="errorMessage" class="mt-2 text-sm text-red-600"></div>
 
@@ -42,15 +43,16 @@
 
         <!-- Buttons -->
 
-       <div class="flex justify-end space-x-2 mt-4">
+        <div class="flex justify-end space-x-2 mt-4">
 
             {{-- Cancel always enabled --}}
-            <x-button.primary @click="closeModal()" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+            <x-button.primary type="button" @click="closeModal()"
+                class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
                 Cancel
             </x-button.primary>
 
             {{-- Upload button --}}
-            <x-button.primary @click="uploadFile()" :disabled="$formPreview" class="px-4 py-2 bg-green-600 text-white rounded
+            <x-button.primary type="button" @click="uploadFile()" :disabled="$formPreview" class="px-4 py-2 bg-green-600 text-white rounded
                {{ $formPreview ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700' }}"
                 wire:loading.attr="disabled" wire:target="saveSingleDocument">
                 <span wire:loading.remove wire:target="saveSingleDocument">

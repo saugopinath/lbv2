@@ -127,11 +127,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('userDutymanagement.index');
 
     // Incomplete Types
-    Route::get('/incomplete-types/{stage?}', [IncompleteTypeController::class, 'index'])
-        ->name('incomplete.types');
-
-    // Route::get('/incomplete-types/{stage?}', [SchemeController::class, 'finalSubmitted'])
+    // Route::get('/incomplete-types/{stage?}', [IncompleteTypeController::class, 'index'])
     //     ->name('incomplete.types');
+
+    Route::get('/incomplete-types/{stage?}', [SchemeController::class, 'finalSubmitted'])
+        ->name('incomplete.types');
 
     Route::get('/incomplet-type/{id}/{stage}/{schemeId}', IncompletTypePage::class)
         ->name('incomplet-type.view');
