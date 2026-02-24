@@ -2,60 +2,86 @@
 
 namespace App\Livewire;
 
-use Livewire\Attributes\On;
 use Livewire\Component;
 
 class BeneficiarySearch extends Component
 {
-    public $selectedOption;
+    public $selectedOption = 'application_id';
     public $inputValue = '';
-    public $isApproved;
-    public $searchOptions = [
-        'application_id'      => 'Application ID',
-        'beneficiary_name'    => 'Beneficiary Name',
-        'mobile_number'       => 'Mobile Number',
-        'aadhaar_number'      => 'Aadhaar Number',
-        'bank_account_number' => 'Bank Account Number',
+    public $isApproved = false;
+    public $fields = [
+
+        'application_id' => [
+            'label' => 'Application ID',
+            'rules' => 'required|numeric',
+            'type'  => 'number'
+        ],
+
+        'beneficiary_name' => [
+            'label' => 'Beneficiary Name',
+            'rules' => 'required|regex:/^[a-zA-Z\s]+$/',
+            'type'  => 'text'
+        ],
+
+        'mobile_number' => [
+            'label' => 'Mobile Number',
+            'rules' => 'required|numeric|digits:10',
+            'max'   => 10,
+            'type'  => 'number'
+        ],
+
+        'aadhaar_number' => [
+            'label' => 'Aadhaar Number',
+            'rules' => 'required|numeric|digits:12',
+            'max'   => 12,
+            'type'  => 'number'
+        ],
+
+        'bank_account_number' => [
+            'label' => 'Bank Account Number',
+            'rules' => 'required|numeric',
+            'type'  => 'number'
+        ],
+
     ];
-    
-    public function mount($isApproved = false)
+
+    public function mount($isApproved = false, $selectedOption = null, $inputValue = null)
     {
         $this->isApproved = $isApproved;
-        foreach ($this->searchOptions as $key => $label) {
-            $camelKey = \Illuminate\Support\Str::camel($key);
-            if (!empty($$camelKey)) {
-                $this->selectedOption = $label;
-                $this->inputValue = $$camelKey;
-                break;
-            }
-        }
-        if (empty($this->selectedOption)) {
-            $this->selectedOption = 'Application ID';
-        }
+        $this->selectedOption = $selectedOption ?? 'application_id';
+        $this->inputValue = $inputValue ?? '';
     }
 
-    #[On('searchTriggered')]
-    public function handleSearch($data)
+    private function getValidationRules($key)
     {
-        switch ($data['key']) {
-            case 'application_id':
-                break;
-            case 'beneficiary_name':
-                break;
-            case 'mobile_number':
-                break;
-            case 'aadhaar_number':
-                break;
-            case 'bank_account_number':
-                break;
-            default:
-        }
+        return $this->fields[$key]['rules'] ?? 'required';
+    }
+
+    public function search()
+    {
+        $this->validate([
+            'selectedOption' => 'required'
+        ], [
+            'selectedOption.required' => 'Please select a search criteria.'
+        ]);
+
+        $key = $this->selectedOption;
+
+        $fieldLabel = $this->fields[$key]['label'] ?? 'Value';
+
+        $data = $this->validate([
+            'inputValue' => $this->getValidationRules($key),
+        ], [
+            'inputValue.required' => "The $fieldLabel is required.",
+            'inputValue.numeric'  => "The $fieldLabel must be numeric.",
+            'inputValue.digits'   => "The $fieldLabel must be :digits digits.",
+            'inputValue.regex'    => "The $fieldLabel should only contain characters (A-Z, a-z).",
+        ]);
+        dd($key, $this->inputValue);
     }
 
     public function render()
     {
-        return view('livewire.beneficiary-search', [
-            'searchOptions' => $this->searchOptions,
-        ]);
+        return view('livewire.beneficiary-search');
     }
 }
