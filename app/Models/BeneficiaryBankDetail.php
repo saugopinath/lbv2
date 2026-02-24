@@ -13,4 +13,18 @@ class BeneficiaryBankDetail extends BaseAuditableModel
     protected $casts = [
         'other_details' => 'array',
     ];
+
+    public function bankname()
+    {
+        $ifsc = $this->ifscbranch;
+        $accno = $this->bank_account_number;
+        if ($ifsc && $ifsc->bank) {
+            return [
+                'bank_name'   => $ifsc->bank->name,
+                'branch_name' => $ifsc->branch,
+                'ifsc_code'   => $ifsc->code,
+                'accno' => $accno,
+            ];
+        }
+    }
 }

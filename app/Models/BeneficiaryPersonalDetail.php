@@ -34,4 +34,12 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     //     $data['new_values']['referrer'] = \Illuminate\Support\Facades\Request::header('referer');
     //     return $data;
     // }
+    public function bank()
+    {
+        return $this->hasOne(BeneficiaryBankDetail::class, 'beneficiary_id', 'beneficiary_id');
+    }
+    public function getStatusText()
+    {
+        return 'Approved';
+    }
 }

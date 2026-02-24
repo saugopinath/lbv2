@@ -171,7 +171,7 @@ class CmoDetailsDataTable extends DataTableComponent
                     //     ]),
                     //     'tooltip' => 'Process',
                     // ])->render();
-                    return view('coulmn_button.actions', [
+                    return view('coulmn_button.actions1', [
                         'link' => route('map-applicant') . '?id=' . Crypt::encryptString($row->application_id) . '&grievance_id=' . $this->grievanceId . '&remarks=' .  $this->remarks . '&atr_type=' . $this->atr_type,
                         'tooltip' => 'Process',
                         'method' => 'POST',

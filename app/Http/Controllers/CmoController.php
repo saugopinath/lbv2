@@ -141,21 +141,23 @@ class CmoController extends Controller
         $atr = CmoAtrMaster::find($record->atr_type);
         $applicant_details = '';
         if ($atr) {
-            $data = BeneficiaryPersonalDetail::with('bank')->find($record->lb_application_id);
-            $add = $data->sourceable->contact->blockmuni();
-            $bank = $data->sourceable->bank->bankname();
+            $data = BeneficiaryPersonalDetail::with('bank','contact')->find($record->lb_application_id);
+            // dd($data->bank);
+            $add = $data->contact->blockmuni();
+            $bank = $data->bank->bankname();
+            // dd($bank);
             $applicant_details = [
-                'applicationId' => $data->sourceable->application_id,
-                'name' => $data->sourceable->full_name,
-                'dob' => $data->sourceable->dob,
-                'mobileNo' => $data->sourceable->mobile_no,
-                'fatherName' => $data->sourceable->relationships->first()->getFullNameByCode(131),
+                'applicationId' => $data->application_id,
+                'name' => $data->full_name,
+                'dob' => $data->dob,
+                'mobileNo' => $data->other_details['mobile_no'],
+                'fatherName' => $data->ben_father_name,
                 'blockMuni' => $add['block'],
                 'gpWard' => $add['gp'],
-                'bankName' => $bank['bank_name'],
-                'branchName' => $bank['branch_name'],
-                'ifscCode' => $bank['ifsc_code'],
-                'accNo' => $bank['accno'],
+                'bankName' => $data->bank['bank_name'],
+                'branchName' => $data->bank['branch_name'],
+                'ifscCode' => $data->bank['ifsc_code'],
+                'accNo' => $data->bank['accno'],
             ];
         }
         $isaddvisible = 0;
