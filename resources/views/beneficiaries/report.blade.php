@@ -6,7 +6,8 @@
             </h1>
             <x-form.back-button url="/beneficiaries_selection" />
         </div>
-        <livewire:filter-lgd-master :button_show="1" />
+        <livewire:filterlgdmasternew />
+
 
 
     </div>

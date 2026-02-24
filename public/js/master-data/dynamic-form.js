@@ -141,7 +141,6 @@ window.initMasterData = function () {
 
 function clearSelect(select) {
     if (!select) return;
-    select.innerHTML = '<option value="">-- Select --</option>';
     delete select.dataset.loaded;
 }
 
