@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Livewire;
-
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class IncompleteSearchWrapper extends Component
@@ -22,6 +22,11 @@ class IncompleteSearchWrapper extends Component
         'filtersApplied' => 'updateGeoFilters',
         'filterIncompleteType' => 'updateIncompleteType',
     ];
+
+    #[On('filter-applied')]
+    public function filterApplied($filters) {
+        dd($filters);
+    }
 
     public function mount(?int $schemeId = null, ?string $stage = null)
     {

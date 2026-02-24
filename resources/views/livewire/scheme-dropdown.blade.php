@@ -46,14 +46,14 @@
                     :wire:key="'lb-application-list-'.$schemeId" />
                 <livewire:revert-reject-modal />
             </div>
-        @elseif($option == 4)
+        @elseif($option == 4)       
             <livewire:incomplete-search-wrapper :schemeId="$schemeId" :stage="$stage ?? null"
                 :wire:key="'incomplete.types-'.$schemeId" />
         @endif
     @endif
 
 </div>
-@if ($option == 1)
+@if ($option == 1 || $option == 4)
     @push('scripts')
         <script src="{{ asset('js/master-data/master-data-v2.js') }}"></script>
         <script src="{{ asset('js/adhar-verhoeff.js') }}"></script>
