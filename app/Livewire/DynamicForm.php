@@ -51,7 +51,7 @@ class DynamicForm extends Component
     public array $appTypeOptions = [];
 
     public $heading = '';
-    public $maxDate, $minDate, $minDOB, $maxDOB;
+    public $maxDate, $minDate, $minDOB, $maxDOB,$isEdit;
 
     protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
