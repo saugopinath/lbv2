@@ -259,7 +259,28 @@ class SchemewiseStoreDataJsonHelper
     {
         $label = $field['level_name'] ?? '';
         $name = $field['field_name'] ?? uniqid();
+
         $type = $field['field_type'] ?? 'text';
+
+        $isConfirmField = false;
+
+        if (!empty($field['validation_rule'])) {
+            $rules = explode('|', $field['validation_rule']);
+            $isRequired = in_array('required', $rules, true);
+
+            foreach ($rules as $rule) {
+                if (str_starts_with($rule, 'same:')) {
+                    $isConfirmField = true;
+                    break;
+                }
+            }
+        }
+
+        if ($isConfirmField) {
+            $type = 'password';
+        }
+
+        // $type = $field['field_type'] ?? 'text';
         $value = $field['value'] ?? 1;
         $placeholder = 'Enter ' . $field['level_name'] ?? '';
         $isRequired = false;
@@ -346,12 +367,12 @@ class SchemewiseStoreDataJsonHelper
             //     </x-form.select>
             //     BLADE;
             //     break;
-case 'select':
+            case 'select':
 
-    // ✅ SPECIAL RENDER FOR app_type ONLY
-    if ($name === 'application_type') {
+                // ✅ SPECIAL RENDER FOR app_type ONLY
+                if ($name === 'application_type') {
 
-        $fieldHtml = <<<BLADE
+                    $fieldHtml = <<<BLADE
         <div wire:key="field-norm-application_type">
             <x-form.select
                 name="application_type"
@@ -370,18 +391,18 @@ case 'select':
         </div>
         BLADE;
 
-        break;
-    }
+                    break;
+                }
 
-    // 🔹 NORMAL SELECT FOR OTHER FIELDS
-    $optionsHtml = '';
-    foreach (($field['options'] ?? []) as $key => $optionlabel) {
-        $key = e($key);
-        $optionlabel = e($optionlabel);
-        $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
-    }
+                // 🔹 NORMAL SELECT FOR OTHER FIELDS
+                $optionsHtml = '';
+                foreach (($field['options'] ?? []) as $key => $optionlabel) {
+                    $key = e($key);
+                    $optionlabel = e($optionlabel);
+                    $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
+                }
 
-    $fieldHtml = <<<BLADE
+                $fieldHtml = <<<BLADE
     <x-form.select
         name="{$name}"
         label="{$label}"
@@ -396,7 +417,7 @@ case 'select':
     </x-form.select>
     BLADE;
 
-    break;
+                break;
 
             case 'textarea':
                 $fieldHtml = <<<BLADE
@@ -489,7 +510,7 @@ case 'select':
                 </div>
                 BLADE;
 
-                /* ===== TEXTAREA ===== */
+            /* ===== TEXTAREA ===== */
             case 'textarea':
                 return <<<BLADE
                 <div class="{$paddingClass}">
@@ -502,7 +523,7 @@ case 'select':
                 </div>
                 BLADE;
 
-                /* ===== SELECT ===== */
+            /* ===== SELECT ===== */
             case 'select':
 
                 $optionsHtml = '';
@@ -529,7 +550,7 @@ case 'select':
                 </div>
                 BLADE;
 
-                /* ===== RADIO ===== */
+            /* ===== RADIO ===== */
             case 'radio':
 
                 $radioHtml = '';
@@ -563,7 +584,7 @@ case 'select':
                 </div>
                 BLADE;
 
-                /* ===== CHECKBOX ===== */
+            /* ===== CHECKBOX ===== */
             case 'checkbox':
                 return <<<BLADE
                 <div class="{$paddingClass}">
@@ -576,7 +597,7 @@ case 'select':
                 </div>
                 BLADE;
 
-                /* ===== DEFAULT TEXT ===== */
+            /* ===== DEFAULT TEXT ===== */
             default:
                 return <<<BLADE
             <div class="{$paddingClass}">

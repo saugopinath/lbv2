@@ -10,44 +10,13 @@
                     @foreach ($schemes as $scheme)
                         <option value="{{ $scheme->id }}">{{ $scheme->name }}</option>
                     @endforeach
-                </x-form.select>
-                {{-- <x-form.select name="report_type" label="Report Type" required>
-                        <option value="">-- Select Report Type --</option>
-                        <option value="1">Partial Entry List</option>
-                        <option value="2">Verified List</option>
-                        <option value="3">Approved List</option>
-                        <option value="4">Rejected List</option>
-                        <option value="5">Reverted List</option>
-                        <option value="6">Submitted List</option>
-                    </x-form.select> --}}
+                </x-form.select>                
 
                 <x-form.select name="report_type" label="Report Type" required>
                     <option value="">-- Select Report Type --</option>
                     @foreach ($reporttypes as $key => $value)
                         <option value="{{ $key }}">{{ $value }}</option>
-                    @endforeach
-                    {{-- @if (\App\Helpers\CheckAuthHelper::isCommmonVerifier()) --}}
-                    {{-- Common Verifier --}}
-                    {{-- <option value="2">Verified List</option>
-                    <option value="4">Rejected List</option>
-                    <option value="5">Reverted List</option>
-                    <option value="3">Approved List</option> --}}
-
-                    {{-- @elseif (\App\Helpers\CheckAuthHelper::isCommonApprover()) --}}
-                    {{-- Common Approver --}}
-                    {{-- <option value="3">Approved List</option>
-                    <option value="4">Rejected List</option>
-                    <option value="5">Reverted List</option> --}}
-
-                    {{-- @else --}}
-                    {{-- Default: Super Admin / Others --}}
-                    {{-- <option value="1">Partial Entry List</option>
-                    <option value="2">Verified List</option>
-                    <option value="3">Approved List</option>
-                    <option value="4">Rejected List</option>
-                    <option value="5">Reverted List</option>
-                    <option value="6">Submitted List</option> --}}
-                    {{-- @endif --}}
+                    @endforeach                    
                 </x-form.select>
 
 

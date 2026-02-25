@@ -289,7 +289,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     $AcceptRejectInfo->browser = request()->header('User-Agent');
                     $AcceptRejectInfo->model_name = null;
                     $AcceptRejectInfo->op_type = $next_level_role_id;
-                    $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
+                    $AcceptRejectInfo->revert_reason_cause_id = $validated['cause'];
                     $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
                     $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
                         ->latest('id')
@@ -326,7 +326,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     $AcceptRejectInfo->browser = request()->header('User-Agent');
                     $AcceptRejectInfo->model_name = null;
                     $AcceptRejectInfo->op_type = Codemaster::getIdByCode(-1);
-                    $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
+                    $AcceptRejectInfo->revert_reason_cause_id = $validated['cause'];
                     $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
                     $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
                         ->latest('id')
