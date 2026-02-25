@@ -18,4 +18,8 @@ class WorkflowsteproleMapping extends Model
         return $query->where('scheme_id', $schemeId)
             ->first(['same_label_role_id', 'next_label_role_id']);
     }
+    public function workflowStep()
+    {
+        return $this->belongsTo(WorkflowStep::class, 'workflow_step_id', 'id');
+    }
 }

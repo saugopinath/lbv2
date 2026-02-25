@@ -159,9 +159,15 @@ class CmoDetailsDataTable extends DataTableComponent
                 ->html(),
 
             Column::make("Status", "Status")
-                ->label(fn($row) => $row->getStatusText()
-                    ?? 'N/A'),
-
+                ->label(function ($row) {
+                    $statusText = $row->getStatusText() ?? 'N/A';
+                    $tailwindClasses = $row->getStatusBadge();
+                    return
+                        "<span class='px-2 py-1 text-xs font-semibold border rounded-md {$tailwindClasses}'>
+                    {$statusText}
+                </span>";
+                })
+                ->html(),
             $columns[] = Column::make("Actions")
                 ->label(function ($row) {
                     // return view('coulmn_button.view', [
