@@ -39,6 +39,7 @@ use App\Http\Controllers\MarkedUpdateBeneficiaryController;
 use App\Http\Controllers\MasterTabCreationController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
+use App\Http\Controllers\SchemeCapacityController;
 use App\Http\Controllers\ValidationManagerController;
 use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
@@ -191,3 +192,6 @@ Route::get('/caste-modification-list', [CasteModificationController::class, 'lis
 Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
     // ->middleware('permission.redirect:canBeneficiaryDetails')
     ->name('view-beneficiary-details');
+
+Route::get('/scheme-capacity', [SchemeCapacityController::class, 'index'])
+    ->name('scheme-capacity');
