@@ -21,7 +21,32 @@ class BeneficiaryContactDetail extends BaseAuditableModel
 
     public function municipality()
     {
-        return $this->belongsTo(Municipality::class, 'blockurban', 'id');
+        return $this->belongsTo(Municipality::class, 'blockurban');
+    }
+
+     public function block()
+    {
+        return $this->belongsTo(Block::class, 'blockurban');
+    }
+
+    public function panchayat()
+    {
+        return $this->belongsTo(Panchayat::class, 'gpward');
+    }
+
+    public function ward()
+    {
+        return $this->belongsTo(Ward::class, 'gpward');
+    }   
+
+    public function district()
+    {
+        return $this->belongsTo(District::class, 'district_id');
+    }
+    
+    public function subdivision()
+    {
+        return $this->belongsTo(Subdivision::class, 'sub_division_id');
     }
 
     public function getFullAddress(): string
@@ -40,7 +65,7 @@ class BeneficiaryContactDetail extends BaseAuditableModel
         }
 
         // Rural
-        if ($this->rural_urban_id == 2) {
+        if ($this->rural_urban == 2) {
             if ($block) {
                 $parts[] = "Block - " . strtoupper($block);
             }
@@ -73,7 +98,7 @@ class BeneficiaryContactDetail extends BaseAuditableModel
         $ward = optional($this->ward)->name;
         $blockname = '';
         $gpname = '';
-        if ($this->rural_urban_id == 2) {
+        if ($this->rural_urban == 2) {
             if ($block) {
                 $blockname = strtoupper($block);
             }

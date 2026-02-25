@@ -140,24 +140,22 @@ class CmoController extends Controller
         $atrs = CmoAtrMaster::all();
         $atr = CmoAtrMaster::find($record->atr_type);
         $applicant_details = '';
-        if ($atr) {
-            $data = BeneficiaryPersonalDetail::with('bank','contact')->find($record->lb_application_id);
-            // dd($data->bank);
+        if ($atr->can_find_applicant) {
+            $data = BeneficiaryPersonalDetail::with('bank', 'contact')->find($record->lb_application_id);
             $add = $data->contact->blockmuni();
-            $bank = $data->bank->bankname();
-            // dd($bank);
+            $bank = $data->bank;
             $applicant_details = [
                 'applicationId' => $data->application_id,
-                'name' => $data->full_name,
+                'name' => $data->beneficiary_name,
                 'dob' => $data->dob,
                 'mobileNo' => $data->other_details['mobile_no'],
                 'fatherName' => $data->ben_father_name,
                 'blockMuni' => $add['block'],
                 'gpWard' => $add['gp'],
-                'bankName' => $data->bank['bank_name'],
-                'branchName' => $data->bank['branch_name'],
-                'ifscCode' => $data->bank['ifsc_code'],
-                'accNo' => $data->bank['accno'],
+                'bankName' => $bank['bankname'],
+                'branchName' => $bank['bank_branch_name'],
+                'ifscCode' => $bank['ifscode'],
+                'accNo' => $bank['bankaccountnumber'],
             ];
         }
         $isaddvisible = 0;
