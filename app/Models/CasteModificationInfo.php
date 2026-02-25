@@ -3,27 +3,32 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 use OwenIt\Auditing\Contracts\Auditable;
 
-class AcceptRejectInfo extends Model implements Auditable
+class CasteModificationInfo extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
-    protected $table = 'accept_reject_infos';
 
-    protected $fillable = [
-        'application_id',
-        'scheme_id',
-        'beneficiary_id',
-        'ip_address',
-        'user_id',
-        'browser',
-        'model_name',
-        'op_type',
-        'revert_reason_cause_id',
-        'revert_reason_remarks',
-        'parent_id'
+    protected $table = 'pension.caste_modification_infos';
+    protected $guarded = ['id'];
+    protected $casts = [
+        'old_data' => 'array',
+        'new_data' => 'array',
     ];
+    public function beneficiaryPersonal()
+    {
+        return $this->hasOne(BeneficiaryPersonalDetail::class, 'application_id', 'application_id');
+    }
+    public function casteRequestType()
+    {
+        return $this->belongsTo(Codemaster::class, 'caste_request_type', 'id');
+    }
+    public function nextLevelRequested()
+    {
+        return $this->belongsTo(Codemaster::class, 'next_level_requested_id', 'id');
+    }
     public function transformAudit(array $data): array
     {
         $userId = Auth::id();
@@ -45,20 +50,8 @@ class AcceptRejectInfo extends Model implements Auditable
             'method' => request()->method(),
             'referrer' => request()->header('referer'),
         ]);
-        return $data;
-    }
 
-    public function revertReason()
-    {
-        return $this->belongsTo(Codemaster::class, 'revert_reason_cause_id');
-    }
-   
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-    public function opType()
-    {
-        return $this->belongsTo(Codemaster::class, 'op_type');
+
+        return $data;
     }
 }

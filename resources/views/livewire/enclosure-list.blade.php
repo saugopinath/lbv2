@@ -41,19 +41,17 @@
                 this.showUploadModal = true;
     
             },
-    
+
             async uploadFile() {
                     if (!this.$refs.fileInput.files.length) {
                         this.errorMessage = 'Please select a file to upload.';
                         return;
                     }
-    
+
                     this.errorMessage = ''; // reset error if file selected
-    
                     try {
                         // Livewire Method Call
                         await this.$wire.saveSingleDocument();
-    
                         // Reset data after upload success
                         this.resetFileData();
                         if (this.$refs.fileInput) this.$refs.fileInput.value = null;
@@ -63,7 +61,6 @@
                         this.errorMessage = 'Something went wrong while uploading.';
                     }
                 },
-    
                 closeModal() {
                     this.showUploadModal = false;
                     this.errorMessage = '';
@@ -75,7 +72,6 @@
                     this.$wire.call('resetSingleDocumentErrors');
                     this.$wire.dispatch('$refresh');
                 },
-    
                 resetFileData() {
                     this.currentFilePreview = null;
                     this.currentFileName = '';

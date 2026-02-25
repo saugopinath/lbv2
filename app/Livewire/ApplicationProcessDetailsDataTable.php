@@ -208,7 +208,10 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $query = BeneficiaryPersonalDetail::where('next_level_role_id', $this->sameLabelRoleId)->where('scheme_id', $this->schemeId)->where('is_final', $this->isFinal);
+        $query = BeneficiaryPersonalDetail::query()->select('application_id', 'beneficiary_id', 'scheme_id', 'beneficiary_name', 'ben_father_name', 'dob')
+            ->where('next_level_role_id', $this->sameLabelRoleId)
+            ->where('scheme_id', $this->schemeId)
+            ->where('is_final', $this->isFinal);
         if (!empty($this->filter_condition)) {
             $query->where($this->filter_condition);
         }
@@ -232,7 +235,6 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $this->handleBulkAction('verification');
     }
 
-
     public function bulkapprove()
     {
         $this->handleBulkAction('approver');
@@ -242,7 +244,6 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     {
         $this->handleBulkAction('revert');
     }
-
     public function bulkreject()
     {
         $this->handleBulkAction('reject');

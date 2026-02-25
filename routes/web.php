@@ -184,3 +184,24 @@ Route::any('draftedit', [SchemeController::class, 'draftedit'])
     ->name('draftedit');
 
 Route::any('/custom_application', [SchemeController::class, 'applicationView'])->name('custom_application.view');
+
+// Caste Update
+Route::get('/Caste-modification-info', [CasteModificationController::class, 'index'])
+    ->middleware('permission.redirect:canModifyCaste')
+    ->name('Caste-modification-info');
+
+Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])
+    // ->middleware('permission.redirect:canEditCaste')
+    ->name('caste-modification.edit');
+
+Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
+    // ->middleware('permission.redirect:canUpdateCaste')
+    ->name('beneficiary.updateCaste');
+
+Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])
+    // ->middleware('permission.redirect:canCasteModification')
+    ->name('caste-modification-list');
+
+Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
+    // ->middleware('permission.redirect:canBeneficiaryDetails')
+    ->name('view-beneficiary-details');

@@ -208,7 +208,6 @@ class WorkFlowPermissionHelper
     public static function canAnyLbMenu(): bool
     {
         return Auth::user()->can('lb-application-list') || Auth::user()->can('submit-lb-form');
-
     }
     public static function canIncomplete(): bool
     {

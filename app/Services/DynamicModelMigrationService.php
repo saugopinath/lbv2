@@ -21,6 +21,7 @@ class DynamicModelMigrationService
         $this->writeMigration($table, $fields, $isAppendMultiple);
         $this->updateModel($modelPath, $table, $fields);
         Artisan::call('migrate', ['--force' => false]);
+        
     }
 
     private function getSchema(): string

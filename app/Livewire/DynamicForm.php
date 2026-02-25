@@ -4,12 +4,14 @@ namespace App\Livewire;
 
 use App\Helpers\FormHelper;
 use App\Helpers\WorkFlowPermissionHelper;
+use App\Models\AcceptRejectInfo;
 use App\Models\AgeManagements;
 use App\Models\BeneficiaryAadhaar;
 use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\DuplicateChecker;
+use App\Models\BeneficiaryPersonalDetail;
 use App\Models\UniqueAppBenId;
 use Livewire\Component;
 use Illuminate\Support\Facades\File;
@@ -50,7 +52,7 @@ class DynamicForm extends Component
 
     public $heading = '';
     public $maxDate, $minDate, $minDOB, $maxDOB;
-    public $isEdit = false;
+
     protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
         'document-validation-failed' => 'onDocumentTabFailed',
@@ -59,7 +61,7 @@ class DynamicForm extends Component
     ];
     /* ================= MOUNT ================= */
 
-    public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null)
+    public function mount($schemeId, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null)
     {
 
         if (!WorkFlowPermissionHelper::canCreateEntry()) {
@@ -79,19 +81,6 @@ class DynamicForm extends Component
         $this->form_preview = $form_preview;
         $this->applicationId = $applicationId;
         $this->beneficiaryId = $beneficiaryId;
-
-        // ✅ EDIT MODE DETECTION
-        if ($this->applicationId) {
-            $this->aadhaarVerified = true;
-            $this->isEdit = true;
-            $this->loadExistingApplication();
-        }
-
-        // ✅ SET ACTIVE TAB CORRECTLY
-        if (!empty($this->views)) {
-            $this->setInitialActiveTab();
-        }
-
         $this->maxDate = Carbon::now()->format('Y-m-d');
         $this->minDate = Carbon::now()->subYears(2)->format('Y-m-d');
         $ageConfig = AgeManagements::where('scheme_id', $schemeId)->first();
@@ -117,145 +106,10 @@ class DynamicForm extends Component
             $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
-
-    private function loadExistingApplication(): void
-    {
-        foreach ($this->views as $tabCode) {
-
-            $tab = MasterTab::where('tab_code', $tabCode)->first();
-
-            if (!$tab || empty($tab->tab_model_name)) {
-                continue;
-            }
-
-            $modelClass = "App\\Models\\{$tab->tab_model_name}";
-
-            if (!class_exists($modelClass)) {
-                continue;
-            }
-
-            $record = $modelClass::where('application_id', $this->applicationId)->first();
-
-            if (!$record) {
-                continue;
-            }
-
-            $this->completedTabs[] = (string) $tabCode;
-
-            $data = $record->toArray();
-
-            /**
-             * ----------------------------------------------------
-             * Build Confirm Mapping (Based On SAME Rule)
-             * ----------------------------------------------------
-             */
-
-            $confirmMap = [];
-
-            // IMPORTANT: Set correct tab context
-            $this->activeTab = $tabCode;
-
-            $rules = $this->getValidationRulesForActiveTab();
-
-            foreach ($rules as $fieldKey => $ruleSet) {
-
-                $ruleParts = is_array($ruleSet)
-                    ? $ruleSet
-                    : explode('|', $ruleSet);
-
-                foreach ($ruleParts as $rule) {
-
-                    if (!is_string($rule)) {
-                        continue;
-                    }
-
-                    if (str_starts_with($rule, 'same:')) {
-
-                        $originalField = str_replace(
-                            'formData.',
-                            '',
-                            substr($rule, 5)
-                        );
-
-                        $confirmField = str_replace(
-                            'formData.',
-                            '',
-                            $fieldKey
-                        );
-
-                        $confirmMap[$originalField] = $confirmField;
-                    }
-                }
-            }
-
-            /**
-             * ----------------------------------------------------
-             * Populate Form Data
-             * ----------------------------------------------------
-             */
-
-            foreach ($data as $key => $value) {
-
-                if ($key === 'other_details') {
-
-                    if (is_string($value)) {
-                        $value = json_decode($value, true);
-                    }
-
-                    if (is_array($value)) {
-                        foreach ($value as $jsonKey => $jsonValue) {
-
-                            $this->formData[$jsonKey] = $jsonValue;
-
-                            if (isset($confirmMap[$jsonKey])) {
-                                $this->formData[$confirmMap[$jsonKey]] = $jsonValue;
-                            }
-                        }
-                    }
-
-                    continue;
-                }
-
-                $this->formData[$key] = $value;
-
-                if (isset($confirmMap[$key])) {
-                    $this->formData[$confirmMap[$key]] = $value;
-                }
-            }
-        }
-
-        if (count($this->completedTabs) === count($this->views)) {
-            $this->allTabsCompleted = true;
-        }
-    }
-
-    private function setInitialActiveTab(): void
-    {
-        // If edit mode
-        if (!empty($this->completedTabs)) {
-
-            $remainingTabs = array_diff($this->views, $this->completedTabs);
-
-            if (!empty($remainingTabs)) {
-                $this->activeTab = (string) reset($remainingTabs);
-            } else {
-                // All tabs completed
-                $this->activeTab = (string) end($this->views);
-            }
-        } else {
-            // New entry
-            $this->activeTab = (string) $this->views[0];
-        }
-
-        $this->updateTabNavigation();
-    }
-
     private function loadAppTypeOptions(): void
     {
         $json = $this->getSchemeJson();
-
         $options = [];
-
         foreach ($json['tabs'] ?? [] as $tab) {
             foreach ($tab['fields'] ?? [] as $field) {
 
@@ -265,18 +119,35 @@ class DynamicForm extends Component
                 }
             }
         }
-
-        // 🔐 Permission Filter
         if (!WorkFlowPermissionHelper::canNormalEntryAllow()) {
             unset($options[1]);
         }
-
         if (!WorkFlowPermissionHelper::canDuareSarkarEntryAllow()) {
             unset($options[2]);
         }
-
         $this->appTypeOptions = $options;
     }
+    // private function loadAppTypeOptions(): void
+    // {
+    //     $row = DB::table('scheme_tab_basefields')
+    //         ->where('field_name', 'application_type')
+    //         ->first();
+    //     if (!$row || empty($row->options)) {
+    //         $this->appTypeOptions = [];
+    //         return;
+    //     }
+    //     $options = json_decode($row->options, true);
+    //     // Permission filter
+    //     foreach ($options as $key => $label) {
+    //         if ($key == 1 && !WorkFlowPermissionHelper::canNormalEntryAllow()) {
+    //             unset($options[$key]);
+    //         }
+    //         if ($key == 2 && !WorkFlowPermissionHelper::canDuareSarkarEntryAllow()) {
+    //             unset($options[$key]);
+    //         }
+    //     }
+    //     $this->appTypeOptions = $options;
+    // }
 
     public function updatedFormDataAppType($value)
     {
@@ -290,14 +161,11 @@ class DynamicForm extends Component
     {
         $this->aadhaarVerified = false;
         $this->aadhaarPayload = [];
-
-        // 🔥 FULL RESET
         $this->applicationId = null;
         $this->beneficiaryId = null;
         $this->formData = [];
         $this->completedTabs = [];
         $this->allTabsCompleted = false;
-
         if (!empty($this->views)) {
             $this->activeTab = (string) $this->views[0];
             $this->updateTabNavigation();
@@ -339,23 +207,102 @@ class DynamicForm extends Component
         $this->activeTab = $tabCode;
         $this->updateTabNavigation();
     }
+    // public function saveAndNext($nextTab)
+    // {
+    //     if ((string) $this->activeTab === '104') {
+    //         $this->dispatch('check-documents-before-next');
+    //         return;
+    //     }
+
+    //     $rules = $this->getValidationRulesForActiveTab();
+    //     if (!empty($rules)) {
+    //         $this->validate($rules);
+    //     }
+
+    //     $this->ensureApplicationIds();
+    //     if (!$this->checkDuplicateEntries()) {
+    //         return;
+    //     }
+    //     $this->saveCurrentTabData();
+    //     $this->markTabCompleted($this->activeTab);
+
+    //     if ($nextTab) {
+    //         $this->activeTab = (string) $nextTab;
+    //         $this->updateTabNavigation();
+    //     }
+    // }
+    // public function saveAndNext($nextTab)
+    // {
+    //     $rules = $this->getValidationRulesForActiveTab();
+
+    //     if (!empty($rules)) {
+    //         $this->validate($rules);
+    //     }
+    //     $this->ensureApplicationIds();
+
+    //     if (!$this->checkDuplicateEntries()) {
+    //         return;
+    //     }
+
+    //     $saved = $this->saveCurrentTabData();
+
+    //     if ($saved !== true) {
+    //         return;
+    //     }
+
+    //     $this->markTabCompleted($this->activeTab);
+
+    //     if ($nextTab) {
+    //         $this->activeTab = (string) $nextTab;
+    //         $this->updateTabNavigation();
+    //     }
+    // }
+
+    // public function saveAndNext($nextTab)
+    // {
+    //     $rules = $this->getValidationRulesForActiveTab();
+
+    //     if (!empty($rules)) {
+    //         $this->validate($rules);
+    //     }
+    //     $this->ensureApplicationIds();
+
+    //     if (!$this->checkDuplicateEntries()) {
+    //         return;
+    //     }
+
+    //     $saved = $this->saveCurrentTabData();
+
+    //     if ($saved !== true) {
+    //         return;
+    //     }
+
+    //     $this->markTabCompleted($this->activeTab);
+
+    //     if ($nextTab) {
+    //         $this->activeTab = (string) $nextTab;
+    //         $this->updateTabNavigation();
+    //     }
+    // }
     public function saveAndNext($nextTab)
     {
         if ((string) $this->activeTab === '104') {
             $this->dispatch('check-documents-before-next');
             return;
         }
-
         $rules = $this->getValidationRulesForActiveTab();
         if (!empty($rules)) {
             $this->validate($rules);
         }
-
         $this->ensureApplicationIds();
         if (!$this->checkDuplicateEntries()) {
             return;
         }
-        $this->saveCurrentTabData();
+        $saved = $this->saveCurrentTabData();
+
+        if ($saved !== true) {
+            return;
+        }
         $this->markTabCompleted($this->activeTab);
 
         if ($nextTab) {
@@ -366,43 +313,62 @@ class DynamicForm extends Component
     public function onDocumentTabPassed()
     {
         $this->markTabCompleted($this->activeTab);
-
         if ($this->nextTab) {
             $this->activeTab = (string) $this->nextTab;
             $this->updateTabNavigation();
         }
     }
     public function onDocumentTabFailed() {}
-    /* ================== HELPERS ================== */
+
+    // public function onDocumentTabPassed()
+    // {
+    //     // $this->markTabCompleted($this->activeTab);
+
+    //     // if ($this->nextTab) {
+    //     //     $this->activeTab = (string) $this->nextTab;
+    //     //     $this->updateTabNavigation();
+    //     // }
+
+    //     if (!$this->checkDuplicateEntries()) {
+    //         return;
+    //     }
+
+    // Final modal open
+    //     $this->openFinalReviewModal();
+    // }
+    // public function onDocumentTabFailed() {}
+
     private function markTabCompleted(string $tabCode): void
     {
         if (!in_array($tabCode, $this->completedTabs, true)) {
             $this->completedTabs[] = $tabCode;
         }
-
         if (count($this->completedTabs) === count($this->views)) {
             $this->allTabsCompleted = true;
         }
     }
-    /* ================= FINAL SUBMIT ================= */
     public function finalSubmit()
     {
         if ((string) $this->activeTab === '104') {
             $this->dispatch('check-documents-before-next');
             return;
-        } else {
-            $rules = $this->getValidationRulesForActiveTab();
-            if (!empty($rules)) {
-                $this->validate($rules);
-            }
-            // dd($rules);
-            $this->ensureApplicationIds();
-            $this->saveCurrentTabData();
         }
-        $tabsData = $this->prepareTabsReviewData();
+        $rules = $this->getValidationRulesForActiveTab();
+        if (!empty($rules)) {
+            $this->validate($rules);
+        }
+        $this->ensureApplicationIds();
+        $this->saveCurrentTabData();
         if (!$this->checkDuplicateEntries()) {
             return;
         }
+
+        $this->openFinalReviewModal();
+    }
+    private function openFinalReviewModal(): void
+    {
+        $tabsData = $this->prepareTabsReviewData();
+
         $this->dispatch(
             'openFinalModal',
             applicationId: $this->applicationId,
@@ -410,6 +376,7 @@ class DynamicForm extends Component
             schemeId: $this->schemeId
         );
     }
+
     /* ================= REVIEW DATA ================= */
     private function prepareTabsReviewData()
     {
@@ -468,149 +435,312 @@ class DynamicForm extends Component
         $this->currentIndex = $index;
         $this->isFirst = ($index === 0);
         $this->isLast = ($index === count($this->views) - 1);
-
         $this->prevTab = $this->views[$index - 1] ?? null;
         $this->nextTab = $this->views[$index + 1] ?? null;
     }
-    private function saveCurrentTabData(): void
+
+
+    // private function saveCurrentTabData(): void
+    // {
+    //     if (!$this->applicationId) {
+    //         return;
+    //     }
+
+    //     $tab = DB::table('master_tabs')
+    //         ->where('tab_code', $this->activeTab)
+    //         ->first();
+
+    //     if (!$tab || empty($tab->tab_model_name)) {
+    //         return;
+    //     }
+
+    //     $modelClass = "App\\Models\\{$tab->tab_model_name}";
+    //     if (!class_exists($modelClass)) {
+    //         return;
+    //     }
+
+    //     $json = $this->getSchemeJson();
+
+    //     $dbData = [
+    //         'scheme_id' => $this->schemeId,
+    //         'application_id' => $this->applicationId,
+    //         'beneficiary_id' => $this->beneficiaryId,
+    //     ];
+    //     $otherDetails = [];
+
+    //     foreach ($json['tabs'] ?? [] as $tabJson) {
+    //         if ((string) $tabJson['tab_code'] !== (string) $this->activeTab) {
+    //             continue;
+    //         }
+    //         foreach ($tabJson['fields'] ?? [] as $field) {
+
+    //             $fieldName = $field['field_name'];
+
+    //             if (!array_key_exists($fieldName, $this->formData)) {
+    //                 continue;
+    //             }
+    //             if (!empty($field['db_column']) && $field['db_column'] !== 'other_details') {
+    //                 $dbData[$field['db_column']] = $this->formData[$fieldName];
+    //             } elseif (!empty($field['db_column']) && $field['db_column'] == 'other_details') {
+    //                 $otherDetails[$fieldName] = $this->formData[$fieldName];
+    //             } else {
+    //                 continue;
+    //             }
+    //         }
+    //     }
+    //     if (!empty($otherDetails)) {
+    //         $dbData['other_details'] = $otherDetails;
+    //     }
+    //     if (!$this->checkDuplicateEntries()) {
+    //         return;
+    //     }
+    //     $beneficiatDetails = $modelClass::updateOrCreate(
+    //         ['application_id' => $this->applicationId],
+    //         $dbData
+    //     );
+    //     if ($beneficiatDetails) {
+    //         $this->navMessage = 'Application saved successfully! ID: ' . $this->applicationId;
+    //         $this->navMessageType = 'success';
+    //         $this->dispatch('toastr', [
+    //             'type' => 'success',
+    //             'message' => 'Application created successfully' . 'application_id: ' . $this->applicationId,
+    //         ]);
+    //     } else {
+    //         $this->dispatch('toastr', [
+    //             'type' => 'error',
+    //             'message' => 'Application not created. Please try again.',
+    //         ]);
+    //     }
+    //     if ($this->aadhaarVerified && !empty($this->aadhaarPayload)) {
+
+    //         BeneficiaryAadhaar::updateOrCreate(
+    //             [
+    //                 'application_id' => $this->applicationId,
+    //             ],
+    //             [
+    //                 'beneficiary_id' => $this->beneficiaryId,
+    //                 'scheme_id' => $this->schemeId,
+    //                 'aadhar_hash' => $this->aadhaarPayload['hash'],
+    //                 'encoded_aadhar' => $this->aadhaarPayload['encoded'],
+    //                 'created_by' => Auth::id(),
+    //                 'encode_key' => null,
+    //                 'aadhaar_vault' => $this->aadhaarPayload['hash'],
+    //             ]
+    //         );
+    //     }
+    // }
+
+
+    private function saveCurrentTabData(): bool
     {
-        try {
-            if (!$this->applicationId) {
-                return;
+        if (!$this->applicationId) {
+            return false;
+        }
+        $tab = DB::table('master_tabs')
+            ->where('tab_code', $this->activeTab)
+            ->first();
+        if (!$tab || empty($tab->tab_model_name)) {
+            return false;
+        }
+        $modelClass = "App\\Models\\{$tab->tab_model_name}";
+        if (!class_exists($modelClass)) {
+            return false;
+        }
+        $json = $this->getSchemeJson();
+        $dbData = [
+            'scheme_id' => $this->schemeId,
+            'application_id' => $this->applicationId,
+            'beneficiary_id' => $this->beneficiaryId,
+        ];
+        $otherDetails = [];
+        foreach ($json['tabs'] ?? [] as $tabJson) {
+            if ((string) $tabJson['tab_code'] !== (string) $this->activeTab) {
+                continue;
             }
-
-            $tab = DB::table('master_tabs')
-                ->where('tab_code', $this->activeTab)
-                ->first();
-
-            if (!$tab || empty($tab->tab_model_name)) {
-                return;
-            }
-
-            $modelClass = "App\\Models\\{$tab->tab_model_name}";
-            if (!class_exists($modelClass)) {
-                return;
-            }
-
-            $json = $this->getSchemeJson();
-
-            $dbData = [
-                'scheme_id' => $this->schemeId,
-                'application_id' => $this->applicationId,
-                'beneficiary_id' => $this->beneficiaryId,
-            ];
-            $otherDetails = [];
-
-            foreach ($json['tabs'] ?? [] as $tabJson) {
-                if ((string) $tabJson['tab_code'] !== (string) $this->activeTab) {
+            foreach ($tabJson['fields'] ?? [] as $field) {
+                $fieldName = $field['field_name'];
+                if (!array_key_exists($fieldName, $this->formData)) {
                     continue;
                 }
-                foreach ($tabJson['fields'] ?? [] as $field) {
-
-                    $fieldName = $field['field_name'];
-
-                    if (!array_key_exists($fieldName, $this->formData)) {
-                        continue;
-                    }
-                    if (!empty($field['db_column']) && $field['db_column'] !== 'other_details') {
-                        $dbData[$field['db_column']] = $this->formData[$fieldName];
-                    } elseif (!empty($field['db_column']) && $field['db_column'] == 'other_details') {
-                        $otherDetails[$fieldName] = $this->formData[$fieldName];
-                    } else {
-                        continue;
-                    }
+                if (!empty($field['db_column']) && $field['db_column'] !== 'other_details') {
+                    $dbData[$field['db_column']] = $this->formData[$fieldName];
+                } elseif (!empty($field['db_column']) && $field['db_column'] == 'other_details') {
+                    $otherDetails[$fieldName] = $this->formData[$fieldName];
+                } else {
+                    continue;
                 }
             }
-            if (!empty($otherDetails)) {
-                $dbData['other_details'] = $otherDetails;
+        }
+        if (!empty($otherDetails)) {
+            $dbData['other_details'] = $otherDetails;
+        }
+        $model = new $modelClass;
+        $tableName = $model->getTable();
+        $columns = Cache::remember(
+            "Schema_columns_$tableName",
+            86400,
+            fn() => Schema::getColumnListing($tableName)
+        );
+        // dd(Cache::get("Schema_columns_$tableName"));
+        $extraFields = [
+            'created_by_dist_code' => $this->filter_data['created_by_dist_code'] ?? null,
+            'created_by_local_body_code' => $this->filter_data['created_by_local_body_code'] ?? null,
+            'created_by' => Auth::id(),
+            'updated_by' => Auth::id(),
+        ];
+        // dd($extraFields);
+        foreach ($extraFields as $column => $value) {
+            if (in_array($column, $columns)) {
+                $dbData[$column] = $value;
             }
-
-            // if (Schema::hasColumn($modelClass::getTableName(), 'created_by_dist_code')) {
-            //     $dbData['created_by_dist_code'] = $this->filter_condition['created_by_dist_code'] ?? null;
-            // }
-
-            // if (Schema::hasColumn($modelClass::getTableName(), 'created_by_local_body_code')) {
-            //     $dbData['created_by_local_body_code'] = $this->filter_condition['created_by_local_body_code'] ?? null;
-            // }
-            $model = new $modelClass;
-            $tableName = $model->getTable();
-            $columns = Cache::remember(
-                "Schema_columns_$tableName",
-                86400,
-                fn() => Schema::getColumnListing($tableName)
-            );
-            // dd(Cache::get("Schema_columns_$tableName"));
-            $extraFields = [
-                'created_by_dist_code' => $this->filter_data['created_by_dist_code'] ?? null,
-                'created_by_local_body_code' => $this->filter_data['created_by_local_body_code'] ?? null,
-                'created_by' => Auth::id(),
-                'updated_by' => Auth::id(),
-            ];
-            // dd($extraFields);
-            foreach ($extraFields as $column => $value) {
-
-                if (in_array($column, $columns)) {
-                    $dbData[$column] = $value;
+        }
+        $dbData = array_intersect_key(
+            $dbData,
+            array_flip($columns)
+        );
+        if (!$this->checkDuplicateEntries()) {
+            return false;
+        }
+        // $beneficiatDetails = $modelClass::updateOrCreate(
+        //     ['application_id' => $this->applicationId],
+        //     $dbData
+        // );
+        // if ($beneficiatDetails) {
+        //     $this->navMessage = 'Application saved successfully! ID: ' . $this->applicationId;
+        //     $this->navMessageType = 'success';
+        //     $this->dispatch('toastr', [
+        //         'type' => 'success',
+        //         'message' => 'Application created successfully' . 'application_id: ' . $this->applicationId,
+        //     ]);
+        // } else {
+        //     $this->dispatch('toastr', [
+        //         'type' => 'error',
+        //         'message' => 'Application not created. Please try again.',
+        //     ]);
+        // }
+        DB::beginTransaction();
+        try {
+            $existingRecord = $modelClass::where('application_id', $this->applicationId)->first();
+            if ($existingRecord) {
+                $updated = $modelClass::where('application_id', $this->applicationId)
+                    ->where('scheme_id', $this->schemeId)
+                    ->update($dbData);
+                if ($updated) {
+                    $this->navMessage = 'Application updated successfully! ID: ' . $this->applicationId;
+                    $this->navMessageType = 'success';
+                    $this->dispatch('toastr', [
+                        'type'    => 'success',
+                        'message' => 'Application updated successfully. Application ID: ' . $this->applicationId,
+                    ]);
+                    DB::commit();
+                    return true;
                 }
-            }
-
-            $dbData = array_intersect_key(
-                $dbData,
-                array_flip($columns)
-            );
-            if (!$this->checkDuplicateEntries()) {
-                return;
-            }
-            $beneficiatDetails = $modelClass::updateOrCreate(
-                ['application_id' => $this->applicationId],
-                $dbData
-            );
-            if ($beneficiatDetails) {
-                $this->navMessage = 'Application saved successfully! ID: ' . $this->applicationId;
-                $this->navMessageType = 'success';
-                $this->dispatch('toastr', [
-                    'type' => 'success',
-                    'message' => 'Application created successfully' . 'application_id: ' . $this->applicationId,
-                ]);
             } else {
-                $this->dispatch('toastr', [
-                    'type' => 'error',
-                    'message' => 'Application not created. Please try again.',
-                ]);
-            }
-            if ($this->aadhaarVerified && !empty($this->aadhaarPayload)) {
+                $created = $modelClass::create($dbData);
+                if ($this->isFirst) {
+                    // $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->value('beneficiary_id');
+                    if ($this->aadhaarVerified && !empty($this->aadhaarPayload) && $created) {
+                        BeneficiaryAadhaar::create(
+                            [
+                                'application_id' => $this->applicationId,
+                                'beneficiary_id' => $this->beneficiaryId,
+                                'scheme_id' => $this->schemeId,
+                                'aadhar_hash' => $this->aadhaarPayload['hash'],
+                                'encoded_aadhar' => $this->aadhaarPayload['encoded'],
+                                'encode_key' => null,
+                                'aadhar_vault' => $this->aadhaarPayload['hash'],
+                            ]
+                        );
+                    }
 
-                BeneficiaryAadhaar::updateOrCreate(
-                    [
-                        'application_id' => $this->applicationId,
-                    ],
-                    [
-                        'beneficiary_id' => $this->beneficiaryId,
-                        'scheme_id' => $this->schemeId,
-                        'aadhar_hash' => $this->aadhaarPayload['hash'],
-                        'encoded_aadhar' => $this->aadhaarPayload['encoded'],
-                        'encode_key' => null,
-                        'aadhar_vault' => $this->aadhaarPayload['hash'],
-                    ]
-                );
+                    $AcceptRejectInfo = new AcceptRejectInfo;
+                    $AcceptRejectInfo->application_id = $this->applicationId;
+                    $AcceptRejectInfo->beneficiary_id = $this->beneficiaryId;
+                    $AcceptRejectInfo->ip_address = request()->ip();
+                    $AcceptRejectInfo->scheme_id = $this->schemeId;
+                    $AcceptRejectInfo->user_id = Auth::id();
+                    $AcceptRejectInfo->browser = request()->header('User-Agent');
+                    $AcceptRejectInfo->model_name = null;
+                    $AcceptRejectInfo->op_type = 1;
+                    $AcceptRejectInfo->revert_reason_cause_id = null;
+                    $AcceptRejectInfo->revert_reason_remarks = null;
+                    $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $this->applicationId)
+                        ->latest('id')
+                        ->value('id') ?? null;
+                    $AcceptRejectInfo->save();
+                }
+                if ($created) {
+                    if ($this->isFirst) {
+                        if ($AcceptRejectInfo) {
+                            DB::commit();
+                            $this->navMessage = 'Application created successfully! ID: ' . $this->applicationId;
+                            $this->navMessageType = 'success';
+
+                            $this->dispatch('toastr', [
+                                'type'    => 'success',
+                                'message' => 'Application created successfully. Application ID: ' . $this->applicationId,
+                            ]);
+                            return true;
+                        } else {
+                            DB::rollBack();
+                            $this->dispatch('toastr', [
+                                'type'    => 'error',
+                                'message' => 'Application not created. Please try again.',
+                            ]);
+                            return false;
+                        }
+                    } else {
+                        DB::commit();
+                        $this->navMessage = 'Application created successfully! ID: ' . $this->applicationId;
+                        $this->navMessageType = 'success';
+                        $this->dispatch('toastr', [
+                            'type'    => 'success',
+                            'message' => 'Application created successfully. Application ID: ' . $this->applicationId,
+                        ]);
+                        return true;
+                    }
+                } else {
+                    DB::rollBack();
+                    $this->dispatch('toastr', [
+                        'type'    => 'error',
+                        'message' => 'Application not created. Please try again.',
+                    ]);
+                    return false;
+                }
             }
+            // if ($this->aadhaarVerified && !empty($this->aadhaarPayload) && $created) {
+            //     BeneficiaryAadhaar::updateOrCreate(
+            //         [
+            //             'application_id' => $this->applicationId,
+            //         ],
+            //         [
+            //             'beneficiary_id' => $this->beneficiaryId,
+            //             'scheme_id' => $this->schemeId,
+            //             'aadhar_hash' => $this->aadhaarPayload['hash'],
+            //             'encoded_aadhar' => $this->aadhaarPayload['encoded'],
+            //             'encode_key' => null,
+            //             'aadhar_vault' => $this->aadhaarPayload['hash'],
+            //         ]
+            //     );
+            // }
         } catch (Throwable $e) {
-            dd($e);
+            // dd($e);
             DB::rollBack();
-
             // Log::error('saveCurrentTabData failed', [
             //     'application_id' => $this->applicationId ?? null,
             //     'tab'            => $this->activeTab ?? null,
             //     'error'          => $e->getMessage(),
             //     'trace'          => $e->getTraceAsString(),
             // ]);
-
             $this->dispatch('toastr', [
                 'type' => 'error',
                 'message' => 'Something went wrong while saving data. Please try again.',
             ]);
+            return false;
         }
+        return false;
     }
+
     private function ensureApplicationIds(): void
     {
         if ($this->applicationId && $this->beneficiaryId) {
@@ -729,7 +859,6 @@ class DynamicForm extends Component
                         $fieldRules[] = "before_or_equal:{$maxDate}";
                     }
                 }
-
 
                 $rules["formData.{$fieldName}"] = array_values(array_filter($fieldRules));
             }

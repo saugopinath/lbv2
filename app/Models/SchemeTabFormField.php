@@ -16,4 +16,9 @@ class SchemeTabFormField extends Model
         'is_multiple' => 'boolean',
         'is_active' => 'boolean',
     ];
+    public function tabMaster()
+    {
+        return $this->belongsTo(MasterTab::class, 'tab_code', 'tab_code');
+    }
+    
 }
