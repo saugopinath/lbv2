@@ -70,11 +70,11 @@ class SchemeCapacityForm extends Component
 
     public function resetRowCapacities($dataArrayName, $index)
     {
-        if (isset($this->{$dataArrayName}[$index])) {
-            $this->{$dataArrayName}[$index]['total_capacity'] = '';
-            $this->{$dataArrayName}[$index]['normal_capacity'] = '';
-            $this->{$dataArrayName}[$index]['ds_capacity'] = '';
-        }
+        // if (isset($this->{$dataArrayName}[$index])) {
+        //     $this->{$dataArrayName}[$index]['total_capacity'] = '';
+        //     $this->{$dataArrayName}[$index]['normal_capacity'] = '';
+        //     $this->{$dataArrayName}[$index]['ds_capacity'] = '';
+        // }
     }
 
     /* ---------------- Location Handling ---------------- */
@@ -287,14 +287,19 @@ class SchemeCapacityForm extends Component
             $this->addError('action_type', 'Action Type is required.');
             return false;
         }
-
         // Deactivate existing records for this combination
-        SchemeCapacity::where('scheme_id', $schemeId)
+        // SchemeCapacity::where('scheme_id', $schemeId)
+        //     ->where('model_type', $modelType)
+        //     ->where('model_id', $modelId)
+        //     ->where('action_type', $this->action_type)
+        //     ->where('is_active', true)
+        //     ->update(['is_active' => false]);
+        SchemeCapacity::select('id')->where('scheme_id', $schemeId)
             ->where('model_type', $modelType)
             ->where('model_id', $modelId)
             ->where('action_type', $this->action_type)
             ->where('is_active', true)
-            ->update(['is_active' => false]);
+            ->delete();
 
         if ($data['entry_type'] == 0) {
 
@@ -370,7 +375,6 @@ class SchemeCapacityForm extends Component
             ]);
             return true;
         }
-        // If entry_type is none of the above, we've already deactivated old ones, which is fine
         session()->flash('error', 'Please select Normal or DS entry type');
         return false;
     }
@@ -386,8 +390,8 @@ class SchemeCapacityForm extends Component
             'full_scheme'
         );
 
-        if ($saved) {
-            $this->schemes_data[$index] = $this->getEmptyRow();
+        if ($saved === true) {
+            $this->schemes_data[$index] = $this->fetchExistingCapacityData($schemeId, Scheme::class, $schemeId);
             session()->flash('success', 'Scheme capacity saved successfully!');
         }
     }
@@ -414,14 +418,17 @@ class SchemeCapacityForm extends Component
             'location'
         );
 
-        if ($saved) {
-            $this->locations_data[$index] = $this->getEmptyRow();
+        if ($saved === true) {
+            $this->locations_data[$index] = $this->fetchExistingCapacityData(
+                $this->location_scheme_id,
+                $modelType,
+                $locationId
+            );
             session()->flash('success', 'Location capacity saved successfully!');
         }
     }
     public function updatedCapacityType()
     {
-        // Common reset
         $this->reset([
             'action_type',
             'location_scheme_id',
