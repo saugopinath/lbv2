@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Helpers\DuplicateChecker;
 use App\Helpers\FormHelper;
+use App\Helpers\SchemeCapacityHelper;
 use App\Helpers\WorkFlowPermissionHelper;
 use App\Models\AcceptRejectInfo;
 use App\Models\AgeManagements;
@@ -149,6 +150,33 @@ class DynamicForm extends Component
         if (! empty($select_lgd['subdivision_id'])) {
             $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
+    }
+
+    private function checkCapacity(): bool
+    {
+
+        $result = SchemeCapacityHelper::check(
+            $this->schemeId,
+            1, // Entry Action
+            $this->filter_data
+        );
+
+        if (is_array($result)) {
+
+            // $this->addError(
+            //     $result['field'],
+            //     $result['message']
+            // );
+
+             $this->dispatch('toastr', [
+                        'type' => 'error',
+                        'message' => $result['message'],
+                    ]);
+
+            return false;
+        }
+
+        return true;
     }
 
     private function loadExistingApplication(): void
@@ -376,10 +404,14 @@ class DynamicForm extends Component
             $this->validate($rules);
         }
         $this->ensureApplicationIds();
+
         if (! $this->checkDuplicateEntries()) {
             return;
         }
-
+        // Capacity check
+        if (! $this->checkCapacity()) {
+            return;
+        }
         $saved = $this->saveCurrentTabData();
 
         if ($saved !== true) {
@@ -470,7 +502,9 @@ class DynamicForm extends Component
         if (! $this->isLast) {
             return;
         }
-
+        if (! $this->checkCapacity()) {
+            return;
+        }
         // If last tab is document tab
         if ((string) $this->activeTab === '104') {
             $this->dispatch('check-documents-before-next');
