@@ -9,12 +9,16 @@ use Illuminate\Support\Facades\Route;
 class SchemeDropdown extends Component
 {
     public $schemes;
-    public $schemeName;
+    public $schemeName, $grievanceId;
     public $schemeId = null;
     public $option = null;
      public $button_show;
     public function mount($schemes)
     {
+        if (request()->has('id')) {
+            $this->grievanceId = request()->query('id');
+        }
+
         $this->schemes = $schemes;
         $this->button_show = 1;
 

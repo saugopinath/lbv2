@@ -10,6 +10,7 @@ use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\DuplicateChecker;
+use App\Models\CmoSmData;
 use App\Models\UniqueAppBenId;
 use Livewire\Component;
 use Illuminate\Support\Facades\File;
@@ -51,6 +52,7 @@ class DynamicForm extends Component
     public $heading = '';
     public $maxDate, $minDate, $minDOB, $maxDOB;
     public $isEdit = false;
+    public $grievanceId;
     protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
         'document-validation-failed' => 'onDocumentTabFailed',
@@ -59,7 +61,7 @@ class DynamicForm extends Component
     ];
     /* ================= MOUNT ================= */
 
-    public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null)
+    public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null)
     {
 
         if (!WorkFlowPermissionHelper::canCreateEntry()) {
@@ -91,7 +93,9 @@ class DynamicForm extends Component
         if (!empty($this->views)) {
             $this->setInitialActiveTab();
         }
-
+        if ($grievanceId) {
+            $this->grievanceId = $grievanceId;
+        }
         $this->maxDate = Carbon::now()->format('Y-m-d');
         $this->minDate = Carbon::now()->subYears(2)->format('Y-m-d');
         $ageConfig = AgeManagements::where('scheme_id', $schemeId)->first();
@@ -310,7 +314,6 @@ class DynamicForm extends Component
             'encoded' => $data['encoded'],
             'hash' => $data['hash'],
         ];
-
         $this->navMessage = null;
         $this->navMessageType = 'success';
         $this->applicationId = null;
@@ -593,6 +596,13 @@ class DynamicForm extends Component
                         'aadhar_vault' => $this->aadhaarPayload['hash'],
                     ]
                 );
+                if ($this->grievanceId) {
+                    $grievanceId = Crypt::decryptString($this->grievanceId);
+                    $CmoSmData = CmoSmData::find($grievanceId);
+                    $CmoSmData->lb_application_id = $this->applicationId;
+                    $CmoSmData->is_mark = 1;
+                    $CmoSmData->save();
+                }
             }
         } catch (Throwable $e) {
             dd($e);

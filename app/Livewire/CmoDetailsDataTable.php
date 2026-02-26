@@ -189,22 +189,35 @@ class CmoDetailsDataTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $query = BeneficiaryPersonalDetail::query(); // Ensure it's a query builder instance
+        $query = BeneficiaryPersonalDetail::query();
 
         if ($this->searchValue) {
             $key = $this->searchValue['key'] ?? null;
             $value = $this->searchValue['value'] ?? null;
 
-            match ($key) {
+            // match returns the updated $query object
+            $query = match ($key) {
                 'application_id' => $query->where('application_id', $value),
+
                 'beneficiary_name' => $query->where('beneficiary_name', 'ILIKE', "%{$value}%"),
+
                 'mobile_number' => $query->where('other_details->mobile_no', $value),
-                'aadhaar_number' => $query->where('encoded_aadhar', md5($value)),
-                'bank_account_number' => $query->where('bank_account_number', $value),
+
+                'aadhaar_number' => $query->whereHas(
+                    'aadhar',
+                    fn($q) =>
+                    $q->where('aadhar_vault', md5($value))
+                )->with('aadhar'),
+
+                'bank_account_number' => $query->whereHas(
+                    'bank',
+                    fn($q) =>
+                    $q->where('bankaccountnumber', $value)
+                )->with('bank'),
+
                 default => $query,
             };
         } else {
-            // এখানেও পরিবর্তন করা হয়েছে
             $query->where('other_details->mobile_no', $this->initialMobile);
         }
 

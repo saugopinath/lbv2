@@ -197,12 +197,12 @@ class CmoWorkFlowDataTable extends DataTableComponent
                     $processType = $this->process_type;
                     $canEdit = false;
                     if (
-                        (CheckAuthHelper::isCommmonVerifier() && in_array(Codemaster::getIdByCode(3301), $processType)) ||
-                        (CheckAuthHelper::isCommonApprover() &&
-                            (in_array(Codemaster::getIdByCode(3302), $processType) || in_array(Codemaster::getIdByCode(3304), $processType))
-                        ) ||
-                        (CheckAuthHelper::isCommonHOD() && in_array(Codemaster::getIdByCode(3303), $processType)) ||
-                        (CheckAuthHelper::isCommonOperator() && in_array(Codemaster::getIdByCode(3304), $processType))
+                        ((CheckAuthHelper::isCommmonVerifier() && in_array(Codemaster::getIdByCode(3301), $processType)) ||
+                            (CheckAuthHelper::isCommonApprover() &&
+                                (in_array(Codemaster::getIdByCode(3302), $processType) || in_array(Codemaster::getIdByCode(3304), $processType))
+                            ) ||
+                            (CheckAuthHelper::isCommonHOD() && in_array(Codemaster::getIdByCode(3303), $processType)) ||
+                            (CheckAuthHelper::isCommonOperator() && in_array(Codemaster::getIdByCode(3304), $processType)) && $row->is_mark != 1)
                     ) {
                         $canEdit = true;
                     }
@@ -212,7 +212,7 @@ class CmoWorkFlowDataTable extends DataTableComponent
                     if (CheckAuthHelper::isCommonFindUser()) {
                         $routeName = 'cmo-grievance-find';
                     } elseif (CheckAuthHelper::isCommonOperator()) {
-                        $routeName = 'lbform';
+                        $routeName = 'schemes.final-submitted';
                     } else {
                         return '';
                     }
