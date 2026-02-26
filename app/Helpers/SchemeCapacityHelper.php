@@ -7,98 +7,59 @@ use App\Models\SchemeCapacity;
 
 class SchemeCapacityHelper
 {
-
     public static function check($schemeId, $actionType, $filterData = [])
     {
 
-        // ================= DISTRICT =================
+        $locations = [
 
-        if (!empty($filterData['created_by_dist_code'])) {
+            'District' => [
+                'filter' => 'created_by_dist_code',
+                'column' => 'created_by_dist_code'
+            ],
 
-            $capacity = SchemeCapacity::where([
-                'scheme_id' => $schemeId,
-                'action_type' => $actionType,
-                'capacity_type' => 2,
-                'model_type' => 'App\Models\District',
-                'model_id' => $filterData['created_by_dist_code'],
-                'is_active' => true
-            ])->first();
+            'Subdivision' => [
+                'filter' => 'created_by_local_body_code',
+                'column' => 'created_by_local_body_code'
+            ],
 
-            if ($capacity) {
+            'Block' => [
+                'filter' => 'created_by_local_body_code',
+                'column' => 'created_by_local_body_code'
+            ],
 
-                $count = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
-                    ->where('created_by_dist_code', $filterData['created_by_dist_code'])
-                    ->count();
+        ];
 
-                if ($count >= (int)$capacity->total_capacity) {
+        foreach ($locations as $model => $config) {
 
-                    return [
-                        'field' => 'formData.app_type',
-                        'message' => 'District capacity full.'
-                    ];
+            if (!empty($filterData[$config['filter']])) {
+
+                $capacity = SchemeCapacity::where([
+                    'scheme_id' => $schemeId,
+                    'action_type' => $actionType,
+                    'capacity_type' => 2,
+                    'model_type' => "App\\Models\\$model",
+                    'model_id' => $filterData[$config['filter']],
+                    'is_active' => true
+                ])->first();
+
+                if ($capacity) {
+
+                    $count = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
+                        ->where($config['column'], $filterData[$config['filter']])
+                        ->count();
+
+                    if ($count >= (int) $capacity->total_capacity) {
+
+                        return [
+                            'field' => 'formData.app_type',
+                            'message' => "$model capacity full."
+                        ];
+                    }
                 }
             }
         }
 
-        // ================= SUBDIVISION =================
-
-        if (!empty($filterData['created_by_subdivision_code'])) {
-
-            $capacity = SchemeCapacity::where([
-                'scheme_id' => $schemeId,
-                'action_type' => $actionType,
-                'capacity_type' => 2,
-                'model_type' => 'App\Models\Subdivision',
-                'model_id' => $filterData['created_by_subdivision_code'],
-                'is_active' => true
-            ])->first();
-
-            if ($capacity) {
-
-                $count = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
-                    ->where('created_by_subdivision_code', $filterData['created_by_subdivision_code'])
-                    ->count();
-
-                if ($count >= (int)$capacity->total_capacity) {
-
-                    return [
-                        'field' => 'formData.app_type',
-                        'message' => 'Subdivision capacity full.'
-                    ];
-                }
-            }
-        }
-
-        // ================= BLOCK =================
-
-        if (!empty($filterData['created_by_local_body_code'])) {
-
-            $capacity = SchemeCapacity::where([
-                'scheme_id' => $schemeId,
-                'action_type' => $actionType,
-                'capacity_type' => 2,
-                'model_type' => 'App\Models\Block',
-                'model_id' => $filterData['created_by_local_body_code'],
-                'is_active' => true
-            ])->first();
-
-            if ($capacity) {
-
-                $count = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
-                    ->where('created_by_local_body_code', $filterData['created_by_local_body_code'])
-                    ->count();
-
-                if ($count >= (int)$capacity->total_capacity) {
-
-                    return [
-                        'field' => 'formData.app_type',
-                        'message' => 'Block capacity full.'
-                    ];
-                }
-            }
-        }
-
-        // ================= FULL SCHEME =================
+        // ===== FULL SCHEME CHECK =====
 
         $capacity = SchemeCapacity::where([
             'scheme_id' => $schemeId,
@@ -112,7 +73,7 @@ class SchemeCapacityHelper
 
             $count = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)->count();
 
-            if ($count >= (int)$capacity->total_capacity) {
+            if ($count >= (int) $capacity->total_capacity) {
 
                 return [
                     'field' => 'formData.app_type',
