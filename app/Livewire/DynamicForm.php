@@ -85,6 +85,8 @@ class DynamicForm extends Component
 
     public $isEdit;
 
+    public $actionType = 1;
+
     protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
         'document-validation-failed' => 'onDocumentTabFailed',
@@ -154,24 +156,18 @@ class DynamicForm extends Component
 
     private function checkCapacity(): bool
     {
-
         $result = SchemeCapacityHelper::check(
             $this->schemeId,
-            1, // Entry Action
+            $this->actionType,
             $this->filter_data
         );
 
         if (is_array($result)) {
 
-            // $this->addError(
-            //     $result['field'],
-            //     $result['message']
-            // );
-
-             $this->dispatch('toastr', [
-                        'type' => 'error',
-                        'message' => $result['message'],
-                    ]);
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => $result['message'],
+            ]);
 
             return false;
         }
