@@ -4,7 +4,6 @@
         location_level: @entangle('location_level')
      }">
 
-    {{-- Success Message --}}
     @if (session()->has('success'))
     <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-800 rounded flex items-center">
         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -13,12 +12,24 @@
         {{ session('success') }}
     </div>
     @endif
-
-    {{-- Header with Toggle --}}
-    <div class="mb-6 flex justify-between items-center">
-        <h2 class="text-2xl font-bold text-gray-800">Scheme Capacity Configuration</h2>
+    @if (session()->has('error'))
+    <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-800 rounded flex items-center">
+        {{ session('error') }}
+    </div>
+    @endif
+    @error('validation')
+    <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-800 rounded flex items-center">
+        {{ $message }}
+    </div>
+    @enderror
+    @error('location_scheme_id')
+    <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-800 rounded flex items-center">
+        {{ $message }}
+    </div>
+    @enderror
+    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div class="flex items-center space-x-3">
-            <span class="text-sm font-medium text-gray-600">Capacity Type:</span>
+            <span class="text-md font-medium text-gray-600">Capacity Type:</span>
             <div class="flex rounded-lg border border-gray-300 overflow-hidden">
                 @foreach(['full_scheme' => 'Full Scheme', 'location' => 'Location Wise'] as $value => $label)
                 <button type="button"
@@ -34,87 +45,69 @@
             </div>
         </div>
     </div>
-
-    {{-- Full Scheme View --}}
-    <div x-show="capacity_type === 'full_scheme'" x-transition.duration.300ms>
-        <x-capacity-table
-            :items="$schemes"
-            type="scheme"
-            data="schemes_data"
-            saveMethod="saveScheme"
-            titleField="name"
-            subtitleField="id"
-            subtitlePrefix="ID: " />
+    {{-- Application Type (Common for Full Scheme & Location Wise) --}}
+    <div class="mb-4 grid grid-cols-3 gap-4" x-show="capacity_type">
+        {{-- Action Type --}}
+        {{-- Scheme Dropdown - This will show only when capacity_type is 'location' --}}
+        <div x-show="capacity_type === 'location'" x-transition>
+            <x-form.select name="location_scheme_id" label="Scheme" wire:model.live="location_scheme_id" required>
+                <option value="">-- Select Scheme --</option>
+                @foreach ($schemes as $scheme)
+                <option value="{{ $scheme->id }}">
+                    {{ $scheme->name }}
+                </option>
+                @endforeach
+            </x-form.select>
+        </div>
+        <x-form.select name="action_type" label="Action Type" wire:model.live="action_type" required>
+            <option value="">-- Select Action Type --</option>
+            @foreach($appTypeOptions as $key => $label)
+            <option value="{{ $key }}">{{ $label }}</option>
+            @endforeach
+        </x-form.select>
     </div>
-
     {{-- Location Wise View --}}
     <div x-show="capacity_type === 'location'" x-transition.duration.100ms>
-        {{-- Scheme Dropdown --}}
-        <div class="mb-4">
-            <label class="block text-xs font-medium text-gray-500 mb-1">
-                Scheme <span class="text-red-500">*</span>
-            </label>
-            <select wire:model.live="location_scheme_id"
-                class="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                <option value="">Select Scheme</option>
-                @foreach($schemes as $scheme)
-                <option value="{{ $scheme->id }}">{{ $scheme->name }}</option>
-                @endforeach
-            </select>
-            @error('location_scheme_id')
-            <span class="text-xs text-red-600">{{ $message }}</span>
-            @enderror
-        </div>
-
-        @if($location_scheme_id)
+        @if($location_scheme_id && $action_type)
         {{-- Location Tabs --}}
         <x-location-tabs :location-level="$location_level" set-method="setLocationLevel" />
-
         {{-- Filters Row --}}
         <div class="mb-4 grid grid-cols-3 gap-4">
             <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">District</label>
-                <select wire:model.live="district_id"
-                    class="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">All Districts</option>
-                    @foreach($districts as $district)
-                    <option value="{{ $district->id }}">{{ $district->name }}</option>
+                <x-form.select name="district_id" label="District" wire:model.live="district_id" required>
+                    <option value="">-- All District --</option>
+                    @foreach ($districts as $district)
+                    <option value="{{ $district->id }}">
+                        {{ $district->name }}
+                    </option>
                     @endforeach
-                </select>
+                </x-form.select>
             </div>
 
             <div x-show="location_level === 'block'">
-                <label class="block text-xs font-medium text-gray-500 mb-1">Block</label>
-                <select wire:model.live="block_id"
-                    class="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">All Blocks</option>
-                    @foreach($blocks as $block)
-                    <option value="{{ $block->id }}">{{ $block->name }}</option>
+                <x-form.select name="block_id" label="Block" wire:model.live="block_id" required>
+                    <option value="">-- All Block --</option>
+                    @foreach ($blocks as $block)
+                    <option value="{{ $block->id }}">
+                        {{ $block->name }}
+                    </option>
                     @endforeach
-                </select>
+                </x-form.select>
             </div>
 
             <div x-show="location_level === 'sub_district'">
-                <label class="block text-xs font-medium text-gray-500 mb-1">Sub District</label>
-                <select wire:model.live="sub_district_id"
-                    class="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">All Sub Districts</option>
-                    @foreach($subdivisions as $subdivision)
-                    <option value="{{ $subdivision->id }}">{{ $subdivision->name }}</option>
+                <x-form.select name="sub_district_id" label="Sub District" wire:model.live="sub_district_id" required>
+                    <option value="">-- All Sub District --</option>
+                    @foreach ($subdivisions as $subdivision)
+                    <option value="{{ $subdivision->id }}">
+                        {{ $subdivision->name }}
+                    </option>
                     @endforeach
-                </select>
+                </x-form.select>
             </div>
         </div>
 
         {{-- Locations Table --}}
-        @php
-        $locations = match($location_level) {
-        'district' => $district_id ? $districts->where('id', $district_id) : $districts,
-        'block' => $block_id ? $blocks->where('id', $block_id) : $blocks,
-        'sub_district' => $sub_district_id ? $subdivisions->where('id', $sub_district_id) : $subdivisions,
-        default => collect()
-        };
-        @endphp
 
         <x-capacity-table
             :items="$locations"
@@ -124,7 +117,22 @@
             titleField="name"
             subtitleField="id"
             subtitlePrefix="Code: "
-            :disabled="!$location_scheme_id" />
+            :disabled="!$location_scheme_id"
+            :showExtraCondition="true" />
+        @endif
+    </div>
+    {{-- Full Scheme View --}}
+    <div x-show="capacity_type === 'full_scheme'" x-transition>
+        @if($action_type)
+        <x-capacity-table
+            :items="$schemes"
+            type="scheme"
+            data="schemes_data"
+            saveMethod="saveScheme"
+            titleField="name"
+            subtitleField="id"
+            subtitlePrefix="ID: "
+            :showExtraCondition="true" />
         @endif
     </div>
 </div>
