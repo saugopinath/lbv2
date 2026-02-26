@@ -11,6 +11,7 @@ use App\Models\MasterTab;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\DuplicateChecker;
 use App\Models\CmoSmData;
+use App\Models\Codemaster;
 use App\Models\UniqueAppBenId;
 use Livewire\Component;
 use Illuminate\Support\Facades\File;
@@ -601,6 +602,7 @@ class DynamicForm extends Component
                     $CmoSmData = CmoSmData::find($grievanceId);
                     $CmoSmData->lb_application_id = $this->applicationId;
                     $CmoSmData->is_mark = 1;
+                    $CmoSmData->redressed_status = Codemaster::getIdByCode(3302);
                     $CmoSmData->save();
                 }
             }
