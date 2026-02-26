@@ -140,7 +140,7 @@ class CmoController extends Controller
         $atrs = CmoAtrMaster::all();
         $atr = CmoAtrMaster::find($record->atr_type);
         $applicant_details = '';
-        if ($atr->can_find_applicant) {
+        if ($atr && ($atr->can_find_applicant)) {
             $data = BeneficiaryPersonalDetail::with('bank', 'contact')->find($record->lb_application_id);
             $add = $data->contact->blockmuni();
             $bank = $data->bank;

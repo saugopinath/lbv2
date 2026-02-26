@@ -61,28 +61,28 @@ class BeneficiaryContactDetail extends BaseAuditableModel
         $parts = [];
 
         if ($district) {
-            $parts[] = "District - " . strtoupper($district);
+            $parts[] = "<b>District - </b>" . strtoupper($district);
         }
 
         // Rural
         if ($this->rural_urban == 2) {
             if ($block) {
-                $parts[] = "Block - " . strtoupper($block);
+                $parts[] = "<b>Block - </b>" . strtoupper($block);
             }
             if ($panchayat) {
-                $parts[] = "GP - " . strtoupper($panchayat);
+                $parts[] = "<b>GP - </b>" . strtoupper($panchayat);
             }
         }
         // Urban
         else {
             if ($subdivision) {
-                $parts[] = "Subdivision - " . strtoupper($subdivision);
+                $parts[] = "<b>Subdivision - </b>" . strtoupper($subdivision);
             }
             if ($municipality) {
-                $parts[] = "Municipality - " . strtoupper($municipality);
+                $parts[] = "<b>Municipality - </b>" . strtoupper($municipality);
             }
             if ($ward) {
-                $parts[] = "Ward - " . strtoupper($ward);
+                $parts[] = "<b>Ward - </b>" . strtoupper($ward);
             }
         }
 
