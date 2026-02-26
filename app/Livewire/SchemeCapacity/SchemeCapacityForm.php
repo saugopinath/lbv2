@@ -60,7 +60,7 @@ class SchemeCapacityForm extends Component
     private function getEmptyRow()
     {
         return [
-            'entry_type' => '0',
+            'entry_type' => '',
             'total_capacity' => '',
             'normal_capacity' => '',
             'ds_capacity' => '',
@@ -426,6 +426,54 @@ class SchemeCapacityForm extends Component
             );
             session()->flash('success', 'Location capacity saved successfully!');
         }
+    }
+
+    public function deleteSchemeCapacity($schemeId, $index)
+    {
+        $deleted = $this->deleteCapacity($schemeId, Scheme::class, $schemeId);
+
+        if ($deleted) {
+            $this->schemes_data[$index] = $this->getEmptyRow();
+            session()->flash('success', 'Scheme capacity reset successfully!');
+        }
+    }
+
+    public function deleteLocationCapacity($locationId, $index)
+    {
+        if (!$this->location_scheme_id) {
+            return;
+        }
+
+        $modelType = match ($this->location_level) {
+            'district' => District::class,
+            'block' => Block::class,
+            'sub_district' => Subdivision::class,
+            default => null,
+        };
+
+        $deleted = $this->deleteCapacity($this->location_scheme_id, $modelType, $locationId);
+
+        if ($deleted) {
+            $this->locations_data[$index] = $this->getEmptyRow();
+            session()->flash('success', 'Location capacity reset successfully!');
+        }
+    }
+
+    private function deleteCapacity($schemeId, $modelType, $modelId)
+    {
+        if (empty($this->action_type)) {
+            $this->addError('action_type', 'Action Type is required for reset.');
+            return false;
+        }
+
+        $deletedCount = SchemeCapacity::where('scheme_id', $schemeId)
+            ->where('model_type', $modelType)
+            ->where('model_id', $modelId)
+            ->where('action_type', $this->action_type)
+            ->where('is_active', true)
+            ->delete();
+
+        return $deletedCount > 0;
     }
     public function updatedCapacityType()
     {

@@ -9,6 +9,7 @@
 'disabled' => false, // Whether save buttons are disabled
 'showExtraCondition' => false, // Whether to show extra condition column
 'locationLevel' => null, // Add this for location type
+'deleteMethod' => null, // Method name to call on delete
 ])
 
 <div class="overflow-x-auto">
@@ -18,7 +19,7 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {{ $type === 'scheme' ? 'Scheme' : ucfirst(str_replace('_', ' ', $locationLevel ?? 'Location')) }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entry Type</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Application Type</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Capacity</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Normal Capacity</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DS Capacity</th>
@@ -39,32 +40,31 @@
                     <select wire:model="{{ $data }}.{{ $index }}.entry_type"
                         wire:change="resetRowCapacities('{{ $data }}', {{ $index }})"
                         class="border border-gray-300 hover:border-blue-500 focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400">
-                        <option value="0">Any</option>
-                        <option value="1">Normal Only</option>
-                        <option value="2">DS Only</option>
-                        <option value="both">Both (Normal & DS)</option>
+                        <option value="">Select Application Type</option>
+                        <option value="0">Not Specified</option>
+                        <option value="1">Normal Entry Only</option>
+                        <option value="2">DS Entry Only</option>
+                        <option value="both">Both (Normal & DS Entry)</option>
                     </select>
-
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-
                     <input type="number"
                         wire:model="{{ $data }}.{{ $index }}.total_capacity"
-                        x-bind:disabled="$wire.{{ $data }}[{{ $index }}].entry_type === 'both' || $wire.{{ $data }}[{{ $index }}].entry_type === '1' || $wire.{{ $data }}[{{ $index }}].entry_type === '2'"
+                        x-bind:disabled="$wire.{{ $data }}[{{ $index }}].entry_type === 'both' || $wire.{{ $data }}[{{ $index }}].entry_type === '1' || $wire.{{ $data }}[{{ $index }}].entry_type === '2' || $wire.{{ $data }}[{{ $index }}].entry_type === ''"
                         class="border border-gray-300 hover:border-blue-500 focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400 disabled:cursor-not-allowed"
                         placeholder="Total Capacity">
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <input type="number"
                         wire:model="{{ $data }}.{{ $index }}.normal_capacity"
-                        x-bind:disabled="$wire.{{ $data }}[{{ $index }}].entry_type !== 'both' && $wire.{{ $data }}[{{ $index }}].entry_type !== '1'"
+                        x-bind:disabled="$wire.{{ $data }}[{{ $index }}].entry_type !== 'both' && $wire.{{ $data }}[{{ $index }}].entry_type !== '1' || $wire.{{ $data }}[{{ $index }}].entry_type === ''"
                         class="border border-gray-300 hover:border-blue-500 focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400 disabled:cursor-not-allowed"
                         placeholder="Normal Capacity">
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <input type="number"
                         wire:model="{{ $data }}.{{ $index }}.ds_capacity"
-                        x-bind:disabled="$wire.{{ $data }}[{{ $index }}].entry_type !== 'both' && $wire.{{ $data }}[{{ $index }}].entry_type !== '2'"
+                        x-bind:disabled="$wire.{{ $data }}[{{ $index }}].entry_type !== 'both' && $wire.{{ $data }}[{{ $index }}].entry_type !== '2' || $wire.{{ $data }}[{{ $index }}].entry_type === ''"
                         class="border border-gray-300 hover:border-blue-500 focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400 disabled:cursor-not-allowed"
                         placeholder="DS Capacity">
                 </td>
@@ -76,16 +76,32 @@
                         placeholder="Extra Condition">
                 </td>
                 @endif
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <button
-                        wire:click="{{ $saveMethod }}({{ $item->id }}, {{ $index }})"
-                        @disabled($disabled)
-                        class="px-3 py-1 text-sm rounded-md transition-colors
-                            {{ $disabled 
-                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                                : 'bg-blue-600 hover:bg-blue-700 text-white' }}">
+                <td class="px-6 py-4 whitespace-nowrap flex items-center gap-2">
+                    <x-form.confirm-action
+                        :itemId="$item->id . ', ' . $index"
+                        :action="$saveMethod"
+                        title="Confirm Save"
+                        message="Are you sure to save the capacity?"
+                        confirmLabel="Save">
                         Save
-                    </button>
+                    </x-form.confirm-action>
+
+                    @if($deleteMethod)
+                    <x-form.confirm-action
+                        :itemId="$item->id . ', ' . $index"
+                        :disabled="$disabled"
+                        :action="$deleteMethod"
+                        title="Reset Capacity"
+                        message="Are you sure to reset this capacity?"
+                        confirm-label="Yes, Reset"
+                        cancel-label="Cancel"
+                        class="px-3 py-1 text-sm rounded-md transition-colors
+        {{ $disabled 
+            ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+            : 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200' }}">
+                        Reset
+                    </x-form.confirm-action>
+                    @endif
                 </td>
             </tr>
             @empty
