@@ -80,27 +80,36 @@
                     <x-form.confirm-action
                         :itemId="$item->id . ', ' . $index"
                         :action="$saveMethod"
+                        :disabled="$disabled"
                         title="Confirm Save"
                         message="Are you sure to save the capacity?"
-                        confirmLabel="Save">
-                        Save
-                    </x-form.confirm-action>
+                        confirmLabel="Save"
+                        tooltip="Save Capacity"
+                        :icon="'<svg class=\'w-4 h-4\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4\' /></svg>'"
+                        class="px-3 py-1 text-sm rounded-md transition-colors {{ $disabled ? 'cursor-not-allowed' : 'cursor-pointer' }}" />
+
 
                     @if($deleteMethod)
-                    <x-form.confirm-action
+                    @php
+                    $rowData = $this->{$data}[$index] ?? [];
+                    $hasNoData = empty($rowData['entry_type']) &&
+                    empty($rowData['total_capacity']) &&
+                    empty($rowData['normal_capacity']) &&
+                    empty($rowData['ds_capacity']);
+                    $isResetDisabled = $disabled || $hasNoData;
+                    @endphp
+                    <x-form.confirm-reset
                         :itemId="$item->id . ', ' . $index"
-                        :disabled="$disabled"
+                        :disabled="$isResetDisabled"
                         :action="$deleteMethod"
                         title="Reset Capacity"
                         message="Are you sure to reset this capacity?"
                         confirm-label="Yes, Reset"
                         cancel-label="Cancel"
+                        tooltip="Reset Capacity"
+                        :icon="'<svg class=\'w-4 h-4\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16\' /></svg>'"
                         class="px-3 py-1 text-sm rounded-md transition-colors
-        {{ $disabled 
-            ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-            : 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200' }}">
-                        Reset
-                    </x-form.confirm-action>
+        {{ $isResetDisabled ? 'cursor-not-allowed' : 'cursor-pointer' }}" />
                     @endif
                 </td>
             </tr>

@@ -443,7 +443,6 @@ class SchemeCapacityForm extends Component
         if (!$this->location_scheme_id) {
             return;
         }
-
         $modelType = match ($this->location_level) {
             'district' => District::class,
             'block' => Block::class,
