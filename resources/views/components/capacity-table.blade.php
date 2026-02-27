@@ -16,22 +16,24 @@
     <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
             <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Sl No.</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {{ $type === 'scheme' ? 'Scheme' : ucfirst(str_replace('_', ' ', $locationLevel ?? 'Location')) }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Application Type</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Capacity</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Normal Capacity</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DS Capacity</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Application Type</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Capacity</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Normal Capacity</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">DS Capacity</th>
                 @if($showExtraCondition)
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Extra Condition</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Extra Condition</th>
                 @endif
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
             </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
             @forelse($items as $index => $item)
             <tr class="hover:bg-gray-50" wire:key="{{ $type }}-{{ $item->id }}">
+                <td class="px-3 py-4 text-center whitespace-nowrap">{{ $index + 1 }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm font-medium text-gray-900">{{ $item->$titleField }}</div>
                     <div class="text-xs text-gray-500">{{ $subtitlePrefix }}{{ $item->$subtitleField }}</div>
@@ -86,21 +88,13 @@
                         confirmLabel="Save"
                         tooltip="Save Capacity"
                         :icon="'<svg class=\'w-4 h-4\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4\' /></svg>'"
-                        class="px-3 py-1 text-sm rounded-md transition-colors {{ $disabled ? 'cursor-not-allowed' : 'cursor-pointer' }}" />
+                        class="px-3 py-1 text-sm rounded-md transition-colors {{ $disabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-green-50 hover:bg-green-100 text-green-600 border border-green-200 cursor-pointer' }}" />
 
 
                     @if($deleteMethod)
-                    @php
-                    $rowData = $this->{$data}[$index] ?? [];
-                    $hasNoData = empty($rowData['entry_type']) &&
-                    empty($rowData['total_capacity']) &&
-                    empty($rowData['normal_capacity']) &&
-                    empty($rowData['ds_capacity']);
-                    $isResetDisabled = $disabled || $hasNoData;
-                    @endphp
                     <x-form.confirm-reset
                         :itemId="$item->id . ', ' . $index"
-                        :disabled="$isResetDisabled"
+                        :disabled="$this->isResetDisabled($data, $index, $disabled)"
                         :action="$deleteMethod"
                         title="Reset Capacity"
                         message="Are you sure to reset this capacity?"
@@ -109,7 +103,7 @@
                         tooltip="Reset Capacity"
                         :icon="'<svg class=\'w-4 h-4\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16\' /></svg>'"
                         class="px-3 py-1 text-sm rounded-md transition-colors
-        {{ $isResetDisabled ? 'cursor-not-allowed' : 'cursor-pointer' }}" />
+        {{ $this->isResetDisabled($data, $index, $disabled) ? 'cursor-not-allowed' : 'cursor-pointer' }}" />
                     @endif
                 </td>
             </tr>

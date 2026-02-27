@@ -37,9 +37,9 @@ class SchemeCapacityForm extends Component
         $this->schemes = Scheme::all();
         $this->districts = District::all();
         $this->appTypeOptions = [
-            '1' => 'Entry',
-            '2' => 'Verification',
-            '3' => 'Approval',
+            '0' => 'Entry',
+            '1' => 'Verification',
+            '2' => 'Approval',
         ];
         $this->resetSchemesData();
     }
@@ -149,7 +149,7 @@ class SchemeCapacityForm extends Component
 
     private function fetchExistingCapacityData($schemeId, $modelType, $modelId)
     {
-        if (empty($this->action_type)) {
+        if ($this->action_type === null || $this->action_type === '') {
             return $this->getEmptyRow();
         }
 
@@ -159,13 +159,11 @@ class SchemeCapacityForm extends Component
             ->where('action_type', $this->action_type)
             ->where('is_active', true)
             ->get();
-
+        // dd($capacities);
         if ($capacities->isEmpty()) {
             return $this->getEmptyRow();
         }
-
         $row = $this->getEmptyRow();
-
         // If there's an 'Any' entry
         $anyEntry = $capacities->where('entry_type', 0)->first();
         if ($anyEntry) {
@@ -237,6 +235,22 @@ class SchemeCapacityForm extends Component
         };
     }
 
+    public function isResetDisabled($dataArrayName, $index, $globalDisabled)
+    {
+        if ($globalDisabled) {
+            return true;
+        }
+
+        $rowData = $this->{$dataArrayName}[$index] ?? [];
+
+        $entryType = (string)($rowData['entry_type'] ?? '');
+        $total = (string)($rowData['total_capacity'] ?? '');
+        $normal = (string)($rowData['normal_capacity'] ?? '');
+        $ds = (string)($rowData['ds_capacity'] ?? '');
+
+        return $entryType === '' && $total === '' && $normal === '' && $ds === '';
+    }
+
     private function validateCapacityData($data, $type)
     {
         $rules = [];
@@ -272,6 +286,9 @@ class SchemeCapacityForm extends Component
 
             if ($validator->fails()) {
                 $this->addError('validation', $validator->errors()->first());
+                // $message = $validator->errors()->first();
+                // session()->flash('xerror', $message);
+                $this->dispatch('toastr', ['type' => 'error', 'message' => $validator->errors()->first()]);
                 return false;
             }
         }
@@ -283,7 +300,7 @@ class SchemeCapacityForm extends Component
 
     private function saveCapacity($schemeId, $data, $modelType, $modelId, $capacityType)
     {
-        if (empty($this->action_type)) {
+        if ($this->action_type === '' || $this->action_type === null) {
             $this->addError('action_type', 'Action Type is required.');
             return false;
         }
@@ -392,7 +409,9 @@ class SchemeCapacityForm extends Component
 
         if ($saved === true) {
             $this->schemes_data[$index] = $this->fetchExistingCapacityData($schemeId, Scheme::class, $schemeId);
-            session()->flash('success', 'Scheme capacity saved successfully!');
+            $message = "Scheme capacity saved successfully!";
+            $this->dispatch('toastr', ['type' => 'success', 'message' => $message]);
+            // session()->flash('success', $message);
         }
     }
 
@@ -424,7 +443,9 @@ class SchemeCapacityForm extends Component
                 $modelType,
                 $locationId
             );
-            session()->flash('success', 'Location capacity saved successfully!');
+            // session()->flash('success', 'Location capacity saved successfully!');
+            $message = "Location capacity saved successfully!";
+            $this->dispatch('toastr', ['type' => 'success', 'message' => $message]);
         }
     }
 
@@ -434,7 +455,9 @@ class SchemeCapacityForm extends Component
 
         if ($deleted) {
             $this->schemes_data[$index] = $this->getEmptyRow();
-            session()->flash('success', 'Scheme capacity reset successfully!');
+            // session()->flash('success', 'Scheme capacity reset successfully!');
+            $message = "Scheme capacity reset successfully!";
+            $this->dispatch('toastr', ['type' => 'success', 'message' => $message]);
         }
     }
 
@@ -454,7 +477,9 @@ class SchemeCapacityForm extends Component
 
         if ($deleted) {
             $this->locations_data[$index] = $this->getEmptyRow();
-            session()->flash('success', 'Location capacity reset successfully!');
+            // session()->flash('success', 'Location capacity reset successfully!');
+            $message = "Location capacity reset successfully!";
+            $this->dispatch('toastr', ['type' => 'success', 'message' => $message]);
         }
     }
 

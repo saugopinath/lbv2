@@ -68,7 +68,7 @@
     </div>
     {{-- Location Wise View --}}
     <div x-show="capacity_type === 'location'" x-transition.duration.100ms>
-        @if($location_scheme_id && $action_type)
+        @if($location_scheme_id && $action_type !=='')
         {{-- Location Tabs --}}
         <x-location-tabs :location-level="$location_level" set-method="setLocationLevel" />
         {{-- Filters Row --}}
@@ -124,7 +124,7 @@
     </div>
     {{-- Full Scheme View --}}
     <div x-show="capacity_type === 'full_scheme'" x-transition>
-        @if($action_type)
+        @if($action_type !== '')
         <x-capacity-table
             :items="$schemes"
             type="scheme"

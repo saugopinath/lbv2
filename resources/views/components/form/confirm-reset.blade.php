@@ -77,7 +77,7 @@ $defaultTitleIcon = <<<SVG
                     @mouseenter="showTip = true"
                     @mouseleave="showTip = false"
                     @click="!{{ $disabled ? 'true' : 'false' }} && (showModal = true)"
-                    {{ $attributes->merge(['class' => 'flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white transition']) }}
+                    {{ $attributes->merge(['class' => 'flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-400 hover:bg-rose-500 text-white transition']) }}
                     @disabled($disabled)>
                     @if(trim($slot))
                     {{ $slot }}
