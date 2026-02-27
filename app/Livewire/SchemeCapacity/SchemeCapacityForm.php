@@ -10,6 +10,7 @@ use App\Models\Subdivision;
 use App\Models\SchemeCapacity;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
 
 class SchemeCapacityForm extends Component
 {
@@ -317,9 +318,7 @@ class SchemeCapacityForm extends Component
             ->where('action_type', $this->action_type)
             ->where('is_active', true)
             ->delete();
-
         if ($data['entry_type'] == 0) {
-
             if (!$this->validateCapacityData($data, '0')) {
                 return false;
             }
@@ -334,15 +333,12 @@ class SchemeCapacityForm extends Component
                 'extra_condition' => $data['extra_condition'] ?? null,
                 'is_active' => true,
             ]);
-
             return true;
         }
         if ($data['entry_type'] === 'both') {
-            // Validate both fields
             if (!$this->validateCapacityData($data, 'both')) {
                 return false;
             }
-            // Create Normal entry (entry_type = 1)
             SchemeCapacity::create([
                 'scheme_id' => $schemeId,
                 'capacity_type' => $this->getCapacityTypeValue(),
@@ -354,7 +350,6 @@ class SchemeCapacityForm extends Component
                 'extra_condition' => $data['extra_condition'] ?? null,
                 'is_active' => true,
             ]);
-            // Create DS entry (entry_type = 2)
             SchemeCapacity::create([
                 'scheme_id' => $schemeId,
                 'capacity_type' => $this->getCapacityTypeValue(),
@@ -366,19 +361,15 @@ class SchemeCapacityForm extends Component
                 'extra_condition' => $data['extra_condition'] ?? null,
                 'is_active' => true,
             ]);
-
             return true;
         }
 
         if ($data['entry_type'] === '1' || $data['entry_type'] === '2') {
-            // Validate single field
             if (!$this->validateCapacityData($data, $data['entry_type'])) {
                 return false;
             }
-
             $field = $data['entry_type'] === '1' ? 'normal_capacity' : 'ds_capacity';
             $entryValue = $data['entry_type'] === '1' ? 1 : 2;
-
             SchemeCapacity::create([
                 'scheme_id' => $schemeId,
                 'capacity_type' => $this->getCapacityTypeValue(),
@@ -398,20 +389,26 @@ class SchemeCapacityForm extends Component
 
     public function saveScheme($schemeId, $index)
     {
-        // dd($this->schemes_data[$index]);
-        $saved = $this->saveCapacity(
-            $schemeId,
-            $this->schemes_data[$index],
-            Scheme::class,
-            $schemeId,
-            'full_scheme'
-        );
-
-        if ($saved === true) {
-            $this->schemes_data[$index] = $this->fetchExistingCapacityData($schemeId, Scheme::class, $schemeId);
-            $message = "Scheme capacity saved successfully!";
-            $this->dispatch('toastr', ['type' => 'success', 'message' => $message]);
-            // session()->flash('success', $message);
+        DB::beginTransaction();
+        try {
+            $saved = $this->saveCapacity(
+                $schemeId,
+                $this->schemes_data[$index],
+                Scheme::class,
+                $schemeId,
+                'full_scheme'
+            );
+            if ($saved === true) {
+                DB::commit();
+                $this->schemes_data[$index] = $this->fetchExistingCapacityData($schemeId, Scheme::class, $schemeId);
+                $message = "Scheme capacity saved successfully!";
+                $this->dispatch('toastr', ['type' => 'success', 'message' => $message]);
+            } else {
+                DB::rollBack();
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('toastr', ['type' => 'error', 'message' => 'Failed to save scheme capacity.']);
         }
     }
 
@@ -422,42 +419,58 @@ class SchemeCapacityForm extends Component
             return;
         }
 
-        $modelType = match ($this->location_level) {
-            'district' => District::class,
-            'block' => Block::class,
-            'sub_district' => Subdivision::class,
-            default => null,
-        };
+        DB::beginTransaction();
+        try {
+            $modelType = match ($this->location_level) {
+                'district' => District::class,
+                'block' => Block::class,
+                'sub_district' => Subdivision::class,
+                default => null,
+            };
 
-        $saved = $this->saveCapacity(
-            $this->location_scheme_id,
-            $this->locations_data[$index],
-            $modelType,
-            $locationId,
-            'location'
-        );
-
-        if ($saved === true) {
-            $this->locations_data[$index] = $this->fetchExistingCapacityData(
+            $saved = $this->saveCapacity(
                 $this->location_scheme_id,
+                $this->locations_data[$index],
                 $modelType,
-                $locationId
+                $locationId,
+                'location'
             );
-            // session()->flash('success', 'Location capacity saved successfully!');
-            $message = "Location capacity saved successfully!";
-            $this->dispatch('toastr', ['type' => 'success', 'message' => $message]);
+
+            if ($saved === true) {
+                DB::commit();
+                $this->locations_data[$index] = $this->fetchExistingCapacityData(
+                    $this->location_scheme_id,
+                    $modelType,
+                    $locationId
+                );
+                $message = "Location capacity saved successfully!";
+                $this->dispatch('toastr', ['type' => 'success', 'message' => $message]);
+            } else {
+                DB::rollBack();
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('toastr', ['type' => 'error', 'message' => 'Failed to save location capacity.']);
         }
     }
 
     public function deleteSchemeCapacity($schemeId, $index)
     {
-        $deleted = $this->deleteCapacity($schemeId, Scheme::class, $schemeId);
+        DB::beginTransaction();
+        try {
+            $deleted = $this->deleteCapacity($schemeId, Scheme::class, $schemeId);
 
-        if ($deleted) {
-            $this->schemes_data[$index] = $this->getEmptyRow();
-            // session()->flash('success', 'Scheme capacity reset successfully!');
-            $message = "Scheme capacity reset successfully!";
-            $this->dispatch('toastr', ['type' => 'success', 'message' => $message]);
+            if ($deleted) {
+                DB::commit();
+                $this->schemes_data[$index] = $this->getEmptyRow();
+                $message = "Scheme capacity reset successfully!";
+                $this->dispatch('toastr', ['type' => 'success', 'message' => $message]);
+            } else {
+                DB::rollBack();
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('toastr', ['type' => 'error', 'message' => 'Failed to reset scheme capacity.']);
         }
     }
 
@@ -466,26 +479,35 @@ class SchemeCapacityForm extends Component
         if (!$this->location_scheme_id) {
             return;
         }
-        $modelType = match ($this->location_level) {
-            'district' => District::class,
-            'block' => Block::class,
-            'sub_district' => Subdivision::class,
-            default => null,
-        };
 
-        $deleted = $this->deleteCapacity($this->location_scheme_id, $modelType, $locationId);
+        DB::beginTransaction();
+        try {
+            $modelType = match ($this->location_level) {
+                'district' => District::class,
+                'block' => Block::class,
+                'sub_district' => Subdivision::class,
+                default => null,
+            };
 
-        if ($deleted) {
-            $this->locations_data[$index] = $this->getEmptyRow();
-            // session()->flash('success', 'Location capacity reset successfully!');
-            $message = "Location capacity reset successfully!";
-            $this->dispatch('toastr', ['type' => 'success', 'message' => $message]);
+            $deleted = $this->deleteCapacity($this->location_scheme_id, $modelType, $locationId);
+
+            if ($deleted) {
+                DB::commit();
+                $this->locations_data[$index] = $this->getEmptyRow();
+                $message = "Location capacity reset successfully!";
+                $this->dispatch('toastr', ['type' => 'success', 'message' => $message]);
+            } else {
+                DB::rollBack();
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('toastr', ['type' => 'error', 'message' => 'Failed to reset location capacity.']);
         }
     }
 
     private function deleteCapacity($schemeId, $modelType, $modelId)
     {
-        if (empty($this->action_type)) {
+        if ($this->action_type === '' || $this->action_type === null) {
             $this->addError('action_type', 'Action Type is required for reset.');
             return false;
         }
