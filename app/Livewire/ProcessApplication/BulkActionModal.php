@@ -3,56 +3,62 @@
 namespace App\Livewire\ProcessApplication;
 
 use App\Helpers\CheckAuthHelper;
+use App\Helpers\SchemeCapacityHelper;
 use App\Helpers\WorkFlowPermissionHelper;
-use App\Models\BeneficiaryPersonalDetail;
-use App\Models\FaultyBeneficiaryPersonal;
-use Livewire\Component;
-use App\Models\Codemaster;
-use Livewire\Attributes\On;
-use Masmerise\Toaster\Toaster;
-use App\Models\BenRejectDetails;
-use App\Models\BeneficiaryAadhaar;
-use Illuminate\Support\Facades\DB;
-use App\Models\BeneficiaryPersonal;
-use App\Models\DraftBeneficiaryBank;
-use Illuminate\Support\Facades\Auth;
-use App\Models\DraftBeneficiaryContact;
-use App\Models\DraftBeneficiaryPersonal;
-use App\Models\DraftBeneficiaryDeclaration;
-use App\Models\ApplicantRejectRevertDetails;
-use App\Models\DraftBeneficiaryRelationship;
 use App\Models\AcceptRejectInfo;
-use Illuminate\Support\Facades\Crypt;
+use App\Models\BeneficiaryPersonalDetail;
+use App\Models\Codemaster;
 use App\Services\WorkflowService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class BulkActionModal extends Component
 {
     public bool $bulkActionModal = false;
+
     public array $selectedRows = [];
+
     public string $bulkActionType = '';
+
     public ?int $reason = null;
 
     public string $remark = '';
+
     public array $reasons = [];
+
     public array $availableActions = [];
+
     public $filter_data = [];
+
     public int $currentUserId;
-    public $applicationId, $entryType;
-    public $sameLabelRoleId, $nextLabelRoleId, $schemeId;
+
+    public $applicationId;
+
+    public $entryType;
+
+    public $sameLabelRoleId;
+
+    public $nextLabelRoleId;
+
+    public $schemeId;
+
     public string $bulkActionTypeLabel = 'Select Operation';
 
     #[On('openBulkActionModal')]
-    public function openModal(array $selectedIds = [], WorkflowService $workflowService)
+    public function openModal(array $selectedIds, WorkflowService $workflowService)
     {
         $select_lgd = session('lgd_session');
         // dd($select_lgd);
-        if (!empty($select_lgd['district_id'])) {
+        if (! empty($select_lgd['district_id'])) {
             $this->filter_data['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
         }
-        if (!empty($select_lgd['block_id'])) {
+        if (! empty($select_lgd['block_id'])) {
             $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
         }
-        if (!empty($select_lgd['subdivision_id'])) {
+        if (! empty($select_lgd['subdivision_id'])) {
             $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
 
@@ -68,7 +74,6 @@ class BulkActionModal extends Component
             $this->sameLabelRoleId = $labelRoles->same_label_role_id;
             $this->nextLabelRoleId = $labelRoles->next_label_role_id;
         }
-
 
         if ($this->entryType == 1) {
             // if ($this->entryType == Codemaster::getIdByCode(41)) {
@@ -127,7 +132,6 @@ class BulkActionModal extends Component
         //     'remark' => in_array($this->bulkActionType, ['R', 'T']) ? 'required|string|max:255' : 'nullable',
         // ]);
 
-
         $validated = $this->validate([
             'bulkActionType' => 'required|in:V,A,R,T',
 
@@ -140,7 +144,45 @@ class BulkActionModal extends Component
                 : 'nullable',
         ]);
 
+        // ✅ CAPACITY CHECK START
+        // dd($this->nextLabelRoleId,$this->sameLabelRoleId);
+        $result = null;
 
+        if ($this->bulkActionType === 'V') {
+
+            $result = SchemeCapacityHelper::check(
+                $this->schemeId,
+                $this->nextLabelRoleId,
+                $this->filter_data
+            );
+
+        }
+
+        if ($this->bulkActionType === 'A') {
+
+            $result = SchemeCapacityHelper::check(
+                $this->schemeId,
+                $this->nextLabelRoleId,
+                $this->filter_data
+            );
+
+        }
+// dd($result);
+        if (is_array($result)) {
+
+            $msg = "{$result['model']} capacity full. 
+            Total: {$result['total']} 
+            Processed: {$result['processed']} 
+            Remaining: {$result['remaining']}";
+
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => $msg,
+            ]);  
+            return;       
+        }
+
+        // ✅ CAPACITY CHECK END
         $approverRoleId = Codemaster::getIdByCode(23);
 
         $ids = (array) $this->applicationId;
@@ -171,7 +213,7 @@ class BulkActionModal extends Component
                     DB::commit();
                     $this->dispatch('toastr', [
                         'type' => 'success',
-                        'message' => 'Application verified successfully!'
+                        'message' => 'Application verified successfully!',
                     ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
@@ -205,7 +247,7 @@ class BulkActionModal extends Component
                     DB::commit();
                     $this->dispatch('toastr', [
                         'type' => 'success',
-                        'message' => 'Application approved successfully!'
+                        'message' => 'Application approved successfully!',
                     ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
@@ -248,7 +290,7 @@ class BulkActionModal extends Component
                     DB::commit();
                     $this->dispatch('toastr', [
                         'type' => 'warning',
-                        'message' => 'Application reverted successfully!'
+                        'message' => 'Application reverted successfully!',
                     ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
@@ -282,7 +324,7 @@ class BulkActionModal extends Component
                     DB::commit();
                     $this->dispatch('toastr', [
                         'type' => 'error',
-                        'message' => 'Application rejected successfully!'
+                        'message' => 'Application rejected successfully!',
                     ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
@@ -301,10 +343,8 @@ class BulkActionModal extends Component
         $this->reset(['bulkActionType', 'reason', 'remark', 'selectedRows', 'bulkActionTypeLabel']);
 
         return redirect()->route('lb-application-list', [
-            'scheme_id' => Crypt::encryptString($this->schemeId)
+            'scheme_id' => Crypt::encryptString($this->schemeId),
         ]);
-
-
 
     }
 

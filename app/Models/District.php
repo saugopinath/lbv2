@@ -14,6 +14,7 @@ class District extends Model
         'short_name',
         'state_id',
     ];
+    public const BENEFICIARY_LOCATION_COLUMN = 'created_by_dist_code';
     public function State(): BelongsTo
     {
         return $this->belongsTo(State::class);
