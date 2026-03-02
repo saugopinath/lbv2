@@ -66,38 +66,6 @@
                 }
             });
         });
-
-        // Session Timeout Auto Logout
-        let sessionLifetime = {
-            {
-                config('session.lifetime')
-            }
-        }* 60 * 1000;
-        let timeoutTimer;
-
-        function resetTimer() {
-            clearTimeout(timeoutTimer);
-            timeoutTimer = setTimeout(() => {
-                window.location.href = "{{ route('session.expired') }}";
-            }, sessionLifetime);
-        }
-
-        // Reset timer on common user activities
-        window.onload = resetTimer;
-        window.onmousemove = resetTimer;
-        window.onmousedown = resetTimer;
-        window.ontouchstart = resetTimer;
-        window.onclick = resetTimer;
-        window.onkeypress = resetTimer;
-
-        // Also reset on Livewire requests (since they are AJAX and refresh the session)
-        document.addEventListener('livewire:initialized', () => {
-            Livewire.hook('request', ({
-                fail
-            }) => {
-                resetTimer();
-            });
-        });
     </script>
     @livewireScripts
     @stack('scripts')

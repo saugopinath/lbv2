@@ -16,7 +16,6 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->redirectGuestsTo(fn() => route('session.expired'));
         $middleware->alias([
             '2fa' => TwofaMiddleware::class,
             'role' => RoleMiddleware::class,
