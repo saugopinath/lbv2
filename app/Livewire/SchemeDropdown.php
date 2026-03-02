@@ -53,68 +53,42 @@ class SchemeDropdown extends Component
         }
     }
 
-    public function updatedSchemeId($value)
-    {
-        $scheme = Scheme::with([
-            'capacities' => fn($q) => $q->active()
-        ])->find($value);
-      
-        $this->schemeName = $scheme?->name;
+    // public function updatedSchemeId($value)
+    // {
+    //     $scheme = Scheme::with([
+    //         'capacities' => fn($q) => $q->active()
+    //     ])->find($value);
 
-        if ($this->currentRoute !== 'schemes.final-submitted') {
-            return;
-        }
+    //     $this->schemeName = $scheme?->name;
 
-        $filter = $this->getFilterData();
+    //     if ($this->currentRoute !== 'schemes.final-submitted') {
+    //         return;
+    //     }
 
-        $result = SchemeCapacityHelper::check(
-            $value,
-            0,
-            $filter
-        );
-        if (is_array($result)) {
+    //     $result = SchemeCapacityHelper::check(
+    //         $value,
+    //         0,
+    //         null
+    //     );
 
-            $msg = "{$result['model']} capacity full. 
-            Total: {$result['total']} 
-            Processed: {$result['processed']} 
-            Remaining: {$result['remaining']}";
+    //     if (is_array($result)) {
 
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => $msg,
-            ]);
+    //         $msg = "{$result['model']} capacity full. 
+    //         Total: {$result['total']} 
+    //         Processed: {$result['processed']} 
+    //         Remaining: {$result['remaining']}";
 
-            $this->schemeId = null;
-            $this->schemeName = null;
-        }
-    }
+    //         $this->dispatch('toastr', [
+    //             'type' => 'error',
+    //             'message' => $msg,
+    //         ]);
 
-    private function getFilterData()
-    {
-        $filter = [];
+    //         $this->schemeId = null;
+    //         $this->schemeName = null;
+    //     }
+    // }
 
-        $select_lgd = session('lgd_session');
 
-        if (! empty($select_lgd['district_id'])) {
-
-            $filter['created_by_dist_code'] =
-                Crypt::decryptString($select_lgd['district_id']);
-        }
-
-        if (! empty($select_lgd['block_id'])) {
-
-            $filter['created_by_local_body_code'] =
-                Crypt::decryptString($select_lgd['block_id']);
-        }
-
-        if (! empty($select_lgd['subdivision_id'])) {
-
-            $filter['created_by_subdivision_code'] =
-                Crypt::decryptString($select_lgd['subdivision_id']);
-        }
-
-        return $filter;
-    }
 
     public function render()
     {
