@@ -58,7 +58,7 @@ class SchemeDropdown extends Component
         $scheme = Scheme::with([
             'capacities' => fn($q) => $q->active()
         ])->find($value);
-        // dd($scheme->capacities->first()->total_capacity);
+      
         $this->schemeName = $scheme?->name;
 
         if ($this->currentRoute !== 'schemes.final-submitted') {
