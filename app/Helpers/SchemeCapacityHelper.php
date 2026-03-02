@@ -14,67 +14,11 @@ class SchemeCapacityHelper
     {
         /*
         |--------------------------------------------------------------------------
-        | PRIORITY MAP (Order Matters)
-        |--------------------------------------------------------------------------
-        */
-        $modelPriority = [
-            'created_by_local_body_code'  => Block::class,
-            'created_by_subdivision_code' => Subdivision::class,
-            'created_by_dist_code'        => District::class,
-        ];
-
-        /*
-        |--------------------------------------------------------------------------
         | BASE QUERY
         |--------------------------------------------------------------------------
         */
         $baseQuery = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
             ->where('next_level_role_id', $actionType);
-
-        /*
-        |--------------------------------------------------------------------------
-        | LOOP THROUGH PRIORITY MODELS
-        |--------------------------------------------------------------------------
-        */
-        foreach ($modelPriority as $key => $modelClass) {
-
-            if (empty($filterData[$key])) {
-                continue;
-            }
-
-            $model = $modelClass::with([
-                'capacities' => fn($q) => $q->active()
-                    ->where('scheme_id', $schemeId)
-                    ->where('action_type', $actionType)
-            ])->find($filterData[$key]);
-
-            if (!$model || $model->capacities->isEmpty()) {
-                continue;
-            }
-
-            $capacity = $model->capacities->first();
-
-            $column = $modelClass::BENEFICIARY_LOCATION_COLUMN;
-
-            $count = (clone $baseQuery)
-                ->where($column, $filterData[$key])
-                ->count();
-
-            if ($count >= $capacity->total_capacity) {
-
-                return [
-                    'model'     => class_basename($modelClass),
-                    'location'  => $filterData[$key],
-                    'total'     => $capacity->total_capacity,
-                    'processed' => $count,
-                    'remaining' => 0,
-                ];
-            }
-
-            // If found but not full, stop checking lower levels
-            return true;
-        }
-
         /*
         |--------------------------------------------------------------------------
         | FULL SCHEME FALLBACK
@@ -85,17 +29,12 @@ class SchemeCapacityHelper
                 ->where('scheme_id', $schemeId)
                 ->where('action_type', $actionType)
         ])->find($schemeId);
-
         if ($scheme && $scheme->capacities->isNotEmpty()) {
-
             $capacity = $scheme->capacities->first();
-
             $count = $baseQuery->count();
-
             if ($count >= $capacity->total_capacity) {
-
                 return [
-                    'level'     => 'Scheme',
+                    'model'     => 'Scheme',
                     'location'  => null,
                     'total'     => $capacity->total_capacity,
                     'processed' => $count,
@@ -103,7 +42,51 @@ class SchemeCapacityHelper
                 ];
             }
         }
+        /*
+        |--------------------------------------------------------------------------
+        | PRIORITY MAP (Order Matters)
+        |--------------------------------------------------------------------------
+        */
+        $modelPriority = [
+            'created_by_local_body_code'  => Block::class,
+            'created_by_subdivision_code' => Subdivision::class,
+            'created_by_dist_code'        => District::class,
+        ];
+        /*
+        |--------------------------------------------------------------------------
+        | LOOP THROUGH PRIORITY MODELS
+        |--------------------------------------------------------------------------
+        */
+        foreach ($modelPriority as $key => $modelClass) {
 
+            if (empty($filterData[$key])) {
+                continue;
+            }
+            $model = $modelClass::with([
+                'capacities' => fn($q) => $q->active()
+                    ->where('scheme_id', $schemeId)
+                    ->where('action_type', $actionType)
+            ])->find($filterData[$key]);
+            if (!$model || $model->capacities->isEmpty()) {
+                continue;
+            }
+            $capacity = $model->capacities->first();
+            $column = $modelClass::BENEFICIARY_LOCATION_COLUMN;
+            $count = (clone $baseQuery)
+                ->where($column, $filterData[$key])
+                ->count();
+            if ($count >= $capacity->total_capacity) {
+                return [
+                    'model'     => class_basename($modelClass),
+                    'location'  => $filterData[$key],
+                    'total'     => $capacity->total_capacity,
+                    'processed' => $count,
+                    'remaining' => 0,
+                ];
+            }
+            // If found but not full, stop checking lower levels
+            return true;
+        }
         return true;
     }
 }

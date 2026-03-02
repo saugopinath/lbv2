@@ -29,4 +29,8 @@ class Subdivision extends Model
     {
         return $this->hasMany(Municipality::class);
     }
+    public function capacities()
+    {
+        return $this->morphMany(SchemeCapacity::class, 'modelable', 'model_type', 'model_id');
+    }
 }
