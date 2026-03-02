@@ -14,7 +14,9 @@ class PageVisitlog
 {
     public function handle(Request $request, Closure $next)
     {
-
+        if (!Auth::check()) {
+            return $next($request);
+        }
         // ✅ Skip spam requests
         if (
             $request->is('livewire/*') ||
@@ -27,9 +29,7 @@ class PageVisitlog
         ) {
             return $next($request);
         }
-
         $response = $next($request);
-
         try {
             $agent = new Agent();
             $browser = $agent->browser();
