@@ -328,4 +328,8 @@ class WorkFlowPermissionHelper
         return Auth::user()->can('master-tab')
             || Auth::user()->can('role-rank-management') || Auth::user()->can('define-workflow');
     }
+    public static function canSchemeCapacitySetting(): bool
+    {
+        return Auth::user()->can('scheme-capacity-setting');
+    }
 }
