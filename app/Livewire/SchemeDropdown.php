@@ -64,20 +64,18 @@ class SchemeDropdown extends Component
         if ($this->currentRoute !== 'schemes.final-submitted') {
             return;
         }
-
         $filter = $this->getFilterData();
-
         $result = SchemeCapacityHelper::check(
             $value,
-            0,
-            $filter
+            0
         );
+        // dd($result);
         if (is_array($result)) {
 
             $msg = "{$result['model']} capacity full. 
-            Total: {$result['total']} 
-            Processed: {$result['processed']} 
-            Remaining: {$result['remaining']}";
+            Total: {$result['total_capacity']} 
+            Processed: {$result['already_entered']} 
+            Remaining: {$result['remaining_capacity']}";
 
             $this->dispatch('toastr', [
                 'type' => 'error',
