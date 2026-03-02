@@ -21,6 +21,9 @@
 
     <!-- Alpine.js local -->
     <!-- <script src="{{ asset('js/alpine.min.js') }}" defer></script> -->
+
+    <!-- Chart.js for Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body x-data="$store.app" class="bg-[#def0f4] dark:bg-gray-900 text-black dark:text-white">
