@@ -27,36 +27,37 @@ class SchemeCapacityHelper
             }
         }
     }
-    public static function check($schemeId, $actionType, $entryType = null)
+    public static function check($schemeId, $actionType, $entryType = 0)
     {
         self::initFilters();
-        $entryType = $entryType ?? 0;
-        $schemeResult = self::checkScheme($schemeId, $actionType, $entryType);
+        $entryTypeArr = ($entryType == 0) ? [1, 2] : [(int)$entryType];
+        $schemeResult = self::checkScheme($schemeId, $actionType, $entryType, $entryTypeArr);
         if (!$schemeResult['is_processed']) {
             return $schemeResult;
         }
         if (!empty(self::$filters['district_id'])) {
-            $districtResult = self::checkDist($schemeId, $actionType, $entryType);
+            $districtResult = self::checkDist($schemeId, $actionType, $entryType, $entryTypeArr);
             if (!$districtResult['is_processed']) {
                 return $districtResult;
             }
         }
         if (!empty(self::$filters['block_id']) || !empty(self::$filters['subdivision_id'])) {
-            $blockSubResult = self::checkBlockSub($schemeId, $actionType, $entryType);
+            $blockSubResult = self::checkBlockSub($schemeId, $actionType, $entryType, $entryTypeArr);
             if (!$blockSubResult['is_processed']) {
                 return $blockSubResult;
             }
         }
     }
 
-    public static function checkScheme($schemeId, $actionType, $entryType)
+    public static function checkScheme($schemeId, $actionType, $entryType, $entryTypeArr)
     {
         $scheme = Scheme::with(['capacities' => function ($q) use ($schemeId, $actionType, $entryType) {
             $q->active()
                 ->where('model_id', $schemeId)
                 ->where('action_type', $actionType)
-                ->when($entryType, function ($query) use ($entryType) {
-                    return $query->where('entry_type', $entryType);
+                ->where(function ($query) use ($entryType) {
+                    $query->where('entry_type', $entryType)
+                        ->orWhere('entry_type', 0);
                 });
         }])->find($schemeId);
         $capacityRecord = $scheme->capacities->first();
@@ -65,8 +66,8 @@ class SchemeCapacityHelper
             if ($total_capacity) {
                 $count = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
                     ->whereIn('is_clean', [1, 2])
-                    ->when($entryType, function ($query) use ($entryType) {
-                        return $query->where('application_type', $entryType);
+                    ->when($entryTypeArr, function ($query) use ($entryTypeArr) {
+                        return $query->whereIn('application_type', $entryTypeArr);
                     })->count();
                 if ($total_capacity > $count) {
                     return [
@@ -93,7 +94,7 @@ class SchemeCapacityHelper
         }
     }
 
-    public static function checkDist($schemeId, $actionType, $entryType)
+    public static function checkDist($schemeId, $actionType, $entryType, $entryTypeArr)
     {
         $currentFilters = self::$filters;
         $district = District::with(['capacities' => function ($q) use ($schemeId, $actionType, $currentFilters, $entryType) {
@@ -101,8 +102,9 @@ class SchemeCapacityHelper
                 ->where('scheme_id', $schemeId)
                 ->where('model_id', $currentFilters['district_id'])
                 ->where('action_type', $actionType)
-                ->when($entryType, function ($query) use ($entryType) {
-                    return $query->where('entry_type', $entryType);
+                ->where(function ($query) use ($entryType) {
+                    $query->where('entry_type', $entryType)
+                        ->orWhere('entry_type', 0);
                 });
         }])->find($currentFilters['district_id']);
         $distcapacityRecord = $district->capacities->first();
@@ -112,8 +114,8 @@ class SchemeCapacityHelper
                 $count = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
                     ->where('created_by_dist_code', $currentFilters['district_id'])
                     ->whereIn('is_clean', [1, 2])
-                    ->when($entryType, function ($query) use ($entryType) {
-                        return $query->where('application_type', $entryType);
+                    ->when($entryTypeArr, function ($query) use ($entryTypeArr) {
+                        return $query->whereIn('application_type', $entryTypeArr);
                     })->count();
                 if ($total_capacity > $count) {
                     return [
@@ -140,7 +142,7 @@ class SchemeCapacityHelper
         }
     }
 
-    public static function checkBlockSub($schemeId, $actionType, $entryType)
+    public static function checkBlockSub($schemeId, $actionType, $entryType, $entryTypeArr)
     {
         $currentFilters = self::$filters;
         if ($currentFilters['block_id']) {
@@ -156,8 +158,9 @@ class SchemeCapacityHelper
                 ->where('scheme_id', $schemeId)
                 ->where('model_id', $model_id)
                 ->where('action_type', $actionType)
-                ->when($entryType, function ($query) use ($entryType) {
-                    return $query->where('entry_type', $entryType);
+                ->where(function ($query) use ($entryType) {
+                    $query->where('entry_type', $entryType)
+                        ->orWhere('entry_type', 0);
                 });
         }])->find($model_id);
         $BlockSubRecord = $BlockSub->capacities->first();
@@ -168,8 +171,8 @@ class SchemeCapacityHelper
                     ->where('created_by_dist_code', $currentFilters['district_id'])
                     ->where('created_by_local_body_code', $model_id)
                     ->whereIn('is_clean', [1, 2])
-                    ->when($entryType, function ($query) use ($entryType) {
-                        return $query->where('application_type', $entryType);
+                    ->when($entryTypeArr, function ($query) use ($entryTypeArr) {
+                        return $query->whereIn('application_type', $entryTypeArr);
                     })->count();
                 if ($total_capacity > $count) {
                     return [

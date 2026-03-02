@@ -67,7 +67,8 @@ class SchemeDropdown extends Component
         $filter = $this->getFilterData();
         $result = SchemeCapacityHelper::check(
             $value,
-            0
+            0,
+            1
         );
         // dd($result);
         if (is_array($result)) {
