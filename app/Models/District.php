@@ -46,4 +46,8 @@ class District extends Model
             'id'
         );
     }
+    public function capacities()
+    {
+        return $this->morphMany(SchemeCapacity::class, 'modelable', 'model_type', 'model_id');
+    }
 }

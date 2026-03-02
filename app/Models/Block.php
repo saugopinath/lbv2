@@ -24,4 +24,8 @@ public const BENEFICIARY_LOCATION_COLUMN = 'created_by_local_body_code';
     {
         return $this->hasMany(Panchayat::class);
     }
+    public function capacities()
+    {
+        return $this->morphMany(SchemeCapacity::class, 'modelable', 'model_type', 'model_id');
+    }
 }

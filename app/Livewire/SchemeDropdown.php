@@ -44,7 +44,6 @@ class SchemeDropdown extends Component
                 $this->schemeId = Crypt::decryptString($scheme_id);
 
                 $this->schemeName = Scheme::where('id', $this->schemeId)->value('name');
-
             } catch (\Exception $e) {
 
                 $this->schemeId = null;
@@ -56,8 +55,10 @@ class SchemeDropdown extends Component
 
     public function updatedSchemeId($value)
     {
-        $scheme = Scheme::find($value);
-
+        $scheme = Scheme::with([
+            'capacities' => fn($q) => $q->active()
+        ])->find($value);
+        // dd($scheme->capacities->first()->total_capacity);
         $this->schemeName = $scheme?->name;
 
         if ($this->currentRoute !== 'schemes.final-submitted') {
@@ -71,7 +72,6 @@ class SchemeDropdown extends Component
             0,
             $filter
         );
-
         if (is_array($result)) {
 
             $msg = "{$result['model']} capacity full. 
