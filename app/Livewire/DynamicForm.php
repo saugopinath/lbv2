@@ -83,9 +83,9 @@ class DynamicForm extends Component
 
     public $maxDOB;
 
-    public $isEdit;
+    public $isEdit = false;
 
-    public $actionType = 1;
+    public $actionType = 0;
 
     protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
@@ -110,7 +110,7 @@ class DynamicForm extends Component
         }
         $this->schemeId = $schemeId;
         $this->schemeName = $schemeName;
-        $this->heading = 'Government Of West Bengal '.$this->schemeName.' Scheme';
+        $this->heading = 'Government Of West Bengal ' . $this->schemeName . ' Scheme';
         $this->ram = $ram;
         $this->form_preview = $form_preview;
         $this->applicationId = $applicationId;
@@ -156,22 +156,26 @@ class DynamicForm extends Component
 
     private function checkCapacity(): bool
     {
+        // dd($this->isEdit);
+        if ($this->isEdit || !empty($this->applicationId)) {
+            return true;
+        }
         $result = SchemeCapacityHelper::check(
             $this->schemeId,
             $this->actionType,
-            $this->filter_data
+            $this->formData['application_type']
         );
-
         if (is_array($result)) {
-
+            $msg = "{$result['model']} capacity full. 
+            Total: {$result['total_capacity']} 
+            Processed: {$result['already_entered']} 
+            Remaining: {$result['remaining_capacity']}";
             $this->dispatch('toastr', [
                 'type' => 'error',
-                'message' => $result['message'],
+                'message' => $msg,
             ]);
-
             return false;
         }
-
         return true;
     }
 
@@ -399,15 +403,16 @@ class DynamicForm extends Component
         if (! empty($rules)) {
             $this->validate($rules);
         }
+        // Capacity check
+        if (! $this->checkCapacity()) {
+            return;
+        }
         $this->ensureApplicationIds();
 
         if (! $this->checkDuplicateEntries()) {
             return;
         }
-        // Capacity check
-        if (! $this->checkCapacity()) {
-            return;
-        }
+        
         $saved = $this->saveCurrentTabData();
 
         if ($saved !== true) {
@@ -643,7 +648,7 @@ class DynamicForm extends Component
         $columns = Cache::remember(
             "Schema_columns_$tableName",
             86400,
-            fn () => Schema::getColumnListing($tableName)
+            fn() => Schema::getColumnListing($tableName)
         );
 
         $extraFields = [
@@ -674,11 +679,11 @@ class DynamicForm extends Component
                     ->where('scheme_id', $this->schemeId)
                     ->update($dbData);
                 if ($updated) {
-                    $this->navMessage = 'Application updated successfully! ID: '.$this->applicationId;
+                    $this->navMessage = 'Application updated successfully! ID: ' . $this->applicationId;
                     $this->navMessageType = 'success';
                     $this->dispatch('toastr', [
                         'type' => 'success',
-                        'message' => 'Application updated successfully. Application ID: '.$this->applicationId,
+                        'message' => 'Application updated successfully. Application ID: ' . $this->applicationId,
                     ]);
                     DB::commit();
 
@@ -723,12 +728,12 @@ class DynamicForm extends Component
                     if ($this->isFirst) {
                         if ($AcceptRejectInfo) {
                             DB::commit();
-                            $this->navMessage = 'Application created successfully! ID: '.$this->applicationId;
+                            $this->navMessage = 'Application created successfully! ID: ' . $this->applicationId;
                             $this->navMessageType = 'success';
 
                             $this->dispatch('toastr', [
                                 'type' => 'success',
-                                'message' => 'Application created successfully. Application ID: '.$this->applicationId,
+                                'message' => 'Application created successfully. Application ID: ' . $this->applicationId,
                             ]);
 
                             return true;
@@ -743,11 +748,11 @@ class DynamicForm extends Component
                         }
                     } else {
                         DB::commit();
-                        $this->navMessage = 'Application created successfully! ID: '.$this->applicationId;
+                        $this->navMessage = 'Application created successfully! ID: ' . $this->applicationId;
                         $this->navMessageType = 'success';
                         $this->dispatch('toastr', [
                             'type' => 'success',
-                            'message' => 'Application created successfully. Application ID: '.$this->applicationId,
+                            'message' => 'Application created successfully. Application ID: ' . $this->applicationId,
                         ]);
 
                         return true;
@@ -762,7 +767,6 @@ class DynamicForm extends Component
                     return false;
                 }
             }
-
         } catch (Throwable $e) {
             // dd($e);
             DB::rollBack();
