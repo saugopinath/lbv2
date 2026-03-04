@@ -8,10 +8,13 @@ use App\Models\Scheme;
 use App\Models\Subdivision;
 use Illuminate\Support\Facades\Crypt;
 use Exception;
+use App\Services\WorkflowService;
 
 class SchemeCapacityHelper
 {
     protected static $filters = [];
+    protected static $nextLabelRoleIds = [];
+    protected static $nextLabelRoleId;
     private static function initFilters()
     {
         if (!empty(self::$filters)) return;
@@ -27,9 +30,27 @@ class SchemeCapacityHelper
             }
         }
     }
+
+    private static function initIds($schemeId)
+    {
+        $workflowService = app(WorkflowService::class);
+        $labelRoles = $workflowService->getLabelRoles($schemeId);
+        if ($labelRoles) {
+            self::$nextLabelRoleId = $labelRoles->next_label_role_id;
+        }
+    }
+
     public static function check($schemeId, $actionType, $entryType = 0)
     {
+        if ($actionType == 0) {
+            self::$nextLabelRoleIds = [0, 1, 2, -$schemeId];
+        } elseif ($actionType == 1) {
+            self::$nextLabelRoleIds = [1, 2];
+        } elseif ($actionType == 2) {
+            self::$nextLabelRoleIds = [2];
+        }
         self::initFilters();
+        // self::initIds($schemeId);
         $entryTypeArr = ($entryType == 0) ? [1, 2] : [(int)$entryType];
         $schemeResult = self::checkScheme($schemeId, $actionType, $entryType, $entryTypeArr);
         if (!$schemeResult['is_processed']) {
@@ -68,6 +89,7 @@ class SchemeCapacityHelper
         if ($total_capacity > 0) {
             $count = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
                 ->whereIn('is_clean', [1, 2])
+                ->whereIn('next_level_role_id', self::$nextLabelRoleIds)
                 ->when($entryTypeArr, function ($query) use ($entryTypeArr) {
                     return $query->whereIn('application_type', $entryTypeArr);
                 })->count();
@@ -121,6 +143,7 @@ class SchemeCapacityHelper
             $count = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
                 ->where('created_by_dist_code', $districtId)
                 ->whereIn('is_clean', [1, 2])
+                ->whereIn('next_level_role_id', self::$nextLabelRoleIds)
                 ->when($entryTypeArr, function ($query) use ($entryTypeArr) {
                     return $query->whereIn('application_type', $entryTypeArr);
                 })->count();
@@ -184,6 +207,7 @@ class SchemeCapacityHelper
                 ->where('created_by_dist_code', $currentFilters['district_id'] ?? null)
                 ->where('created_by_local_body_code', $model_id)
                 ->whereIn('is_clean', [1, 2])
+                ->whereIn('next_level_role_id', self::$nextLabelRoleIds)
                 ->when($entryTypeArr, function ($query) use ($entryTypeArr) {
                     return $query->whereIn('application_type', $entryTypeArr);
                 })->count();

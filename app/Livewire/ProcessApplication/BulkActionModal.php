@@ -146,49 +146,48 @@ class BulkActionModal extends Component
 
         // ✅ CAPACITY CHECK START
         // dd($this->nextLabelRoleId,$this->sameLabelRoleId);
-        $result = null;
+        // $result = null;
 
-        if ($this->bulkActionType === 'V') {
+        // if ($this->bulkActionType === 'V') {
 
-            $result = SchemeCapacityHelper::check(
-                $this->schemeId,
-                $this->nextLabelRoleId,
-                $this->filter_data
-            );
+        //     $result = SchemeCapacityHelper::check(
+        //         $this->schemeId,
+        //         $this->nextLabelRoleId,
+        //         $this->filter_data
+        //     );
+        // }
 
-        }
+        // if ($this->bulkActionType === 'A') {
 
-        if ($this->bulkActionType === 'A') {
+        //     $result = SchemeCapacityHelper::check(
+        //         $this->schemeId,
+        //         $this->nextLabelRoleId,
+        //         $this->filter_data
+        //     );
+        // }
+        // dd($result);
+        // if (is_array($result)) {
 
-            $result = SchemeCapacityHelper::check(
-                $this->schemeId,
-                $this->nextLabelRoleId,
-                $this->filter_data
-            );
+        //     $msg = "{$result['model']} capacity full. 
+        //     Total: {$result['total']} 
+        //     Processed: {$result['processed']} 
+        //     Remaining: {$result['remaining']}";
 
-        }
-// dd($result);
-        if (is_array($result)) {
-
-            $msg = "{$result['model']} capacity full. 
-            Total: {$result['total']} 
-            Processed: {$result['processed']} 
-            Remaining: {$result['remaining']}";
-
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => $msg,
-            ]);  
-            return;       
-        }
+        //     $this->dispatch('toastr', [
+        //         'type' => 'error',
+        //         'message' => $msg,
+        //     ]);
+        //     return;
+        // }
 
         // ✅ CAPACITY CHECK END
         $approverRoleId = Codemaster::getIdByCode(23);
-
         $ids = (array) $this->applicationId;
         if ($this->bulkActionType === 'V') {
             foreach ($ids as $id) {
-
+                if (! $this->checkCapacity()) {
+                    return;
+                }
                 DB::beginTransaction();
                 try {
                     BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->update([
@@ -222,6 +221,9 @@ class BulkActionModal extends Component
             }
         } elseif ($this->bulkActionType === 'A') {
             foreach ($ids as $id) {
+                if (! $this->checkCapacity()) {
+                    return;
+                }
                 DB::beginTransaction();
                 try {
                     BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->update([
@@ -345,9 +347,27 @@ class BulkActionModal extends Component
         return redirect()->route('lb-application-list', [
             'scheme_id' => Crypt::encryptString($this->schemeId),
         ]);
-
     }
-
+    private function checkCapacity(): bool
+    {
+        $result = SchemeCapacityHelper::check(
+            $this->schemeId,
+            $this->nextLabelRoleId,
+            $this->entryType
+        );
+        if (is_array($result)) {
+            $msg = "{$result['model']} capacity full. 
+            Total: {$result['total_capacity']} 
+            Processed: {$result['already_entered']} 
+            Remaining: {$result['remaining_capacity']}";
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => $msg,
+            ]);
+            return false;
+        }
+        return true;
+    }
     public function render()
     {
         return view('livewire.process-application.bulk-action-modal');

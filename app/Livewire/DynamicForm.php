@@ -86,7 +86,7 @@ class DynamicForm extends Component
 
     public $isEdit = false;
 
-    public $actionType;
+    public $actionType = 0;
 
     protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
@@ -96,7 +96,7 @@ class DynamicForm extends Component
     ];
     /* ================= MOUNT ================= */
 
-    public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null,WorkflowService $workflowService)
+    public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null)
     {
 
         if (! WorkFlowPermissionHelper::canCreateEntry()) {
@@ -140,11 +140,12 @@ class DynamicForm extends Component
                 $this->maxDOB = now()->subYears($ageConfig['min_age'])->format('Y-m-d');
             }
         }
-        $map = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->schemeId)['min'];
-        $labelRoles = $workflowService->getLabelRoles($map);
-        if ($labelRoles) {
-            $this->actionType = $labelRoles->next_label_role_id;
-        }
+        // ,WorkflowService $workflowService
+        // $map = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->schemeId)['min'];
+        // $labelRoles = $workflowService->getLabelRoles($map);
+        // if ($labelRoles) {
+        //     $this->actionType = $labelRoles->next_label_role_id;
+        // }
         $select_lgd = session('lgd_session');
         // dd($select_lgd);
         if (! empty($select_lgd['district_id'])) {
