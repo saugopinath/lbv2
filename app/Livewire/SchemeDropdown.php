@@ -61,31 +61,31 @@ class SchemeDropdown extends Component
         // dd($scheme->capacities->first()->total_capacity);
         $this->schemeName = $scheme?->name;
 
-        if ($this->currentRoute !== 'schemes.final-submitted') {
-            return;
-        }
-        $filter = $this->getFilterData();
-        $result = SchemeCapacityHelper::check(
-            $value,
-            0,
-            1
-        );
+        // if ($this->currentRoute !== 'schemes.final-submitted') {
+        //     return;
+        // }
+        // $filter = $this->getFilterData();
+        // $result = SchemeCapacityHelper::check(
+        //     $value,
+        //     0,
+        //     1
+        // );
         // dd($result);
-        if (is_array($result)) {
+        // if (is_array($result)) {
 
-            $msg = "{$result['model']} capacity full. 
-            Total: {$result['total_capacity']} 
-            Processed: {$result['already_entered']} 
-            Remaining: {$result['remaining_capacity']}";
+        //     $msg = "{$result['model']} capacity full. 
+        //     Total: {$result['total_capacity']} 
+        //     Processed: {$result['already_entered']} 
+        //     Remaining: {$result['remaining_capacity']}";
 
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => $msg,
-            ]);
+        //     $this->dispatch('toastr', [
+        //         'type' => 'error',
+        //         'message' => $msg,
+        //     ]);
 
-            $this->schemeId = null;
-            $this->schemeName = null;
-        }
+        //     $this->schemeId = null;
+        //     $this->schemeName = null;
+        // }
     }
 
     private function getFilterData()
