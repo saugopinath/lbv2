@@ -13,6 +13,7 @@ use App\Models\BeneficiaryPersonalDetail;
 use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
 use App\Models\UniqueAppBenId;
+use App\Models\WorkflowsteproleMapping;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -22,7 +23,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
 use Throwable;
-
+use App\Services\WorkflowService;
 class DynamicForm extends Component
 {
     public $schemeId;
@@ -85,7 +86,7 @@ class DynamicForm extends Component
 
     public $isEdit = false;
 
-    public $actionType = 0;
+    public $actionType;
 
     protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
@@ -95,7 +96,7 @@ class DynamicForm extends Component
     ];
     /* ================= MOUNT ================= */
 
-    public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null)
+    public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null,WorkflowService $workflowService)
     {
 
         if (! WorkFlowPermissionHelper::canCreateEntry()) {
@@ -139,6 +140,11 @@ class DynamicForm extends Component
                 $this->maxDOB = now()->subYears($ageConfig['min_age'])->format('Y-m-d');
             }
         }
+        $map = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->schemeId)['min'];
+        $labelRoles = $workflowService->getLabelRoles($map);
+        if ($labelRoles) {
+            $this->actionType = $labelRoles->next_label_role_id;
+        }
         $select_lgd = session('lgd_session');
         // dd($select_lgd);
         if (! empty($select_lgd['district_id'])) {
@@ -156,7 +162,8 @@ class DynamicForm extends Component
 
     private function checkCapacity(): bool
     {
-        // dd($this->isEdit);
+        
+        // dd($this->actionType);
         if ($this->isEdit || !empty($this->applicationId)) {
             return true;
         }
