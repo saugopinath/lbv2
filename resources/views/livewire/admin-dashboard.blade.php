@@ -14,7 +14,7 @@
         <!-- Total Users -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border-b-4 border-blue-500 hover:shadow-md transition-shadow duration-300">
             <div class="flex justify-between items-start mb-2">
-                <span class="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-wider">Total Users</span>
+                <span class="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-wider">Total Active Users</span>
                 <div class="p-1.5 bg-blue-50 rounded-lg">
                     <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -27,14 +27,14 @@
         <!-- Active Users -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border-b-4 border-emerald-500 hover:shadow-md transition-shadow duration-300">
             <div class="flex justify-between items-start mb-2">
-                <span class="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-wider">Active Users</span>
+                <span class="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-wider">Online Users</span>
                 <div class="p-1.5 bg-emerald-50 rounded-lg">
                     <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                 </div>
             </div>
-            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['active_users']) }}</div>
+            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['online_users']) }}</div>
         </div>
 
         <!-- Avg Engagement -->
@@ -137,58 +137,10 @@
         </div>
     </div>
 
-    <!-- Recent Activity Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-bold text-gray-800 dark:text-white uppercase tracking-wider">Recent Activity</h3>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left">
-                <thead class="bg-gray-50 dark:bg-gray-700 text-gray-400 uppercase text-xs font-bold tracking-widest">
-                    <tr>
-                        <th class="px-6 py-4">User</th>
-                        <th class="px-6 py-4">Visit Time</th>
-                        <th class="px-6 py-4">Device / Browser</th>
-                        <th class="px-6 py-4">Page accessed</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                    @forelse($recentActivity as $log)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                        <td class="px-6 py-4">
-                            <div class="flex flex-col">
-                                <span class="font-bold text-gray-900 dark:text-white">{{ $log->User->name ?? 'System' }}</span>
-                                <span class="text-xs text-gray-400 font-mono">{{ $log->User->email ?? 'N/A' }}</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-                            {{ \Carbon\Carbon::parse($log->visit_time)->format('M d, Y, h:i:s A') }}
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex space-x-2">
-                                <span class="px-2.5 py-1 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-bold rounded-full">
-                                    {{ $log->platform }}
-                                </span>
-                                <span class="px-2.5 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-full">
-                                    {{ $log->browser }}
-                                </span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 max-w-[220px]">
-                            <span class="inline-block max-w-full px-2.5 py-1 bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300 text-xs font-bold rounded-full truncate whitespace-nowrap overflow-hidden" title="{{ $log->url }}">
-                                {{ Str::afterLast($log->url, '/') ?: 'Home' }}
-                            </span>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="px-6 py-10 text-center text-gray-400">No recent activity detected</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+
+
+    <!-- Daily User Activity Section -->
+    <livewire:daily-user-activity />
 
     <!-- Chart Scripts -->
     @push('scripts')

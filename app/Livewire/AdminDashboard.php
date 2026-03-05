@@ -8,6 +8,7 @@ use App\Models\Scheme;
 use App\Models\UserPageVisitLog;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Spatie\Activitylog\Models\Activity;
 
 class AdminDashboard extends Component
 {
@@ -27,23 +28,21 @@ class AdminDashboard extends Component
     public function loadStats()
     {
         $this->stats = [
-            'total_users' => User::count(),
-            'active_users' => DB::table('audits')->where('event', 'login')->distinct('user_id')->count(),
-            'avg_engagement' => '657.8%', // Placeholder as per design or calculate if possible
+            'total_users' => User::where('is_active', 1)->count(),
+            'online_users' => User::where('is_login', 1)->count(),
+            'avg_engagement' => '657.8%',
             'new_users_30d' => User::where('created_at', '>=', Carbon::now()->subDays(30))->count(),
             'modules_onboarded' => Scheme::count(),
-            'total_admins' => User::role('Super Admin')->count() ?? 0, // Adjust based on your role naming
+            'total_admins' => User::role('Super Admin')->count() ?? 0,
         ];
 
-        // Fallback for total_admins if role doesn't exist
         if ($this->stats['total_admins'] == 0) {
-            $this->stats['total_admins'] = DB::table('model_has_roles')->where('role_id', 1)->count(); // Assuming 1 is superadmin/admin
+            $this->stats['total_admins'] = DB::table('model_has_roles')->where('role_id', 1)->count();
         }
     }
 
     public function loadChartData()
     {
-        // Device Data (Pie/Donut)
         $devices = UserPageVisitLog::select('platform', DB::raw('count(*) as total'))
             ->groupBy('platform')
             ->orderBy('total', 'desc')
@@ -55,7 +54,6 @@ class AdminDashboard extends Component
             'data' => $devices->pluck('total')->toArray(),
         ];
 
-        // Browser Data (Pie/Donut)
         $browsers = UserPageVisitLog::select('browser', DB::raw('count(*) as total'))
             ->groupBy('browser')
             ->orderBy('total', 'desc')
@@ -67,7 +65,6 @@ class AdminDashboard extends Component
             'data' => $browsers->pluck('total')->toArray(),
         ];
 
-        // Hourly Activity (Line Chart - Last 24 hours)
         $visits = UserPageVisitLog::select(DB::raw('extract(hour from visit_time) as hour'), DB::raw('count(*) as total'))
             ->where('visit_time', '>=', Carbon::now()->subDay())
             ->groupBy('hour')
@@ -92,7 +89,6 @@ class AdminDashboard extends Component
     {
         $this->recentActivity = UserPageVisitLog::with('User')
             ->orderBy('visit_time', 'desc')
-            ->take(10)
             ->get();
     }
 

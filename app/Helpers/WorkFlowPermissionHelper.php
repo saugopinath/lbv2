@@ -320,7 +320,7 @@ class WorkFlowPermissionHelper
     }
     public static function canDefineWorkflow(): bool
     {
-        return Auth::user()->can('define-workflow');
+        return Auth::user() && Auth::user()->can('define-workflow');
     }
 
     public static function canSchemeOnboard(): bool

@@ -47,7 +47,7 @@ class PageVisitlog
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),
                 'referrer' => $request->headers->get('referer'),
-
+                'session_id' => $request->session()->getId(),
             ]);
         } catch (\Exception $e) {
 

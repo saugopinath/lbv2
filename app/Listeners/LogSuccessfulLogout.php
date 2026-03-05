@@ -17,7 +17,7 @@ class LogSuccessfulLogout
 
         $sessionId = session()->getId();
 
-        $exists = Activity::where('properties->session_id', $sessionId)
+        $exists = Activity::where('session_id', $sessionId)
             ->where('event', 'logout')
             ->exists();
 
@@ -42,8 +42,12 @@ class LogSuccessfulLogout
                 'is_mobile' => $agent->isMobile(),
                 'is_desktop' => $agent->isDesktop(),
                 'session_id' => $sessionId,
+                'reason' => 'manual_logout',
                 'logout_time' => now(),
             ])
             ->log("{$user->name} logged out");
+        $UpdateUser = User::where('id', $user->id)->update([
+            'is_login' => 0,
+        ]);
     }
 }
