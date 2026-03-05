@@ -6,6 +6,7 @@ use App\Models\BeneficiaryPersonalDetail;
 use App\Models\District;
 use App\Models\Scheme;
 use App\Models\Subdivision;
+use App\Models\WorkflowsteproleMapping;
 use Illuminate\Support\Facades\Crypt;
 use Exception;
 use App\Services\WorkflowService;
@@ -42,13 +43,16 @@ class SchemeCapacityHelper
 
     public static function check($schemeId, $actionType, $entryType = 0, $bencreatAdd = null)
     {
+        $map = WorkflowsteproleMapping::getMinMaxWorkflowStep($schemeId)['max'];
+        $workflowService = app(WorkflowService::class);
+        $labelRoles = $workflowService->getLabelRoles($schemeId, $map);
         // if ($actionType == 0) {
         //     self::$nextLabelRoleIds = [0, 1, 2, -$schemeId];
         // } else
         if ($actionType == 1) {
-            self::$nextLabelRoleIds = [1, 2];
+            self::$nextLabelRoleIds = [$labelRoles->same_label_role_id, $labelRoles->next_label_role_id];
         } elseif ($actionType == 2) {
-            self::$nextLabelRoleIds = [2];
+            self::$nextLabelRoleIds = [$labelRoles->next_label_role_id];
         }
         self::initFilters();
         // self::initIds($schemeId);
