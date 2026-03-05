@@ -42,9 +42,10 @@ class SchemeCapacityHelper
 
     public static function check($schemeId, $actionType, $entryType = 0, $bencreatAdd = null)
     {
-        if ($actionType == 0) {
-            self::$nextLabelRoleIds = [0, 1, 2, -$schemeId];
-        } elseif ($actionType == 1) {
+        // if ($actionType == 0) {
+        //     self::$nextLabelRoleIds = [0, 1, 2, -$schemeId];
+        // } else
+        if ($actionType == 1) {
             self::$nextLabelRoleIds = [1, 2];
         } elseif ($actionType == 2) {
             self::$nextLabelRoleIds = [2];
@@ -89,7 +90,9 @@ class SchemeCapacityHelper
         if ($total_capacity > 0) {
             $count = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
                 ->whereIn('is_clean', [1, 2])
-                ->whereIn('next_level_role_id', self::$nextLabelRoleIds)
+                ->when(self::$nextLabelRoleIds, function ($query, $roles) {
+                    return $query->whereIn('next_level_role_id', $roles);
+                })
                 ->when($entryTypeArr, function ($query) use ($entryTypeArr) {
                     return $query->whereIn('application_type', $entryTypeArr);
                 })->count();
@@ -147,7 +150,9 @@ class SchemeCapacityHelper
             $count = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
                 ->where('created_by_dist_code', $districtId)
                 ->whereIn('is_clean', [1, 2])
-                ->whereIn('next_level_role_id', self::$nextLabelRoleIds)
+                ->when(self::$nextLabelRoleIds, function ($query, $roles) {
+                    return $query->whereIn('next_level_role_id', $roles);
+                })
                 ->when($entryTypeArr, function ($query) use ($entryTypeArr) {
                     return $query->whereIn('application_type', $entryTypeArr);
                 })->count();
@@ -221,7 +226,9 @@ class SchemeCapacityHelper
                 ->where('created_by_dist_code', $districtId)
                 ->where('created_by_local_body_code', $model_id)
                 ->whereIn('is_clean', [1, 2])
-                ->whereIn('next_level_role_id', self::$nextLabelRoleIds)
+                ->when(self::$nextLabelRoleIds, function ($query, $roles) {
+                    return $query->whereIn('next_level_role_id', $roles);
+                })
                 ->when($entryTypeArr, function ($query) use ($entryTypeArr) {
                     return $query->whereIn('application_type', $entryTypeArr);
                 })->count();
