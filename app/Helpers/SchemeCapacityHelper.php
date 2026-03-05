@@ -40,7 +40,7 @@ class SchemeCapacityHelper
         }
     }
 
-    public static function check($schemeId, $actionType, $entryType = 0, $bencreatAdd = [])
+    public static function check($schemeId, $actionType, $entryType = 0, $bencreatAdd = null)
     {
         if ($actionType == 0) {
             self::$nextLabelRoleIds = [0, 1, 2, -$schemeId];
@@ -57,16 +57,16 @@ class SchemeCapacityHelper
             return $schemeResult;
         }
         // if (!empty(self::$filters['district_id'])) {
-            $districtResult = self::checkDist($schemeId, $actionType, $entryType, $entryTypeArr, $bencreatAdd);
-            if (!$districtResult['is_processed']) {
-                return $districtResult;
-            }
+        $districtResult = self::checkDist($schemeId, $actionType, $entryType, $entryTypeArr, $bencreatAdd);
+        if (!$districtResult['is_processed']) {
+            return $districtResult;
+        }
         // }
         // if (!empty(self::$filters['block_id']) || !empty(self::$filters['subdivision_id'])) {
-            $blockSubResult = self::checkBlockSub($schemeId, $actionType, $entryType, $entryTypeArr, $bencreatAdd);
-            if (!$blockSubResult['is_processed']) {
-                return $blockSubResult;
-            }
+        $blockSubResult = self::checkBlockSub($schemeId, $actionType, $entryType, $entryTypeArr, $bencreatAdd);
+        if (!$blockSubResult['is_processed']) {
+            return $blockSubResult;
+        }
         // }
     }
 
@@ -120,13 +120,13 @@ class SchemeCapacityHelper
         ];
     }
 
-    public static function checkDist($schemeId, $actionType, $entryType, $entryTypeArr, $bencreatAdd = [])
+    public static function checkDist($schemeId, $actionType, $entryType, $entryTypeArr, $bencreatAdd = null)
     {
         $currentFilters = self::$filters;
         if ($bencreatAdd) {
             $districtId = $bencreatAdd['created_by_dist_code'];
         } else {
-            $districtId = $currentFilters['district_id'];
+            $districtId = $currentFilters['district_id'] ?? null;
         }
         $district = District::with(['capacities' => function ($q) use ($schemeId, $actionType, $districtId, $entryType) {
             $q->active()
@@ -178,7 +178,7 @@ class SchemeCapacityHelper
         ];
     }
 
-    public static function checkBlockSub($schemeId, $actionType, $entryType, $entryTypeArr, $bencreatAdd = [])
+    public static function checkBlockSub($schemeId, $actionType, $entryType, $entryTypeArr, $bencreatAdd = null)
     {
         $currentFilters = self::$filters;
         if ($bencreatAdd) {
@@ -189,9 +189,9 @@ class SchemeCapacityHelper
                 $subdivision_id = $bencreatAdd['created_by_local_body_code'];
             }
         } else {
-            $districtId = $currentFilters['district_id'];
-            $block_id = $currentFilters['block_id'];
-            $subdivision_id = $currentFilters['subdivision_id'];
+            $districtId = $currentFilters['district_id'] ?? null;
+            $block_id = $currentFilters['block_id'] ?? null;
+            $subdivision_id = $currentFilters['subdivision_id'] ?? null;
         }
         if ($block_id) {
             $modelName = 'Block';
