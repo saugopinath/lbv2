@@ -34,4 +34,16 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     //     $data['new_values']['referrer'] = \Illuminate\Support\Facades\Request::header('referer');
     //     return $data;
     // }
+
+    public function creator()
+    {
+        $block = Block::where('lgd_code', $this->created_by_local_body_code)->first();
+        if ($block) {
+            return 1;
+        }
+        $subdivision = Subdivision::where('ref_code', $this->created_by_local_body_code)->first();
+        if ($subdivision) {
+            return 2;
+        }
+    }
 }

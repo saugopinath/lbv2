@@ -209,6 +209,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public function builder(): Builder
     {
         $query = BeneficiaryPersonalDetail::query()->select('application_id', 'beneficiary_id', 'scheme_id', 'beneficiary_name', 'ben_father_name', 'dob')
+            ->whereIn('is_clean', [1, 2])
             ->where('next_level_role_id', $this->sameLabelRoleId)
             ->where('scheme_id', $this->schemeId)
             ->where('is_final', $this->isFinal);
@@ -238,7 +239,6 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public function bulkapprove()
     {
         $this->handleBulkAction('approver');
-
     }
     public function bulkrevert()
     {

@@ -350,10 +350,17 @@ class BulkActionModal extends Component
     }
     private function checkCapacity(): bool
     {
+        $beneficiary = BeneficiaryPersonalDetail::find($this->applicationId);
+        $bencreatAdd = [
+            'created_by_dist_code' => $beneficiary->created_by_dist_code,
+            'created_by_local_body_code' => $beneficiary->created_by_local_body_code,
+            'creator' => $beneficiary->creator()
+        ];
         $result = SchemeCapacityHelper::check(
             $this->schemeId,
             $this->nextLabelRoleId,
-            $this->entryType
+            $this->entryType,
+            $bencreatAdd
         );
         if (is_array($result)) {
             $msg = "{$result['model']} capacity full. 
