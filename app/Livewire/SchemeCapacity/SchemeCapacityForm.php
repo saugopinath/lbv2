@@ -124,7 +124,7 @@ class SchemeCapacityForm extends Component
 
     private function loadLocationsData()
     {
-        if (!$this->location_scheme_id || !$this->action_type) {
+        if (!$this->location_scheme_id || $this->action_type === '' || $this->action_type === null) {
             $this->locations_data = [];
             return;
         }
