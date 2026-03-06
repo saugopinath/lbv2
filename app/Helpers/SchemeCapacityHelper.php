@@ -56,7 +56,7 @@ class SchemeCapacityHelper
 
         self::initFilters();
         $entryTypeArr = ($entryType == 0) ? [1, 2] : [(int)$entryType];
-
+        
         // ১. Scheme Level Check
         $schemeResult = self::checkScheme($schemeId, $actionType, $entryType, $entryTypeArr);
         if (!$schemeResult['is_processed']) return $schemeResult;

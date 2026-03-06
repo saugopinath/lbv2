@@ -348,65 +348,56 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $this->dispatch('actionPerformedAndRedirect');
         } elseif ($this->revertrejectAction === 'verification') {
 
-            $ids = $this->getSelected(); // এটি একটি array রিটার্ন করে
+            $ids = $this->getSelected(); // এটি একটি অ্যারে (Array)
             $selectedCount = count($ids);
 
             if (empty($ids)) {
                 return;
             }
 
-            /** * মডিফিকেশন: লুপের বাইরে একবারেই চেক করুন। 
-             * checkBulk-এ $ids (Array) পাঠাতে হবে।
+            /** * হায়ারার্কি নিশ্চিত করতে লুপের বাইরে একবারেই চেক করুন।
+             * এটি প্রথমে checkScheme, তারপর checkDist এবং শেষে checkBlockSub কল করবে।
              */
             $capacityCheck = \App\Helpers\SchemeCapacityHelper::checkBulk(
                 $this->schemeId,
-                1, // Verification
-                $ids // সরাসরি সিলেক্ট করা আইডিগুলোর অ্যারে পাঠান
+                1,   // Action Type 1 (Verification)
+                $ids // সিলেক্ট করা আইডিগুলোর অ্যারে
             );
 
+            // যদি Scheme-এ ক্যাপাসিটি না থাকে, তবে আগে Scheme এর মেসেজ আসবে
             if (!$capacityCheck || !$capacityCheck['is_processed'] || $capacityCheck['remaining_capacity'] < $selectedCount) {
+
+                $modelName = $capacityCheck['model'] ?? 'Scheme';
+                $available = $capacityCheck['remaining_capacity'] ?? 0;
+
                 $this->dispatch('toastr', [
                     'type' => 'error',
-                    'message' => 'Capacity exceeded for ' . ($capacityCheck['model'] ?? 'Scheme') .
-                        '! Available: ' . ($capacityCheck['remaining_capacity'] ?? 0)
+                    'message' => "Capacity exceeded for {$modelName}! Available: {$available}, but you selected {$selectedCount}."
                 ]);
-                return;
+
+                return; // স্কিম লেভেলে আটকে গেলে কোড আর নিচে নামবে না
             }
 
-            $processed = 0;
-            $approverRoleId = Codemaster::getIdByCode(23);
-
+            // ক্যাপাসিটি ঠিক থাকলে তবেই নিচের ডাটাবেজ আপডেট শুরু হবে
             foreach ($ids as $id) {
-                DB::beginTransaction();
-                try {
+                DB::transaction(function () use ($id) {
                     $application = BeneficiaryPersonalDetail::where('application_id', $id)->first();
-
                     if ($application) {
                         $application->update(['next_level_role_id' => $this->nextLabelRoleId]);
 
-                        $AcceptRejectInfo = new AcceptRejectInfo;
-                        $AcceptRejectInfo->application_id = $id;
-                        $AcceptRejectInfo->beneficiary_id = $application->beneficiary_id;
-                        $AcceptRejectInfo->ip_address = request()->ip();
-                        $AcceptRejectInfo->scheme_id = $this->schemeId;
-                        $AcceptRejectInfo->user_id = Auth::id();
-                        $AcceptRejectInfo->browser = request()->header('User-Agent');
-                        $AcceptRejectInfo->op_type = $approverRoleId;
-                        $AcceptRejectInfo->revert_reason_remarks = $validated['remark'] ?? null;
-                        $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                            ->latest('id')->value('id') ?? null;
-                        $AcceptRejectInfo->save();
-
-                        DB::commit();
-                        $processed++;
+                        // AcceptRejectInfo লগ তৈরি...
+                        $log = new AcceptRejectInfo;
+                        $log->application_id = $id;
+                        $log->beneficiary_id = $application->beneficiary_id;
+                        $log->scheme_id = $this->schemeId;
+                        $log->user_id = Auth::id();
+                        $log->op_type = Codemaster::getIdByCode(23);
+                        $log->save();
                     }
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    throw $e;
-                }
+                });
             }
 
-            $this->dispatch('toastr', ['type' => 'success', 'message' => $processed . ' application verified!']);
+            $this->dispatch('toastr', ['type' => 'success', 'message' => $selectedCount . ' applications verified!']);
             $this->clearSelected();
             $this->dispatch('actionPerformedAndRedirect');
         } elseif ($this->revertrejectAction === 'approver') {
