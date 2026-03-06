@@ -29,7 +29,7 @@ class LoginRequest extends FormRequest
     }
     public function messages()
     {
-       
+
         return [
             'mobile_no.required' => __('messages.mobilerequired'),
             'mobile_no.regex' => __('messages.invalidMobile'),

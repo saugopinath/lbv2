@@ -247,6 +247,13 @@
                         x: {
                             grid: {
                                 display: false
+                            },
+                            ticks: {
+                                callback: function(val, index) {
+                                    // axis-এ শুধু সময় দেখাবে (যেমন: 12:00)
+                                    const label = this.getLabelForValue(val);
+                                    return label.split(', ')[1];
+                                }
                             }
                         },
                         y: {

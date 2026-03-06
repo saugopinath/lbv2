@@ -622,10 +622,9 @@ class DynamicForm extends Component
         try {
             $existingRecord = $modelClass::where('application_id', $this->applicationId)->first();
             if ($existingRecord) {
-                $updated = $modelClass::where('application_id', $this->applicationId)
-                    ->where('scheme_id', $this->schemeId)
-                    ->update($dbData);
+                $updated = $existingRecord->update($dbData);
                 if ($updated) {
+
                     $this->navMessage = 'Application updated successfully! ID: ' . $this->applicationId;
                     $this->navMessageType = 'success';
                     $this->dispatch('toastr', [

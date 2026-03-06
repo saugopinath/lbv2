@@ -9,6 +9,8 @@ use App\Models\UserPageVisitLog;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use OwenIt\Auditing\Models\Audit;
+
 
 class DailyUserActivity extends Component
 {
@@ -17,6 +19,10 @@ class DailyUserActivity extends Component
     public $dateRange;
     public $name;
     public $username;
+    public $selectedSessionId;
+    public $selectedUrl;
+    public $showAuditModal = false;
+
 
     protected $queryString = [
         'name' => ['except' => ''],
@@ -24,12 +30,50 @@ class DailyUserActivity extends Component
         'dateRange' => ['except' => ''],
     ];
 
+
     public function updating($name)
     {
         $this->resetPage();
     }
 
+    public function openAuditModal($sessionId, $url = null)
+    {
+        $this->selectedSessionId = $sessionId;
+        $this->selectedUrl = $url;
+        $this->showAuditModal = true;
+    }
+
+    public function closeAuditModal()
+    {
+        $this->showAuditModal = false;
+        $this->selectedSessionId = null;
+        $this->selectedUrl = null;
+    }
+
+    public function getAuditsProperty()
+    {
+        if (!$this->selectedSessionId) {
+            return collect();
+        }
+
+        $query = Audit::where('session_id', $this->selectedSessionId);
+
+        if ($this->selectedUrl) {
+            $query->where(function ($q) {
+                $q->where('other_details->url', $this->selectedUrl)
+                    ->orWhere('other_details->referrer', $this->selectedUrl)
+                    ->orWhere('other_details', 'LIKE', '%"url":"' . $this->selectedUrl . '"%')
+                    ->orWhere('other_details', 'LIKE', '%"referrer":"' . $this->selectedUrl . '"%');
+            });
+        }
+
+
+        return $query->latest()->get();
+    }
+
+
     public function render()
+
     {
         $query = Activity::query()
             ->from('activity_log as main_log')
@@ -42,17 +86,18 @@ class DailyUserActivity extends Component
                     ->where('event', 'logout')
                     ->whereColumn('created_at', '>', 'main_log.created_at')
                     ->orderBy('created_at', 'asc')
+                    ->limit(1),
+                'last_activity' => DB::table('sessions')
+                    ->select('last_activity')
+                    ->whereColumn('id', 'main_log.session_id')
                     ->limit(1)
             ]);
-
         if ($this->name) {
             $query->whereRaw("properties->>'user_name' ILIKE ?", ["%{$this->name}%"]);
         }
-
         if ($this->username) {
             $query->whereRaw("properties->>'user_mobile' ILIKE ?", ["%{$this->username}%"]);
         }
-
         if ($this->dateRange) {
             try {
                 $dates = explode(' to ', $this->dateRange);
@@ -73,7 +118,6 @@ class DailyUserActivity extends Component
         }
 
         $activities = $query->latest()->paginate(10);
-
         // Fetch visited pages for each session
         $sessionIds = $activities->pluck('session_id')->filter()->unique();
 
@@ -84,9 +128,13 @@ class DailyUserActivity extends Component
             ->map(function ($logs) {
                 return $logs->map(function ($log) {
                     $pageName = Str::afterLast($log->url, '/');
-                    return $pageName ? Str::title(str_replace(['-', '_'], ' ', $pageName)) : 'Home';
+                    return [
+                        'url' => $log->url,
+                        'name' => $pageName ? Str::title(str_replace(['-', '_'], ' ', $pageName)) : 'Home'
+                    ];
                 })->unique();
             });
+
 
         return view('livewire.daily-user-activity', [
             'activities' => $activities,
