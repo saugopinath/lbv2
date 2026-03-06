@@ -162,7 +162,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         ) {
             $actions['bulkrevert'] = 'Revert';
         }
-
+        $actions['bulkverify'] = 'Verify';
         return $actions;
     }
 
@@ -183,7 +183,8 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         return [
             Column::make("Application ID", "application_id")
                 ->label(fn($row) => $row->application_id ?? 'N/A'),
-
+            Column::make("Application Type", "application_type")
+                ->label(fn($row) => $row->application_type ?? 'N/A'),
             Column::make("Applicant Name")
                 ->label(fn($row) => $row->beneficiary_name ?? 'N/A'),
 
@@ -208,7 +209,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $query = BeneficiaryPersonalDetail::query()->select('application_id', 'beneficiary_id', 'scheme_id', 'beneficiary_name', 'ben_father_name', 'dob')
+        $query = BeneficiaryPersonalDetail::query()->select('application_id', 'beneficiary_id', 'scheme_id', 'beneficiary_name', 'ben_father_name', 'dob', 'application_type')
             ->whereIn('is_clean', [1, 2])
             ->where('next_level_role_id', $this->sameLabelRoleId)
             ->where('scheme_id', $this->schemeId)
@@ -346,19 +347,58 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $this->clearSelected();
             $this->dispatch('actionPerformedAndRedirect');
         } elseif ($this->revertrejectAction === 'verification') {
+
             $ids = $this->getSelected();
+
+            if (empty($ids)) {
+                return;
+            }
+
+            // get application types for selected rows
+            $applicationTypes = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
+                ->pluck('application_type', 'application_id');
+
+            $processed = 0;
             $approverRoleId = Codemaster::getIdByCode(23);
+
             foreach ($ids as $id) {
 
-                DB::beginTransaction();
-                try {
-                    BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_condition)->update([
-                        'next_level_role_id' => $this->nextLabelRoleId,
+                $applicationType = $applicationTypes[$id] ?? 0;
+
+                $capacityCheck = \App\Helpers\SchemeCapacityHelper::checkBulk(
+                    $this->schemeId,
+                    1,
+                    $applicationType
+                );
+
+                if (!$capacityCheck || !$capacityCheck['is_processed']) {
+
+                    $this->dispatch('toastr', [
+                        'type' => 'error',
+                        'message' => 'Capacity exceeded for ' . ($capacityCheck['model'] ?? 'Scheme')
                     ]);
-                    $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
+
+                    break;
+                }
+
+                DB::beginTransaction();
+
+                try {
+
+                    $application = BeneficiaryPersonalDetail::where('application_id', $id)->first();
+
+                    if (!$application) {
+                        DB::rollBack();
+                        continue;
+                    }
+
+                    BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                        'next_level_role_id' => $this->nextLabelRoleId
+                    ]);
+
                     $AcceptRejectInfo = new AcceptRejectInfo;
-                    $AcceptRejectInfo->application_id = $id;
-                    $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
+                    $AcceptRejectInfo->application_id = $application->application_id;
+                    $AcceptRejectInfo->beneficiary_id = $application->beneficiary_id;
                     $AcceptRejectInfo->ip_address = request()->ip();
                     $AcceptRejectInfo->scheme_id = $this->schemeId;
                     $AcceptRejectInfo->user_id = Auth::id();
@@ -370,17 +410,33 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
                         ->latest('id')
                         ->value('id') ?? null;
+
                     $AcceptRejectInfo->save();
+
                     DB::commit();
+
+                    $processed++;
                 } catch (\Exception $e) {
+
                     DB::rollBack();
                     throw $e;
                 }
             }
-            $this->dispatch('toastr', [
-                'type' => 'success',
-                'message' => 'All applications verified successfully!'
-            ]);
+
+            if ($processed == 0) {
+
+                // $this->dispatch('toastr', [
+                //     'type' => 'error',
+                //     'message' => 'Capacity exceeded. No application verified.'
+                // ]);
+            } else {
+
+                $this->dispatch('toastr', [
+                    'type' => 'success',
+                    'message' => $processed . ' application verified successfully!'
+                ]);
+            }
+
             $this->clearSelected();
             $this->dispatch('actionPerformedAndRedirect');
         } elseif ($this->revertrejectAction === 'approver') {

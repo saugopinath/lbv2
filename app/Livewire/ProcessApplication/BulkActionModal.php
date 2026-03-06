@@ -362,7 +362,7 @@ class BulkActionModal extends Component
             $this->entryType,
             $bencreatAdd
         );
-        if (is_array($result)) {
+        if (!$result['is_processed']) {
             $msg = "{$result['model']} capacity full. 
             Total: {$result['total_capacity']} 
             Processed: {$result['already_entered']} 

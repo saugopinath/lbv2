@@ -173,7 +173,7 @@ class DynamicForm extends Component
             $this->actionType,
             $this->formData['application_type']
         );
-        if (is_array($result)) {
+        if (!$result['is_processed']) {
             $msg = "{$result['model']} capacity full. 
             Total: {$result['total_capacity']} 
             Processed: {$result['already_entered']} 

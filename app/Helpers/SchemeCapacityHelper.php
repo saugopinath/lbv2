@@ -73,6 +73,9 @@ class SchemeCapacityHelper
             return $blockSubResult;
         }
         // }
+        return [
+            'is_processed' => true
+        ];
     }
 
     public static function checkScheme($schemeId, $actionType, $entryType, $entryTypeArr)
@@ -260,6 +263,20 @@ class SchemeCapacityHelper
             'already_entered' => 0,
             'remaining_capacity' => 0,
             'model' => $modelName,
+        ];
+    }
+    public static function checkBulk($schemeId, $actionType, $entryType = 0, $bencreatAdd = null)
+    {
+        $singleCheck = self::check($schemeId, $actionType, $entryType, $bencreatAdd);
+        if (!$singleCheck || !$singleCheck['is_processed']) {
+            return $singleCheck;
+        }
+        return [
+            'is_processed' => true,
+            'total_capacity' => $singleCheck['total_capacity'] ?? 0,
+            'already_entered' => $singleCheck['already_entered'] ?? 0,
+            'remaining_capacity' => $singleCheck['remaining_capacity'] ?? 0,
+            'model' => $singleCheck['model'] ?? 'Scheme',
         ];
     }
 }
