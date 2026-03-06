@@ -348,95 +348,65 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $this->dispatch('actionPerformedAndRedirect');
         } elseif ($this->revertrejectAction === 'verification') {
 
-            $ids = $this->getSelected();
+            $ids = $this->getSelected(); // এটি একটি array রিটার্ন করে
+            $selectedCount = count($ids);
 
             if (empty($ids)) {
                 return;
             }
 
-            // get application types for selected rows
-            $applicationTypes = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
-                ->pluck('application_type', 'application_id');
+            /** * মডিফিকেশন: লুপের বাইরে একবারেই চেক করুন। 
+             * checkBulk-এ $ids (Array) পাঠাতে হবে।
+             */
+            $capacityCheck = \App\Helpers\SchemeCapacityHelper::checkBulk(
+                $this->schemeId,
+                1, // Verification
+                $ids // সরাসরি সিলেক্ট করা আইডিগুলোর অ্যারে পাঠান
+            );
+
+            if (!$capacityCheck || !$capacityCheck['is_processed'] || $capacityCheck['remaining_capacity'] < $selectedCount) {
+                $this->dispatch('toastr', [
+                    'type' => 'error',
+                    'message' => 'Capacity exceeded for ' . ($capacityCheck['model'] ?? 'Scheme') .
+                        '! Available: ' . ($capacityCheck['remaining_capacity'] ?? 0)
+                ]);
+                return;
+            }
 
             $processed = 0;
             $approverRoleId = Codemaster::getIdByCode(23);
 
             foreach ($ids as $id) {
-
-                $applicationType = $applicationTypes[$id] ?? 0;
-
-                $capacityCheck = \App\Helpers\SchemeCapacityHelper::checkBulk(
-                    $this->schemeId,
-                    1,
-                    $applicationType
-                );
-
-                if (!$capacityCheck || !$capacityCheck['is_processed']) {
-
-                    $this->dispatch('toastr', [
-                        'type' => 'error',
-                        'message' => 'Capacity exceeded for ' . ($capacityCheck['model'] ?? 'Scheme')
-                    ]);
-
-                    break;
-                }
-
                 DB::beginTransaction();
-
                 try {
-
                     $application = BeneficiaryPersonalDetail::where('application_id', $id)->first();
 
-                    if (!$application) {
-                        DB::rollBack();
-                        continue;
+                    if ($application) {
+                        $application->update(['next_level_role_id' => $this->nextLabelRoleId]);
+
+                        $AcceptRejectInfo = new AcceptRejectInfo;
+                        $AcceptRejectInfo->application_id = $id;
+                        $AcceptRejectInfo->beneficiary_id = $application->beneficiary_id;
+                        $AcceptRejectInfo->ip_address = request()->ip();
+                        $AcceptRejectInfo->scheme_id = $this->schemeId;
+                        $AcceptRejectInfo->user_id = Auth::id();
+                        $AcceptRejectInfo->browser = request()->header('User-Agent');
+                        $AcceptRejectInfo->op_type = $approverRoleId;
+                        $AcceptRejectInfo->revert_reason_remarks = $validated['remark'] ?? null;
+                        $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+                            ->latest('id')->value('id') ?? null;
+                        $AcceptRejectInfo->save();
+
+                        DB::commit();
+                        $processed++;
                     }
-
-                    BeneficiaryPersonalDetail::where('application_id', $id)->update([
-                        'next_level_role_id' => $this->nextLabelRoleId
-                    ]);
-
-                    $AcceptRejectInfo = new AcceptRejectInfo;
-                    $AcceptRejectInfo->application_id = $application->application_id;
-                    $AcceptRejectInfo->beneficiary_id = $application->beneficiary_id;
-                    $AcceptRejectInfo->ip_address = request()->ip();
-                    $AcceptRejectInfo->scheme_id = $this->schemeId;
-                    $AcceptRejectInfo->user_id = Auth::id();
-                    $AcceptRejectInfo->browser = request()->header('User-Agent');
-                    $AcceptRejectInfo->model_name = null;
-                    $AcceptRejectInfo->op_type = $approverRoleId;
-                    $AcceptRejectInfo->revert_reason_cause_id = null;
-                    $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
-                    $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                        ->latest('id')
-                        ->value('id') ?? null;
-
-                    $AcceptRejectInfo->save();
-
-                    DB::commit();
-
-                    $processed++;
                 } catch (\Exception $e) {
-
                     DB::rollBack();
                     throw $e;
                 }
             }
 
-            if ($processed == 0) {
-
-                // $this->dispatch('toastr', [
-                //     'type' => 'error',
-                //     'message' => 'Capacity exceeded. No application verified.'
-                // ]);
-            } else {
-
-                $this->dispatch('toastr', [
-                    'type' => 'success',
-                    'message' => $processed . ' application verified successfully!'
-                ]);
-            }
-
+            $this->dispatch('toastr', ['type' => 'success', 'message' => $processed . ' application verified!']);
             $this->clearSelected();
             $this->dispatch('actionPerformedAndRedirect');
         } elseif ($this->revertrejectAction === 'approver') {

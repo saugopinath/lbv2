@@ -363,10 +363,8 @@ class BulkActionModal extends Component
             $bencreatAdd
         );
         if (!$result['is_processed']) {
-            $msg = "{$result['model']} capacity full. 
-            Total: {$result['total_capacity']} 
-            Processed: {$result['already_entered']} 
-            Remaining: {$result['remaining_capacity']}";
+            $msg = 'Capacity exceeded for ' . ($result['model'] ?? 'Scheme') .
+                '! Available: ' . ($result['remaining_capacity'] ?? 0);
             $this->dispatch('toastr', [
                 'type' => 'error',
                 'message' => $msg,

@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
 use Throwable;
 use App\Services\WorkflowService;
+
 class DynamicForm extends Component
 {
     public $schemeId;
@@ -163,7 +164,7 @@ class DynamicForm extends Component
 
     private function checkCapacity(): bool
     {
-        
+
         // dd($this->actionType);
         if ($this->isEdit || !empty($this->applicationId)) {
             return true;
@@ -174,10 +175,8 @@ class DynamicForm extends Component
             $this->formData['application_type']
         );
         if (!$result['is_processed']) {
-            $msg = "{$result['model']} capacity full. 
-            Total: {$result['total_capacity']} 
-            Processed: {$result['already_entered']} 
-            Remaining: {$result['remaining_capacity']}";
+            $msg = 'Capacity exceeded for ' . ($result['model'] ?? 'Scheme') .
+                '! Available: ' . ($result['remaining_capacity'] ?? 0);
             $this->dispatch('toastr', [
                 'type' => 'error',
                 'message' => $msg,
@@ -420,7 +419,7 @@ class DynamicForm extends Component
         if (! $this->checkDuplicateEntries()) {
             return;
         }
-        
+
         $saved = $this->saveCurrentTabData();
 
         if ($saved !== true) {
