@@ -347,45 +347,30 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $this->clearSelected();
             $this->dispatch('actionPerformedAndRedirect');
         } elseif ($this->revertrejectAction === 'verification') {
-
-            $ids = $this->getSelected(); // এটি একটি অ্যারে (Array)
+            $ids = $this->getSelected();
             $selectedCount = count($ids);
-
             if (empty($ids)) {
                 return;
             }
-
-            /** * হায়ারার্কি নিশ্চিত করতে লুপের বাইরে একবারেই চেক করুন।
-             * এটি প্রথমে checkScheme, তারপর checkDist এবং শেষে checkBlockSub কল করবে।
-             */
             $capacityCheck = \App\Helpers\SchemeCapacityHelper::checkBulk(
                 $this->schemeId,
-                1,   // Action Type 1 (Verification)
-                $ids // সিলেক্ট করা আইডিগুলোর অ্যারে
+                1,
+                $ids
             );
-
-            // যদি Scheme-এ ক্যাপাসিটি না থাকে, তবে আগে Scheme এর মেসেজ আসবে
             if (!$capacityCheck || !$capacityCheck['is_processed'] || $capacityCheck['remaining_capacity'] < $selectedCount) {
-
                 $modelName = $capacityCheck['model'] ?? 'Scheme';
                 $available = $capacityCheck['remaining_capacity'] ?? 0;
-
                 $this->dispatch('toastr', [
                     'type' => 'error',
                     'message' => "Capacity exceeded for {$modelName}! Available: {$available}, but you selected {$selectedCount}."
                 ]);
-
-                return; // স্কিম লেভেলে আটকে গেলে কোড আর নিচে নামবে না
+                return;
             }
-
-            // ক্যাপাসিটি ঠিক থাকলে তবেই নিচের ডাটাবেজ আপডেট শুরু হবে
             foreach ($ids as $id) {
                 DB::transaction(function () use ($id) {
                     $application = BeneficiaryPersonalDetail::where('application_id', $id)->first();
                     if ($application) {
                         $application->update(['next_level_role_id' => $this->nextLabelRoleId]);
-
-                        // AcceptRejectInfo লগ তৈরি...
                         $log = new AcceptRejectInfo;
                         $log->application_id = $id;
                         $log->beneficiary_id = $application->beneficiary_id;
@@ -396,7 +381,6 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     }
                 });
             }
-
             $this->dispatch('toastr', ['type' => 'success', 'message' => $selectedCount . ' applications verified!']);
             $this->clearSelected();
             $this->dispatch('actionPerformedAndRedirect');
