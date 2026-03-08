@@ -183,9 +183,10 @@ class BulkActionModal extends Component
         // ✅ CAPACITY CHECK END
         $approverRoleId = Codemaster::getIdByCode(23);
         $ids = (array) $this->applicationId;
+        $actionType = ($this->bulkActionType === 'V') ? 1 : (($this->bulkActionType === 'A') ? 2 : null);
         if ($this->bulkActionType === 'V') {
             foreach ($ids as $id) {
-                if (! $this->checkCapacity()) {
+                if (! $this->checkCapacity($id, $actionType)) {
                     return;
                 }
                 DB::beginTransaction();
@@ -221,7 +222,7 @@ class BulkActionModal extends Component
             }
         } elseif ($this->bulkActionType === 'A') {
             foreach ($ids as $id) {
-                if (! $this->checkCapacity()) {
+                if (! $this->checkCapacity($id, $actionType)) {
                     return;
                 }
                 DB::beginTransaction();
@@ -348,29 +349,38 @@ class BulkActionModal extends Component
             'scheme_id' => Crypt::encryptString($this->schemeId),
         ]);
     }
-    private function checkCapacity(): bool
+    private function checkCapacity($id, $actionType): bool
     {
-        $beneficiary = BeneficiaryPersonalDetail::find($this->applicationId);
+        // ডাটাবেস থেকে ওই নির্দিষ্ট বেনিফিশিয়ারির ডাটা তুলে আনা
+        $beneficiary = BeneficiaryPersonalDetail::where('application_id', $id)->first();
+
+        if (!$beneficiary) return false;
+
         $bencreatAdd = [
             'created_by_dist_code' => $beneficiary->created_by_dist_code,
             'created_by_local_body_code' => $beneficiary->created_by_local_body_code,
-            'creator' => $beneficiary->creator()
+            'creator' => $beneficiary->creator() // আপনার মডেলে যদি এই মেথড থাকে
         ];
-        $result = SchemeCapacityHelper::check(
+
+        // হেল্পার কল (এখানে ৩য় প্যারামিটার হিসেবে সিঙ্গেল টাইপটি পাঠানো হচ্ছে)
+        $result = \App\Helpers\SchemeCapacityHelper::checkBulk(
             $this->schemeId,
-            $this->nextLabelRoleId,
-            $this->entryType,
+            $actionType,
+            [(int)$beneficiary->application_type], // সিঙ্গেল টাইপটিকে অ্যারে হিসেবে পাঠানো
             $bencreatAdd
         );
+
         if (!$result['is_processed']) {
             $msg = 'Capacity exceeded for ' . ($result['model'] ?? 'Scheme') .
                 '! Available: ' . ($result['remaining_capacity'] ?? 0);
+
             $this->dispatch('toastr', [
                 'type' => 'error',
                 'message' => $msg,
             ]);
             return false;
         }
+
         return true;
     }
     public function render()

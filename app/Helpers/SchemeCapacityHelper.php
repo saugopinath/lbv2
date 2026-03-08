@@ -5,260 +5,134 @@ namespace App\Helpers;
 use App\Models\BeneficiaryPersonalDetail;
 use App\Models\District;
 use App\Models\Scheme;
+use App\Models\Block;
+use App\Models\Subdivision;
 use App\Models\WorkflowsteproleMapping;
-use Illuminate\Support\Facades\Crypt;
-use Exception;
 use App\Services\WorkflowService;
 
 class SchemeCapacityHelper
 {
     protected static $filters = [];
     protected static $nextLabelRoleIds = [];
-    protected static $nextLabelRoleId;
-    private static function initFilters()
+
+    private static function initFilters($bencreatAdd = null)
     {
-        if (!empty(self::$filters)) return;
-        $select_lgd = session('lgd_session', []);
-        $keys = ['district_id', 'block_id', 'subdivision_id', 'state_id'];
-        foreach ($keys as $key) {
-            if (!empty($select_lgd[$key])) {
-                try {
-                    self::$filters[$key] = Crypt::decryptString($select_lgd[$key]);
-                } catch (Exception $e) {
-                    self::$filters[$key] = null;
-                }
-            }
+        // যদি $bencreatAdd থাকে তবে সেটি নিবে, নাহলে সেশন থেকে নিবে
+        if ($bencreatAdd) {
+            self::$filters['dist'] = $bencreatAdd['created_by_dist_code'] ?? null;
+            self::$filters['local'] = $bencreatAdd['created_by_local_body_code'] ?? null;
+            self::$filters['creator'] = $bencreatAdd['creator'] ?? null;
+        } else {
+            $lgd = session('lgd_session', []);
+            self::$filters['dist'] = isset($lgd['district_id']) ? \Illuminate\Support\Facades\Crypt::decryptString($lgd['district_id']) : null;
+            self::$filters['local'] = isset($lgd['block_id']) ? \Illuminate\Support\Facades\Crypt::decryptString($lgd['block_id']) : 
+                                     (\Illuminate\Support\Facades\Crypt::decryptString($lgd['subdivision_id'] ?? '') ?: null);
         }
     }
 
-    public static function check($schemeId, $actionType, $entryType = 0, $bencreatAdd = null)
+    public static function check($schemeId, $actionType, $selectedTypes = [], $bencreatAdd = null)
     {
         $map = WorkflowsteproleMapping::getMinMaxWorkflowStep($schemeId)['max'];
         $workflowService = app(WorkflowService::class);
         $labelRoles = $workflowService->getLabelRoles($schemeId, $map);
+
         if ($actionType == 1) {
             self::$nextLabelRoleIds = [$labelRoles->same_label_role_id, $labelRoles->next_label_role_id];
         } elseif ($actionType == 2) {
             self::$nextLabelRoleIds = [$labelRoles->next_label_role_id];
         }
-        self::initFilters();
-        $entryTypeArr = ($entryType == 0) ? [1, 2] : [(int)$entryType];
-        $schemeResult = self::checkScheme($schemeId, $actionType, $entryType, $entryTypeArr);
-        if (!$schemeResult['is_processed']) {
-            return $schemeResult;
-        }
-        $districtResult = self::checkDist($schemeId, $actionType, $entryType, $entryTypeArr, $bencreatAdd);
-        if (!$districtResult['is_processed']) {
-            return $districtResult;
-        }
-        $blockSubResult = self::checkBlockSub($schemeId, $actionType, $entryType, $entryTypeArr, $bencreatAdd);
-        if (!$blockSubResult['is_processed']) {
-            return $blockSubResult;
-        }
-        return [
-            'is_processed' => true
-        ];
+
+        self::initFilters($bencreatAdd);
+
+        // ১. Scheme Level
+        $res = self::checkScheme($schemeId, $actionType, $selectedTypes);
+        if (!$res['is_processed']) return $res;
+
+        // ২. District Level
+        $res = self::checkDistrict($schemeId, $actionType, $selectedTypes);
+        if (!$res['is_processed']) return $res;
+
+        // ৩. Local Body Level
+        $res = self::checkLocal($schemeId, $actionType, $selectedTypes);
+        if (!$res['is_processed']) return $res;
+
+        return ['is_processed' => true];
     }
 
-    public static function checkScheme($schemeId, $actionType, $entryType, $entryTypeArr)
+    public static function checkScheme($schemeId, $actionType, $selectedTypes)
     {
-        $scheme = Scheme::with(['capacities' => function ($q) use ($schemeId, $actionType, $entryType) {
-            $q->active()
-                ->where('model_id', $schemeId)
-                ->where('action_type', $actionType)
-                ->where(function ($query) use ($entryType) {
-                    $query->where('entry_type', $entryType)
-                        ->orWhere('entry_type', 0);
-                });
-        }])->find($schemeId);
-        if (!$scheme || !$scheme->capacities->first()) {
-            return ['is_processed' => true];
-        }
-        $capacityRecord = $scheme->capacities->first();
-        $total_capacity = (int)$capacityRecord->total_capacity;
-        if ($total_capacity > 0) {
-            $count = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
-                ->whereIn('is_clean', [1, 2])
-                ->when(self::$nextLabelRoleIds, function ($query, $roles) {
-                    return $query->whereIn('next_level_role_id', $roles);
-                })
-                ->when($entryTypeArr, function ($query) use ($entryTypeArr) {
-                    return $query->whereIn('application_type', $entryTypeArr);
-                })->count();
-            if ($total_capacity > $count) {
-                return [
-                    'is_processed' => true,
-                    'total_capacity' => $total_capacity,
-                    'already_entered' => $count,
-                    'remaining_capacity' => ($total_capacity - $count),
-                    'model' => 'Scheme',
-                ];
-            } else {
-                return [
-                    'is_processed' => false,
-                    'total_capacity' => $total_capacity,
-                    'already_entered' => $count,
-                    'remaining_capacity' => ($total_capacity - $count),
-                    'model' => 'Scheme',
-                ];
-            }
-        }
-        return [
-            'is_processed' => false,
-            'total_capacity' => $total_capacity,
-            'already_entered' => 0,
-            'remaining_capacity' => 0,
-            'model' => 'Scheme',
-        ];
+        $scheme = Scheme::with(['capacities' => fn($q) => $q->where('action_type', $actionType)->active()])->find($schemeId);
+        $capacity = $scheme?->capacities->first();
+        if (!$capacity) return ['is_processed' => true];
+
+        return self::calculate($capacity, 'Scheme', $schemeId, null, null, $selectedTypes);
     }
 
-    public static function checkDist($schemeId, $actionType, $entryType, $entryTypeArr, $bencreatAdd = null)
+    public static function checkDistrict($schemeId, $actionType, $selectedTypes)
     {
-        $currentFilters = self::$filters;
-        if ($bencreatAdd) {
-            $districtId = $bencreatAdd['created_by_dist_code'];
+        $distId = self::$filters['dist'];
+        if (!$distId) return ['is_processed' => true];
+
+        // রিলেশনশিপ দিয়ে ডিস্ট্রিক্ট ক্যাপাসিটি চেক
+        $district = District::with(['capacities' => fn($q) => $q->where('scheme_id', $schemeId)->where('action_type', $actionType)->active()])->find($distId);
+        $capacity = $district?->capacities->first();
+        if (!$capacity) return ['is_processed' => true];
+
+        return self::calculate($capacity, 'District', $schemeId, $distId, null, $selectedTypes);
+    }
+
+    public static function checkLocal($schemeId, $actionType, $selectedTypes)
+    {
+        $localId = self::$filters['local'];
+        if (!$localId) return ['is_processed' => true];
+
+        // $bencreatAdd থেকে আসলে 'creator' এর ওপর ভিত্তি করে মডেল ঠিক করা
+        if (isset(self::$filters['creator'])) {
+            $model = (self::$filters['creator'] == 1) ? Block::class : Subdivision::class;
         } else {
-            $districtId = $currentFilters['district_id'] ?? null;
+            $model = session('lgd_session')['block_id'] ? Block::class : Subdivision::class;
         }
-        $district = District::with(['capacities' => function ($q) use ($schemeId, $actionType, $districtId, $entryType) {
-            $q->active()
-                ->where('scheme_id', $schemeId)
-                ->where('model_id', $districtId)
-                ->where('action_type', $actionType)
-                ->where(function ($query) use ($entryType) {
-                    $query->where('entry_type', $entryType)
-                        ->orWhere('entry_type', 0);
-                });
-        }])->find($districtId);
-        if (!$district || !$district->capacities->first()) {
-            return ['is_processed' => true];
-        }
-        $capacityRecord = $district->capacities->first();
-        $total_capacity = (int)$capacityRecord->total_capacity;
-        if ($total_capacity > 0) {
-            $count = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
-                ->where('created_by_dist_code', $districtId)
-                ->whereIn('is_clean', [1, 2])
-                ->when(self::$nextLabelRoleIds, function ($query, $roles) {
-                    return $query->whereIn('next_level_role_id', $roles);
-                })
-                ->when($entryTypeArr, function ($query) use ($entryTypeArr) {
-                    return $query->whereIn('application_type', $entryTypeArr);
-                })->count();
-            if ($total_capacity > $count) {
-                return [
-                    'is_processed' => true,
-                    'total_capacity' => $total_capacity,
-                    'already_entered' => $count,
-                    'remaining_capacity' => ($total_capacity - $count),
-                    'model' => 'District',
-                ];
-            } else {
-                return [
-                    'is_processed' => false,
-                    'total_capacity' => $total_capacity,
-                    'already_entered' => $count,
-                    'remaining_capacity' => ($total_capacity - $count),
-                    'model' => 'District',
-                ];
-            }
-        }
-        return [
-            'is_processed' => false,
-            'total_capacity' => $total_capacity,
-            'already_entered' => 0,
-            'remaining_capacity' => 0,
-            'model' => 'District',
-        ];
+
+        $localBody = $model::with(['capacities' => fn($q) => $q->where('scheme_id', $schemeId)->where('action_type', $actionType)->active()])->find($localId);
+        $capacity = $localBody?->capacities->first();
+        if (!$capacity) return ['is_processed' => true];
+
+        $label = ($model == Block::class) ? 'Block' : 'Subdivision';
+        return self::calculate($capacity, $label, $schemeId, self::$filters['dist'], $localId, $selectedTypes);
     }
 
-    public static function checkBlockSub($schemeId, $actionType, $entryType, $entryTypeArr, $bencreatAdd = null)
+    private static function calculate($capacity, $label, $schemeId, $distId, $localId, $selectedTypes)
     {
-        $currentFilters = self::$filters;
-        if ($bencreatAdd) {
-            $districtId = $bencreatAdd['created_by_dist_code'];
-            if ($bencreatAdd['creator'] == 1) {
-                $block_id = $bencreatAdd['created_by_local_body_code'];
-            } else {
-                $subdivision_id = $bencreatAdd['created_by_local_body_code'];
-            }
-        } else {
-            $districtId = $currentFilters['district_id'] ?? null;
-            $block_id = $currentFilters['block_id'] ?? null;
-            $subdivision_id = $currentFilters['subdivision_id'] ?? null;
+        $total = (int)$capacity->total_capacity;
+        $dbType = (int)$capacity->entry_type;
+        $currentRequestCount = empty($selectedTypes) ? 1 : count($selectedTypes);
+
+        // বেনিফিশিয়ারি কাউন্ট কুয়েরি
+        $query = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
+                    ->whereIn('is_clean', [1, 2])
+                    ->whereIn('next_level_role_id', self::$nextLabelRoleIds);
+
+        if ($dbType === 0) $query->whereIn('application_type', [1, 2]); else $query->where('application_type', $dbType);
+        if ($distId) $query->where('created_by_dist_code', $distId);
+        if ($localId) $query->where('created_by_local_body_code', $localId);
+
+        $existingCount = $query->count();
+
+        if (($existingCount + $currentRequestCount) > $total) {
+            return [
+                'is_processed' => false,
+                'total_capacity' => $total,
+                'already_entered' => $existingCount,
+                'remaining_capacity' => max(0, $total - $existingCount),
+                'model' => $label
+            ];
         }
-        if ($block_id) {
-            $modelName = 'Block';
-            $model_id = $block_id;
-        } elseif ($subdivision_id) {
-            $modelName = 'Subdivision';
-            $model_id = $subdivision_id;
-        }
-        $fullModelPath = "App\\Models\\" . $modelName;
-        $record = $fullModelPath::with(['capacities' => function ($q) use ($schemeId, $actionType, $model_id, $entryType) {
-            $q->active()
-                ->where('scheme_id', $schemeId)
-                ->where('model_id', $model_id)
-                ->where('action_type', $actionType)
-                ->where(function ($query) use ($entryType) {
-                    $query->where('entry_type', $entryType)
-                        ->orWhere('entry_type', 0);
-                });
-        }])->find($model_id);
-        if (!$record || !$record->capacities->first()) {
-            return ['is_processed' => true];
-        }
-        $capacityRecord = $record->capacities->first();
-        $total_capacity = (int)$capacityRecord->total_capacity;
-        if ($total_capacity > 0) {
-            $count = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
-                ->where('created_by_dist_code', $districtId)
-                ->where('created_by_local_body_code', $model_id)
-                ->whereIn('is_clean', [1, 2])
-                ->when(self::$nextLabelRoleIds, function ($query, $roles) {
-                    return $query->whereIn('next_level_role_id', $roles);
-                })
-                ->when($entryTypeArr, function ($query) use ($entryTypeArr) {
-                    return $query->whereIn('application_type', $entryTypeArr);
-                })->count();
-            if ($total_capacity > $count) {
-                return [
-                    'is_processed' => true,
-                    'total_capacity' => $total_capacity,
-                    'already_entered' => $count,
-                    'remaining_capacity' => ($total_capacity - $count),
-                    'model' => $modelName,
-                ];
-            } else {
-                return [
-                    'is_processed' => false,
-                    'total_capacity' => $total_capacity,
-                    'already_entered' => $count,
-                    'remaining_capacity' => ($total_capacity - $count),
-                    'model' => $modelName,
-                ];
-            }
-        }
-        return [
-            'is_processed' => false,
-            'total_capacity' => $total_capacity,
-            'already_entered' => 0,
-            'remaining_capacity' => 0,
-            'model' => $modelName,
-        ];
+
+        return ['is_processed' => true, 'remaining_capacity' => ($total - $existingCount), 'model' => $label];
     }
-    public static function checkBulk($schemeId, $actionType, $entryType = 0, $bencreatAdd = null)
+
+    public static function checkBulk($schemeId, $actionType, $selectedTypes = [], $bencreatAdd = null)
     {
-        $checkResult = self::check($schemeId, $actionType, $entryType, $bencreatAdd);
-        if (!$checkResult['is_processed']) {
-            return $checkResult;
-        }
-        return [
-            'is_processed' => true,
-            'total_capacity' => $checkResult['total_capacity'] ?? 0,
-            'already_entered' => $checkResult['already_entered'] ?? 0,
-            'remaining_capacity' => $checkResult['remaining_capacity'] ?? 0,
-            'model' => $checkResult['model'] ?? 'Scheme',
-        ];
+        return self::check($schemeId, $actionType, $selectedTypes, $bencreatAdd);
     }
 }

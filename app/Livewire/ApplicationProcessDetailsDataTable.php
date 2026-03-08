@@ -347,44 +347,35 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $this->clearSelected();
             $this->dispatch('actionPerformedAndRedirect');
         } elseif ($this->revertrejectAction === 'verification') {
-            $ids = $this->getSelected();
-            $selectedCount = count($ids);
-            if (empty($ids)) {
-                return;
-            }
-            $capacityCheck = \App\Helpers\SchemeCapacityHelper::checkBulk(
-                $this->schemeId,
-                1,
-                $ids
-            );
-            if (!$capacityCheck || !$capacityCheck['is_processed'] || $capacityCheck['remaining_capacity'] < $selectedCount) {
-                $modelName = $capacityCheck['model'] ?? 'Scheme';
-                $available = $capacityCheck['remaining_capacity'] ?? 0;
-                $this->dispatch('toastr', [
-                    'type' => 'error',
-                    'message' => "Capacity exceeded for {$modelName}! Available: {$available}, but you selected {$selectedCount}."
-                ]);
-                return;
-            }
-            foreach ($ids as $id) {
-                DB::transaction(function () use ($id) {
-                    $application = BeneficiaryPersonalDetail::where('application_id', $id)->first();
-                    if ($application) {
-                        $application->update(['next_level_role_id' => $this->nextLabelRoleId]);
-                        $log = new AcceptRejectInfo;
-                        $log->application_id = $id;
-                        $log->beneficiary_id = $application->beneficiary_id;
-                        $log->scheme_id = $this->schemeId;
-                        $log->user_id = Auth::id();
-                        $log->op_type = Codemaster::getIdByCode(23);
-                        $log->save();
-                    }
-                });
-            }
-            $this->dispatch('toastr', ['type' => 'success', 'message' => $selectedCount . ' applications verified!']);
-            $this->clearSelected();
-            $this->dispatch('actionPerformedAndRedirect');
-        } elseif ($this->revertrejectAction === 'approver') {
+    $ids = $this->getSelected();
+    if (empty($ids)) return;
+
+    // মডেল থেকে application_type সংগ্রহ
+    $selectedTypes = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
+                        ->pluck('application_type')
+                        ->toArray();
+// dd($selectedTypes);
+    // চেক মেথড কল
+    $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, 1, $selectedTypes);
+// dd($check);
+    if (!$check['is_processed'] || $check['remaining_capacity'] < count($ids)) {
+        $this->dispatch('toastr', [
+            'type' => 'error',
+            'message' => "Capacity full for {$check['model']}! Space: {$check['remaining_capacity']}."
+        ]);
+        return;
+    }
+
+    // আপডেট
+    DB::transaction(function () use ($ids) {
+        BeneficiaryPersonalDetail::whereIn('application_id', $ids)->update([
+            'next_level_role_id' => $this->nextLabelRoleId
+        ]);
+    });
+
+    $this->dispatch('toastr', ['type' => 'success', 'message' => 'Processed!']);
+    $this->clearSelected();
+} elseif ($this->revertrejectAction === 'approver') {
             $ids = $this->getSelected();
 
             foreach ($ids as $id) {
