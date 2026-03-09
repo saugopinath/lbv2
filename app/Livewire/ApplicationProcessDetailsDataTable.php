@@ -353,7 +353,8 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 ->pluck('application_type')
                 ->toArray();
             $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, 1, $selectedTypes);
-            if (!$check['is_processed'] || $check['remaining_capacity'] < count($ids)) {
+            // dd($check);
+            if (!$check['is_processed'] && $check['remaining_capacity'] < count($ids)) {
                 $this->dispatch('toastr', [
                     'type' => 'error',
                     'message' => "Capacity full for {$check['model']}! Space: {$check['remaining_capacity']}."
