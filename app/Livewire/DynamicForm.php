@@ -13,6 +13,7 @@ use App\Models\BeneficiaryPersonalDetail;
 use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
 use App\Models\UniqueAppBenId;
+use App\Models\WorkflowsteproleMapping;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -22,6 +23,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
 use Throwable;
+use App\Services\WorkflowService;
 
 class DynamicForm extends Component
 {
@@ -83,9 +85,9 @@ class DynamicForm extends Component
 
     public $maxDOB;
 
-    public $isEdit;
+    public $isEdit = false;
 
-    public $actionType = 1;
+    public $actionType = 0;
 
     protected $listeners = [
         'document-validation-passed' => 'onDocumentTabPassed',
@@ -139,6 +141,12 @@ class DynamicForm extends Component
                 $this->maxDOB = now()->subYears($ageConfig['min_age'])->format('Y-m-d');
             }
         }
+        // ,WorkflowService $workflowService
+        // $map = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->schemeId)['min'];
+        // $labelRoles = $workflowService->getLabelRoles($map);
+        // if ($labelRoles) {
+        //     $this->actionType = $labelRoles->next_label_role_id;
+        // }
         $select_lgd = session('lgd_session');
         // dd($select_lgd);
         if (!empty($select_lgd['district_id'])) {
@@ -156,28 +164,23 @@ class DynamicForm extends Component
 
     private function checkCapacity(): bool
     {
-
+        if ($this->isEdit || !empty($this->applicationId)) {
+            return true;
+        }
         $result = SchemeCapacityHelper::check(
             $this->schemeId,
             $this->actionType,
-            $this->formData['application_type'] ?? null
+            [(int) $this->formData['application_type']]
         );
-
-        if (is_array($result)) {
-
-            $msg = "{$result['model']} capacity full. 
-            Total: {$result['total']} 
-            Processed: {$result['processed']} 
-            Remaining: {$result['remaining']}";
-
+        if (!$result['is_processed']) {
+            $msg = 'Capacity exceeded for ' . ($result['model'] ?? 'Scheme') .
+                '! Available: ' . ($result['remaining_capacity'] ?? 0);
             $this->dispatch('toastr', [
                 'type' => 'error',
                 'message' => $msg,
             ]);
-
             return false;
         }
-
         return true;
     }
 
@@ -201,10 +204,8 @@ class DynamicForm extends Component
                 'type' => 'error',
                 'message' => 'Duare Sarkar entry is not allowed.'
             ]);
-
             return false;
         }
-
         return true;
     }
 
@@ -815,7 +816,6 @@ class DynamicForm extends Component
                     return false;
                 }
             }
-
         } catch (Throwable $e) {
             // dd($e);
             DB::rollBack();

@@ -2,351 +2,124 @@
 
 namespace App\Helpers;
 
-use App\Models\Scheme;
+use App\Models\BeneficiaryPersonalDetail;
 use App\Models\District;
+use App\Models\Scheme;
 use App\Models\Block;
 use App\Models\Subdivision;
-use App\Models\BeneficiaryPersonalDetail;
-use Illuminate\Support\Facades\Crypt;
+use App\Models\WorkflowsteproleMapping;
+use App\Services\WorkflowService;
 
 class SchemeCapacityHelper
 {
+    protected static $filters = [];
+    protected static $nextLabelRoleIds = [];
 
-    /*
-    |--------------------------------------------------------------------------
-    | MAIN FUNCTION
-    |--------------------------------------------------------------------------
-    */
-
-    public static function check($schemeId, $actionType, $entryType = null)
+    private static function initFilters($bencreatAdd = null)
     {
-
-        $filterData = self::getFilterData();
-
-        $baseQuery = self::getBaseQuery($schemeId);
-
-        /*
-        |--------------------------------------------------------------------------
-        | SCHEME CHECK
-        |--------------------------------------------------------------------------
-        */
-
-        $result = self::checkScheme($schemeId, $actionType, $entryType, $baseQuery);
-
-        if ($result !== true) {
-            return $result;
+        if ($bencreatAdd) {
+            self::$filters['dist'] = $bencreatAdd['created_by_dist_code'] ?? null;
+            self::$filters['local'] = $bencreatAdd['created_by_local_body_code'] ?? null;
+            self::$filters['creator'] = $bencreatAdd['creator'] ?? null;
+        } else {
+            $lgd = session('lgd_session', []);
+            self::$filters['dist'] = isset($lgd['district_id']) ? \Illuminate\Support\Facades\Crypt::decryptString($lgd['district_id']) : null;
+            self::$filters['local'] = isset($lgd['block_id']) ? \Illuminate\Support\Facades\Crypt::decryptString($lgd['block_id']) : 
+                                     (\Illuminate\Support\Facades\Crypt::decryptString($lgd['subdivision_id'] ?? '') ?: null);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | DISTRICT CHECK
-        |--------------------------------------------------------------------------
-        */
-
-        if (!empty($filterData['created_by_dist_code'])) {
-
-            $result = self::checkDistrict(
-                $schemeId,
-                $actionType,
-                $entryType,
-                $filterData['created_by_dist_code'],
-                $baseQuery
-            );
-
-            if ($result !== true) {
-                return $result;
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | BLOCK CHECK
-        |--------------------------------------------------------------------------
-        */
-
-        if (!empty($filterData['created_by_local_body_code'])) {
-
-            $result = self::checkBlock(
-                $schemeId,
-                $actionType,
-                $entryType,
-                $filterData['created_by_local_body_code'],
-                $baseQuery
-            );
-
-            if ($result !== true) {
-                return $result;
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | SUBDIVISION CHECK
-        |--------------------------------------------------------------------------
-        */
-
-        if (!empty($filterData['created_by_subdivision_code'])) {
-
-            $result = self::checkSubdivision(
-                $schemeId,
-                $actionType,
-                $entryType,
-                $filterData['created_by_subdivision_code'],
-                $baseQuery
-            );
-
-            if ($result !== true) {
-                return $result;
-            }
-        }
-
-        return true;
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | SESSION FILTER DATA
-    |--------------------------------------------------------------------------
-    */
-
-    private static function getFilterData()
+    public static function check($schemeId, $actionType, $selectedTypes = [], $bencreatAdd = null)
     {
-        $filter = [];
+        $map = WorkflowsteproleMapping::getMinMaxWorkflowStep($schemeId)['max'];
+        $workflowService = app(WorkflowService::class);
+        $labelRoles = $workflowService->getLabelRoles($schemeId, $map);
 
-        $select_lgd = session('lgd_session');
-
-        if (!empty($select_lgd['district_id'])) {
-
-            $filter['created_by_dist_code'] =
-                Crypt::decryptString($select_lgd['district_id']);
+        if ($actionType == 1) {
+            self::$nextLabelRoleIds = [$labelRoles->same_label_role_id, $labelRoles->next_label_role_id];
+        } elseif ($actionType == 2) {
+            self::$nextLabelRoleIds = [$labelRoles->next_label_role_id];
         }
 
-        if (!empty($select_lgd['block_id'])) {
+        self::initFilters($bencreatAdd);
+        $res = self::checkScheme($schemeId, $actionType, $selectedTypes);
+        if (!$res['is_processed']) return $res;
+        $res = self::checkDistrict($schemeId, $actionType, $selectedTypes);
+        if (!$res['is_processed']) return $res;
+        $res = self::checkLocal($schemeId, $actionType, $selectedTypes);
+        if (!$res['is_processed']) return $res;
 
-            $filter['created_by_local_body_code'] =
-                Crypt::decryptString($select_lgd['block_id']);
-        }
-
-        if (!empty($select_lgd['subdivision_id'])) {
-
-            $filter['created_by_subdivision_code'] =
-                Crypt::decryptString($select_lgd['subdivision_id']);
-        }
-
-        return $filter;
+        return ['is_processed' => true];
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | BASE QUERY
-    |--------------------------------------------------------------------------
-    */
-
-    private static function getBaseQuery($schemeId)
+    public static function checkScheme($schemeId, $actionType, $selectedTypes)
     {
-        return BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
-            ->whereIn('is_clean', [1, 2]);
+        $scheme = Scheme::with(['capacities' => fn($q) => $q->where('action_type', $actionType)->active()])->find($schemeId);
+        $capacity = $scheme?->capacities->first();
+        if (!$capacity) return ['is_processed' => true];
+
+        return self::calculate($capacity, 'Scheme', $schemeId, null, null, $selectedTypes);
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | SCHEME CAPACITY CHECK
-    |--------------------------------------------------------------------------
-    */
-
-    private static function checkScheme($schemeId, $actionType, $entryType, $baseQuery)
+    public static function checkDistrict($schemeId, $actionType, $selectedTypes)
     {
+        $distId = self::$filters['dist'];
+        if (!$distId) return ['is_processed' => true];
+        $district = District::with(['capacities' => fn($q) => $q->where('scheme_id', $schemeId)->where('action_type', $actionType)->active()])->find($distId);
+        $capacity = $district?->capacities->first();
+        if (!$capacity) return ['is_processed' => true];
 
-        $scheme = Scheme::with([
-            'capacities' => function ($q) use ($schemeId, $actionType, $entryType) {
-
-                $q->active()
-                    ->where('scheme_id', $schemeId)
-                    ->where('action_type', $actionType);
-
-                if ($entryType !== null) {
-                    $q->where('entry_type', $entryType);
-                }
-            }
-        ])->find($schemeId);
-
-        if (!$scheme || $scheme->capacities->isEmpty()) {
-            return true;
-        }
-
-        $capacity = $scheme->capacities->first();
-
-        $count = $baseQuery->count();
-
-        if ($count >= $capacity->total_capacity) {
-
-            return self::makeResponse(
-                'Scheme',
-                null,
-                $capacity->total_capacity,
-                $count
-            );
-        }
-
-        return true;
+        return self::calculate($capacity, 'District', $schemeId, $distId, null, $selectedTypes);
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | DISTRICT CAPACITY CHECK
-    |--------------------------------------------------------------------------
-    */
-
-    private static function checkDistrict($schemeId, $actionType, $entryType, $distId, $baseQuery)
+    public static function checkLocal($schemeId, $actionType, $selectedTypes)
     {
-
-        $district = District::with([
-            'capacities' => function ($q) use ($schemeId, $actionType, $entryType) {
-
-                $q->active()
-                    ->where('scheme_id', $schemeId)
-                    ->where('action_type', $actionType);
-
-                if ($entryType !== null) {
-                    $q->where('entry_type', $entryType);
-                }
-            }
-        ])->find($distId);
-
-        if (!$district || $district->capacities->isEmpty()) {
-            return true;
+        $localId = self::$filters['local'];
+        if (!$localId) return ['is_processed' => true];
+        if (isset(self::$filters['creator'])) {
+            $model = (self::$filters['creator'] == 1) ? Block::class : Subdivision::class;
+        } else {
+            $model = session('lgd_session')['block_id'] ? Block::class : Subdivision::class;
         }
 
-        $capacity = $district->capacities->first();
+        $localBody = $model::with(['capacities' => fn($q) => $q->where('scheme_id', $schemeId)->where('action_type', $actionType)->active()])->find($localId);
+        $capacity = $localBody?->capacities->first();
+        if (!$capacity) return ['is_processed' => true];
 
-        $count = (clone $baseQuery)
-            ->where(District::BENEFICIARY_LOCATION_COLUMN, $distId)
-            ->count();
-
-        if ($count >= $capacity->total_capacity) {
-
-            return self::makeResponse(
-                'District',
-                $distId,
-                $capacity->total_capacity,
-                $count
-            );
-        }
-
-        return true;
+        $label = ($model == Block::class) ? 'Block' : 'Subdivision';
+        return self::calculate($capacity, $label, $schemeId, self::$filters['dist'], $localId, $selectedTypes);
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | BLOCK CAPACITY CHECK
-    |--------------------------------------------------------------------------
-    */
-
-    private static function checkBlock($schemeId, $actionType, $entryType, $blockId, $baseQuery)
+    private static function calculate($capacity, $label, $schemeId, $distId, $localId, $selectedTypes)
     {
+        $total = (int)$capacity->total_capacity;
+        $dbType = (int)$capacity->entry_type;
+        $currentRequestCount = empty($selectedTypes) ? 1 : count($selectedTypes);
+        $query = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
+                    ->whereIn('is_clean', [1, 2])
+                    ->whereIn('next_level_role_id', self::$nextLabelRoleIds);
 
-        $block = Block::with([
-            'capacities' => function ($q) use ($schemeId, $actionType, $entryType) {
+        if ($dbType === 0) $query->whereIn('application_type', [1, 2]); else $query->where('application_type', $dbType);
+        if ($distId) $query->where('created_by_dist_code', $distId);
+        if ($localId) $query->where('created_by_local_body_code', $localId);
 
-                $q->active()
-                    ->where('scheme_id', $schemeId)
-                    ->where('action_type', $actionType);
+        $existingCount = $query->count();
 
-                if ($entryType !== null) {
-                    $q->where('entry_type', $entryType);
-                }
-            }
-        ])->find($blockId);
-
-        if (!$block || $block->capacities->isEmpty()) {
-            return true;
+        if (($existingCount + $currentRequestCount) > $total) {
+            return [
+                'is_processed' => false,
+                'total_capacity' => $total,
+                'already_entered' => $existingCount,
+                'remaining_capacity' => max(0, $total - $existingCount),
+                'model' => $label
+            ];
         }
 
-        $capacity = $block->capacities->first();
-
-        $count = (clone $baseQuery)
-            ->where(Block::BENEFICIARY_LOCATION_COLUMN, $blockId)
-            ->count();
-
-        if ($count >= $capacity->total_capacity) {
-
-            return self::makeResponse(
-                'Block',
-                $blockId,
-                $capacity->total_capacity,
-                $count
-            );
-        }
-
-        return true;
+        return ['is_processed' => true, 'remaining_capacity' => ($total - $existingCount), 'model' => $label];
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | SUBDIVISION CAPACITY CHECK
-    |--------------------------------------------------------------------------
-    */
-
-    private static function checkSubdivision($schemeId, $actionType, $entryType, $subId, $baseQuery)
+    public static function checkBulk($schemeId, $actionType, $selectedTypes = [], $bencreatAdd = null)
     {
-
-        $sub = Subdivision::with([
-            'capacities' => function ($q) use ($schemeId, $actionType, $entryType) {
-
-                $q->active()
-                    ->where('scheme_id', $schemeId)
-                    ->where('action_type', $actionType);
-
-                if ($entryType !== null) {
-                    $q->where('entry_type', $entryType);
-                }
-            }
-        ])->find($subId);
-
-        if (!$sub || $sub->capacities->isEmpty()) {
-            return true;
-        }
-
-        $capacity = $sub->capacities->first();
-
-        $count = (clone $baseQuery)
-            ->where(Subdivision::BENEFICIARY_LOCATION_COLUMN, $subId)
-            ->count();
-
-        if ($count >= $capacity->total_capacity) {
-
-            return self::makeResponse(
-                'Subdivision',
-                $subId,
-                $capacity->total_capacity,
-                $count
-            );
-        }
-
-        return true;
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | RESPONSE FORMAT
-    |--------------------------------------------------------------------------
-    */
-
-    private static function makeResponse($model, $location, $total, $processed)
-    {
-        return [
-            'model' => $model,
-            'location' => $location,
-            'total' => $total,
-            'processed' => $processed,
-            'remaining' => max($total - $processed, 0),
-        ];
+        return self::check($schemeId, $actionType, $selectedTypes, $bencreatAdd);
     }
 }
