@@ -352,8 +352,9 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $selectedTypes = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
                 ->pluck('application_type')
                 ->toArray();
+                // dd($selectedTypes);
             $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, 1, $selectedTypes);
-            if (!$check['is_processed'] || $check['remaining_capacity'] < count($ids)) {
+            if (!$check['is_processed'] && $check['remaining_capacity'] < count($ids)) {
                 $this->dispatch('toastr', [
                     'type' => 'error',
                     'message' => "Capacity full for {$check['model']}! Space: {$check['remaining_capacity']}."

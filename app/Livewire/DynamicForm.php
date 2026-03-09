@@ -435,7 +435,6 @@ class DynamicForm extends Component
         if (!empty($rules)) {
             $this->validate($rules);
         }
-        $this->ensureApplicationIds();
 
         /* ===============================
        FIRST TAB CHECK ONLY
@@ -453,6 +452,7 @@ class DynamicForm extends Component
                 return;
             }
         }
+        $this->ensureApplicationIds();
         if (!$this->checkDuplicateEntries()) {
             return;
         }
@@ -817,7 +817,7 @@ class DynamicForm extends Component
                 }
             }
         } catch (Throwable $e) {
-            // dd($e);
+            dd($e);
             DB::rollBack();
             $this->dispatch('toastr', [
                 'type' => 'error',
