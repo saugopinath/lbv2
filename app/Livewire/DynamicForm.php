@@ -723,7 +723,7 @@ class DynamicForm extends Component
             //     );
             // }
         } catch (Throwable $e) {
-            // dd($e);
+            dd($e);
             DB::rollBack();
             // Log::error('saveCurrentTabData failed', [
             //     'application_id' => $this->applicationId ?? null,

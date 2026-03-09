@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Activitylog\Models\Activity;
 use App\Models\UserPageVisitLog;
+use App\Models\LivewireActionLog;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -22,6 +23,19 @@ class DailyUserActivity extends Component
     public $selectedSessionId;
     public $selectedUrl;
     public $showAuditModal = false;
+
+    // Livewire Action Modal
+    public $showActionModal = false;
+    public $actionModalSessionId = null;
+    public $actionModalUrl = null;
+    public $selectedActionLog = null;
+
+    // Request/Response modal (separate from audit log)
+    public $showActionRequestModal = false;
+    public $selectedActionRequestLog = null;
+
+    public $showActionAuditModal = false;
+    public $actionAudits = [];
 
 
     protected $queryString = [
@@ -50,14 +64,112 @@ class DailyUserActivity extends Component
         $this->selectedUrl = null;
     }
 
+    // ── Livewire Action Modal ────
+
+    public function openActionModal($sessionId, $url)
+    {
+        $this->actionModalSessionId = $sessionId;
+        $this->actionModalUrl = $url;
+        $this->showActionModal = true;
+    }
+
+    public function closeActionModal()
+    {
+        $this->showActionModal = false;
+        $this->actionModalSessionId = null;
+        $this->actionModalUrl = null;
+        $this->selectedActionLog   = null;
+        $this->selectedActionRequestLog = null;
+        $this->showActionRequestModal = false;
+        $this->showActionAuditModal = false;
+    }
+
+    public function openActionRequestModal($actionLogId)
+    {
+        $actionLog = LivewireActionLog::find($actionLogId);
+
+        if (!$actionLog) {
+            $this->selectedActionRequestLog = null;
+            $this->showActionRequestModal = true;
+            return;
+        }
+
+        $arr = $actionLog->toArray();
+        $arr['request_payload']  = is_string($arr['request_payload']  ?? null) ? json_decode($arr['request_payload'],  true) : ($arr['request_payload']  ?? []);
+        $arr['response_payload'] = is_string($arr['response_payload'] ?? null) ? json_decode($arr['response_payload'], true) : ($arr['response_payload'] ?? []);
+
+        $this->selectedActionRequestLog = $arr;
+        $this->showActionRequestModal = true;
+    }
+
+    public function closeActionRequestModal()
+    {
+        $this->showActionRequestModal = false;
+        $this->selectedActionRequestLog = null;
+    }
+
+    public function openActionAuditLog($actionLogId)
+    {
+        // dd($actionLogId);
+        $actionLog = LivewireActionLog::find($actionLogId);
+
+        if (!$actionLog) {
+            $this->selectedActionLog = null;
+            $this->actionAudits = [];
+            $this->showActionAuditModal = true;
+            return;
+        }
+
+        $arr = $actionLog->toArray();
+        $arr['request_payload']  = is_string($arr['request_payload']  ?? null) ? json_decode($arr['request_payload'],  true) : ($arr['request_payload']  ?? []);
+        $arr['response_payload'] = is_string($arr['response_payload'] ?? null) ? json_decode($arr['response_payload'], true) : ($arr['response_payload'] ?? []);
+        $this->selectedActionLog = $arr;
+        $nextAction = LivewireActionLog::where('session_id', $actionLog->session_id)
+            ->where('created_at', '>', $actionLog->created_at)
+            ->orderBy('created_at')
+            ->first();
+
+        $from = $actionLog->created_at;
+        $to   = $nextAction
+            ? $nextAction->created_at
+            : $actionLog->created_at->addSeconds(5);
+
+        $query = Audit::where('session_id', $actionLog->session_id);
+        $query->where('livewire_action_log_id', (string) $actionLog->id);
+        // $query->where('other_details', 'LIKE', '%"livewire_action_log_id":"' . $actionLog->id . '"%');
+        // dd($query->toSql(), $query->getBindings());
+
+        $this->actionAudits = $query
+            ->whereBetween('created_at', [$from, $to])
+            ->orderBy('created_at')
+            ->get()
+            ->toArray();
+        $this->showActionAuditModal = true;
+    }
+
+    public function closeActionAuditLog()
+    {
+        $this->showActionAuditModal = false;
+        $this->selectedActionLog = null;
+        $this->actionAudits = [];
+    }
+
+    public function getActionLogsProperty()
+    {
+        if (!$this->actionModalSessionId || !$this->actionModalUrl) {
+            return collect();
+        }
+        return LivewireActionLog::where('session_id', $this->actionModalSessionId)
+            ->where('url', $this->actionModalUrl)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
     public function getAuditsProperty()
     {
         if (!$this->selectedSessionId) {
             return collect();
         }
-
         $query = Audit::where('session_id', $this->selectedSessionId);
-
         if ($this->selectedUrl) {
             $query->where(function ($q) {
                 $q->where('other_details->url', $this->selectedUrl)
@@ -66,14 +178,10 @@ class DailyUserActivity extends Component
                     ->orWhere('other_details', 'LIKE', '%"referrer":"' . $this->selectedUrl . '"%');
             });
         }
-
-
         return $query->latest()->get();
     }
 
-
     public function render()
-
     {
         $query = Activity::query()
             ->from('activity_log as main_log')
