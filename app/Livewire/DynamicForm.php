@@ -164,15 +164,13 @@ class DynamicForm extends Component
 
     private function checkCapacity(): bool
     {
-
-        // dd($this->actionType);
         if ($this->isEdit || !empty($this->applicationId)) {
             return true;
         }
         $result = SchemeCapacityHelper::check(
             $this->schemeId,
             $this->actionType,
-            $this->formData['application_type']
+            [(int)$this->formData['application_type']]
         );
         if (!$result['is_processed']) {
             $msg = 'Capacity exceeded for ' . ($result['model'] ?? 'Scheme') .
@@ -410,7 +408,6 @@ class DynamicForm extends Component
         if (! empty($rules)) {
             $this->validate($rules);
         }
-        // Capacity check
         if (! $this->checkCapacity()) {
             return;
         }

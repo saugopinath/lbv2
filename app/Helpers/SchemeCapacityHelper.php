@@ -17,7 +17,6 @@ class SchemeCapacityHelper
 
     private static function initFilters($bencreatAdd = null)
     {
-        // যদি $bencreatAdd থাকে তবে সেটি নিবে, নাহলে সেশন থেকে নিবে
         if ($bencreatAdd) {
             self::$filters['dist'] = $bencreatAdd['created_by_dist_code'] ?? null;
             self::$filters['local'] = $bencreatAdd['created_by_local_body_code'] ?? null;
@@ -43,16 +42,10 @@ class SchemeCapacityHelper
         }
 
         self::initFilters($bencreatAdd);
-
-        // ১. Scheme Level
         $res = self::checkScheme($schemeId, $actionType, $selectedTypes);
         if (!$res['is_processed']) return $res;
-
-        // ২. District Level
         $res = self::checkDistrict($schemeId, $actionType, $selectedTypes);
         if (!$res['is_processed']) return $res;
-
-        // ৩. Local Body Level
         $res = self::checkLocal($schemeId, $actionType, $selectedTypes);
         if (!$res['is_processed']) return $res;
 
@@ -72,8 +65,6 @@ class SchemeCapacityHelper
     {
         $distId = self::$filters['dist'];
         if (!$distId) return ['is_processed' => true];
-
-        // রিলেশনশিপ দিয়ে ডিস্ট্রিক্ট ক্যাপাসিটি চেক
         $district = District::with(['capacities' => fn($q) => $q->where('scheme_id', $schemeId)->where('action_type', $actionType)->active()])->find($distId);
         $capacity = $district?->capacities->first();
         if (!$capacity) return ['is_processed' => true];
@@ -85,8 +76,6 @@ class SchemeCapacityHelper
     {
         $localId = self::$filters['local'];
         if (!$localId) return ['is_processed' => true];
-
-        // $bencreatAdd থেকে আসলে 'creator' এর ওপর ভিত্তি করে মডেল ঠিক করা
         if (isset(self::$filters['creator'])) {
             $model = (self::$filters['creator'] == 1) ? Block::class : Subdivision::class;
         } else {
@@ -106,8 +95,6 @@ class SchemeCapacityHelper
         $total = (int)$capacity->total_capacity;
         $dbType = (int)$capacity->entry_type;
         $currentRequestCount = empty($selectedTypes) ? 1 : count($selectedTypes);
-
-        // বেনিফিশিয়ারি কাউন্ট কুয়েরি
         $query = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
                     ->whereIn('is_clean', [1, 2])
                     ->whereIn('next_level_role_id', self::$nextLabelRoleIds);

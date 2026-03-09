@@ -351,7 +351,6 @@ class BulkActionModal extends Component
     }
     private function checkCapacity($id, $actionType): bool
     {
-        // ডাটাবেস থেকে ওই নির্দিষ্ট বেনিফিশিয়ারির ডাটা তুলে আনা
         $beneficiary = BeneficiaryPersonalDetail::where('application_id', $id)->first();
 
         if (!$beneficiary) return false;
@@ -359,14 +358,12 @@ class BulkActionModal extends Component
         $bencreatAdd = [
             'created_by_dist_code' => $beneficiary->created_by_dist_code,
             'created_by_local_body_code' => $beneficiary->created_by_local_body_code,
-            'creator' => $beneficiary->creator() // আপনার মডেলে যদি এই মেথড থাকে
+            'creator' => $beneficiary->creator()
         ];
-
-        // হেল্পার কল (এখানে ৩য় প্যারামিটার হিসেবে সিঙ্গেল টাইপটি পাঠানো হচ্ছে)
         $result = \App\Helpers\SchemeCapacityHelper::checkBulk(
             $this->schemeId,
             $actionType,
-            [(int)$beneficiary->application_type], // সিঙ্গেল টাইপটিকে অ্যারে হিসেবে পাঠানো
+            [(int)$beneficiary->application_type],
             $bencreatAdd
         );
 

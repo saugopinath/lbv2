@@ -347,35 +347,28 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $this->clearSelected();
             $this->dispatch('actionPerformedAndRedirect');
         } elseif ($this->revertrejectAction === 'verification') {
-    $ids = $this->getSelected();
-    if (empty($ids)) return;
+            $ids = $this->getSelected();
+            if (empty($ids)) return;
+            $selectedTypes = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
+                ->pluck('application_type')
+                ->toArray();
+            $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, 1, $selectedTypes);
+            if (!$check['is_processed'] || $check['remaining_capacity'] < count($ids)) {
+                $this->dispatch('toastr', [
+                    'type' => 'error',
+                    'message' => "Capacity full for {$check['model']}! Space: {$check['remaining_capacity']}."
+                ]);
+                return;
+            }
+            DB::transaction(function () use ($ids) {
+                BeneficiaryPersonalDetail::whereIn('application_id', $ids)->update([
+                    'next_level_role_id' => $this->nextLabelRoleId
+                ]);
+            });
 
-    // মডেল থেকে application_type সংগ্রহ
-    $selectedTypes = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
-                        ->pluck('application_type')
-                        ->toArray();
-// dd($selectedTypes);
-    // চেক মেথড কল
-    $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, 1, $selectedTypes);
-// dd($check);
-    if (!$check['is_processed'] || $check['remaining_capacity'] < count($ids)) {
-        $this->dispatch('toastr', [
-            'type' => 'error',
-            'message' => "Capacity full for {$check['model']}! Space: {$check['remaining_capacity']}."
-        ]);
-        return;
-    }
-
-    // আপডেট
-    DB::transaction(function () use ($ids) {
-        BeneficiaryPersonalDetail::whereIn('application_id', $ids)->update([
-            'next_level_role_id' => $this->nextLabelRoleId
-        ]);
-    });
-
-    $this->dispatch('toastr', ['type' => 'success', 'message' => 'Processed!']);
-    $this->clearSelected();
-} elseif ($this->revertrejectAction === 'approver') {
+            $this->dispatch('toastr', ['type' => 'success', 'message' => 'Processed!']);
+            $this->clearSelected();
+        } elseif ($this->revertrejectAction === 'approver') {
             $ids = $this->getSelected();
 
             foreach ($ids as $id) {
