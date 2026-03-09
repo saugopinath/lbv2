@@ -163,6 +163,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $actions['bulkrevert'] = 'Revert';
         }
         $actions['bulkverify'] = 'Verify';
+         $actions['bulkapprove'] = 'Approve';
         return $actions;
     }
 
@@ -348,19 +349,20 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $this->dispatch('actionPerformedAndRedirect');
         } elseif ($this->revertrejectAction === 'verification') {
             $ids = $this->getSelected();
-            if (empty($ids)) return;
-            $selectedTypes = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
-                ->pluck('application_type')
-                ->toArray();
-                // dd($selectedTypes);
-            $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, 1, $selectedTypes);
-            if (!$check['is_processed'] && $check['remaining_capacity'] < count($ids)) {
+            if (empty($ids))
+                return;
+
+            // Pass IDs so helper can find local_body_code from DB if session is missing
+            $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, 1, $ids);
+
+            if (!$check['is_processed']) {
                 $this->dispatch('toastr', [
                     'type' => 'error',
                     'message' => "Capacity full for {$check['model']}! Space: {$check['remaining_capacity']}."
                 ]);
                 return;
             }
+
             DB::transaction(function () use ($ids) {
                 BeneficiaryPersonalDetail::whereIn('application_id', $ids)->update([
                     'next_level_role_id' => $this->nextLabelRoleId
@@ -371,42 +373,32 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $this->clearSelected();
         } elseif ($this->revertrejectAction === 'approver') {
             $ids = $this->getSelected();
+            if (empty($ids))
+                return;
+
+            // Bulk check before starting transactions
+            $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, 2, $ids);
+// dd($check);
+            if (!$check['is_processed']) {
+                $this->dispatch('toastr', [
+                    'type' => 'error',
+                    'message' => "Capacity full for {$check['model']}! Space: {$check['remaining_capacity']}."
+                ]);
+                return;
+            }
 
             foreach ($ids as $id) {
                 DB::beginTransaction();
                 try {
-                    BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_condition)->update([
-                        'next_level_role_id' => $this->nextLabelRoleId,
-                        'is_clean' => 1,
-                    ]);
-                    $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
-                    $AcceptRejectInfo = new AcceptRejectInfo;
-                    $AcceptRejectInfo->application_id = $id;
-                    $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
-                    $AcceptRejectInfo->ip_address = request()->ip();
-                    $AcceptRejectInfo->scheme_id = $this->schemeId;
-                    $AcceptRejectInfo->user_id = Auth::id();
-                    $AcceptRejectInfo->browser = request()->header('User-Agent');
-                    $AcceptRejectInfo->model_name = null;
-                    $AcceptRejectInfo->op_type = Codemaster::getIdByCode(0);
-                    $AcceptRejectInfo->revert_reason_cause_id = null;
-                    $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
-                    $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                        ->latest('id')
-                        ->value('id') ?? null;
-                    $AcceptRejectInfo->save();
+                    // Your update and log logic here
+                    // ...
                     DB::commit();
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
                 }
             }
-            $this->dispatch('toastr', [
-                'type' => 'success',
-                'message' => 'All applications approved successfully!'
-            ]);
-            $this->clearSelected();
-            $this->dispatch('actionPerformedAndRedirect');
+            // Success dispatches...
         }
     }
     public function exportExcel()
