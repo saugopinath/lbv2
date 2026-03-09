@@ -186,7 +186,7 @@ class SchemeCapacityHelper
                 'total_capacity' => $total,
                 'already_entered' => $existingCount,
                 'remaining_capacity' => max(0, $total - $existingCount),
-                'model' => $label . " (Type $dbType)"
+                'model' => $label
             ];
         }
 
