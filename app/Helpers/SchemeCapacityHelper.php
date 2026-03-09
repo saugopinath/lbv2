@@ -24,8 +24,7 @@ class SchemeCapacityHelper
         } else {
             $lgd = session('lgd_session', []);
             self::$filters['dist'] = isset($lgd['district_id']) ? \Illuminate\Support\Facades\Crypt::decryptString($lgd['district_id']) : null;
-            self::$filters['local'] = isset($lgd['block_id']) ? \Illuminate\Support\Facades\Crypt::decryptString($lgd['block_id']) : 
-                                     (\Illuminate\Support\Facades\Crypt::decryptString($lgd['subdivision_id'] ?? '') ?: null);
+            self::$filters['local'] = isset($lgd['block_id']) ? \Illuminate\Support\Facades\Crypt::decryptString($lgd['block_id']) : (\Illuminate\Support\Facades\Crypt::decryptString($lgd['subdivision_id'] ?? '') ?: null);
         }
     }
 
@@ -54,7 +53,14 @@ class SchemeCapacityHelper
 
     public static function checkScheme($schemeId, $actionType, $selectedTypes)
     {
-        $scheme = Scheme::with(['capacities' => fn($q) => $q->where('action_type', $actionType)->active()])->find($schemeId);
+        $scheme = Scheme::with(['capacities' => function ($q) use ($actionType, $selectedTypes) {
+            $q->active()
+                ->where('action_type', $actionType)
+                ->where(function ($query) use ($selectedTypes) {
+                    $query->whereIn('entry_type', $selectedTypes)
+                        ->orwhere('entry_type', 0);
+                });
+        }])->find($schemeId);
         $capacity = $scheme?->capacities->first();
         if (!$capacity) return ['is_processed' => true];
 
@@ -65,7 +71,15 @@ class SchemeCapacityHelper
     {
         $distId = self::$filters['dist'];
         if (!$distId) return ['is_processed' => true];
-        $district = District::with(['capacities' => fn($q) => $q->where('scheme_id', $schemeId)->where('action_type', $actionType)->active()])->find($distId);
+        $district = District::with(['capacities' => function ($q) use ($schemeId, $actionType, $selectedTypes) {
+            $q->active()
+                ->where('action_type', $actionType)
+                ->where('scheme_id', $schemeId)
+                ->where(function ($query) use ($selectedTypes) {
+                    $query->whereIn('entry_type', $selectedTypes)
+                        ->orwhere('entry_type', 0);
+                });
+        }])->find($distId);
         $capacity = $district?->capacities->first();
         if (!$capacity) return ['is_processed' => true];
 
@@ -81,8 +95,15 @@ class SchemeCapacityHelper
         } else {
             $model = session('lgd_session')['block_id'] ? Block::class : Subdivision::class;
         }
-
-        $localBody = $model::with(['capacities' => fn($q) => $q->where('scheme_id', $schemeId)->where('action_type', $actionType)->active()])->find($localId);
+        $localBody = $model::with(['capacities' => function ($q) use ($schemeId, $actionType, $selectedTypes) {
+            $q->active()
+                ->where('action_type', $actionType)
+                ->where('scheme_id', $schemeId)
+                ->where(function ($query) use ($selectedTypes) {
+                    $query->whereIn('entry_type', $selectedTypes)
+                        ->orwhere('entry_type', 0);
+                });
+        }])->find($localId);
         $capacity = $localBody?->capacities->first();
         if (!$capacity) return ['is_processed' => true];
 
@@ -96,10 +117,11 @@ class SchemeCapacityHelper
         $dbType = (int)$capacity->entry_type;
         $currentRequestCount = empty($selectedTypes) ? 1 : count($selectedTypes);
         $query = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
-                    ->whereIn('is_clean', [1, 2])
-                    ->whereIn('next_level_role_id', self::$nextLabelRoleIds);
+            ->whereIn('is_clean', [1, 2])
+            ->whereIn('next_level_role_id', self::$nextLabelRoleIds);
 
-        if ($dbType === 0) $query->whereIn('application_type', [1, 2]); else $query->where('application_type', $dbType);
+        if ($dbType === 0) $query->whereIn('application_type', [1, 2]);
+        else $query->where('application_type', $dbType);
         if ($distId) $query->where('created_by_dist_code', $distId);
         if ($localId) $query->where('created_by_local_body_code', $localId);
 
