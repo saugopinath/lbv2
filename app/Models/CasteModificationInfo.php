@@ -49,6 +49,7 @@ class CasteModificationInfo extends Model implements Auditable
             'url' => request()->fullUrl(),
             'method' => request()->method(),
             'referrer' => request()->header('referer'),
+            
         ]);
 
 

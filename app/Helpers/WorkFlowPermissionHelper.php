@@ -19,55 +19,55 @@ class WorkFlowPermissionHelper
 
     public static function canEntry(): bool
     {
-        return Auth::user()->can('submit-lb-form');
+        return Auth::user() && Auth::user()->can('submit-lb-form');
     }
     public static function canViewUser(): bool
     {
-        return Auth::user()->can('view users');
+        return Auth::user() && Auth::user()->can('view users');
     }
     public static function canDraftList(): bool
     {
-        return Auth::user()->can('view draft list');
+        return Auth::user() && Auth::user()->can('view draft list');
     }
     public static function canEditDraft(): bool
     {
-        return Auth::user()->can('edit draft');
+        return Auth::user() && Auth::user()->can('edit draft');
     }
     public static function canViewBeneficiaries(): bool
     {
-        return Auth::user()->can('view beneficiaries');
+        return Auth::user() && Auth::user()->can('view beneficiaries');
     }
     public static function canViewReport(): bool
     {
-        return Auth::user()->can('view reports');
+        return Auth::user() && Auth::user()->can('view reports');
     }
     public static function canRoleMappings(): bool
     {
-        return Auth::user()->can('create role mappings');
+        return Auth::user() && Auth::user()->can('create role mappings');
     }
     public static function canApproveApplication(): bool
     {
-        return Auth::user()->can('approve application');
+        return Auth::user() && Auth::user()->can('approve application');
     }
     public static function canRevertApplication(): bool
     {
-        return Auth::user()->can('revert application');
+        return Auth::user() && Auth::user()->can('revert application');
     }
     public static function canCreateUsers(): bool
     {
-        return Auth::user()->can('create users');
+        return Auth::user() && Auth::user()->can('create users');
     }
     public static function canNormalEntryAllow(): bool
     {
-        return Auth::user()->can('Normal Entry');
+        return Auth::user() && Auth::user()->can('Normal Entry');
     }
     public static function canDuareSarkarEntryAllow(): bool
     {
-        return Auth::user()->can('Duare Sarkar Entry');
+        return Auth::user() && Auth::user()->can('Duare Sarkar Entry');
     }
     public static function canEntryAllow(): bool
     {
-        return Auth::user()->can('Entry Allow');
+        return Auth::user() && Auth::user()->can('Entry Allow');
     }
     public static function canCreateEntry(): bool
     {
@@ -91,51 +91,51 @@ class WorkFlowPermissionHelper
     }
     public static function canModifyCaste(): bool
     {
-        return Auth::user()->can('modify caste');
+        return Auth::user() && Auth::user()->can('modify caste');
     }
     public static function canEditCaste(): bool
     {
-        return Auth::user()->can('edit caste');
+        return Auth::user() && Auth::user()->can('edit caste');
     }
     public static function canUpdateCaste(): bool
     {
-        return Auth::user()->can('update caste');
+        return Auth::user() && Auth::user()->can('update caste');
     }
     public static function canCasteModification(): bool
     {
-        return Auth::user()->can('view caste modification list');
+        return Auth::user() && Auth::user()->can('view caste modification list');
     }
     public static function canBeneficiaryDetails(): bool
     {
-        return Auth::user()->can('view beneficiary details');
+        return Auth::user() && Auth::user()->can('view beneficiary details');
     }
     public static function canVerifierIncomplet(): bool
     {
-        return Auth::user()->can('view verifier incomplete');
+        return Auth::user() && Auth::user()->can('view verifier incomplete');
     }
     public static function canApproverIncomplet(): bool
     {
-        return Auth::user()->can('view approver incomplete');
+        return Auth::user() && Auth::user()->can('view approver incomplete');
     }
     public static function canUpdateIncomplet(): bool
     {
-        return Auth::user()->can('update incomplete');
+        return Auth::user() && Auth::user()->can('update incomplete');
     }
     public static function canRevertIncomplet(): bool
     {
-        return Auth::user()->can('revert incomplete');
+        return Auth::user() && Auth::user()->can('revert incomplete');
     }
     public static function canViewOffices(): bool
     {
-        return Auth::user()->can('view offices');
+        return Auth::user() && Auth::user()->can('view offices');
     }
     public static function canRoleMapping(): bool
     {
-        return Auth::user()->can('manage role mappings');
+        return Auth::user() && Auth::user()->can('manage role mappings');
     }
     public static function canViewPermission(): bool
     {
-        return Auth::user()->can('view permission');
+        return Auth::user() && Auth::user()->can('view permission');
     }
     public static function canUpdateBankDetails(): bool
     {
@@ -195,33 +195,33 @@ class WorkFlowPermissionHelper
     }
     public static function canApproverAllow(): bool
     {
-        return Auth::user()->can('Approver Allow');
+        return Auth::user() && Auth::user()->can('Approver Allow');
     }
     public static function canRejectAllow(): bool
     {
-        return Auth::user()->can('Reject Allow');
+        return Auth::user() && Auth::user()->can('Reject Allow');
     }
     public static function canRevertAllow(): bool
     {
-        return Auth::user()->can('Revert Allow');
+        return Auth::user() && Auth::user()->can('Revert Allow');
     }
     public static function canAnyLbMenu(): bool
     {
-        return Auth::user()->can('lb-application-list') || Auth::user()->can('submit-lb-form');
+        return Auth::user() && (Auth::user()->can('lb-application-list') || Auth::user()->can('submit-lb-form'));
     }
     public static function canIncomplete(): bool
     {
-        return Auth::user()->can('view verifier incomplete')
-            || Auth::user()->can('view approver incomplete');
+        return Auth::user() && (Auth::user()->can('view verifier incomplete')
+            || Auth::user()->can('view approver incomplete'));
     }
     public static function canDutyManagement(): bool
     {
-        return Auth::user()->can('view users')
-            || Auth::user()->can('view offices') || Auth::user()->can('manage role mappings');
+        return Auth::user() && (Auth::user()->can('view users')
+            || Auth::user()->can('view offices') || Auth::user()->can('manage role mappings'));
     }
     public static function canCaste(): bool
     {
-        return Auth::user()->can('view caste modification list')
+        return Auth::user() && Auth::user()->can('view caste modification list')
             || Auth::user()->can('modify caste');
     }
     public static function canUserPermission(): bool
@@ -320,12 +320,16 @@ class WorkFlowPermissionHelper
     }
     public static function canDefineWorkflow(): bool
     {
-        return Auth::user()->can('define-workflow');
+        return Auth::user() && Auth::user()->can('define-workflow');
     }
 
     public static function canSchemeOnboard(): bool
     {
         return Auth::user()->can('master-tab')
             || Auth::user()->can('role-rank-management') || Auth::user()->can('define-workflow');
+    }
+    public static function canSchemeCapacitySetting(): bool
+    {
+        return Auth::user()->can('scheme-capacity-setting');
     }
 }

@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
             \App\Http\Middleware\PageVisitlog::class,
+            \App\Http\Middleware\DetectSessionTimeout::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

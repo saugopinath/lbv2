@@ -18,6 +18,7 @@ $defaultTitleIcon = <<<SVG
     <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 5v6h-2V7h2zm0 8v2h-2v-2h2z" />
     </svg>
     SVG;
+
     $defaultIcon = <<<SVG
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -76,12 +77,12 @@ $defaultTitleIcon = <<<SVG
                     @mouseenter="showTip = true"
                     @mouseleave="showTip = false"
                     @click="!{{ $disabled ? 'true' : 'false' }} && (showModal = true)"
-                    {{ $attributes->merge(['class' => 'flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white transition']) }}
+                    {{ $attributes->merge(['class' => 'flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-zinc-400 to-zinc-500 hover:from-zinc-500 hover:to-zinc-600 text-white transition']) }}
                     @disabled($disabled)>
                     @if(trim($slot))
                     {{ $slot }}
                     @else
-                    {!! $icon ?? $defaultIcon !!}
+                    {!! $icon !!}
                     @endif
                 </button>
 
