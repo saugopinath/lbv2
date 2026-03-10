@@ -163,7 +163,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $actions['bulkrevert'] = 'Revert';
         }
         $actions['bulkverify'] = 'Verify';
-         $actions['bulkapprove'] = 'Approve';
+        $actions['bulkapprove'] = 'Approve';
         return $actions;
     }
 
@@ -351,7 +351,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $ids = $this->getSelected();
             if (empty($ids))
                 return;
-            $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, 1, $ids);
+            $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, $this->nextLabelRoleId, $ids);
             if (!$check['is_processed']) {
                 $this->dispatch('toastr', [
                     'type' => 'error',
@@ -370,7 +370,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $ids = $this->getSelected();
             if (empty($ids))
                 return;
-            $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, 2, $ids);
+            $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, $this->nextLabelRoleId, $ids);
             if (!$check['is_processed']) {
                 $this->dispatch('toastr', [
                     'type' => 'error',
@@ -378,15 +378,14 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 ]);
                 return;
             }
-            foreach ($ids as $id) {
-                DB::beginTransaction();
-                try {
-                    DB::commit();
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    throw $e;
-                }
-            }
+            DB::transaction(function () use ($ids) {
+                BeneficiaryPersonalDetail::whereIn('application_id', $ids)->update([
+                    'next_level_role_id' => $this->nextLabelRoleId,
+                    'is_clean' => 1,
+                ]);
+            });
+            $this->dispatch('toastr', ['type' => 'success', 'message' => 'Processed!']);
+            $this->clearSelected();
         }
     }
     public function exportExcel()

@@ -183,10 +183,10 @@ class BulkActionModal extends Component
         // ✅ CAPACITY CHECK END
         $approverRoleId = Codemaster::getIdByCode(23);
         $ids = (array) $this->applicationId;
-        $actionType = ($this->bulkActionType === 'V') ? 1 : (($this->bulkActionType === 'A') ? 2 : null);
+        // $actionType = ($this->bulkActionType === 'V') ? 1 : (($this->bulkActionType === 'A') ? 2 : null);
         if ($this->bulkActionType === 'V') {
             foreach ($ids as $id) {
-                if (! $this->checkCapacity($id, $actionType)) {
+                if (! $this->checkCapacity($id, $this->nextLabelRoleId)) {
                     return;
                 }
                 DB::beginTransaction();
@@ -222,7 +222,7 @@ class BulkActionModal extends Component
             }
         } elseif ($this->bulkActionType === 'A') {
             foreach ($ids as $id) {
-                if (! $this->checkCapacity($id, $actionType)) {
+                if (! $this->checkCapacity($id, $this->nextLabelRoleId)) {
                     return;
                 }
                 DB::beginTransaction();
