@@ -351,20 +351,10 @@ class BulkActionModal extends Component
     }
     private function checkCapacity($id, $actionType): bool
     {
-        $beneficiary = BeneficiaryPersonalDetail::where('application_id', $id)->first();
-
-        if (!$beneficiary) return false;
-
-        $bencreatAdd = [
-            'created_by_dist_code' => $beneficiary->created_by_dist_code,
-            'created_by_local_body_code' => $beneficiary->created_by_local_body_code,
-            'creator' => $beneficiary->creator()
-        ];
         $result = \App\Helpers\SchemeCapacityHelper::checkBulk(
             $this->schemeId,
             $actionType,
-            [(int)$beneficiary->application_type],
-            $bencreatAdd
+            [$id]
         );
 
         if (!$result['is_processed']) {
