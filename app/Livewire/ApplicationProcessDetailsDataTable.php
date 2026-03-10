@@ -355,7 +355,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             if (!$check['is_processed']) {
                 $this->dispatch('toastr', [
                     'type' => 'error',
-                    'message' => "Capacity full for {$check['model']}! Space: {$check['remaining_capacity']}."
+                    'message' => "Capacity exceeded for {$check['model']}! Available: {$check['remaining_capacity']}"
                 ]);
                 return;
             }
@@ -374,7 +374,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             if (!$check['is_processed']) {
                 $this->dispatch('toastr', [
                     'type' => 'error',
-                    'message' => "Capacity full for {$check['model']}! Space: {$check['remaining_capacity']}."
+                    'message' => "Capacity exceeded for {$check['model']}! Available: {$check['remaining_capacity']}"
                 ]);
                 return;
             }
