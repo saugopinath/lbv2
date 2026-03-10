@@ -351,10 +351,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $ids = $this->getSelected();
             if (empty($ids))
                 return;
-
-            // Pass IDs so helper can find local_body_code from DB if session is missing
             $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, 1, $ids);
-
             if (!$check['is_processed']) {
                 $this->dispatch('toastr', [
                     'type' => 'error',
@@ -362,23 +359,18 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 ]);
                 return;
             }
-
             DB::transaction(function () use ($ids) {
                 BeneficiaryPersonalDetail::whereIn('application_id', $ids)->update([
                     'next_level_role_id' => $this->nextLabelRoleId
                 ]);
             });
-
             $this->dispatch('toastr', ['type' => 'success', 'message' => 'Processed!']);
             $this->clearSelected();
         } elseif ($this->revertrejectAction === 'approver') {
             $ids = $this->getSelected();
             if (empty($ids))
                 return;
-
-            // Bulk check before starting transactions
             $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, 2, $ids);
-// dd($check);
             if (!$check['is_processed']) {
                 $this->dispatch('toastr', [
                     'type' => 'error',
@@ -386,19 +378,15 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 ]);
                 return;
             }
-
             foreach ($ids as $id) {
                 DB::beginTransaction();
                 try {
-                    // Your update and log logic here
-                    // ...
                     DB::commit();
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
                 }
             }
-            // Success dispatches...
         }
     }
     public function exportExcel()

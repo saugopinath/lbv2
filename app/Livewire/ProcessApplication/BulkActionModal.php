@@ -356,18 +356,15 @@ class BulkActionModal extends Component
             $actionType,
             [$id]
         );
-
         if (!$result['is_processed']) {
             $msg = 'Capacity exceeded for ' . ($result['model'] ?? 'Scheme') .
                 '! Available: ' . ($result['remaining_capacity'] ?? 0);
-
             $this->dispatch('toastr', [
                 'type' => 'error',
                 'message' => $msg,
             ]);
             return false;
         }
-
         return true;
     }
     public function render()
