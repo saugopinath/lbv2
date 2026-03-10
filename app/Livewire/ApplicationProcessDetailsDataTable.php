@@ -360,9 +360,15 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 return;
             }
             DB::transaction(function () use ($ids) {
-                BeneficiaryPersonalDetail::whereIn('application_id', $ids)->update([
-                    'next_level_role_id' => $this->nextLabelRoleId
-                ]);
+                try {
+                    BeneficiaryPersonalDetail::whereIn('application_id', $ids)->update([
+                        'next_level_role_id' => $this->nextLabelRoleId
+                    ]);
+                    DB::commit();
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    throw $e;
+                }
             });
             $this->dispatch('toastr', ['type' => 'success', 'message' => 'Processed!']);
             $this->clearSelected();
@@ -379,10 +385,16 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 return;
             }
             DB::transaction(function () use ($ids) {
-                BeneficiaryPersonalDetail::whereIn('application_id', $ids)->update([
-                    'next_level_role_id' => $this->nextLabelRoleId,
-                    'is_clean' => 1,
-                ]);
+                try {
+                    BeneficiaryPersonalDetail::whereIn('application_id', $ids)->update([
+                        'next_level_role_id' => $this->nextLabelRoleId,
+                        'is_clean' => 1,
+                    ]);
+                    DB::commit();
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    throw $e;
+                }
             });
             $this->dispatch('toastr', ['type' => 'success', 'message' => 'Processed!']);
             $this->clearSelected();
