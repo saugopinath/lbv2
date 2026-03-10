@@ -63,7 +63,7 @@ class SchemeCapacityHelper
         if (!$scheme || $scheme->capacities->isEmpty())
             return ['is_processed' => true];
         foreach ($scheme->capacities as $capacity) {
-            $res = self::calculate($capacity, 'Scheme', $schemeId, null, null, $selectedTypes);
+            $res = self::calculate($capacity, 'Scheme', $schemeId, $selectedTypes);
             if (!$res['is_processed'])
                 return $res;
         }
@@ -85,7 +85,7 @@ class SchemeCapacityHelper
         if (!$district || $district->capacities->isEmpty())
             return ['is_processed' => true];
         foreach ($district->capacities as $capacity) {
-            $res = self::calculate($capacity, 'District', $schemeId, $distId, null, $selectedTypes);
+            $res = self::calculate($capacity, 'District', $schemeId, $selectedTypes);
             if (!$res['is_processed'])
                 return $res;
         }
@@ -110,13 +110,13 @@ class SchemeCapacityHelper
             return ['is_processed' => true];
         $label = ($model == Block::class) ? 'Block' : 'Subdivision';
         foreach ($localBody->capacities as $capacity) {
-            $res = self::calculate($capacity, $label, $schemeId, self::$filters['dist'], $localId, $selectedTypes);
+            $res = self::calculate($capacity, $label, $schemeId, $selectedTypes);
             if (!$res['is_processed'])
                 return $res;
         }
         return ['is_processed' => true];
     }
-    private static function calculate($capacity, $label, $schemeId, $distId, $localId, $selectedTypes)
+    private static function calculate($capacity, $label, $schemeId, $selectedTypes)
     {
         $total = (int) $capacity->total_capacity;
         $dbType = (int) $capacity->entry_type;
