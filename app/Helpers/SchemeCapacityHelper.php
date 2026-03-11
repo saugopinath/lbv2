@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Helpers;
+
 use App\Models\BeneficiaryPersonalDetail;
 use App\Models\District;
 use App\Models\Scheme;
@@ -7,6 +9,7 @@ use App\Models\Block;
 use App\Models\Subdivision;
 use App\Models\WorkflowsteproleMapping;
 use App\Services\WorkflowService;
+
 class SchemeCapacityHelper
 {
     protected static $filters = [];
@@ -93,26 +96,38 @@ class SchemeCapacityHelper
     }
     public static function checkLocal($schemeId, $actionType, $selectedTypes)
     {
-        $localId = self::$filters['local'];
-        if (!$localId)
+        $localId = self::$filters['local'] ?? null;
+        if (!$localId) {
             return ['is_processed' => true];
-        $model = (isset(self::$filters['creator']) && self::$filters['creator'] == 1) || session('lgd_session')['block_id']
-            ? Block::class : Subdivision::class;
+        }
+        $session = session('lgd_session') ?? [];
+        $creator = self::$filters['creator'] ?? null;
+        $model = match (true) {
+            ($creator == 1) || !empty($session['block_id'])
+            => Block::class,
+            ($creator == 2)
+            => !empty($session['subdivision_id']) ? Subdivision::class : Subdivision::class,
+            default => Subdivision::class,
+        };
         $localBody = $model::with([
             'capacities' => function ($q) use ($schemeId, $actionType, $selectedTypes) {
-                $q->active()->where('action_type', $actionType)->where('scheme_id', $schemeId)
+                $q->active()
+                    ->where('action_type', $actionType)
+                    ->where('scheme_id', $schemeId)
                     ->where(function ($query) use ($selectedTypes) {
                         $query->whereIn('entry_type', $selectedTypes)->orWhere('entry_type', 0);
                     });
             }
         ])->find($localId);
-        if (!$localBody || $localBody->capacities->isEmpty())
+        if (!$localBody || $localBody->capacities->isEmpty()) {
             return ['is_processed' => true];
+        }
         $label = ($model == Block::class) ? 'Block' : 'Subdivision';
         foreach ($localBody->capacities as $capacity) {
             $res = self::calculate($capacity, $label, $schemeId, $selectedTypes);
-            if (!$res['is_processed'])
+            if (!$res['is_processed']) {
                 return $res;
+            }
         }
         return ['is_processed' => true];
     }
