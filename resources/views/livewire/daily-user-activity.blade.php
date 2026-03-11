@@ -70,59 +70,55 @@
 
     <!-- Table Section -->
     <div class="overflow-x-auto p-2">
-        <table class="w-full text-left">
+        <table class="w-full text-left min-w-[1000px] lg:min-w-full">
             <thead class="bg-gray-50/50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 text-xs font-black uppercase tracking-[0.2em]">
                 <tr>
-                    <th class="px-8 py-5 rounded-tl-2xl">User</th>
-                    <th class="px-8 py-5 text-center">Login Time</th>
-                    <th class="px-8 py-5 text-center">Logout Time</th>
-                    <th class="px-8 py-5 text-center rounded-tr-2xl">Applications</th>
+                    <th class="px-4 lg:px-8 py-5 rounded-tl-2xl">User</th>
+                    <th class="px-4 lg:px-8 py-5 text-center">Login Time</th>
+                    <th class="px-4 lg:px-8 py-5 text-center">Logout Time</th>
+                    <th class="px-4 lg:px-8 py-5 text-center rounded-tr-2xl">Applications</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                 @forelse($activities as $activity)
                 <tr class="hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all duration-200 group">
-                    <td class="px-8 py-6">
-                        <div class="flex items-center space-x-4">
-                            <div class="relative cursor-pointer" wire:click="openAuditModal('{{ $activity->session_id }}')">
-                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md group-hover:rotate-6 transition-transform">
+                    <td class="px-4 lg:px-8 py-4 lg:py-6">
+                        <div class="flex items-center space-x-3 lg:space-x-4">
+                            <div class="relative cursor-pointer flex-shrink-0" wire:click="openAuditModal('{{ $activity->session_id }}')">
+                                <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-base lg:text-lg shadow-md group-hover:rotate-6 transition-transform">
                                     {{ substr($activity->properties['user_name'] ?? 'U', 0, 1) }}
                                 </div>
-                                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></div>
+                                <div class="absolute -bottom-1 -right-1 w-3 h-3 lg:w-4 lg:h-4 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></div>
                             </div>
-                            <div class="flex flex-col cursor-pointer" wire:click="openAuditModal('{{ $activity->session_id }}')">
-                                <span class="font-bold text-gray-900 dark:text-white text-lg leading-tight hover:text-blue-600 transition-colors">{{ $activity->properties['user_name'] ?? 'Unknown User' }}</span>
-                                <span class="text-sm font-medium text-gray-400 dark:text-gray-500">@ {{ $activity->properties['user_mobile'] ?? 'N/A' }}</span>
+                            <div class="flex flex-col cursor-pointer min-w-0" wire:click="openAuditModal('{{ $activity->session_id }}')">
+                                <span class="font-bold text-gray-900 dark:text-white text-sm lg:text-lg leading-tight hover:text-blue-600 transition-colors truncate max-w-[150px] lg:max-w-none" title="{{ $activity->properties['user_name'] ?? 'Unknown User' }}">{{ $activity->properties['user_name'] ?? 'Unknown User' }}</span>
+                                <span class="text-xs lg:text-sm font-medium text-gray-400 dark:text-gray-500">@ {{ $activity->properties['user_mobile'] ?? 'N/A' }}</span>
                             </div>
                         </div>
                     </td>
-                    <td class="px-8 py-6 text-center">
+                    <td class="px-4 lg:px-8 py-4 lg:py-6 text-center">
                         <div class="inline-flex flex-col items-center">
-                            <span class="text-gray-900 dark:text-white font-semibold">{{ $activity->created_at->format('M d, Y') }}</span>
-                            <span class="text-sm text-blue-500 dark:text-blue-400 font-bold tabular-nums">{{ $activity->created_at->format('h:i:s A') }}</span>
+                            <span class="text-gray-900 dark:text-white font-semibold text-xs lg:text-sm">{{ $activity->created_at->format('M d, Y') }}</span>
+                            <span class="text-xs lg:text-sm text-blue-500 dark:text-blue-400 font-bold tabular-nums">{{ $activity->created_at->format('h:i:s A') }}</span>
                         </div>
                     </td>
-                    <td class="px-8 py-6 text-center">
-
+                    <td class="px-4 lg:px-8 py-4 lg:py-6 text-center">
                         @if($activity->logout_time)
-
                         <div class="inline-flex flex-col items-center">
-                            <span class="text-gray-900 dark:text-white font-semibold">{{ \Carbon\Carbon::parse($activity->logout_time)->format('M d, Y') }}</span>
-                            <span class="text-sm text-indigo-500 dark:text-indigo-400 font-bold tabular-nums">{{ \Carbon\Carbon::parse($activity->logout_time)->format('h:i:s A') }}</span>
+                            <span class="text-gray-900 dark:text-white font-semibold text-xs lg:text-sm">{{ \Carbon\Carbon::parse($activity->logout_time)->format('M d, Y') }}</span>
+                            <span class="text-xs lg:text-sm text-indigo-500 dark:text-indigo-400 font-bold tabular-nums">{{ \Carbon\Carbon::parse($activity->logout_time)->format('h:i:s A') }}</span>
                         </div>
-
                         @elseif($activity->last_activity)
-
-                        <span class="px-4 py-2 bg-emerald-100 text-emerald-600 text-xs font-bold rounded-full animate-pulse">
+                        <span class="px-3 lg:px-4 py-1.5 lg:py-2 bg-emerald-100 text-emerald-600 text-[10px] lg:text-xs font-bold rounded-full animate-pulse whitespace-nowrap">
                             Active Now
                         </span>
                         @else
-                        <span class="px-4 py-2 bg-red-100 text-red-600 text-xs font-bold rounded-full">
+                        <span class="px-3 lg:px-4 py-1.5 lg:py-2 bg-red-100 text-red-600 text-[10px] lg:text-xs font-bold rounded-full whitespace-nowrap">
                             Session Timeout
                         </span>
                         @endif
                     </td>
-                    <td class="px-8 py-6 text-center">
+                    <td class="px-4 lg:px-8 py-4 lg:py-6 text-center max-w-[300px] lg:max-w-[400px]">
                         @if(isset($pageLogs[$activity->session_id]))
                         @php
                         $pages = $pageLogs[$activity->session_id];
@@ -132,48 +128,52 @@
 
                         <div
                             x-data="{ 
-                showAll: false,
-                totalPages: {{ $totalPages }},
-                hiddenCount: {{ $hiddenCount }}
-            }"
-                            class="flex flex-col items-center gap-2">
-                            <!-- Grid container for badges -->
-                            <div class="grid grid-cols-3 gap-2 w-full max-w-auto">
+                            showAll: false,
+                            totalPages: {{ $totalPages }},
+                            hiddenCount: {{ $hiddenCount }}
+                        }"
+                            class="flex flex-col items-center gap-2 w-full">
+
+                            <!-- Grid container for badges - Fixed width and better grid -->
+                            <div class="grid grid-cols-2 gap-3 mx-auto">
                                 @foreach($pages as $index => $page)
-                                <div
-                                    class="flex items-center justify-between gap-2 px-3 py-1 bg-gradient-to-r from-cyan-400/10 to-emerald-400/10 
-                            text-cyan-700 dark:text-cyan-300 text-[10px] font-black uppercase 
-                            tracking-widest rounded-lg border border-cyan-100 
-                            dark:border-cyan-800/50 shadow-sm whitespace-nowrap text-center
-                            transition-all duration-300 cursor-pointer hover:from-cyan-400/20 hover:to-emerald-400/20 hover:scale-105"
+                                <div class="flex items-center gap-2 lg:gap-3 px-1.5 lg:px-3 py-1 bg-gradient-to-r from-cyan-400/10 to-emerald-400/10 
+                                        text-cyan-700 dark:text-cyan-300 text-[8px] lg:text-[10px] font-black uppercase 
+                                        tracking-widest rounded-lg border border-cyan-100 
+                                        dark:border-cyan-800/50 shadow-sm
+                                        transition-all duration-300 cursor-pointer hover:from-cyan-400/20 hover:to-emerald-400/20 hover:scale-105
+                                        min-w-0 w-full"
                                     :class="{ 
-                            'hidden': !showAll && {{ $index }} >= 3,
-                            'col-span-1': true
-                        }">
-                                    <span class="flex-1" wire:click="openActionModal('{{ $activity->session_id }}', '{{ addslashes($page['url']) }}')">
+                                        'hidden': !showAll && {{ $index }} >= 3,
+                                        'col-span-1': true
+                                    }">
+
+                                    <span
+                                        wire:click="openActionModal('{{ $activity->session_id }}', '{{ addslashes($page['url']) }}')"
+                                        class="truncate flex-1 min-w-0 text-center"
+                                        title="{{ $page['name'] }}">
                                         {{ $page['name'] }}
                                     </span>
+
                                     <button
                                         type="button"
                                         wire:click.stop="openAuditModal('{{ $activity->session_id }}', '{{ addslashes($page['url']) }}')"
-                                        class="p-1 rounded-lg bg-white/50 dark:bg-gray-900/40 hover:bg-white dark:hover:bg-gray-800 text-cyan-700 dark:text-cyan-200"
-                                        title="View audit log for this page">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        class="flex-shrink-0 p-0.5 lg:p-1 rounded-lg bg-white/50 dark:bg-gray-900/40 hover:bg-white dark:hover:bg-gray-800 text-cyan-700 dark:text-cyan-200">
+                                        <svg class="w-2.5 h-2.5 lg:w-3.5 lg:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z" />
                                         </svg>
                                     </button>
                                 </div>
                                 @endforeach
-
-
                             </div>
 
                             @if($totalPages > 3)
                             <button
                                 @click="showAll = !showAll"
-                                class="text-xs text-blue-600 font-semibold hover:text-blue-800 
-                        transition-all duration-200 hover:scale-105 mt-1
-                        px-3 py-1 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                class="text-[10px] lg:text-xs text-blue-600 font-semibold hover:text-blue-800 
+                                    transition-all duration-200 hover:scale-105 mt-1
+                                    px-2 lg:px-3 py-1 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20
+                                    whitespace-nowrap"
                                 x-text="showAll ? 'Show Less' : 'View More (' + hiddenCount + ' more)'">
                             </button>
                             @endif
@@ -181,21 +181,21 @@
 
                         @else
                         <div class="text-center">
-                            <span class="text-gray-400 text-[10px] italic">No page activity</span>
+                            <span class="text-gray-400 text-[8px] lg:text-[10px] italic">No page activity</span>
                         </div>
                         @endif
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="4" class="px-8 py-20 text-center">
-                        <div class="flex flex-col items-center space-y-4">
-                            <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-full">
-                                <svg class="w-16 h-16 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <td colspan="4" class="px-4 lg:px-8 py-10 lg:py-20 text-center">
+                        <div class="flex flex-col items-center space-y-3 lg:space-y-4">
+                            <div class="p-4 lg:p-6 bg-gray-50 dark:bg-gray-800 rounded-full">
+                                <svg class="w-12 h-12 lg:w-16 lg:h-16 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
                             </div>
-                            <p class="text-xl font-bold text-gray-400 dark:text-gray-500">No activity logs found for this criteria recorded</p>
+                            <p class="text-base lg:text-xl font-bold text-gray-400 dark:text-gray-500">No activity logs found for this criteria recorded</p>
                         </div>
                     </td>
                 </tr>
@@ -231,8 +231,12 @@
                         <div>
                             <h3 class="text-xl font-bold text-gray-900 dark:text-white">Audit Logs</h3>
                             @if($selectedUrl)
-                            <p class="text-xs text-blue-500 font-bold uppercase tracking-widest mt-1">
-                                Filtered by: {{ Str::title(str_replace(['-', '_'], ' ', Str::afterLast($selectedUrl, '/'))) ?: 'Home' }}
+                            <p class="text-xs text-blue-500 font-bold uppercase tracking-widest mt-1 flex items-center gap-1 flex-wrap">
+                                <span class="flex-shrink-0">Filtered by:</span>
+                                <span class="font-black truncate max-w-[150px] md:max-w-[200px] lg:max-w-[300px]"
+                                    title="{{ $this->getDisplayNameFromUrl($selectedUrl) }}">
+                                    {{ $this->getDisplayNameFromUrl($selectedUrl) }}
+                                </span>
                             </p>
                             @else
                             <p class="text-xs text-gray-400 font-medium mt-1">Full Session Activity</p>
@@ -360,8 +364,12 @@
                         <div>
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white">Livewire Actions</h3>
                             @if($actionModalUrl)
-                            <p class="text-[10px] text-violet-500 font-bold uppercase tracking-widest mt-0.5">
-                                {{ Str::afterLast($actionModalUrl, '/') ?: 'Home' }}
+                            <p class="text-xs text-blue-500 font-bold uppercase tracking-widest mt-1 flex items-center gap-1 flex-wrap">
+                                <span class="flex-shrink-0">Filtered by:</span>
+                                <span class="font-black truncate max-w-[150px] md:max-w-[200px] lg:max-w-[300px]"
+                                    title="{{ $this->getDisplayNameFromUrl($actionModalUrl) }}">
+                                    {{ $this->getDisplayNameFromUrl($actionModalUrl) }}
+                                </span>
                             </p>
                             @endif
                         </div>

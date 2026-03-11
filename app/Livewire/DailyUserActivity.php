@@ -181,6 +181,22 @@ class DailyUserActivity extends Component
         return $query->latest()->get();
     }
 
+    public function getDisplayNameFromUrl($url)
+    {
+        if (!$url) {
+            return 'Home';
+        }
+        $path = parse_url($url, PHP_URL_PATH) ?: $url;
+        $segments = array_filter(explode('/', trim($path, '/')));
+        $last = end($segments);
+        if ($last && strlen($last) > 30 && preg_match('/^[A-Za-z0-9_\-]+$/', $last)) {
+            array_pop($segments);
+            $last = end($segments);
+        }
+        $name = $last ?: 'Home';
+
+        return Str::title(str_replace(['-', '_'], ' ', $name));
+    }
     public function render()
     {
         $query = Activity::query()
@@ -221,12 +237,9 @@ class DailyUserActivity extends Component
                 // Ignore invalid date format
             }
         } else {
-            // Default to today
             $query->whereDate('created_at', Carbon::today());
         }
-
         $activities = $query->latest()->paginate(10);
-        // Fetch visited pages for each session
         $sessionIds = $activities->pluck('session_id')->filter()->unique();
 
         $pageLogs = UserPageVisitLog::whereIn('session_id', $sessionIds)
@@ -235,15 +248,22 @@ class DailyUserActivity extends Component
             ->groupBy('session_id')
             ->map(function ($logs) {
                 return $logs->map(function ($log) {
-                    $pageName = Str::afterLast($log->url, '/');
+                    $path = parse_url($log->url, PHP_URL_PATH) ?: $log->url;
+                    $segments = array_filter(explode('/', trim($path, '/')));
+                    $lastSegment = end($segments);
+                    if ($lastSegment && strlen($lastSegment) > 30 && preg_match('/^[A-Za-z0-9_\-]+$/', $lastSegment)) {
+                        array_pop($segments);
+                        $lastSegment = end($segments);
+                    }
+
+                    $pageName = $lastSegment ?: 'Home';
+
                     return [
                         'url' => $log->url,
                         'name' => $pageName ? Str::title(str_replace(['-', '_'], ' ', $pageName)) : 'Home'
                     ];
                 })->unique();
             });
-
-
         return view('livewire.daily-user-activity', [
             'activities' => $activities,
             'pageLogs' => $pageLogs
