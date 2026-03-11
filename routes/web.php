@@ -44,6 +44,7 @@ use App\Http\Controllers\SchemeCapacityController;
 use App\Http\Controllers\ValidationManagerController;
 use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
+use App\Livewire\CsvSplitter;
 
 // Guest Routes
 Route::get('/session-expired', function () {
@@ -215,3 +216,6 @@ Route::get('/view-beneficiary-details', [CasteModificationController::class, 'vi
 
 Route::get('/scheme-capacity', [SchemeCapacityController::class, 'index'])
     ->name('scheme-capacity');
+
+Route::get('/csv-splitter', CsvSplitter::class)
+    ->name('csv-splitter');

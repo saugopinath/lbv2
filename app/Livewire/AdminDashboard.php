@@ -73,9 +73,16 @@ class AdminDashboard extends Component
 
         $hours = [];
         $counts = [];
-        for ($i = 0; $i < 24; $i++) {
-            $hours[] = sprintf("%02d:00", $i);
-            $found = $visits->firstWhere('hour', $i);
+        $now = Carbon::now();
+
+        for ($i = 23; $i >= 0; $i--) {
+            $time = (clone $now)->subHours($i);
+            $hourInt = (int)$time->format('H');
+
+            // Full label for tooltip (Date and Time)
+            $hours[] = $time->format('d M, H:i');
+
+            $found = $visits->firstWhere('hour', $hourInt);
             $counts[] = $found ? $found->total : 0;
         }
 

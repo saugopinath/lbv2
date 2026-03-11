@@ -67,7 +67,7 @@ class FinalSubmitModal extends Component
     // public function confirmSubmit(WorkflowService $workflowService)
     // {
     //     $labelRoles = $workflowService->getLabelRoles($this->schemeId);
-    
+
     //     try {
     //         BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->update([
     //             'next_level_role_id' => $labelRoles->next_label_role_id,
@@ -98,11 +98,21 @@ class FinalSubmitModal extends Component
         $labelRoles = $workflowService->getLabelRoles($this->schemeId);
 
         try {
-            BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->where($this->filter_data)->update([
-                'next_level_role_id' => $labelRoles->next_label_role_id,
-                'is_final' => 1,
-                'updated_at' => now(),
-            ]);
+            // BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->where($this->filter_data)->update([
+            //     'next_level_role_id' => $labelRoles->next_label_role_id,
+            //     'is_final' => 1,
+            //     'updated_at' => now(),
+            // ]);
+            $BeneficiaryDetails = BeneficiaryPersonalDetail::where('application_id', $this->applicationId)
+                ->where($this->filter_data)
+                ->first();
+            if ($BeneficiaryDetails) {
+                $BeneficiaryDetails->next_level_role_id = $labelRoles->next_label_role_id;
+                $BeneficiaryDetails->is_final = 1;
+                $BeneficiaryDetails->updated_at = now();
+                $BeneficiaryDetails->save();
+            }
+            
             $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->value('beneficiary_id');
             $AcceptRejectInfo = new AcceptRejectInfo();
             $AcceptRejectInfo->application_id = $this->applicationId;
