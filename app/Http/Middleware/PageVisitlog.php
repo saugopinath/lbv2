@@ -39,6 +39,32 @@ class PageVisitlog
 
                     $componentName = $snapshot['memo']['name'] ?? 'unknown';
 
+                    // ⭐ mount / component property data
+                    $state = $snapshot['data'] ?? [];
+
+                    $cleanState = [];
+
+                    foreach ($state as $key => $value) {
+
+                        // Livewire model serialization
+                        if (is_array($value) && isset($value[1]['key'])) {
+                            $cleanState[$key] = $value[1]['key'];
+                            continue;
+                        }
+
+                        if (is_array($value)) {
+                            $cleanState[$key] = json_encode($value);
+                            continue;
+                        }
+
+                        $cleanState[$key] = $value;
+                    }
+                    // merge with params
+                    $params = array_merge(
+                        $call['params'] ?? [],
+                        $cleanState
+                    );
+
                     foreach ($calls as $call) {
 
                         $methodName = $call['method'] ?? 'unknown';
@@ -50,7 +76,6 @@ class PageVisitlog
                             '_startUpload',
                             '_finishUpload',
                             '_cancelUpload'
-                            
                         ])) {
                             continue;
                         }
@@ -62,9 +87,14 @@ class PageVisitlog
                             'ip' => $request->ip(),
                             'component_name' => $componentName,
                             'method_name' => $methodName,
+                            // 'request_payload' => [
+                            //     'params' => $call['params'] ?? [],
+                            //     'updates' => $component['updates'] ?? [],
+                            //     'state'  => $state
+                            // ],
                             'request_payload' => [
-                                'params' => $call['params'] ?? [],
-                                'updates' => $component['updates'] ?? []
+                                'params' => $params,
+                                'updates' => $component['updates'] ?? [],
                             ],
                             'response_payload' => null,
                         ]);
@@ -128,6 +158,8 @@ class PageVisitlog
             return $response;
         }
 
+
+
         if (
             $request->is('livewire/*') ||
             $request->is('api/*') ||
@@ -175,3 +207,4 @@ class PageVisitlog
         return $response;
     }
 }
+ 

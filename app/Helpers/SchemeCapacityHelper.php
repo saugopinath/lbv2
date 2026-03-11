@@ -146,7 +146,7 @@ class SchemeCapacityHelper
             ->whereIn('is_clean', [1, 2]);
         $query->when(!empty(self::$nextLabelRoleIds), function ($q) {
             return $q->whereIn('next_level_role_id', self::$nextLabelRoleIds);
-        });
+        });      
         if ($dbType === 0) {
             $query->whereIn('application_type', [1, 2]);
         } else {
