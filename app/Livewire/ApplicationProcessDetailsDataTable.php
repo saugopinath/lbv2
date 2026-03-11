@@ -162,8 +162,8 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         ) {
             $actions['bulkrevert'] = 'Revert';
         }
-        $actions['bulkverify'] = 'Verify';
-        $actions['bulkapprove'] = 'Approve';
+        // $actions['bulkverify'] = 'Verify';
+        // $actions['bulkapprove'] = 'Approve';
         return $actions;
     }
 
