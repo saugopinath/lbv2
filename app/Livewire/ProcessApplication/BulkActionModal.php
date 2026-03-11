@@ -52,13 +52,13 @@ class BulkActionModal extends Component
     {
         $select_lgd = session('lgd_session');
         // dd($select_lgd);
-        if (! empty($select_lgd['district_id'])) {
+        if (!empty($select_lgd['district_id'])) {
             $this->filter_data['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
         }
-        if (! empty($select_lgd['block_id'])) {
+        if (!empty($select_lgd['block_id'])) {
             $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
         }
-        if (! empty($select_lgd['subdivision_id'])) {
+        if (!empty($select_lgd['subdivision_id'])) {
             $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
 
@@ -186,14 +186,17 @@ class BulkActionModal extends Component
         // $actionType = ($this->bulkActionType === 'V') ? 1 : (($this->bulkActionType === 'A') ? 2 : null);
         if ($this->bulkActionType === 'V') {
             foreach ($ids as $id) {
-                if (! $this->checkCapacity($id, $this->nextLabelRoleId)) {
+                if (!$this->checkCapacity($id, $this->nextLabelRoleId)) {
                     return;
                 }
                 DB::beginTransaction();
                 try {
-                    BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->update([
+                    $dbData = [
                         'next_level_role_id' => $this->nextLabelRoleId,
-                    ]);
+                    ];
+                    $existingRecord = BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->first();
+                    $existingRecord->update($dbData);
+
                     $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
                     $AcceptRejectInfo = new AcceptRejectInfo;
                     $AcceptRejectInfo->application_id = $id;
@@ -222,15 +225,19 @@ class BulkActionModal extends Component
             }
         } elseif ($this->bulkActionType === 'A') {
             foreach ($ids as $id) {
-                if (! $this->checkCapacity($id, $this->nextLabelRoleId)) {
+                if (!$this->checkCapacity($id, $this->nextLabelRoleId)) {
                     return;
                 }
                 DB::beginTransaction();
                 try {
-                    BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->update([
+
+                    $dbData = [
                         'next_level_role_id' => $this->nextLabelRoleId,
                         'is_clean' => 1,
-                    ]);
+                    ];
+                    $existingRecord = BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->first();
+                    $existingRecord->update($dbData);
+
                     $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
                     $AcceptRejectInfo = new AcceptRejectInfo;
                     $AcceptRejectInfo->application_id = $id;
@@ -268,9 +275,12 @@ class BulkActionModal extends Component
             foreach ($ids as $id) {
                 DB::beginTransaction();
                 try {
-                    BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->update([
+                    $dbData = [
                         'next_level_role_id' => $this->nextLabelRoleId,
-                    ]);
+                    ];
+                    $existingRecord = BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->first();
+                    $existingRecord->update($dbData);
+
                     $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
                     $AcceptRejectInfo = new AcceptRejectInfo;
                     $AcceptRejectInfo->application_id = $id;
@@ -303,11 +313,14 @@ class BulkActionModal extends Component
         } elseif ($this->bulkActionType === 'R') {
             foreach ($ids as $id) {
                 DB::beginTransaction();
-                try {
-                    BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->update([
+                try {                    
+                    $dbData = [
                         'next_level_role_id' => $this->nextLabelRoleId,
                         'is_clean' => 10,
-                    ]);
+                    ];
+                    $existingRecord = BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->first();
+                    $existingRecord->update($dbData);
+
                     $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
                     $AcceptRejectInfo = new AcceptRejectInfo;
                     $AcceptRejectInfo->application_id = $id;
