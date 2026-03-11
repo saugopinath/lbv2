@@ -39,6 +39,32 @@ class PageVisitlog
 
                     $componentName = $snapshot['memo']['name'] ?? 'unknown';
 
+                    // ⭐ mount / component property data
+                    $state = $snapshot['data'] ?? [];
+
+                    $cleanState = [];
+
+                    foreach ($state as $key => $value) {
+
+                        // Livewire model serialization
+                        if (is_array($value) && isset($value[1]['key'])) {
+                            $cleanState[$key] = $value[1]['key'];
+                            continue;
+                        }
+
+                        if (is_array($value)) {
+                            $cleanState[$key] = json_encode($value);
+                            continue;
+                        }
+
+                        $cleanState[$key] = $value;
+                    }
+                    // merge with params
+                    $params = array_merge(
+                        $call['params'] ?? [],
+                        $cleanState
+                    );
+
                     foreach ($calls as $call) {
 
                         $methodName = $call['method'] ?? 'unknown';
@@ -50,7 +76,6 @@ class PageVisitlog
                             '_startUpload',
                             '_finishUpload',
                             '_cancelUpload'
-                            
                         ])) {
                             continue;
                         }
@@ -62,9 +87,14 @@ class PageVisitlog
                             'ip' => $request->ip(),
                             'component_name' => $componentName,
                             'method_name' => $methodName,
+                            // 'request_payload' => [
+                            //     'params' => $call['params'] ?? [],
+                            //     'updates' => $component['updates'] ?? [],
+                            //     'state'  => $state
+                            // ],
                             'request_payload' => [
-                                'params' => $call['params'] ?? [],
-                                'updates' => $component['updates'] ?? []
+                                'params' => $params,
+                                'updates' => $component['updates'] ?? [],
                             ],
                             'response_payload' => null,
                         ]);
@@ -128,6 +158,10 @@ class PageVisitlog
             return $response;
         }
 
+
+        if (!Auth::check()) {
+            return $next($request);
+        }
         if (
             $request->is('livewire/*') ||
             $request->is('api/*') ||
@@ -135,24 +169,38 @@ class PageVisitlog
             $request->is('css/*') ||
             $request->is('js/*') ||
             $request->is('images/*') ||
-            $request->is('favicon.ico')
+            $request->is('favicon.ico') ||
+            $request->is('otp-validate*') ||
+            $request->is('login*') ||
+            $request->is('logout*')
+
+
         ) {
             return $next($request);
         }
-
         $response = $next($request);
-
         try {
-
             $agent = new Agent();
             $browser = $agent->browser();
-
             $userId = Auth::id();
-
             $userRole = UserRoleSchemeOfficeMapping::where('user_id', $userId)
                 ->first()
                 ->role_id ?? null;
+            $requestPayload = [
+                // 'query' => $request->query(),
+                'body' => $request->except(['password', '_token']),
+                // 'route_name' => optional($request->route())->getName(),
+                'route_params' => optional($request->route())->parameters(),
+            ];
+            $responsePayload = [
+                'status' => $response->getStatusCode(),
+                'headers' => $response->headers->all(),
+            ];
+            $referrer = $request->headers->get('referer');
 
+            if ($referrer && str_contains($referrer, 'otp-validate')) {
+                $referrer = null;
+            }
             UserPageVisitLog::create([
                 'visit_time' => now(),
                 'user_id' => $userId,
@@ -164,11 +212,15 @@ class PageVisitlog
                 'browser_version' => $agent->version($browser),
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),
-                'referrer' => $request->headers->get('referer'),
+                'referrer' => $referrer,            
                 'session_id' => $request->session()->getId(),
+                'request_payload' => $requestPayload,
+                'response_payload' => $responsePayload,
+                'status_code' => $response->getStatusCode(),
+
             ]);
         } catch (\Exception $e) {
-
+            dd($e);
             Log::error('Page visit log failed: ' . $e->getMessage());
         }
 

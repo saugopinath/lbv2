@@ -351,82 +351,122 @@
             <div x-show="show"
                 x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
                 x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                class="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-3xl border border-gray-100 dark:border-gray-700 z-[120]">
+                class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl border border-gray-100 dark:border-gray-700 z-[120]">
 
-                <!-- Header -->
-                <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-violet-50 to-transparent dark:from-gray-800/50">
-                    <div class="flex items-center space-x-3">
-                        <div class="p-2.5 bg-violet-100 dark:bg-violet-900/30 rounded-xl">
-                            <svg class="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <!-- Header - Cleaner gradient -->
+                <div class="px-6 py-5 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-indigo-50/50 to-transparent dark:from-indigo-900/10">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-indigo-100 dark:bg-indigo-900/40 rounded-xl shadow-sm">
+                            <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Livewire Actions</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Action Logs</h3>
                             @if($actionModalUrl)
-                            <p class="text-xs text-blue-500 font-bold uppercase tracking-widest mt-1 flex items-center gap-1 flex-wrap">
+                            <p class="text-xs text-indigo-600 dark:text-indigo-400 font-medium mt-0.5 flex items-center gap-1.5">
                                 <span class="flex-shrink-0">Filtered by:</span>
-                                <span class="font-black truncate max-w-[150px] md:max-w-[200px] lg:max-w-[300px]"
+                                <span class="font-semibold truncate max-w-[200px] md:max-w-[300px] bg-indigo-50 dark:bg-indigo-900/20 px-2 py-0.5 rounded-md"
                                     title="{{ $this->getDisplayNameFromUrl($actionModalUrl) }}">
                                     {{ $this->getDisplayNameFromUrl($actionModalUrl) }}
                                 </span>
                             </p>
                             @endif
+
                         </div>
+                        <button
+                            wire:click="openPageRequestResponse('{{ $actionModalSessionId }}','{{ addslashes($actionModalUrl) }}')"
+                            class="inline-flex items-center px-3 py-1.5 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 text-xs font-medium rounded-lg border border-yellow-200 transition-all">
+                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z" />
+                            </svg>
+                            Request / Response
+                        </button>
                     </div>
-                    <button wire:click="closeActionModal" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                    <button wire:click="closeActionModal" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
 
-                <!-- Action List -->
-                <div class="max-h-[60vh] overflow-y-auto p-6 space-y-3">
+                <!-- Action List - Improved spacing and cards -->
+                <div class="max-h-[60vh] overflow-y-auto p-5 space-y-2.5 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
                     @if($this->actionLogs->isEmpty())
-                    <div class="text-center py-12 text-gray-400">
-                        <svg class="w-10 h-10 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                        <p class="font-medium text-sm">No Livewire actions recorded for this page.</p>
+                    <div class="text-center py-16 px-4">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700/50 rounded-2xl flex items-center justify-center">
+                            <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                        </div>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">No action logs recorded</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Actions performed on this page will appear here</p>
                     </div>
                     @else
                     @foreach($this->actionLogs as $actionLog)
-                    <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-700/40 rounded-2xl px-5 py-4 border border-gray-100 dark:border-gray-600/50 hover:border-violet-200 dark:hover:border-violet-700 transition-all duration-200 group">
-                        <div class="flex items-center gap-4 min-w-0">
-                            <!-- Component Badge -->
-                            <span class="shrink-0 px-2.5 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[10px] font-black uppercase tracking-widest rounded-lg">
-                                {{ $actionLog->component_name }}
-                            </span>
-                            <!-- Method Name -->
-                            <span class="font-mono font-bold text-gray-800 dark:text-gray-100 text-sm truncate">
-                                {{ $actionLog->method_name }}()
-                            </span>
-                            <!-- Response status -->
-                            @if(isset($actionLog->response_payload['_action']) && $actionLog->response_payload['_action'] === 'redirect')
-                            <span class="shrink-0 px-2 py-0.5 bg-blue-100 text-blue-600 text-[9px] font-black rounded-full uppercase tracking-widest">Redirect</span>
-                            @elseif(isset($actionLog->response_payload['returns']))
-                            <span class="shrink-0 px-2 py-0.5 bg-emerald-100 text-emerald-600 text-[9px] font-black rounded-full uppercase tracking-widest">Success</span>
-                            @endif
-                        </div>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <span class="text-[10px] text-gray-400 font-medium tabular-nums">
-                                {{ $actionLog->created_at->format('h:i:s A') }}
-                            </span>
-                            <button wire:click="openActionRequestModal({{ $actionLog->id }})" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-sm shadow-blue-500/20 transition-all duration-200 group-hover:scale-105">
-                                View Request/Response
-                            </button>
-                            <button wire:click="openActionAuditLog({{ $actionLog->id }})" class="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-sm shadow-violet-500/20 transition-all duration-200 group-hover:scale-105">
-                                View Audit Log
-                            </button>
+                    <div class="group relative bg-white dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-600/50 hover:border-indigo-200 dark:hover:border-indigo-700 hover:shadow-md transition-all duration-200">
+                        <!-- Mobile-friendly flex column on small screens -->
+                        <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="flex-1 min-w-0 space-y-2">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-medium rounded-md border border-indigo-100 dark:border-indigo-800">
+                                        {{ $actionLog->component_name }}
+                                    </span>
+                                    <span class="font-mono text-sm font-medium text-gray-700 dark:text-gray-200 truncate">
+                                        {{ $actionLog->method_name }}()
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    @if(isset($actionLog->response_payload['_action']) && $actionLog->response_payload['_action'] === 'redirect')
+                                    <span class="inline-flex items-center px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[10px] font-medium rounded-full border border-blue-200 dark:border-blue-800">
+                                        <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5"></span>
+                                        Redirect
+                                    </span>
+                                    @elseif(isset($actionLog->response_payload['returns']))
+                                    <span class="inline-flex items-center px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-[10px] font-medium rounded-full border border-emerald-200 dark:border-emerald-800">
+                                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5"></span>
+                                        Success
+                                    </span>
+                                    @endif
+                                    <span class="text-xs text-gray-400 dark:text-gray-500 font-mono">
+                                        {{ $actionLog->created_at->format('H:i:s') }}
+                                    </span>
+                                    <span class="text-xs text-gray-300 dark:text-gray-600">•</span>
+                                    <span class="text-xs text-gray-400 dark:text-gray-500">
+                                        {{ $actionLog->created_at->format('M d, Y') }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2 sm:flex-shrink-0">
+                                <button wire:click="openActionRequestModal({{ $actionLog->id }})"
+                                    class="inline-flex items-center px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-lg shadow-sm hover:shadow transition-all duration-200 group-hover:border-blue-200 dark:group-hover:border-blue-700">
+                                    <svg class="w-3.5 h-3.5 mr-1.5 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    Details
+                                </button>
+                                <button wire:click="openActionAuditLog({{ $actionLog->id }})"
+                                    class="inline-flex items-center px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-medium rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all duration-200 group-hover:border-indigo-300 dark:group-hover:border-indigo-700">
+                                    <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Audit
+                                </button>
+                            </div>
                         </div>
                     </div>
                     @endforeach
                     @endif
                 </div>
 
-                <div class="p-5 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex justify-end rounded-b-3xl">
-                    <button wire:click="closeActionModal" class="px-6 py-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition-all text-sm">
+                <!-- Footer - Cleaner design -->
+                <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex justify-end rounded-b-2xl">
+                    <button wire:click="closeActionModal"
+                        class="px-5 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all text-sm shadow-sm">
                         Close
                     </button>
                 </div>
@@ -435,7 +475,7 @@
     </div>
     @endteleport
 
-    <!-- ═══ Action Audit Detail Modal ════════════════════════════════════════ -->
+    <!-- ======================== Action Audit Detail Modal======================== -->
     @teleport('body')
     <div x-data="{ show: @entangle('showActionAuditModal') }" x-show="show"
         class="fixed inset-0 z-[130] overflow-y-auto" style="display: none;">
@@ -501,7 +541,6 @@
                     <!-- Laravel Audit Records -->
                     <div>
                         <span class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 block mb-3">� Database Changes (Audit Log)</span>
-
                         @if(empty($actionAudits))
                         <div class="text-center py-8 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-100 dark:border-gray-600/50">
                             <svg class="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -592,7 +631,6 @@
                 x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
                 x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
                 class="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-3xl border border-gray-100 dark:border-gray-700 z-[150]">
-
                 @if($selectedActionRequestLog)
                 <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-sky-50 to-transparent dark:from-gray-800/50">
                     <div>
@@ -661,5 +699,186 @@
         </div>
     </div>
     @endteleport
+
+ 
+    <div
+    x-data="{ show: @entangle('showPageRequestModal') }"
+    x-show="show"
+    x-transition:enter="transition ease-out duration-200"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-150"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    class="fixed inset-0 z-[140] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm px-4"
+    style="display:none;">
+
+    <div 
+        x-show="show"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95"
+        class="bg-white dark:bg-gray-800 w-full max-w-5xl rounded-2xl shadow-2xl max-h-[85vh] overflow-hidden border border-gray-100 dark:border-gray-700">
+
+        <!-- Header with icon and gradient -->
+        <div class="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-indigo-50/50 to-transparent dark:from-indigo-900/10">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl">
+                    <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-800 dark:text-white">
+                        Request & Response Logs
+                    </h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        Detailed payload history for page requests
+                    </p>
+                </div>
+            </div>
+
+            <button wire:click="$set('showPageRequestModal', false)"
+                class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Body with improved scrolling - using Tailwind only -->
+        <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(85vh-80px)] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
+
+            @forelse($pageRequests as $index => $log)
+
+            <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:border-indigo-200 dark:hover:border-indigo-700 hover:shadow-md transition-all duration-200">
+                
+                <!-- Log Header with timestamp -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 gap-2">
+                    <div class="flex items-center gap-3">
+                        <span class="flex items-center justify-center w-6 h-6 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-medium rounded-lg">
+                            {{ $loop->iteration }}
+                        </span>
+                        <span class="text-xs font-mono font-medium text-gray-500 dark:text-gray-400">
+                            {{ \Carbon\Carbon::parse($log['visit_time'])->format('H:i:s') }}
+                        </span>
+                        <span class="text-xs text-gray-300 dark:text-gray-600">•</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ \Carbon\Carbon::parse($log['visit_time'])->format('M d, Y') }}
+                        </span>
+                    </div>
+                    <span class="text-[10px] bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full w-fit">
+                        Log #{{ $log['id'] ?? $loop->iteration }}
+                    </span>
+                </div>
+
+                <!-- Request/Response Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 dark:divide-gray-700">
+                    
+                    <!-- Request Section -->
+                    <div class="p-4 bg-gradient-to-br from-red-50/30 to-transparent dark:from-red-900/10">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="p-1.5 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                                <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
+                                </svg>
+                            </div>
+                            <span class="text-xs font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider">
+                                Request Payload
+                            </span>
+                            
+                        </div>
+                        <div class="relative">
+                            <pre class="text-[11px] font-mono bg-white dark:bg-gray-900 p-4 rounded-xl border border-red-100 dark:border-red-900/30 overflow-x-auto max-h-80 whitespace-pre-wrap break-words"><code class="text-gray-800 dark:text-gray-200">{{ json_encode($log['request_payload'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Response Section -->
+                    <div class="p-4 bg-gradient-to-br from-emerald-50/30 to-transparent dark:from-emerald-900/10">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="p-1.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                                <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                                Response Payload
+                            </span>
+                            
+                        </div>
+                        <div class="relative">
+                            <pre class="text-[11px] font-mono bg-white dark:bg-gray-900 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30 overflow-x-auto max-h-80 whitespace-pre-wrap break-words"><code class="text-gray-800 dark:text-gray-200">{{ json_encode($log['response_payload'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Response Metadata if available -->
+                @php
+                    $status = null;
+                    $duration = null;
+                    
+                    if (is_array($log['response_payload'])) {
+                        $status = $log['response_payload']['status'] ?? ($log['response_payload']['http_status'] ?? null);
+                        $duration = $log['response_payload']['duration'] ?? ($log['response_payload']['execution_time'] ?? null);
+                    }
+                @endphp
+
+                @if($status || $duration)
+                <div class="px-4 py-2.5 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700 flex flex-wrap items-center gap-4">
+                    @if($status)
+                    <span class="flex items-center gap-1.5 text-xs">
+                        <span class="w-1.5 h-1.5 rounded-full {{ $status >= 200 && $status < 300 ? 'bg-emerald-500' : ($status >= 400 ? 'bg-red-500' : 'bg-yellow-500') }}"></span>
+                        <span class="text-gray-600 dark:text-gray-400">Status:</span>
+                        <span class="font-mono font-medium text-gray-800 dark:text-gray-200">{{ $status }}</span>
+                    </span>
+                    @endif
+                    @if($duration)
+                    <span class="flex items-center gap-1.5 text-xs">
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-gray-600 dark:text-gray-400">Duration:</span>
+                        <span class="font-mono font-medium text-gray-800 dark:text-gray-200">{{ $duration }}ms</span>
+                    </span>
+                    @endif
+                </div>
+                @endif
+            </div>
+
+            @empty
+
+            <div class="text-center py-16">
+                <div class="w-20 h-20 mx-auto mb-4 bg-gray-100 dark:bg-gray-700/50 rounded-2xl flex items-center justify-center">
+                    <svg class="w-10 h-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">No request logs found</p>
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Page requests will appear here as they occur</p>
+            </div>
+
+            @endforelse
+
+        </div>
+
+        <!-- Footer with count and close button -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-3 px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+            <div class="flex items-center gap-2">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                </span>
+                
+            </div>
+            <button wire:click="$set('showPageRequestModal', false)" 
+                class="w-full sm:w-auto px-5 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all text-sm shadow-sm">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
 
 </div>

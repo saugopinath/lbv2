@@ -12,4 +12,8 @@ class UserPageVisitLog extends Model
     {
         return $this->belongsTo(User::class);
     }
+    protected $casts = [
+        'request_payload' => 'array',
+        'response_payload' => 'array',
+    ];
 }

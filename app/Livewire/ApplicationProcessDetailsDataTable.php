@@ -162,7 +162,8 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         ) {
             $actions['bulkrevert'] = 'Revert';
         }
-
+        // $actions['bulkverify'] = 'Verify';
+        // $actions['bulkapprove'] = 'Approve';
         return $actions;
     }
 
@@ -177,72 +178,14 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $this->setPerPage((int) $value);
         $this->resetPage();
     }
-    // public function filters(): array
-    // {
-    //     return [
-    //         TextFilter::make('Application ID')
-    //             ->filter(function ($query, $value) {
-    //                 $query->whereHas('sourceable', function ($q) use ($value) {
-    //                     $q->where('application_id', 'ILIKE', "%{$value}%");
-    //                 });
-    //             }),
-
-    //         TextFilter::make('Applicant Name')
-    //             ->filter(function ($query, $value) {
-    //                 $query->whereHas('sourceable', function ($q) use ($value) {
-    //                     $q->where('full_name', 'ILIKE', "%{$value}%");
-    //                 });
-    //             }),
-    //     ];
-    // }
-
-    // public function columns(): array
-    // {
-    //     return [
-    //         Column::make("Application ID", "application_id")
-    //             ->label(fn($row) => $row->sourceable->application_id ?? 'N/A')
-    //             ->sortable()
-    //             ->searchable(function ($query, $searchTerm) {
-    //                 $query->whereHas('sourceable', function ($q) use ($searchTerm) {
-    //                     $q->where('application_id', 'ILIKE', "%{$searchTerm}%");
-    //                 });
-    //             }),
-
-    //         Column::make("Applicant Name", "full_name")
-    //             ->label(fn($row) => $row->sourceable->full_name ?? 'N/A'),
-
-    //         Column::make("Father's Name", "fullname")
-    //             ->label(function ($row) {
-    //                 return optional(
-    //                     $row->sourceable->relationships->firstWhere(
-    //                         'relation_type_id',
-    //                         Codemaster::getIdByCode(131)
-    //                     )
-    //                 )->full_name ?? 'N/A';
-    //             }),
-
-    //         Column::make("Age", "age")
-    //             ->label(fn($row) => Carbon::parse($row->sourceable->dob)->age
-    //                 ?? 'N/A'),
-
-    //         $columns[] = Column::make("Actions")
-    //             ->label(function ($row) {
-    //                 return view('coulmn_button.view', [
-    //                     'link' => route('draft-application.view', Crypt::encryptString($row->sourceable->application_id)),
-    //                     'tooltip' => 'View Application',
-    //                 ])->render();
-    //             })
-    //             ->html(),
-    //     ];
-    // }
-
 
     public function columns(): array
     {
         return [
             Column::make("Application ID", "application_id")
                 ->label(fn($row) => $row->application_id ?? 'N/A'),
-
+            Column::make("Application Type", "application_type")
+                ->label(fn($row) => $row->application_type ?? 'N/A'),
             Column::make("Applicant Name")
                 ->label(fn($row) => $row->beneficiary_name ?? 'N/A'),
 
@@ -257,7 +200,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             Column::make("Actions")
                 ->label(function ($row) {
                     return view('coulmn_button.view', [
-                        'link' => route('draft-application.view', Crypt::encryptString($row->application_id)),
+                        'link' => route('draft-application.view', ['application_id' => Crypt::encryptString($row->application_id)]),
                         'tooltip' => 'View Application',
                     ])->render();
                 })
@@ -267,7 +210,8 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $query = BeneficiaryPersonalDetail::query()->select('application_id', 'beneficiary_id', 'scheme_id', 'beneficiary_name', 'ben_father_name', 'dob')
+        $query = BeneficiaryPersonalDetail::query()->select('application_id', 'beneficiary_id', 'scheme_id', 'beneficiary_name', 'ben_father_name', 'dob', 'application_type')
+            ->whereIn('is_clean', [1, 2])
             ->where('next_level_role_id', $this->sameLabelRoleId)
             ->where('scheme_id', $this->schemeId)
             ->where('is_final', $this->isFinal);
@@ -291,80 +235,12 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
     public function bulkverify()
     {
-        $ids = $this->getSelected();
-        $approverRoleId = Codemaster::getIdByCode(23);
-        foreach ($ids as $id) {
-            DB::beginTransaction();
-            try {
-                BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_condition)->update([
-                    'next_level_role_id' => $this->nextLabelRoleId,
-                ]);
-                $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
-                $AcceptRejectInfo = new AcceptRejectInfo;
-                $AcceptRejectInfo->application_id = $id;
-                $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
-                $AcceptRejectInfo->ip_address = request()->ip();
-                $AcceptRejectInfo->scheme_id = $this->schemeId;
-                $AcceptRejectInfo->user_id = Auth::id();
-                $AcceptRejectInfo->browser = request()->header('User-Agent');
-                $AcceptRejectInfo->model_name = null;
-                $AcceptRejectInfo->op_type = $approverRoleId;
-                $AcceptRejectInfo->revert_reason_cause_id = null;
-                $AcceptRejectInfo->revert_reason_remarks = null;
-                $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                    ->latest('id')
-                    ->value('id') ?? null;
-                $AcceptRejectInfo->save();
-                DB::commit();
-            } catch (\Exception $e) {
-                DB::rollBack();
-                throw $e;
-            }
-        }
-        $this->dispatch('toastr', [
-            'type' => 'success',
-            'message' => 'All applications verified successfully!'
-        ]);
-        $this->clearSelected();
+        $this->handleBulkAction('verification');
     }
 
     public function bulkapprove()
     {
-        $ids = $this->getSelected();
-        foreach ($ids as $id) {
-            DB::beginTransaction();
-            try {
-                BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_condition)->update([
-                    'next_level_role_id' => $this->nextLabelRoleId,
-                    'is_clean' => 1,
-                ]);
-                $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
-                $AcceptRejectInfo = new AcceptRejectInfo;
-                $AcceptRejectInfo->application_id = $id;
-                $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
-                $AcceptRejectInfo->ip_address = request()->ip();
-                $AcceptRejectInfo->scheme_id = $this->schemeId;
-                $AcceptRejectInfo->user_id = Auth::id();
-                $AcceptRejectInfo->browser = request()->header('User-Agent');
-                $AcceptRejectInfo->model_name = null;
-                $AcceptRejectInfo->op_type = Codemaster::getIdByCode(0);
-                $AcceptRejectInfo->revert_reason_cause_id = null;
-                $AcceptRejectInfo->revert_reason_remarks = null;
-                $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                    ->latest('id')
-                    ->value('id') ?? null;
-                $AcceptRejectInfo->save();
-                DB::commit();
-            } catch (\Exception $e) {
-                DB::rollBack();
-                throw $e;
-            }
-        }
-        $this->dispatch('toastr', [
-            'type' => 'success',
-            'message' => 'All applications approved successfully!'
-        ]);
-        $this->clearSelected();
+        $this->handleBulkAction('approver');
     }
     public function bulkrevert()
     {
@@ -392,83 +268,246 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $select_lgd = session('lgd_session');
         $user_id = Crypt::decryptString($select_lgd['role_id']);
         if ($this->revertrejectAction === 'revert') {
-            // $user = auth()->user();
-            /*  if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
-                $next_level_role_id = Codemaster::getIdByCode(22);
-            }
-            if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
-                $next_level_role_id = Codemaster::getIdByCode(21);
-            } */
-            $next_level_role_id = Codemaster::getIdByCode(21);
-            foreach ($ids as $id) {
-                DB::beginTransaction();
-                try {
-                    BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_condition)->update([
-                        'next_level_role_id' => $this->nextLabelRoleId,
-                    ]);
-                    $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
-                    $AcceptRejectInfo = new AcceptRejectInfo;
-                    $AcceptRejectInfo->application_id = $id;
-                    $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
-                    $AcceptRejectInfo->ip_address = request()->ip();
-                    $AcceptRejectInfo->scheme_id = $this->schemeId;
-                    $AcceptRejectInfo->user_id = Auth::id();
-                    $AcceptRejectInfo->browser = request()->header('User-Agent');
-                    $AcceptRejectInfo->model_name = null;
-                    $AcceptRejectInfo->op_type = $next_level_role_id;
-                    $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
-                    $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
-                    $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
-                        ->latest('id')
-                        ->value('id') ?? null;
-                    $AcceptRejectInfo->save();
-                    DB::commit();
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    throw $e;
-                }
-            }
-            $this->dispatch('toastr', [
-                'type' => 'warning',
-                'message' => 'All applications reverted successfully!'
-            ]);
-            $this->clearSelected();
-        } elseif ($this->revertrejectAction === 'reject') {
+
             $ids = $this->getSelected();
-            foreach ($ids as $id) {
-                DB::beginTransaction();
-                try {
-                    BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_condition)->update([
+
+            if (empty($ids)) {
+                return;
+            }
+
+            $next_level_role_id = Codemaster::getIdByCode(21);
+
+            DB::beginTransaction();
+
+            try {
+
+                $records = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
+                    ->select('application_id', 'beneficiary_id', 'next_level_role_id', 'is_clean')
+                    ->get();
+
+                foreach ($records as $record) {
+
+                    // update workflow step
+                    $record->update([
+                        'next_level_role_id' => $next_level_role_id
+                    ]);
+
+                    // previous audit id
+                    $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
+                        ->latest('id')
+                        ->value('id');
+
+                    // audit log
+                    AcceptRejectInfo::create([
+                        'application_id' => $record->application_id,
+                        'beneficiary_id' => $record->beneficiary_id,
+                        'ip_address' => request()->ip(),
+                        'scheme_id' => $this->schemeId,
+                        'user_id' => Auth::id(),
+                        'browser' => request()->header('User-Agent'),
+                        'op_type' => $next_level_role_id,
+                        'revert_reason_cause_id' => $validated['cause'],
+                        'revert_reason_remarks' => $validated['remark'],
+                        'parent_id' => $parentId,
+                    ]);
+                }
+
+                DB::commit();
+
+                $this->dispatch('toastr', [
+                    'type' => 'warning',
+                    'message' => 'All applications reverted successfully!'
+                ]);
+
+                $this->clearSelected();
+                $this->dispatch('actionPerformedAndRedirect');
+
+            } catch (\Throwable $e) {
+
+                DB::rollBack();
+                throw $e;
+            }
+        } elseif ($this->revertrejectAction === 'reject') {
+
+            $ids = $this->getSelected();
+
+            if (empty($ids)) {
+                return;
+            }
+
+            DB::beginTransaction();
+
+            try {
+
+                $records = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
+                    ->select('application_id', 'beneficiary_id', 'next_level_role_id', 'is_clean')
+                    ->get();
+
+                foreach ($records as $record) {
+
+                    // update application
+                    $record->update([
                         'next_level_role_id' => $this->nextLabelRoleId,
                         'is_clean' => 10,
                     ]);
-                    $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
-                    $AcceptRejectInfo = new AcceptRejectInfo;
-                    $AcceptRejectInfo->application_id = $id;
-                    $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
-                    $AcceptRejectInfo->ip_address = request()->ip();
-                    $AcceptRejectInfo->scheme_id = $this->schemeId;
-                    $AcceptRejectInfo->user_id = Auth::id();
-                    $AcceptRejectInfo->browser = request()->header('User-Agent');
-                    $AcceptRejectInfo->model_name = null;
-                    $AcceptRejectInfo->op_type = Codemaster::getIdByCode(-1);
-                    $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
-                    $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
-                    $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
+
+                    // previous audit id
+                    $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
                         ->latest('id')
-                        ->value('id') ?? null;
-                    $AcceptRejectInfo->save();
-                    DB::commit();
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    throw $e;
+                        ->value('id');
+
+                    // insert audit
+                    AcceptRejectInfo::create([
+                        'application_id' => $record->application_id,
+                        'beneficiary_id' => $record->beneficiary_id,
+                        'ip_address' => request()->ip(),
+                        'scheme_id' => $this->schemeId,
+                        'user_id' => Auth::id(),
+                        'browser' => request()->header('User-Agent'),
+                        'op_type' => Codemaster::getIdByCode(-1),
+                        'revert_reason_cause_id' => $validated['cause'],
+                        'revert_reason_remarks' => $validated['remark'],
+                        'parent_id' => $parentId,
+                    ]);
                 }
+
+                DB::commit();
+
+                $this->dispatch('toastr', [
+                    'type' => 'error',
+                    'message' => 'All applications rejected successfully!'
+                ]);
+
+                $this->clearSelected();
+                $this->dispatch('actionPerformedAndRedirect');
+
+            } catch (\Throwable $e) {
+
+                DB::rollBack();
+                throw $e;
             }
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => 'All applications rejected successfully!'
-            ]);
-            $this->clearSelected();
+        } elseif ($this->revertrejectAction === 'verification') {
+            $ids = $this->getSelected();
+            if (empty($ids))
+                return;
+            $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, $this->nextLabelRoleId, $ids);
+            if (!$check['is_processed']) {
+                $this->dispatch('toastr', [
+                    'type' => 'error',
+                    'message' => "Capacity exceeded for {$check['model']}! Available: {$check['remaining_capacity']}"
+                ]);
+                return;
+            }
+            DB::beginTransaction();
+            try {
+                $records = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
+                    ->select('application_id', 'beneficiary_id', 'next_level_role_id', 'is_clean')
+                    ->get();
+
+                foreach ($records as $record) {
+
+                    // Update record
+                    $record->update([
+                        'next_level_role_id' => $this->nextLabelRoleId
+                    ]);
+
+                    // Get parent audit id
+                    $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
+                        ->latest('id')
+                        ->value('id');
+
+                    // Insert audit
+                    AcceptRejectInfo::create([
+                        'application_id' => $record->application_id,
+                        'beneficiary_id' => $record->beneficiary_id,
+                        'ip_address' => request()->ip(),
+                        'scheme_id' => $this->schemeId,
+                        'user_id' => Auth::id(),
+                        'browser' => request()->header('User-Agent'),
+                        'op_type' => Codemaster::getIdByCode(23),
+                        'revert_reason_remarks' => $validated['remark'] ?? null,
+                        'parent_id' => $parentId,
+                    ]);
+                }
+                DB::commit();
+                $this->dispatch('toastr', ['type' => 'success', 'message' => 'Processed!']);
+                $this->clearSelected();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+        } elseif ($this->revertrejectAction === 'approver') {
+
+            $ids = $this->getSelected();
+
+            if (empty($ids)) {
+                return;
+            }
+
+            $check = \App\Helpers\SchemeCapacityHelper::checkBulk(
+                $this->schemeId,
+                $this->nextLabelRoleId,
+                $ids
+            );
+
+            if (!$check['is_processed']) {
+                $this->dispatch('toastr', [
+                    'type' => 'error',
+                    'message' => "Capacity exceeded for {$check['model']}! Available: {$check['remaining_capacity']}"
+                ]);
+                return;
+            }
+
+            DB::beginTransaction();
+
+            try {
+
+                // Fetch records once
+                $records = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
+                    ->select('application_id', 'beneficiary_id', 'next_level_role_id', 'is_clean')
+                    ->get();
+
+                foreach ($records as $record) {
+
+                    // Update record
+                    $record->update([
+                        'next_level_role_id' => $this->nextLabelRoleId,
+                        'is_clean' => 1,
+                    ]);
+
+                    // previous audit id
+                    $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
+                        ->latest('id')
+                        ->value('id');
+
+                    // Insert audit log
+                    AcceptRejectInfo::create([
+                        'application_id' => $record->application_id,
+                        'beneficiary_id' => $record->beneficiary_id,
+                        'ip_address' => request()->ip(),
+                        'scheme_id' => $this->schemeId,
+                        'user_id' => Auth::id(),
+                        'browser' => request()->header('User-Agent'),
+                        'op_type' => Codemaster::getIdByCode(0),
+                        'revert_reason_remarks' => $validated['remark'] ?? null,
+                        'parent_id' => $parentId,
+                    ]);
+                }
+
+                DB::commit();
+
+                $this->dispatch('toastr', [
+                    'type' => 'success',
+                    'message' => 'Applications approved successfully!'
+                ]);
+
+                $this->clearSelected();
+
+            } catch (\Throwable $e) {
+
+                DB::rollBack();
+                throw $e;
+            }
         }
     }
     public function exportExcel()

@@ -36,6 +36,8 @@ class DailyUserActivity extends Component
 
     public $showActionAuditModal = false;
     public $actionAudits = [];
+    public $showPageRequestModal = false;
+    public $pageRequests = [];
 
 
     protected $queryString = [
@@ -82,6 +84,28 @@ class DailyUserActivity extends Component
         $this->selectedActionRequestLog = null;
         $this->showActionRequestModal = false;
         $this->showActionAuditModal = false;
+    }
+    public function openPageRequestResponse($sessionId, $url)
+    {
+        $logs = UserPageVisitLog::where('session_id', $sessionId)
+            ->where('url', $url)
+            ->orderBy('visit_time')
+            ->get();
+
+        $this->pageRequests = $logs->map(function ($log) {
+            return [
+                'visit_time' => $log->visit_time,
+                'request_payload' => is_string($log->request_payload)
+                    ? json_decode($log->request_payload, true)
+                    : $log->request_payload,
+
+                'response_payload' => is_string($log->response_payload)
+                    ? json_decode($log->response_payload, true)
+                    : $log->response_payload
+            ];
+        })->toArray();
+
+        $this->showPageRequestModal = true;
     }
 
     public function openActionRequestModal($actionLogId)
@@ -156,26 +180,43 @@ class DailyUserActivity extends Component
 
     public function getActionLogsProperty()
     {
+        // dd($this->actionModalSessionId, $this->actionModalUrl);
+        // dump(
+        //     $this->actionModalUrl,
+        //     LivewireActionLog::where('session_id', $this->actionModalSessionId)->count()
+        // );
         if (!$this->actionModalSessionId || !$this->actionModalUrl) {
             return collect();
         }
+        $url = $this->actionModalUrl;
+        $parsed = parse_url($url);
+        $segments = explode('/', trim($parsed['path'], '/'));
+        $baseUrl = $parsed['scheme'] . '://' . $parsed['host'] . '/' . ($segments[0] ?? '');
         return LivewireActionLog::where('session_id', $this->actionModalSessionId)
-            ->where('url', $this->actionModalUrl)
+            ->where('url', 'LIKE', $baseUrl . '%')
             ->orderBy('created_at', 'desc')
             ->get();
+        // return LivewireActionLog::where('session_id', $this->actionModalSessionId)
+        //     ->where('url', 'LIKE', '%' . $this->actionModalUrl . '%')
+        //     ->orderBy('created_at', 'desc')
+        //     ->get();
     }
     public function getAuditsProperty()
     {
+        // dd($this->selectedSessionId);
         if (!$this->selectedSessionId) {
             return collect();
         }
         $query = Audit::where('session_id', $this->selectedSessionId);
         if ($this->selectedUrl) {
-            $query->where(function ($q) {
-                $q->where('other_details->url', $this->selectedUrl)
-                    ->orWhere('other_details->referrer', $this->selectedUrl)
-                    ->orWhere('other_details', 'LIKE', '%"url":"' . $this->selectedUrl . '"%')
-                    ->orWhere('other_details', 'LIKE', '%"referrer":"' . $this->selectedUrl . '"%');
+            $url = $this->selectedUrl;
+            $parsed = parse_url($url);
+            $segments = explode('/', trim($parsed['path'], '/'));
+            $baseUrl = $parsed['scheme'] . '://' . $parsed['host'] . '/' . ($segments[0] ?? '');
+
+            $query->where(function ($q) use ($baseUrl) {
+                $q->where('other_details->url', 'LIKE', $baseUrl . '%')
+                    ->orWhere('other_details->referrer', 'LIKE', $baseUrl . '%');
             });
         }
         return $query->latest()->get();
@@ -188,6 +229,7 @@ class DailyUserActivity extends Component
         }
         $path = parse_url($url, PHP_URL_PATH) ?: $url;
         $segments = array_filter(explode('/', trim($path, '/')));
+
         $last = end($segments);
         if ($last && strlen($last) > 30 && preg_match('/^[A-Za-z0-9_\-]+$/', $last)) {
             array_pop($segments);
@@ -197,6 +239,7 @@ class DailyUserActivity extends Component
 
         return Str::title(str_replace(['-', '_'], ' ', $name));
     }
+
     public function render()
     {
         $query = Activity::query()
@@ -237,9 +280,12 @@ class DailyUserActivity extends Component
                 // Ignore invalid date format
             }
         } else {
+            // Default to today
             $query->whereDate('created_at', Carbon::today());
         }
+
         $activities = $query->latest()->paginate(10);
+        // Fetch visited pages for each session
         $sessionIds = $activities->pluck('session_id')->filter()->unique();
 
         $pageLogs = UserPageVisitLog::whereIn('session_id', $sessionIds)
@@ -248,21 +294,22 @@ class DailyUserActivity extends Component
             ->groupBy('session_id')
             ->map(function ($logs) {
                 return $logs->map(function ($log) {
+
                     $path = parse_url($log->url, PHP_URL_PATH) ?: $log->url;
                     $segments = array_filter(explode('/', trim($path, '/')));
+
                     $lastSegment = end($segments);
+
                     if ($lastSegment && strlen($lastSegment) > 30 && preg_match('/^[A-Za-z0-9_\-]+$/', $lastSegment)) {
                         array_pop($segments);
                         $lastSegment = end($segments);
                     }
-
                     $pageName = $lastSegment ?: 'Home';
-
                     return [
                         'url' => $log->url,
-                        'name' => $pageName ? Str::title(str_replace(['-', '_'], ' ', $pageName)) : 'Home'
+                        'name' => Str::title(str_replace(['-', '_'], ' ', $pageName))
                     ];
-                })->unique();
+                })->unique('name');
             });
         return view('livewire.daily-user-activity', [
             'activities' => $activities,
