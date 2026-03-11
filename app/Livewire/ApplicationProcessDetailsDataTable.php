@@ -200,7 +200,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             Column::make("Actions")
                 ->label(function ($row) {
                     return view('coulmn_button.view', [
-                        'link' => route('draft-application.view', Crypt::encryptString($row->application_id)),
+                        'link' => route('draft-application.view', ['application_id' => Crypt::encryptString($row->application_id)]),
                         'tooltip' => 'View Application',
                     ])->render();
                 })

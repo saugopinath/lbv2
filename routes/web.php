@@ -82,7 +82,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/lb-application-list/{scheme_id?}', SchemeDropdown::class)
         ->name('lb-application-list');
 
-    Route::get('/application/{id}', DraftApplicationView::class)
+    Route::get('/application', DraftApplicationView::class)
         ->name('draft-application.view');
 
     // User Management

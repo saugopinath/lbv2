@@ -15,10 +15,11 @@ class DraftApplicationView extends Component
     public $schemeId;
     public $schemeName;
 
-    public function mount($id)
+    public function mount()
     {
         try {
-            $this->applicationId = (int) Crypt::decryptString($id);
+            $encrypted = request()->query('application_id');
+            $this->applicationId = (int) Crypt::decryptString($encrypted);
 
             $this->application = BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->first();
 
