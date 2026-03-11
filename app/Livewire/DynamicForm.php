@@ -112,6 +112,7 @@ class DynamicForm extends Component
         }
         $this->schemeId = $schemeId;
         $this->schemeName = $schemeName;
+        // dd($this->schemeName);
         $this->heading = 'Government Of West Bengal ' . $this->schemeName . ' Scheme';
         $this->ram = $ram;
         $this->form_preview = $form_preview;

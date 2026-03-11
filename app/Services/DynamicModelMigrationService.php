@@ -207,10 +207,10 @@ class DynamicModelMigrationService
                             ->on('pension.unique_app_ben_ids')
                             ->cascadeOnDelete();
 
-                    \$table->foreign('beneficiary_id', 'beneficiary_id_fk')
-                            ->references('beneficiary_id')
-                            ->on('pension.unique_app_ben_ids')
-                            ->cascadeOnDelete();
+                    // \$table->foreign('beneficiary_id', 'beneficiary_id_fk')
+                    //         ->references('beneficiary_id')
+                    //         ->on('pension.unique_app_ben_ids')
+                    //         ->cascadeOnDelete();
                     \$table->foreign('scheme_id', 'scheme_id_fk')
                             ->references('id')
                             ->on('public.schemes')

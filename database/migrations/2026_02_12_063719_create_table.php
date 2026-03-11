@@ -27,7 +27,10 @@ return new class extends Migration {
                 application_id bigint NOT NULL DEFAULT nextval('{$this->schema}.application_id_seq'::regclass),
                 beneficiary_id bigint NOT NULL DEFAULT nextval('{$this->schema}.beneficiary_id_seq'::regclass),
                 created_at timestamp without time zone,
-                updated_at timestamp without time zone
+                updated_at timestamp without time zone,
+                CONSTRAINT unique_app_ben_ids_pkey PRIMARY KEY (application_id),
+                CONSTRAINT unique_app_ben_ids_uniquekey UNIQUE (application_id, scheme_id)
+
             )
         ");
 

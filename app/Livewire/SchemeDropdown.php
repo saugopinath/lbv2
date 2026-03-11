@@ -52,7 +52,11 @@ class SchemeDropdown extends Component
             }
         }
     }
-
+    public function updatedSchemeId($value)
+    {
+        $scheme = Scheme::find($value);
+        $this->schemeName = $scheme?->name;
+    }
     // public function updatedSchemeId($value)
     // {
     //     $scheme = Scheme::with([

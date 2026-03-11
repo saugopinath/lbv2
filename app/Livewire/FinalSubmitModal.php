@@ -125,7 +125,10 @@ class FinalSubmitModal extends Component
             return redirect()->route('schemes.final-submitted');
             $this->show = false;
         } catch (Exception $e) {
-            dd($e);
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Please Configure Workflow Steps',
+            ]);
             session()->flash('error', "Application ID: " . $this->applicationId . " Submitted failed!");
         }
     }
