@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Scheme;
 use App\Models\SchemeFinalSubmitCheck;
 use Illuminate\Support\Facades\Route;
+// use App\Attributes\Loggable;
+
 
 class SchemeController extends Controller
 {
+    // #[Loggable(level: 'Normal', nickname: 'Select Scheme for Final Submission')]
     public function finalSubmitted()
     {
         $schemes = '';

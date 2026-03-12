@@ -10,6 +10,8 @@ use App\Models\UserPageVisitLog;
 use App\Models\UserRoleSchemeOfficeMapping;
 use Illuminate\Support\Facades\Log;
 
+use App\Attributes\Loggable;
+
 class PageVisitlog
 {
     public function handle(Request $request, Closure $next)
@@ -19,6 +21,17 @@ class PageVisitlog
         }
 
         if ($request->is('livewire/update')) {
+
+            // ⭐ Link Livewire Action to the current Page Visit
+            $referrer = $request->headers->get('referer');
+            $latestVisit = UserPageVisitLog::where('session_id', $request->session()->getId())
+                ->where('url', $referrer)
+                ->latest()
+                ->first();
+
+            if ($latestVisit) {
+                app()->instance('user_page_visit_log_id', (string) $latestVisit->id);
+            }
 
             $payload = json_decode($request->getContent(), true) ?? [];
             $components = $payload['components'] ?? [];
@@ -36,10 +49,8 @@ class PageVisitlog
                     $snapshot = is_string($component['snapshot'] ?? null)
                         ? json_decode($component['snapshot'], true)
                         : ($component['snapshot'] ?? []);
-
                     $componentName = $snapshot['memo']['name'] ?? 'unknown';
-
-                    // ⭐ mount / component property data
+                    $componentClass = 'App\\Livewire\\' . \Illuminate\Support\Str::studly($componentName);
                     $state = $snapshot['data'] ?? [];
 
                     $cleanState = [];
@@ -59,11 +70,6 @@ class PageVisitlog
 
                         $cleanState[$key] = $value;
                     }
-                    // merge with params
-                    $params = array_merge(
-                        $call['params'] ?? [],
-                        $cleanState
-                    );
 
                     foreach ($calls as $call) {
 
@@ -80,6 +86,13 @@ class PageVisitlog
                             continue;
                         }
 
+                        // merge with params
+                        $params = array_merge(
+                            $call['params'] ?? [],
+                            $cleanState
+                        );
+
+                        $metadata = $this->getLoggingMetadata($componentClass, $methodName);
                         $createdActionLogs[] = \App\Models\LivewireActionLog::create([
                             'user_id' => Auth::id(),
                             'session_id' => $request->session()->getId(),
@@ -87,11 +100,9 @@ class PageVisitlog
                             'ip' => $request->ip(),
                             'component_name' => $componentName,
                             'method_name' => $methodName,
-                            // 'request_payload' => [
-                            //     'params' => $call['params'] ?? [],
-                            //     'updates' => $component['updates'] ?? [],
-                            //     'state'  => $state
-                            // ],
+                            'log_level' => $metadata['level'],
+                            'log_nickname' => $metadata['nickname'],
+                            'user_page_visit_log_id' => app()->has('user_page_visit_log_id') ? app('user_page_visit_log_id') : null,
                             'request_payload' => [
                                 'params' => $params,
                                 'updates' => $component['updates'] ?? [],
@@ -178,7 +189,9 @@ class PageVisitlog
         ) {
             return $next($request);
         }
-        $response = $next($request);
+
+        // ⭐ Pre-create Page Visit Log to get ID for Audits
+        $pageVisitLog = null;
         try {
             $agent = new Agent();
             $browser = $agent->browser();
@@ -186,22 +199,18 @@ class PageVisitlog
             $userRole = UserRoleSchemeOfficeMapping::where('user_id', $userId)
                 ->first()
                 ->role_id ?? null;
-            $requestPayload = [
-                // 'query' => $request->query(),
-                'body' => $request->except(['password', '_token']),
-                // 'route_name' => optional($request->route())->getName(),
-                'route_params' => optional($request->route())->parameters(),
-            ];
-            $responsePayload = [
-                'status' => $response->getStatusCode(),
-                'headers' => $response->headers->all(),
-            ];
-            $referrer = $request->headers->get('referer');
 
+            $route = $request->route();
+            $controller = $route ? $route->getControllerClass() : null;
+            $action = $route ? $route->getActionMethod() : null;
+            $metadata = $this->getLoggingMetadata($controller, $action);
+
+            $referrer = $request->headers->get('referer');
             if ($referrer && str_contains($referrer, 'otp-validate')) {
                 $referrer = null;
             }
-            UserPageVisitLog::create([
+
+            $pageVisitLog = UserPageVisitLog::create([
                 'visit_time' => now(),
                 'user_id' => $userId,
                 'user_role_id' => $userRole,
@@ -212,18 +221,83 @@ class PageVisitlog
                 'browser_version' => $agent->version($browser),
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),
-                'referrer' => $referrer,            
+                'referrer' => $referrer,
                 'session_id' => $request->session()->getId(),
-                'request_payload' => $requestPayload,
-                'response_payload' => $responsePayload,
-                'status_code' => $response->getStatusCode(),
-
+                'log_level' => $metadata['level'],
+                'log_nickname' => $metadata['nickname'],
             ]);
+
+            app()->instance('user_page_visit_log_id', (string) $pageVisitLog->id);
         } catch (\Exception $e) {
-            dd($e);
-            Log::error('Page visit log failed: ' . $e->getMessage());
+            Log::error('Pre-request page visit log failed: ' . $e->getMessage());
+        }
+
+        $response = $next($request);
+
+        // ⭐ Post-update Page Visit Log with Payload and Status
+        if ($pageVisitLog) {
+            try {
+                $requestPayload = [
+                    'body' => $request->except(['password', '_token']),
+                    'route_params' => optional($request->route())->parameters(),
+                ];
+                $responsePayload = [
+                    'status' => $response->getStatusCode(),
+                    'headers' => $response->headers->all(),
+                ];
+
+                $pageVisitLog->update([
+                    'request_payload' => $requestPayload,
+                    'response_payload' => $responsePayload,
+                    'status_code' => $response->getStatusCode(),
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Post-request page visit log update failed: ' . $e->getMessage());
+            }
         }
 
         return $response;
+    }
+
+    /**
+     * Resolve logging metadata from PHP Attributes.
+     */
+    private function getLoggingMetadata($class, $method = null)
+    {
+        $metadata = [
+            'level' => 'Normal',
+            'nickname' => null,
+        ];
+
+        if (!$class) return $metadata;
+
+        try {
+            $reflectionClass = new \ReflectionClass($class);
+
+            // Check Class Level Attributes
+            $classAttributes = $reflectionClass->getAttributes(Loggable::class);
+            if (!empty($classAttributes)) {
+                $instance = $classAttributes[0]->newInstance();
+                $metadata['level'] = $instance->level;
+                $metadata['nickname'] = $instance->nickname;
+            }
+
+            // Check Method Level Attributes (overwrites class level if present)
+            if ($method && $reflectionClass->hasMethod($method)) {
+                $reflectionMethod = $reflectionClass->getMethod($method);
+                $methodAttributes = $reflectionMethod->getAttributes(Loggable::class);
+                if (!empty($methodAttributes)) {
+                    $instance = $methodAttributes[0]->newInstance();
+                    $metadata['level'] = $instance->level;
+                    if ($instance->nickname) {
+                        $metadata['nickname'] = $instance->nickname;
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // Silently fail if reflection is not possible
+        }
+
+        return $metadata;
     }
 }

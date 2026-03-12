@@ -22,6 +22,9 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use Throwable;
 
+use App\Attributes\Loggable;
+
+#[Loggable(level: 'Normal', nickname: 'Dynamic Form Entry')]
 class DynamicForm extends Component
 {
     public $schemeId;
@@ -171,6 +174,7 @@ class DynamicForm extends Component
             $this->updateTabNavigation();
         }
     }
+    #[Loggable(level: 'Moderate', nickname: 'Aadhaar Verification Successful')]
     public function onAadhaarChecked($data)
     {
         $this->aadhaarVerified = true;
@@ -284,6 +288,7 @@ class DynamicForm extends Component
     //         $this->updateTabNavigation();
     //     }
     // }
+    #[Loggable(level: 'Moderate', nickname: 'Save Application details')]
     public function saveAndNext($nextTab)
     {
         if ((string) $this->activeTab === '104') {
@@ -347,6 +352,7 @@ class DynamicForm extends Component
             $this->allTabsCompleted = true;
         }
     }
+    #[Loggable(level: 'Critical', nickname: 'Final Application Submission')]
     public function finalSubmit()
     {
         if ((string) $this->activeTab === '104') {

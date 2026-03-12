@@ -22,6 +22,7 @@ class DailyUserActivity extends Component
     public $username;
     public $selectedSessionId;
     public $selectedUrl;
+    public $selectedLogId;
     public $showAuditModal = false;
 
     // Livewire Action Modal
@@ -52,10 +53,11 @@ class DailyUserActivity extends Component
         $this->resetPage();
     }
 
-    public function openAuditModal($sessionId, $url = null)
+    public function openAuditModal($sessionId, $url = null, $logId = null)
     {
         $this->selectedSessionId = $sessionId;
         $this->selectedUrl = $url;
+        $this->selectedLogId = $logId;
         $this->showAuditModal = true;
     }
 
@@ -64,6 +66,7 @@ class DailyUserActivity extends Component
         $this->showAuditModal = false;
         $this->selectedSessionId = null;
         $this->selectedUrl = null;
+        $this->selectedLogId = null;
     }
 
     // ── Livewire Action Modal ────
@@ -87,14 +90,22 @@ class DailyUserActivity extends Component
     }
     public function openPageRequestResponse($sessionId, $url)
     {
-        $logs = UserPageVisitLog::where('session_id', $sessionId)
-            ->where('url', $url)
+        $this->selectedSessionId = (string) $sessionId;
+        $this->selectedUrl = (string) $url;
+        $logs = UserPageVisitLog::where('session_id', $this->selectedSessionId)
+            ->where('url', $this->selectedUrl)
             ->orderBy('visit_time')
             ->get();
 
-        $this->pageRequests = $logs->map(function ($log) {
-            return [
+        $requests = [];
+        foreach ($logs as $log) {
+            $requests[] = [
+                'id' => $log->id,
+                'session_id' => (string) $this->selectedSessionId,
                 'visit_time' => $log->visit_time,
+                'url' => $log->url,
+                'log_level' => $log->log_level,
+                'log_nickname' => $log->log_nickname,
                 'request_payload' => is_string($log->request_payload)
                     ? json_decode($log->request_payload, true)
                     : $log->request_payload,
@@ -103,8 +114,9 @@ class DailyUserActivity extends Component
                     ? json_decode($log->response_payload, true)
                     : $log->response_payload
             ];
-        })->toArray();
+        }
 
+        $this->pageRequests = $requests;
         $this->showPageRequestModal = true;
     }
 
@@ -136,14 +148,12 @@ class DailyUserActivity extends Component
     {
         // dd($actionLogId);
         $actionLog = LivewireActionLog::find($actionLogId);
-
         if (!$actionLog) {
             $this->selectedActionLog = null;
             $this->actionAudits = [];
             $this->showActionAuditModal = true;
             return;
         }
-
         $arr = $actionLog->toArray();
         $arr['request_payload']  = is_string($arr['request_payload']  ?? null) ? json_decode($arr['request_payload'],  true) : ($arr['request_payload']  ?? []);
         $arr['response_payload'] = is_string($arr['response_payload'] ?? null) ? json_decode($arr['response_payload'], true) : ($arr['response_payload'] ?? []);
@@ -152,17 +162,14 @@ class DailyUserActivity extends Component
             ->where('created_at', '>', $actionLog->created_at)
             ->orderBy('created_at')
             ->first();
-
         $from = $actionLog->created_at;
         $to   = $nextAction
             ? $nextAction->created_at
             : $actionLog->created_at->addSeconds(5);
-
         $query = Audit::where('session_id', $actionLog->session_id);
         $query->where('livewire_action_log_id', (string) $actionLog->id);
         // $query->where('other_details', 'LIKE', '%"livewire_action_log_id":"' . $actionLog->id . '"%');
         // dd($query->toSql(), $query->getBindings());
-
         $this->actionAudits = $query
             ->whereBetween('created_at', [$from, $to])
             ->orderBy('created_at')
@@ -203,20 +210,23 @@ class DailyUserActivity extends Component
     }
     public function getAuditsProperty()
     {
-        // dd($this->selectedSessionId);
         if (!$this->selectedSessionId) {
             return collect();
         }
         $query = Audit::where('session_id', $this->selectedSessionId);
-        if ($this->selectedUrl) {
+        if ($this->selectedLogId) {
+            dump($this->selectedSessionId, $this->selectedLogId, $this->selectedUrl);
+            $query->where('user_page_visit_log_id', (string) $this->selectedLogId);
+        } elseif ($this->selectedUrl) {
             $url = $this->selectedUrl;
             $parsed = parse_url($url);
-            $segments = explode('/', trim($parsed['path'], '/'));
-            $baseUrl = $parsed['scheme'] . '://' . $parsed['host'] . '/' . ($segments[0] ?? '');
+            $path = $parsed['path'] ?? '';
+            // Match the path without query strings for better results
+            $matchPath = $parsed['scheme'] . '://' . $parsed['host'] . $path;
 
-            $query->where(function ($q) use ($baseUrl) {
-                $q->where('other_details->url', 'LIKE', $baseUrl . '%')
-                    ->orWhere('other_details->referrer', 'LIKE', $baseUrl . '%');
+            $query->where(function ($q) use ($matchPath) {
+                $q->where('other_details->url', 'LIKE', $matchPath . '%')
+                    ->orWhere('other_details->referrer', 'LIKE', $matchPath . '%');
             });
         }
         return $query->latest()->get();
@@ -289,7 +299,7 @@ class DailyUserActivity extends Component
         $sessionIds = $activities->pluck('session_id')->filter()->unique();
 
         $pageLogs = UserPageVisitLog::whereIn('session_id', $sessionIds)
-            ->select('session_id', 'url')
+            ->select('session_id', 'url', 'log_nickname')
             ->get()
             ->groupBy('session_id')
             ->map(function ($logs) {
@@ -307,10 +317,12 @@ class DailyUserActivity extends Component
                     $pageName = $lastSegment ?: 'Home';
                     return [
                         'url' => $log->url,
-                        'name' => Str::title(str_replace(['-', '_'], ' ', $pageName))
+                        'name' => Str::title(str_replace(['-', '_'], ' ', $pageName)),
+                        'log_nickname' => $log->log_nickname
                     ];
                 })->unique('name');
             });
+        // dump($pageLogs);
         return view('livewire.daily-user-activity', [
             'activities' => $activities,
             'pageLogs' => $pageLogs

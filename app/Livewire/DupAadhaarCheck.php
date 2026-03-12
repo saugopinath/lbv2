@@ -8,12 +8,14 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\AadhaarHelper;
 use App\Helpers\WorkFlowPermissionHelper;
+use App\Attributes\Loggable;
 
 class DupAadhaarCheck extends Component
 {
     public $aadhaar;
-    public $error = null;  
+    public $error = null;
 
+    #[Loggable(level: 'Moderate', nickname: 'Check Aadhaar Duplication')]
     public function checkDuplicate()
     {
         $this->error = null;
@@ -29,11 +31,11 @@ class DupAadhaarCheck extends Component
             $this->error = "Duplicate Aadhaar found!";
             $this->dispatch('hideLoader');
             return ['status' => 'duplicate', 'message' => $this->error];
-        }       
+        }
 
         $this->dispatch('aadhaarChecked', [
             'encoded' => $encoded_aadhar,
-            'hash' => $aadhaar_hash,           
+            'hash' => $aadhaar_hash,
         ]);
         $this->dispatch('hideLoader');
         return ['status' => 'success', 'message' => '✅ Aadhaar is valid and not duplicate.'];

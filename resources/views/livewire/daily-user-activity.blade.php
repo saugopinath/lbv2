@@ -133,7 +133,6 @@
                             hiddenCount: {{ $hiddenCount }}
                         }"
                             class="flex flex-col items-center gap-2 w-full">
-
                             <!-- Grid container for badges - Fixed width and better grid -->
                             <div class="grid grid-cols-2 gap-3 mx-auto">
                                 @foreach($pages as $index => $page)
@@ -151,10 +150,9 @@
                                     <span
                                         wire:click="openActionModal('{{ $activity->session_id }}', '{{ addslashes($page['url']) }}')"
                                         class="truncate flex-1 min-w-0 text-center"
-                                        title="{{ $page['name'] }}">
-                                        {{ $page['name'] }}
+                                        title="{{ $page['log_nickname'] ?? $page['name'] }}">
+                                        {{ $page['log_nickname'] ?? $page['name'] }}
                                     </span>
-
                                     <button
                                         type="button"
                                         wire:click.stop="openAuditModal('{{ $activity->session_id }}', '{{ addslashes($page['url']) }}')"
@@ -212,14 +210,14 @@
     <!-- Audit Details Modal -->
     @teleport('body')
     <div x-data="{ show: @entangle('showAuditModal') }" x-show="show"
-        class="fixed inset-0 z-[100] overflow-y-auto" style="display: none;">
+        class="fixed inset-0 z-[2000] overflow-y-auto" style="display: none;">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <div x-show="show" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 transition-opacity bg-gray-900/60 backdrop-blur-sm" @click="show = false"></div>
 
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
             <div x-show="show" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-gray-100 dark:border-gray-700 z-[110]">
+                class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-gray-100 dark:border-gray-700 z-[2000]">
 
                 <div class="p-8 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-blue-50 to-transparent dark:from-gray-800/50">
                     <div class="flex items-center space-x-4">
@@ -287,7 +285,7 @@
                                 <div class="space-y-2">
                                     <span class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Old Values</span>
                                     <div class="bg-red-50/50 dark:bg-red-900/10 p-3 rounded-xl border border-red-100 dark:border-red-900/20">
-                                        <pre class="text-[11px] text-red-600 dark:text-red-400 font-mono whitespace-pre-wrap">{{ json_encode($audit->old_values, JSON_PRETTY_PRINT) }}</pre>
+                                        <pre class="text-[11px] text-red-600 dark:text-red-400 font-mono whitespace-pre-wrap overflow-x-auto">{{ json_encode($audit->old_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
                                     </div>
                                 </div>
                                 @endif
@@ -295,7 +293,7 @@
                                 <div class="space-y-2">
                                     <span class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">New Values</span>
                                     <div class="bg-emerald-50/50 dark:bg-emerald-900/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/20">
-                                        <pre class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono whitespace-pre-wrap">{{ json_encode($audit->new_values, JSON_PRETTY_PRINT) }}</pre>
+                                        <pre class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono whitespace-pre-wrap overflow-x-auto">{{ json_encode($audit->new_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
                                     </div>
                                 </div>
                                 @endif
@@ -416,6 +414,17 @@
                                     <span class="font-mono text-sm font-medium text-gray-700 dark:text-gray-200 truncate">
                                         {{ $actionLog->method_name }}()
                                     </span>
+                                    @if($actionLog->log_nickname)
+                                    <span class="px-2 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-[10px] font-bold rounded border border-amber-100 dark:border-amber-800/50">
+                                        {{ $actionLog->log_nickname }}
+                                    </span>
+                                    @endif
+                                    <span @class([ 'px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded border' , 'bg-red-50 text-red-600 border-red-100'=> $actionLog->log_level === 'Critical',
+                                        'bg-orange-50 text-orange-600 border-orange-100' => $actionLog->log_level === 'Moderate',
+                                        'bg-blue-50 text-blue-600 border-blue-100' => $actionLog->log_level === 'Normal' || !$actionLog->log_level,
+                                        ])>
+                                        {{ $actionLog->log_level ?: 'Normal' }}
+                                    </span>
                                 </div>
 
                                 <div class="flex items-center gap-2 flex-wrap">
@@ -524,13 +533,13 @@
                         @if(!empty($req['updates']))
                         <div class="mb-2">
                             <span class="text-[9px] font-bold uppercase text-blue-400 block mb-1">Form Values (wire:model)</span>
-                            <pre class="text-[11px] text-blue-700 dark:text-blue-300 font-mono whitespace-pre-wrap">{{ json_encode($req['updates'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                            <pre class="text-[11px] text-blue-700 dark:text-blue-300 font-mono whitespace-pre-wrap overflow-x-auto">{{ json_encode($req['updates'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                         </div>
                         @endif
                         @if(!empty($req['params']))
                         <div>
                             <span class="text-[9px] font-bold uppercase text-blue-400 block mb-1">Method Params</span>
-                            <pre class="text-[11px] text-blue-700 dark:text-blue-300 font-mono whitespace-pre-wrap">{{ json_encode($req['params'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                            <pre class="text-[11px] text-blue-700 dark:text-blue-300 font-mono whitespace-pre-wrap overflow-x-auto">{{ json_encode($req['params'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                         </div>
                         @endif
                         @if(empty($req['updates']) && empty($req['params']))
@@ -579,7 +588,7 @@
                                     <div class="p-4">
                                         <span class="text-[9px] font-black uppercase tracking-widest text-red-400 block mb-2">Before (Old Values)</span>
                                         <div class="bg-red-50/50 dark:bg-red-900/10 rounded-lg p-3 border border-red-100 dark:border-red-900/20">
-                                            <pre class="text-[11px] text-red-600 dark:text-red-400 font-mono whitespace-pre-wrap">{{ json_encode($oldVals, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                            <pre class="text-[11px] text-red-600 dark:text-red-400 font-mono whitespace-pre-wrap overflow-x-auto">{{ json_encode($oldVals, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                                         </div>
                                     </div>
                                     @endif
@@ -587,7 +596,7 @@
                                     <div class="p-4">
                                         <span class="text-[9px] font-black uppercase tracking-widest text-emerald-400 block mb-2">After (New Values)</span>
                                         <div class="bg-emerald-50/50 dark:bg-emerald-900/10 rounded-lg p-3 border border-emerald-100 dark:border-emerald-900/20">
-                                            <pre class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono whitespace-pre-wrap">{{ json_encode($newVals, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                            <pre class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono whitespace-pre-wrap overflow-x-auto">{{ json_encode($newVals, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                                         </div>
                                     </div>
                                     @endif
@@ -657,13 +666,13 @@
                         @if(!empty($req['updates']))
                         <div class="mb-2">
                             <span class="text-[9px] font-bold uppercase text-blue-400 block mb-1">Form Values (wire:model)</span>
-                            <pre class="text-[11px] text-blue-700 dark:text-blue-300 font-mono whitespace-pre-wrap">{{ json_encode($req['updates'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                            <pre class="text-[11px] text-blue-700 dark:text-blue-300 font-mono whitespace-pre-wrap overflow-x-auto">{{ json_encode($req['updates'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                         </div>
                         @endif
                         @if(!empty($req['params']))
                         <div>
                             <span class="text-[9px] font-bold uppercase text-blue-400 block mb-1">Method Params</span>
-                            <pre class="text-[11px] text-blue-700 dark:text-blue-300 font-mono whitespace-pre-wrap">{{ json_encode($req['params'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                            <pre class="text-[11px] text-blue-700 dark:text-blue-300 font-mono whitespace-pre-wrap overflow-x-auto">{{ json_encode($req['params'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                         </div>
                         @endif
                         @if(empty($req['updates']) && empty($req['params']))
@@ -675,7 +684,7 @@
                         <span class="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400 block mb-2">📥 Response</span>
                         @php $res = $selectedActionRequestLog['response_payload'] ?? []; @endphp
                         @if(!empty($res))
-                        <pre class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono whitespace-pre-wrap">{{ json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                        <pre class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono whitespace-pre-wrap overflow-x-auto">{{ json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                         @else
                         <p class="text-[11px] text-gray-400 italic">No response payload recorded.</p>
                         @endif
@@ -700,185 +709,214 @@
     </div>
     @endteleport
 
- 
+    @teleport('body')
     <div
-    x-data="{ show: @entangle('showPageRequestModal') }"
-    x-show="show"
-    x-transition:enter="transition ease-out duration-200"
-    x-transition:enter-start="opacity-0"
-    x-transition:enter-end="opacity-100"
-    x-transition:leave="transition ease-in duration-150"
-    x-transition:leave-start="opacity-100"
-    x-transition:leave-end="opacity-0"
-    class="fixed inset-0 z-[140] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm px-4"
-    style="display:none;">
-
-    <div 
+        x-data="{ show: @entangle('showPageRequestModal') }"
         x-show="show"
         x-transition:enter="transition ease-out duration-200"
-        x-transition:enter-start="opacity-0 scale-95"
-        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
         x-transition:leave="transition ease-in duration-150"
-        x-transition:leave-start="opacity-100 scale-100"
-        x-transition:leave-end="opacity-0 scale-95"
-        class="bg-white dark:bg-gray-800 w-full max-w-5xl rounded-2xl shadow-2xl max-h-[85vh] overflow-hidden border border-gray-100 dark:border-gray-700">
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-[140] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm px-4"
+        style="display:none;">
 
-        <!-- Header with icon and gradient -->
-        <div class="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-indigo-50/50 to-transparent dark:from-indigo-900/10">
-            <div class="flex items-center gap-3">
-                <div class="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl">
-                    <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        <div
+            x-show="show"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="bg-white dark:bg-gray-800 w-full max-w-5xl rounded-2xl shadow-2xl max-h-[85vh] overflow-hidden border border-gray-100 dark:border-gray-700">
+
+            <!-- Header with icon and gradient -->
+            <div class="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-indigo-50/50 to-transparent dark:from-indigo-900/10">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl">
+                        <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-white">
+                            Request & Response Logs
+                        </h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            Detailed payload history for page requests
+                        </p>
+                    </div>
+                </div>
+
+                <button wire:click="$set('showPageRequestModal', false)"
+                    class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                </div>
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-800 dark:text-white">
-                        Request & Response Logs
-                    </h2>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        Detailed payload history for page requests
-                    </p>
-                </div>
+                </button>
             </div>
 
-            <button wire:click="$set('showPageRequestModal', false)"
-                class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
+            <!-- Body with improved scrolling - using Tailwind only -->
+            <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(85vh-80px)] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
 
-        <!-- Body with improved scrolling - using Tailwind only -->
-        <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(85vh-80px)] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
+                @forelse($pageRequests as $index => $log)
 
-            @forelse($pageRequests as $index => $log)
+                <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:border-indigo-200 dark:hover:border-indigo-700 hover:shadow-md transition-all duration-200">
 
-            <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:border-indigo-200 dark:hover:border-indigo-700 hover:shadow-md transition-all duration-200">
-                
-                <!-- Log Header with timestamp -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 gap-2">
-                    <div class="flex items-center gap-3">
-                        <span class="flex items-center justify-center w-6 h-6 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-medium rounded-lg">
-                            {{ $loop->iteration }}
-                        </span>
-                        <span class="text-xs font-mono font-medium text-gray-500 dark:text-gray-400">
-                            {{ \Carbon\Carbon::parse($log['visit_time'])->format('H:i:s') }}
-                        </span>
-                        <span class="text-xs text-gray-300 dark:text-gray-600">•</span>
-                        <span class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ \Carbon\Carbon::parse($log['visit_time'])->format('M d, Y') }}
-                        </span>
-                    </div>
-                    <span class="text-[10px] bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full w-fit">
-                        Log #{{ $log['id'] ?? $loop->iteration }}
-                    </span>
-                </div>
-
-                <!-- Request/Response Grid -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 dark:divide-gray-700">
-                    
-                    <!-- Request Section -->
-                    <div class="p-4 bg-gradient-to-br from-red-50/30 to-transparent dark:from-red-900/10">
-                        <div class="flex items-center gap-2 mb-3">
-                            <div class="p-1.5 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                                <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
-                                </svg>
-                            </div>
-                            <span class="text-xs font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider">
-                                Request Payload
+                    <!-- Log Header with timestamp -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 gap-2">
+                        <div class="flex items-center gap-3">
+                            <span class="flex items-center justify-center w-6 h-6 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-medium rounded-lg">
+                                {{ $loop->iteration }}
                             </span>
-                            
-                        </div>
-                        <div class="relative">
-                            <pre class="text-[11px] font-mono bg-white dark:bg-gray-900 p-4 rounded-xl border border-red-100 dark:border-red-900/30 overflow-x-auto max-h-80 whitespace-pre-wrap break-words"><code class="text-gray-800 dark:text-gray-200">{{ json_encode($log['request_payload'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</code></pre>
-                        </div>
-                    </div>
-
-                    <!-- Response Section -->
-                    <div class="p-4 bg-gradient-to-br from-emerald-50/30 to-transparent dark:from-emerald-900/10">
-                        <div class="flex items-center gap-2 mb-3">
-                            <div class="p-1.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                                <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                                Response Payload
+                            @if($log['log_nickname'])
+                            <span class="text-xs font-bold text-gray-900 dark:text-white bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded-md">
+                                {{ $log['log_nickname'] }}
                             </span>
-                            
+                            @endif
+                            <span @class([ 'px-2 py-1 text-[10px] font-black uppercase tracking-wider rounded-md border' , 'bg-red-50 text-red-600 border-red-100'=> $log['log_level'] === 'Critical',
+                                'bg-orange-50 text-orange-600 border-orange-100' => $log['log_level'] === 'Moderate',
+                                'bg-blue-50 text-blue-600 border-blue-100' => $log['log_level'] === 'Normal' || !$log['log_level'],
+                                ])>
+                                {{ $log['log_level'] ?: 'Normal' }}
+                            </span>
+                            <span class="text-xs font-mono font-medium text-gray-500 dark:text-gray-400">
+                                {{ \Carbon\Carbon::parse($log['visit_time'])->format('H:i:s') }}
+                            </span>
+                            <span class="text-xs text-gray-300 dark:text-gray-600">•</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                {{ \Carbon\Carbon::parse($log['visit_time'])->format('M d, Y') }}
+                            </span>
                         </div>
-                        <div class="relative">
-                            <pre class="text-[11px] font-mono bg-white dark:bg-gray-900 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30 overflow-x-auto max-h-80 whitespace-pre-wrap break-words"><code class="text-gray-800 dark:text-gray-200">{{ json_encode($log['response_payload'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</code></pre>
+                        <span class="text-[10px] bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full w-fit">
+                            Log #{{ $log['id'] ?? $loop->iteration }}
+                        </span>
+                        <button
+                            type="button"
+                            wire:click.stop="openAuditModal('{{ $log['session_id'] }}', '{{ addslashes($log['url'] ?? $selectedUrl) }}', {{ $log['id'] }})"
+                            class="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase rounded-lg border border-emerald-100 dark:border-emerald-800/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-all"
+                            title="View Database Audit for this visit">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 00-2 2h10a2 2 0 002-2v-1M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                            View Audit Trail
+                        </button>
+                    </div>
+
+                    <!-- Request/Response Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 dark:divide-gray-700">
+
+                        <!-- Request Section -->
+                        <div class="p-4 bg-gradient-to-br from-red-50/30 to-transparent dark:from-red-900/10">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="p-1.5 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                                    <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider">
+                                    Request Payload
+                                </span>
+
+                            </div>
+                            <div class="relative">
+                                <pre class="text-[11px] font-mono bg-white dark:bg-gray-900 p-4 rounded-xl border border-red-100 dark:border-red-900/30 overflow-x-auto max-h-80 whitespace-pre-wrap break-words"><code class="text-gray-800 dark:text-gray-200">{{ json_encode($log['request_payload'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Response Section -->
+                        <div class="p-4 bg-gradient-to-br from-emerald-50/30 to-transparent dark:from-emerald-900/10">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="p-1.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                                    <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                                    Response Payload
+                                </span>
+
+                            </div>
+                            <div class="relative">
+                                <pre class="text-[11px] font-mono bg-white dark:bg-gray-900 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30 overflow-x-auto max-h-80 whitespace-pre-wrap break-words"><code class="text-gray-800 dark:text-gray-200">{{ json_encode($log['response_payload'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</code></pre>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Response Metadata if available -->
-                @php
+                    @php
                     $status = null;
                     $duration = null;
-                    
+
                     if (is_array($log['response_payload'])) {
-                        $status = $log['response_payload']['status'] ?? ($log['response_payload']['http_status'] ?? null);
-                        $duration = $log['response_payload']['duration'] ?? ($log['response_payload']['execution_time'] ?? null);
+                    $status = $log['response_payload']['status'] ?? ($log['response_payload']['http_status'] ?? null);
+                    $duration = $log['response_payload']['duration'] ?? ($log['response_payload']['execution_time'] ?? null);
                     }
-                @endphp
+                    @endphp
 
-                @if($status || $duration)
-                <div class="px-4 py-2.5 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700 flex flex-wrap items-center gap-4">
-                    @if($status)
-                    <span class="flex items-center gap-1.5 text-xs">
-                        <span class="w-1.5 h-1.5 rounded-full {{ $status >= 200 && $status < 300 ? 'bg-emerald-500' : ($status >= 400 ? 'bg-red-500' : 'bg-yellow-500') }}"></span>
-                        <span class="text-gray-600 dark:text-gray-400">Status:</span>
-                        <span class="font-mono font-medium text-gray-800 dark:text-gray-200">{{ $status }}</span>
-                    </span>
+                    @if($status || $duration || ($log['url'] ?? null))
+                    <div class="px-4 py-2.5 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700 flex flex-wrap items-center gap-4">
+                        @if($log['url'] ?? null)
+                        <span class="flex items-center gap-1.5 text-xs flex-1 min-w-0">
+                            <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                            <span class="text-gray-500 flex-shrink-0">URL:</span>
+                            <span class="font-mono text-gray-400 truncate" title="{{ $log['url'] }}">{{ $log['url'] }}</span>
+                        </span>
+                        @endif
+
+                        @if($status)
+                        <span class="flex items-center gap-1.5 text-xs">
+                            <span class="w-1.5 h-1.5 rounded-full {{ $status >= 200 && $status < 300 ? 'bg-emerald-500' : ($status >= 400 ? 'bg-red-500' : 'bg-yellow-500') }}"></span>
+                            <span class="text-gray-600 dark:text-gray-400">Status:</span>
+                            <span class="font-mono font-medium text-gray-800 dark:text-gray-200">{{ $status }}</span>
+                        </span>
+                        @endif
+                        @if($duration)
+                        <span class="flex items-center gap-1.5 text-xs">
+                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="text-gray-600 dark:text-gray-400">Duration:</span>
+                            <span class="font-mono font-medium text-gray-800 dark:text-gray-200">{{ $duration }}ms</span>
+                        </span>
+                        @endif
+                    </div>
                     @endif
-                    @if($duration)
-                    <span class="flex items-center gap-1.5 text-xs">
-                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </div>
+
+                @empty
+
+                <div class="text-center py-16">
+                    <div class="w-20 h-20 mx-auto mb-4 bg-gray-100 dark:bg-gray-700/50 rounded-2xl flex items-center justify-center">
+                        <svg class="w-10 h-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <span class="text-gray-600 dark:text-gray-400">Duration:</span>
-                        <span class="font-mono font-medium text-gray-800 dark:text-gray-200">{{ $duration }}ms</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">No request logs found</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Page requests will appear here as they occur</p>
+                </div>
+
+                @endforelse
+
+            </div>
+
+            <!-- Footer with count and close button -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-3 px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+                <div class="flex items-center gap-2">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
                     </span>
-                    @endif
+
                 </div>
-                @endif
+                <button wire:click="$set('showPageRequestModal', false)"
+                    class="w-full sm:w-auto px-5 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all text-sm shadow-sm">
+                    Close
+                </button>
             </div>
-
-            @empty
-
-            <div class="text-center py-16">
-                <div class="w-20 h-20 mx-auto mb-4 bg-gray-100 dark:bg-gray-700/50 rounded-2xl flex items-center justify-center">
-                    <svg class="w-10 h-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                </div>
-                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">No request logs found</p>
-                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Page requests will appear here as they occur</p>
-            </div>
-
-            @endforelse
-
-        </div>
-
-        <!-- Footer with count and close button -->
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-3 px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-            <div class="flex items-center gap-2">
-                <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-                </span>
-                
-            </div>
-            <button wire:click="$set('showPageRequestModal', false)" 
-                class="w-full sm:w-auto px-5 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all text-sm shadow-sm">
-                Close
-            </button>
         </div>
     </div>
-</div>
-
-</div>
+    @endteleport
