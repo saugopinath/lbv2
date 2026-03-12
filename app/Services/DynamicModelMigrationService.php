@@ -21,7 +21,7 @@ class DynamicModelMigrationService
         $this->writeMigration($table, $fields, $isAppendMultiple);
         $this->updateModel($modelPath, $table, $fields);
         Artisan::call('migrate', ['--force' => false]);
-        
+
     }
 
     private function getSchema(): string
@@ -145,7 +145,7 @@ class DynamicModelMigrationService
             $columns .= "            {$line};\n";
             /* ---------------- FOREIGN KEY ---------------- */
             if (($field['key_type'] ?? null) === 'foreign') {
-                $fkTable  = $field['fk_table'];
+                $fkTable = $field['fk_table'];
                 $fkColumn = $field['fk_column'];
                 if (!empty($field['key_name'])) {
                     $key_name = $field['key_name'];
@@ -239,15 +239,35 @@ class DynamicModelMigrationService
         $schema = $this->getSchema();
 
         $guardedBlock = <<<PHP
-            protected \$guarded = [];
-        PHP;
+    protected \$guarded = [];
+    PHP;
 
         $tableBlock = "protected \$table = '{$schema}.{$table}';\n\n";
-        $castsBlock = "protected \$casts = ['other_details' => 'array'];\n\n";
+        $castsBlock = <<<PHP
+    protected \$casts = [
+        'other_details' => 'array',
+    ];
+    
+    PHP;
 
         $content = File::get($modelPath);
 
+        /* ---------- EXTENDS BASE AUDITABLE MODEL ---------- */
+
+        $content = preg_replace(
+            '/use\s+Illuminate\\\\Database\\\\Eloquent\\\\Model\s*;/',
+            'use App\Models\BaseAuditableModel;',
+            $content
+        );
+
+        $content = preg_replace(
+            '/class\s+(\w+)\s+extends\s+Model/',
+            'class $1 extends BaseAuditableModel',
+            $content
+        );
+
         /* ---------- TABLE ---------- */
+
         if (preg_match('/protected \$table\s*=/', $content)) {
             $content = preg_replace(
                 '/protected \$table\s*=\s*[\'"][^\'"]+[\'"]\s*;/m',
@@ -256,14 +276,15 @@ class DynamicModelMigrationService
             );
         } else {
             $content = preg_replace(
-                '/class\s+\w+\s+extends\s+Model\s*\{/m',
+                '/class\s+\w+\s+extends\s+\w+\s*\{/m',
                 "$0\n{$tableBlock}",
                 $content
             );
         }
 
-        /* ---------- GUARDED ONLY ---------- */
-        if (preg_match('/protected \$guarded\s*=\s*\[[\s\S]*?\];/m', $content)) {
+        /* ---------- GUARDED ---------- */
+
+        if (preg_match('/protected \$guarded\s*=/', $content)) {
             $content = preg_replace(
                 '/protected \$guarded\s*=\s*\[[\s\S]*?\];/m',
                 trim($guardedBlock),
@@ -271,13 +292,14 @@ class DynamicModelMigrationService
             );
         } else {
             $content = preg_replace(
-                '/class\s+\w+\s+extends\s+Model\s*\{/m',
+                '/class\s+\w+\s+extends\s+\w+\s*\{/m',
                 "$0\n{$guardedBlock}",
                 $content
             );
         }
 
         /* ---------- CASTS ---------- */
+
         if (preg_match('/protected \$casts\s*=/', $content)) {
             $content = preg_replace(
                 '/protected \$casts\s*=\s*\[[\s\S]*?\];/m',
@@ -286,7 +308,7 @@ class DynamicModelMigrationService
             );
         } else {
             $content = preg_replace(
-                '/class\s+\w+\s+extends\s+Model\s*\{/m',
+                '/class\s+\w+\s+extends\s+\w+\s*\{/m',
                 "$0\n{$castsBlock}",
                 $content
             );
