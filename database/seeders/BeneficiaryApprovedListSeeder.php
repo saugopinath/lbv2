@@ -34,7 +34,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
         try {
 
 
-            for ($i = 0; $i < 200; $i++) {
+            for ($i = 0; $i < 600; $i++) {
                 // 🔹 Random Scheme
                 $schemeId = $schemes[array_rand($schemes)];
 
