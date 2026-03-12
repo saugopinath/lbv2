@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\AadhaarHelper;
 use App\Helpers\WorkFlowPermissionHelper;
+use App\Attributes\Loggable;
 
 class DupAadhaarCheck extends Component
 {
@@ -38,6 +39,7 @@ class DupAadhaarCheck extends Component
     //     $this->dispatch('hideLoader');
     //     return ['status' => 'success', 'message' => '✅ Aadhaar is valid and not duplicate.'];
     // }
+    #[Loggable(level: 'Moderate', nickname: 'Check Aadhaar Duplication')]
     public function mount($schemeId = null)
     {
         $this->schemeId = $schemeId;

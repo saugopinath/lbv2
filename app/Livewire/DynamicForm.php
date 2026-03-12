@@ -21,6 +21,9 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
 use Throwable;
+use App\Attributes\Loggable;
+
+#[Loggable(level: 'Normal', nickname: 'Dynamic Form Entry')]
 
 class DynamicForm extends Component
 {
@@ -92,7 +95,7 @@ class DynamicForm extends Component
         'aadhaarChecked' => 'onAadhaarChecked',
         'aadhaarCheckedReset' => 'onAadhaarCheckedReset',
     ];
-    
+
     public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null)
     {
 
@@ -113,13 +116,13 @@ class DynamicForm extends Component
         $this->form_preview = $form_preview;
         $this->applicationId = $applicationId;
         $this->beneficiaryId = $beneficiaryId;
-        
+
         if ($this->applicationId) {
             $this->aadhaarVerified = true;
             $this->isEdit = true;
             $this->loadExistingApplication();
         }
-       
+
         if (!empty($this->views)) {
             $this->setInitialActiveTab();
         }
@@ -135,9 +138,9 @@ class DynamicForm extends Component
                 $this->maxDOB = now()->subYears($ageConfig['min_age'])->format('Y-m-d');
             }
         }
-        
+
         $select_lgd = session('lgd_session');
-       
+
         if (!empty($select_lgd['district_id'])) {
             $this->filter_data['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
         }
@@ -225,7 +228,7 @@ class DynamicForm extends Component
             $data = $record->toArray();
 
             $confirmMap = [];
-          
+
             $this->activeTab = $tabCode;
 
             $rules = $this->getValidationRulesForActiveTab();
@@ -298,17 +301,17 @@ class DynamicForm extends Component
 
     private function setInitialActiveTab(): void
     {
-      
+
         if (!empty($this->completedTabs)) {
 
             $remainingTabs = array_diff($this->views, $this->completedTabs);
 
             if (!empty($remainingTabs)) {
                 $this->activeTab = (string) reset($remainingTabs);
-            } else {                
+            } else {
                 $this->activeTab = (string) end($this->views);
             }
-        } else {          
+        } else {
             $this->activeTab = (string) $this->views[0];
         }
 
@@ -324,7 +327,7 @@ class DynamicForm extends Component
 
                 if (($field['field_name'] ?? '') === 'application_type') {
                     $options = $field['options'] ?? [];
-                    break 2; 
+                    break 2;
                 }
             }
         }
@@ -399,7 +402,7 @@ class DynamicForm extends Component
         $this->activeTab = $tabCode;
         $this->updateTabNavigation();
     }
-
+    #[Loggable(level: 'Moderate', nickname: 'Save Application details')]
     public function saveAndNext($nextTab)
     {
         if ((string) $this->activeTab === '104') {
@@ -413,11 +416,11 @@ class DynamicForm extends Component
         }
 
         if ($this->isFirst) {
-           
+
             if (!$this->checkApplicationTypePermission()) {
                 return;
             }
-           
+
             if (!$this->checkCapacity()) {
                 return;
             }
@@ -438,12 +441,12 @@ class DynamicForm extends Component
             $this->activeTab = (string) $nextTab;
             $this->updateTabNavigation();
         }
-    }    
+    }
 
     public function onDocumentTabPassed()
     {
         $this->markTabCompleted($this->activeTab);
-       
+
         if ($this->isLast) {
 
             $tabsData = $this->prepareTabsReviewData();
@@ -457,7 +460,7 @@ class DynamicForm extends Component
 
             return;
         }
-       
+
         if ($this->nextTab) {
             $this->activeTab = (string) $this->nextTab;
             $this->updateTabNavigation();
@@ -476,24 +479,24 @@ class DynamicForm extends Component
         if (count($this->completedTabs) === count($this->views)) {
             $this->allTabsCompleted = true;
         }
-    }   
+    }
 
     public function finalSubmit()
     {
-      
+
         if (!$this->isLast) {
             return;
         }
         if (!$this->checkCapacity()) {
             return;
         }
-      
+
         if ((string) $this->activeTab === '104') {
             $this->dispatch('check-documents-before-next');
 
             return;
         }
-        
+
         $rules = $this->getValidationRulesForActiveTab();
 
         if (!empty($rules)) {
@@ -508,7 +511,7 @@ class DynamicForm extends Component
         if (!$this->checkDuplicateEntries()) {
             return;
         }
-        
+
         $this->dispatch(
             'openFinalModal',
             applicationId: $this->applicationId,
@@ -516,7 +519,7 @@ class DynamicForm extends Component
             schemeId: $this->schemeId
         );
     }
-    
+
     private function prepareTabsReviewData()
     {
         $review = [];
@@ -635,7 +638,7 @@ class DynamicForm extends Component
             'created_by' => Auth::id(),
             'updated_by' => Auth::id(),
         ];
-       
+
         foreach ($extraFields as $column => $value) {
             if (in_array($column, $columns)) {
                 $dbData[$column] = $value;
@@ -652,7 +655,7 @@ class DynamicForm extends Component
         DB::beginTransaction();
         try {
             $existingRecord = $modelClass::where('application_id', $this->applicationId)->first();
-            if ($existingRecord) {              
+            if ($existingRecord) {
 
                 $updated = $existingRecord->update($dbData);
 
@@ -670,7 +673,7 @@ class DynamicForm extends Component
             } else {
                 $created = $modelClass::create($dbData);
                 if ($this->isFirst) {
-                    
+
                     if ($this->aadhaarVerified && !empty($this->aadhaarPayload) && $created) {
                         BeneficiaryAadhaar::create(
                             [
@@ -803,7 +806,7 @@ class DynamicForm extends Component
                 'This IFSC code is not registered.'
             );
         }
-    }   
+    }
     private function loadScheme($schemeId)
     {
         $this->schemeId = $schemeId;
@@ -825,7 +828,7 @@ class DynamicForm extends Component
             ->get()
             ->keyBy('tab_code');
     }
-   
+
     private function getSchemeJson(): array
     {
         $path = storage_path("app/final_schemes_formdata/scheme_{$this->schemeId}.json");
@@ -958,7 +961,7 @@ class DynamicForm extends Component
         }
 
         return true;
-    }   
+    }
 
     public function render()
     {
