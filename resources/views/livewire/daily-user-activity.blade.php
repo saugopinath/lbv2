@@ -134,7 +134,7 @@
                         }"
                             class="flex flex-col items-center gap-2 w-full">
                             <!-- Grid container for badges - Fixed width and better grid -->
-                            <div class="grid grid-cols-2 gap-3 mx-auto">
+                            <div class="grid grid-cols-3 gap-3 mx-auto">
                                 @foreach($pages as $index => $page)
                                 <div class="flex items-center gap-2 lg:gap-3 px-1.5 lg:px-3 py-1 bg-gradient-to-r from-cyan-400/10 to-emerald-400/10 
                                         text-cyan-700 dark:text-cyan-300 text-[8px] lg:text-[10px] font-black uppercase 
@@ -143,7 +143,7 @@
                                         transition-all duration-300 cursor-pointer hover:from-cyan-400/20 hover:to-emerald-400/20 hover:scale-105
                                         min-w-0 w-full"
                                     :class="{ 
-                                        'hidden': !showAll && {{ $index }} >= 3,
+                                        'hidden': !showAll && {{ $loop->index }} >= 3,
                                         'col-span-1': true
                                     }">
 

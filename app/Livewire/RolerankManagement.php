@@ -83,9 +83,11 @@ class RolerankManagement extends Component
                     }
                 }
 
-                Role::where('id', $roleData['id'])
-                    ->update(['rank' => $currentRank]);
-
+                // Role::where('id', $roleData['id'])
+                //     ->update(['rank' => $currentRank]);
+                $role = Role::find($roleData['id']);
+                $role->rank = $currentRank;
+                $role->save();
                 $isFirst = false;
             }
         });

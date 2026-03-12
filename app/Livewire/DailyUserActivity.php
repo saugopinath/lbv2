@@ -215,7 +215,7 @@ class DailyUserActivity extends Component
         }
         $query = Audit::where('session_id', $this->selectedSessionId);
         if ($this->selectedLogId) {
-            dump($this->selectedSessionId, $this->selectedLogId, $this->selectedUrl);
+            // dump($this->selectedSessionId, $this->selectedLogId, $this->selectedUrl);
             $query->where('user_page_visit_log_id', (string) $this->selectedLogId);
         } elseif ($this->selectedUrl) {
             $url = $this->selectedUrl;
@@ -320,7 +320,7 @@ class DailyUserActivity extends Component
                         'name' => Str::title(str_replace(['-', '_'], ' ', $pageName)),
                         'log_nickname' => $log->log_nickname
                     ];
-                })->unique('name');
+                })->unique('name')->values();
             });
         // dump($pageLogs);
         return view('livewire.daily-user-activity', [
