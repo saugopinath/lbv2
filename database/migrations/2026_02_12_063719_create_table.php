@@ -57,7 +57,7 @@ return new class extends Migration {
                 ben_mother_name varchar(250),
                 mar_statu integer,
                 ben_spouse_name varchar(250),
-                caste char(10),
+                caste smallint,
                 caste_cer_no varchar(250),
                 next_level_role_id smallint,
                 is_final smallint default 0,
