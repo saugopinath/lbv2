@@ -56,44 +56,7 @@ class SchemeDropdown extends Component
     {
         $scheme = Scheme::find($value);
         $this->schemeName = $scheme?->name;
-    }
-    // public function updatedSchemeId($value)
-    // {
-    //     $scheme = Scheme::with([
-    //         'capacities' => fn($q) => $q->active()
-    //     ])->find($value);
-
-    //     $this->schemeName = $scheme?->name;
-
-    //     if ($this->currentRoute !== 'schemes.final-submitted') {
-    //         return;
-    //     }
-
-    //     $result = SchemeCapacityHelper::check(
-    //         $value,
-    //         0,
-    //         null
-    //     );
-
-    //     if (is_array($result)) {
-
-    //         $msg = "{$result['model']} capacity full. 
-    //         Total: {$result['total']} 
-    //         Processed: {$result['processed']} 
-    //         Remaining: {$result['remaining']}";
-
-    //         $this->dispatch('toastr', [
-    //             'type' => 'error',
-    //             'message' => $msg,
-    //         ]);
-
-    //         $this->schemeId = null;
-    //         $this->schemeName = null;
-    //     }
-    // }
-
-
-
+    }  
     public function render()
     {
         return view('livewire.scheme-dropdown');
