@@ -639,7 +639,7 @@ class SchemewiseStoreDataJsonHelper
         if ($validation && preg_match('/(?:digits|size):(\d+)/', $validation, $matches)) {
             $maxDigits = $matches[1];
         }
-
+        
         $cleanInput = "";
 
         // IFSC Code এর জন্য বিশেষ লজিক (অক্ষর + সংখ্যা এবং Uppercase)

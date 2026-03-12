@@ -281,19 +281,13 @@ class CommonTabFieldsSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_mendetory' => 1,
                 ],
-                // contact Details
+              
                 [
                     'field_id' => 'district_id',
                     'field_name' => 'district_id',
                     'level_name' => 'District',
                     'field_type' => 'select',
-                    'field_class' => 'district_id',
-                    // 'options'         => [
-                    //     'source' => 'lgd_districts',
-                    //     'label'  => 'name',
-                    //     'value'  => 'id',
-                    //     'visible_key' => 'district_dropdown'
-                    // ],
+                    'field_class' => 'district_id',                   
                     'is_common' => true,
                     'tab_code' => 102,
                     'validation_rule' => 'required',
@@ -310,12 +304,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_name' => 'rural_urban',
                     'level_name' => 'Rural/Urbar',
                     'field_type' => 'select',
-                    'field_class' => 'rural_urban',
-                    // 'options'         => [
-                    //     'source' => 'config',
-                    //     'key'    => 'constants.rural_urban',
-                    //     'visible_key' => 'rural_urban_dropdown'
-                    // ],
+                    'field_class' => 'rural_urban',                    
                     'is_common' => true,
                     'tab_code' => 102,
                     'validation_rule' => 'required',
@@ -333,17 +322,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_name' => 'blockurban',
                     'level_name' => 'Block/Municipality',
                     'field_type' => 'select',
-                    'field_class' => 'blockurban',
-                    // 'options'         => [
-                    //     'depends_on' => ['district_id', 'rural_urban'],
-                    //     'source_map' => [
-                    //         '2' => 'lgd_blocks',
-                    //         '1' => 'lgd_municipalities'
-                    //     ],
-                    //     'label' => 'name',
-                    //     'value' => 'id',
-                    //     'visible_key' => 'block_dropdown'
-                    // ],
+                    'field_class' => 'blockurban',                   
                     'is_common' => true,
                     'tab_code' => 102,
                     'validation_rule' => 'required',
@@ -355,28 +334,13 @@ class CommonTabFieldsSeeder extends Seeder
                     'db_colunm' => 'blockurban',
                     'is_mendetory' => 1,
                 ],
-
-                /*
-                |--------------------------------------------------------------------------
-                | GP / Ward
-                |--------------------------------------------------------------------------
-                */
+                
                 [
                     'field_id' => 'gpward',
                     'field_name' => 'gpward',
                     'level_name' => 'GP / Ward',
                     'field_type' => 'select',
-                    'field_class' => 'gpward',
-                    // 'options'         => [
-                    //     'depends_on' => ['blockurban', 'rural_urban'],
-                    //     'source_map' => [
-                    //         '2' => 'lgd_gps',
-                    //         '1' => 'lgd_wards'
-                    //     ],
-                    //     'label' => 'name',
-                    //     'value' => 'id',
-                    //     'visible_key' => 'gp_ward_dropdown'
-                    // ],
+                    'field_class' => 'gpward',                    
                     'is_common' => true,
                     'tab_code' => 102,
                     'validation_rule' => 'required',
@@ -389,11 +353,6 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_mendetory' => 1,
                 ],
 
-                /*
-                |--------------------------------------------------------------------------
-                | State (Disabled)
-                |--------------------------------------------------------------------------
-                */
                 [
                     'field_id' => 'state',
                     'field_name' => 'state',
@@ -414,11 +373,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_mendetory' => 1,
                 ],
 
-                /*
-                |--------------------------------------------------------------------------
-                | Police Station
-                |--------------------------------------------------------------------------
-                */
+               
                 [
                     'field_id' => 'policestation',
                     'field_name' => 'policestation',
@@ -435,11 +390,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'db_colunm' => 'policestation'
                 ],
 
-                /*
-                |--------------------------------------------------------------------------
-                | Village / Town / City
-                |--------------------------------------------------------------------------
-                */
+                
                 [
                     'field_id' => 'villtowncity',
                     'field_name' => 'villtowncity',
@@ -455,12 +406,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_active' => true,
                     'db_colunm' => 'villtowncity'
                 ],
-
-                /*
-                |--------------------------------------------------------------------------
-                | House / Premise No
-                |--------------------------------------------------------------------------
-                */
+                
                 [
                     'field_id' => 'housepremiseno',
                     'field_name' => 'housepremiseno',
@@ -477,12 +423,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_active' => true,
                     'db_colunm' => 'housepremiseno'
                 ],
-
-                /*
-                |--------------------------------------------------------------------------
-                | Post Office
-                |--------------------------------------------------------------------------
-                */
+                
                 [
                     'field_id' => 'postoffice',
                     'field_name' => 'postoffice',
@@ -500,11 +441,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'db_colunm' => 'postoffice'
                 ],
 
-                /*
-                |--------------------------------------------------------------------------
-                | Pin Code
-                |--------------------------------------------------------------------------
-                */
+               
                 [
                     'field_id' => 'pincode',
                     'field_name' => 'pincode',
@@ -522,23 +459,11 @@ class CommonTabFieldsSeeder extends Seeder
                 ],
 
 
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | IFSC Code
-                |--------------------------------------------------------------------------
-                */
                 [
                     'field_id' => 'ifscode',
                     'field_name' => 'ifscode',
                     'level_name' => 'IFSC Code',
-                    'field_type' => 'text',
-                    // 'options'         => [
-                    //     'uppercase' => true,
-                    //     'maxlength' => 11,
-                    //     'fetch_bank_details' => true
-                    // ],
+                    'field_type' => 'text',                    
                     'is_common' => true,
                     'tab_code' => 103,
                     'validation_rule' => 'required|size:11',
@@ -550,21 +475,12 @@ class CommonTabFieldsSeeder extends Seeder
                     'db_colunm' => 'ifscode',
                     'is_mendetory' => 1,
                 ],
-
-                /*
-                |--------------------------------------------------------------------------
-                | Bank Name (Auto-filled)
-                |--------------------------------------------------------------------------
-                */
+               
                 [
                     'field_id' => 'bankname',
                     'field_name' => 'bankname',
                     'level_name' => 'Bank Name',
-                    'field_type' => 'text',
-                    // 'options'         => [
-                    //     'disabled' => true,
-                    //     'depends_on' => 'ifscode'
-                    // ],
+                    'field_type' => 'text',                    
                     'is_common' => true,
                     'tab_code' => 103,
                     'validation_rule' => 'required|string',
@@ -577,12 +493,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_mendetory' => 1,
                     'is_readonly' => 1,
                 ],
-
-                /*
-                |--------------------------------------------------------------------------
-                | Bank Branch Name (Auto-filled)
-                |--------------------------------------------------------------------------
-                */
+                
                 [
                     'field_id' => 'bank_branch_name',
                     'field_name' => 'bank_branch_name',
@@ -600,20 +511,12 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_mendetory' => 1,
                     'is_readonly' => 1,
                 ],
-                /*
-                |--------------------------------------------------------------------------
-                | Bank Account Number
-                |--------------------------------------------------------------------------
-                */
+               
                 [
                     'field_id' => 'bankaccountnumber',
                     'field_name' => 'bankaccountnumber',
                     'level_name' => 'Bank Account Number',
-                    'field_type' => 'text',
-                    // 'options'         => [
-                    //     'numeric' => true,
-                    //     'mask' => true
-                    // ],
+                    'field_type' => 'text',                    
                     'is_common' => true,
                     'tab_code' => 103,
                     'validation_rule' => 'required|numeric|min:9',
@@ -626,21 +529,12 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_mendetory' => 1,
                 ],
 
-                /*
-                |--------------------------------------------------------------------------
-                | Confirm Bank Account Number
-                |--------------------------------------------------------------------------
-                */
                 [
                     'field_id' => 'confirmbankaccountnumber',
                     'field_name' => 'confirmbankaccountnumber',
                     'level_name' => 'Confirm Bank Account Number',
                     'field_type' => 'text',
-                    // 'options'         => [
-                    //     'numeric' => true,
-                    //     'match_with' => 'bankaccountnumber'
-                    // ],
-                    'is_common' => true,
+                                        'is_common' => true,
                     'tab_code' => 103,
                     'validation_rule' => 'required|same:formData.bankaccountnumber',
                     'regex' => '^[0-9]{9,18}$',

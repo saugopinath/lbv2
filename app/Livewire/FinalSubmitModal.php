@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use App\Services\WorkflowService;
 use Livewire\Component;
-
+use Illuminate\Support\Facades\DB;
 
 class FinalSubmitModal extends Component
 {
@@ -64,24 +64,6 @@ class FinalSubmitModal extends Component
         $this->show = false;
     }
 
-    // public function confirmSubmit(WorkflowService $workflowService)
-    // {
-    //     $labelRoles = $workflowService->getLabelRoles($this->schemeId);
-
-    //     try {
-    //         BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->update([
-    //             'next_level_role_id' => $labelRoles->next_label_role_id,
-    //             'is_final' => 1,
-    //         ]);
-    //         // $this->show = false;
-    //         session()->flash('success', "Application ID: " . $this->applicationId . " Submitted successfully");
-    //         return redirect()->route('schemes.final-submitted');
-    //         $this->show = false;
-    //     } catch (Exception $e) {
-    //         dd($e);
-    //         session()->flash('error', "Application ID: " . $this->applicationId . " Submitted failed!");
-    //     }
-    // }
     public function confirmSubmit(WorkflowService $workflowService)
     {
         $select_lgd = session('lgd_session');
@@ -96,13 +78,10 @@ class FinalSubmitModal extends Component
             $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
         $labelRoles = $workflowService->getLabelRoles($this->schemeId);
-
+        
+        DB::beginTransaction();
         try {
-            // BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->where($this->filter_data)->update([
-            //     'next_level_role_id' => $labelRoles->next_label_role_id,
-            //     'is_final' => 1,
-            //     'updated_at' => now(),
-            // ]);
+
             $BeneficiaryDetails = BeneficiaryPersonalDetail::where('application_id', $this->applicationId)
                 ->where($this->filter_data)
                 ->first();
@@ -112,7 +91,7 @@ class FinalSubmitModal extends Component
                 $BeneficiaryDetails->updated_at = now();
                 $BeneficiaryDetails->save();
             }
-            
+
             $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->value('beneficiary_id');
             $AcceptRejectInfo = new AcceptRejectInfo();
             $AcceptRejectInfo->application_id = $this->applicationId;
@@ -129,12 +108,13 @@ class FinalSubmitModal extends Component
                 ->latest('id')
                 ->value('id') ?? null;
             $AcceptRejectInfo->save();
-
+            DB::commit();
             // $this->show = false;
             session()->flash('success', "Application ID: " . $this->applicationId . " Submitted successfully");
             return redirect()->route('schemes.final-submitted');
             $this->show = false;
         } catch (Exception $e) {
+            DB::rollBack();
             $this->dispatch('toastr', [
                 'type' => 'error',
                 'message' => 'Please Configure Workflow Steps',

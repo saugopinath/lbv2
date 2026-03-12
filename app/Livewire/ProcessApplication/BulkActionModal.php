@@ -51,7 +51,7 @@ class BulkActionModal extends Component
     public function openModal(array $selectedIds, WorkflowService $workflowService)
     {
         $select_lgd = session('lgd_session');
-        // dd($select_lgd);
+      
         if (!empty($select_lgd['district_id'])) {
             $this->filter_data['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
         }
@@ -64,22 +64,20 @@ class BulkActionModal extends Component
 
         $this->reset(['bulkActionType', 'reason', 'remark', 'availableActions', 'bulkActionTypeLabel']);
         $this->selectedRows = $selectedIds;
-        // dd($this->selectedRows);
+      
         $this->applicationId = $this->selectedRows['selectedIds']['application_id'];
         $this->entryType = $this->selectedRows['selectedIds']['entry_type'];
         $this->schemeId = $this->selectedRows['selectedIds']['schemeId'];
-        // dd($this->entryType);
+      
         $labelRoles = $workflowService->getLabelRoles($this->schemeId);
         if ($labelRoles) {
             $this->sameLabelRoleId = $labelRoles->same_label_role_id;
             $this->nextLabelRoleId = $labelRoles->next_label_role_id;
         }
 
-        if ($this->entryType == 1) {
-            // if ($this->entryType == Codemaster::getIdByCode(41)) {
+        if ($this->entryType == 1) {          
             $entryType = 1;
-        } elseif ($this->entryType == 2) {
-            // } elseif ($this->entryType == Codemaster::getIdByCode(42)) {
+        } elseif ($this->entryType == 2) {           
             $entryType = 2;
         } else {
             $entryType = null;
@@ -126,12 +124,6 @@ class BulkActionModal extends Component
 
     public function performBulkAction()
     {
-        // $validated = $this->validate([
-        //     'bulkActionType' => 'required|in:V,A,R,T',
-        //     'reason' => in_array($this->bulkActionType, ['R', 'T']) ? 'required' : 'nullable',
-        //     'remark' => in_array($this->bulkActionType, ['R', 'T']) ? 'required|string|max:255' : 'nullable',
-        // ]);
-
         $validated = $this->validate([
             'bulkActionType' => 'required|in:V,A,R,T',
 
@@ -143,47 +135,10 @@ class BulkActionModal extends Component
                 ? 'required|string|max:255'
                 : 'nullable',
         ]);
-
-        // ✅ CAPACITY CHECK START
-        // dd($this->nextLabelRoleId,$this->sameLabelRoleId);
-        // $result = null;
-
-        // if ($this->bulkActionType === 'V') {
-
-        //     $result = SchemeCapacityHelper::check(
-        //         $this->schemeId,
-        //         $this->nextLabelRoleId,
-        //         $this->filter_data
-        //     );
-        // }
-
-        // if ($this->bulkActionType === 'A') {
-
-        //     $result = SchemeCapacityHelper::check(
-        //         $this->schemeId,
-        //         $this->nextLabelRoleId,
-        //         $this->filter_data
-        //     );
-        // }
-        // dd($result);
-        // if (is_array($result)) {
-
-        //     $msg = "{$result['model']} capacity full. 
-        //     Total: {$result['total']} 
-        //     Processed: {$result['processed']} 
-        //     Remaining: {$result['remaining']}";
-
-        //     $this->dispatch('toastr', [
-        //         'type' => 'error',
-        //         'message' => $msg,
-        //     ]);
-        //     return;
-        // }
-
-        // ✅ CAPACITY CHECK END
+       
         $approverRoleId = Codemaster::getIdByCode(23);
         $ids = (array) $this->applicationId;
-        // $actionType = ($this->bulkActionType === 'V') ? 1 : (($this->bulkActionType === 'A') ? 2 : null);
+       
         if ($this->bulkActionType === 'V') {
             foreach ($ids as $id) {
                 if (!$this->checkCapacity($id, $this->nextLabelRoleId)) {
@@ -348,12 +303,6 @@ class BulkActionModal extends Component
                 }
             }
         }
-
-        // $this->bulkActionModal = false;
-
-        // $this->reset(['bulkActionType', 'reason', 'remark', 'selectedRows', 'bulkActionTypeLabel']);
-
-        // return redirect()->route('lb-application-list');
         $this->bulkActionModal = false;
 
         $this->reset(['bulkActionType', 'reason', 'remark', 'selectedRows', 'bulkActionTypeLabel']);
@@ -364,7 +313,7 @@ class BulkActionModal extends Component
     }
     private function checkCapacity($id, $actionType): bool
     {
-        $result = \App\Helpers\SchemeCapacityHelper::checkBulk(
+        $result = SchemeCapacityHelper::checkBulk(
             $this->schemeId,
             $actionType,
             [$id]

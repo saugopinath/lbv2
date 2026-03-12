@@ -9,11 +9,9 @@ use App\Helpers\WorkFlowPermissionHelper;
 use App\Models\AcceptRejectInfo;
 use App\Models\AgeManagements;
 use App\Models\BeneficiaryAadhaar;
-use App\Models\BeneficiaryPersonalDetail;
 use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
 use App\Models\UniqueAppBenId;
-use App\Models\WorkflowsteproleMapping;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -23,7 +21,6 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
 use Throwable;
-use App\Services\WorkflowService;
 
 class DynamicForm extends Component
 {
@@ -95,8 +92,7 @@ class DynamicForm extends Component
         'aadhaarChecked' => 'onAadhaarChecked',
         'aadhaarCheckedReset' => 'onAadhaarCheckedReset',
     ];
-    /* ================= MOUNT ================= */
-
+    
     public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null)
     {
 
@@ -117,15 +113,13 @@ class DynamicForm extends Component
         $this->form_preview = $form_preview;
         $this->applicationId = $applicationId;
         $this->beneficiaryId = $beneficiaryId;
-
-        // ✅ EDIT MODE DETECTION
+        
         if ($this->applicationId) {
             $this->aadhaarVerified = true;
             $this->isEdit = true;
             $this->loadExistingApplication();
         }
-
-        // ✅ SET ACTIVE TAB CORRECTLY
+       
         if (!empty($this->views)) {
             $this->setInitialActiveTab();
         }
@@ -141,14 +135,9 @@ class DynamicForm extends Component
                 $this->maxDOB = now()->subYears($ageConfig['min_age'])->format('Y-m-d');
             }
         }
-        // ,WorkflowService $workflowService
-        // $map = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->schemeId)['min'];
-        // $labelRoles = $workflowService->getLabelRoles($map);
-        // if ($labelRoles) {
-        //     $this->actionType = $labelRoles->next_label_role_id;
-        // }
+        
         $select_lgd = session('lgd_session');
-        // dd($select_lgd);
+       
         if (!empty($select_lgd['district_id'])) {
             $this->filter_data['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
         }
@@ -235,14 +224,8 @@ class DynamicForm extends Component
 
             $data = $record->toArray();
 
-            /**
-             * ----------------------------------------------------
-             * Build Confirm Mapping (Based On SAME Rule)
-             * ----------------------------------------------------
-             */
             $confirmMap = [];
-
-            // IMPORTANT: Set correct tab context
+          
             $this->activeTab = $tabCode;
 
             $rules = $this->getValidationRulesForActiveTab();
@@ -278,11 +261,6 @@ class DynamicForm extends Component
                 }
             }
 
-            /**
-             * ----------------------------------------------------
-             * Populate Form Data
-             * ----------------------------------------------------
-             */
             foreach ($data as $key => $value) {
 
                 if ($key === 'other_details') {
@@ -320,19 +298,17 @@ class DynamicForm extends Component
 
     private function setInitialActiveTab(): void
     {
-        // If edit mode
+      
         if (!empty($this->completedTabs)) {
 
             $remainingTabs = array_diff($this->views, $this->completedTabs);
 
             if (!empty($remainingTabs)) {
                 $this->activeTab = (string) reset($remainingTabs);
-            } else {
-                // All tabs completed
+            } else {                
                 $this->activeTab = (string) end($this->views);
             }
-        } else {
-            // New entry
+        } else {          
             $this->activeTab = (string) $this->views[0];
         }
 
@@ -348,7 +324,7 @@ class DynamicForm extends Component
 
                 if (($field['field_name'] ?? '') === 'application_type') {
                     $options = $field['options'] ?? [];
-                    break 2; // stop loop
+                    break 2; 
                 }
             }
         }
@@ -436,18 +412,12 @@ class DynamicForm extends Component
             $this->validate($rules);
         }
 
-        /* ===============================
-       FIRST TAB CHECK ONLY
-    =============================== */
-
         if ($this->isFirst) {
-
-            // 1️⃣ Application Type Permission
+           
             if (!$this->checkApplicationTypePermission()) {
                 return;
             }
-
-            // 2️⃣ Capacity Check
+           
             if (!$this->checkCapacity()) {
                 return;
             }
@@ -468,21 +438,12 @@ class DynamicForm extends Component
             $this->activeTab = (string) $nextTab;
             $this->updateTabNavigation();
         }
-    }
-    // public function onDocumentTabPassed()
-    // {
-    //     $this->markTabCompleted($this->activeTab);
-    //     if ($this->nextTab) {
-    //         $this->activeTab = (string) $this->nextTab;
-    //         $this->updateTabNavigation();
-    //     }
-    // }
+    }    
 
     public function onDocumentTabPassed()
     {
         $this->markTabCompleted($this->activeTab);
-
-        // If this is last tab → open modal
+       
         if ($this->isLast) {
 
             $tabsData = $this->prepareTabsReviewData();
@@ -496,8 +457,7 @@ class DynamicForm extends Component
 
             return;
         }
-
-        // Otherwise go next tab
+       
         if ($this->nextTab) {
             $this->activeTab = (string) $this->nextTab;
             $this->updateTabNavigation();
@@ -516,50 +476,24 @@ class DynamicForm extends Component
         if (count($this->completedTabs) === count($this->views)) {
             $this->allTabsCompleted = true;
         }
-    }
-    // public function finalSubmit()
-    // {
-    //     if ((string) $this->activeTab === '104') {
-    //         $this->dispatch('check-documents-before-next');
-    //         return;
-    //     } else {
-    //         $rules = $this->getValidationRulesForActiveTab();
-    //         if (!empty($rules)) {
-    //             $this->validate($rules);
-    //         }
-    //         // dd($rules);
-    //         $this->ensureApplicationIds();
-    //         $this->saveCurrentTabData();
-    //     }
-    //     $tabsData = $this->prepareTabsReviewData();
-    //     if (!$this->checkDuplicateEntries()) {
-    //         return;
-    //     }
-    //     $this->dispatch(
-    //         'openFinalModal',
-    //         applicationId: $this->applicationId,
-    //         tabsData: $tabsData,
-    //         schemeId: $this->schemeId
-    //     );
-    // }
+    }   
 
     public function finalSubmit()
     {
-        // Last tab check
+      
         if (!$this->isLast) {
             return;
         }
         if (!$this->checkCapacity()) {
             return;
         }
-        // If last tab is document tab
+      
         if ((string) $this->activeTab === '104') {
             $this->dispatch('check-documents-before-next');
 
             return;
         }
-
-        // Normal validation
+        
         $rules = $this->getValidationRulesForActiveTab();
 
         if (!empty($rules)) {
@@ -574,8 +508,7 @@ class DynamicForm extends Component
         if (!$this->checkDuplicateEntries()) {
             return;
         }
-
-        // Open final modal
+        
         $this->dispatch(
             'openFinalModal',
             applicationId: $this->applicationId,
@@ -583,8 +516,7 @@ class DynamicForm extends Component
             schemeId: $this->schemeId
         );
     }
-
-    /* ================= REVIEW DATA ================= */
+    
     private function prepareTabsReviewData()
     {
         $review = [];
@@ -703,7 +635,7 @@ class DynamicForm extends Component
             'created_by' => Auth::id(),
             'updated_by' => Auth::id(),
         ];
-        // dd($extraFields);
+       
         foreach ($extraFields as $column => $value) {
             if (in_array($column, $columns)) {
                 $dbData[$column] = $value;
@@ -720,10 +652,7 @@ class DynamicForm extends Component
         DB::beginTransaction();
         try {
             $existingRecord = $modelClass::where('application_id', $this->applicationId)->first();
-            if ($existingRecord) {
-                // $updated = $modelClass::where('application_id', $this->applicationId)
-                //     ->where('scheme_id', $this->schemeId)
-                //     ->update($dbData);
+            if ($existingRecord) {              
 
                 $updated = $existingRecord->update($dbData);
 
@@ -741,7 +670,7 @@ class DynamicForm extends Component
             } else {
                 $created = $modelClass::create($dbData);
                 if ($this->isFirst) {
-                    // $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->value('beneficiary_id');
+                    
                     if ($this->aadhaarVerified && !empty($this->aadhaarPayload) && $created) {
                         BeneficiaryAadhaar::create(
                             [
@@ -874,9 +803,7 @@ class DynamicForm extends Component
                 'This IFSC code is not registered.'
             );
         }
-    }
-
-    /* ================= SCHEME LOAD ================= */
+    }   
     private function loadScheme($schemeId)
     {
         $this->schemeId = $schemeId;
@@ -898,8 +825,7 @@ class DynamicForm extends Component
             ->get()
             ->keyBy('tab_code');
     }
-
-    /* ================= JSON HELPERS ================= */
+   
     private function getSchemeJson(): array
     {
         $path = storage_path("app/final_schemes_formdata/scheme_{$this->schemeId}.json");
@@ -1028,16 +954,11 @@ class DynamicForm extends Component
         if (is_array($result)) {
             $this->addError($result['field'], $result['message']);
 
-            // $this->dispatch('toastr', [
-            //     'type' => 'error',
-            //     'message' => $result['message']
-            // ]);
             return false;
         }
 
         return true;
-    }
-    /* ================= RENDER ================= */
+    }   
 
     public function render()
     {

@@ -39,9 +39,18 @@ class ApproverPermissionSeeder extends Seeder
             'View Details To Reject',
             'Reject Beneficiary',
             'lb-application-list',
-
-
-
+            'Bulk Actions Normal Entry Approver Allow',
+            'Bulk Actions Normal Entry Reject Allow',
+            'Bulk Actions Normal Entry Revert Allow',
+            'Bulk Actions Duare Sarkar Entry Approver Allow',
+            'Bulk Actions Duare Sarkar Entry Reject Allow',
+            'Bulk Actions Duare Sarkar Entry Revert Allow',
+            'Duare Sarkar Entry Approver Allow',
+            'Duare Sarkar Entry Reject Allow',
+            'Duare Sarkar Entry Revert Allow',
+            'Normal Entry Revert Allow',
+            'Normal Entry Approver Allow',
+            'Normal Entry Reject Allow',
         ];
         try {
             $role = Role::findByName('Approver');

@@ -2,35 +2,21 @@
 
 namespace App\Livewire;
 
-use App\Models\BeneficiaryCommonList;
 use App\Helpers\EncryptionArray;
 use App\Exports\BeneficiariesExport;
 use App\Helpers\CheckAuthHelper;
+use App\Helpers\SchemeCapacityHelper;
 use App\Helpers\WorkFlowPermissionHelper;
-use App\Models\BeneficiaryPersonal;
-use App\Models\FaultyBeneficiaryPersonal;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Actions\Action;
-use Rappasoft\LaravelLivewireTables\Views\Filters\TextFilter;
 use App\Models\Codemaster;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\HtmlString;
-use App\Models\DraftBeneficiaryPersonal;
 use App\Models\AcceptRejectInfo;
-use App\Models\BeneficiaryAadhaar;
 use App\Models\BeneficiaryPersonalDetail;
 use Livewire\Attributes\On;
-use Illuminate\Support\Facades\Log;
-use App\Models\BenRejectDetails;
-use App\Models\DraftBeneficiaryBank;
-use App\Models\DraftBeneficiaryContact;
-use App\Models\DraftBeneficiaryDeclaration;
-use App\Models\DraftBeneficiaryRelationship;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Services\WorkflowService;
@@ -75,8 +61,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         }
     }
     public function filtersApplied($filters)
-    {
-        // dd($filters);
+    {       
         $this->district_id = $filters['district_id'];
         $this->rural_urban = $filters['rural_urban'] ?? null;
         $this->blockurban = $filters['blockurban'];
@@ -130,40 +115,35 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $actions = [
             'exportSelected' => 'Export',
         ];
-
-        // Bulk Verify
+      
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'verification', true) ||
                 WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true)) && CheckAuthHelper::isCommmonVerifier()
         ) {
             $actions['bulkverify'] = 'Verify';
         }
-
-        // Bulk Approve
+       
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'approver', true) ||
                 WorkFlowPermissionHelper::canBulkActionAllow(2, 'approver', true)) && CheckAuthHelper::isCommonApprover()
         ) {
             $actions['bulkapprove'] = 'Approve';
         }
-
-        // Bulk Reject
+       
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'reject', true) ||
                 WorkFlowPermissionHelper::canBulkActionAllow(2, 'reject', true)) && CheckAuthHelper::isCommonWorkFlow2ndStep()
         ) {
             $actions['bulkreject'] = 'Reject';
         }
-
-        // Bulk Revert
+      
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'revert', true) ||
                 WorkFlowPermissionHelper::canBulkActionAllow(2, 'revert', true)) && CheckAuthHelper::isCommonWorkFlow2ndStep()
         ) {
             $actions['bulkrevert'] = 'Revert';
         }
-        // $actions['bulkverify'] = 'Verify';
-        // $actions['bulkapprove'] = 'Approve';
+        
         return $actions;
     }
 
@@ -228,8 +208,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 $this->sub_div ? (int) $this->sub_div : null
             );
         }
-        $this->dispatch('hideLoader');
-        // dd($query->get());
+        $this->dispatch('hideLoader');      
         return $query;
     }
 
@@ -286,18 +265,15 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     ->get();
 
                 foreach ($records as $record) {
-
-                    // update workflow step
+                   
                     $record->update([
                         'next_level_role_id' => $next_level_role_id
                     ]);
-
-                    // previous audit id
+                 
                     $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
                         ->latest('id')
                         ->value('id');
-
-                    // audit log
+                  
                     AcceptRejectInfo::create([
                         'application_id' => $record->application_id,
                         'beneficiary_id' => $record->beneficiary_id,
@@ -344,19 +320,16 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     ->get();
 
                 foreach ($records as $record) {
-
-                    // update application
+                  
                     $record->update([
                         'next_level_role_id' => $this->nextLabelRoleId,
                         'is_clean' => 10,
                     ]);
-
-                    // previous audit id
+                  
                     $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
                         ->latest('id')
                         ->value('id');
-
-                    // insert audit
+                   
                     AcceptRejectInfo::create([
                         'application_id' => $record->application_id,
                         'beneficiary_id' => $record->beneficiary_id,
@@ -390,7 +363,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $ids = $this->getSelected();
             if (empty($ids))
                 return;
-            $check = \App\Helpers\SchemeCapacityHelper::checkBulk($this->schemeId, $this->nextLabelRoleId, $ids);
+            $check =SchemeCapacityHelper::checkBulk($this->schemeId, $this->nextLabelRoleId, $ids);
             if (!$check['is_processed']) {
                 $this->dispatch('toastr', [
                     'type' => 'error',
@@ -405,18 +378,15 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     ->get();
 
                 foreach ($records as $record) {
-
-                    // Update record
+                    
                     $record->update([
                         'next_level_role_id' => $this->nextLabelRoleId
                     ]);
-
-                    // Get parent audit id
+                  
                     $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
                         ->latest('id')
                         ->value('id');
-
-                    // Insert audit
+                   
                     AcceptRejectInfo::create([
                         'application_id' => $record->application_id,
                         'beneficiary_id' => $record->beneficiary_id,
@@ -444,7 +414,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 return;
             }
 
-            $check = \App\Helpers\SchemeCapacityHelper::checkBulk(
+            $check =SchemeCapacityHelper::checkBulk(
                 $this->schemeId,
                 $this->nextLabelRoleId,
                 $ids
@@ -461,26 +431,22 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             DB::beginTransaction();
 
             try {
-
-                // Fetch records once
+              
                 $records = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
                     ->select('application_id', 'beneficiary_id', 'next_level_role_id', 'is_clean')
                     ->get();
 
                 foreach ($records as $record) {
-
-                    // Update record
+                   
                     $record->update([
                         'next_level_role_id' => $this->nextLabelRoleId,
                         'is_clean' => 1,
                     ]);
-
-                    // previous audit id
+                  
                     $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
                         ->latest('id')
                         ->value('id');
-
-                    // Insert audit log
+                   
                     AcceptRejectInfo::create([
                         'application_id' => $record->application_id,
                         'beneficiary_id' => $record->beneficiary_id,
