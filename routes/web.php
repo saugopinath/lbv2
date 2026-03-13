@@ -226,3 +226,5 @@ Route::get('/form', [Formcontroller::class, 'index'])
     ->name('form');
 Route::get('application-lists', [Formcontroller::class, 'applicationLists'])
     ->name('application-lists');
+Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])
+    ->name('define-workflow1');

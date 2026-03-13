@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\DB;
 
 class workflowmanagementController extends Controller
 {
+    public function index()
+    {
+        return view('workflowmanagement.index');
+    }
     public function createSteps(Request $request)
     {
         if ($request->isMethod('post')) {
@@ -18,17 +22,17 @@ class workflowmanagementController extends Controller
             ]);
             try {
                 DB::transaction(function () use ($request) {
-                    $schemeId   = $request->scheme;
+                    $schemeId = $request->scheme;
                     $totalSteps = (int) $request->noofSteps;
                     $parentId = null;
                     for ($i = 1; $i <= $totalSteps; $i++) {
                         $step = new WorkflowStep();
                         $step->scheme_id = $schemeId;
-                        $step->rank      = $i;
-                        $step->label     = $request->input('labelName' . $i);
+                        $step->rank = $i;
+                        $step->label = $request->input('labelName' . $i);
                         $step->parent_id = $parentId;
-                        $step->is_first  = ($i === 1);
-                        $step->is_last   = ($i === $totalSteps);
+                        $step->is_first = ($i === 1);
+                        $step->is_last = ($i === $totalSteps);
                         $step->save();
                         $parentId = $step->id;
                     }
