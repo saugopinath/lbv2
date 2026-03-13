@@ -10,4 +10,8 @@ class Formcontroller extends Controller
     {
         return view('form');
     }
+    public function applicationLists()
+    {
+        return view('applicationlists');
+    }
 }

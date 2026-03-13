@@ -1,4 +1,4 @@
-<div>
+<div class="w-full space-y-6">
     @if (!$schemeData)
         <livewire:scheme-dropdown-new :isFinal="true" :isAssigned="true" />
     @endif

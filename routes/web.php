@@ -222,5 +222,7 @@ Route::get('/csv-splitter', CsvSplitter::class)
     ->name('csv-splitter');
 
 
- Route::get('/form', [Formcontroller::class, 'index'])
+Route::get('/form', [Formcontroller::class, 'index'])
     ->name('form');
+Route::get('application-lists', [Formcontroller::class, 'applicationLists'])
+    ->name('application-lists');

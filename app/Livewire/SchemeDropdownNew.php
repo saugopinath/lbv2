@@ -39,8 +39,6 @@ class SchemeDropdownNew extends Component
             $schemeName = Scheme::find($value)->name;
             $schemeData = ['scheme_id' => $value, 'scheme_name' => $schemeName];
             $this->dispatch('selectedScheme', $schemeData);
-        } else {
-            $this->dispatch('selectedScheme', null);
         }
     }
     public function render()
