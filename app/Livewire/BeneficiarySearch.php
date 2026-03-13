@@ -17,29 +17,34 @@ class BeneficiarySearch extends Component
         'application_id' => [
             'label' => 'Application ID',
             'rules' => 'required|numeric',
-            'type'  => 'number'
+            'type'  => 'number',
+            'input_type' => 'text'
         ],
         'beneficiary_name' => [
             'label' => 'Beneficiary Name',
             'rules' => 'required|regex:/^[a-zA-Z\s]+$/',
-            'type'  => 'text'
+            'type'  => 'text',
+            'input_type' => 'text'
         ],
         'mobile_number' => [
             'label' => 'Mobile Number',
             'rules' => 'required|numeric|digits:10',
             'max'   => 10,
-            'type'  => 'number'
+            'type'  => 'number',
+            'input_type' => 'text'
         ],
         'aadhaar_number' => [
             'label' => 'Aadhaar Number',
             'rules' => 'required|numeric|digits:12',
             'max'   => 12,
-            'type'  => 'number'
+            'type'  => 'number',
+            'input_type' => 'password'
         ],
         'bank_account_number' => [
             'label' => 'Bank Account Number',
             'rules' => 'required|numeric',
-            'type'  => 'number'
+            'type'  => 'number',
+            'input_type' => 'text'
         ],
     ];
 
