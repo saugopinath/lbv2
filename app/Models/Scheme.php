@@ -28,4 +28,8 @@ class Scheme extends Model
     {
         return $this->morphMany(SchemeCapacity::class, 'modelable', 'model_type', 'model_id');
     }
+    public function schemeFinalSubmitChecks()
+    {
+        return $this->hasMany(SchemeFinalSubmitCheck::class);
+    }
 }

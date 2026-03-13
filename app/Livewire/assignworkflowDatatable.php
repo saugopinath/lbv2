@@ -17,6 +17,10 @@ class assignworkflowDatatable extends DataTableComponent
     {
         $this->schemeId = $schemeId;
     }
+    public function mount($schemeId)
+    {
+        $this->schemeId = $schemeId;
+    }
     public function configure(): void
     {
         $this->setPrimaryKey('sourceable_id')

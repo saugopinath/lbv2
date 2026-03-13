@@ -6,7 +6,7 @@
                     Assign Role to Steps
                 </h1>
             </div>
-            <livewire:assignworkflow-datatable />
+            <livewire:assignworkflow-datatable :schemeId="$schemeId" />
             <livewire:openassignworkflow-modal />
         </div>
     @else
