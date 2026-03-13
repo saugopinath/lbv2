@@ -259,7 +259,41 @@ class SchemewiseStoreDataJsonHelper
     {
         $label = $field['level_name'] ?? '';
         $name = $field['field_name'] ?? uniqid();
+
         $type = $field['field_type'] ?? 'text';
+        $validation = $field['validation_rule'] ?? ''; // <--- নতুন
+        $regex = $field['regex'] ?? null;              // <--- নতুন
+        $dynamicAttr = self::generateDynamicInputLogic($name, $validation, $regex);
+        if ($name === 'ifscode' || $name === 'ifsc_code') {
+            $wireModelMode = 'wire:model.live';
+        } 
+        // বাকি যেসব ফিল্ডে digits বা size আছে সেগুলোতে .blur হবে
+        elseif (str_contains($validation, 'digits') || str_contains($validation, 'size')) {
+            $wireModelMode = 'wire:model.blur';
+        } 
+        // অন্য সব সাধারণ ফিল্ডে .live থাকবে
+        else {
+            $wireModelMode = 'wire:model.live';
+        }
+        $isConfirmField = false;
+
+        if (!empty($field['validation_rule'])) {
+            $rules = explode('|', $field['validation_rule']);
+            $isRequired = in_array('required', $rules, true);
+
+            foreach ($rules as $rule) {
+                if (str_starts_with($rule, 'same:')) {
+                    $isConfirmField = true;
+                    break;
+                }
+            }
+        }
+
+        if ($isConfirmField) {
+            $type = 'password';
+        }
+
+        // $type = $field['field_type'] ?? 'text';
         $value = $field['value'] ?? 1;
         $placeholder = 'Enter ' . $field['level_name'] ?? '';
         $isRequired = false;
@@ -324,27 +358,78 @@ class SchemewiseStoreDataJsonHelper
         }
 
         switch ($type) {
+            // case 'select':
+            //     $optionsHtml = '';
+            //     foreach (($field['options'] ?? []) as $key => $optionlabel) {
+            //         $key = e($key);
+            //         $optionlabel = e($optionlabel);
+            //         $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
+            //     }
+            //     $fieldHtml = <<<BLADE
+            //     <x-form.select
+            //         name="{$name}"
+            //         label="{$label}"
+            //         data-wire="{$name}"
+            //         {$wireIgnore}
+            //          {$readonlyAttr}
+            //           {$requiredAttr}
+            //         wire:model.live="formData.{$name}"
+            //     >
+            //         <option value="">-- Select {$label} --</option>
+            //         {$optionsHtml}
+            //     </x-form.select>
+            //     BLADE;
+            //     break;
             case 'select':
+
+                // ✅ SPECIAL RENDER FOR app_type ONLY
+                if ($name === 'application_type') {
+
+                    $fieldHtml = <<<BLADE
+        <div wire:key="field-norm-application_type">
+            <x-form.select
+                name="application_type"
+                label="Application Type"
+                data-wire="application_type"
+                required
+                wire:model.live="formData.application_type"
+            >
+                <option value="">-- Select Application Type --</option>
+
+                @foreach(\$appTypeOptions as \$value => \$label)
+                    <option value="{{ \$value }}">{{ \$label }}</option>
+                @endforeach
+
+            </x-form.select>
+        </div>
+        BLADE;
+
+                    break;
+                }
+
+                // 🔹 NORMAL SELECT FOR OTHER FIELDS
                 $optionsHtml = '';
                 foreach (($field['options'] ?? []) as $key => $optionlabel) {
                     $key = e($key);
                     $optionlabel = e($optionlabel);
                     $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
                 }
+
                 $fieldHtml = <<<BLADE
-                <x-form.select
-                    name="{$name}"
-                    label="{$label}"
-                    data-wire="{$name}"
-                    {$wireIgnore}
-                     {$readonlyAttr}
-                      {$requiredAttr}
-                    wire:model.live="formData.{$name}"
-                >
-                    <option value="">-- Select {$label} --</option>
-                    {$optionsHtml}
-                </x-form.select>
-                BLADE;
+    <x-form.select
+        name="{$name}"
+        label="{$label}"
+        data-wire="{$name}"
+        {$wireIgnore}
+        {$readonlyAttr}
+        {$requiredAttr}
+        wire:model.live="formData.{$name}"
+    >
+        <option value="">-- Select {$label} --</option>
+        {$optionsHtml}
+    </x-form.select>
+    BLADE;
+
                 break;
 
             case 'textarea':
@@ -386,7 +471,8 @@ class SchemewiseStoreDataJsonHelper
                     {$requiredAttr}
                     {$minAttr}
                     {$maxAttr}
-                    wire:model.live="formData.{$name}"
+                    {$wireModelMode}="formData.{$name}"
+                    {$dynamicAttr}
                 />
                 BLADE;
                 break;
@@ -406,11 +492,13 @@ class SchemewiseStoreDataJsonHelper
         $label = $field->level_name;
         $name = $field->field_name;
         $type = $field->field_type ?? 'text';
+        $validation = $field->validation_rule ?? ''; // <--- নতুন
+        $regex = $field->regex ?? null;
         $value = $field->value ?? 1;
         $placeholder = 'Enter ' . $field->level_name ?? '';
         $paddingClass = $field->section_level_id ? 'pl-6' : 'pl-0';
         $options = [];
-
+        $dynamicAttr = self::generateDynamicInputLogic($name, $validation, $regex);
         if (!empty($field->options)) {
             if (is_string($field->options)) {
                 $decoded = json_decode($field->options, true);
@@ -535,9 +623,42 @@ class SchemewiseStoreDataJsonHelper
                     label="{$label}"
                     placeholder="{$placeholder}"
                     wire:model.live="formData.{$name}"
+                    {$dynamicAttr}
                 />
             </div>
             BLADE;
         }
+    }
+
+    private static function generateDynamicInputLogic(string $name, ?string $validation, ?string $regex): string
+    {
+        if (empty($validation) && empty($regex)) return '';
+
+        $maxDigits = null;
+        // validation_rule থেকে size:11 বা digits:10 বের করা
+        if ($validation && preg_match('/(?:digits|size):(\d+)/', $validation, $matches)) {
+            $maxDigits = $matches[1];
+        }
+
+        $cleanInput = "";
+
+        // IFSC Code এর জন্য বিশেষ লজিক (অক্ষর + সংখ্যা এবং Uppercase)
+        if ($name === 'ifscode' || $name === 'ifsc_code') {
+            $cleanInput = "\$el.value = \$el.value.toUpperCase().replace(/[^A-Z0-9]/g, '')";
+        }
+        // সংখ্যা ফিল্টার (Mobile/Pin/Bank Acc) - যেখানে digits বা regex এ শুধু সংখ্যা আছে
+        elseif (($validation && str_contains($validation, 'digits')) || ($regex && str_contains($regex, '0-9') && !str_contains($regex, 'A-Z'))) {
+            $cleanInput = "\$el.value = \$el.value.replace(/[^0-9]/g, '')";
+        }
+        // নাম ফিল্টার (Letters only)
+        elseif ($regex && $regex === '^[A-Za-z .]+$') {
+            $cleanInput = "\$el.value = \$el.value.replace(/[^A-Za-z .]/g, '')";
+        }
+
+        if (empty($cleanInput)) return '';
+
+        $sliceCode = $maxDigits ? ".slice(0, {$maxDigits})" : "";
+
+        return "x-on:input.stop=\"{$cleanInput}{$sliceCode}; \$wire.set('formData.{$name}', \$el.value, false)\"";
     }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\SchemeController;
 use App\Http\Controllers\workflowmanagementController;
 use App\Livewire\ApplicationView;
 use App\Livewire\IncompletTypePage;
+use App\Livewire\SchemeDropdown;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LBController;
 use App\Http\Controllers\UsersController;
@@ -39,15 +40,24 @@ use App\Http\Controllers\MarkedUpdateBeneficiaryController;
 use App\Http\Controllers\MasterTabCreationController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
+use App\Http\Controllers\SchemeCapacityController;
 use App\Http\Controllers\ValidationManagerController;
 use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
+use App\Livewire\CsvSplitter;
 
 
 
 require __DIR__ . '/home.php';
 // Guest Routes
 // Route::get('/', fn() => view('welcome'));
+Route::get('/session-expired', function () {
+    return view('auth.session-expired', [
+        'expired_at' => now()->format('h:i:s A')
+    ]);
+})->name('session.expired');
+
+Route::get('/', fn() => view('welcome'));
 Route::get('refresh-captcha', [App\Http\Controllers\CaptchaController::class, 'refreshCaptcha'])
     ->name('refresh-captcha');
 
@@ -71,41 +81,39 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])
-        // ->middleware('permission.redirect:canViewLbApplications')
         ->name('lb-application-list');
 
-    Route::get('/application/{id}', DraftApplicationView::class)
+    Route::get('/lb-application-list/{scheme_id?}', SchemeDropdown::class)
+        ->name('lb-application-list');
+
+    Route::get('/application', DraftApplicationView::class)
         ->name('draft-application.view');
 
     // User Management
     Route::get('/user-managements', [UsersController::class, 'index'])
-        // ->middleware('permission.redirect:canViewUser')
+        ->middleware('permission.redirect:canViewUser')
         ->name('user-managements');
 
     Route::get('/users/create', UsersCreate::class)
-        // ->middleware('permission.redirect:canCreateUsers')
+        ->middleware('permission.redirect:canCreateUsers')
         ->name('users');
 
     // Role & Office Mappings
     Route::get('role-office-master-mappings', [RoleOfficeTypeMappingsController::class, 'index'])
-        // ->middleware('permission.redirect:canRoleMapping')
+        ->middleware('permission.redirect:canRoleMapping')
         ->name('role-office-master-mappings');
 
-    //  Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])
-    // // ->middleware('permission.redirect:canViewLbApplications')
-    // ->name('lb-application-list');
-
     Route::get('/role-office-type-mappings/create', Create::class)
-        // ->middleware('permission.redirect:canRoleMappings')
+        ->middleware('permission.redirect:canRoleMappings')
         ->name('role-office-type-mappings');
 
     // Office Masters
     Route::get('officemasters', [OfficeMastersController::class, 'index'])
-        // ->middleware('permission.redirect:canViewOffices')
+        ->middleware('permission.redirect:canViewOffices')
         ->name('officemasters');
 
     Route::get('/office-masters/create', OfficeMasterCreate::class)
-        // ->middleware('permission.redirect:canCreateOffices')
+        ->middleware('permission.redirect:canCreateOffices')
         ->name('office-masters');
 
     // Permissions Management
@@ -121,11 +129,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('assign-users-permissions');
 
     Route::get('/role-permission-management', [RolePermisssionManagementController::class, 'index'])
+        ->middleware('permission.redirect:canRolePermissionManagement')
         ->name('role-permission-management');
 
     // Duty Management
     Route::get('/userDutymanagement', [UserDutyManagementController::class, 'index'])
-        ->middleware('permission.redirect:manage user duties')
+        // ->middleware('permission.redirect:manage user duties')
         ->name('userDutymanagement.index');
 
 
@@ -133,7 +142,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
     Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
     Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
-    Route::get('/custom_application/{id}', ApplicationView::class)->name('custom_application.view');
+    // Route::get('/custom_application/{id}', ApplicationView::class)->name('custom_application.view');
     Route::get('/getelsticsearchIndex', [ElasticSearchController::class, 'index'])->name('getelsticsearchIndex');
 });
 
@@ -147,7 +156,9 @@ Route::get(
     [DynamicFormController::class, 'show']
 )->name('dynamic-form-page');
 
-Route::get('/master-tab', App\Livewire\MasterTabManager::class)->name('master-tab');
+Route::get('/master-tab', App\Livewire\MasterTabManager::class)
+    ->middleware('permission.redirect:canMasterTab')
+    ->name('master-tab');
 // Route::get('/tab-filed-manage', App\Livewire\SchemeTabFieldManager::class)->name('tab-filed-manage');
 Route::get('/tab-field-manager', SchemeTabFieldManager::class)->name('tab-field-manager');
 // Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name(name: 'menu-tab');
@@ -156,16 +167,59 @@ Route::get('/edit-validation', [ValidationManagerController::class, 'index'])->n
 Route::get('/master-tab-creation', [MasterTabCreationController::class, 'index'])->name('master-tab-creation');
 
 Route::get('/schemes-final-submitted', [SchemeController::class, 'finalSubmitted'])
+    ->middleware('permission.redirect:canEntry')
     ->name('schemes.final-submitted');
 
 Route::get('/duplicate-checks', [SchemeController::class, 'finalSubmitted'])->name('duplicate-checks');
 Route::get('/age-management', [SchemeController::class, 'finalSubmitted'])->name('age-management');
 
 Route::controller(workflowmanagementController::class)->group(function () {
-    Route::any('/create-steps',  'createSteps')->name('create-steps');
-    Route::any('/assign-workflow',  'assignWorkflow')->name('assign-workflow');
+    Route::any('/create-steps', 'createSteps')->name('create-steps');
+    Route::any('/assign-workflow', 'assignWorkflow')->name('assign-workflow');
 });
 
-Route::get('/role-rank-management', RolerankManagement::class)->name('role-rank-management');
+Route::get('/role-rank-management', RolerankManagement::class)
+    ->middleware('permission.redirect:canRoleRankManagement')
+    ->name('role-rank-management');
 
-Route::get('/define-workflow', [SchemeController::class, 'finalSubmitted'])->name('define-workflow');
+Route::get('/define-workflow', [SchemeController::class, 'finalSubmitted'])
+    ->middleware('permission.redirect:canDefineWorkflow')
+    ->name('define-workflow');
+
+Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])
+    ->name('beneficiaries_selection.index');
+
+Route::get('/report', [BeneficiaryListController::class, 'show'])
+    ->name('report.show');
+
+Route::any('draftedit', [SchemeController::class, 'draftedit'])
+    ->name('draftedit');
+
+Route::any('/custom_application', [SchemeController::class, 'applicationView'])->name('custom_application.view');
+
+// Caste Update
+Route::get('/Caste-modification-info', [CasteModificationController::class, 'index'])
+    ->middleware('permission.redirect:canModifyCaste')
+    ->name('Caste-modification-info');
+
+Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])
+    // ->middleware('permission.redirect:canEditCaste')
+    ->name('caste-modification.edit');
+
+Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
+    // ->middleware('permission.redirect:canUpdateCaste')
+    ->name('beneficiary.updateCaste');
+
+Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])
+    // ->middleware('permission.redirect:canCasteModification')
+    ->name('caste-modification-list');
+
+Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
+    // ->middleware('permission.redirect:canBeneficiaryDetails')
+    ->name('view-beneficiary-details');
+
+Route::get('/scheme-capacity', [SchemeCapacityController::class, 'index'])
+    ->name('scheme-capacity');
+
+Route::get('/csv-splitter', CsvSplitter::class)
+    ->name('csv-splitter');

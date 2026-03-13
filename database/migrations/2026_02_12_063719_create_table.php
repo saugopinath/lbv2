@@ -27,7 +27,10 @@ return new class extends Migration {
                 application_id bigint NOT NULL DEFAULT nextval('{$this->schema}.application_id_seq'::regclass),
                 beneficiary_id bigint NOT NULL DEFAULT nextval('{$this->schema}.beneficiary_id_seq'::regclass),
                 created_at timestamp without time zone,
-                updated_at timestamp without time zone
+                updated_at timestamp without time zone,
+                CONSTRAINT unique_app_ben_ids_pkey PRIMARY KEY (application_id),
+                CONSTRAINT unique_app_ben_ids_uniquekey UNIQUE (application_id, scheme_id)
+
             )
         ");
 
@@ -54,7 +57,7 @@ return new class extends Migration {
                 ben_mother_name varchar(250),
                 mar_statu integer,
                 ben_spouse_name varchar(250),
-                caste char(10),
+                caste smallint,
                 caste_cer_no varchar(250),
                 next_level_role_id smallint,
                 is_final smallint default 0,
@@ -111,7 +114,7 @@ return new class extends Migration {
                 ifscode varchar(25),
                 bankname varchar(150),
                 bank_branch_name varchar(100),
-                bankaccountnumber char(30),
+                bankaccountnumber varchar(30),
                 other_details jsonb,
                 is_clean smallint NOT NULL DEFAULT 1,
                 created_at timestamp without time zone,

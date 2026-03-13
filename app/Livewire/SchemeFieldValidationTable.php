@@ -18,21 +18,7 @@ class SchemeFieldValidationTable extends DataTableComponent
     public int $rowNumberOffset = 0;
     public ?int $perPage = 20;
     public array $validationOptions = [];
-    // public array $validationOptions = [
-
-    //     ['rule' => 'required', 'description' => 'Field is mandatory'],
-    //     ['rule' => 'nullable', 'description' => 'Field is optional'],
-    //     ['rule' => 'email',    'description' => 'Must be valid email'],
-    //     ['rule' => 'numeric',  'description' => 'Must be numeric'],
-    //     ['rule' => 'max:255',  'description' => 'Maximum 255 characters'],
-    //     ['rule' => 'min:3',    'description' => 'Minimum 3 characters'],
-    //     ['rule' => 'digits:10',    'description' => 'Must be 10 digits'],
-    //     // ['label' => 'Required', 'value' => 'required'],
-    //     // ['label' => 'Numeric',  'value' => 'numeric'],
-    //     // ['label' => 'Email',    'value' => 'email'],
-    //     // ['label' => 'Min 1',    'value' => 'min:1'],
-    //     // ['label' => 'Max 10',   'value' => 'max:10'],
-    // ];
+    
     public function configure(): void
     {
         $this->setPrimaryKey('id');
@@ -151,23 +137,7 @@ class SchemeFieldValidationTable extends DataTableComponent
                 ->html(),
         ];
     }
-    // public function saveValidation($fieldId): void
-    // {
-    //     $rules = $this->selectedValidations[$fieldId] ?? [];
-    //     $field = SchemeTabFormField::findOrFail($fieldId);
-    //     if ((int) $field->is_mandatory === 1 && !in_array('required', $rules)) {
-    //         array_unshift($rules, 'required');
-    //     }
-    //     $field->update([
-    //         'validation_rule' => empty($rules)
-    //             ? null
-    //             : implode('|', array_unique($rules)),
-    //     ]);
-    //     $this->dispatch('toastr', [
-    //         'type'    => 'success',
-    //         'message' => 'Validation Rule updated successfully',
-    //     ]);
-    // }
+   
     public function saveValidation(int $fieldId): void
     {
         $rules = $this->selectedValidations[$fieldId] ?? [];

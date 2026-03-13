@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\BeneficiaryTemEnclosure;
 use App\Models\BeneficiaryPersonalDetail;
 use App\Models\SchemeAttachedDocMappings;
+use App\Models\UniqueAppBenId;
 
 class EnclosureList extends Component
 {
@@ -241,44 +242,51 @@ class EnclosureList extends Component
         }
 
         $this->validate();
-
         $base64 = base64_encode(file_get_contents($this->singleDocument->getRealPath()));
-
         $model = $this->enclosureModel();
+        $beneficiaryId = BeneficiaryPersonalDetail::where('application_id', $this->application_id)->value('beneficiary_id');
         // dd($model);
         $existingDoc = $model::where('application_id', $this->application_id)
             ->where('document_type', $this->currentDocId)
             ->where('scheme_id', $this->scheme_id)
-            ->where('tab_code', $this->tabCode)
+            ->when(
+                $this->enclosureSource != 5,
+                fn($q) => $q->where('tab_code', $this->tabCode)
+            )
             ->first();
         // dd($existingDoc);
         if ($existingDoc) {
-            $existingDoc->update([
-                'attched_document' => $base64,
-                'ip_address' => request()->ip(),
+            $updateData = [
+                'attched_document'   => $base64,
+                'ip_address'         => request()->ip(),
                 'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
                 'document_mime_type' => $this->singleDocument->getMimeType(),
-                'created_by' => Auth::id(),
-                'scheme_id' => $this->scheme_id,   
-                'tab_code' => $this->tabCode,    
-            ]);
+                'created_by'         => Auth::id(),
+                'scheme_id'          => $this->scheme_id,
+            ];
+            if ($this->enclosureSource != 5) {
+                $updateData['tab_code'] = $this->tabCode;
+            }
+            $existingDoc->update($updateData);
         } else {
-            $model::create([
-                'application_id' => $this->application_id,
-                'attched_document' => $base64,
-                'ip_address' => request()->ip(),
+            $createData = [
+                'application_id'     => $this->application_id,
+                'beneficiary_id'     => $beneficiaryId,
+                'attched_document'   => $base64,
+                'ip_address'         => request()->ip(),
                 'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
                 'document_mime_type' => $this->singleDocument->getMimeType(),
-                'document_type' => $this->currentDocId,
-                'created_by' => Auth::id(),
-                'scheme_id' => $this->scheme_id,  
-                'tab_code' => $this->tabCode,    
-            ]);
+                'document_type'      => $this->currentDocId,
+                'created_by'         => Auth::id(),
+                'scheme_id'          => $this->scheme_id,
+            ];
+            if ($this->enclosureSource != 5) {
+                $createData['tab_code'] = $this->tabCode;
+            }
+            $model::create($createData);
             // dd($is_upload);
         }
-
         $docId = $this->currentDocId;
-
         $this->singleDocument = null;
         $this->currentDocId = null;
         $this->currentDocMaxSize = '';
@@ -304,7 +312,6 @@ class EnclosureList extends Component
                 }
             }
         }
-
         $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.', docId: $docId);
         $this->dispatch('$refresh');
         $this->loadExistingDocuments();
@@ -316,7 +323,6 @@ class EnclosureList extends Component
         $document = $model::findOrFail($id);
         $decoded = base64_decode($document->attched_document);
         $filename = 'document_' . $document->document_type . '.' . $document->document_extension;
-
         return response()->streamDownload(function () use ($decoded) {
             echo $decoded;
         }, $filename, [
@@ -330,7 +336,6 @@ class EnclosureList extends Component
     public function validateBeforeNext()
     {
         $this->showErrors = false;
-
         foreach ($this->doc_lists as $doc) {
             $existing = $this->existingDocuments[$doc->doc_type_id] ?? null;
 
@@ -340,8 +345,6 @@ class EnclosureList extends Component
                 return;
             }
         }
-
-        // ✅ ALL REQUIRED DOCS PRESENT
         $this->dispatch('document-validation-passed');
     }
 

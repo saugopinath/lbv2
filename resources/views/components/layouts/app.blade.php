@@ -21,6 +21,9 @@
 
     <!-- Alpine.js local -->
     <!-- <script src="{{ asset('js/alpine.min.js') }}" defer></script> -->
+
+    <!-- Chart.js for Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body x-data="$store.app" class="bg-[#def0f4] dark:bg-gray-900 text-black dark:text-white">
@@ -36,7 +39,7 @@
             <div class="flex-1 flex flex-col">
                 <!-- Top Bar -->
                 <x-layouts.das_top_bar />
-                 <livewire:loader />
+                <livewire:loader />
                 <!-- Content -->
                 <div class="flex-1 p-2 overflow-auto">
                     <!-- Main Content -->

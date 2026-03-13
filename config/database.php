@@ -67,7 +67,7 @@ return [
             'password' => env('DB_PASSWORD', '12345'),
             'charset' => 'utf8',
             'prefix' => '',
-            'schema' => 'lb_scheme',
+            'schema' => 'pension',
             'sslmode' => 'prefer',
         ],
 

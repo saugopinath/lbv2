@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Models\WorkflowsteproleMapping;
 class WorkflowService
 {
-    public function getLabelRoles($schemeId)
+    public function getLabelRoles($schemeId, $rank = null)
     {
         $encryptedRoleId = session('lgd_session.role_id');
         if (!$encryptedRoleId) {
@@ -12,7 +12,7 @@ class WorkflowService
         }
         try {
             $roleId = Crypt::decryptString($encryptedRoleId);
-            return WorkflowsteproleMapping::getLabelRoleIdsByRole($schemeId, $roleId);
+            return WorkflowsteproleMapping::getLabelRoleIdsByRole($schemeId, $roleId, $rank);
         } catch (\Exception $e) {
             return null;
         }

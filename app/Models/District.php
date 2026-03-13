@@ -14,6 +14,7 @@ class District extends Model
         'short_name',
         'state_id',
     ];
+    public const BENEFICIARY_LOCATION_COLUMN = 'created_by_dist_code';
     public function State(): BelongsTo
     {
         return $this->belongsTo(State::class);
@@ -39,10 +40,14 @@ class District extends Model
         return $this->hasManyThrough(
             Municipality::class,
             Subdivision::class,
-            'district_id',     // subdivisions টেবিলে district_id আছে
-            'subdivision_id',  // municipalities টেবিলে subdivision_id আছে
-            'id',              // districts টেবিলের primary key
-            'id'               // subdivisions টেবিলের primary key
+            'district_id',
+            'subdivision_id',
+            'id',
+            'id'
         );
+    }
+    public function capacities()
+    {
+        return $this->morphMany(SchemeCapacity::class, 'modelable', 'model_type', 'model_id');
     }
 }

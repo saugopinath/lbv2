@@ -77,7 +77,7 @@ class EncryptionArray
                 $query->where('district_id', $district_id);
             }
 
-             if ($sub_div) {
+            if ($sub_div) {
                 $query->where('subdivision_id', $sub_div);
             }
 
@@ -92,70 +92,71 @@ class EncryptionArray
 
         return $query;
     }
-    public static function applyLocationFilters(Builder $query, ?int $district_id, ?int $rural_urban, ?int $blockurban, ?int $gp_ward, ?int $sub_div): Builder
-    {
-        // dump($sub_div);
-        // dd($query);
-        $blockField  = $rural_urban == 2 ? 'block_id'      : 'municipality_id';
-        $gpWardField = $rural_urban == 2 ? 'panchayat_id'  : 'ward_id';
+    // public static function applyLocationFilters(Builder $query, ?int $district_id, ?int $rural_urban, ?int $blockurban, ?int $gp_ward, ?int $sub_div): Builder
+    // {
+    //     // dump($sub_div);
 
-        // $query->with('sourceable.contact');
-        // dd($query1->toSql(), $query1->getBindings());
-        if ($district_id) {
-            $query->whereHasMorph(
-                'sourceable',
-                '*',
-                function ($q) use ($district_id) {
-                    $q->whereHas('contact', function ($contactQuery) use ($district_id) {
-                        $contactQuery->where('district_id', $district_id);
-                    });
-                }
-            );
-        }
-        if ($blockurban) {
-            $query->whereHasMorph(
-                'sourceable',
-                '*',
-                function ($q) use ($blockField, $blockurban) {
-                    $q->whereHas('contact', function ($subQuery) use ($blockField, $blockurban) {
-                        $subQuery->where($blockField, $blockurban);
-                    });
-                }
-            );
-        }
+    //     // dd($query->toSql(), $query->getBindings());
+    //     $blockField  = $rural_urban == 2 ? 'block_id'      : 'municipality_id';
+    //     $gpWardField = $rural_urban == 2 ? 'panchayat_id'  : 'ward_id';
 
-        if ($sub_div) {
-            $query->whereHasMorph(
-                'sourceable',
-                '*', // use your morph model(s)
-                function ($q) use ($sub_div) {
-                    $q->whereHas('contact.municipality', function ($municipalityQuery) use ($sub_div) {
-                        $municipalityQuery->where('subdivision_id', $sub_div);
-                    });
-                }
-            );
-        }
+    //     // $query->with('sourceable.contact');
+    //     // dd($query1->toSql(), $query1->getBindings());
+    //     if ($district_id) {
+    //         $query->whereHasMorph(
+    //             'sourceable',
+    //             '*',
+    //             function ($q) use ($district_id) {
+    //                 $q->whereHas('contact', function ($contactQuery) use ($district_id) {
+    //                     $contactQuery->where('district_id', $district_id);
+    //                 });
+    //             }
+    //         );
+    //     }
+    //     if ($blockurban) {
+    //         $query->whereHasMorph(
+    //             'sourceable',
+    //             '*',
+    //             function ($q) use ($blockField, $blockurban) {
+    //                 $q->whereHas('contact', function ($subQuery) use ($blockField, $blockurban) {
+    //                     $subQuery->where($blockField, $blockurban);
+    //                 });
+    //             }
+    //         );
+    //     }
 
-        // dd('fdf');
-        // $query->whereHas('sourceable.contact', function ($q) use ($blockField, $blockurban) {
-        //     $q->where($blockField, $blockurban);
-        // });
-        // }
+    //     if ($sub_div) {
+    //         $query->whereHasMorph(
+    //             'sourceable',
+    //             '*', // use your morph model(s)
+    //             function ($q) use ($sub_div) {
+    //                 $q->whereHas('contact.municipality', function ($municipalityQuery) use ($sub_div) {
+    //                     $municipalityQuery->where('subdivision_id', $sub_div);
+    //                 });
+    //             }
+    //         );
+    //     }
 
-        if ($gp_ward) {
-            $query->whereHasMorph(
-                'sourceable',
-                '*',
-                function ($q) use ($gpWardField, $gp_ward) {
-                    $q->whereHas('contact', function ($subQuery) use ($gpWardField, $gp_ward) {
-                        $subQuery->where($gpWardField, $gp_ward);
-                    });
-                }
-            );
-        }
+    //             // dd('fdf');
+    //             // $query->whereHas('sourceable.contact', function ($q) use ($blockField, $blockurban) {
+    //             //     $q->where($blockField, $blockurban);
+    //             // });
+    //             // }
 
-        return $query;
-    }
+    //             if ($gp_ward) {
+    //                 $query->whereHasMorph(
+    //                     'sourceable',
+    //                     '*',
+    //                     function ($q) use ($gpWardField, $gp_ward) {
+    //                         $q->whereHas('contact', function ($subQuery) use ($gpWardField, $gp_ward) {
+    //                             $subQuery->where($gpWardField, $gp_ward);
+    //                         });
+    //                     }
+    //                 );
+    //             }
+
+    //             return $query;
+    //         }
 
     public static function applyLocationFilte(Builder $query, ?int $district_id, ?int $rural_urban, ?int $blockurban, ?int $gp_ward): Builder
     {
@@ -411,5 +412,28 @@ class EncryptionArray
     //     return $query;
     // }
 
-
+    // New applyed filter on 16/02/2026
+    public static function applyLocationFilters(Builder $query, ?int $district_id, ?int $rural_urban, ?int $blockurban, ?int $gp_ward, ?int $sub_div): Builder
+    {
+        $query->whereHas('contact', function ($q) use ($district_id, $rural_urban, $blockurban, $gp_ward, $sub_div) {
+            if ($district_id) {
+                $q->where('district_id', $district_id);
+            }
+            if ($sub_div) {
+                $q->whereHas('municipality', function ($mq) use ($sub_div) {
+                    $mq->where('subdivision_id', $sub_div);
+                });
+            }
+            if ($rural_urban) {
+                $q->where('rural_urban', $rural_urban);
+            }
+            if ($blockurban) {
+                $q->where('blockurban', $blockurban);
+            }
+            if ($gp_ward) {
+                $q->where('gpward', $gp_ward);
+            }
+        });
+        return $query;
+    }
 }

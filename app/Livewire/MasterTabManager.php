@@ -37,7 +37,7 @@ class MasterTabManager extends Component
 
     protected $rules = [
         'selectedSchemeId' => 'required|exists:schemes,id',
-        'selectedTabs'     => 'required|array|min:1',
+        'selectedTabs' => 'required|array|min:1',
     ];
     public function updatedSelectedSchemeId($value)
     {
@@ -57,7 +57,8 @@ class MasterTabManager extends Component
         $this->positions = [];
 
         $scheme = Scheme::find((int) $value);
-        if (!$scheme) return;
+        if (!$scheme)
+            return;
 
         $this->selectedSchemeName = $scheme->name;
 
@@ -85,7 +86,8 @@ class MasterTabManager extends Component
             ]);
             return;
         }
-        if (!$this->selectedTabCode) return;
+        if (!$this->selectedTabCode)
+            return;
 
         if (!in_array($this->selectedTabCode, $this->selectedTabs)) {
             $this->selectedTabs[] = (int) $this->selectedTabCode;
@@ -108,7 +110,7 @@ class MasterTabManager extends Component
             return;
         }
         $this->selectedTabs = array_values(
-            array_diff($this->selectedTabs, [(int)$tabCode])
+            array_diff($this->selectedTabs, [(int) $tabCode])
         );
         $this->recalculatePositions();
         DB::transaction(function () use ($tabCode) {
@@ -171,22 +173,28 @@ class MasterTabManager extends Component
         }
         $this->validate();
 
-        DB::transaction(function () {
+        DB::beginTransaction();
+        try {
             SchemeTabMapping::where('scheme_id', $this->selectedSchemeId)
                 ->increment('position', 1000, ['is_active' => false]);
             foreach ($this->selectedTabs as $tabCode) {
                 SchemeTabMapping::updateOrCreate(
                     [
                         'scheme_id' => $this->selectedSchemeId,
-                        'tab_code'  => $tabCode,
+                        'tab_code' => $tabCode,
                     ],
                     [
-                        'position'  => $this->positions[$tabCode],
+                        'position' => $this->positions[$tabCode],
                         'is_active' => true,
                     ]
                 );
             }
-        });
+            DB::commit();
+        } catch (\Throwable $e) {
+
+            DB::rollBack();
+            throw $e;
+        }
         $this->mappingSaved = true;
         session()->flash('message', 'Tabs mapped successfully.');
     }

@@ -21,7 +21,7 @@ class CreateworkflowSteps extends Component
             ->orderBy('rank')
             ->get();
         $exists = Role::whereNotNull('rank')->exists();
-        if($exists){
+        if ($exists) {
             $this->originalrolerank = true;
         }
         if ($steps->isNotEmpty()) {
@@ -34,14 +34,14 @@ class CreateworkflowSteps extends Component
     {
         return [
             'noofSteps' => 'required|integer|min:1',
-            'labels.*'  => 'required',
+            'labels.*' => 'required',
         ];
     }
     protected function messages()
     {
         return [
             'noofSteps.*' => 'Number of steps is required.',
-            'labels.*.*'  => 'Label Name is required.',
+            'labels.*.*' => 'Label Name is required.',
         ];
     }
     public function updatedNoofSteps($value)
@@ -59,22 +59,35 @@ class CreateworkflowSteps extends Component
     }
     public function save()
     {
-        $this->validate();
-        DB::transaction(function () {
+        DB::beginTransaction();
+        try {
             $parentId = null;
             $totalSteps = count($this->labels);
             for ($i = 0; $i < $totalSteps; $i++) {
                 $step = new WorkflowStep();
                 $step->scheme_id = $this->schemeId;
-                $step->rank      = $i + 1;
-                $step->label     = $this->labels[$i];
+                $step->rank = $i + 1;
+                $step->label = $this->labels[$i];
                 $step->parent_id = $parentId;
-                $step->is_first  = ($i === 0);
-                $step->is_last   = ($i === $totalSteps - 1);
+                $step->is_first = ($i === 0);
+                $step->is_last = ($i === $totalSteps - 1);
                 $step->save();
                 $parentId = $step->id;
             }
-        });
+            DB::commit();
+            $this->already = true;
+            $this->dispatch('toastr', [
+                'type' => 'success',
+                'message' => 'Workflow steps created successfully!'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->already = false;
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Something went wrong. Please try again.'
+            ]);
+        }
     }
     public function render()
     {

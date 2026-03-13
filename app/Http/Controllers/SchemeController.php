@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Scheme;
 use App\Models\SchemeFinalSubmitCheck;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 class SchemeController extends Controller
@@ -55,5 +57,35 @@ class SchemeController extends Controller
             ],
         ];
         return view('workflow.mastercon', compact('steps'));
+    }
+
+    public function draftedit(Request $request)
+    {
+        
+        // if (WorkFlowPermissionHelper::canEditDraft()) {
+        // if (Auth::user()->can('edit draft')) {
+            $app_id = Crypt::decryptString($request->app_id);
+            $ben_id = Crypt::decryptString($request->ben_id);
+            return view('schemesblade.draftedit', compact('app_id','ben_id'));
+        // }
+
+        $header = 'Oops! You do not have permission to edit draft.';
+        return view('CommonRestictedpage.index', compact('header'));
+    }
+
+    public function applicationView(Request $request)
+    {
+        // dd($request->all());
+        // if (WorkFlowPermissionHelper::canEditDraft()) {
+        // if (Auth::user()->can('edit draft')) {
+            $app_id = Crypt::decryptString($request['id']);
+            $scheme_id = Crypt::decryptString($request['scheme_id']);
+            $schemeName = Scheme::find($scheme_id)->name;
+            // dd( $app_id,$scheme_id,$schemeName);
+            return view('schemesblade.applicationview', compact('app_id','scheme_id', 'schemeName'));
+        // }
+
+        $header = 'Oops! You do not have permission to edit draft.';
+        return view('CommonRestictedpage.index', compact('header'));
     }
 }

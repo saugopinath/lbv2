@@ -25,8 +25,20 @@ class VerifierPermissionSeeder extends Seeder
             'view beneficiary details',
             'TakeActionForCaste',
             'VerifyCasteApplication',
-            'RevertCasteApplication'
-
+            'RevertCasteApplication',
+            'lb-application-list',
+            'Bulk Actions Duare Sarkar Entry Verification Allow',
+            'Bulk Actions Duare Sarkar Entry Reject Allow',
+            'Bulk Actions Duare Sarkar Entry Revert Allow',
+            'Duare Sarkar Entry Reject Allow',
+            'Duare Sarkar Entry Verification Allow',
+            'Duare Sarkar Entry Revert Allow',
+            'Bulk Actions Normal Entry Revert Allow',
+            'Bulk Actions Normal Entry Reject Allow',
+            'Bulk Actions Normal Entry Verification Allow',
+            'Normal Entry Verification Allow',
+            'Normal Entry Reject Allow',
+            'Normal Entry Revert Allow'
         ];
 
         // 1) find role

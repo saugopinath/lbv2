@@ -33,6 +33,7 @@ class ApplicationTabService
             $fields = $tab->getFields()
                 ->where('scheme_id', $schemeId)
                 ->values();
+            // dd($fields);
             if (!$tab->tab_model_name) {
                 continue;
             }
@@ -41,6 +42,7 @@ class ApplicationTabService
                 continue;
             }
             $record = $modelClass::where('application_id', $applicationId)->first();
+            // dd($record);
             $rows = [];
             if ($record) {
                 foreach ($fields as $field) {
@@ -58,12 +60,12 @@ class ApplicationTabService
                         $column = $field->db_column;
                         $value  = $record->$column ?? null;
                     }
-                    
+
                     // Skip if value is null or empty - don't show this field at all
                     if ($value === null || $value === '') {
                         continue;
                     }
-                    
+
                     $ruralUrban = $record->rural_urban ?? null;
                     $value = LocationHelper::resolve(
                         $field->db_column ?? $field->field_name,
@@ -95,7 +97,8 @@ class ApplicationTabService
         if ($value === null || empty($field->options)) {
             return $value;
         }
-        return $field->options[$value] ?? $value;
+        $key = is_string($value) ? trim($value) : $value;
+        return $field->options[$key] ?? $value;
     }
     private function normalizeValue($value): string
     {

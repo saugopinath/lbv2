@@ -33,6 +33,14 @@ abstract class BaseAuditableModel extends Model implements Auditable
             'referrer' => request()->header('referer'),
         ]);
 
+        if (app()->has('livewire_action_log_id')) {
+            $data['livewire_action_log_id'] = (string) app('livewire_action_log_id');
+        }
+
+        if (app()->has('user_page_visit_log_id')) {
+            $data['user_page_visit_log_id'] = (string) app('user_page_visit_log_id');
+        }
+
 
         return $data;
     }
