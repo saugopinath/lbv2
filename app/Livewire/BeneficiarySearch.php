@@ -8,10 +8,10 @@ use Livewire\Component;
 
 class BeneficiarySearch extends Component
 {
-    public $selectedOption = null; // ডিফল্টভাবে কিছুই সিলেক্ট থাকবে না
+    public $selectedOption = null;
     public $inputValue = '';
     public $isApproved = false;
-    public $displayType = 'select'; // ডিফল্ট ডিসপ্লে টাইপ select
+    public $displayType = 'select';
 
     public $fields = [
         'application_id' => [
