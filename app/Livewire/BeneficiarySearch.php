@@ -51,7 +51,7 @@ class BeneficiarySearch extends Component
     public function mount($isApproved = false, $selectedOption = null, $inputValue = null, $displayType = 'select')
     {
         $this->isApproved = $isApproved;
-        $this->selectedOption = $selectedOption; 
+        $this->selectedOption = $selectedOption;
         $this->inputValue = $inputValue ?? '';
         $this->displayType = $displayType;
     }
@@ -60,7 +60,10 @@ class BeneficiarySearch extends Component
     {
         return $this->fields[$key]['rules'] ?? 'required';
     }
-
+    public function updatedSelectedOption()
+    {
+        $this->resetValidation();
+    }
     public function search()
     {
         $this->validate([

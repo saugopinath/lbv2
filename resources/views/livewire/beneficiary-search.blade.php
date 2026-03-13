@@ -1,6 +1,6 @@
 <div>
     <div x-data="{
-        selectedOption: @entangle('selectedOption'),
+        selectedOption: @entangle('selectedOption').live,
         inputValue: @entangle('inputValue'),
         displayType: @js($displayType),
         fields: @js($fields),
