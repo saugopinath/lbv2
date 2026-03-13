@@ -5,7 +5,7 @@
     @if ($schemeData)
         <div class="bg-white dark:bg-gray-800 shadow-md rounded-2xl p-4 space-y-2 flex items-center justify-between">
             <h1 class="text-xl font-bold text-indigo-800 dark:text-white mt-2 pl-4">
-                Process Appliaction
+                Process Appliaction {{ $schemeName }}
             </h1>
             <x-form.back-button :url="route('application-lists')" />
         </div>
