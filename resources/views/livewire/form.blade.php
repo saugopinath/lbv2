@@ -1,0 +1,14 @@
+<div>
+    @if (!$schemeData)
+        <livewire:scheme-dropdown-new :isFinal="true" :isAssigned="true" />
+    @endif
+    @if ($schemeData)
+        <div class="max-w-auto mx-auto bg-white rounded-xl shadow-sm p-6">
+            <livewire:dynamic-form :scheme-id="$schemeId" :schemeName="$schemeName" :wire:key="'dynamic-form-'.$schemeId" />
+        </div>
+    @endif
+    @push('scripts')
+        <script src="{{ asset('js/master-data/master-data-v2.js') }}"></script>
+        <script src="{{ asset('js/adhar-verhoeff.js') }}"></script>
+    @endpush
+</div>

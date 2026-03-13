@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Formcontroller;
 use App\Http\Controllers\RejectApprovedBeneficiaryController;
 use App\Http\Controllers\SchemeController;
 use App\Http\Controllers\workflowmanagementController;
@@ -219,3 +220,7 @@ Route::get('/scheme-capacity', [SchemeCapacityController::class, 'index'])
 
 Route::get('/csv-splitter', CsvSplitter::class)
     ->name('csv-splitter');
+
+
+ Route::get('/form', [Formcontroller::class, 'index'])
+    ->name('form');

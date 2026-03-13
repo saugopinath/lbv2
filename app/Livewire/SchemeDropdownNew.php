@@ -12,6 +12,7 @@ class SchemeDropdownNew extends Component
     public $isAssigned = false;
     public $schemes = [];
     public $schemeId;
+    public $schemeSelected = false;
     public function mount($isFinal = false, $isAssigned = false)
     {
         $scheme_id = null;
@@ -33,12 +34,14 @@ class SchemeDropdownNew extends Component
     }
     public function updatedSchemeId($value)
     {
-        if (!$value) {
-            return;
+        if ($value) {
+            $this->schemeSelected = true;
+            $schemeName = Scheme::find($value)->name;
+            $schemeData = ['scheme_id' => $value, 'scheme_name' => $schemeName];
+            $this->dispatch('selectedScheme', $schemeData);
+        } else {
+            $this->dispatch('selectedScheme', null);
         }
-        $schemeName = Scheme::find($value)->name;
-        $schemeData = ['scheme_id' => $value, 'scheme_name' => $schemeName];
-        $this->dispatch('selectedScheme', $schemeData);
     }
     public function render()
     {
