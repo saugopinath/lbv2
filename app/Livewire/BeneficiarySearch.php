@@ -2,59 +2,53 @@
 
 namespace App\Livewire;
 
-use App\Models\BeneficiaryAadhaar;
-use App\Models\BeneficiaryBankDetail;
 use App\Models\BeneficiaryPersonalDetail;
-use App\Models\SchemeTabFormField;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
 class BeneficiarySearch extends Component
 {
-    public $selectedOption = 'application_id';
+    public $selectedOption = null; // ডিফল্টভাবে কিছুই সিলেক্ট থাকবে না
     public $inputValue = '';
     public $isApproved = false;
-    public $fields = [
+    public $displayType = 'select'; // ডিফল্ট ডিসপ্লে টাইপ select
 
+    public $fields = [
         'application_id' => [
             'label' => 'Application ID',
             'rules' => 'required|numeric',
             'type'  => 'number'
         ],
-
         'beneficiary_name' => [
             'label' => 'Beneficiary Name',
             'rules' => 'required|regex:/^[a-zA-Z\s]+$/',
             'type'  => 'text'
         ],
-
         'mobile_number' => [
             'label' => 'Mobile Number',
             'rules' => 'required|numeric|digits:10',
             'max'   => 10,
             'type'  => 'number'
         ],
-
         'aadhaar_number' => [
             'label' => 'Aadhaar Number',
             'rules' => 'required|numeric|digits:12',
             'max'   => 12,
             'type'  => 'number'
         ],
-
         'bank_account_number' => [
             'label' => 'Bank Account Number',
             'rules' => 'required|numeric',
             'type'  => 'number'
         ],
-
     ];
 
-    public function mount($isApproved = false, $selectedOption = null, $inputValue = null)
+    public function mount($isApproved = false, $selectedOption = null, $inputValue = null, $displayType = 'select')
     {
         $this->isApproved = $isApproved;
-        $this->selectedOption = $selectedOption ?? 'application_id';
+        $this->selectedOption = $selectedOption; 
         $this->inputValue = $inputValue ?? '';
+        $this->displayType = $displayType;
     }
 
     private function getValidationRules($key)
@@ -71,7 +65,6 @@ class BeneficiarySearch extends Component
         ]);
 
         $key = $this->selectedOption;
-
         $fieldLabel = $this->fields[$key]['label'] ?? 'Value';
 
         $this->validate([
@@ -82,13 +75,16 @@ class BeneficiarySearch extends Component
             'inputValue.digits'   => "The $fieldLabel must be :digits digits.",
             'inputValue.regex'    => "The $fieldLabel should only contain characters (A-Z, a-z).",
         ]);
+
         $payload = [
             'searchKey'   => $key,
             'searchValue' => $this->inputValue,
         ];
+
         $modelClass = BeneficiaryPersonalDetail::class;
         $searchValue = $this->inputValue;
         $query = $modelClass::query();
+
         switch ($key) {
             case 'application_id':
             case 'beneficiary_name':
@@ -108,7 +104,9 @@ class BeneficiarySearch extends Component
                 })->with('bank');
                 break;
         }
+
         $result = $query->first(['application_id', 'beneficiary_id', 'next_level_role_id', 'is_final', 'is_clean', 'scheme_id']);
+
         if ($result) {
             $attributes = $result->attributesToArray();
             $camelData = collect($attributes)->mapWithKeys(function ($value, $attr) {
@@ -116,6 +114,7 @@ class BeneficiarySearch extends Component
             })->toArray();
             $payload = array_merge($payload, $camelData);
         }
+
         $this->dispatch('beneficiary-search', data: $payload);
     }
 
