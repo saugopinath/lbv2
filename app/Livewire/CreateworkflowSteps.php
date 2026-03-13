@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\WorkflowStep;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use App\Attributes\Loggable;
 
 class CreateworkflowSteps extends Component
 {
@@ -57,6 +58,7 @@ class CreateworkflowSteps extends Component
             $this->labels[$i] = $existing[$i] ?? '';
         }
     }
+    #[Loggable(level: 'C', nickname: 'Create Workflow Steps')]
     public function save()
     {
         DB::beginTransaction();

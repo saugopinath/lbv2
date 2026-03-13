@@ -8,6 +8,7 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use App\Attributes\Loggable;
 
 class RoleOfficeTypeMappingsTable extends DataTableComponent
 {
@@ -92,13 +93,17 @@ class RoleOfficeTypeMappingsTable extends DataTableComponent
     {
         return RoleOfficeTypeMapping::with(['officeType', 'role']);
     }
-
+    #[Loggable(level: 'C', nickname: 'Delete RoleOfficeTypeMappings')]
     public function delete($id)
     {
-        DB::transaction(function () use ($id) {
-            RoleOfficeTypeMapping::where('id', $id)->delete();
-        });
+        $mapping = RoleOfficeTypeMapping::find($id);
+        if ($mapping) {
+            $mapping->delete();
+        }
 
-        $this->dispatch('notify', message: 'RoleOfficeTypeMappings deleted successfully!', type: 'success');
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'RoleOfficeTypeMappings deleted successfully!',
+        ]);
     }
 }

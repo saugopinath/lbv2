@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Illuminate\Support\Facades\DB;
+use App\Attributes\Loggable;
 
 class OfficeMasters extends DataTableComponent
 {
@@ -95,12 +96,17 @@ class OfficeMasters extends DataTableComponent
     {
         return OfficeMaster::with(['officeType']);
     }
+    #[Loggable(level: 'C', nickname: 'Delete OfficeMaster')]
     public function delete($id)
     {
-        DB::transaction(function () use ($id) {
-            OfficeMaster::where('id', $id)->delete();
-        });
+        $mapping = OfficeMaster::find($id);
+        if ($mapping) {
+            $mapping->delete();
+        }
 
-        $this->dispatch('notify', message: 'OfficeMaster deleted successfully!', type: 'success');
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'OfficeMaster deleted successfully!',
+        ]);
     }
 }

@@ -5,10 +5,11 @@ namespace App\Livewire\UserPermission;
 use App\Models\Permission;
 use App\Models\User;
 use Livewire\Component;
+use App\Attributes\Loggable;
 
 class UserPermissionEditModal extends Component
 
-    {
+{
     public $isOpen = false;
     public $userId;
     public $userName;
@@ -29,7 +30,7 @@ class UserPermissionEditModal extends Component
         $this->selectedPermissions = User::findOrFail($userId)->permissions->pluck('id')->toArray();
         $this->isOpen = true;
     }
-
+    #[Loggable(level: 'C', nickname: 'Update User Permission')]
     public function updateUserPermission()
     {
         $user = User::find($this->userId);
@@ -39,20 +40,29 @@ class UserPermissionEditModal extends Component
             $this->isOpen = false;
             return;
         }
-        $user->syncPermissions(Permission::whereIn('id', $this->selectedPermissions)->get());
+        // $user->syncPermissions(Permission::whereIn('id', $this->selectedPermissions)->get());
+
+        // ⭐ Capture old permissions for the Audit Log
+        $user->audit_old_permissions = $user->permissions->pluck('name')->toArray();
+
+        $user->syncPermissions(
+            Permission::whereIn('id', $this->selectedPermissions)->get()
+        );
+        $user->updated_at = now();
+        $user->save();
         $this->close();
         $this->dispatch('toastr', [
-                        'type' => 'success',
-                        'message' => 'Permissions Assign successfully!']);
+            'type' => 'success',
+            'message' => 'Permissions Assign successfully!'
+        ]);
         $this->dispatch('refreshUserTable');
     }
     public function close()
     {
-         $this->reset(['isOpen', 'userId', 'userName', 'permissions', 'selectedPermissions']);
+        $this->reset(['isOpen', 'userId', 'userName', 'permissions', 'selectedPermissions']);
     }
     public function render()
     {
         return view('livewire.user-permission.user-permission-edit-modal');
-
     }
 }

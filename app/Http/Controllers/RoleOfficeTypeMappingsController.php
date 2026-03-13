@@ -25,6 +25,7 @@ class RoleOfficeTypeMappingsController extends Controller
         // if (WorkFlowPermissionHelper::canRoleMapping()) {
         // if (Auth::user()->can('manage role mappings')) {
             return view('roleofficeTypemappings.index');
+            
         // }
         // $header = 'Oops! You do not have permission to manage role mappings.';
         // return view('CommonRestictedpage.index', compact('header'));

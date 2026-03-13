@@ -13,11 +13,13 @@ use Illuminate\Support\Facades\Auth;
 
 class Role extends SpatieRole implements Auditable
 {
-    use \OwenIt\Auditing\Auditable;
-    protected $table = 'roles';
-    public $timestamps = false;
-
     use HasFactory;
+    use \OwenIt\Auditing\Auditable;
+
+    protected $table = 'roles';
+    public $timestamps = true;
+
+    public $audit_old_permissions;
 
     /**
      * The model's default values for attributes.
@@ -95,6 +97,11 @@ class Role extends SpatieRole implements Auditable
         }
         if (app()->has('user_page_visit_log_id')) {
             $data['user_page_visit_log_id'] = (string) app('user_page_visit_log_id');
+        }
+
+        if ($data['event'] === 'updated' && isset($this->audit_old_permissions)) {
+            $data['old_values']['permissions'] = $this->audit_old_permissions;
+            $data['new_values']['permissions'] = $this->permissions->pluck('name')->toArray();
         }
 
         return $data;

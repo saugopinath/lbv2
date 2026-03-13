@@ -99,18 +99,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission.redirect:canRoleMapping')
         ->name('role-office-master-mappings');
 
-    Route::get('/role-office-type-mappings/create', Create::class)
+    Route::get('/role-office-type-mappings-create', Create::class)
         ->middleware('permission.redirect:canRoleMappings')
-        ->name('role-office-type-mappings');
+        ->name('role-office-type-mappings-create');
 
     // Office Masters
     Route::get('officemasters', [OfficeMastersController::class, 'index'])
         ->middleware('permission.redirect:canViewOffices')
         ->name('officemasters');
 
-    Route::get('/office-masters/create', OfficeMasterCreate::class)
+    Route::get('/office-masters-create', OfficeMasterCreate::class)
         ->middleware('permission.redirect:canCreateOffices')
-        ->name('office-masters');
+        ->name('office-masters-create');
 
     // Permissions Management
     Route::get('/permission', [PermissionController::class, 'index'])

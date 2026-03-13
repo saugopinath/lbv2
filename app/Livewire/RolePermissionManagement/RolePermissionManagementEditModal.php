@@ -7,6 +7,7 @@ use App\Models\Role;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Spatie\Permission\PermissionRegistrar;
+use App\Attributes\Loggable;
 
 class RolePermissionManagementEditModal extends Component
 {
@@ -31,7 +32,7 @@ class RolePermissionManagementEditModal extends Component
         $this->selectedPermissions = $role->permissions->pluck('id')->toArray();
         $this->isOpen = true;
     }
-
+    #[Loggable(level: 'C', nickname: 'Role Permission Management')]
     public function updateRolePermission()
     {
         $role = Role::find($this->roleId);
@@ -39,8 +40,9 @@ class RolePermissionManagementEditModal extends Component
         if (!$role) {
             $this->dispatch('notify', ['message' => 'Role not found!']);
             $this->dispatch('toastr', [
-                        'type' => 'success',
-                        'message' => 'Role created successfully!']);
+                'type' => 'success',
+                'message' => 'Role created successfully!'
+            ]);
             $this->isOpen = false;
             return;
         }
@@ -62,23 +64,25 @@ class RolePermissionManagementEditModal extends Component
         // dd($toRemove);
         // DB::beginTransaction();
         try {
+            // ⭐ Capture old permissions for the Audit Log
+            $role->audit_old_permissions = $role->permissions->pluck('name')->toArray();
+
             // CASE A: role has no permissions before
             if (empty($currentIds) && !empty($selectedIds)) {
                 // dd('here');
                 // Add all selected permissions to role
                 $permissions = Permission::whereIn('id', $selectedIds)->get();
                 $role->givePermissionTo($permissions);
-                 $usersWithRole = $role->users()->get();
-                    // dd($usersWithRole);
-                    if ($usersWithRole->isNotEmpty()) {
-                        // chunking for safety if there are many users
-                        foreach ($usersWithRole as $user) {
-                            // direct assign permission to each user
-                            $user->givePermissionTo($permissions);
-                        }
+                $usersWithRole = $role->users()->get();
+                // dd($usersWithRole);
+                if ($usersWithRole->isNotEmpty()) {
+                    // chunking for safety if there are many users
+                    foreach ($usersWithRole as $user) {
+                        // direct assign permission to each user
+                        $user->givePermissionTo($permissions);
                     }
-            }
-            else {
+                }
+            } else {
                 // dd('there');
                 if (!empty($toAdd)) {
                     // dd($toAdd);
@@ -93,11 +97,11 @@ class RolePermissionManagementEditModal extends Component
                             $user->givePermissionTo($permissionsToAdd);
                         }
                     }
-                }           
-            if (!empty($toRemove)) {
-                $permissionsToRemove = Permission::whereIn('id', $toRemove)->get();
-                $role->revokePermissionTo($permissionsToRemove);
-                $usersWithRole = $role->users()->get();
+                }
+                if (!empty($toRemove)) {
+                    $permissionsToRemove = Permission::whereIn('id', $toRemove)->get();
+                    $role->revokePermissionTo($permissionsToRemove);
+                    $usersWithRole = $role->users()->get();
                     // dd($usersWithRole);
                     if ($usersWithRole->isNotEmpty()) {
                         foreach ($usersWithRole as $user) {
@@ -105,23 +109,28 @@ class RolePermissionManagementEditModal extends Component
                             $user->revokePermissionTo($permissionsToRemove);
                         }
                     }
+                }
             }
-        
-            }
+            // ⭐ Force update timestamp to trigger audit trail
+            $role->updated_at = now();
+            $role->save();
+
             // clear permission cache so changes reflect immediately
             // app(PermissionRegistrar::class)->forgetCachedPermissions();
             // DB::commit();
             $this->close();
             $this->dispatch('refreshDatatable');
             $this->dispatch('toastr', [
-                        'type' => 'success',
-                        'message' => 'Permission successfully assignd to the Role']);
+                'type' => 'success',
+                'message' => 'Permission successfully assignd to the Role'
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             // log or send error message
             $this->dispatch('toastr', [
-                        'type' => 'error',
-                        'message' => 'Failed to Assign Permission']);
+                'type' => 'error',
+                'message' => 'Failed to Assign Permission'
+            ]);
             // $this->dispatch('notify', ['message' => 'Update failed: ' . $e->getMessage()]);
         }
     }

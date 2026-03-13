@@ -241,7 +241,7 @@ class DailyUserActivity extends Component
         $segments = array_filter(explode('/', trim($path, '/')));
 
         $last = end($segments);
-        if ($last && strlen($last) > 30 && preg_match('/^[A-Za-z0-9_\-]+$/', $last)) {
+        if ($last && strlen($last) > 100 && preg_match('/^[A-Za-z0-9_\-]+$/', $last)) {
             array_pop($segments);
             $last = end($segments);
         }
@@ -310,7 +310,7 @@ class DailyUserActivity extends Component
 
                     $lastSegment = end($segments);
 
-                    if ($lastSegment && strlen($lastSegment) > 30 && preg_match('/^[A-Za-z0-9_\-]+$/', $lastSegment)) {
+                    if ($lastSegment && strlen($lastSegment) > 100 && preg_match('/^[A-Za-z0-9_\-]+$/', $lastSegment)) {
                         array_pop($segments);
                         $lastSegment = end($segments);
                     }
