@@ -57,7 +57,7 @@
                     <span x-text="fields[selectedOption] ? fields[selectedOption].label + ': ' : ''"></span>
                     <span class="text-red-600">*</span>
                 </label>
-                <input type="text" x-model="inputValue" :maxlength="fields[selectedOption]?.max"
+                <input :type="fields[selectedOption]?.input_type || 'text'" x-model="inputValue" :maxlength="fields[selectedOption]?.max"
                     :placeholder="'Enter ' + (fields[selectedOption]?.label || '')"
                     :inputmode="fields[selectedOption]?.type === 'text' ? 'text' : 'numeric'"
                     x-on:input="filterInput($event.target.value)"
