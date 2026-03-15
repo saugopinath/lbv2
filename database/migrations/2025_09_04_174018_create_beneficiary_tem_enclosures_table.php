@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->timestamps();
             $table->unsignedInteger('application_id');
+            $table->bigInteger('beneficiary_id')->nullable();
             $table->integer('scheme_id');
             $table->text('attched_document');
             $table->string('ip_address');

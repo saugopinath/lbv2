@@ -58,6 +58,42 @@ class IncompletTypePage extends Component
             }
         }
 
+        // Preserve form values when redirected back after validation errors
+        // (e.g., when `back()->withInput()` is used in the controller)
+        $oldAadhaar = request()->old('aadhar_modification');
+        if (!is_null($oldAadhaar)) {
+            $this->formData['aadhar_modification'][$this->id] = $oldAadhaar;
+        }
+
+        $oldMobile = request()->old('dup_mobile');
+        if (is_array($oldMobile)) {
+            $oldMobile = $oldMobile[$this->id] ?? null;
+        }
+
+        if (!is_null($oldMobile)) {
+            $this->formData['dup_mobile'][$this->id] = $oldMobile;
+        }
+
+        $oldIfsc = request()->old('ifscode');
+        if (!is_null($oldIfsc)) {
+            $this->ifscode = $oldIfsc;
+        }
+
+        $oldBankAcc = request()->old('bank_account_number');
+        if (!is_null($oldBankAcc)) {
+            $this->bank_account_number = $oldBankAcc;
+        }
+
+        $oldConfirmAcc = request()->old('confirmbankaccountnumber');
+        if (!is_null($oldConfirmAcc)) {
+            $this->confirmbankaccountnumber = $oldConfirmAcc;
+        }
+
+        $oldBankAction = request()->old('bank_action');
+        if (!is_null($oldBankAction)) {
+            $this->bank_action = $oldBankAction;
+        }
+
         $this->classifyIssues();
     }
 

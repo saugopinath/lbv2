@@ -59,7 +59,9 @@ class IncompleteTypeController extends Controller
         try {
             // Collect input
             $aadharData = $request->aadhar_modification;
-            $mobileData = $request->dup_mobile;
+            // When the form sends mobile as an array (dup_mobile[<appId>]), extract the relevant value.
+            $rawMobileData = $request->dup_mobile;
+            $mobileData = is_array($rawMobileData) ? ($rawMobileData[$realId] ?? null) : $rawMobileData;
             $bankActionData = (int) $request->bank_action;
             $bankAccData = $request->bank_account_number;
             $confirmAccData = $request->confirmbankaccountnumber;
@@ -188,7 +190,7 @@ class IncompleteTypeController extends Controller
                     }
 
                 }
-            }          
+            }
             // ✅ Step 5: Begin DB transaction safely
             DB::beginTransaction();
 
@@ -297,11 +299,12 @@ class IncompleteTypeController extends Controller
             //  Step 1: Get related data
             // ---------------------------------------------------------
             $aadharData = $request->aadhar_modification;
-            $mobileData = $request->dup_mobile;
+            $rawMobileData = $request->dup_mobile;
+            $mobileData = is_array($rawMobileData) ? ($rawMobileData[$realId] ?? null) : $rawMobileData;
             $bankActionData = (int) $request->bank_action;
             $bankAccData = $request->bank_account_number;
             $confirmAccData = $request->confirmbankaccountnumber;
-            $ifscodeData = $request->ifscode;          
+            $ifscodeData = $request->ifscode;
 
             // Get all issues
             $allIssues = ApplicantIncompletDeatil::where('application_id', $realId)->where('scheme_id', $schemeId)->get();
@@ -525,9 +528,10 @@ class IncompleteTypeController extends Controller
         $realId = Crypt::decrypt($id);
 
         $aadharData = $request->aadhar_modification;
-        $mobileData = $request->dup_mobile;
+        $rawMobileData = $request->dup_mobile;
+        $mobileData = is_array($rawMobileData) ? ($rawMobileData[$realId] ?? null) : $rawMobileData;
         $confirmAccData = $request->confirmbankaccountnumber;
-        // dd( $mobileData );      
+        // dd( $mobileData );
         $allIssues = ApplicantIncompletDeatil::where('application_id', $realId)->where('scheme_id', $schemeId)->get();
 
         if ($allIssues->isEmpty()) {
@@ -544,7 +548,7 @@ class IncompleteTypeController extends Controller
                 if ($result !== true) {
                     return $result; // Return error message
                 }
-            } elseif (in_array($typeCode, ['142', '1410']) && $mobileData) {               
+            } elseif (in_array($typeCode, ['142', '1410']) && $mobileData) {
                 // $result = ChechDupHelper::checkDuplicate('mobile', $mobileData, $schemeId,$item->personaldetails);
                 $result = ChechDupHelper::checkDuplicate('mobile', $mobileData, $item->incomplet_type, $schemeId);
                 if ($result !== true) {
