@@ -11,8 +11,10 @@
         "guzzlehttp/guzzle": "^7.10",
         "jenssegers/agent": "^2.6",
         "laravel/framework": "^11.0",
+        "laravel/scout": "^11.0",
         "laravel/tinker": "^2.9",
         "maatwebsite/excel": "^3.1",
+        "meilisearch/meilisearch-php": "^1.16",
         "mews/captcha": "3.3.3",
         "orangehill/iseed": "^3.1",
         "owen-it/laravel-auditing": "^14.0",
@@ -77,7 +79,7 @@
             "php-http/discovery": true
         },
         "audit": {
-            "ignore": ["PKSA-rkkf-636k-qjb3"]
+            "ignore": ["PKSA-rkkf-636k-qjb3", "PKSA-2cx9-ynrq-qdk3"]
         }
     },
     "minimum-stability": "stable",

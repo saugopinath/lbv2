@@ -1,11 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Home;
 
+use App\Http\Controllers\Controller;
 use App\Models\BenDocs;
 use App\Models\Beneficiary;
 use App\Models\BeneficiaryJBLB;
+use App\Models\BeneficiaryPersonalDetail;
 use App\Models\BenEntry;
+use App\Models\Block;
 use App\Models\District;
 use App\Models\GP;
 use App\Models\Scheme;
@@ -13,6 +16,9 @@ use App\Models\Taluka;
 use App\Models\UrbanBody;
 use App\Models\Ward;
 use App\Models\DocumentType;
+use App\Models\Municipality;
+use App\Models\Panchayat;
+use App\Models\Subdivision;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -27,30 +33,25 @@ class BeneficiaryTrackController extends Controller
         $districts = District::all();
 
         // Count total accessible records via Scout
-        $results = Beneficiary::search('*')->get()->count();
+        $results = BeneficiaryPersonalDetail::search('*')->get()->count();
 
         // Fetch Location Data for Scripts
-        $blocks = DB::table('m_block')
-            ->select('block_code as id', 'block_name as text', 'district_code')
+        $blocks = Block::select('id  as id', 'name as name', 'district_id')
             ->get();
 
-        $subDistricts = DB::table('m_sub_district')
-            ->select('sub_district_code as id', 'sub_district_name as text', 'district_code')
+        $subDistricts = Subdivision::select('id as id', 'name as name', 'district_id')
             ->get();
 
-        $ulbs = DB::table('m_urban_body')
-            ->select('urban_body_code as id', 'urban_body_name as text', 'district_code', 'sub_district_code')
+        $ulbs = Municipality::select('id as id', 'name as name', 'subdivision_id')
             ->get();
 
-        $gps = DB::table('m_gp')
-            ->select('gram_panchyat_code as id', 'gram_panchyat_name as text', 'district_code', 'block_code')
+        $gps = Panchayat::select('id as id', 'name as name', 'block_id')
             ->get();
 
-        $ulb_wards = DB::table('m_urban_body_ward')
-            ->select('urban_body_ward_code as id', 'urban_body_ward_name as text', 'urban_body_code')
+        $ulb_wards = Ward::select('id as id', 'name as name', 'municipality_id')
             ->get();
 
-        return view('track-ben.ben-track', compact(
+        return view('frontend.track-ben.ben-track', compact(
             'schemes',
             'districts',
             'results',
@@ -75,7 +76,7 @@ class BeneficiaryTrackController extends Controller
                 $search = $request->search;
 
                 // 🔥 Meilisearch query
-                $scout = BeneficiaryJBLB::search($search ?: '');
+                $scout = BeneficiaryPersonalDetail::search($search ?: '');
 
                 // ✅ Filters (must match filterableAttributes exactly)
 
@@ -109,21 +110,20 @@ class BeneficiaryTrackController extends Controller
                     ->paginate($limit, 'page', $page);
 
                 $total = $beneficiaries->total();
-                // dd($total);
                 $html = '';
 
                 foreach ($beneficiaries as $b) {
 
                     // 🔥 No more DB queries if you include names in index
                     $districtName = $b->district_name ?? 'Unknown';
-                    $schemeName = $b->scheme_name ?? 'Unknown';
+                    $schemeName = Scheme::where('id', $b->scheme_id)->first()->name ?? 'Unknown';
 
                     $status = $b->next_level_role_id == 0 ? 'Approved' : 'Approval Pending';
                     $statusClass = $b->next_level_role_id == 0
                         ? 'status-active'
                         : 'status-pending';
 
-                    $html .= view('track-ben.beneficiary-card', [
+                    $html .= view('frontend.track-ben.beneficiary-card', [
                         'status' => $status,
                         'statusClass' => $statusClass,
                         'beneficiaryId' => $b->application_id,
@@ -139,11 +139,10 @@ class BeneficiaryTrackController extends Controller
                 return response()->json([
                     'html' => $html,
                     'total' => $total,
-                    'loaded' => $offset + $beneficiaries->count()
+                    'loaded' => $offset + count($beneficiaries->items())
                 ]);
             }
-
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
 
             return response()->json([
                 'html' => '',
@@ -153,5 +152,4 @@ class BeneficiaryTrackController extends Controller
             ]);
         }
     }
-
 }
