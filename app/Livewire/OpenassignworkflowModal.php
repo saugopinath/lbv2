@@ -5,6 +5,7 @@ use App\Models\WorkflowStep;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\Attributes\On;
+use App\Attributes\Loggable;
 class OpenassignworkflowModal extends Component
 {
     public bool $isOpen = false;
@@ -35,6 +36,7 @@ class OpenassignworkflowModal extends Component
         $this->isOpen = false;
         $this->reset(['selectedRoles', 'workflowStep']);
     }
+    #[Loggable(level: 'C', nickname: 'Assign Workflow')]
     public function save()
     {
         $this->validate([

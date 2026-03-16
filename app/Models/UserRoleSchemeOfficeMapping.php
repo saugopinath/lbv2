@@ -2,13 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Log;
-use OwenIt\Auditing\Contracts\Auditable;
-class UserRoleSchemeOfficeMapping extends Model implements Auditable
+
+class UserRoleSchemeOfficeMapping extends BaseAuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
     protected $fillable = [
             'user_id',
             'office_id',

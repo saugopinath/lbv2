@@ -50,7 +50,7 @@ class PageVisitlog
                         ? json_decode($component['snapshot'], true)
                         : ($component['snapshot'] ?? []);
                     $componentName = $snapshot['memo']['name'] ?? 'unknown';
-                    $componentClass = 'App\\Livewire\\' . \Illuminate\Support\Str::studly($componentName);
+                    $componentClass = 'App\\Livewire\\' . implode('\\', array_map(fn($part) => \Illuminate\Support\Str::studly($part), explode('.', $componentName)));
                     $state = $snapshot['data'] ?? [];
 
                     $cleanState = [];
@@ -234,7 +234,6 @@ class PageVisitlog
 
         $response = $next($request);
 
-        // ⭐ Post-update Page Visit Log with Payload and Status
         if ($pageVisitLog) {
             try {
                 $requestPayload = [
@@ -265,12 +264,10 @@ class PageVisitlog
     private function getLoggingMetadata($class, $method = null)
     {
         $metadata = [
-            'level' => 'Normal',
+            'level' => 'N',
             'nickname' => null,
         ];
-
         if (!$class) return $metadata;
-
         try {
             $reflectionClass = new \ReflectionClass($class);
 

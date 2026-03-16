@@ -9,7 +9,7 @@
 
                 {{-- Body (scrollable) --}}
                 <div class="flex-1 overflow-y-auto px-6 py-4">
-                    <form wire:submit.prevent="save" class="flex flex-col h-full">
+                    <form wire:submit.prevent="updateUserPermission" class="flex flex-col h-full">
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                             @foreach($permissions as $id => $name)
                                 <label class="flex items-center space-x-2">

@@ -3,8 +3,10 @@
 namespace App\Livewire\UserPermission;
 
 use App\Models\User;
-use Spatie\Permission\Models\Permission;
+use App\Models\Permission;
 use Livewire\Component;
+use App\Attributes\Loggable;
+
 class BulkUserPermissionModal extends Component
 {
     public $isOpen = false;
@@ -20,24 +22,24 @@ class BulkUserPermissionModal extends Component
         $this->permissions = Permission::pluck('name', 'id')->toArray();
     }
 
-   public function open($users)
-{
-    $this->reset(['selectedPermissions', 'selectedUserIds']);
-    $this->selectedUserIds = $users;
-    $this->isOpen = true;
-}
+    public function open($users)
+    {
+        $this->reset(['selectedPermissions', 'selectedUserIds']);
+        $this->selectedUserIds = $users;
+        $this->isOpen = true;
+    }
 
 
     public function close()
     {
         $this->reset(['selectedPermissions', 'selectedUserIds']);
         $this->isOpen = false;
-        $this->dispatch('assign-success'); 
+        $this->dispatch('assign-success');
     }
-
+    #[Loggable(level: 'C', nickname: 'Assign Bulk Permission ')]
     public function save()
     {
-         if (empty($this->selectedUserIds)) {
+        if (empty($this->selectedUserIds)) {
             $this->addError('selectedUserIds', 'Please select at least one user.');
             return;
         }
@@ -59,24 +61,35 @@ class BulkUserPermissionModal extends Component
         //     $this->duplicateMessages = $duplicateMessages;
         //     return;
         // }
-         $permissions = Permission::whereIn('id', $this->selectedPermissions)->get();
+        $permissions = Permission::whereIn('id', $this->selectedPermissions)->get();
         foreach ($users as $user) {
-            
+            // ⭐ Capture old permissions for the Audit Log
+            $user->audit_old_permissions = $user->permissions->pluck('name')->toArray();
+
             $user->givePermissionTo($permissions);
-        } 
+
+            // ⭐ Force update and save to trigger audit trail
+            $user->updated_at = now();
+            $user->save();
+        }
         $this->close();
         $this->dispatch('toastr', [
-                        'type' => 'success',
-                        'message' => 'Permissions Assigned successfully!']);
+            'type' => 'success',
+            'message' => 'Permissions Assigned successfully!'
+        ]);
     }
+    #[Loggable(level: 'C', nickname: 'Remove Bulk Permission')]
     public function remove()
     {
-         if (empty($this->selectedUserIds)) {
+        if (empty($this->selectedUserIds)) {
             $this->addError('selectedUserIds', 'Please select at least one user.');
             return;
         }
         $users = User::whereIn('id', $this->selectedUserIds)->get();
         foreach ($users as $user) {
+            // ⭐ Capture old permissions for the Audit Log
+            $user->audit_old_permissions = $user->permissions->pluck('name')->toArray();
+
             foreach ($this->selectedPermissions as $permissionId) {
                 $permission = Permission::find($permissionId);
 
@@ -84,12 +97,17 @@ class BulkUserPermissionModal extends Component
                     $user->revokePermissionTo($permission->name);
                 }
             }
-        } 
-       
+
+            // ⭐ Force update and save to trigger audit trail
+            $user->updated_at = now();
+            $user->save();
+        }
+
         $this->close();
-       $this->dispatch('toastr', [
-                        'type' => 'success',
-                        'message' => 'Permissions Removed successfully!']);
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'Permissions Removed successfully!'
+        ]);
     }
     public function render()
     {

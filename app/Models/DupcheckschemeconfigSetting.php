@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class DupcheckschemeconfigSetting extends Model
+class DupcheckschemeconfigSetting extends BaseAuditableModel
 {
     protected $guarded = ['id'];
     protected $casts = [
         'scheme_lists' => 'array',
-    ];
+    ];    
 }

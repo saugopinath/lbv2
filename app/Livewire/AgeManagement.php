@@ -6,6 +6,8 @@ use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use App\Models\AgeManagements;
+use App\Attributes\Loggable;
+
 class AgeManagement extends Component
 {
     public $schemeId;
@@ -79,7 +81,7 @@ class AgeManagement extends Component
         unset($this->selectedSpecialCases[$index]);
         $this->selectedSpecialCases = array_values($this->selectedSpecialCases);
     }
-
+    #[Loggable(level: 'C', nickname: 'Age Management')]
     public function save()
     {
         $rules = [
@@ -112,14 +114,18 @@ class AgeManagement extends Component
                     ];
                 }
             }
-            AgeManagements::where('scheme_id', $this->schemeId)->delete();
-            AgeManagements::create([
-                'scheme_id'    => $this->schemeId,
-                'min_age'      => ($this->minage !== '' && $this->minage !== null) ? (int)$this->minage : null,
-                'max_age'      => ($this->maxage !== '' && $this->maxage !== null) ? (int)$this->maxage : null,
-                'is_special'   => $this->isspecial === 'yes',
-                'special_case' => $jsonContent ? json_encode($jsonContent) : null,
-            ]);
+            $old = AgeManagements::where('scheme_id', $this->schemeId)->first();
+            if ($old) {
+                $old->delete();
+            }
+            $age = new AgeManagements();
+            $age->scheme_id = $this->schemeId;
+            $age->min_age = $this->minage ?: null;
+            $age->max_age = $this->maxage ?: null;
+            $age->is_special = $this->isspecial === 'yes';
+            $age->special_case = $jsonContent ? json_encode($jsonContent) : null;
+
+            $age->save();
             DB::commit();
             $this->dispatch('toastr', ['type' => 'success', 'message' => 'Saved Successfully!']);
         } catch (Exception $e) {

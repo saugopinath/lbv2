@@ -134,7 +134,7 @@
                         }"
                             class="flex flex-col items-center gap-2 w-full">
                             <!-- Grid container for badges - Fixed width and better grid -->
-                            <div class="grid grid-cols-2 gap-3 mx-auto">
+                            <div class="grid grid-cols-3 gap-3 mx-auto">
                                 @foreach($pages as $index => $page)
                                 <div class="flex items-center gap-2 lg:gap-3 px-1.5 lg:px-3 py-1 bg-gradient-to-r from-cyan-400/10 to-emerald-400/10 
                                         text-cyan-700 dark:text-cyan-300 text-[8px] lg:text-[10px] font-black uppercase 
@@ -143,7 +143,7 @@
                                         transition-all duration-300 cursor-pointer hover:from-cyan-400/20 hover:to-emerald-400/20 hover:scale-105
                                         min-w-0 w-full"
                                     :class="{ 
-                                        'hidden': !showAll && {{ $index }} >= 3,
+                                        'hidden': !showAll && {{ $loop->index }} >= 3,
                                         'col-span-1': true
                                     }">
 
@@ -419,11 +419,16 @@
                                         {{ $actionLog->log_nickname }}
                                     </span>
                                     @endif
-                                    <span @class([ 'px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded border' , 'bg-red-50 text-red-600 border-red-100'=> $actionLog->log_level === 'Critical',
-                                        'bg-orange-50 text-orange-600 border-orange-100' => $actionLog->log_level === 'Moderate',
-                                        'bg-blue-50 text-blue-600 border-blue-100' => $actionLog->log_level === 'Normal' || !$actionLog->log_level,
+                                    @php
+                                    $level = $actionLog->log_level ?? 'N';
+                                    @endphp
+
+                                    <span @class([ 'px-2 py-1 text-[10px] font-black uppercase tracking-wider rounded-md border' , 'bg-red-50 text-red-600 border-red-100'=> $level === 'C',
+                                        'bg-orange-50 text-orange-600 border-orange-100' => $level === 'M',
+
+                                        'bg-blue-50 text-blue-600 border-blue-100' => $level === 'N',
                                         ])>
-                                        {{ $actionLog->log_level ?: 'Normal' }}
+                                        {{ $level === 'C' ? 'Critical' : ($level === 'M' ? 'Moderate' : 'Normal') }}
                                     </span>
                                 </div>
 
@@ -730,7 +735,7 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
-            class="bg-white dark:bg-gray-800 w-full max-w-5xl rounded-2xl shadow-2xl max-h-[85vh] overflow-hidden border border-gray-100 dark:border-gray-700">
+            class="bg-white dark:bg-gray-800 w-full max-w-5xl rounded-2xl shadow-2xl max-h-[85vh] overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col">
 
             <!-- Header with icon and gradient -->
             <div class="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-indigo-50/50 to-transparent dark:from-indigo-900/10">
@@ -758,8 +763,8 @@
                 </button>
             </div>
 
-            <!-- Body with improved scrolling - using Tailwind only -->
-            <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(85vh-80px)] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
+            <!-- Body with improved scrolling - Fixed height calculation -->
+            <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(85vh-160px)] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 flex-1">
 
                 @forelse($pageRequests as $index => $log)
 
@@ -776,11 +781,18 @@
                                 {{ $log['log_nickname'] }}
                             </span>
                             @endif
-                            <span @class([ 'px-2 py-1 text-[10px] font-black uppercase tracking-wider rounded-md border' , 'bg-red-50 text-red-600 border-red-100'=> $log['log_level'] === 'Critical',
-                                'bg-orange-50 text-orange-600 border-orange-100' => $log['log_level'] === 'Moderate',
-                                'bg-blue-50 text-blue-600 border-blue-100' => $log['log_level'] === 'Normal' || !$log['log_level'],
+                            @php
+                            $level = $log['log_level'] ?? 'N';
+                            @endphp
+
+                            <span @class([ 'px-2 py-1 text-[10px] font-black uppercase tracking-wider rounded-md border' , 'bg-red-50 text-red-600 border-red-100'=> $level === 'C',
+                                'bg-orange-50 text-orange-600 border-orange-100' => $level === 'M',
+
+                                'bg-blue-50 text-blue-600 border-blue-100' => $level === 'N',
                                 ])>
-                                {{ $log['log_level'] ?: 'Normal' }}
+
+                                {{ $level === 'C' ? 'Critical' : ($level === 'M' ? 'Moderate' : 'Normal') }}
+
                             </span>
                             <span class="text-xs font-mono font-medium text-gray-500 dark:text-gray-400">
                                 {{ \Carbon\Carbon::parse($log['visit_time'])->format('H:i:s') }}
