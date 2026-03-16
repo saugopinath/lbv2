@@ -10,7 +10,7 @@ use App\Models\Block;
 use App\Models\Codemaster;
 use App\Models\OfficeMaster;
 use Illuminate\Support\Facades\DB;
-
+use App\Attributes\Loggable;
 class Create extends Component
 {
     public $name, $address, $zip;
@@ -72,7 +72,7 @@ class Create extends Component
             $this->blocks = Block::where('district_id', $districtId)->get();
         }
     }
-
+    #[Loggable(level: 'C', nickname: 'Create OfficeMaster')]
     public function submit()
     {
         $rules = [

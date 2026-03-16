@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('user_page_visit_logs', function (Blueprint $table) {
-            $table->string('log_level')->default('Normal')->after('status_code');
+            $table->string('log_level')->default('N')->after('status_code');
             $table->string('log_nickname')->nullable()->after('log_level');
         });
 
         Schema::table('livewire_action_logs', function (Blueprint $table) {
-            $table->string('log_level')->default('Normal')->after('method_name');
+            $table->string('log_level')->default('N')->after('method_name');
             $table->string('log_nickname')->nullable()->after('log_level');
         });
     }

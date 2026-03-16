@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Role;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
+use App\Attributes\Loggable;
 
 class RolerankManagement extends Component
 {
@@ -67,7 +68,7 @@ class RolerankManagement extends Component
 
         $this->roles = $newOrder;
     }
-
+    #[Loggable(level: 'C', nickname: 'Update Role Rank')]
     public function saveMapping()
     {
         DB::transaction(function () {
@@ -83,9 +84,11 @@ class RolerankManagement extends Component
                     }
                 }
 
-                Role::where('id', $roleData['id'])
-                    ->update(['rank' => $currentRank]);
-
+                // Role::where('id', $roleData['id'])
+                //     ->update(['rank' => $currentRank]);
+                $role = Role::find($roleData['id']);
+                $role->rank = $currentRank;
+                $role->save();
                 $isFirst = false;
             }
         });

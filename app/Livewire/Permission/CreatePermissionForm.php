@@ -5,6 +5,7 @@ namespace App\Livewire\Permission;
 use App\Models\Permission;
 use App\Models\ValidationScoreMapping;
 use Livewire\Component;
+use App\Attributes\Loggable;
 
 class CreatePermissionForm extends Component
 {
@@ -15,8 +16,6 @@ class CreatePermissionForm extends Component
     public $has_score = null;
     public $min_score;
     public $max_score;
-
-
 
     public function rules()
     {
@@ -39,7 +38,7 @@ class CreatePermissionForm extends Component
 
         return $rules;
     }
-    public function massages()
+    public function messages()
     {
         return [
             'name.required' => 'The permission name is required.',
@@ -55,6 +54,7 @@ class CreatePermissionForm extends Component
             'max_score.gte' => 'Maximum score must be greater than or equal to minimum score.',
         ];
     }
+    #[Loggable(level: 'C', nickname: 'Create Permission')]
     public function save()
     {
         $this->dispatch('showLoader');
@@ -95,10 +95,12 @@ class CreatePermissionForm extends Component
         $this->dispatch('hideLoader');
         // $this->dispatch('notify', 'Permission created successfully!', 'success');
         $this->dispatch('toastr', [
-                        'type' => 'success',
-                        'message' => 'Permission created successfully!']);
+            'type' => 'success',
+            'message' => 'Permission created successfully!'
+        ]);
         $this->dispatch('refreshDatatable');
     }
+    #[Loggable(level: 'N', nickname: 'Cancel Create Permission')]
     public function cancel()
     {
         $this->reset(['name', 'is_parent', 'parent_id', 'has_score', 'min_score', 'max_score']);

@@ -13,6 +13,7 @@ use Livewire\Attributes\On;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
+use App\Attributes\Loggable;
 
 class UserPermissionDetailsTable extends DataTableComponent
 {
@@ -160,6 +161,7 @@ class UserPermissionDetailsTable extends DataTableComponent
                 ->html(),
         ];
     }
+    #[Loggable(level: 'M', nickname: 'Open Assign Bulk Permission Modal')]
     public function assign_bulk_permissions()
     {
         // dd($this->getSelected());

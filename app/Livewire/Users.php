@@ -16,7 +16,7 @@ class Users extends DataTableComponent
     public ?int $perPage = 5;
     public string $search = '';
     protected $listeners = ['userFilter' => 'userFilter'];
-    public $role, $selectedMappingLevel, $selectedState, $selectedDistrict, $office;
+    public $role, $selectedMappingLevel, $selectedState, $selectedDistrict, $office, $scheme;
 
     public function configure(): void
     {
@@ -83,19 +83,20 @@ class Users extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make("Id", "id")               
+            Column::make("Id", "id")
                 ->searchable(),
-            Column::make("Name", "name")              
+            Column::make("Name", "name")
                 ->searchable(),
-            Column::make("Mobile No", "mobile_no")                
+            Column::make("Mobile No", "mobile_no")
                 ->searchable(),
-            Column::make("Email", "email")               
+            Column::make("Email", "email")
                 ->searchable(),
             Column::make("Scheme Name", "id")
                 ->format(function ($value, $row, Column $column) {
                     $schemes = $row->RoleSchemeOfficeMappings->pluck('scheme.name')->unique()->implode(', ');
                     return $schemes ?: 'N/A';
-                }),
+                }),            
+
             Column::make('Actions')
                 ->label(fn($row) => view('coulmn_button.ConfirmDeleteButton', [
                     'itemId' => $row->id,
@@ -133,11 +134,10 @@ class Users extends DataTableComponent
                 }
             })
             ->with(['mappedRoles', 'mappedPermissions', 'RoleSchemeOfficeMappings.scheme'])
-            ->orderBy('id', 'asc');
-
+            ->orderBy('id', 'asc');           
         return $query;
     }
-
+   
     public function delete($id)
     {
         DB::transaction(function () use ($id) {
@@ -147,5 +147,5 @@ class Users extends DataTableComponent
         });
 
         $this->dispatch('notify', message: 'User deleted successfully!', type: 'success');
-    }   
+    }
 }

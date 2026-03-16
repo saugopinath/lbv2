@@ -19,7 +19,7 @@ use App\Models\RoleOfficeTypeMapping;
 use Illuminate\Support\Facades\Config;
 use App\Models\UserRoleSchemeOfficeMapping;
 use Illuminate\Support\Facades\DB;
-
+use App\Attributes\Loggable;
 class Create extends Component
 {
     public $name, $email, $password, $mobile;
@@ -98,7 +98,7 @@ class Create extends Component
                 ->get();
         }
     }
-
+  #[Loggable(level: 'C', nickname: 'Create User')]
     public function submit()
     {
         $rules = $this->rules;
@@ -138,7 +138,6 @@ class Create extends Component
             if ($role) {
                 $user->assignRole($role);
                 $permissions = $role->permissions;
-                // dd($permissions);
                 if ($permissions->isNotEmpty()) {
                     $user->givePermissionTo($permissions);
                 }

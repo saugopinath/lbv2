@@ -7,6 +7,7 @@ use App\Models\Scheme;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use App\Attributes\Loggable;
 
 class DupCheckSchemeConfigSettings extends Component
 {
@@ -49,23 +50,22 @@ class DupCheckSchemeConfigSettings extends Component
         }
     }
 
+    #[Loggable(level: 'C', nickname: 'Dup Check Scheme Config Settings')]
     public function save()
     {
-        
-
         DB::beginTransaction();
         try {
             DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)->delete();
 
             foreach ($this->config as $optionName => $data) {
                 if ($data['selected']) {
-                    DupcheckschemeconfigSetting::create([
-                        'scheme_id'    => $this->schemeId,
-                        'check_with'   => $optionName,
-                        'is_same'     => $data['issame'] === 'yes' ? true : false,
-                        'is_cross'     => $data['iscross'] === 'yes' ? true : false,
-                        'scheme_lists' => ($data['iscross'] === 'yes') ? $data['schemes'] : null,
-                    ]);
+                    $setting = new DupcheckschemeconfigSetting();
+                    $setting->scheme_id = $this->schemeId;
+                    $setting->check_with = $optionName;
+                    $setting->is_same = $data['issame'] === 'yes' ? true : false;
+                    $setting->is_cross = $data['iscross'] === 'yes' ? true : false;
+                    $setting->scheme_lists = ($data['iscross'] === 'yes') ? $data['schemes'] : null;
+                    $setting->save();
                 }
             }
 

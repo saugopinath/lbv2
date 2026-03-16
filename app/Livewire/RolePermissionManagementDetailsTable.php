@@ -9,6 +9,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
+use App\Attributes\Loggable;
 
 class RolePermissionManagementDetailsTable extends DataTableComponent
 {
@@ -120,22 +121,23 @@ class RolePermissionManagementDetailsTable extends DataTableComponent
                     'title' => 'Delete Role',
                     'message' => "This is $row->name , are you want to delete this role?",
                     'tooltip' => 'Delete Role',
-                    
+
                 ])->render())
                 ->html(),
         ];
     }
 
+    #[Loggable(level: 'C', nickname: 'Delete Role')]
     public function delete($id)
     {
-
         $role = Role::find($id);
         // dd($role);
         if ($role) {
             $role->delete();
             $this->dispatch('toastr', [
-                        'type' => 'warning',
-                        'message' => 'Role Deleted successfully!']);
+                'type' => 'warning',
+                'message' => 'Role Deleted successfully!'
+            ]);
             $this->dispatch('refreshDatatable');
         }
     }
