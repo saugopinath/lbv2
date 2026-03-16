@@ -90,11 +90,10 @@ class BeneficiarySearch extends Component
     }
     public function search()
     {
-        $this->validate([
-            'selectedOption' => 'required'
-        ], [
-            'selectedOption.required' => 'Please select a search criteria.'
-        ]);
+        $rules = [];
+        $messages = [];
+        $rules['selectedOption'] = 'required';
+        $messages['selectedOption.required'] = 'Please select a search criteria.';
         if ($this->isShownScheme) {
             $rules['selectedScheme'] = 'required';
             $messages['selectedScheme.required'] = 'Please select a scheme.';
