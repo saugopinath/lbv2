@@ -84,10 +84,7 @@ class BeneficiarySearch extends Component
     {
         return $this->fields[$key]['rules'] ?? 'required';
     }
-    public function updatedSelectedOption()
-    {
-        $this->resetValidation();
-    }
+    
     public function search()
     {
         $rules = [];
@@ -98,21 +95,18 @@ class BeneficiarySearch extends Component
             $rules['selectedScheme'] = 'required';
             $messages['selectedScheme.required'] = 'Please select a scheme.';
         }
+        if ($this->selectedOption) {
+            $key = $this->selectedOption;
+            $fieldLabel = $this->fields[$key]['label'] ?? 'Value';
+            $rules['inputValue'] = $this->getValidationRules($key);
+            $messages['inputValue.required'] = "The $fieldLabel is required.";
+            $messages['inputValue.numeric']  = "The $fieldLabel must be numeric.";
+            $messages['inputValue.digits']   = "The $fieldLabel must be :digits digits.";
+            $messages['inputValue.regex']    = "The $fieldLabel should only contain characters (A-Z, a-z).";
+        }
         $this->validate($rules, $messages);
-        $key = $this->selectedOption;
-        $fieldLabel = $this->fields[$key]['label'] ?? 'Value';
-
-        $this->validate([
-            'inputValue' => $this->getValidationRules($key),
-        ], [
-            'inputValue.required' => "The $fieldLabel is required.",
-            'inputValue.numeric'  => "The $fieldLabel must be numeric.",
-            'inputValue.digits'   => "The $fieldLabel must be :digits digits.",
-            'inputValue.regex'    => "The $fieldLabel should only contain characters (A-Z, a-z).",
-        ]);
-
         $payload = [
-            'searchKey'   => $key,
+            'searchKey'   => $this->selectedOption,
             'searchValue' => $this->inputValue,
             'isApproved'  => $this->isApproved,
             'schemeId'    => $this->selectedScheme,
