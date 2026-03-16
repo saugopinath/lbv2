@@ -9,6 +9,7 @@ use App\Helpers\WorkFlowPermissionHelper;
 use App\Models\AcceptRejectInfo;
 use App\Models\AgeManagements;
 use App\Models\BeneficiaryAadhaar;
+use App\Models\Codemaster;
 use App\Models\Ifsccodemaster;
 use App\Models\MasterTab;
 use App\Models\UniqueAppBenId;
@@ -696,7 +697,7 @@ class DynamicForm extends Component
                     $AcceptRejectInfo->user_id = Auth::id();
                     $AcceptRejectInfo->browser = request()->header('User-Agent');
                     $AcceptRejectInfo->model_name = null;
-                    $AcceptRejectInfo->op_type = 1;
+                    $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2106);
                     $AcceptRejectInfo->revert_reason_cause_id = null;
                     $AcceptRejectInfo->revert_reason_remarks = null;
                     $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $this->applicationId)

@@ -37,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(AuthenticationInterface::class, AuthenticationService::class);
-       
+
         $this->app->bind(SendSmsInterface::class, SendSmsService::class);
 
         $this->app->bind(UserInterface::class, UserService::class);
@@ -45,7 +45,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ElasticsearchInterface::class, ElasticsearchService::class);
 
         $this->app->bind(CmoAuthenticationInterface::class, CmoAuthenticationService::class);
-       
+
     }
 
     /**
@@ -53,6 +53,35 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-         User::observe(UserObserver::class);         
+        User::observe(UserObserver::class);
+
+        if (config('scout.driver') === 'meilisearch') {
+
+            $client = new \Meilisearch\Client(
+                config('scout.meilisearch.host'),
+                config('scout.meilisearch.key')
+            );
+
+            $index = $client->index('pension_beneficiary_personals');
+
+            // ✅ Sortable attributes (must exist in searchable array)
+            $index->updateSortableAttributes([
+                'application_id',
+                'scheme_id',
+                'district_id',
+                'created_at',
+                'updated_at',
+            ]);
+
+            // ✅ Filterable attributes (must exist in searchable array)
+            $index->updateFilterableAttributes([
+                'scheme_id',
+                'district_id',
+                'rural_urban',
+                'blockurban',
+                'gpward',
+                'next_level_role_id'
+            ]);
+        }
     }
 }
