@@ -117,7 +117,6 @@ class BeneficiarySearch extends Component
             'isApproved'  => $this->isApproved,
             'schemeId'    => $this->selectedScheme,
         ];
-        dd($payload);
         $this->dispatch('beneficiary-search', data: $payload);
     }
 
