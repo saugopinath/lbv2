@@ -95,18 +95,7 @@ class Users extends DataTableComponent
                 ->format(function ($value, $row, Column $column) {
                     $schemes = $row->RoleSchemeOfficeMappings->pluck('scheme.name')->unique()->implode(', ');
                     return $schemes ?: 'N/A';
-                }),
-            Column::make("Status", "is_active")
-                ->label(fn($row) => view('coulmn_button.confirmtoggle', [
-                    'itemId' => $row->id,
-                    'action' => 'toggleStatus',
-                    'state' => $row->is_active,
-                    'title' => 'Toggle User Status',
-                    'message' => "Change status for user: $row->name ?",
-                    'tooltipOn' => 'Deactivate User',
-                    'tooltipOff' => 'Activate User'
-                ])->render())
-                ->html(),
+                }),            
 
             Column::make('Actions')
                 ->label(fn($row) => view('coulmn_button.ConfirmDeleteButton', [
@@ -145,22 +134,10 @@ class Users extends DataTableComponent
                 }
             })
             ->with(['mappedRoles', 'mappedPermissions', 'RoleSchemeOfficeMappings.scheme'])
-            ->orderBy('id', 'asc');
+            ->orderBy('id', 'asc');           
         return $query;
     }
-    public function toggleStatus($id)
-    {
-        $user = User::find($id);
-
-        if (!$user) {
-            return;
-        }
-        $user->update([
-            'is_active' => $user->is_active ? 0 : 1
-        ]);
-        $this->dispatch('statusUpdated');
-        $this->dispatch('refreshDatatable');
-    }
+   
     public function delete($id)
     {
         DB::transaction(function () use ($id) {
