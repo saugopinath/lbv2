@@ -57,7 +57,7 @@ Route::get('/session-expired', function () {
     ]);
 })->name('session.expired');
 
-Route::get('/', fn() => view('welcome'));
+// Route::get('/', fn() => view('welcome'));
 Route::get('refresh-captcha', [App\Http\Controllers\CaptchaController::class, 'refreshCaptcha'])
     ->name('refresh-captcha');
 

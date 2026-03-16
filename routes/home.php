@@ -1,6 +1,8 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Home\{HomeController, MapController, BeneficiarySearchController, BeneficiaryTrackController, NotificationController, DashboardController, DemoController};
+use Illuminate\Support\Facades\DB;
 
 Route::get('welcome', function () {
     return view('welcome');
@@ -25,7 +27,7 @@ Route::get('/search', [BeneficiarySearchController::class, 'search']);
 
 
 Route::get('track-beneficiary', [BeneficiaryTrackController::class, 'trackBeneficiary'])->name('track-beneficiary');
-Route::get('/api/beneficiaries/search', [BeneficiaryTrackController::class, 'trackBeneficiary'])->name('beneficiaries.search');
+Route::get('/api/beneficiaries/search', [BeneficiaryTrackController::class, 'trackBeneficiaryData'])->name('beneficiaries.search');
 
 Route::get('notifications', [NotificationController::class, 'index'])->name('notifications');
 Route::post('/notifications/datatable', [NotificationController::class, 'datatable'])->name('notifications.datatable');
@@ -53,6 +55,3 @@ Route::post('/dashboard/refresh-scheme-status', function () {
 Route::get('ben-details/{id}', [BeneficiarySearchController::class, 'ben_details'])->name('ben-details');
 
 Route::get('jbDownload', [BeneficiarySearchController::class, 'viewEncloser'])->name('jbDownload');
-
-
-Route::get('demo', [DemoController::class, 'demo'])->name('demo');
