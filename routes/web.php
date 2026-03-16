@@ -46,7 +46,11 @@ use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
 use App\Livewire\CsvSplitter;
 
+
+
+require __DIR__ . '/home.php';
 // Guest Routes
+// Route::get('/', fn() => view('welcome'));
 Route::get('/session-expired', function () {
     return view('auth.session-expired', [
         'expired_at' => now()->format('h:i:s A')
