@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Models\BeneficiaryPersonalDetail;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use App\Models\Scheme;
+use Illuminate\Support\Facades\Crypt;
 
 class BeneficiarySearch extends Component
 {
@@ -12,7 +14,11 @@ class BeneficiarySearch extends Component
     public $inputValue = '';
     public $isApproved = false;
     public $displayType = 'select';
-
+    public $isFinal = false;
+    public $isAssigned = false;
+    public $schemes = [];
+    public $isShownScheme = true;
+    public $selectedScheme = null;
     public $fields = [
         'application_id' => [
             'label' => 'Application ID',
@@ -48,12 +54,30 @@ class BeneficiarySearch extends Component
         ],
     ];
 
-    public function mount($isApproved = false, $selectedOption = null, $inputValue = null, $displayType = 'select')
+    public function mount($isApproved = false, $selectedOption = null, $inputValue = null, $displayType = 'select', $isFinal = false, $isAssigned = false, $isShownScheme = true)
     {
         $this->isApproved = $isApproved;
         $this->selectedOption = $selectedOption;
         $this->inputValue = $inputValue ?? '';
         $this->displayType = $displayType;
+        $this->isShownScheme = $isShownScheme;
+        $scheme_id = null;
+        if ($isAssigned) {
+            $select_lgd = session('lgd_session');
+
+            if (!empty($select_lgd['scheme_id'])) {
+                $scheme_id = Crypt::decryptString($select_lgd['scheme_id']);
+            }
+        }
+        $query = Scheme::query()
+            ->where('is_active', 1)
+            ->when($scheme_id, fn($q) => $q->where('id', $scheme_id));
+        if ($isFinal) {
+            $query->whereHas('schemeFinalSubmitChecks', function ($q) {
+                $q->where('is_final_submitted', true);
+            });
+        }
+        $this->schemes = $query->get();
     }
 
     private function getValidationRules($key)
@@ -71,7 +95,11 @@ class BeneficiarySearch extends Component
         ], [
             'selectedOption.required' => 'Please select a search criteria.'
         ]);
-
+        if ($this->isShownScheme) {
+            $rules['selectedScheme'] = 'required';
+            $messages['selectedScheme.required'] = 'Please select a scheme.';
+        }
+        $this->validate($rules, $messages);
         $key = $this->selectedOption;
         $fieldLabel = $this->fields[$key]['label'] ?? 'Value';
 
@@ -88,7 +116,9 @@ class BeneficiarySearch extends Component
             'searchKey'   => $key,
             'searchValue' => $this->inputValue,
             'isApproved'  => $this->isApproved,
+            'schemeId'    => $this->selectedScheme,
         ];
+        dd($payload);
         $this->dispatch('beneficiary-search', data: $payload);
     }
 

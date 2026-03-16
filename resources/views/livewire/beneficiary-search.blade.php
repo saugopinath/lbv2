@@ -16,7 +16,19 @@
             }
         }
     }" x-init="$watch('selectedOption', () => resetInput())" class="bg-white p-4 rounded shadow border border-gray-200">
-
+        @if ($isShownScheme)
+            <div class="mb-4">
+                <x-form.select name="selectedScheme" label="selectedScheme" wire:model.live="selectedScheme"
+                    class="border rounded px-3 py-2 w-full" required>
+                    <option value="">-- Select --</option>
+                    @foreach ($schemes as $scheme)
+                        <option value="{{ $scheme->id }}">
+                            {{ $scheme->name }}
+                        </option>
+                    @endforeach
+                </x-form.select>
+            </div>
+        @endif
         <div class="mb-4">
             <label class="block font-bold text-sm text-gray-700 mb-3">
                 Please select search criteria:
@@ -57,7 +69,8 @@
                     <span x-text="fields[selectedOption] ? fields[selectedOption].label + ': ' : ''"></span>
                     <span class="text-red-600">*</span>
                 </label>
-                <input :type="fields[selectedOption]?.input_type || 'text'" x-model="inputValue" :maxlength="fields[selectedOption]?.max"
+                <input :type="fields[selectedOption]?.input_type || 'text'" x-model="inputValue"
+                    :maxlength="fields[selectedOption]?.max"
                     :placeholder="'Enter ' + (fields[selectedOption]?.label || '')"
                     :inputmode="fields[selectedOption]?.type === 'text' ? 'text' : 'numeric'"
                     x-on:input="filterInput($event.target.value)"
