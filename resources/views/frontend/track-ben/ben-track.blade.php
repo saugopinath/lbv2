@@ -204,7 +204,7 @@
                 <select id="scheme" class="mt-1 input">
                     <option value="">All Schemes</option>
                     @foreach($schemes as $scheme)
-                    <option value="{{ $scheme->id }}">{{ $scheme->scheme_name }}</option>
+                    <option value="{{ $scheme->id }}">{{ $scheme->name }}</option>
                     @endforeach
                 </select>
             </div>

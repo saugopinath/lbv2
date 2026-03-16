@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use Laravel\Scout\Searchable;
+
 class BeneficiaryEnclosure extends BaseAuditableModel
 {
+    use Searchable;
     protected $table = 'pension.beneficiary_documents';
     protected $primaryKey = 'application_id';
     public $incrementing = false;
@@ -25,6 +28,10 @@ class BeneficiaryEnclosure extends BaseAuditableModel
     public function codemaster()
     {
         return $this->belongsTo(Codemaster::class, 'document_type', 'id');
+    }
+    public function searchableAs()
+    {
+        return 'pension_beneficiary_documents';
     }
     public function toSearchableArray()
     {
