@@ -27,8 +27,9 @@ class CommonTabFieldsSeeder extends Seeder
                     'regex' => null,
                     'is_multiple' => false,
                     'is_active' => true,
-                    'field_position' => 1,                   
+                    'field_position' => 1,
                     'db_colunm' => 'application_type',
+                    'is_mendetory' => 1,
                 ],
                 [
                     'field_id' => 'application_date',
@@ -281,13 +282,13 @@ class CommonTabFieldsSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_mendetory' => 1,
                 ],
-              
+
                 [
                     'field_id' => 'district_id',
                     'field_name' => 'district_id',
                     'level_name' => 'District',
                     'field_type' => 'select',
-                    'field_class' => 'district_id',                   
+                    'field_class' => 'district_id',
                     'is_common' => true,
                     'tab_code' => 102,
                     'validation_rule' => 'required',
@@ -304,7 +305,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_name' => 'rural_urban',
                     'level_name' => 'Rural/Urbar',
                     'field_type' => 'select',
-                    'field_class' => 'rural_urban',                    
+                    'field_class' => 'rural_urban',
                     'is_common' => true,
                     'tab_code' => 102,
                     'validation_rule' => 'required',
@@ -322,7 +323,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_name' => 'blockurban',
                     'level_name' => 'Block/Municipality',
                     'field_type' => 'select',
-                    'field_class' => 'blockurban',                   
+                    'field_class' => 'blockurban',
                     'is_common' => true,
                     'tab_code' => 102,
                     'validation_rule' => 'required',
@@ -334,13 +335,13 @@ class CommonTabFieldsSeeder extends Seeder
                     'db_colunm' => 'blockurban',
                     'is_mendetory' => 1,
                 ],
-                
+
                 [
                     'field_id' => 'gpward',
                     'field_name' => 'gpward',
                     'level_name' => 'GP / Ward',
                     'field_type' => 'select',
-                    'field_class' => 'gpward',                    
+                    'field_class' => 'gpward',
                     'is_common' => true,
                     'tab_code' => 102,
                     'validation_rule' => 'required',
@@ -373,7 +374,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_mendetory' => 1,
                 ],
 
-               
+
                 [
                     'field_id' => 'policestation',
                     'field_name' => 'policestation',
@@ -390,7 +391,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'db_colunm' => 'policestation'
                 ],
 
-                
+
                 [
                     'field_id' => 'villtowncity',
                     'field_name' => 'villtowncity',
@@ -406,7 +407,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_active' => true,
                     'db_colunm' => 'villtowncity'
                 ],
-                
+
                 [
                     'field_id' => 'housepremiseno',
                     'field_name' => 'housepremiseno',
@@ -423,7 +424,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_active' => true,
                     'db_colunm' => 'housepremiseno'
                 ],
-                
+
                 [
                     'field_id' => 'postoffice',
                     'field_name' => 'postoffice',
@@ -441,7 +442,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'db_colunm' => 'postoffice'
                 ],
 
-               
+
                 [
                     'field_id' => 'pincode',
                     'field_name' => 'pincode',
@@ -463,7 +464,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_id' => 'ifscode',
                     'field_name' => 'ifscode',
                     'level_name' => 'IFSC Code',
-                    'field_type' => 'text',                    
+                    'field_type' => 'text',
                     'is_common' => true,
                     'tab_code' => 103,
                     'validation_rule' => 'required|size:11',
@@ -475,12 +476,12 @@ class CommonTabFieldsSeeder extends Seeder
                     'db_colunm' => 'ifscode',
                     'is_mendetory' => 1,
                 ],
-               
+
                 [
                     'field_id' => 'bankname',
                     'field_name' => 'bankname',
                     'level_name' => 'Bank Name',
-                    'field_type' => 'text',                    
+                    'field_type' => 'text',
                     'is_common' => true,
                     'tab_code' => 103,
                     'validation_rule' => 'required|string',
@@ -493,7 +494,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_mendetory' => 1,
                     'is_readonly' => 1,
                 ],
-                
+
                 [
                     'field_id' => 'bank_branch_name',
                     'field_name' => 'bank_branch_name',
@@ -511,12 +512,12 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_mendetory' => 1,
                     'is_readonly' => 1,
                 ],
-               
+
                 [
                     'field_id' => 'bankaccountnumber',
                     'field_name' => 'bankaccountnumber',
                     'level_name' => 'Bank Account Number',
-                    'field_type' => 'text',                    
+                    'field_type' => 'text',
                     'is_common' => true,
                     'tab_code' => 103,
                     'validation_rule' => 'required|numeric|min:9',
@@ -534,7 +535,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_name' => 'confirmbankaccountnumber',
                     'level_name' => 'Confirm Bank Account Number',
                     'field_type' => 'text',
-                                        'is_common' => true,
+                    'is_common' => true,
                     'tab_code' => 103,
                     'validation_rule' => 'required|same:formData.bankaccountnumber',
                     'regex' => '^[0-9]{9,18}$',

@@ -1,6 +1,6 @@
 <div class="w-full space-y-6">
     @if ($showSchemeDropdown && !$schemeData)
-        <livewire:scheme-dropdown-new :isFinal="true" :isAssigned="true" />
+        <livewire:scheme-dropdown-new :isFinal="true" />
     @endif
     @if ($schemeData)
         <div class="max-w-auto mx-auto bg-white rounded-xl shadow-sm p-6">
