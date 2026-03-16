@@ -61,6 +61,7 @@ class CreateworkflowSteps extends Component
     #[Loggable(level: 'C', nickname: 'Create Workflow Steps')]
     public function save()
     {
+        $this->validate();
         DB::beginTransaction();
         try {
             $parentId = null;
