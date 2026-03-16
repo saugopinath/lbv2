@@ -10,6 +10,7 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use App\Attributes\Loggable;
 
 class Users extends DataTableComponent
 {
@@ -95,7 +96,7 @@ class Users extends DataTableComponent
                 ->format(function ($value, $row, Column $column) {
                     $schemes = $row->RoleSchemeOfficeMappings->pluck('scheme.name')->unique()->implode(', ');
                     return $schemes ?: 'N/A';
-                }),            
+                }),
 
             Column::make('Actions')
                 ->label(fn($row) => view('coulmn_button.ConfirmDeleteButton', [
@@ -134,18 +135,23 @@ class Users extends DataTableComponent
                 }
             })
             ->with(['mappedRoles', 'mappedPermissions', 'RoleSchemeOfficeMappings.scheme'])
-            ->orderBy('id', 'asc');           
+            ->orderBy('id', 'asc');
         return $query;
     }
-   
+    #[Loggable(level: 'C', nickname: 'Delete User')]
     public function delete($id)
     {
-        DB::transaction(function () use ($id) {
+        $user = User::find($id);
+
+        if ($user) {
             UserRoleSchemeOfficeMapping::where('user_id', $id)->delete();
             UserPersonal::where('user_id', $id)->delete();
-            User::where('id', $id)->delete();
-        });
+            $user->delete();
+        }
 
-        $this->dispatch('notify', message: 'User deleted successfully!', type: 'success');
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'User deleted successfully!',
+        ]);
     }
 }

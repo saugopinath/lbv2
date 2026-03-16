@@ -59,8 +59,8 @@
                     <ul>
                         @if (\App\Helpers\WorkFlowPermissionHelper::canEntry())
                             <li>
-                                <a href="{{ route('schemes.final-submitted') }}"
-                                    class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white @if (request()->routeIs('schemes.final-submitted')) bg-slate-700 text-white @endif">
+                                <a href="{{ route('form') }}"
+                                    class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white @if (request()->routeIs('form')) bg-slate-700 text-white @endif">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path opacity="0.3"
@@ -76,7 +76,7 @@
                         @endif
                         @if (\App\Helpers\WorkFlowPermissionHelper::canViewLbApplications())
                             <li>
-                                <a href="{{ route('lb-application-list') }}"
+                                <a href="{{ route('application-lists') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white  bg-slate-700 text-white">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
@@ -223,7 +223,7 @@
                         @endif
                         @if (\App\Helpers\WorkFlowPermissionHelper::canDefineWorkflow())
                             <li>
-                                <a href="{{ route('define-workflow') }}"
+                                <a href="{{ route('define-workflow1') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
