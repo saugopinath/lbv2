@@ -1,3 +1,3 @@
 <x-layouts.app>
-    <livewire:form />
+    <livewire:form :hideSchemeDropdown="true" />
 </x-layouts.app>

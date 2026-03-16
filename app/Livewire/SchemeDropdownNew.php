@@ -24,6 +24,7 @@ class SchemeDropdownNew extends Component
             }
         }
         $query = Scheme::query()
+            ->where('is_active', 1)
             ->when($scheme_id, fn($q) => $q->where('id', $scheme_id));
         if ($isFinal) {
             $query->whereHas('schemeFinalSubmitChecks', function ($q) {
