@@ -12,8 +12,9 @@
     x-data="{
 showTooltip:false,
 showModal:false,
-isOn:@js((bool)$state)
+isOn: {{ $state ? 'true' : 'false' }}
 }"
+    wire:key="confirm-toggle-{{ $itemId }}-{{ $state ? '1' : '0' }}"
     class="relative inline-block">
 
     <button
@@ -25,7 +26,7 @@ isOn:@js((bool)$state)
         class="relative inline-flex items-center cursor-pointer">
 
         <span
-            :class="isOn ? 'bg-green-600':'bg-gray-300'"
+            :class="isOn ? 'bg-green-600':'bg-red-600'"
             class="w-11 h-6 flex items-center rounded-full p-1 transition">
 
             <span
@@ -35,6 +36,12 @@ isOn:@js((bool)$state)
 
         </span>
 
+        <span
+            x-text="isOn ? 'Active' : 'Inactive'"
+            :class="isOn ? 'text-green-600' : 'text-red-600'"
+            class="ml-2 text-sm font-medium transition-colors">
+        </span>
+
     </button>
 
     <div
@@ -42,8 +49,7 @@ isOn:@js((bool)$state)
         x-cloak
         class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded">
 
-        <span x-show="isOn">{{ $tooltipOn }}</span>
-        <span x-show="!isOn">{{ $tooltipOff }}</span>
+        <span x-text="isOn ? '{{ $tooltipOn }}' : '{{ $tooltipOff }}'"></span>
 
     </div>
 
@@ -65,12 +71,14 @@ isOn:@js((bool)$state)
             <div class="flex justify-end gap-2">
 
                 <button
+                    type="button"
                     @click="showModal=false"
                     class="px-4 py-2 bg-gray-200 rounded">
                     Cancel
                 </button>
 
                 <button
+                    type="button"
                     wire:click="{{ $action }}({{ $itemId }})"
                     @click="showModal=false; isOn=!isOn"
                     class="px-4 py-2 bg-green-600 text-white rounded">

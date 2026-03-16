@@ -96,7 +96,7 @@ class Users extends DataTableComponent
                     $schemes = $row->RoleSchemeOfficeMappings->pluck('scheme.name')->unique()->implode(', ');
                     return $schemes ?: 'N/A';
                 }),
-            Column::make("Status")
+            Column::make("Status", "is_active")
                 ->label(fn($row) => view('coulmn_button.confirmtoggle', [
                     'itemId' => $row->id,
                     'action' => 'toggleStatus',
@@ -155,11 +155,11 @@ class Users extends DataTableComponent
         if (!$user) {
             return;
         }
-
-        $user->is_active = $user->is_active ? 0 : 1;
-        $user->save();
-
+        $user->update([
+            'is_active' => $user->is_active ? 0 : 1
+        ]);
         $this->dispatch('statusUpdated');
+        $this->dispatch('refreshDatatable');
     }
     public function delete($id)
     {
