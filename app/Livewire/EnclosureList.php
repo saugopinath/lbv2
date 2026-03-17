@@ -227,7 +227,7 @@ class EnclosureList extends Component
     }
     protected function enclosureModel()
     {
-        return $this->enclosureSource === '5'
+        return (int)$this->enclosureSource === 5
             ? new BeneficiaryTemEnclosure
             : new BeneficiaryEnclosure;
     }
@@ -264,7 +264,7 @@ class EnclosureList extends Component
                 'created_by'         => Auth::id(),
                 'scheme_id'          => $this->scheme_id,
             ];
-            if ($this->enclosureSource != 5) {
+            if ((int)$this->enclosureSource !== 5) {
                 $updateData['tab_code'] = $this->tabCode;
             }
             $existingDoc->update($updateData);
@@ -280,7 +280,7 @@ class EnclosureList extends Component
                 'created_by'         => Auth::id(),
                 'scheme_id'          => $this->scheme_id,
             ];
-            if ($this->enclosureSource != 5) {
+            if ((int)$this->enclosureSource !== 5) {
                 $createData['tab_code'] = $this->tabCode;
             }
             $model::create($createData);
@@ -293,7 +293,7 @@ class EnclosureList extends Component
         $this->currentDocExtensions = '';
         $this->showUploadModal = false;
         if ($this->application_id) {
-            if ($this->enclosureSource === '5') {
+            if ($this->enclosureSource === 5) {
                 // dd( 'here');
                 $docs = BeneficiaryTemEnclosure::where('application_id', $this->application_id)
                     ->whereIn('document_type', $this->doc_type_id_array_list)

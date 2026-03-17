@@ -10,17 +10,17 @@
             currentFileName: '',
             currentFileMime: '',
             errorMessage:'',
-    
+
             handleFileChange(event) {
                 const file = event.target.files[0];
                 if (!file) {
                     this.resetFileData();
                     return;
                 }
-    
+
                 this.currentFileName = file.name;
                 this.currentFileMime = file.type || 'Unknown MIME type';
-    
+
                 if (this.currentFileMime.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = e => this.currentFilePreview = e.target.result;
@@ -29,7 +29,7 @@
                     this.currentFilePreview = null;
                 }
             },
-    
+
             openModal(docId, docName) {
                 this.currentDocName = docName || '';
                 this.resetFileData();
@@ -39,7 +39,7 @@
                 this.currentDocId = docId;
                 this.$wire.call('setCurrentDoc', docId);
                 this.showUploadModal = true;
-    
+
             },
 
             async uploadFile() {
@@ -49,9 +49,11 @@
                     }
 
                     this.errorMessage = ''; // reset error if file selected
+
                     try {
                         // Livewire Method Call
                         await this.$wire.saveSingleDocument();
+
                         // Reset data after upload success
                         this.resetFileData();
                         if (this.$refs.fileInput) this.$refs.fileInput.value = null;
@@ -61,6 +63,7 @@
                         this.errorMessage = 'Something went wrong while uploading.';
                     }
                 },
+
                 closeModal() {
                     this.showUploadModal = false;
                     this.errorMessage = '';
@@ -72,13 +75,14 @@
                     this.$wire.call('resetSingleDocumentErrors');
                     this.$wire.dispatch('$refresh');
                 },
+
                 resetFileData() {
                     this.currentFilePreview = null;
                     this.currentFileName = '';
                     this.currentFileMime = '';
                     this.errorMessage = '';
                 }
-    
+
     }" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         @foreach ($doc_lists as $doc)
         <div wire:key="doc_{{ $doc->doc_type_id }}">
@@ -88,5 +92,5 @@
         @endforeach
 
         <x-upload-modal :currentDocExtensions="$currentDocExtensions" :currentDocMaxSize="$currentDocMaxSize" :formPreview="$form_preview" />
-    </div>    
+    </div>
 </div>

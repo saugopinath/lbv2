@@ -16,7 +16,6 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
         'other_details' => 'array',
     ];
 
-
     public function contact()
     {
         return $this->hasOne(BeneficiaryContactDetail::class, 'application_id', 'application_id');
@@ -25,17 +24,26 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     {
         return $this->hasMany(BeneficiaryEnclosure::class, 'application_id');
     }
-
-    // public function transformAudit(array $data): array
-    // {
-    //     $data['new_values']['updated_by_role'] = Auth::user()->role_id;
-    //     $data['new_values']['session_id'] = session()->getId();
-    //     $data['new_values']['user_agent'] = \Illuminate\Support\Facades\Request::userAgent();
-    //     $data['new_values']['url'] = \Illuminate\Support\Facades\Request::fullUrl();
-    //     $data['new_values']['method'] = \Illuminate\Support\Facades\Request::method();
-    //     $data['new_values']['referrer'] = \Illuminate\Support\Facades\Request::header('referer');
-    //     return $data;
-    // }
+    public function aadhaar()
+    {
+        return $this->hasOne(BeneficiaryAadhaar::class, 'application_id');
+    }
+    public function banks()
+    {
+        return $this->hasOne(BeneficiaryBankDetail::class, 'application_id', 'application_id');
+    }
+    public function enclosers()
+    {
+        return $this->hasMany(BeneficiaryEnclosure::class, 'application_id', 'application_id');
+    }
+    public function failedPaymentDetails()
+    {
+        return $this->hasOne(FailedPaymentDetails::class, 'ben_id', 'beneficiary_id');
+    }
+     public function benPaymentDetails()
+    {
+        return $this->hasOne(BenPaymentDetails::class, 'ben_id', 'beneficiary_id');
+    }
 
     public function creator()
     {
@@ -48,7 +56,6 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
             return 2;
         }
     }
-
 
     public function toSearchableArray()
     {

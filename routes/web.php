@@ -138,6 +138,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('userDutymanagement.index');
 
 
+         // Incomplete Types
+    Route::get('/incomplete-types/{stage?}', [IncompleteTypeController::class, 'index'])
+        ->name('incomplete.types');
+
+    // Route::get('/incomplete-types/{stage?}', [SchemeController::class, 'finalSubmitted'])
+    //     ->name('incomplete.types');
+
+    Route::get('/incomplet-type/{id}/{stage}/{schemeId}', IncompletTypePage::class)
+        ->name('incomplet-type.view');
+
+    Route::post('/incomplete/update/{id}/{schemeId}', [IncompleteTypeController::class, 'fullUpdate'])
+        // ->middleware('permission.redirect:canUpdateIncomplet')
+        ->name('incomplete-full-deatils-update');
+
+    Route::post('/incomplete/revert/{id}/{schemeId}', [IncompleteTypeController::class, 'revertVerify'])
+        // ->middleware('permission.redirect:canRevertIncomplet')
+        ->name('incomplete-revert-update');
+    // Route::get('/incomplete-details-mis-report', [IncompleteTypeController::class, 'incompleteDetails'])
+    //     ->name('incomplete.details.mis.report');
+
+
     // Design Pages (Dev Only – Remove in Prod)
     Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
     Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');

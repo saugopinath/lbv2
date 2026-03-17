@@ -180,7 +180,65 @@
 
         @endif
 
+             {{-- Incomplete Menu --}}
+        @if (\App\Helpers\WorkFlowPermissionHelper::canIncomplete())
+            <div>
+                <button @click="activeMenu === 'Incomplete' ? activeMenu = null : activeMenu = 'Incomplete'"
+                    class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 text-slate-200 hover:text-white rounded">
+                    <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path opacity="0.3"
+                            d="M10.8939 22H13.1061C16.5526 22 18.2759 22 19.451 20.9882C20.626 19.9764 20.8697 18.2827 21.3572 14.8952L21.6359 12.9579C22.0154 10.3208 22.2051 9.00229 21.6646 7.87495C21.1242 6.7476 19.9738 6.06234 17.6731 4.69182L16.2882 3.86687C14.199 2.62229 13.1543 2 12 2C10.8457 2 9.80104 2.62229 7.71175 3.86687L6.32691 4.69181C4.02619 6.06234 2.87583 6.7476 2.33537 7.87495C1.79491 9.00229 1.98463 10.3208 2.36407 12.9579L2.64284 14.8952C3.13025 18.2827 3.37396 19.9764 4.54903 20.9882C5.72409 22 7.44737 22 10.8939 22Z"
+                            fill="currentColor" />
+                    </svg>
+                    <span x-show="sidebar" class="mr-2 truncate">Incomplete</span>
+                    <svg class="mr-2 w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="m1 1 4 4 4-4" />
+                    </svg>
+                </button>
 
+                <!-- Sub-menu -->
+                <div id="list_menu" x-show="activeMenu === 'Incomplete'" x-collapse x-transition class="pl-4">
+                    <ul>
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canVerifierIncomplet())
+                            <li>
+                                <a href="{{ route('incomplete.types', 'verifier') }}"
+                                    class="flex item-center px-2 py-1 text-left rounder hover:bg-slate-700 hover:text-white
+                                                                                                                                                                                                                                                        ">
+                                    <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path opacity="0.3"
+                                            d="M6.22209 4.60104C6.66665 4.30399 7.13344 4.04635 7.6171 3.82975C8.98898 3.21538 9.67491 2.90819 10.5875 3.4994C11.5 4.0906 11.5 5.0604 11.5 7V8.5C11.5 10.3856 11.5 11.3284 12.0858 11.9142C12.6716 12.5 13.6144 12.5 15.5 12.5H17C18.9396 12.5 19.9094 12.5 20.5006 13.4125C21.0918 14.3251 20.7846 15.011 20.1702 16.3829C19.9536 16.8666 19.696 17.3333 19.399 17.7779C18.3551 19.3402 16.8714 20.5578 15.1355 21.2769C13.3996 21.9959 11.4895 22.184 9.64665 21.8175C7.80383 21.4509 6.11109 20.5461 4.78249 19.2175C3.45389 17.8889 2.5491 16.1962 2.18254 14.3534C1.81598 12.5105 2.00412 10.6004 2.72315 8.8645C3.44218 7.12861 4.65982 5.64491 6.22209 4.60104Z"
+                                            fill="currentColor"></path>
+                                    </svg>
+                                    <span x-show="sidebar" class="truncate">Verifier Incomplete</span>
+                                </a>
+                            </li>
+
+                        @endif
+
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canApproverIncomplet())
+                            <li>
+                                <a href="{{ route('incomplete.types', 'approver') }}"
+                                    class="flex item-center px-2 py-1 text-left rounder hover:bg-slate-700 hover:text-white
+                                                                                                                                                                                                                                                        ">
+                                    <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path opacity="0.3"
+                                            d="M6.22209 4.60104C6.66665 4.30399 7.13344 4.04635 7.6171 3.82975C8.98898 3.21538 9.67491 2.90819 10.5875 3.4994C11.5 4.0906 11.5 5.0604 11.5 7V8.5C11.5 10.3856 11.5 11.3284 12.0858 11.9142C12.6716 12.5 13.6144 12.5 15.5 12.5H17C18.9396 12.5 19.9094 12.5 20.5006 13.4125C21.0918 14.3251 20.7846 15.011 20.1702 16.3829C19.9536 16.8666 19.696 17.3333 19.399 17.7779C18.3551 19.3402 16.8714 20.5578 15.1355 21.2769C13.3996 21.9959 11.4895 22.184 9.64665 21.8175C7.80383 21.4509 6.11109 20.5461 4.78249 19.2175C3.45389 17.8889 2.5491 16.1962 2.18254 14.3534C1.81598 12.5105 2.00412 10.6004 2.72315 8.8645C3.44218 7.12861 4.65982 5.64491 6.22209 4.60104Z"
+                                            fill="currentColor"></path>
+                                    </svg>
+                                    <span x-show="sidebar" class="truncate">Approver Incomplete</span>
+                                </a>
+                            </li>
+                        @endif
+                    </ul>
+                </div>
+            </div>
+
+        @endif
+        
         @if (\App\Helpers\WorkFlowPermissionHelper::canSchemeOnboard())
             <div>
                 <button @click="activeMenu === 'SchemeOnboard' ? activeMenu = null : activeMenu = 'SchemeOnboard'"
