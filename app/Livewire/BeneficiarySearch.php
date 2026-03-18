@@ -107,6 +107,30 @@ class BeneficiarySearch extends Component
             $messages['inputValue.regex']    = "The $fieldLabel should only contain characters (A-Z, a-z).";
         }
         $this->validate($rules, $messages);
+        $modelClass = BeneficiaryPersonalDetail::class;
+        $searchValue = $this->inputValue;
+        $query = $modelClass::query();
+        switch ($key) {
+            case 'application_id':
+                $query->where($key, $searchValue);
+                break;
+            case 'beneficiary_name':
+                $query->where($key, $searchValue);
+                break;
+            case 'mobile_number':
+                $query->where('other_details->mobile_no', $searchValue);
+                break;
+            case 'aadhaar_number':
+                $query->whereHas('aadhar', function ($q) use ($searchValue) {
+                    $q->where('aadhar_vault', md5($searchValue));
+                })->with('aadhar');
+                break;
+            case 'bank_account_number':
+                $query->whereHas('bank', function ($q) use ($searchValue) {
+                    $q->where('bankaccountnumber', $searchValue);
+                })->with('bank');
+                break;
+        }
         $payload = [
             'searchKey'   => $this->selectedOption,
             'searchValue' => $this->inputValue,
