@@ -269,8 +269,8 @@
 
                 <button id="refreshSchemeStatus"
                     class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
-                                                                                                                                                       bg-blue-600 text-white hover:bg-blue-700
-                                                                                                                                                       disabled:opacity-50 disabled:cursor-not-allowed">
+                                                                                                                                                                                                   bg-blue-600 text-white hover:bg-blue-700
+                                                                                                                                                                                                   disabled:opacity-50 disabled:cursor-not-allowed">
                     <i class="fas fa-sync-alt"></i>
                     Refresh
                 </button>
@@ -309,7 +309,7 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function () {
+        document.addEventListener('DOMContentLoaded', function () {
 
             function formatIndianNumber(num) {
                 return num.toLocaleString('en-IN');
@@ -325,9 +325,9 @@
                 return { value: num, suffix: '' };
             }
 
-            function animateCounter($el, duration = 1500) {
-                let target = parseFloat($el.data('value')) || 0;
-                let isMoney = $el.data('money') === true;
+            function animateCounter(el, duration = 1500) {
+                let target = parseFloat(el.dataset.value) || 0;
+                let isMoney = el.dataset.money === 'true';
                 let startTime = null;
 
                 let suffixData = getIndianSuffix(target);
@@ -344,11 +344,10 @@
                         ? current.toFixed(2)
                         : Math.floor(current);
 
-                    $el.text(
+                    el.textContent =
                         (isMoney ? '₹ ' : '') +
                         formatIndianNumber(Number(displayValue)) +
-                        suffix
-                    );
+                        suffix;
 
                     if (progress < 1) {
                         window.requestAnimationFrame(step);
@@ -358,79 +357,73 @@
                 window.requestAnimationFrame(step);
             }
 
-            $('.stat-number').each(function () {
-                animateCounter($(this));
+            document.querySelectorAll('.stat-number').forEach(function (el) {
+                animateCounter(el);
             });
 
         });
     </script>
 
     <script>
-        $(document).ready(function () {
+        document.addEventListener('DOMContentLoaded', function () {
 
-            $('#lastRefreshed')
-                .text('Last refreshed: ' + new Date().toLocaleString('en-IN'))
-                .removeClass('hidden');
-            $('#refreshSchemeStatus').on('click', function () {
+            const lastRefreshed = document.getElementById('lastRefreshed');
+            if (lastRefreshed) {
+                lastRefreshed.textContent = 'Last refreshed: ' + new Date().toLocaleString('en-IN');
+                lastRefreshed.classList.remove('hidden');
+            }
 
-                let btn = $(this);
-                btn.prop('disabled', true);
-                btn.html('<i class="fas fa-spinner fa-spin"></i> Refreshing...');
+            document.getElementById('refreshSchemeStatus').addEventListener('click', function () {
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
 
-                $.ajax({
-                    url: "{{ route('dashboard.refreshSchemeStatus') }}",
-                    type: "POST",
+                fetch("{{ route('dashboard.refreshSchemeStatus') }}", {
+                    method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    success: function () {
-                        loadSchemeStatusTable();
-                    },
-                    error: function () {
-                        alert('Failed to refresh materialized view');
-                    },
-                    complete: function () {
-                        btn.prop('disabled', false);
-                        btn.html('<i class="fas fa-sync-alt"></i> Refresh Data');
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
                     }
-                });
+                })
+                    .then(function () {
+                        loadSchemeStatusTable();
+                    })
+                    .catch(function () {
+                        alert('Failed to refresh materialized view');
+                    })
+                    .finally(function () {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Data';
+                    });
             });
 
             loadSchemeStatusTable();
 
             function loadSchemeStatusTable() {
-
-                $.ajax({
-                    url: '/chart/scheme-status',
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (response) {
-
+                fetch('/chart/scheme-status', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                })
+                    .then(res => res.json())
+                    .then(function (response) {
                         let tbody = '';
                         let hasData = false;
 
-                        $.each(response, function (index, row) {
-
+                        response.forEach(function (row) {
                             hasData = true;
 
                             const schemeId = parseInt(row.scheme_id);
-
                             const entry = parseInt(row.entry_count) || 0;
 
-                            let verified = 0,
-                                approved = 0,
-                                recommended = 0,
-                                rejected = 0;
+                            let verified = 0, approved = 0, recommended = 0, rejected = 0;
 
                             if ([8, 9].includes(schemeId)) {
                                 approved = parseInt(row.approved_count) || 0;
-                            }
-                            else if (schemeId === 17) {
+                            } else if (schemeId === 17) {
                                 verified = parseInt(row.verified_count) || 0;
                                 approved = parseInt(row.approved_count) || 0;
                                 recommended = parseInt(row.recomended_count) || 0;
-                            }
-                            else {
+                            } else {
                                 verified = parseInt(row.verified_count) || 0;
                                 approved = parseInt(row.approved_count) || 0;
                                 recommended = parseInt(row.recomended_count) || 0;
@@ -438,87 +431,68 @@
                             }
 
                             tbody += `
-                                                                                                                                                                                                    <tr class="hover:bg-gray-50">
-                                                                                                                                                                                                        <td class="px-4 py-3 font-medium text-gray-800">
-                                                                                                                                                                                                            ${row.scheme_name}
-                                                                                                                                                                                                        </td>
-                                                                                                                                                                                                        <td class="px-4 py-3 text-right">${entry}</td>
-                                                                                                                                                                                                        <td class="px-4 py-3 text-right">${verified}</td>
-                                                                                                                                                                                                        <td class="px-4 py-3 text-right font-semibold text-green-600">${approved}</td>
-                                                                                                                                                                                                        <td class="px-4 py-3 text-right">${recommended}</td>
-                                                                                                                                                                                                        <td class="px-4 py-3 text-right text-red-500">${rejected}</td>
-                                                                                                                                                                                                    </tr>
-                                                                                                                                                                                                `;
+                                                                            <tr class="hover:bg-gray-50">
+                                                                                <td class="px-4 py-3 font-medium text-gray-800">${row.scheme_name}</td>
+                                                                                <td class="px-4 py-3 text-right">${entry}</td>
+                                                                                <td class="px-4 py-3 text-right">${verified}</td>
+                                                                                <td class="px-4 py-3 text-right font-semibold text-green-600">${approved}</td>
+                                                                                <td class="px-4 py-3 text-right">${recommended}</td>
+                                                                                <td class="px-4 py-3 text-right text-red-500">${rejected}</td>
+                                                                            </tr>
+                                                                        `;
                         });
 
                         if (!hasData) {
                             tbody = `
-                                                                                                                                                                                                    <tr>
-                                                                                                                                                                                                        <td colspan="6" class="px-4 py-6 text-center text-gray-400">
-                                                                                                                                                                                                            No data available
-                                                                                                                                                                                                        </td>
-                                                                                                                                                                                                    </tr>
-                                                                                                                                                                                                `;
+                                                                            <tr>
+                                                                                <td colspan="6" class="px-4 py-6 text-center text-gray-400">No data available</td>
+                                                                            </tr>
+                                                                        `;
                         }
 
-                        $('#schemeStatusTbody').html(tbody);
-                    },
-                    error: function () {
-                        $('#schemeStatusTbody').html(`
-                                                                                                                                                                                                <tr>
-                                                                                                                                                                                                    <td colspan="6" class="px-4 py-6 text-center text-red-500">
-                                                                                                                                                                                                        Failed to load scheme status data
-                                                                                                                                                                                                    </td>
-                                                                                                                                                                                                </tr>
-                                                                                                                                                                                            `);
-                    }
-                });
+                        document.getElementById('schemeStatusTbody').innerHTML = tbody;
+                    })
+                    .catch(function () {
+                        document.getElementById('schemeStatusTbody').innerHTML = `
+                                                                        <tr>
+                                                                            <td colspan="6" class="px-4 py-6 text-center text-red-500">Failed to load scheme status data</td>
+                                                                        </tr>
+                                                                    `;
+                    });
             }
 
         });
     </script>
 
-
-
-
-
     <script>
-        $(document).ready(function () {
+        document.addEventListener('DOMContentLoaded', function () {
+
             loadSchemeWiseApplications('all');
-            $('#schemeFilter').on('change', function () {
-                let days = $(this).val();
-                loadSchemeWiseApplications(days);
+
+            document.getElementById('schemeFilter').addEventListener('change', function () {
+                loadSchemeWiseApplications(this.value);
             });
+
             function loadSchemeWiseApplications(days) {
-                $.ajax({
-                    url: "{{ route('dashboard.schemeWiseApplications') }}",
-                    method: "GET",
-                    data: { days: days },
-                    dataType: "json",
-                    success: function (response) {
+                fetch("{{ route('dashboard.schemeWiseApplications') }}?days=" + days, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                })
+                    .then(res => res.json())
+                    .then(function (response) {
                         Highcharts.chart('applicationsChart', {
-                            chart: {
-                                type: 'column',
-                                backgroundColor: 'transparent'
-                            },
+                            chart: { type: 'column', backgroundColor: 'transparent' },
                             title: { text: null },
                             xAxis: {
                                 categories: response.categories,
-                                labels: {
-                                    rotation: -45,
-                                    style: { fontSize: '11px' }
-                                }
+                                labels: { rotation: -45, style: { fontSize: '11px' } }
                             },
-                            yAxis: {
-                                title: { text: 'Applications' }
-                            },
+                            yAxis: { title: { text: 'Applications' } },
                             legend: { enabled: false },
                             plotOptions: {
                                 column: {
                                     borderRadius: 8,
-                                    dataLabels: {
-                                        enabled: true
-                                    }
+                                    dataLabels: { enabled: true }
                                 }
                             },
                             series: [{
@@ -533,38 +507,28 @@
                             }],
                             credits: { enabled: false }
                         });
-                    }
-                });
+                    });
             }
 
             loadDistrictWiseBeneficiaries();
-            function loadDistrictWiseBeneficiaries() {
-                $.ajax({
-                    url: "{{ route('dashboard.districtWiseBeneficiaries') }}",
-                    type: "GET",
-                    dataType: "json",
-                    success: function (response) {
 
-                        const totalDistricts = response.categories.length; // 23
+            function loadDistrictWiseBeneficiaries() {
+                fetch("{{ route('dashboard.districtWiseBeneficiaries') }}", {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                })
+                    .then(res => res.json())
+                    .then(function (response) {
+                        const totalDistricts = response.categories.length;
                         const barHeight = 45;
                         const minHeight = 350;
-
                         const chartHeight = Math.max(totalDistricts * barHeight, minHeight);
 
                         Highcharts.chart('districtChart', {
-                            chart: {
-                                type: 'bar',
-                                height: chartHeight,
-                                backgroundColor: 'transparent'
-                            },
+                            chart: { type: 'bar', height: chartHeight, backgroundColor: 'transparent' },
                             title: { text: null },
-                            xAxis: {
-                                categories: response.categories,
-                                title: { text: null }
-                            },
-                            yAxis: {
-                                title: { text: 'Beneficiaries' }
-                            },
+                            xAxis: { categories: response.categories, title: { text: null } },
+                            yAxis: { title: { text: 'Beneficiaries' } },
                             legend: { enabled: false },
                             plotOptions: {
                                 bar: {
@@ -582,50 +546,36 @@
                             }],
                             credits: { enabled: false }
                         });
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(error);
+                    })
+                    .catch(function (err) {
+                        console.error(err);
                         alert('Failed to load district-wise beneficiary data');
-                    }
-                });
+                    });
             }
 
-
             function loadAgeDistribution() {
-
-                $.ajax({
-                    url: '/age-distribution',
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (data) {
-
+                fetch('/age-distribution', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                })
+                    .then(res => res.json())
+                    .then(function (data) {
                         Highcharts.chart('categoryChart', {
-                            chart: {
-                                type: 'pie',
-                                backgroundColor: 'transparent'
-                            },
-
-                            title: {
-                                text: 'Age Distribution'
-                            },
-
+                            chart: { type: 'pie', backgroundColor: 'transparent' },
+                            title: { text: 'Age Distribution' },
                             plotOptions: {
                                 pie: {
                                     innerSize: '65%',
                                     dataLabels: {
                                         enabled: true,
                                         format: '<b>{point.name}</b>: {point.y}',
-                                        style: {
-                                            fontSize: '12px'
-                                        }
+                                        style: { fontSize: '12px' }
                                     }
                                 }
                             },
-
                             tooltip: {
                                 pointFormat: '<b>{point.y}</b> beneficiaries ({point.percentage:.1f}%)'
                             },
-
                             series: [{
                                 name: 'Beneficiaries',
                                 data: [
@@ -636,31 +586,25 @@
                                     { name: '60+', y: Number(data.age_60_plus), color: '#ef4444' }
                                 ]
                             }],
-
-                            credits: {
-                                enabled: false
-                            }
+                            credits: { enabled: false }
                         });
-                    },
-                    error: function () {
+                    })
+                    .catch(function () {
                         console.error('Failed to load age distribution data');
-                    }
+                    });
+            }
+
+            loadAgeDistribution();
+
+            const refreshAgeChart = document.getElementById('refreshAgeChart');
+            if (refreshAgeChart) {
+                refreshAgeChart.addEventListener('click', function () {
+                    loadAgeDistribution();
                 });
             }
 
-            // Initial Load
-            loadAgeDistribution();
-
-            // Optional: Refresh button
-            $('#refreshAgeChart').on('click', function () {
-                loadAgeDistribution();
-            });
-
         });
     </script>
-
-
-
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -670,41 +614,28 @@
                 return;
             }
 
-            $.ajax({
-                url: "{{ route('dashboard.fy.consolidated') }}",
-                type: "GET",
-                data: {
-                    fin_year: "{{ $cur_fin_year }}"
-                },
-                success: function (response) {
-
+            fetch("{{ route('dashboard.fy.consolidated') }}?fin_year={{ $cur_fin_year }}", {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            })
+                .then(res => res.json())
+                .then(function (response) {
                     if (response.status !== 'success') {
                         console.error('Invalid response');
                         return;
                     }
 
                     Highcharts.chart('trendsChart', {
-                        chart: {
-                            type: 'areaspline',
-                            backgroundColor: 'transparent'
-                        },
-                        title: {
-                            text: null
-                        },
+                        chart: { type: 'areaspline', backgroundColor: 'transparent' },
+                        title: { text: null },
                         xAxis: {
                             categories: [
                                 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
                                 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'
                             ]
                         },
-                        yAxis: {
-                            title: {
-                                text: 'Payment Amount (₹)'
-                            }
-                        },
-                        legend: {
-                            enabled: false
-                        },
+                        yAxis: { title: { text: 'Payment Amount (₹)' } },
+                        legend: { enabled: false },
                         plotOptions: {
                             areaspline: {
                                 fillColor: {
@@ -715,10 +646,7 @@
                                     ]
                                 },
                                 lineWidth: 3,
-                                marker: {
-                                    enabled: true,
-                                    radius: 4
-                                }
+                                marker: { enabled: true, radius: 4 }
                             }
                         },
                         series: [{
@@ -726,20 +654,14 @@
                             data: response.series,
                             color: '#667eea'
                         }],
-                        credits: {
-                            enabled: false
-                        }
+                        credits: { enabled: false }
                     });
-                },
-                error: function () {
-                    console.error('AJAX failed');
-                }
-            });
+                })
+                .catch(function () {
+                    console.error('Fetch failed');
+                });
 
         });
     </script>
-
-
-
 
 @endpush

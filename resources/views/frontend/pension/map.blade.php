@@ -1,6 +1,7 @@
 @extends('frontend.layouts.app-template')
 
 @push('styles')
+    <meta name="map-district-count-url" content="{{ route('map.district.count') }}">
     <style>
         /* SVG Map Styles */
         .district {
@@ -85,11 +86,11 @@
 
             <!-- ================= GRID LAYOUT ================= -->
             <div class="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[auto_650px_auto] gap-8" style="
-                                                                                            grid-template-areas:
-                                                                                                'cards cards cards'
-                                                                                                'map map info'
-                                                                                                'full full full';
-                                                                                        ">
+                                                                                                        grid-template-areas:
+                                                                                                            'cards cards cards'
+                                                                                                            'map map info'
+                                                                                                            'full full full';
+                                                                                                    ">
 
                 <!-- ================= STATS CARDS ================= -->
                 <div style="grid-area: cards;">
@@ -205,136 +206,125 @@
 
 
 
-        $(document).ready(function () {
-            initMap();
-        });
-        $(function () {
+        document.addEventListener('DOMContentLoaded', function () {
             let districtData = {};
 
             async function initMap() {
                 try {
-                    districtData = await $.ajax({
-                        url: "{{ route('map.district.count') }}",
-                        type: "POST",
-                        dataType: "json",
-                        data: {
-                            _token: "{{ csrf_token() }}",
-                            // optional filters if needed later
-                            // year: 2025,
-                            // scheme_id: 1
-                        }
+                    const response = await fetch(document.querySelector('meta[name="map-district-count-url"]').content, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({})
                     });
 
-                    $('#loading').hide();
-                    $('#map-svg-wrapper')
-                        .removeClass('hidden')
-                        .addClass('flex');
+                    districtData = await response.json();
+
+                    document.getElementById('loading').style.display = 'none';
+                    const mapWrapper = document.getElementById('map-svg-wrapper');
+                    mapWrapper.classList.remove('hidden');
+                    mapWrapper.classList.add('flex');
 
                     bindDistricts();
                     updateStats();
 
-                } catch (xhr) {
-                    console.error(xhr.responseText);
-
-                    $('#loading').html(`
-                                                    <div class="text-center">
-                                                        <i class="fa-solid fa-triangle-exclamation text-red-500 text-3xl mb-2"></i>
-                                                        <p class="text-red-600 font-bold">
-                                                            Failed to load district data
-                                                        </p>
-                                                    </div>
-                                                `);
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById('loading').innerHTML = `
+                            <div class="text-center">
+                                <i class="fa-solid fa-triangle-exclamation text-red-500 text-3xl mb-2"></i>
+                                <p class="text-red-600 font-bold">Failed to load district data</p>
+                            </div>
+                        `;
                 }
             }
 
-
-
-
             function bindDistricts() {
-                $('.district').each(function () {
-                    const $d = $(this);
-                    const code = $d.attr('district-code');
-                    const name = $d.data('name');
+                document.querySelectorAll('.district').forEach(function (d) {
+                    const code = d.getAttribute('district-code');
+                    const name = d.dataset.name;
                     const count = parseInt(districtData[code] || 0);
 
-                    $d.data({ count, name });
-                    setColor($d, count);
+                    d.dataset.count = count;
+                    d.dataset.name = name;
+                    setColor(d, count);
 
-                    $d.on('mouseenter', e => showTooltip(e, name, count));
-                    $d.on('mousemove', moveTooltip);
-                    $d.on('mouseleave', hideTooltip);
-                    $d.on('click', () => selectDistrict($d, code, name, count));
+                    d.addEventListener('mouseenter', e => showTooltip(e, name, count));
+                    d.addEventListener('mousemove', moveTooltip);
+                    d.addEventListener('mouseleave', hideTooltip);
+                    d.addEventListener('click', () => selectDistrict(d, code, name, count));
                 });
             }
 
-            function setColor($d, count) {
-                // Improved color ramp based on your logic
-                // let c = '#e0e7ff'; // default
+            function setColor(d, count) {
+                let c = '#e0e7ff';
                 if (count > 500) c = '#1e293b';
                 else if (count > 200) c = '#334155';
                 else if (count > 50) c = '#6366f1';
-                $d.css('fill', c);
+                d.style.fill = c;
             }
 
-            function selectDistrict($d, code, name, count) {
-                $('.district').removeClass('selected');
-                $d.addClass('selected');
+            function selectDistrict(d, code, name, count) {
+                document.querySelectorAll('.district').forEach(el => el.classList.remove('selected'));
+                d.classList.add('selected');
 
                 const totalBeneficiaries = total();
                 const pct = totalBeneficiaries > 0 ? ((count / totalBeneficiaries) * 100).toFixed(2) : 0;
 
-                // Restructured HTML for better Right-Panel UI
-                $('#district-info').fadeOut(150, function () {
-                    $(this).html(`
-                                                                                                                <div class="w-full">
-                                                                                                                    <div class="text-center mb-8">
-                                                                                                                        <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">District Selected</span>
-                                                                                                                        <h4 class="text-3xl font-black text-gray-900 mt-4">${name}</h4>
-                                                                                                                        <div class="w-12 h-1 bg-indigo-500 mx-auto mt-4 rounded-full"></div>
-                                                                                                                    </div>
+                const infoEl = document.getElementById('district-info');
+                infoEl.style.opacity = '0';
+                infoEl.style.transition = 'opacity 0.15s';
 
-                                                                                                                    <div class="space-y-4">
-                                                                                                                        <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                                                                                                                            <p class="text-gray-500 text-xs font-bold uppercase mb-1">Total Beneficiaries</p>
-                                                                                                                            <p class="text-4xl font-black text-indigo-600">${count.toLocaleString()}</p>
-                                                                                                                        </div>
-
-                                                                                                                        <div class="grid grid-cols-2 gap-4">
-                                                                                                                            <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 text-left">
-                                                                                                                                <p class="text-gray-500 text-[10px] font-bold uppercase">State Share</p>
-                                                                                                                                <p class="text-xl font-bold text-gray-800">${pct}%</p>
-                                                                                                                            </div>
-                                                                                                                            <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 text-left">
-                                                                                                                                <p class="text-gray-500 text-[10px] font-bold uppercase">Status</p>
-                                                                                                                                <p class="text-xl font-bold text-green-600 truncate">Active</p>
-                                                                                                                            </div>
-                                                                                                                        </div>
-                                                                                                                    </div>
-                                                                                                                </div>
-                                                                                                            `).fadeIn(300);
-                });
+                setTimeout(() => {
+                    infoEl.innerHTML = `
+                            <div class="w-full">
+                                <div class="text-center mb-8">
+                                    <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">District Selected</span>
+                                    <h4 class="text-3xl font-black text-gray-900 mt-4">${name}</h4>
+                                    <div class="w-12 h-1 bg-indigo-500 mx-auto mt-4 rounded-full"></div>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                                        <p class="text-gray-500 text-xs font-bold uppercase mb-1">Total Beneficiaries</p>
+                                        <p class="text-4xl font-black text-indigo-600">${count.toLocaleString()}</p>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 text-left">
+                                            <p class="text-gray-500 text-[10px] font-bold uppercase">State Share</p>
+                                            <p class="text-xl font-bold text-gray-800">${pct}%</p>
+                                        </div>
+                                        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 text-left">
+                                            <p class="text-gray-500 text-[10px] font-bold uppercase">Status</p>
+                                            <p class="text-xl font-bold text-green-600 truncate">Active</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    infoEl.style.opacity = '1';
+                }, 150);
             }
 
             function updateStats() {
-                let t = total();
-                let keys = Object.keys(districtData);
-                let d = keys.length;
-                let avg = d ? Math.round(t / d) : 0;
+                const t = total();
+                const keys = Object.keys(districtData);
+                const d = keys.length;
+                const avg = d ? Math.round(t / d) : 0;
 
                 let highest = { name: '-', count: 0 };
-                $('.district').each(function () {
-                    if ($(this).data('count') > highest.count) {
-                        highest = {
-                            name: $(this).data('name'),
-                            count: $(this).data('count')
-                        };
+                document.querySelectorAll('.district').forEach(function (el) {
+                    const c = parseInt(el.dataset.count || 0);
+                    if (c > highest.count) {
+                        highest = { name: el.dataset.name, count: c };
                     }
                 });
 
-                $('#total-count').text(t.toLocaleString());
-                $('#district-count').text(d);
-                $('#avg-count').text(avg.toLocaleString());
-                $('#highest-district').text(highest.name);
+                document.getElementById('total-count').textContent = t.toLocaleString();
+                document.getElementById('district-count').textContent = d;
+                document.getElementById('avg-count').textContent = avg.toLocaleString();
+                document.getElementById('highest-district').textContent = highest.name;
             }
 
             function total() {
@@ -342,42 +332,37 @@
             }
 
             function showTooltip(e, name, count) {
-                $('#tooltip-content').html(`
-                                                                    <div class="font-bold border-b border-gray-700 pb-1 mb-1">
-                                                                        ${name}
-                                                                    </div>
-                                                                    <div class="text-indigo-400">
-                                                                        Beneficiaries:
-                                                                        <span class="text-white">${count.toLocaleString()}</span>
-                                                                    </div>
-                                                                `);
-
-                $('#custom-tooltip').show();
-                moveTooltip(e); // 🔥 important
+                document.getElementById('tooltip-content').innerHTML = `
+                        <div class="font-bold border-b border-gray-700 pb-1 mb-1">${name}</div>
+                        <div class="text-indigo-400">
+                            Beneficiaries: <span class="text-white">${count.toLocaleString()}</span>
+                        </div>
+                    `;
+                document.getElementById('custom-tooltip').style.display = 'block';
+                moveTooltip(e);
             }
 
             function moveTooltip(e) {
-                $('#custom-tooltip').css({
-                    left: e.clientX + 'px',
-                    top: e.clientY + 'px'
-                });
+                const tooltip = document.getElementById('custom-tooltip');
+                tooltip.style.left = e.clientX + 'px';
+                tooltip.style.top = e.clientY + 'px';
             }
 
             function hideTooltip() {
-                $('#custom-tooltip').hide();
+                document.getElementById('custom-tooltip').style.display = 'none';
             }
 
-            $('#reset-btn').on('click', () => {
-                $('.district').removeClass('selected');
-                $('#district-info').html(`
-                                                                                                            <div class="p-8 bg-gray-50 rounded-full mb-4">
-                                                                                                                <i class="fa-solid fa-hand-pointer text-4xl text-gray-300"></i>
-                                                                                                            </div>
-                                                                                                            <h4 class="text-gray-800 font-bold text-lg">No Selection</h4>
-                                                                                                            <p class="text-gray-500 max-w-xs mt-2">
-                                                                                                                Please click on a district within the map to view specific beneficiary statistics.
-                                                                                                            </p>
-                                                                                                        `);
+            document.getElementById('reset-btn').addEventListener('click', () => {
+                document.querySelectorAll('.district').forEach(el => el.classList.remove('selected'));
+                document.getElementById('district-info').innerHTML = `
+                        <div class="p-8 bg-gray-50 rounded-full mb-4">
+                            <i class="fa-solid fa-hand-pointer text-4xl text-gray-300"></i>
+                        </div>
+                        <h4 class="text-gray-800 font-bold text-lg">No Selection</h4>
+                        <p class="text-gray-500 max-w-xs mt-2">
+                            Please click on a district within the map to view specific beneficiary statistics.
+                        </p>
+                    `;
             });
 
             initMap();

@@ -5,17 +5,28 @@ namespace App\Http\Controllers\Home;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\BeneficiaryPersonalDetail;
+use Illuminate\Support\Facades\Storage;
 
 class HomeController extends Controller
 {
     public static function index(Request $request)
     {
-        $total_dept = 7;
-        $total_schemes = 13;
         $monthly_disbursement = 7000000000; // 70 crore
-        $ben_count = 100000000000;
-        $scheme_info = DB::table('home.m_scheme')->where('is_active', 1)->orderBy('rank')->get();
-        $department = DB::table('home.m_department')->where('is_active', 1)->orderBy('rank')->get(); // ← collection of objects
+        $ben_count = BeneficiaryPersonalDetail::count();
+        $scheme_info = Storage::get('data/m_scheme.json');
+        $data = json_decode($scheme_info, true);
+        $activeSchemes = array_filter($data, function ($item) {
+            return $item['is_active'] == 1;
+        });
+        $department_info = Storage::get('data/m_department.json');
+        $data = json_decode($department_info, true);
+        $activeDepartment = array_filter($data, function ($item) {
+            return $item['is_active'] == 1;
+        });
+
+        $total_dept = count($activeDepartment);
+        $total_schemes = count($activeSchemes);
 
         // dd($department);
         return view('frontend.home.home', [
@@ -23,8 +34,8 @@ class HomeController extends Controller
             'total_dept' => $total_dept,
             'total_schemes' => $total_schemes,
             'monthly_disbursement' => $monthly_disbursement,
-            'scheme_info' => $scheme_info,
-            'department' => $department
+            'scheme_info' => $activeSchemes,
+            'department' => $activeDepartment
         ]);
     }
     public static function scheme_index(Request $request)
@@ -35,7 +46,7 @@ class HomeController extends Controller
         $scheme_id = $scheme_info->id;
         $ben_count = 100000000000;
         $department = DB::table('home.m_department')->where('id', $scheme_info->department_id)->first();
-        return view('home.scheme-info', [
+        return view('frontend.home.scheme-info', [
             'scheme_info' => $scheme_info,
             'scheme_json' => $scheme_config,
             'ben_count' => $ben_count,
@@ -65,7 +76,7 @@ class HomeController extends Controller
         $onboard_scheme_count = count($onboard_scheme);
 
         $total_disbrusment = 3200000000;
-        return view('home.department-info', [
+        return view('frontend.home.department-info', [
             'department_info' => $department_info,
             'department_json' => $department_json,
             'ben_count_all' => $ben_count_all,

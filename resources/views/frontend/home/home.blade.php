@@ -6,213 +6,218 @@
 
 @section('content')
 
-    <!-- <body class="bg-gray-50 text-gray-800"> -->
-        <!-- Top Accessibility Bar -->
-       @include('frontend.components.top-header')
+            <!-- <body class="bg-gray-50 text-gray-800"> -->
+                <!-- Top Accessibility Bar -->
+               @include('frontend.components.top-header')
 
-        <!-- Main Header -->
-        @include('frontend.components.header')
+                <!-- Main Header -->
+                @include('frontend.components.header')
 
-        <!-- Hero Banner -->
-<section class="relative overflow-hidden h-[500px] md:h-[600px]">
+                <!-- Hero Banner -->
+        <section class="relative overflow-hidden h-[500px] md:h-[600px]">
 
-    <div id="hero-carousel" class="relative h-full">
-        
-        @foreach (Config::get('home_landing.home_image') as $key => $value)
-            @include('frontend.components.carousel-img', [
-                'image'  => $value['image'],
-                'title'  => $value['title'],
-                'header' => $value['header']
-            ])
-        @endforeach
+            <div id="hero-carousel" class="relative h-full">
 
-        <!-- Prev -->
-        <button id="prevBtn"
-            class="absolute left-5 top-1/2 -translate-y-1/2 z-50 bg-white/30 hover:bg-white/60 
-                   text-gray-800 p-3 rounded-full backdrop-blur-md transition shadow">
-            <i class="fa-solid fa-chevron-left"></i>
-        </button>
+                @php
+    $data = json_decode(Storage::get('data/master_data.json'), true);
+                @endphp
 
-        <!-- Next -->
-        <button id="nextBtn"
-            class="absolute right-5 top-1/2 -translate-y-1/2 z-50 bg-white/30 hover:bg-white/60 
-                   text-gray-800 p-3 rounded-full backdrop-blur-md transition shadow">
-            <i class="fa-solid fa-chevron-right"></i>
-        </button>
-
-        <!-- Indicators (Dynamic) -->
-        <div class="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2 z-50">
-            @foreach (Config::get('home_landing.home_image') as $k => $v)
-                <button class="carousel-indicator w-3 h-3 rounded-full bg-white/40 hover:bg-white transition"
-                        data-slide="{{ $k - 1 }}">
+                @foreach ($data['home_image'] as $key => $value)
+                    @include('frontend.components.carousel-img', [
+            'image' => $value['image'],
+            'title' => $value['title'],
+            'header' => $value['header']
+        ])
+                @endforeach
+                <!-- Prev -->
+                <button id="prevBtn"
+                    class="absolute left-5 top-1/2 -translate-y-1/2 z-50 bg-white/30 hover:bg-white/60 
+                           text-gray-800 p-3 rounded-full backdrop-blur-md transition shadow">
+                    <i class="fa-solid fa-chevron-left"></i>
                 </button>
-            @endforeach
-        </div>
 
-    </div>
-</section>
+                <!-- Next -->
+                <button id="nextBtn"
+                    class="absolute right-5 top-1/2 -translate-y-1/2 z-50 bg-white/30 hover:bg-white/60 
+                           text-gray-800 p-3 rounded-full backdrop-blur-md transition shadow">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
 
-
-        <!-- Noytification -->
-        <!-- Modern Notification Marquee -->
-        @include('frontend.components.notification-h')
-
-        <!-- Statistics -->
-    <section class="max-w-7xl mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-
-            <div>
-                <div class="text-3xl font-bold text-indigo-600"
-                    id="deptCounter"
-                    data-target="{{ $total_dept }}">
-                    0
+                <!-- Indicators (Dynamic) -->
+                <div class="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2 z-50">
+                    @foreach ($data['home_image'] as $k => $v)
+                            <button class="carousel-indicator w-3 h-3 rounded-full bg-white/40 hover:bg-white transition"
+                                    data-slide="{{ $k - 1 }}">
+                        </button>
+                    @endforeach
                 </div>
-                <p class="mt-2 text-sm">Total Department</p>
-            </div>
 
-            <div>
-                <div class="text-3xl font-bold text-green-600"
-                    id="schemeCounter"
-                    data-target="{{ $total_schemes }}">
-                    0
-                </div>
-                <p class="mt-2 text-sm">Total Schemes</p>
             </div>
-
-            <div>
-                <div class="text-3xl font-bold text-amber-600"
-                    id="beneficiaryCounter"
-                    data-target="{{ $ben_count }}">
-                    0
-                </div>
-                <p class="mt-2 text-sm">Total Beneficiaries</p>
-            </div>
-
-            <div>
-                <div class="text-3xl font-bold text-pink-600"
-                    id="disbursementCounter"
-                    data-target="{{ $monthly_disbursement }}">
-                    0
-                </div>
-                <p class="mt-2 text-sm">Monthly Disbursement</p>
-            </div>
-
         </section>
 
 
-        <!-- Info Sections -->
-        <section class="max-w-7xl mx-auto mb-8 grid md:grid-cols-3 gap-6">
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 id="about" class="font-semibold text-lg text-indigo-600">
-                    Scheme Rationale
-                </h3>
-                <p class="mt-3 text-sm">
-                    The jai bangla scheme aims to consolidate various welfare initiatives
-                    of the Government of West Bengal under a single umbrella to ensure
-                    efficiency, transparency, and greater citizen access.
-                </p>
-                <a href="#" class="text-indigo-600 text-sm mt-3 inline-block">Read More →</a>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 id="objectives" class="font-semibold text-lg text-green-600">
-                    Objectives
-                </h3>
-                <p class="mt-3 text-sm">
-                    The scheme provides financial, social, and developmental assistance
-                    for youth, women, elderly, and marginalized communities, ensuring
-                    holistic empowerment and inclusion.
-                </p>
-                <a href="#" class="text-green-600 text-sm mt-3 inline-block">Read More →</a>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 id="guidelines" class="font-semibold text-lg text-amber-600">
-                    Scheme Design
-                </h3>
-                <p class="mt-3 text-sm">
-                    jai bangla follows a transparent digital-first process with direct
-                    benefit transfers, robust grievance redressal, and integration with
-                    district-level monitoring systems.
-                </p>
-                <a href="#" class="text-amber-600 text-sm mt-3 inline-block">Read More →</a>
-            </div>
-        </section>
+                <!-- Noytification -->
+                <!-- Modern Notification Marquee -->
+                @include('frontend.components.notification-h')
 
-        <!-- Sliding Card Carousel -->
-        <section id="department" class="bg-gray-100 py-8">
-            <div class="max-w-7xl mx-auto px-4">
-                <h2 class="text-3xl font-bold text-center mb-8 text-indigo-700">
-                    Departments Involved
-                </h2>
+                <!-- Statistics -->
+            <section class="max-w-7xl mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
 
-               <div id="card-carousel-wrapper" class="relative overflow-hidden">
-
-                    <div id="card-carousel" class="flex transition-transform duration-500 ease-in-out">
-
-                        @foreach ($department as $dept)
-                            @php
-                                $json = json_decode($dept->json_data);
-                            @endphp
-
-                            @include('frontend.components.department-h', [
-                                'ref_color' => $json->ref_color,
-                                'slug'  => $dept->slug,
-                                'name'  => $dept->f_name,
-                                'about' => $json->very_short ?? ''
-                            ])
-                        @endforeach
-
+                    <div>
+                        <div class="text-3xl font-bold text-indigo-600"
+                            id="deptCounter"
+                            data-target="{{ $total_dept }}">
+                            0
+                        </div>
+                        <p class="mt-2 text-sm">Total Department</p>
                     </div>
 
-                    <!-- Navigation Buttons -->
-                    <button id="card-prev"
-                        class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-3 shadow-md hover:bg-gray-100 transition">
-                        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
+                    <div>
+                        <div class="text-3xl font-bold text-green-600"
+                            id="schemeCounter"
+                            data-target="{{ $total_schemes }}">
+                            0
+                        </div>
+                        <p class="mt-2 text-sm">Total Schemes</p>
+                    </div>
 
-                    <button id="card-next"
-                        class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-3 shadow-md hover:bg-gray-100 transition">
-                        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
+                    <div>
+                        <div class="text-3xl font-bold text-amber-600"
+                            id="beneficiaryCounter"
+                            data-target="{{ $ben_count }}">
+                            0
+                        </div>
+                        <p class="mt-2 text-sm">Total Beneficiaries</p>
+                    </div>
 
-                    <!-- Auto Indicators (count matches items dynamically) -->
-                    <div id="card-indicators" class="card-indicators flex justify-center mt-6 space-x-2"></div>
+                    <div>
+                        <div class="text-3xl font-bold text-pink-600"
+                            id="disbursementCounter"
+                            data-target="{{ $monthly_disbursement }}">
+                            0
+                        </div>
+                        <p class="mt-2 text-sm">Monthly Disbursement</p>
+                    </div>
 
-                </div>
-
-            </div>
-        </section>
+                </section>
 
 
-        <!-- here make the section of department link when i click redirect to new pages -->
-        <!-- Departments Section -->
-        <section id="scheme" class="max-w-7xl mx-auto px-4 py-8">
-            <h2 class="text-2xl font-bold text-center mb-4 text-indigo-700">
-                Schemes
-            </h2>
+                <!-- Info Sections -->
+                <section class="max-w-7xl mx-auto mb-8 grid md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 id="about" class="font-semibold text-lg text-indigo-600">
+                            Scheme Rationale
+                        </h3>
+                        <p class="mt-3 text-sm">
+                            The jai bangla scheme aims to consolidate various welfare initiatives
+                            of the Government of West Bengal under a single umbrella to ensure
+                            efficiency, transparency, and greater citizen access.
+                        </p>
+                        <a href="#" class="text-indigo-600 text-sm mt-3 inline-block">Read More →</a>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 id="objectives" class="font-semibold text-lg text-green-600">
+                            Objectives
+                        </h3>
+                        <p class="mt-3 text-sm">
+                            The scheme provides financial, social, and developmental assistance
+                            for youth, women, elderly, and marginalized communities, ensuring
+                            holistic empowerment and inclusion.
+                        </p>
+                        <a href="#" class="text-green-600 text-sm mt-3 inline-block">Read More →</a>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 id="guidelines" class="font-semibold text-lg text-amber-600">
+                            Scheme Design
+                        </h3>
+                        <p class="mt-3 text-sm">
+                            jai bangla follows a transparent digital-first process with direct
+                            benefit transfers, robust grievance redressal, and integration with
+                            district-level monitoring systems.
+                        </p>
+                        <a href="#" class="text-amber-600 text-sm mt-3 inline-block">Read More →</a>
+                    </div>
+                </section>
 
-            <div class="max-h-90 overflow-y-auto scroll-container bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      @foreach ($scheme_info as $info)
+                <!-- Sliding Card Carousel -->
+                <section id="department" class="bg-gray-100 py-8">
+                    <div class="max-w-7xl mx-auto px-4">
+                        <h2 class="text-3xl font-bold text-center mb-8 text-indigo-700">
+                            Departments Involved
+                        </h2>
+
+                       <div id="card-carousel-wrapper" class="relative overflow-hidden">
+
+                            <div id="card-carousel" class="flex transition-transform duration-500 ease-in-out">
+
+                                @foreach ($department as $dept)
+
+        @php
+        $json = $dept['json_data'];
+        @endphp
+
+        @include('frontend.components.department-h', [
+            'ref_color' => $json['ref_color'] ?? '',
+            'slug' => $dept['slug'] ?? '',
+            'name' => $dept['f_name'] ?? '',
+            'about' => $json['very_short'] ?? ''
+        ])
+
+    @endforeach
+
+                            </div>
+
+                            <!-- Navigation Buttons -->
+                            <button id="card-prev"
+                                class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-3 shadow-md hover:bg-gray-100 transition">
+                                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+
+                            <button id="card-next"
+                                class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-3 shadow-md hover:bg-gray-100 transition">
+                                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+
+                            <!-- Auto Indicators (count matches items dynamically) -->
+                            <div id="card-indicators" class="card-indicators flex justify-center mt-6 space-x-2"></div>
+
+                        </div>
+
+                    </div>
+                </section>
+
+
+                <!-- here make the section of department link when i click redirect to new pages -->
+                <!-- Departments Section -->
+                <section id="scheme" class="max-w-7xl mx-auto px-4 py-8">
+                    <h2 class="text-2xl font-bold text-center mb-4 text-indigo-700">
+                        Schemes
+                    </h2>
+
+                    <div class="max-h-90 overflow-y-auto scroll-container bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          @foreach ($scheme_info as $info)
             @include('frontend.components.scheme-icon-h', [
-                'name'  => $info->scheme_name,
-                'icon'  => $info->icon,
-                'color' => $info->ref_color,
-                'id'    => $info->id,
-                'slug'  => $info->slug
+                'name' => $info['scheme_name'],
+                'icon' => $info['icon'],
+                'color' => $info['ref_color'],
+                'id' => $info['id'],
+                'slug' => $info['slug']
             ])
         @endforeach
 
-                </div>
-            </div>
-        </section>
+                        </div>
+                    </div>
+                </section>
 
 
-        <!-- Footer -->
-        @include('frontend.layouts.footer')
-    <!-- </body> -->
+                <!-- Footer -->
+                @include('frontend.layouts.footer')
+            <!-- </body> -->
 @endsection
 
 @push('scripts')

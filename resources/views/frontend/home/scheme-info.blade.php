@@ -304,33 +304,6 @@
             return num;
         }
 
-        function animateCounter(id, target) {
-            let $el = $("#" + id);
-            let start = 0;
-
-            const duration = 1800;
-            const stepTime = Math.max(10, duration / target);
-
-            let timer = setInterval(() => {
-                start += Math.ceil(target / (duration / stepTime));
-
-                if (start >= target) {
-                    $el.text(formatIndianCompact(target));
-                    clearInterval(timer);
-                } else {
-                    $el.text(formatIndianCompact(start));
-                }
-            }, stepTime);
-        }
-
-        // RUN ON PAGE LOAD
-        $(document).ready(function () {
-            let $el = $("#beneficiariesCounter");
-            animateCounter("beneficiariesCounter", parseInt($el.data("target")));
-        });
-    </script>
-
-    <script>
         // Money Format with ₹ symbol
         function formatIndianMoney(num) {
             if (num >= 10000000) {
@@ -343,29 +316,36 @@
             return "₹" + num.toLocaleString("en-IN");
         }
 
-        function animateMoneyCounter(id, target) {
-            let $el = $("#" + id);
-            let start = 0;
+        function animateCounter(id, target, formatter) {
+            const el = document.getElementById(id);
+            if (!el || !target) return;
 
-            const duration = 2000;
+            let start = 0;
+            const duration = 1800;
             const stepTime = Math.max(10, duration / target);
 
-            let timer = setInterval(() => {
+            const timer = setInterval(() => {
                 start += Math.ceil(target / (duration / stepTime));
 
                 if (start >= target) {
-                    $el.text(formatIndianMoney(target));
+                    el.textContent = formatter(target);
                     clearInterval(timer);
                 } else {
-                    $el.text(formatIndianMoney(start));
+                    el.textContent = formatter(start);
                 }
             }, stepTime);
         }
 
-        // RUN ON PAGE LOAD
-        $(document).ready(function () {
-            let $el = $("#allocationCounter");
-            animateMoneyCounter("allocationCounter", parseInt($el.data("target")));
+        document.addEventListener('DOMContentLoaded', function () {
+            const beneficiariesEl = document.getElementById('beneficiariesCounter');
+            if (beneficiariesEl) {
+                animateCounter('beneficiariesCounter', parseInt(beneficiariesEl.dataset.target), formatIndianCompact);
+            }
+
+            const allocationEl = document.getElementById('allocationCounter');
+            if (allocationEl) {
+                animateCounter('allocationCounter', parseInt(allocationEl.dataset.target), formatIndianMoney);
+            }
         });
     </script>
 @endpush

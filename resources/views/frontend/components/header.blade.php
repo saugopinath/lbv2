@@ -58,7 +58,7 @@
           </a>
 
           <!-- Login -->
-          <a href="https://jaibangla.wb.gov.in/login" target="_blank"
+          <a href="{{ route('login') }}" target="_blank"
             class="flex flex-col items-center text-gray-700 hover:text-indigo-600 transition">
             <div class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full shadow-sm mb-1">
               <i class="fa-solid fa-key text-lg"></i>
