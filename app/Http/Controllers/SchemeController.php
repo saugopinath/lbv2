@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 
 class SchemeController extends Controller
 {
-    public function finalSubmitted()
+    public function finalSubmitted($stage=null)
     {
         $schemes = '';
         $route = Route::currentRouteName();
@@ -25,7 +25,7 @@ class SchemeController extends Controller
         } else {
             $schemes = Scheme::all();
         }
-        return view('schemesblade.dropdown', compact('schemes'));
+        return view('schemesblade.dropdown', compact('schemes','stage'));
     }
 
     public function defineWorkflow()
@@ -61,7 +61,7 @@ class SchemeController extends Controller
 
     public function draftedit(Request $request)
     {
-        
+
         // if (WorkFlowPermissionHelper::canEditDraft()) {
         // if (Auth::user()->can('edit draft')) {
             $app_id = Crypt::decryptString($request->app_id);
@@ -88,4 +88,10 @@ class SchemeController extends Controller
         $header = 'Oops! You do not have permission to edit draft.';
         return view('CommonRestictedpage.index', compact('header'));
     }
+
+    public function lgd()
+    {
+        return view('schemesblade.lgd');
+    }
+
 }
