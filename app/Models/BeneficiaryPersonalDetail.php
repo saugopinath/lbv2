@@ -25,7 +25,14 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     {
         return $this->hasMany(BeneficiaryEnclosure::class, 'application_id');
     }
-
+    public function aadhar()
+    {
+        return $this->hasOne(BeneficiaryAadhaar::class, 'application_id', 'application_id');
+    }
+    public function bank()
+    {
+        return $this->hasOne(BeneficiaryBankDetail::class, 'application_id', 'application_id');
+    }
     // public function transformAudit(array $data): array
     // {
     //     $data['new_values']['updated_by_role'] = Auth::user()->role_id;

@@ -6,7 +6,9 @@ use App\Models\BeneficiaryPersonalDetail;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use App\Models\Scheme;
+use App\Models\WorkflowsteproleMapping;
 use Illuminate\Support\Facades\Crypt;
+use App\Services\WorkflowService;
 
 class BeneficiarySearch extends Component
 {
@@ -85,7 +87,7 @@ class BeneficiarySearch extends Component
         return $this->fields[$key]['rules'] ?? 'required';
     }
 
-    public function search()
+    public function search(WorkflowService $workflowService)
     {
         $rules = [];
         $messages = [];
@@ -109,7 +111,14 @@ class BeneficiarySearch extends Component
         $this->validate($rules, $messages);
         $modelClass = BeneficiaryPersonalDetail::class;
         $searchValue = $this->inputValue;
-        $query = $modelClass::query();
+        $query = $modelClass::query()->whereIn('is_clean', [1, 2]);
+        $query->where('scheme_id', $this->selectedScheme);
+        if ($this->isApproved) {
+            $getMinMaxWorkflowStep = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->selectedScheme);
+            $nextLabelRoleId = $workflowService->getLabelRoles($this->selectedScheme, $getMinMaxWorkflowStep['max'])->next_label_role_id;
+            $query->where('is_final', 1);
+            $query->where('next_level_role_id', $nextLabelRoleId);
+        }
         switch ($key) {
             case 'application_id':
                 $query->where($key, $searchValue);
@@ -123,20 +132,23 @@ class BeneficiarySearch extends Component
             case 'aadhaar_number':
                 $query->whereHas('aadhar', function ($q) use ($searchValue) {
                     $q->where('aadhar_vault', md5($searchValue));
-                })->with('aadhar');
+                });
                 break;
             case 'bank_account_number':
                 $query->whereHas('bank', function ($q) use ($searchValue) {
                     $q->where('bankaccountnumber', $searchValue);
-                })->with('bank');
+                });
                 break;
         }
+        $results = $query->get(['application_id', 'beneficiary_id', 'next_level_role_id', 'is_final', 'is_clean', 'scheme_id']);
         $payload = [
             'searchKey'   => $this->selectedOption,
             'searchValue' => $this->inputValue,
-            'isApproved'  => $this->isApproved,
-            'schemeId'    => $this->selectedScheme,
         ];
+        if ($results->isNotEmpty()) {
+            $payload['results'] = $results->toArray();
+            $payload['count']   = $results->count();
+        }
         dd($payload);
         $this->dispatch('beneficiary-search', data: $payload);
     }
