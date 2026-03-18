@@ -84,7 +84,7 @@ class BeneficiarySearch extends Component
     {
         return $this->fields[$key]['rules'] ?? 'required';
     }
-    
+
     public function search()
     {
         $rules = [];
@@ -94,6 +94,8 @@ class BeneficiarySearch extends Component
         if ($this->isShownScheme) {
             $rules['selectedScheme'] = 'required';
             $messages['selectedScheme.required'] = 'Please select a scheme.';
+        } else {
+            $this->selectedScheme = Scheme::where('is_active', 1)->first()->id;
         }
         if ($this->selectedOption) {
             $key = $this->selectedOption;
@@ -111,6 +113,7 @@ class BeneficiarySearch extends Component
             'isApproved'  => $this->isApproved,
             'schemeId'    => $this->selectedScheme,
         ];
+        dd($payload);
         $this->dispatch('beneficiary-search', data: $payload);
     }
 
