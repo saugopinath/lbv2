@@ -21,6 +21,7 @@ class BeneficiarySearch extends Component
     public $schemes = [];
     public $isShownScheme = true;
     public $selectedScheme = null;
+    public $lgdData = [];
     public $fields = [
         'application_id' => [
             'label' => 'Application ID',
@@ -28,10 +29,10 @@ class BeneficiarySearch extends Component
             'type'  => 'number',
             'input_type' => 'text'
         ],
-        'beneficiary_name' => [
-            'label' => 'Beneficiary Name',
-            'rules' => 'required|regex:/^[a-zA-Z\s]+$/',
-            'type'  => 'text',
+        'beneficiary_id' => [
+            'label' => 'Beneficiary ID',
+            'rules' => 'required|numeric',
+            'type'  => 'number',
             'input_type' => 'text'
         ],
         'mobile_number' => [
@@ -48,6 +49,12 @@ class BeneficiarySearch extends Component
             'type'  => 'number',
             'input_type' => 'password'
         ],
+        'beneficiary_name' => [
+            'label' => 'Beneficiary Name',
+            'rules' => 'required|regex:/^[a-zA-Z\s]+$/',
+            'type'  => 'text',
+            'input_type' => 'text'
+        ],
         'bank_account_number' => [
             'label' => 'Bank Account Number',
             'rules' => 'required|numeric',
@@ -56,17 +63,35 @@ class BeneficiarySearch extends Component
         ],
     ];
 
-    public function mount($isApproved = false, $selectedOption = null, $inputValue = null, $displayType = 'select', $isFinal = false, $isAssigned = false, $isShownScheme = true)
-    {
+    public function mount(
+        $isApproved = false,
+        $selectedOption = null,
+        $inputValue = null,
+        $displayType = 'select',
+        $isFinal = false,
+        $isAssigned = false,
+        $isShownScheme = true,
+        $excludeFields = []
+    ) {
         $this->isApproved = $isApproved;
         $this->selectedOption = $selectedOption;
         $this->inputValue = $inputValue ?? '';
         $this->displayType = $displayType;
         $this->isShownScheme = $isShownScheme;
         $scheme_id = null;
+        $select_lgd = session('lgd_session');
+        if ($select_lgd) {
+            if (!empty($select_lgd['district_id'])) {
+                $this->lgdData['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
+            }
+            if (!empty($select_lgd['block_id'])) {
+                $this->lgdData['created_by_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
+            }
+            if (!empty($select_lgd['subdivision_id'])) {
+                $this->lgdData['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
+            }
+        }
         if ($isAssigned) {
-            $select_lgd = session('lgd_session');
-
             if (!empty($select_lgd['scheme_id'])) {
                 $scheme_id = Crypt::decryptString($select_lgd['scheme_id']);
             }
@@ -80,6 +105,9 @@ class BeneficiarySearch extends Component
             });
         }
         $this->schemes = $query->get();
+        if (!empty($excludeFields)) {
+            $this->fields = array_diff_key($this->fields, array_flip($excludeFields));
+        }
     }
 
     private function getValidationRules($key)
@@ -113,6 +141,9 @@ class BeneficiarySearch extends Component
         $searchValue = $this->inputValue;
         $query = $modelClass::query()->whereIn('is_clean', [1, 2]);
         $query->where('scheme_id', $this->selectedScheme);
+        if ($this->lgdData) {
+            $query->where($this->lgdData);
+        }
         if ($this->isApproved) {
             $getMinMaxWorkflowStep = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->selectedScheme);
             $nextLabelRoleId = $workflowService->getLabelRoles($this->selectedScheme, $getMinMaxWorkflowStep['max'])->next_label_role_id;
@@ -121,6 +152,9 @@ class BeneficiarySearch extends Component
         }
         switch ($key) {
             case 'application_id':
+                $query->where($key, $searchValue);
+                break;
+            case 'beneficiary_id':
                 $query->where($key, $searchValue);
                 break;
             case 'beneficiary_name':
@@ -151,7 +185,6 @@ class BeneficiarySearch extends Component
         }
         $this->dispatch('beneficiary-search', data: $payload);
     }
-
     public function render()
     {
         return view('livewire.beneficiary-search');
