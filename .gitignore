@@ -18,4 +18,14 @@ yarn-error.log
 /.idea
 /.vscode
 /resources/views/schemes/*
-!/storage/app/data
+# Ignore all storage
+/storage/*
+
+# Allow app folder
+!/storage/app/
+
+# Allow data folder inside app
+!/storage/app/data/
+
+# Allow files inside data
+!/storage/app/data/**
