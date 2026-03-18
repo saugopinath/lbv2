@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Laravel\Scout\Searchable;
+use Illuminate\Database\Eloquent\Model;
 
 class BeneficiaryPersonalDetail extends BaseAuditableModel
 {
@@ -16,14 +17,21 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
         'other_details' => 'array',
     ];
 
-
-    public function contact()
-    {
-        return $this->hasOne(BeneficiaryContactDetail::class, 'application_id', 'application_id');
-    }
     public function documents()
     {
         return $this->hasMany(BeneficiaryEnclosure::class, 'application_id');
+    }
+    public function bank()
+    {
+        return $this->hasOne(BeneficiaryBankDetail::class, 'application_id', 'application_id');
+    }
+    public function aadhar()
+    {
+        return $this->hasOne(BeneficiaryAadhaar::class, 'application_id', 'application_id');
+    }
+    public function contact()
+    {
+        return $this->hasOne(BeneficiaryContactDetail::class, 'application_id', 'application_id');
     }
 
     // public function transformAudit(array $data): array

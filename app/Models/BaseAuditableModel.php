@@ -14,7 +14,7 @@ abstract class BaseAuditableModel extends Model implements Auditable
     public function transformAudit(array $data): array
     {
         $userId = Auth::id();
-        $userRole = UserRoleSchemeOfficeMapping::where('user_id', $userId)
+        $userRole = \App\Models\UserRoleSchemeOfficeMapping::where('user_id', $userId)
             ->value('role_id');
         $data['tags'] = class_basename($this) . '_' . $data['event'];
         $data['session_id'] = session()->getId();

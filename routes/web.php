@@ -235,12 +235,12 @@ Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])
 //Reject Approved Beneficiary
 Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
     Route::get('/reject-approved-beneficiary',  'index')
-        // ->middleware('permission.redirect:canRejectApprovedBeneficiary')
+        ->middleware('permission.redirect:canRejectApprovedBeneficiary')
         ->name('reject-approved-beneficiary');
-    Route::get('/reject-approved-beneficiary/de-activate', 'editview')
-        // ->middleware('permission.redirect:canViewDetailsToReject')
-        ->name('reject-approved-beneficiary.de-activate');
+    Route::get('/reject-approved-beneficiary/BeneficiaryDetails', 'editview')
+        ->middleware('permission.redirect:canViewDetailsToReject')
+        ->name('reject-approved-beneficiary.BeneficiaryDetails');
     Route::post('/deActivebeneficiary', 'deActiveBeneficiary')
-        // ->middleware('permission.redirect:canRejectBeneficiary')
+        ->middleware('permission.redirect:canRejectBeneficiary')
         ->name('beneficiary.deActivebeneficiary');
 });
