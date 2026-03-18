@@ -19,6 +19,7 @@ use App\Http\Controllers\CMOGrievanceController;
 use App\Http\Controllers\OfficeMastersController;
 use App\Http\Controllers\JnpmController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\BackFromJBController;
 use App\Http\Controllers\IncompleteTypeController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\BeneficiaryListController;
@@ -276,60 +277,8 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
         ->name('beneficiary.deActivebeneficiary');
 });
 
-/// Global Dynamic Workflow Routes
-Route::get('dynamic-workflow-config', WorkflowWizard::class)->name('dynamic-workflow-config');
-// Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
-// Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
-// Route::get('dynamic-process-workflow', DynamicProcessPage::class)->name('dynamic-process-workflow');
 
-Route::get('request-update-beneficiary', [UpdateMarkBeneficiaryDetailsController::class, 'updateRequest'])->name('request-update-beneficiary');
-Route::get('update-mark-beneficiary-details', [UpdateMarkBeneficiaryDetailsController::class, 'index'])->name('update-mark-beneficiary-details');
-Route::get('update-beneficiary-list', [UpdateMarkBeneficiaryDetailsController::class, 'listdetails'])->name('update-beneficiary-list');
-
-
-Route::get('caste-management', [CasteManagementController::class, 'index'])->name('caste-management');
-Route::get('caste-management-request-list', [CasteManagementController::class, 'requestdedlistdetails'])->name('caste-management-request-list');
-// Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
-//     // ->middleware('permission.redirect:canBeneficiaryDetails')
-//     ->name('view-beneficiary-details');
-
-// Route::controller(CasteManagementController::class)->group(function () {
-//     Route::get('caste-management', 'index')->name('caste-management');
-//     Route::get('caste-management-request-list', 'requestdedlistdetails')->name('caste-management-request-list');
-// });
-Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])
-    ->middleware('permission:update bank details')
-    ->name('bankUpdate');
-
-Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])
-    // ->middleware('permission:search bank update')
-    ->name('bank-update.search-beneficiary');
-
-Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])
-    // ->middleware('permission:update mobile')
-    ->name('update-mobile');
-
-Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
-    // ->middleware('permission:update bank')
-    ->name('update-bank');
-
-Route::controller(JnpmController::class)->group(function () {
-
-    Route::any('/jnmp/pull', 'pullJnmpData')
-    ->middleware('permission.redirect:canImportJanmaMrityuData')
-    ->name('jnmp.pull');
-
-    Route::post('/jnmp/details-callback', 'detailsCallback')->name('jnmp.details-callback');
-
-    Route::get('/jnmp-stats', 'getJnmpStats');
-    Route::post('/jnmp/mark-as-death', 'markAsDeathProcess')->name('jnmp.mark-as-death');
-
-    Route::get('jnmp-data', 'index')
-    ->middleware('permission.redirect:canReActivateDeathIncident')
-    ->name('jnmp-data');
-
-    // JNMP List at HOD
-    Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')
-    ->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')
-    ->name('jnmp-marked-data');
+Route::controller(BackFromJBController::class)->group(function () {
+    Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
+    Route::any('/backfromjbactions', 'backfromjbactions')->name('backfromjbactions');
 });
