@@ -40,11 +40,14 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     {
         return $this->hasOne(FailedPaymentDetails::class, 'ben_id', 'beneficiary_id');
     }
-     public function benPaymentDetails()
+    public function benPaymentDetails()
     {
         return $this->hasOne(BenPaymentDetails::class, 'ben_id', 'beneficiary_id');
     }
-
+    public function scheme()
+    {
+        return $this->hasOne(Scheme::class, 'id', 'scheme_id');
+    }
     public function creator()
     {
         $block = Block::where('lgd_code', $this->created_by_local_body_code)->first();

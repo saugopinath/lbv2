@@ -138,7 +138,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('userDutymanagement.index');
 
 
-         // Incomplete Types
+    // Incomplete Types
     Route::get('/incomplete-types/{stage?}', [IncompleteTypeController::class, 'index'])
         ->name('incomplete.types');
 
@@ -265,3 +265,18 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
         // ->middleware('permission.redirect:canRejectBeneficiary')
         ->name('beneficiary.deActivebeneficiary');
 });
+Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])
+    ->middleware('permission:update bank details')
+    ->name('bankUpdate');
+
+Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])
+    // ->middleware('permission:search bank update')
+    ->name('bank-update.search-beneficiary');
+
+Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])
+    // ->middleware('permission:update mobile')
+    ->name('update-mobile');
+
+Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
+    // ->middleware('permission:update bank')
+    ->name('update-bank');
