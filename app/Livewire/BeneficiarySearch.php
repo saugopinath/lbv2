@@ -149,7 +149,6 @@ class BeneficiarySearch extends Component
             $payload['results'] = $results->toArray();
             $payload['count']   = $results->count();
         }
-        dd($payload);
         $this->dispatch('beneficiary-search', data: $payload);
     }
 
