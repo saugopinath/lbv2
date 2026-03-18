@@ -18,6 +18,7 @@ use App\Livewire\RoleOfficeTypeMappings\Create;
 use App\Http\Controllers\CMOGrievanceController;
 use App\Http\Controllers\OfficeMastersController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\BackFromJBController;
 use App\Http\Controllers\IncompleteTypeController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\BeneficiaryListController;
@@ -243,4 +244,10 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
     Route::post('/deActivebeneficiary', 'deActiveBeneficiary')
         // ->middleware('permission.redirect:canRejectBeneficiary')
         ->name('beneficiary.deActivebeneficiary');
+});
+
+
+Route::controller(BackFromJBController::class)->group(function () {
+    Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
+    Route::any('/backfromjbactions', 'backfromjbactions')->name('backfromjbactions');
 });

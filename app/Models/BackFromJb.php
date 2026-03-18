@@ -1,0 +1,15 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class BackFromJb extends Model
+{
+    protected $table = 'pension.back_from_jbs';
+    protected $primaryKey = 'application_id';
+    public function beneficiary()
+    {
+        return $this->hasOne(BeneficiaryPersonalDetail::class, 'application_id', 'application_id');
+    }
+}
