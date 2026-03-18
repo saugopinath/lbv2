@@ -14,7 +14,7 @@ class WorkflowsteproleMapping extends Model implements Auditable
     {
         $query = self::query();
         if ($rank !== null) {
-            $query->where('rank', $rank);
+            $query->where('workflow_step_id', $rank);
         } else {
             $query->where('role_id', $roleId);
         }

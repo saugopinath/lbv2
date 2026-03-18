@@ -231,3 +231,16 @@ Route::get('application-lists', [Formcontroller::class, 'applicationLists'])
     ->name('application-lists');
 Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])
     ->name('define-workflow1');
+
+//Reject Approved Beneficiary
+Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
+    Route::get('/reject-approved-beneficiary',  'index')
+        // ->middleware('permission.redirect:canRejectApprovedBeneficiary')
+        ->name('reject-approved-beneficiary');
+    Route::get('/reject-approved-beneficiary/de-activate', 'editview')
+        // ->middleware('permission.redirect:canViewDetailsToReject')
+        ->name('reject-approved-beneficiary.de-activate');
+    Route::post('/deActivebeneficiary', 'deActiveBeneficiary')
+        // ->middleware('permission.redirect:canRejectBeneficiary')
+        ->name('beneficiary.deActivebeneficiary');
+});
