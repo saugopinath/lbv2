@@ -85,12 +85,14 @@
 
     }" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         @foreach ($doc_lists as $doc)
-        <div wire:key="doc_{{ $doc->doc_type_id }}">
-            <x-document-card :docName="$doc->codemaster->name" :isRequired="$doc->is_required" :docTypeId="$doc->doc_type_id" :existingDoc="$existingDocuments[$doc->doc_type_id] ?? null" :xIsDuplicate="$is_page == 1 ? 1 : 0"
-                :showErrors="$showErrors ?? false" />
-        </div>
+            <div wire:key="doc_{{ $doc->doc_type_id }}">
+                <x-document-card :docName="$doc->codemaster->name" :isRequired="$doc->is_required"
+                    :docTypeId="$doc->doc_type_id" :existingDoc="$existingDocuments[$doc->doc_type_id] ?? null"
+                    :xIsDuplicate="$is_page == 1 ? 1 : 0" :showErrors="$showErrors ?? false" />
+            </div>
         @endforeach
 
-        <x-upload-modal :currentDocExtensions="$currentDocExtensions" :currentDocMaxSize="$currentDocMaxSize" :formPreview="$form_preview" />
+        <x-upload-modal :currentDocExtensions="$currentDocExtensions" :currentDocMaxSize="$currentDocMaxSize"
+            :formPreview="$form_preview" />
     </div>
 </div>

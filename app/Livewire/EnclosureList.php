@@ -227,7 +227,7 @@ class EnclosureList extends Component
     }
     protected function enclosureModel()
     {
-        return (int)$this->enclosureSource === 5
+        return (int) $this->enclosureSource === 5
             ? new BeneficiaryTemEnclosure
             : new BeneficiaryEnclosure;
     }
@@ -257,30 +257,30 @@ class EnclosureList extends Component
         // dd($existingDoc);
         if ($existingDoc) {
             $updateData = [
-                'attched_document'   => $base64,
-                'ip_address'         => request()->ip(),
+                'attched_document' => $base64,
+                'ip_address' => request()->ip(),
                 'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
                 'document_mime_type' => $this->singleDocument->getMimeType(),
-                'created_by'         => Auth::id(),
-                'scheme_id'          => $this->scheme_id,
+                'created_by' => Auth::id(),
+                'scheme_id' => $this->scheme_id,
             ];
-            if ((int)$this->enclosureSource !== 5) {
+            if ((int) $this->enclosureSource !== 5) {
                 $updateData['tab_code'] = $this->tabCode;
             }
             $existingDoc->update($updateData);
         } else {
             $createData = [
-                'application_id'     => $this->application_id,
-                'beneficiary_id'     => $beneficiaryId,
-                'attched_document'   => $base64,
-                'ip_address'         => request()->ip(),
+                'application_id' => $this->application_id,
+                'beneficiary_id' => $beneficiaryId,
+                'attched_document' => $base64,
+                'ip_address' => request()->ip(),
                 'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
                 'document_mime_type' => $this->singleDocument->getMimeType(),
-                'document_type'      => $this->currentDocId,
-                'created_by'         => Auth::id(),
-                'scheme_id'          => $this->scheme_id,
+                'document_type' => $this->currentDocId,
+                'created_by' => Auth::id(),
+                'scheme_id' => $this->scheme_id,
             ];
-            if ((int)$this->enclosureSource !== 5) {
+            if ((int) $this->enclosureSource !== 5) {
                 $createData['tab_code'] = $this->tabCode;
             }
             $model::create($createData);
