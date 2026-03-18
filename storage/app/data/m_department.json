@@ -1,0 +1,1355 @@
+[
+    {
+        "id": 4,
+        "name": "Disaster Management",
+        "is_active": 0,
+        "slug": null,
+        "icon": null,
+        "image_ref": null,
+        "rank": 10,
+        "f_name": "Disaster Management",
+        "ref_color": "violet",
+        "json_data": null,
+        "json_data_bak": null
+    },
+    {
+        "id": 5,
+        "name": "WBSCSTOBCDFC",
+        "is_active": 0,
+        "slug": null,
+        "icon": null,
+        "image_ref": null,
+        "rank": 9,
+        "f_name": "West Bengal SC, ST, OBC Development & Finance Corporation",
+        "ref_color": "lime",
+        "json_data": null,
+        "json_data_bak": null
+    },
+    {
+        "id": 1,
+        "name": "Tribal Welfare Dept",
+        "is_active": 1,
+        "slug": "tirbal-dept",
+        "icon": null,
+        "image_ref": null,
+        "rank": 2,
+        "f_name": "Tribal Development Department",
+        "ref_color": "green",
+        "json_data": {
+            "id": 1,
+            "long": "The Tribal Development Department of West Bengal works to improve the socio-economic conditions of Scheduled Tribe communities. It implements welfare schemes related to education, healthcare, housing, livelihood generation, and skill development. The department especially focuses on remote and tribal-dominated regions where access to services is limited. It also preserves tribal culture, traditions, and community identity through cultural promotion and support programs. By coordinating with various state and central agencies, the department ensures equitable access to social protection and development resources, empowering ST citizens to live secure and dignified lives.",
+            "about": {
+                "vision_mission": [
+                    {
+                        "text": "A society where women and children realize their full potential in a safe and supportive environment.",
+                        "title": "Vision"
+                    },
+                    {
+                        "text": "To implement policies and programs that promote women's empowerment, child development, and social welfare through strategic interventions and community participation.",
+                        "title": "Mission"
+                    }
+                ]
+            },
+            "short": "The Tribal Development Department implements welfare, livelihood, education, and development programs for Scheduled Tribes, ensuring access to essential services and government benefits.",
+            "contact": {
+                "email": "secy-wcd@wb.gov.in",
+                "address": "Writers' Buildings, Kolkata - 700001",
+                "website": "www.wbwcd.gov.in",
+                "helplines": [
+                    "1800-345-6789 (Women Helpline)",
+                    "1098 (Child Helpline)"
+                ]
+            },
+            "tagline": {
+                "line1": "Empowering Women",
+                "line2": "Nurturing Children",
+                "line3": "Building Stronger Communities"
+            },
+            "ref_color": "green",
+            "very_short": "Leads welfare, livelihood, and development initiatives for tribal communities in West Bengal.",
+            "quick_stats": [
+                {
+                    "schemes": 3
+                }
+            ],
+            "key_functions": [
+                {
+                    "icon": "fa-user-shield",
+                    "text": "Economic, social, and political empowerment through skill development, entrepreneurship, and leadership programs.",
+                    "title": "Women Empowerment"
+                },
+                {
+                    "icon": "fa-baby",
+                    "text": "Ensuring holistic development of children through nutrition, health, education, and protection services.",
+                    "title": "Child Development"
+                },
+                {
+                    "icon": "fa-shield-alt",
+                    "text": "Protection against violence, abuse, exploitation via women helplines, shelter homes, and child protection services.",
+                    "title": "Protection Services"
+                },
+                {
+                    "icon": "fa-balance-scale",
+                    "text": "Implementing state policies aligned with national frameworks and international conventions.",
+                    "title": "Policy Implementation"
+                }
+            ],
+            "department_name": "Tribal Development Department",
+            "flagship_schemes": [
+                {
+                    "name": "Lakshmir Bhandar",
+                    "color": "purple",
+                    "benefit": "₹500-₹1000/month",
+                    "description": "Monthly financial assistance to women heads of families.",
+                    "target_group": "Women"
+                },
+                {
+                    "name": "Old Age Pension",
+                    "color": "blue",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for elderly citizens.",
+                    "target_group": "60+ Years"
+                },
+                {
+                    "name": "Widow Pension",
+                    "color": "green",
+                    "benefit": "₹1000/month",
+                    "description": "Financial support for widowed women.",
+                    "target_group": "Widows"
+                },
+                {
+                    "name": "Manabik",
+                    "color": "yellow",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for disabled persons.",
+                    "target_group": "Persons with Disabilities"
+                },
+                {
+                    "name": "Kanyashree Prakalpa",
+                    "color": "pink",
+                    "description": "Empowerment through education and financial assistance.",
+                    "target_group": "Girl Students"
+                }
+            ],
+            "major_initiatives": [
+                {
+                    "icon": "fa-female",
+                    "name": "Kanyashree Prakalpa",
+                    "description": "Award-winning conditional cash transfer scheme for girl children."
+                },
+                {
+                    "icon": "fa-heart",
+                    "name": "Rupashree Prakalpa",
+                    "description": "Financial assistance for marriage of girls from economically weak families."
+                },
+                {
+                    "icon": "fa-home",
+                    "name": "Swabalamban",
+                    "description": "Shelter homes and rehabilitation for women in distress."
+                },
+                {
+                    "icon": "fa-utensils",
+                    "name": "ICDS Services",
+                    "description": "Integrated Child Development Services across all blocks."
+                }
+            ],
+            "ref_grident_color": "purple",
+            "ref_gradient_color": "emerald",
+            "orgnizational_structure": [
+                {
+                    "icon": "fa-user-tie",
+                    "title": "Minister-in-Charge"
+                },
+                {
+                    "icon": "fa-user-md",
+                    "title": "Principal Secretary"
+                },
+                {
+                    "icon": "fa-users",
+                    "title": "District Magistrates"
+                },
+                {
+                    "icon": "fa-female",
+                    "title": "Child Development Project Officers"
+                },
+                {
+                    "icon": "fa-school",
+                    "title": "AngAnganwadi Workers"
+                },
+                {
+                    "icon": "fa-hands-helping",
+                    "title": "NGO Partners"
+                }
+            ]
+        },
+        "json_data_bak": {
+            "id": 1,
+            "long": "The Tribal Development Department of West Bengal works to improve the socio-economic conditions of Scheduled Tribe communities. It implements welfare schemes related to education, healthcare, housing, livelihood generation, and skill development. The department especially focuses on remote and tribal-dominated regions where access to services is limited. It also preserves tribal culture, traditions, and community identity through cultural promotion and support programs. By coordinating with various state and central agencies, the department ensures equitable access to social protection and development resources, empowering ST citizens to live secure and dignified lives.",
+            "short": "The Tribal Development Department implements welfare, livelihood, education, and development programs for Scheduled Tribes, ensuring access to essential services and government benefits.",
+            "ref_color": "green",
+            "very_short": "Leads welfare, livelihood, and development initiatives for tribal communities in West Bengal.",
+            "department_name": "Tribal Development Department"
+        }
+    },
+    {
+        "id": 6,
+        "name": "Fisheries Department",
+        "is_active": 1,
+        "slug": "fisheries-dept",
+        "icon": null,
+        "image_ref": null,
+        "rank": 8,
+        "f_name": "Fisheries Department",
+        "ref_color": "sky",
+        "json_data": {
+            "id": 6,
+            "long": "The Fisheries Department of West Bengal enhances fish production and improves the livelihoods of fishing communities. It supports modern aquaculture techniques, breeding programs, and resource management. The department provides subsidies for boats, nets, equipment, and cold storage infrastructure. Training programs, credit support, and market linkages help fishermen improve productivity and income. The department works on sustainable inland, marine, and brackish-water fisheries, restoring habitats and maintaining ecological balance. By developing fish farms, hatcheries, and cooperative structures, it ensures food security, employment generation, and economic growth in the state.",
+            "about": {
+                "vision_mission": [
+                    {
+                        "text": "A society where women and children realize their full potential in a safe and supportive environment.",
+                        "title": "Vision"
+                    },
+                    {
+                        "text": "To implement policies and programs that promote women's empowerment, child development, and social welfare through strategic interventions and community participation.",
+                        "title": "Mission"
+                    }
+                ]
+            },
+            "short": "The Fisheries Department promotes fish production, aquaculture, and welfare of fishing communities through training, subsidies, and scientific resource management.",
+            "contact": {
+                "email": "secy-wcd@wb.gov.in",
+                "address": "Writers' Buildings, Kolkata - 700001",
+                "website": "www.wbwcd.gov.in",
+                "helplines": [
+                    "1800-345-6789 (Women Helpline)",
+                    "1098 (Child Helpline)"
+                ]
+            },
+            "tagline": {
+                "line1": "Empowering Women",
+                "line2": "Nurturing Children",
+                "line3": "Building Stronger Communities"
+            },
+            "ref_color": "sky",
+            "very_short": "Develops fisheries, aquaculture, and supports fishing communities.",
+            "quick_stats": [
+                {
+                    "schemes": 3
+                }
+            ],
+            "key_functions": [
+                {
+                    "icon": "fa-user-shield",
+                    "text": "Economic, social, and political empowerment through skill development, entrepreneurship, and leadership programs.",
+                    "title": "Women Empowerment"
+                },
+                {
+                    "icon": "fa-baby",
+                    "text": "Ensuring holistic development of children through nutrition, health, education, and protection services.",
+                    "title": "Child Development"
+                },
+                {
+                    "icon": "fa-shield-alt",
+                    "text": "Protection against violence, abuse, exploitation via women helplines, shelter homes, and child protection services.",
+                    "title": "Protection Services"
+                },
+                {
+                    "icon": "fa-balance-scale",
+                    "text": "Implementing state policies aligned with national frameworks and international conventions.",
+                    "title": "Policy Implementation"
+                }
+            ],
+            "department_name": "Fisheries Department",
+            "flagship_schemes": [
+                {
+                    "name": "Lakshmir Bhandar",
+                    "color": "purple",
+                    "benefit": "₹500-₹1000/month",
+                    "description": "Monthly financial assistance to women heads of families.",
+                    "target_group": "Women"
+                },
+                {
+                    "name": "Old Age Pension",
+                    "color": "blue",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for elderly citizens.",
+                    "target_group": "60+ Years"
+                },
+                {
+                    "name": "Widow Pension",
+                    "color": "green",
+                    "benefit": "₹1000/month",
+                    "description": "Financial support for widowed women.",
+                    "target_group": "Widows"
+                },
+                {
+                    "name": "Manabik",
+                    "color": "yellow",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for disabled persons.",
+                    "target_group": "Persons with Disabilities"
+                },
+                {
+                    "name": "Kanyashree Prakalpa",
+                    "color": "pink",
+                    "description": "Empowerment through education and financial assistance.",
+                    "target_group": "Girl Students"
+                }
+            ],
+            "major_initiatives": [
+                {
+                    "icon": "fa-female",
+                    "name": "Kanyashree Prakalpa",
+                    "description": "Award-winning conditional cash transfer scheme for girl children."
+                },
+                {
+                    "icon": "fa-heart",
+                    "name": "Rupashree Prakalpa",
+                    "description": "Financial assistance for marriage of girls from economically weak families."
+                },
+                {
+                    "icon": "fa-home",
+                    "name": "Swabalamban",
+                    "description": "Shelter homes and rehabilitation for women in distress."
+                },
+                {
+                    "icon": "fa-utensils",
+                    "name": "ICDS Services",
+                    "description": "Integrated Child Development Services across all blocks."
+                }
+            ],
+            "ref_grident_color": "purple",
+            "ref_gradient_color": "blue",
+            "orgnizational_structure": [
+                {
+                    "icon": "fa-user-tie",
+                    "title": "Minister-in-Charge"
+                },
+                {
+                    "icon": "fa-user-md",
+                    "title": "Principal Secretary"
+                },
+                {
+                    "icon": "fa-users",
+                    "title": "District Magistrates"
+                },
+                {
+                    "icon": "fa-female",
+                    "title": "Child Development Project Officers"
+                },
+                {
+                    "icon": "fa-school",
+                    "title": "AngAnganwadi Workers"
+                },
+                {
+                    "icon": "fa-hands-helping",
+                    "title": "NGO Partners"
+                }
+            ]
+        },
+        "json_data_bak": {
+            "id": 6,
+            "long": "The Fisheries Department of West Bengal enhances fish production and improves the livelihoods of fishing communities. It supports modern aquaculture techniques, breeding programs, and resource management. The department provides subsidies for boats, nets, equipment, and cold storage infrastructure. Training programs, credit support, and market linkages help fishermen improve productivity and income. The department works on sustainable inland, marine, and brackish-water fisheries, restoring habitats and maintaining ecological balance. By developing fish farms, hatcheries, and cooperative structures, it ensures food security, employment generation, and economic growth in the state.",
+            "short": "The Fisheries Department promotes fish production, aquaculture, and welfare of fishing communities through training, subsidies, and scientific resource management.",
+            "ref_color": "sky",
+            "very_short": "Develops fisheries, aquaculture, and supports fishing communities.",
+            "department_name": "Fisheries Department"
+        }
+    },
+    {
+        "id": 2,
+        "name": "BCW Department",
+        "is_active": 1,
+        "slug": "bcd-dept",
+        "icon": null,
+        "image_ref": null,
+        "rank": 3,
+        "f_name": "Backward Class Welfare Department",
+        "ref_color": "amber",
+        "json_data": {
+            "id": 2,
+            "long": "The Backward Class Welfare Department of West Bengal implements development programs for Scheduled Castes, Scheduled Tribes, and Other Backward Classes. It provides scholarships, hostels, coaching, and special educational support for students. Economic empowerment initiatives include loans, skill development, and entrepreneurship assistance. The department also supports housing, land reforms, and social protection programs to reduce inequalities. Through district-level monitoring and transparent processes, it ensures benefits reach deserving families. The department plays a vital role in promoting social justice, reducing disparities, and ensuring inclusive growth across the state.",
+            "about": {
+                "vision_mission": [
+                    {
+                        "text": "A society where women and children realize their full potential in a safe and supportive environment.",
+                        "title": "Vision"
+                    },
+                    {
+                        "text": "To implement policies and programs that promote women's empowerment, child development, and social welfare through strategic interventions and community participation.",
+                        "title": "Mission"
+                    }
+                ]
+            },
+            "short": "The Backward Class Welfare Department supports SC, ST, and OBC communities through scholarships, economic programs, housing, and social security schemes, promoting equal opportunities.",
+            "contact": {
+                "email": "secy-wcd@wb.gov.in",
+                "address": "Writers' Buildings, Kolkata - 700001",
+                "website": "www.wbwcd.gov.in",
+                "helplines": [
+                    "1800-345-6789 (Women Helpline)",
+                    "1098 (Child Helpline)"
+                ]
+            },
+            "tagline": {
+                "line1": "Empowering Women",
+                "line2": "Nurturing Children",
+                "line3": "Building Stronger Communities"
+            },
+            "ref_color": "amber",
+            "very_short": "Promotes welfare and development of SC, ST, and OBC communities.",
+            "quick_stats": [
+                {
+                    "schemes": 3
+                }
+            ],
+            "key_functions": [
+                {
+                    "icon": "fa-user-shield",
+                    "text": "Economic, social, and political empowerment through skill development, entrepreneurship, and leadership programs.",
+                    "title": "Women Empowerment"
+                },
+                {
+                    "icon": "fa-baby",
+                    "text": "Ensuring holistic development of children through nutrition, health, education, and protection services.",
+                    "title": "Child Development"
+                },
+                {
+                    "icon": "fa-shield-alt",
+                    "text": "Protection against violence, abuse, exploitation via women helplines, shelter homes, and child protection services.",
+                    "title": "Protection Services"
+                },
+                {
+                    "icon": "fa-balance-scale",
+                    "text": "Implementing state policies aligned with national frameworks and international conventions.",
+                    "title": "Policy Implementation"
+                }
+            ],
+            "department_name": "Backward Class Welfare Department",
+            "flagship_schemes": [
+                {
+                    "name": "Lakshmir Bhandar",
+                    "color": "purple",
+                    "benefit": "₹500-₹1000/month",
+                    "description": "Monthly financial assistance to women heads of families.",
+                    "target_group": "Women"
+                },
+                {
+                    "name": "Old Age Pension",
+                    "color": "blue",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for elderly citizens.",
+                    "target_group": "60+ Years"
+                },
+                {
+                    "name": "Widow Pension",
+                    "color": "green",
+                    "benefit": "₹1000/month",
+                    "description": "Financial support for widowed women.",
+                    "target_group": "Widows"
+                },
+                {
+                    "name": "Manabik",
+                    "color": "yellow",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for disabled persons.",
+                    "target_group": "Persons with Disabilities"
+                },
+                {
+                    "name": "Kanyashree Prakalpa",
+                    "color": "pink",
+                    "description": "Empowerment through education and financial assistance.",
+                    "target_group": "Girl Students"
+                }
+            ],
+            "major_initiatives": [
+                {
+                    "icon": "fa-female",
+                    "name": "Kanyashree Prakalpa",
+                    "description": "Award-winning conditional cash transfer scheme for girl children."
+                },
+                {
+                    "icon": "fa-heart",
+                    "name": "Rupashree Prakalpa",
+                    "description": "Financial assistance for marriage of girls from economically weak families."
+                },
+                {
+                    "icon": "fa-home",
+                    "name": "Swabalamban",
+                    "description": "Shelter homes and rehabilitation for women in distress."
+                },
+                {
+                    "icon": "fa-utensils",
+                    "name": "ICDS Services",
+                    "description": "Integrated Child Development Services across all blocks."
+                }
+            ],
+            "ref_grident_color": "purple",
+            "ref_gradient_color": "orange",
+            "orgnizational_structure": [
+                {
+                    "icon": "fa-user-tie",
+                    "title": "Minister-in-Charge"
+                },
+                {
+                    "icon": "fa-user-md",
+                    "title": "Principal Secretary"
+                },
+                {
+                    "icon": "fa-users",
+                    "title": "District Magistrates"
+                },
+                {
+                    "icon": "fa-female",
+                    "title": "Child Development Project Officers"
+                },
+                {
+                    "icon": "fa-school",
+                    "title": "AngAnganwadi Workers"
+                },
+                {
+                    "icon": "fa-hands-helping",
+                    "title": "NGO Partners"
+                }
+            ]
+        },
+        "json_data_bak": {
+            "id": 2,
+            "long": "The Backward Class Welfare Department of West Bengal implements development programs for Scheduled Castes, Scheduled Tribes, and Other Backward Classes. It provides scholarships, hostels, coaching, and special educational support for students. Economic empowerment initiatives include loans, skill development, and entrepreneurship assistance. The department also supports housing, land reforms, and social protection programs to reduce inequalities. Through district-level monitoring and transparent processes, it ensures benefits reach deserving families. The department plays a vital role in promoting social justice, reducing disparities, and ensuring inclusive growth across the state.",
+            "short": "The Backward Class Welfare Department supports SC, ST, and OBC communities through scholarships, economic programs, housing, and social security schemes, promoting equal opportunities.",
+            "ref_color": "amber",
+            "very_short": "Promotes welfare and development of SC, ST, and OBC communities.",
+            "department_name": "Backward Class Welfare Department"
+        }
+    },
+    {
+        "id": 8,
+        "name": "Information And Cultural Affairs",
+        "is_active": 1,
+        "slug": "inc-dept",
+        "icon": null,
+        "image_ref": null,
+        "rank": 4,
+        "f_name": "Information and Cultural Affairs Department",
+        "ref_color": "indigo",
+        "json_data": {
+            "id": 8,
+            "long": "The Information and Cultural Affairs Department of West Bengal promotes the state's cultural heritage, arts, literature, and creative activities. It supports artists, cultural institutions, and community programs through festivals, grants, and events. The department also organizes film-related activities, exhibitions, and preservation of traditional art forms. On the communication front, it manages government-public information flow through press releases, media coordination, and awareness campaigns. By integrating cultural promotion with public communication, the department strengthens Bengal’s cultural identity and ensures transparent dissemination of government policies and initiatives to citizens.",
+            "about": {
+                "vision_mission": [
+                    {
+                        "text": "A society where women and children realize their full potential in a safe and supportive environment.",
+                        "title": "Vision"
+                    },
+                    {
+                        "text": "To implement policies and programs that promote women's empowerment, child development, and social welfare through strategic interventions and community participation.",
+                        "title": "Mission"
+                    }
+                ]
+            },
+            "short": "This department promotes art, culture, and heritage while coordinating media communication and public information dissemination for the state government.",
+            "contact": {
+                "email": "secy-wcd@wb.gov.in",
+                "address": "Writers' Buildings, Kolkata - 700001",
+                "website": "www.wbwcd.gov.in",
+                "helplines": [
+                    "1800-345-6789 (Women Helpline)",
+                    "1098 (Child Helpline)"
+                ]
+            },
+            "tagline": {
+                "line1": "Empowering Women",
+                "line2": "Nurturing Children",
+                "line3": "Building Stronger Communities"
+            },
+            "ref_color": "indigo",
+            "very_short": "Handles culture, heritage, media communication, and public information.",
+            "quick_stats": [
+                {
+                    "schemes": 3
+                }
+            ],
+            "key_functions": [
+                {
+                    "icon": "fa-user-shield",
+                    "text": "Economic, social, and political empowerment through skill development, entrepreneurship, and leadership programs.",
+                    "title": "Women Empowerment"
+                },
+                {
+                    "icon": "fa-baby",
+                    "text": "Ensuring holistic development of children through nutrition, health, education, and protection services.",
+                    "title": "Child Development"
+                },
+                {
+                    "icon": "fa-shield-alt",
+                    "text": "Protection against violence, abuse, exploitation via women helplines, shelter homes, and child protection services.",
+                    "title": "Protection Services"
+                },
+                {
+                    "icon": "fa-balance-scale",
+                    "text": "Implementing state policies aligned with national frameworks and international conventions.",
+                    "title": "Policy Implementation"
+                }
+            ],
+            "department_name": "Information and Cultural Affairs Department",
+            "flagship_schemes": [
+                {
+                    "name": "Lakshmir Bhandar",
+                    "color": "purple",
+                    "benefit": "₹500-₹1000/month",
+                    "description": "Monthly financial assistance to women heads of families.",
+                    "target_group": "Women"
+                },
+                {
+                    "name": "Old Age Pension",
+                    "color": "blue",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for elderly citizens.",
+                    "target_group": "60+ Years"
+                },
+                {
+                    "name": "Widow Pension",
+                    "color": "green",
+                    "benefit": "₹1000/month",
+                    "description": "Financial support for widowed women.",
+                    "target_group": "Widows"
+                },
+                {
+                    "name": "Manabik",
+                    "color": "yellow",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for disabled persons.",
+                    "target_group": "Persons with Disabilities"
+                },
+                {
+                    "name": "Kanyashree Prakalpa",
+                    "color": "pink",
+                    "description": "Empowerment through education and financial assistance.",
+                    "target_group": "Girl Students"
+                }
+            ],
+            "major_initiatives": [
+                {
+                    "icon": "fa-female",
+                    "name": "Kanyashree Prakalpa",
+                    "description": "Award-winning conditional cash transfer scheme for girl children."
+                },
+                {
+                    "icon": "fa-heart",
+                    "name": "Rupashree Prakalpa",
+                    "description": "Financial assistance for marriage of girls from economically weak families."
+                },
+                {
+                    "icon": "fa-home",
+                    "name": "Swabalamban",
+                    "description": "Shelter homes and rehabilitation for women in distress."
+                },
+                {
+                    "icon": "fa-utensils",
+                    "name": "ICDS Services",
+                    "description": "Integrated Child Development Services across all blocks."
+                }
+            ],
+            "ref_grident_color": "purple",
+            "ref_gradient_color": "violet",
+            "orgnizational_structure": [
+                {
+                    "icon": "fa-user-tie",
+                    "title": "Minister-in-Charge"
+                },
+                {
+                    "icon": "fa-user-md",
+                    "title": "Principal Secretary"
+                },
+                {
+                    "icon": "fa-users",
+                    "title": "District Magistrates"
+                },
+                {
+                    "icon": "fa-female",
+                    "title": "Child Development Project Officers"
+                },
+                {
+                    "icon": "fa-school",
+                    "title": "AngAnganwadi Workers"
+                },
+                {
+                    "icon": "fa-hands-helping",
+                    "title": "NGO Partners"
+                }
+            ]
+        },
+        "json_data_bak": {
+            "id": 8,
+            "long": "The Information and Cultural Affairs Department of West Bengal promotes the state's cultural heritage, arts, literature, and creative activities. It supports artists, cultural institutions, and community programs through festivals, grants, and events. The department also organizes film-related activities, exhibitions, and preservation of traditional art forms. On the communication front, it manages government-public information flow through press releases, media coordination, and awareness campaigns. By integrating cultural promotion with public communication, the department strengthens Bengal’s cultural identity and ensures transparent dissemination of government policies and initiatives to citizens.",
+            "short": "This department promotes art, culture, and heritage while coordinating media communication and public information dissemination for the state government.",
+            "ref_color": "indigo",
+            "very_short": "Handles culture, heritage, media communication, and public information.",
+            "department_name": "Information and Cultural Affairs Department"
+        }
+    },
+    {
+        "id": 10,
+        "name": "Agriculture",
+        "is_active": 1,
+        "slug": "agriculture-dept",
+        "icon": null,
+        "image_ref": null,
+        "rank": 5,
+        "f_name": "Agriculture Department",
+        "ref_color": "orange",
+        "json_data": {
+            "id": 10,
+            "long": "The Agriculture Department of West Bengal promotes sustainable farming, improves agricultural productivity, and supports the welfare of farmers. It provides essential inputs such as seeds, fertilizers, and machinery, along with training and technical guidance. Programs include soil health management, irrigation development, crop insurance, horticulture, and organic farming. Extension services and field demonstrations help farmers adopt scientific and climate-resilient practices. The department also ensures market support and procurement facilities to strengthen farm incomes. By improving infrastructure, promoting innovation, and enhancing productivity, the Agriculture Department contributes to rural development and food security across the state.",
+            "about": {
+                "vision_mission": [
+                    {
+                        "text": "A society where women and children realize their full potential in a safe and supportive environment.",
+                        "title": "Vision"
+                    },
+                    {
+                        "text": "To implement policies and programs that promote women's empowerment, child development, and social welfare through strategic interventions and community participation.",
+                        "title": "Mission"
+                    }
+                ]
+            },
+            "short": "The Agriculture Department enhances crop productivity, supports farmers, and promotes modern farming practices through subsidies, training, irrigation, and scientific agriculture.",
+            "contact": {
+                "email": "secy-wcd@wb.gov.in",
+                "address": "Writers' Buildings, Kolkata - 700001",
+                "website": "www.wbwcd.gov.in",
+                "helplines": [
+                    "1800-345-6789 (Women Helpline)",
+                    "1098 (Child Helpline)"
+                ]
+            },
+            "tagline": {
+                "line1": "Empowering Women",
+                "line2": "Nurturing Children",
+                "line3": "Building Stronger Communities"
+            },
+            "ref_color": "orange",
+            "very_short": "Supports farmers, modern farming, and crop development.",
+            "quick_stats": [
+                {
+                    "schemes": 3
+                }
+            ],
+            "key_functions": [
+                {
+                    "icon": "fa-user-shield",
+                    "text": "Economic, social, and political empowerment through skill development, entrepreneurship, and leadership programs.",
+                    "title": "Women Empowerment"
+                },
+                {
+                    "icon": "fa-baby",
+                    "text": "Ensuring holistic development of children through nutrition, health, education, and protection services.",
+                    "title": "Child Development"
+                },
+                {
+                    "icon": "fa-shield-alt",
+                    "text": "Protection against violence, abuse, exploitation via women helplines, shelter homes, and child protection services.",
+                    "title": "Protection Services"
+                },
+                {
+                    "icon": "fa-balance-scale",
+                    "text": "Implementing state policies aligned with national frameworks and international conventions.",
+                    "title": "Policy Implementation"
+                }
+            ],
+            "department_name": "Agriculture Department",
+            "flagship_schemes": [
+                {
+                    "name": "Lakshmir Bhandar",
+                    "color": "purple",
+                    "benefit": "₹500-₹1000/month",
+                    "description": "Monthly financial assistance to women heads of families.",
+                    "target_group": "Women"
+                },
+                {
+                    "name": "Old Age Pension",
+                    "color": "blue",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for elderly citizens.",
+                    "target_group": "60+ Years"
+                },
+                {
+                    "name": "Widow Pension",
+                    "color": "green",
+                    "benefit": "₹1000/month",
+                    "description": "Financial support for widowed women.",
+                    "target_group": "Widows"
+                },
+                {
+                    "name": "Manabik",
+                    "color": "yellow",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for disabled persons.",
+                    "target_group": "Persons with Disabilities"
+                },
+                {
+                    "name": "Kanyashree Prakalpa",
+                    "color": "pink",
+                    "description": "Empowerment through education and financial assistance.",
+                    "target_group": "Girl Students"
+                }
+            ],
+            "major_initiatives": [
+                {
+                    "icon": "fa-female",
+                    "name": "Kanyashree Prakalpa",
+                    "description": "Award-winning conditional cash transfer scheme for girl children."
+                },
+                {
+                    "icon": "fa-heart",
+                    "name": "Rupashree Prakalpa",
+                    "description": "Financial assistance for marriage of girls from economically weak families."
+                },
+                {
+                    "icon": "fa-home",
+                    "name": "Swabalamban",
+                    "description": "Shelter homes and rehabilitation for women in distress."
+                },
+                {
+                    "icon": "fa-utensils",
+                    "name": "ICDS Services",
+                    "description": "Integrated Child Development Services across all blocks."
+                }
+            ],
+            "ref_grident_color": "purple",
+            "ref_gradient_color": "amber",
+            "orgnizational_structure": [
+                {
+                    "icon": "fa-user-tie",
+                    "title": "Minister-in-Charge"
+                },
+                {
+                    "icon": "fa-user-md",
+                    "title": "Principal Secretary"
+                },
+                {
+                    "icon": "fa-users",
+                    "title": "District Magistrates"
+                },
+                {
+                    "icon": "fa-female",
+                    "title": "Child Development Project Officers"
+                },
+                {
+                    "icon": "fa-school",
+                    "title": "AngAnganwadi Workers"
+                },
+                {
+                    "icon": "fa-hands-helping",
+                    "title": "NGO Partners"
+                }
+            ]
+        },
+        "json_data_bak": {
+            "id": 10,
+            "long": "The Agriculture Department of West Bengal promotes sustainable farming, improves agricultural productivity, and supports the welfare of farmers. It provides essential inputs such as seeds, fertilizers, and machinery, along with training and technical guidance. Programs include soil health management, irrigation development, crop insurance, horticulture, and organic farming. Extension services and field demonstrations help farmers adopt scientific and climate-resilient practices. The department also ensures market support and procurement facilities to strengthen farm incomes. By improving infrastructure, promoting innovation, and enhancing productivity, the Agriculture Department contributes to rural development and food security across the state.",
+            "short": "The Agriculture Department enhances crop productivity, supports farmers, and promotes modern farming practices through subsidies, training, irrigation, and scientific agriculture.",
+            "ref_color": "orange",
+            "very_short": "Supports farmers, modern farming, and crop development.",
+            "department_name": "Agriculture Department"
+        }
+    },
+    {
+        "id": 9,
+        "name": "WCD",
+        "is_active": 1,
+        "slug": "wcd-sw-dept",
+        "icon": null,
+        "image_ref": null,
+        "rank": 1,
+        "f_name": "Women and Child Development & Social Welfare Department",
+        "ref_color": "fuchsia",
+        "json_data": {
+            "id": 9,
+            "long": "The Women and Child Development & Social Welfare Department oversees programs focused on the welfare of women, children, senior citizens, disabled individuals, and marginalized households. It manages child development services, nutrition programs, Anganwadi centers, adoption processes, and protection schemes. The department also administers pensions, disability support, rehabilitation services, and women empowerment initiatives. Through partnerships with NGOs and district authorities, it ensures effective delivery of welfare benefits. Awareness campaigns, training, and community outreach strengthen gender equality and social protection. Its comprehensive approach makes it central to inclusive development and social welfare in West Bengal.",
+            "about": {
+                "vision_mission": [
+                    {
+                        "text": "A society where women and children realize their full potential in a safe and supportive environment.",
+                        "title": "Vision"
+                    },
+                    {
+                        "text": "To implement policies and programs that promote women's empowerment, child development, and social welfare through strategic interventions and community participation.",
+                        "title": "Mission"
+                    }
+                ]
+            },
+            "short": "This department implements welfare schemes for women, children, elderly persons, and vulnerable groups, focusing on nutrition, protection, empowerment, and social security.",
+            "contact": {
+                "email": "secy-wcd@wb.gov.in",
+                "address": "Writers' Buildings, Kolkata - 700001",
+                "website": "www.wbwcd.gov.in",
+                "helplines": [
+                    "1800-345-6789 (Women Helpline)",
+                    "1098 (Child Helpline)"
+                ]
+            },
+            "tagline": {
+                "line1": "Empowering Women",
+                "line2": "Nurturing Children",
+                "line3": "Building Stronger Communities"
+            },
+            "ref_color": "fuchsia",
+            "very_short": "Supports welfare of women, children, disabled, elderly, and vulnerable groups.",
+            "quick_stats": [
+                {
+                    "schemes": 3
+                }
+            ],
+            "key_functions": [
+                {
+                    "icon": "fa-user-shield",
+                    "text": "Economic, social, and political empowerment through skill development, entrepreneurship, and leadership programs.",
+                    "title": "Women Empowerment"
+                },
+                {
+                    "icon": "fa-baby",
+                    "text": "Ensuring holistic development of children through nutrition, health, education, and protection services.",
+                    "title": "Child Development"
+                },
+                {
+                    "icon": "fa-shield-alt",
+                    "text": "Protection against violence, abuse, exploitation via women helplines, shelter homes, and child protection services.",
+                    "title": "Protection Services"
+                },
+                {
+                    "icon": "fa-balance-scale",
+                    "text": "Implementing state policies aligned with national frameworks and international conventions.",
+                    "title": "Policy Implementation"
+                }
+            ],
+            "department_name": "Women and Child Development & Social Welfare Department",
+            "flagship_schemes": [
+                {
+                    "name": "Lakshmir Bhandar",
+                    "color": "purple",
+                    "benefit": "₹500-₹1000/month",
+                    "description": "Monthly financial assistance to women heads of families.",
+                    "target_group": "Women"
+                },
+                {
+                    "name": "Old Age Pension",
+                    "color": "blue",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for elderly citizens.",
+                    "target_group": "60+ Years"
+                },
+                {
+                    "name": "Widow Pension",
+                    "color": "green",
+                    "benefit": "₹1000/month",
+                    "description": "Financial support for widowed women.",
+                    "target_group": "Widows"
+                },
+                {
+                    "name": "Manabik",
+                    "color": "yellow",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for disabled persons.",
+                    "target_group": "Persons with Disabilities"
+                },
+                {
+                    "name": "Kanyashree Prakalpa",
+                    "color": "pink",
+                    "description": "Empowerment through education and financial assistance.",
+                    "target_group": "Girl Students"
+                }
+            ],
+            "major_initiatives": [
+                {
+                    "icon": "fa-female",
+                    "name": "Kanyashree Prakalpa",
+                    "description": "Award-winning conditional cash transfer scheme for girl children."
+                },
+                {
+                    "icon": "fa-heart",
+                    "name": "Rupashree Prakalpa",
+                    "description": "Financial assistance for marriage of girls from economically weak families."
+                },
+                {
+                    "icon": "fa-home",
+                    "name": "Swabalamban",
+                    "description": "Shelter homes and rehabilitation for women in distress."
+                },
+                {
+                    "icon": "fa-utensils",
+                    "name": "ICDS Services",
+                    "description": "Integrated Child Development Services across all blocks."
+                }
+            ],
+            "ref_gradient_color": "purple",
+            "orgnizational_structure": [
+                {
+                    "icon": "fa-user-tie",
+                    "title": "Minister-in-Charge"
+                },
+                {
+                    "icon": "fa-user-md",
+                    "title": "Principal Secretary"
+                },
+                {
+                    "icon": "fa-users",
+                    "title": "District Magistrates"
+                },
+                {
+                    "icon": "fa-female",
+                    "title": "Child Development Project Officers"
+                },
+                {
+                    "icon": "fa-school",
+                    "title": "AngAnganwadi Workers"
+                },
+                {
+                    "icon": "fa-hands-helping",
+                    "title": "NGO Partners"
+                }
+            ]
+        },
+        "json_data_bak": {
+            "id": 9,
+            "long": "The Women and Child Development & Social Welfare Department oversees programs focused on the welfare of women, children, senior citizens, disabled individuals, and marginalized households. It manages child development services, nutrition programs, Anganwadi centers, adoption processes, and protection schemes. The department also administers pensions, disability support, rehabilitation services, and women empowerment initiatives. Through partnerships with NGOs and district authorities, it ensures effective delivery of welfare benefits. Awareness campaigns, training, and community outreach strengthen gender equality and social protection. Its comprehensive approach makes it central to inclusive development and social welfare in West Bengal.",
+            "short": "This department implements welfare schemes for women, children, elderly persons, and vulnerable groups, focusing on nutrition, protection, empowerment, and social security.",
+            "ref_color": "fuchsia",
+            "very_short": "Supports welfare of women, children, disabled, elderly, and vulnerable groups.",
+            "department_name": "Women and Child Development & Social Welfare Department"
+        }
+    },
+    {
+        "id": 3,
+        "name": "Dept of Finance",
+        "is_active": 1,
+        "slug": "finance-dept",
+        "icon": null,
+        "image_ref": null,
+        "rank": 7,
+        "f_name": "Department of Finance",
+        "ref_color": "rose",
+        "json_data": {
+            "id": 3,
+            "long": "The Department of Finance is the chief financial authority of the West Bengal Government. It prepares the state budget, allocates funds to departments, and oversees expenditure management. The department also handles revenue collection, taxation, audits, procurement systems, and fiscal reforms. Through monitoring economic trends and implementing financial guidelines, it ensures efficient financial governance. It collaborates with national agencies for grants and financial assistance. By maintaining fiscal discipline and efficient resource utilization, the Finance Department contributes to stable governance and long-term economic growth of the state.",
+            "about": {
+                "vision_mission": [
+                    {
+                        "text": "A society where women and children realize their full potential in a safe and supportive environment.",
+                        "title": "Vision"
+                    },
+                    {
+                        "text": "To implement policies and programs that promote women's empowerment, child development, and social welfare through strategic interventions and community participation.",
+                        "title": "Mission"
+                    }
+                ]
+            },
+            "short": "The Finance Department oversees budgeting, revenue generation, expenditure control, and financial policy for West Bengal, ensuring proper use of public funds.",
+            "contact": {
+                "email": "secy-wcd@wb.gov.in",
+                "address": "Writers' Buildings, Kolkata - 700001",
+                "website": "www.wbwcd.gov.in",
+                "helplines": [
+                    "1800-345-6789 (Women Helpline)",
+                    "1098 (Child Helpline)"
+                ]
+            },
+            "tagline": {
+                "line1": "Empowering Women",
+                "line2": "Nurturing Children",
+                "line3": "Building Stronger Communities"
+            },
+            "ref_color": "rose",
+            "very_short": "Manages state finances, budgeting, revenue, and fiscal planning.",
+            "quick_stats": [
+                {
+                    "schemes": 3
+                }
+            ],
+            "key_functions": [
+                {
+                    "icon": "fa-user-shield",
+                    "text": "Economic, social, and political empowerment through skill development, entrepreneurship, and leadership programs.",
+                    "title": "Women Empowerment"
+                },
+                {
+                    "icon": "fa-baby",
+                    "text": "Ensuring holistic development of children through nutrition, health, education, and protection services.",
+                    "title": "Child Development"
+                },
+                {
+                    "icon": "fa-shield-alt",
+                    "text": "Protection against violence, abuse, exploitation via women helplines, shelter homes, and child protection services.",
+                    "title": "Protection Services"
+                },
+                {
+                    "icon": "fa-balance-scale",
+                    "text": "Implementing state policies aligned with national frameworks and international conventions.",
+                    "title": "Policy Implementation"
+                }
+            ],
+            "department_name": "Department of Finance",
+            "flagship_schemes": [
+                {
+                    "name": "Lakshmir Bhandar",
+                    "color": "purple",
+                    "benefit": "₹500-₹1000/month",
+                    "description": "Monthly financial assistance to women heads of families.",
+                    "target_group": "Women"
+                },
+                {
+                    "name": "Old Age Pension",
+                    "color": "blue",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for elderly citizens.",
+                    "target_group": "60+ Years"
+                },
+                {
+                    "name": "Widow Pension",
+                    "color": "green",
+                    "benefit": "₹1000/month",
+                    "description": "Financial support for widowed women.",
+                    "target_group": "Widows"
+                },
+                {
+                    "name": "Manabik",
+                    "color": "yellow",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for disabled persons.",
+                    "target_group": "Persons with Disabilities"
+                },
+                {
+                    "name": "Kanyashree Prakalpa",
+                    "color": "pink",
+                    "description": "Empowerment through education and financial assistance.",
+                    "target_group": "Girl Students"
+                }
+            ],
+            "major_initiatives": [
+                {
+                    "icon": "fa-female",
+                    "name": "Kanyashree Prakalpa",
+                    "description": "Award-winning conditional cash transfer scheme for girl children."
+                },
+                {
+                    "icon": "fa-heart",
+                    "name": "Rupashree Prakalpa",
+                    "description": "Financial assistance for marriage of girls from economically weak families."
+                },
+                {
+                    "icon": "fa-home",
+                    "name": "Swabalamban",
+                    "description": "Shelter homes and rehabilitation for women in distress."
+                },
+                {
+                    "icon": "fa-utensils",
+                    "name": "ICDS Services",
+                    "description": "Integrated Child Development Services across all blocks."
+                }
+            ],
+            "ref_grident_color": "purple",
+            "ref_gradient_color": "purple",
+            "orgnizational_structure": [
+                {
+                    "icon": "fa-user-tie",
+                    "title": "Minister-in-Charge"
+                },
+                {
+                    "icon": "fa-user-md",
+                    "title": "Principal Secretary"
+                },
+                {
+                    "icon": "fa-users",
+                    "title": "District Magistrates"
+                },
+                {
+                    "icon": "fa-female",
+                    "title": "Child Development Project Officers"
+                },
+                {
+                    "icon": "fa-school",
+                    "title": "AngAnganwadi Workers"
+                },
+                {
+                    "icon": "fa-hands-helping",
+                    "title": "NGO Partners"
+                }
+            ]
+        },
+        "json_data_bak": {
+            "id": 3,
+            "long": "The Department of Finance is the chief financial authority of the West Bengal Government. It prepares the state budget, allocates funds to departments, and oversees expenditure management. The department also handles revenue collection, taxation, audits, procurement systems, and fiscal reforms. Through monitoring economic trends and implementing financial guidelines, it ensures efficient financial governance. It collaborates with national agencies for grants and financial assistance. By maintaining fiscal discipline and efficient resource utilization, the Finance Department contributes to stable governance and long-term economic growth of the state.",
+            "short": "The Finance Department oversees budgeting, revenue generation, expenditure control, and financial policy for West Bengal, ensuring proper use of public funds.",
+            "ref_color": "rose",
+            "very_short": "Manages state finances, budgeting, revenue, and fiscal planning.",
+            "department_name": "Department of Finance"
+        }
+    },
+    {
+        "id": 7,
+        "name": "MSME",
+        "is_active": 1,
+        "slug": "msme-dept",
+        "icon": null,
+        "image_ref": null,
+        "rank": 6,
+        "f_name": "Department of Micro, Small and Medium Enterprises",
+        "ref_color": "emerald",
+        "json_data": {
+            "id": 7,
+            "long": "The Department of Micro, Small and Medium Enterprises plays a key role in promoting small-scale industries in West Bengal. It supports entrepreneurs with financial aid, subsidies, credit access, and training programs. The department facilitates growth of cottage industries, handicrafts, rural enterprises, and manufacturing units. Industrial clusters, estates, and startup incubators strengthen competitiveness and innovation within the MSME sector. It collaborates with banks and national agencies to ensure efficient credit flow. Through technology adoption, market development, and policy reforms, the department boosts employment and industrial growth across the state, making MSMEs a major driver of economic development.",
+            "about": {
+                "vision_mission": [
+                    {
+                        "text": "A society where women and children realize their full potential in a safe and supportive environment.",
+                        "title": "Vision"
+                    },
+                    {
+                        "text": "To implement policies and programs that promote women's empowerment, child development, and social welfare through strategic interventions and community participation.",
+                        "title": "Mission"
+                    }
+                ]
+            },
+            "short": "The MSME Department promotes micro, small, and medium industries through financial assistance, industrial infrastructure, reforms, and skill development initiatives.",
+            "contact": {
+                "email": "secy-wcd@wb.gov.in",
+                "address": "Writers' Buildings, Kolkata - 700001",
+                "website": "www.wbwcd.gov.in",
+                "helplines": [
+                    "1800-345-6789 (Women Helpline)",
+                    "1098 (Child Helpline)"
+                ]
+            },
+            "tagline": {
+                "line1": "Empowering Women",
+                "line2": "Nurturing Children",
+                "line3": "Building Stronger Communities"
+            },
+            "ref_color": "emerald",
+            "very_short": "Supports MSMEs through loans, subsidies, training, and policies.",
+            "quick_stats": [
+                {
+                    "schemes": 3
+                }
+            ],
+            "key_functions": [
+                {
+                    "icon": "fa-user-shield",
+                    "text": "Economic, social, and political empowerment through skill development, entrepreneurship, and leadership programs.",
+                    "title": "Women Empowerment"
+                },
+                {
+                    "icon": "fa-baby",
+                    "text": "Ensuring holistic development of children through nutrition, health, education, and protection services.",
+                    "title": "Child Development"
+                },
+                {
+                    "icon": "fa-shield-alt",
+                    "text": "Protection against violence, abuse, exploitation via women helplines, shelter homes, and child protection services.",
+                    "title": "Protection Services"
+                },
+                {
+                    "icon": "fa-balance-scale",
+                    "text": "Implementing state policies aligned with national frameworks and international conventions.",
+                    "title": "Policy Implementation"
+                }
+            ],
+            "department_name": "Department of Micro, Small and Medium Enterprises",
+            "flagship_schemes": [
+                {
+                    "name": "Lakshmir Bhandar",
+                    "color": "purple",
+                    "benefit": "₹500-₹1000/month",
+                    "description": "Monthly financial assistance to women heads of families.",
+                    "target_group": "Women"
+                },
+                {
+                    "name": "Old Age Pension",
+                    "color": "blue",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for elderly citizens.",
+                    "target_group": "60+ Years"
+                },
+                {
+                    "name": "Widow Pension",
+                    "color": "green",
+                    "benefit": "₹1000/month",
+                    "description": "Financial support for widowed women.",
+                    "target_group": "Widows"
+                },
+                {
+                    "name": "Manabik",
+                    "color": "yellow",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for disabled persons.",
+                    "target_group": "Persons with Disabilities"
+                },
+                {
+                    "name": "Kanyashree Prakalpa",
+                    "color": "pink",
+                    "description": "Empowerment through education and financial assistance.",
+                    "target_group": "Girl Students"
+                }
+            ],
+            "major_initiatives": [
+                {
+                    "icon": "fa-female",
+                    "name": "Kanyashree Prakalpa",
+                    "description": "Award-winning conditional cash transfer scheme for girl children."
+                },
+                {
+                    "icon": "fa-heart",
+                    "name": "Rupashree Prakalpa",
+                    "description": "Financial assistance for marriage of girls from economically weak families."
+                },
+                {
+                    "icon": "fa-home",
+                    "name": "Swabalamban",
+                    "description": "Shelter homes and rehabilitation for women in distress."
+                },
+                {
+                    "icon": "fa-utensils",
+                    "name": "ICDS Services",
+                    "description": "Integrated Child Development Services across all blocks."
+                }
+            ],
+            "ref_grident_color": "purple",
+            "ref_gradient_color": "teal",
+            "orgnizational_structure": [
+                {
+                    "icon": "fa-user-tie",
+                    "title": "Minister-in-Charge"
+                },
+                {
+                    "icon": "fa-user-md",
+                    "title": "Principal Secretary"
+                },
+                {
+                    "icon": "fa-users",
+                    "title": "District Magistrates"
+                },
+                {
+                    "icon": "fa-female",
+                    "title": "Child Development Project Officers"
+                },
+                {
+                    "icon": "fa-school",
+                    "title": "AngAnganwadi Workers"
+                },
+                {
+                    "icon": "fa-hands-helping",
+                    "title": "NGO Partners"
+                }
+            ]
+        },
+        "json_data_bak": {
+            "id": 7,
+            "long": "The Department of Micro, Small and Medium Enterprises plays a key role in promoting small-scale industries in West Bengal. It supports entrepreneurs with financial aid, subsidies, credit access, and training programs. The department facilitates growth of cottage industries, handicrafts, rural enterprises, and manufacturing units. Industrial clusters, estates, and startup incubators strengthen competitiveness and innovation within the MSME sector. It collaborates with banks and national agencies to ensure efficient credit flow. Through technology adoption, market development, and policy reforms, the department boosts employment and industrial growth across the state, making MSMEs a major driver of economic development.",
+            "short": "The MSME Department promotes micro, small, and medium industries through financial assistance, industrial infrastructure, reforms, and skill development initiatives.",
+            "ref_color": "emerald",
+            "very_short": "Supports MSMEs through loans, subsidies, training, and policies.",
+            "department_name": "Department of Micro, Small and Medium Enterprises"
+        }
+    }
+]

@@ -1,0 +1,1968 @@
+[
+    {
+        "id": 17,
+        "scheme_name": "State Welfare Scheme for Purohits",
+        "is_active": 1,
+        "slug": "purohit",
+        "icon": "fa-solid fa-hands-praying",
+        "department_id": 8,
+        "ref_color": "orange",
+        "json_data": {
+            "icon": "fa-solid fa-hands-praying",
+            "about": {
+                "long": "The State Welfare Scheme for Purohits is aimed at providing social and financial security to priests who serve temples, religious institutions, and communities across West Bengal. Many Purohits work independently and rely on irregular offerings, making their income unpredictable, especially during old age or periods of low demand.\n To support them, the government provides a monthly pension to eligible Purohits who meet the economic and age requirements. This assistance ensures that senior or economically vulnerable priests can manage their essential needs with dignity.\n The scheme acknowledges the cultural, spiritual, and community service contributions of Purohits, who guide religious practices, rituals, and traditions. It also promotes social inclusion by supporting individuals who may otherwise struggle without formal income sources. Through structured verification, the scheme ensures that deserving priests receive timely financial help.\n Overall, the initiative reflects the state’s respect for cultural workers and its commitment to community welfare.",
+                "short": "This scheme provides monthly financial assistance to economically weak Purohits (priests) in West Bengal. It aims to support their livelihood, recognize their community service, and ensure dignity for elderly or low-income priests."
+            },
+            "money": "1500",
+            "benefits": [
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Financial Assistance",
+                    "description": "₹1500/month For beneficiaries above 18+ years age"
+                },
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Enhanced Pension",
+                    "description": "₹1200/month For beneficiaries aged 80 years and above."
+                },
+                {
+                    "icon": "fas fa-universal-access",
+                    "title": "Special Category Benefits",
+                    "description": "Additional Support For specially abled senior citizens."
+                },
+                {
+                    "icon": "fas fa-hand-holding-medical",
+                    "title": "Healthcare Support",
+                    "description": "Free health services Includes health camps and medical check-up support."
+                }
+            ],
+            "required": {
+                "documents": [
+                    "Age Proof Certificate",
+                    "Income Certificate",
+                    "Residence Proof",
+                    "Bank Account Details (Passbook Copy)",
+                    "Aadhaar Card",
+                    "Passport Size Photographs",
+                    "BPL Card (if Applicable)"
+                ]
+            },
+            "workflow": {
+                "steps": [
+                    {
+                        "name": "Collect Application Form",
+                        "rank": 1,
+                        "description": "Available at Block Development Office or can be downloaded online."
+                    },
+                    {
+                        "name": "Submit Documents",
+                        "rank": 2,
+                        "description": "Submit age proof, income certificate, residence proof, bank details, etc."
+                    },
+                    {
+                        "name": "Verification",
+                        "rank": 3,
+                        "description": "Local authorities verify the eligibility and documents."
+                    },
+                    {
+                        "name": "Recomendtion",
+                        "rank": 4,
+                        "description": "Recomend the application Application from the District End"
+                    },
+                    {
+                        "name": "Approval & Disbursement",
+                        "rank": 5,
+                        "description": "Pension is approved and directly credited into the bank account monthly."
+                    }
+                ]
+            },
+            "ref_color": "orange",
+            "scheme_id": 17,
+            "eligibility": {
+                "age": {
+                    "max": 120,
+                    "min": 60
+                },
+                "caste": [
+                    "ST"
+                ],
+                "gender": [
+                    "Male",
+                    "Female",
+                    "Others"
+                ],
+                "income": {
+                    "max": 100000,
+                    "min": 0
+                },
+                "criteria": {
+                    "aadhaar_required": true,
+                    "bank_account_required": true,
+                    "permanent_residence_years": 10
+                },
+                "exclusion": {
+                    "description": "Applicants already receiving other government pensions are excluded.",
+                    "receiving_other_pension": true
+                },
+                "residency": "WB",
+                "disability": false,
+                "eligibility_criteria": {
+                    "key": [
+                        {
+                            "icon": "fas fa-birthday-cake",
+                            "title": "Age Requirement",
+                            "description": "Minimum 60 years of age for general category, 50 years for specially abled persons"
+                        },
+                        {
+                            "icon": "fas fa-rupee-sign",
+                            "title": "Income Criteria",
+                            "description": "Annual family income should not exceed ₹1,00,000"
+                        },
+                        {
+                            "icon": "fas fa-home",
+                            "title": "Residency",
+                            "description": "Must be a permanent resident of West Bengal for at least 10 years"
+                        },
+                        {
+                            "icon": "fas fa-list",
+                            "title": "Exclusion Criteria",
+                            "description": "Not receiving any other government pension or regular income source"
+                        }
+                    ]
+                }
+            },
+            "quick_stats": {
+                "allocation": "1000000000",
+                "beneficiaries": "25L+",
+                "direct_transfer": "100%",
+                "eligibility_age": "18+",
+                "eligibility_caste": "Scheduled Tribe (ST)",
+                "eligibility_criteria": "Specially Abled"
+            },
+            "scheme_name": "State Welfare Scheme for Purohits",
+            "key_highlight": [
+                "Monthly financial assistance for elderly citizens of ST community",
+                "Direct Benefit Transfer to bank accounts",
+                "No contribution required from beneficiaries",
+                "Coverage across all districts of West Bengal"
+            ]
+        },
+        "rank": 10
+    },
+    {
+        "id": 4,
+        "scheme_name": "Prachesta",
+        "is_active": 0,
+        "slug": null,
+        "icon": null,
+        "department_id": null,
+        "ref_color": null,
+        "json_data": null,
+        "rank": 0
+    },
+    {
+        "id": 12,
+        "scheme_name": "Defunct Scheme WCD",
+        "is_active": 0,
+        "slug": null,
+        "icon": null,
+        "department_id": null,
+        "ref_color": null,
+        "json_data": null,
+        "rank": 0
+    },
+    {
+        "id": 14,
+        "scheme_name": "Construction Worker",
+        "is_active": 0,
+        "slug": null,
+        "icon": null,
+        "department_id": null,
+        "ref_color": null,
+        "json_data": null,
+        "rank": 0
+    },
+    {
+        "id": 15,
+        "scheme_name": "Transport Worker",
+        "is_active": 0,
+        "slug": null,
+        "icon": null,
+        "department_id": null,
+        "ref_color": null,
+        "json_data": null,
+        "rank": 0
+    },
+    {
+        "id": 16,
+        "scheme_name": "Defunct scheme",
+        "is_active": 0,
+        "slug": null,
+        "icon": null,
+        "department_id": null,
+        "ref_color": null,
+        "json_data": null,
+        "rank": 0
+    },
+    {
+        "id": 18,
+        "scheme_name": "Housing Scheme for Purohits",
+        "is_active": 0,
+        "slug": null,
+        "icon": null,
+        "department_id": null,
+        "ref_color": null,
+        "json_data": null,
+        "rank": 0
+    },
+    {
+        "id": 20,
+        "scheme_name": "Lakshmir Bhandar",
+        "is_active": 0,
+        "slug": null,
+        "icon": null,
+        "department_id": null,
+        "ref_color": null,
+        "json_data": null,
+        "rank": 0
+    },
+    {
+        "id": 2,
+        "scheme_name": "WCD Manabik",
+        "is_active": 1,
+        "slug": "manabik",
+        "icon": "fa-solid fa-hand-holding-heart",
+        "department_id": 9,
+        "ref_color": "pink",
+        "json_data": {
+            "icon": "fa-solid fa-hand-holding-heart",
+            "about": {
+                "long": "The Manabik scheme, implemented by the Department of Women & Child Development and Social Welfare, offers financial assistance to persons with disabilities across West Bengal. Many differently-abled individuals face lifelong challenges in accessing employment, healthcare, and social participation. To address this, the State Government provides a monthly pension to those with 40% or more disability, ensuring that they receive continuous financial support regardless of their socio-economic condition.\n The scheme covers various types of disabilities, including physical, intellectual, sensory, and developmental disabilities. Eligible applicants are verified by medical boards and district authorities to ensure accurate assessment. The pension helps beneficiaries manage essential living expenses, buy medicines, and maintain a more secure and dignified life.\n By reducing the financial burden on families and strengthening social protection for vulnerable individuals, the Manabik scheme reinforces the government’s commitment to welfare, inclusion, and equal opportunity. It plays a critical role in improving the quality of life and independence of thousands of differently-abled residents in West Bengal.",
+                "short": "WCD Manabik is a disability pension scheme by the West Bengal Government that provides monthly financial assistance to persons with 40% or more disability. It aims to support their basic needs, reduce economic stress on families, and promote inclusion for differently-abled individuals across the state."
+            },
+            "money": "1000",
+            "benefits": [
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Financial Assistance",
+                    "description": "₹1000/month For beneficiaries between 60 and 79 years."
+                },
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Enhanced Pension",
+                    "description": "₹1200/month For beneficiaries aged 80 years and above."
+                },
+                {
+                    "icon": "fas fa-universal-access",
+                    "title": "Special Category Benefits",
+                    "description": "Additional Support For specially abled senior citizens."
+                },
+                {
+                    "icon": "fas fa-hand-holding-medical",
+                    "title": "Healthcare Support",
+                    "description": "Free health services Includes health camps and medical check-up support."
+                }
+            ],
+            "required": {
+                "documents": [
+                    "Age Proof Certificate",
+                    "Income Certificate",
+                    "Residence Proof",
+                    "Bank Account Details (Passbook Copy)",
+                    "Aadhaar Card",
+                    "Passport Size Photographs",
+                    "BPL Card (if Applicable)"
+                ]
+            },
+            "workflow": {
+                "steps": [
+                    {
+                        "name": "Collect Application Form",
+                        "rank": 1,
+                        "description": "Available at Block Development Office or can be downloaded online."
+                    },
+                    {
+                        "name": "Submit Documents",
+                        "rank": 2,
+                        "description": "Submit age proof, income certificate, residence proof, bank details, etc."
+                    },
+                    {
+                        "name": "Verification",
+                        "rank": 3,
+                        "description": "Local authorities verify the eligibility and documents."
+                    },
+                    {
+                        "name": "Approval & Disbursement",
+                        "rank": 4,
+                        "description": "Pension is approved and directly credited into the bank account monthly."
+                    }
+                ]
+            },
+            "ref_color": "pink",
+            "scheme_id": "2",
+            "eligibility": {
+                "age": {
+                    "max": 120,
+                    "min": 60
+                },
+                "caste": [
+                    "ST"
+                ],
+                "gender": [
+                    "Male",
+                    "Female",
+                    "Others"
+                ],
+                "income": {
+                    "max": 100000,
+                    "min": 0
+                },
+                "criteria": {
+                    "aadhaar_required": true,
+                    "bank_account_required": true,
+                    "permanent_residence_years": 10
+                },
+                "exclusion": {
+                    "description": "Applicants already receiving other government pensions are excluded.",
+                    "receiving_other_pension": true
+                },
+                "residency": "WB",
+                "disability": false,
+                "eligibility_criteria": {
+                    "key": [
+                        {
+                            "icon": "fas fa-birthday-cake",
+                            "title": "Age Requirement",
+                            "description": "Minimum 60 years of age for general category, 50 years for specially abled persons"
+                        },
+                        {
+                            "icon": "fas fa-rupee-sign",
+                            "title": "Income Criteria",
+                            "description": "Annual family income should not exceed ₹1,00,000"
+                        },
+                        {
+                            "icon": "fas fa-home",
+                            "title": "Residency",
+                            "description": "Must be a permanent resident of West Bengal for at least 10 years"
+                        },
+                        {
+                            "icon": "fas fa-list",
+                            "title": "Exclusion Criteria",
+                            "description": "Not receiving any other government pension or regular income source"
+                        }
+                    ]
+                }
+            },
+            "quick_stats": {
+                "allocation": "1000000000",
+                "beneficiaries": "25L+",
+                "direct_transfer": "100%",
+                "eligibility_age": "0+",
+                "eligibility_caste": "Scheduled Tribe (ST)",
+                "eligibility_criteria": "Specially Abled"
+            },
+            "scheme_name": "Manabik (WCD)",
+            "key_highlight": [
+                "Monthly financial assistance for elderly citizens of ST community",
+                "Direct Benefit Transfer to bank accounts",
+                "No contribution required from beneficiaries",
+                "Coverage across all districts of West Bengal"
+            ]
+        },
+        "rank": 1
+    },
+    {
+        "id": 3,
+        "scheme_name": "Taposili Bandhu(for SC)",
+        "is_active": 1,
+        "slug": "taposali-bandhu",
+        "icon": "fa-solid fa-people-group",
+        "department_id": 2,
+        "ref_color": "indigo",
+        "json_data": {
+            "icon": "fa-solid fa-people-group",
+            "about": {
+                "long": "Taposili Bandhu is a dedicated social security scheme of the West Bengal Government for elderly individuals belonging to the Scheduled Caste community. Many SC households face economic hardships, limited access to stable income, and social disadvantages. To ensure that senior citizens in these communities receive proper care and protection, the scheme provides a monthly pension to eligible beneficiaries above a certain age who do not have a regular income.\nThe financial support enables elderly citizens to meet basic expenses and maintain a better standard of living, reducing dependence on family members or community support. The district administration verifies applications to ensure that assistance is delivered to genuine beneficiaries.\nTaposili Bandhu represents the government’s commitment to uplift Scheduled Castes through dependable social security measures. By ensuring steady income support, the scheme promotes dignity, empowerment, and a more inclusive society for SC senior citizens in West Bengal.",
+                "short": "Taposili Bandhu provides monthly financial assistance to elderly Scheduled Caste citizens in West Bengal. The scheme aims to support SC senior citizens who belong to economically weaker families, helping them live with dignity and reducing their dependence on others."
+            },
+            "money": "1000",
+            "benefits": [
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Financial Assistance",
+                    "description": "₹1000/month For beneficiaries between 60 and 79 years."
+                },
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Enhanced Pension",
+                    "description": "₹1200/month For beneficiaries aged 80 years and above."
+                },
+                {
+                    "icon": "fas fa-universal-access",
+                    "title": "Special Category Benefits",
+                    "description": "Additional Support For specially abled senior citizens."
+                },
+                {
+                    "icon": "fas fa-hand-holding-medical",
+                    "title": "Healthcare Support",
+                    "description": "Free health services Includes health camps and medical check-up support."
+                }
+            ],
+            "required": {
+                "documents": [
+                    "Age Proof Certificate",
+                    "Income Certificate",
+                    "Residence Proof",
+                    "Bank Account Details (Passbook Copy)",
+                    "Aadhaar Card",
+                    "Passport Size Photographs",
+                    "BPL Card (if Applicable)"
+                ]
+            },
+            "workflow": {
+                "steps": [
+                    {
+                        "name": "Collect Application Form",
+                        "rank": 1,
+                        "description": "Available at Block Development Office or can be downloaded online."
+                    },
+                    {
+                        "name": "Submit Documents",
+                        "rank": 2,
+                        "description": "Submit age proof, income certificate, residence proof, bank details, etc."
+                    },
+                    {
+                        "name": "Verification",
+                        "rank": 3,
+                        "description": "Local authorities verify the eligibility and documents."
+                    },
+                    {
+                        "name": "Approval & Disbursement",
+                        "rank": 4,
+                        "description": "Pension is approved and directly credited into the bank account monthly."
+                    }
+                ]
+            },
+            "ref_color": "indigo",
+            "scheme_id": 3,
+            "eligibility": {
+                "age": {
+                    "max": 120,
+                    "min": 60
+                },
+                "caste": [
+                    "ST"
+                ],
+                "gender": [
+                    "Male",
+                    "Female",
+                    "Others"
+                ],
+                "income": {
+                    "max": 100000,
+                    "min": 0
+                },
+                "criteria": {
+                    "aadhaar_required": true,
+                    "bank_account_required": true,
+                    "permanent_residence_years": 10
+                },
+                "exclusion": {
+                    "description": "Applicants already receiving other government pensions are excluded.",
+                    "receiving_other_pension": true
+                },
+                "residency": "WB",
+                "disability": false,
+                "eligibility_criteria": {
+                    "key": [
+                        {
+                            "icon": "fas fa-birthday-cake",
+                            "title": "Age Requirement",
+                            "description": "Minimum 60 years of age for general category, 50 years for specially abled persons"
+                        },
+                        {
+                            "icon": "fas fa-rupee-sign",
+                            "title": "Income Criteria",
+                            "description": "Annual family income should not exceed ₹1,00,000"
+                        },
+                        {
+                            "icon": "fas fa-home",
+                            "title": "Residency",
+                            "description": "Must be a permanent resident of West Bengal for at least 10 years"
+                        },
+                        {
+                            "icon": "fas fa-list",
+                            "title": "Exclusion Criteria",
+                            "description": "Not receiving any other government pension or regular income source"
+                        }
+                    ]
+                }
+            },
+            "quick_stats": {
+                "allocation": "1000000000",
+                "beneficiaries": "25L+",
+                "direct_transfer": "100%",
+                "eligibility_age": "0+",
+                "eligibility_caste": "Scheduled Tribe (ST)",
+                "eligibility_criteria": "Specially Abled"
+            },
+            "scheme_name": "Taposili Bandhu(for SC)",
+            "key_highlight": [
+                "Monthly financial assistance for elderly citizens of ST community",
+                "Direct Benefit Transfer to bank accounts",
+                "No contribution required from beneficiaries",
+                "Coverage across all districts of West Bengal"
+            ]
+        },
+        "rank": 4
+    },
+    {
+        "id": 5,
+        "scheme_name": "Old age Pension for FisherMan",
+        "is_active": 1,
+        "slug": "oap-fisherman",
+        "icon": "fa-solid fa-fish",
+        "department_id": 6,
+        "ref_color": "sky",
+        "json_data": {
+            "icon": "fa-solid fa-fish",
+            "about": {
+                "long": "The Old Age Pension for Fishermen is a welfare initiative designed for elderly individuals in West Bengal who have dedicated their lives to the fisheries and allied sectors. Many fishermen depend on daily labor-based income and face hardships once they are no longer able to work due to age or health issues. To address this vulnerability, the State Government provides a monthly pension to eligible senior fishermen, ensuring financial stability in their later years.\nThe scheme recognizes the significant contribution of fishing communities to the state’s economy, nutrition, and livelihood networks. Beneficiaries are verified based on their occupation history, age criteria, and economic background before receiving aid.\nThis pension helps senior fishermen meet essential needs, including food, medicine, and daily expenses, thereby reducing their dependence on family members. By offering consistent financial support, the scheme promotes dignity, security, and social protection for a traditionally marginalized and economically fragile community.",
+                "short": "This scheme provides monthly financial support to elderly fishermen in West Bengal who have spent their lives working in the fisheries sector. It aims to ensure security and dignity for senior citizens from fishing communities after they retire from active work."
+            },
+            "money": "1000",
+            "benefits": [
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Financial Assistance",
+                    "description": "₹1000/month For beneficiaries between 60 and 79 years."
+                },
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Enhanced Pension",
+                    "description": "₹1200/month For beneficiaries aged 80 years and above."
+                },
+                {
+                    "icon": "fas fa-universal-access",
+                    "title": "Special Category Benefits",
+                    "description": "Additional Support For specially abled senior citizens."
+                },
+                {
+                    "icon": "fas fa-hand-holding-medical",
+                    "title": "Healthcare Support",
+                    "description": "Free health services Includes health camps and medical check-up support."
+                }
+            ],
+            "required": {
+                "documents": [
+                    "Age Proof Certificate",
+                    "Income Certificate",
+                    "Residence Proof",
+                    "Bank Account Details (Passbook Copy)",
+                    "Aadhaar Card",
+                    "Passport Size Photographs",
+                    "BPL Card (if Applicable)"
+                ]
+            },
+            "workflow": {
+                "steps": [
+                    {
+                        "name": "Collect Application Form",
+                        "rank": 1,
+                        "description": "Available at Block Development Office or can be downloaded online."
+                    },
+                    {
+                        "name": "Submit Documents",
+                        "rank": 2,
+                        "description": "Submit age proof, income certificate, residence proof, bank details, etc."
+                    },
+                    {
+                        "name": "Verification",
+                        "rank": 3,
+                        "description": "Local authorities verify the eligibility and documents."
+                    },
+                    {
+                        "name": "Approval & Disbursement",
+                        "rank": 4,
+                        "description": "Pension is approved and directly credited into the bank account monthly."
+                    }
+                ]
+            },
+            "ref_color": "sky",
+            "scheme_id": 5,
+            "eligibility": {
+                "age": {
+                    "max": 120,
+                    "min": 60
+                },
+                "caste": [
+                    "ST"
+                ],
+                "gender": [
+                    "Male",
+                    "Female",
+                    "Others"
+                ],
+                "income": {
+                    "max": 100000,
+                    "min": 0
+                },
+                "criteria": {
+                    "aadhaar_required": true,
+                    "bank_account_required": true,
+                    "permanent_residence_years": 10
+                },
+                "exclusion": {
+                    "description": "Applicants already receiving other government pensions are excluded.",
+                    "receiving_other_pension": true
+                },
+                "residency": "WB",
+                "disability": false,
+                "eligibility_criteria": {
+                    "key": [
+                        {
+                            "icon": "fas fa-birthday-cake",
+                            "title": "Age Requirement",
+                            "description": "Minimum 60 years of age for general category, 50 years for specially abled persons"
+                        },
+                        {
+                            "icon": "fas fa-rupee-sign",
+                            "title": "Income Criteria",
+                            "description": "Annual family income should not exceed ₹1,00,000"
+                        },
+                        {
+                            "icon": "fas fa-home",
+                            "title": "Residency",
+                            "description": "Must be a permanent resident of West Bengal for at least 10 years"
+                        },
+                        {
+                            "icon": "fas fa-list",
+                            "title": "Exclusion Criteria",
+                            "description": "Not receiving any other government pension or regular income source"
+                        }
+                    ]
+                }
+            },
+            "quick_stats": {
+                "allocation": "1000000000",
+                "beneficiaries": "25L+",
+                "direct_transfer": "100%",
+                "eligibility_age": "0+",
+                "eligibility_caste": "Scheduled Tribe (ST)",
+                "eligibility_criteria": "Specially Abled"
+            },
+            "scheme_name": "Old age Pension for FisherMan",
+            "key_highlight": [
+                "Monthly financial assistance for elderly citizens of ST community",
+                "Direct Benefit Transfer to bank accounts",
+                "No contribution required from beneficiaries",
+                "Coverage across all districts of West Bengal"
+            ]
+        },
+        "rank": 7
+    },
+    {
+        "id": 6,
+        "scheme_name": "MSME Pension",
+        "is_active": 1,
+        "slug": "msme",
+        "icon": "fa-solid fa-industry",
+        "department_id": 6,
+        "ref_color": "amber",
+        "json_data": {
+            "icon": "fa-solid fa-industry",
+            "about": {
+                "long": "The MSME Pension scheme is a social security initiative of the West Bengal Government aimed at supporting elderly individuals who have worked in micro, small, and medium enterprises. Many MSME workers, artisans, and small entrepreneurs operate in unorganized sectors without access to long-term savings or retirement benefits. To help them live with dignity after retirement, the government provides a monthly pension to eligible senior members of the MSME sector.\nApplicants are assessed based on age, occupational history, and financial background. The pension provides reliable support to meet essential needs, such as household expenses, healthcare, and daily living costs.\nBy recognizing the vital role of the MSME sector in employment generation and economic growth, the scheme ensures that workers who contributed for decades are not left vulnerable in old age. It strengthens inclusive industrial development and offers a safety net for thousands of individuals involved in cottage industries, handicrafts, small manufacturing, and service-oriented enterprises.",
+                "short": "The MSME Pension scheme supports elderly small entrepreneurs, artisans, and workers associated with the MSME sector in West Bengal. It provides monthly assistance to help them manage expenses after retirement, recognizing their contribution to the state’s industrial growth."
+            },
+            "money": "1000",
+            "benefits": [
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Financial Assistance",
+                    "description": "₹1000/month For beneficiaries between 60 and 79 years."
+                },
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Enhanced Pension",
+                    "description": "₹1200/month For beneficiaries aged 80 years and above."
+                },
+                {
+                    "icon": "fas fa-universal-access",
+                    "title": "Special Category Benefits",
+                    "description": "Additional Support For specially abled senior citizens."
+                },
+                {
+                    "icon": "fas fa-hand-holding-medical",
+                    "title": "Healthcare Support",
+                    "description": "Free health services Includes health camps and medical check-up support."
+                }
+            ],
+            "required": {
+                "documents": [
+                    "Age Proof Certificate",
+                    "Income Certificate",
+                    "Residence Proof",
+                    "Bank Account Details (Passbook Copy)",
+                    "Aadhaar Card",
+                    "Passport Size Photographs",
+                    "BPL Card (if Applicable)"
+                ]
+            },
+            "workflow": {
+                "steps": [
+                    {
+                        "name": "Collect Application Form",
+                        "rank": 1,
+                        "description": "Available at Block Development Office or can be downloaded online."
+                    },
+                    {
+                        "name": "Submit Documents",
+                        "rank": 2,
+                        "description": "Submit age proof, income certificate, residence proof, bank details, etc."
+                    },
+                    {
+                        "name": "Verification",
+                        "rank": 3,
+                        "description": "Local authorities verify the eligibility and documents."
+                    },
+                    {
+                        "name": "Approval & Disbursement",
+                        "rank": 4,
+                        "description": "Pension is approved and directly credited into the bank account monthly."
+                    }
+                ]
+            },
+            "ref_color": "amber",
+            "scheme_id": 6,
+            "eligibility": {
+                "age": {
+                    "max": 120,
+                    "min": 60
+                },
+                "caste": [
+                    "ST"
+                ],
+                "gender": [
+                    "Male",
+                    "Female",
+                    "Others"
+                ],
+                "income": {
+                    "max": 100000,
+                    "min": 0
+                },
+                "criteria": {
+                    "aadhaar_required": true,
+                    "bank_account_required": true,
+                    "permanent_residence_years": 10
+                },
+                "exclusion": {
+                    "description": "Applicants already receiving other government pensions are excluded.",
+                    "receiving_other_pension": true
+                },
+                "residency": "WB",
+                "disability": false,
+                "eligibility_criteria": {
+                    "key": [
+                        {
+                            "icon": "fas fa-birthday-cake",
+                            "title": "Age Requirement",
+                            "description": "Minimum 60 years of age for general category, 50 years for specially abled persons"
+                        },
+                        {
+                            "icon": "fas fa-rupee-sign",
+                            "title": "Income Criteria",
+                            "description": "Annual family income should not exceed ₹1,00,000"
+                        },
+                        {
+                            "icon": "fas fa-home",
+                            "title": "Residency",
+                            "description": "Must be a permanent resident of West Bengal for at least 10 years"
+                        },
+                        {
+                            "icon": "fas fa-list",
+                            "title": "Exclusion Criteria",
+                            "description": "Not receiving any other government pension or regular income source"
+                        }
+                    ]
+                }
+            },
+            "quick_stats": {
+                "allocation": "1000000000",
+                "beneficiaries": "25L+",
+                "direct_transfer": "100%",
+                "eligibility_age": "0+",
+                "eligibility_caste": "Scheduled Tribe (ST)",
+                "eligibility_criteria": "Specially Abled"
+            },
+            "scheme_name": "MSME Pension",
+            "key_highlight": [
+                "Monthly financial assistance for elderly citizens of ST community",
+                "Direct Benefit Transfer to bank accounts",
+                "No contribution required from beneficiaries",
+                "Coverage across all districts of West Bengal"
+            ]
+        },
+        "rank": 11
+    },
+    {
+        "id": 7,
+        "scheme_name": "Textile Pension",
+        "is_active": 1,
+        "slug": "textile",
+        "icon": "fa-solid fa-scissors",
+        "department_id": 7,
+        "ref_color": "violet",
+        "json_data": {
+            "icon": "fa-solid fa-scissors",
+            "about": {
+                "long": "The Textile Pension scheme supports elderly individuals who have spent their working lives in the textile sector of West Bengal. Workers in this industry—such as weavers, spinners, dyers, and laborers—often operate in unorganized or semi-organized setups with minimal long-term social security. As they grow older, income opportunities drastically reduce, making them economically vulnerable.\nTo address this challenge, the State Government provides a monthly pension to eligible senior textile workers who meet age and income criteria. The pension helps them cover essential expenses, medical needs, and day-to-day living costs. Beneficiary verification ensures that genuine workers receive timely support.\nThis initiative acknowledges the contribution of textile workers to the state's cultural heritage and industrial economy. It also uplifts marginalized artisans and laborers by offering a reliable financial safety net. The scheme strengthens social inclusion and ensures that senior workers continue to live with dignity.",
+                "short": "This scheme provides monthly pension support to elderly workers from West Bengal’s textile sector. It ensures financial stability, dignity, and basic security for senior textile laborers who lack formal retirement benefits."
+            },
+            "money": "1000",
+            "benefits": [
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Financial Assistance",
+                    "description": "₹1000/month For beneficiaries between 60 and 79 years."
+                },
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Enhanced Pension",
+                    "description": "₹1200/month For beneficiaries aged 80 years and above."
+                },
+                {
+                    "icon": "fas fa-universal-access",
+                    "title": "Special Category Benefits",
+                    "description": "Additional Support For specially abled senior citizens."
+                },
+                {
+                    "icon": "fas fa-hand-holding-medical",
+                    "title": "Healthcare Support",
+                    "description": "Free health services Includes health camps and medical check-up support."
+                }
+            ],
+            "required": {
+                "documents": [
+                    "Age Proof Certificate",
+                    "Income Certificate",
+                    "Residence Proof",
+                    "Bank Account Details (Passbook Copy)",
+                    "Aadhaar Card",
+                    "Passport Size Photographs",
+                    "BPL Card (if Applicable)"
+                ]
+            },
+            "workflow": {
+                "steps": [
+                    {
+                        "name": "Collect Application Form",
+                        "rank": 1,
+                        "description": "Available at Block Development Office or can be downloaded online."
+                    },
+                    {
+                        "name": "Submit Documents",
+                        "rank": 2,
+                        "description": "Submit age proof, income certificate, residence proof, bank details, etc."
+                    },
+                    {
+                        "name": "Verification",
+                        "rank": 3,
+                        "description": "Local authorities verify the eligibility and documents."
+                    },
+                    {
+                        "name": "Approval & Disbursement",
+                        "rank": 4,
+                        "description": "Pension is approved and directly credited into the bank account monthly."
+                    }
+                ]
+            },
+            "ref_color": "violet",
+            "scheme_id": 7,
+            "eligibility": {
+                "age": {
+                    "max": 120,
+                    "min": 60
+                },
+                "caste": [
+                    "ST"
+                ],
+                "gender": [
+                    "Male",
+                    "Female",
+                    "Others"
+                ],
+                "income": {
+                    "max": 100000,
+                    "min": 0
+                },
+                "criteria": {
+                    "aadhaar_required": true,
+                    "bank_account_required": true,
+                    "permanent_residence_years": 10
+                },
+                "exclusion": {
+                    "description": "Applicants already receiving other government pensions are excluded.",
+                    "receiving_other_pension": true
+                },
+                "residency": "WB",
+                "disability": false,
+                "eligibility_criteria": {
+                    "key": [
+                        {
+                            "icon": "fas fa-birthday-cake",
+                            "title": "Age Requirement",
+                            "description": "Minimum 60 years of age for general category, 50 years for specially abled persons"
+                        },
+                        {
+                            "icon": "fas fa-rupee-sign",
+                            "title": "Income Criteria",
+                            "description": "Annual family income should not exceed ₹1,00,000"
+                        },
+                        {
+                            "icon": "fas fa-home",
+                            "title": "Residency",
+                            "description": "Must be a permanent resident of West Bengal for at least 10 years"
+                        },
+                        {
+                            "icon": "fas fa-list",
+                            "title": "Exclusion Criteria",
+                            "description": "Not receiving any other government pension or regular income source"
+                        }
+                    ]
+                }
+            },
+            "quick_stats": {
+                "allocation": "1000000000",
+                "beneficiaries": "25L+",
+                "direct_transfer": "100%",
+                "eligibility_age": "0+",
+                "eligibility_caste": "Scheduled Tribe (ST)",
+                "eligibility_criteria": "Specially Abled"
+            },
+            "scheme_name": "Textile Pension",
+            "key_highlight": [
+                "Monthly financial assistance for elderly citizens of ST community",
+                "Direct Benefit Transfer to bank accounts",
+                "No contribution required from beneficiaries",
+                "Coverage across all districts of West Bengal"
+            ]
+        },
+        "rank": 12
+    },
+    {
+        "id": 8,
+        "scheme_name": "LPP Retainer",
+        "is_active": 1,
+        "slug": "lpp-retiner",
+        "icon": "fa-solid fa-user-shield",
+        "department_id": 8,
+        "ref_color": "emerald",
+        "json_data": {
+            "icon": "fa-solid fa-user-shield",
+            "about": {
+                "long": "The LPP Retainer scheme supports individuals who served as cultural workers, folk artists, or community communicators under the Lok Prasar Prakalpa (LPP) initiative in West Bengal. LPP was introduced to promote folk culture, traditional art forms, and awareness programs across the state through trained performers and communicators. Many of these workers served the community for years but lacked long-term financial security.\nTo recognize their contribution and ensure their well-being in old age, the State Government offers a monthly pension to eligible former retainers. This financial support helps them meet daily expenses, purchase essential items, and maintain a dignified standard of living.\nThe scheme highlights the government’s commitment to preserving Bengal’s cultural heritage while protecting the welfare of individuals who contributed to social communication and cultural enrichment. By providing dependable social security, the initiative honors folk artists and cultural workers for their dedication and service.",
+                "short": "LPP Retainer provides monthly financial assistance to individuals who previously served as retainers under the Lok Prasar Prakalpa scheme. It supports them after years of cultural and community service, ensuring financial stability in their later years."
+            },
+            "money": "1000",
+            "benefits": [
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Financial Assistance",
+                    "description": "₹1000/month For beneficiaries between 60 and 79 years."
+                },
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Enhanced Pension",
+                    "description": "₹1200/month For beneficiaries aged 80 years and above."
+                },
+                {
+                    "icon": "fas fa-universal-access",
+                    "title": "Special Category Benefits",
+                    "description": "Additional Support For specially abled senior citizens."
+                },
+                {
+                    "icon": "fas fa-hand-holding-medical",
+                    "title": "Healthcare Support",
+                    "description": "Free health services Includes health camps and medical check-up support."
+                }
+            ],
+            "required": {
+                "documents": [
+                    "Age Proof Certificate",
+                    "Income Certificate",
+                    "Residence Proof",
+                    "Bank Account Details (Passbook Copy)",
+                    "Aadhaar Card",
+                    "Passport Size Photographs",
+                    "BPL Card (if Applicable)"
+                ]
+            },
+            "workflow": {
+                "steps": [
+                    {
+                        "name": "Collect Application Form",
+                        "rank": 1,
+                        "description": "Available at Block Development Office or can be downloaded online."
+                    },
+                    {
+                        "name": "Submit Documents",
+                        "rank": 2,
+                        "description": "Submit age proof, income certificate, residence proof, bank details, etc."
+                    },
+                    {
+                        "name": "Verification",
+                        "rank": 3,
+                        "description": "Local authorities verify the eligibility and documents."
+                    },
+                    {
+                        "name": "Approval & Disbursement",
+                        "rank": 4,
+                        "description": "Pension is approved and directly credited into the bank account monthly."
+                    }
+                ]
+            },
+            "ref_color": "emerald",
+            "scheme_id": 8,
+            "eligibility": {
+                "age": {
+                    "max": 120,
+                    "min": 60
+                },
+                "caste": [
+                    "ST"
+                ],
+                "gender": [
+                    "Male",
+                    "Female",
+                    "Others"
+                ],
+                "income": {
+                    "max": 100000,
+                    "min": 0
+                },
+                "criteria": {
+                    "aadhaar_required": true,
+                    "bank_account_required": true,
+                    "permanent_residence_years": 10
+                },
+                "exclusion": {
+                    "description": "Applicants already receiving other government pensions are excluded.",
+                    "receiving_other_pension": true
+                },
+                "residency": "WB",
+                "disability": false,
+                "eligibility_criteria": {
+                    "key": [
+                        {
+                            "icon": "fas fa-birthday-cake",
+                            "title": "Age Requirement",
+                            "description": "Minimum 60 years of age for general category, 50 years for specially abled persons"
+                        },
+                        {
+                            "icon": "fas fa-rupee-sign",
+                            "title": "Income Criteria",
+                            "description": "Annual family income should not exceed ₹1,00,000"
+                        },
+                        {
+                            "icon": "fas fa-home",
+                            "title": "Residency",
+                            "description": "Must be a permanent resident of West Bengal for at least 10 years"
+                        },
+                        {
+                            "icon": "fas fa-list",
+                            "title": "Exclusion Criteria",
+                            "description": "Not receiving any other government pension or regular income source"
+                        }
+                    ]
+                }
+            },
+            "quick_stats": {
+                "allocation": "1000000000",
+                "beneficiaries": "25L+",
+                "direct_transfer": "100%",
+                "eligibility_age": "0+",
+                "eligibility_caste": "Scheduled Tribe (ST)",
+                "eligibility_criteria": "Specially Abled"
+            },
+            "scheme_name": "LPP Retainer",
+            "key_highlight": [
+                "Monthly financial assistance for elderly citizens of ST community",
+                "Direct Benefit Transfer to bank accounts",
+                "No contribution required from beneficiaries",
+                "Coverage across all districts of West Bengal"
+            ]
+        },
+        "rank": 8
+    },
+    {
+        "id": 9,
+        "scheme_name": "LPP Pensioner",
+        "is_active": 1,
+        "slug": "lpp-pensioner",
+        "icon": "fa-solid fa-user-tie",
+        "department_id": 8,
+        "ref_color": "blue",
+        "json_data": {
+            "icon": "fa-solid fa-user-tie",
+            "about": {
+                "long": "The LPP Pensioner scheme extends financial assistance to elderly folk artists, performers, and cultural workers associated with the Lok Prasar Prakalpa program. For years, these individuals played a vital role in spreading social messages, preserving traditional art forms, and strengthening Bengal’s cultural identity. However, many lacked formal employment benefits or savings to rely on in old age.\nTo address this gap, the West Bengal Government provides monthly pensions to eligible LPP pensioners who meet the prescribed age and income criteria. The assistance helps them manage household expenses, healthcare costs, and essential needs, ensuring a more stable and dignified life.\nThe scheme acknowledges the invaluable contributions of folk artists, storytellers, drummers, puppeteers, and many others in nurturing Bengal’s heritage. It strengthens cultural preservation by honoring those who dedicated their lives to enriching community life.",
+                "short": "This scheme provides monthly pensions to senior artists and cultural workers previously enrolled under Lok Prasar Prakalpa. It ensures economic support, dignity, and recognition for individuals who helped preserve and promote Bengal’s traditional arts."
+            },
+            "money": "1000",
+            "benefits": [
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Financial Assistance",
+                    "description": "₹1000/month For beneficiaries between 60 and 79 years."
+                },
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Enhanced Pension",
+                    "description": "₹1200/month For beneficiaries aged 80 years and above."
+                },
+                {
+                    "icon": "fas fa-universal-access",
+                    "title": "Special Category Benefits",
+                    "description": "Additional Support For specially abled senior citizens."
+                },
+                {
+                    "icon": "fas fa-hand-holding-medical",
+                    "title": "Healthcare Support",
+                    "description": "Free health services Includes health camps and medical check-up support."
+                }
+            ],
+            "required": {
+                "documents": [
+                    "Age Proof Certificate",
+                    "Income Certificate",
+                    "Residence Proof",
+                    "Bank Account Details (Passbook Copy)",
+                    "Aadhaar Card",
+                    "Passport Size Photographs",
+                    "BPL Card (if Applicable)"
+                ]
+            },
+            "workflow": {
+                "steps": [
+                    {
+                        "name": "Collect Application Form",
+                        "rank": 1,
+                        "description": "Available at Block Development Office or can be downloaded online."
+                    },
+                    {
+                        "name": "Submit Documents",
+                        "rank": 2,
+                        "description": "Submit age proof, income certificate, residence proof, bank details, etc."
+                    },
+                    {
+                        "name": "Verification",
+                        "rank": 3,
+                        "description": "Local authorities verify the eligibility and documents."
+                    },
+                    {
+                        "name": "Approval & Disbursement",
+                        "rank": 4,
+                        "description": "Pension is approved and directly credited into the bank account monthly."
+                    }
+                ]
+            },
+            "ref_color": "blue",
+            "scheme_id": 9,
+            "eligibility": {
+                "age": {
+                    "max": 120,
+                    "min": 60
+                },
+                "caste": [
+                    "ST"
+                ],
+                "gender": [
+                    "Male",
+                    "Female",
+                    "Others"
+                ],
+                "income": {
+                    "max": 100000,
+                    "min": 0
+                },
+                "criteria": {
+                    "aadhaar_required": true,
+                    "bank_account_required": true,
+                    "permanent_residence_years": 10
+                },
+                "exclusion": {
+                    "description": "Applicants already receiving other government pensions are excluded.",
+                    "receiving_other_pension": true
+                },
+                "residency": "WB",
+                "disability": false,
+                "eligibility_criteria": {
+                    "key": [
+                        {
+                            "icon": "fas fa-birthday-cake",
+                            "title": "Age Requirement",
+                            "description": "Minimum 60 years of age for general category, 50 years for specially abled persons"
+                        },
+                        {
+                            "icon": "fas fa-rupee-sign",
+                            "title": "Income Criteria",
+                            "description": "Annual family income should not exceed ₹1,00,000"
+                        },
+                        {
+                            "icon": "fas fa-home",
+                            "title": "Residency",
+                            "description": "Must be a permanent resident of West Bengal for at least 10 years"
+                        },
+                        {
+                            "icon": "fas fa-list",
+                            "title": "Exclusion Criteria",
+                            "description": "Not receiving any other government pension or regular income source"
+                        }
+                    ]
+                }
+            },
+            "quick_stats": {
+                "allocation": "1000000000",
+                "beneficiaries": "25L+",
+                "direct_transfer": "100%",
+                "eligibility_age": "0+",
+                "eligibility_caste": "Scheduled Tribe (ST)",
+                "eligibility_criteria": "Specially Abled"
+            },
+            "scheme_name": "LPP Pensioner",
+            "key_highlight": [
+                "Monthly financial assistance for elderly citizens of ST community",
+                "Direct Benefit Transfer to bank accounts",
+                "No contribution required from beneficiaries",
+                "Coverage across all districts of West Bengal"
+            ]
+        },
+        "rank": 9
+    },
+    {
+        "id": 10,
+        "scheme_name": "WCD Old Age Pension",
+        "is_active": 1,
+        "slug": "wcd-old-age",
+        "icon": "fa-solid fa-house-chimney-user",
+        "department_id": 9,
+        "ref_color": "rose",
+        "json_data": {
+            "icon": "fa-solid fa-house-chimney-user",
+            "about": {
+                "long": "The WCD Old Age Pension is a key social welfare program implemented by the Department of Women & Child Development and Social Welfare, Government of West Bengal. It aims to support senior citizens who belong to financially weaker sections and do not have a stable source of income in their advanced age.\nThrough this scheme, eligible elderly persons receive a monthly pension that helps them cover essential expenses such as food, medicine, and daily living costs. Many older individuals face hardships due to declining physical capacity, lack of employment opportunities, or insufficient family support. The scheme acts as a safety net for these vulnerable groups.\nDistrict authorities verify beneficiaries to ensure that assistance reaches the genuine needy. By providing consistent financial support, the WCD Old Age Pension promotes social dignity, reduces insecurity, and ensures that senior citizens can lead a more independent and comfortable life. It reflects the government’s commitment to inclusive welfare and the protection of elderly residents.",
+                "short": "The WCD Old Age Pension scheme provides monthly financial support to economically weak senior citizens in West Bengal. It ensures dignity and basic security for elderly individuals who lack sufficient income or family support."
+            },
+            "money": "1000",
+            "benefits": [
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Financial Assistance",
+                    "description": "₹1000/month For beneficiaries between 60 and 79 years."
+                },
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Enhanced Pension",
+                    "description": "₹1200/month For beneficiaries aged 80 years and above."
+                },
+                {
+                    "icon": "fas fa-universal-access",
+                    "title": "Special Category Benefits",
+                    "description": "Additional Support For specially abled senior citizens."
+                },
+                {
+                    "icon": "fas fa-hand-holding-medical",
+                    "title": "Healthcare Support",
+                    "description": "Free health services Includes health camps and medical check-up support."
+                }
+            ],
+            "required": {
+                "documents": [
+                    "Age Proof Certificate",
+                    "Income Certificate",
+                    "Residence Proof",
+                    "Bank Account Details (Passbook Copy)",
+                    "Aadhaar Card",
+                    "Passport Size Photographs",
+                    "BPL Card (if Applicable)"
+                ]
+            },
+            "workflow": {
+                "steps": [
+                    {
+                        "name": "Collect Application Form",
+                        "rank": 1,
+                        "description": "Available at Block Development Office or can be downloaded online."
+                    },
+                    {
+                        "name": "Submit Documents",
+                        "rank": 2,
+                        "description": "Submit age proof, income certificate, residence proof, bank details, etc."
+                    },
+                    {
+                        "name": "Verification",
+                        "rank": 3,
+                        "description": "Local authorities verify the eligibility and documents."
+                    },
+                    {
+                        "name": "Approval & Disbursement",
+                        "rank": 4,
+                        "description": "Pension is approved and directly credited into the bank account monthly."
+                    }
+                ]
+            },
+            "ref_color": "rose",
+            "scheme_id": 10,
+            "eligibility": {
+                "age": {
+                    "max": 120,
+                    "min": 60
+                },
+                "caste": [
+                    "ST"
+                ],
+                "gender": [
+                    "Male",
+                    "Female",
+                    "Others"
+                ],
+                "income": {
+                    "max": 100000,
+                    "min": 0
+                },
+                "criteria": {
+                    "aadhaar_required": true,
+                    "bank_account_required": true,
+                    "permanent_residence_years": 10
+                },
+                "exclusion": {
+                    "description": "Applicants already receiving other government pensions are excluded.",
+                    "receiving_other_pension": true
+                },
+                "residency": "WB",
+                "disability": false,
+                "eligibility_criteria": {
+                    "key": [
+                        {
+                            "icon": "fas fa-birthday-cake",
+                            "title": "Age Requirement",
+                            "description": "Minimum 60 years of age for general category, 50 years for specially abled persons"
+                        },
+                        {
+                            "icon": "fas fa-rupee-sign",
+                            "title": "Income Criteria",
+                            "description": "Annual family income should not exceed ₹1,00,000"
+                        },
+                        {
+                            "icon": "fas fa-home",
+                            "title": "Residency",
+                            "description": "Must be a permanent resident of West Bengal for at least 10 years"
+                        },
+                        {
+                            "icon": "fas fa-list",
+                            "title": "Exclusion Criteria",
+                            "description": "Not receiving any other government pension or regular income source"
+                        }
+                    ]
+                }
+            },
+            "quick_stats": {
+                "allocation": "1000000000",
+                "beneficiaries": "25L+",
+                "direct_transfer": "100%",
+                "eligibility_age": "0+",
+                "eligibility_caste": "Scheduled Tribe (ST)",
+                "eligibility_criteria": "Specially Abled"
+            },
+            "scheme_name": "WCD Old Age Pension",
+            "key_highlight": [
+                "Monthly financial assistance for elderly citizens of ST community",
+                "Direct Benefit Transfer to bank accounts",
+                "No contribution required from beneficiaries",
+                "Coverage across all districts of West Bengal"
+            ]
+        },
+        "rank": 6
+    },
+    {
+        "id": 11,
+        "scheme_name": "WCD Widow Pension",
+        "is_active": 1,
+        "slug": "wcd-widow",
+        "icon": "fa-solid fa-person-dress",
+        "department_id": 9,
+        "ref_color": "fuchsia",
+        "json_data": {
+            "icon": "fa-solid fa-person-dress",
+            "about": {
+                "long": "The Widow Pension scheme, implemented by the Department of Women & Child Development and Social Welfare, supports widowed women who face financial hardship after losing their spouse. Many widows struggle with daily expenses, childcare responsibilities, and limited employment opportunities, especially in rural and low-income households.\nTo help them live with dignity, the West Bengal Government provides a monthly pension to eligible widows based on age and income criteria. This support enables beneficiaries to meet basic necessities, manage healthcare needs, and maintain financial independence.\nThe scheme plays a vital role in empowering vulnerable women by offering monetary relief and reducing economic insecurity. District-level verification ensures that benefits reach deserving applicants. By supporting widows during difficult periods, the scheme reinforces the government’s commitment to gender-sensitive welfare and social protection.",
+                "short": "The WCD Widow Pension scheme provides monthly assistance to widowed women from economically weaker families in West Bengal. It aims to ensure financial stability, dignity, and security for women who lack social or economic support after the loss of their spouse."
+            },
+            "money": "1000",
+            "benefits": [
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Financial Assistance",
+                    "description": "₹1000/month For beneficiaries between 60 and 79 years."
+                },
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Enhanced Pension",
+                    "description": "₹1200/month For beneficiaries aged 80 years and above."
+                },
+                {
+                    "icon": "fas fa-universal-access",
+                    "title": "Special Category Benefits",
+                    "description": "Additional Support For specially abled senior citizens."
+                },
+                {
+                    "icon": "fas fa-hand-holding-medical",
+                    "title": "Healthcare Support",
+                    "description": "Free health services Includes health camps and medical check-up support."
+                }
+            ],
+            "required": {
+                "documents": [
+                    "Age Proof Certificate",
+                    "Income Certificate",
+                    "Residence Proof",
+                    "Bank Account Details (Passbook Copy)",
+                    "Aadhaar Card",
+                    "Passport Size Photographs",
+                    "BPL Card (if Applicable)"
+                ]
+            },
+            "workflow": {
+                "steps": [
+                    {
+                        "name": "Collect Application Form",
+                        "rank": 1,
+                        "description": "Available at Block Development Office or can be downloaded online."
+                    },
+                    {
+                        "name": "Submit Documents",
+                        "rank": 2,
+                        "description": "Submit age proof, income certificate, residence proof, bank details, etc."
+                    },
+                    {
+                        "name": "Verification",
+                        "rank": 3,
+                        "description": "Local authorities verify the eligibility and documents."
+                    },
+                    {
+                        "name": "Approval & Disbursement",
+                        "rank": 4,
+                        "description": "Pension is approved and directly credited into the bank account monthly."
+                    }
+                ]
+            },
+            "ref_color": "fuchsia",
+            "scheme_id": 11,
+            "eligibility": {
+                "age": {
+                    "max": 120,
+                    "min": 60
+                },
+                "caste": [
+                    "ST"
+                ],
+                "gender": [
+                    "Male",
+                    "Female",
+                    "Others"
+                ],
+                "income": {
+                    "max": 100000,
+                    "min": 0
+                },
+                "criteria": {
+                    "aadhaar_required": true,
+                    "bank_account_required": true,
+                    "permanent_residence_years": 10
+                },
+                "exclusion": {
+                    "description": "Applicants already receiving other government pensions are excluded.",
+                    "receiving_other_pension": true
+                },
+                "residency": "WB",
+                "disability": false,
+                "eligibility_criteria": {
+                    "key": [
+                        {
+                            "icon": "fas fa-birthday-cake",
+                            "title": "Age Requirement",
+                            "description": "Minimum 60 years of age for general category, 50 years for specially abled persons"
+                        },
+                        {
+                            "icon": "fas fa-rupee-sign",
+                            "title": "Income Criteria",
+                            "description": "Annual family income should not exceed ₹1,00,000"
+                        },
+                        {
+                            "icon": "fas fa-home",
+                            "title": "Residency",
+                            "description": "Must be a permanent resident of West Bengal for at least 10 years"
+                        },
+                        {
+                            "icon": "fas fa-list",
+                            "title": "Exclusion Criteria",
+                            "description": "Not receiving any other government pension or regular income source"
+                        }
+                    ]
+                }
+            },
+            "quick_stats": {
+                "allocation": "1000000000",
+                "beneficiaries": "25L+",
+                "direct_transfer": "100%",
+                "eligibility_age": "0+",
+                "eligibility_caste": "Scheduled Tribe (ST)",
+                "eligibility_criteria": "Specially Abled"
+            },
+            "scheme_name": "WCD Widow Pension",
+            "key_highlight": [
+                "Monthly financial assistance for elderly citizens of ST community",
+                "Direct Benefit Transfer to bank accounts",
+                "No contribution required from beneficiaries",
+                "Coverage across all districts of West Bengal"
+            ]
+        },
+        "rank": 2
+    },
+    {
+        "id": 19,
+        "scheme_name": "Legacy Old Age Pension for ST",
+        "is_active": 1,
+        "slug": "oap-st",
+        "icon": "fa-solid fa-person-cane",
+        "department_id": 1,
+        "ref_color": "teal",
+        "json_data": {
+            "icon": "fa-solid fa-person-cane",
+            "about": {
+                "long": "The Legacy Old Age Pension for Scheduled Tribes is designed to support elderly ST beneficiaries who were previously covered under earlier pension schemes of the West Bengal Government. Many of these individuals belong to economically and socially vulnerable communities with limited income opportunities.\nTo ensure continuity of welfare benefits, the government provides a monthly pension to eligible legacy beneficiaries who meet age and economic criteria. This financial assistance helps them manage essential expenses such as food, healthcare, transportation, and daily needs.\n The scheme reflects the government’s commitment to protecting the rights and entitlements of tribal communities. It also ensures that no elderly ST citizen is deprived of support due to administrative or policy transitions.\n Through systematic verification processes, authorities ensure accurate identification and seamless extension of benefits. By strengthening old-age security among tribal populations, the scheme upholds social justice, dignity, and inclusive development.",
+                "short": "This scheme provides monthly pension support to elderly members of the Scheduled Tribe community who were beneficiaries of earlier pension programs. It ensures continued social protection and financial stability for senior ST citizens under legacy entitlements."
+            },
+            "money": "1000",
+            "benefits": [
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Financial Assistance",
+                    "description": "₹1000/month For beneficiaries between 60 and 79 years."
+                },
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Enhanced Pension",
+                    "description": "₹1200/month For beneficiaries aged 80 years and above."
+                },
+                {
+                    "icon": "fas fa-universal-access",
+                    "title": "Special Category Benefits",
+                    "description": "Additional Support For specially abled senior citizens."
+                },
+                {
+                    "icon": "fas fa-hand-holding-medical",
+                    "title": "Healthcare Support",
+                    "description": "Free health services Includes health camps and medical check-up support."
+                }
+            ],
+            "required": {
+                "documents": [
+                    "Age Proof Certificate",
+                    "Income Certificate",
+                    "Residence Proof",
+                    "Bank Account Details (Passbook Copy)",
+                    "Aadhaar Card",
+                    "Passport Size Photographs",
+                    "BPL Card (if Applicable)"
+                ]
+            },
+            "workflow": {
+                "steps": [
+                    {
+                        "name": "Collect Application Form",
+                        "rank": 1,
+                        "description": "Available at Block Development Office or can be downloaded online."
+                    },
+                    {
+                        "name": "Submit Documents",
+                        "rank": 2,
+                        "description": "Submit age proof, income certificate, residence proof, bank details, etc."
+                    },
+                    {
+                        "name": "Verification",
+                        "rank": 3,
+                        "description": "Local authorities verify the eligibility and documents."
+                    },
+                    {
+                        "name": "Approval & Disbursement",
+                        "rank": 4,
+                        "description": "Pension is approved and directly credited into the bank account monthly."
+                    }
+                ]
+            },
+            "ref_color": "teal",
+            "scheme_id": 19,
+            "eligibility": {
+                "age": {
+                    "max": 120,
+                    "min": 60
+                },
+                "caste": [
+                    "ST"
+                ],
+                "gender": [
+                    "Male",
+                    "Female",
+                    "Others"
+                ],
+                "income": {
+                    "max": 100000,
+                    "min": 0
+                },
+                "criteria": {
+                    "aadhaar_required": true,
+                    "bank_account_required": true,
+                    "permanent_residence_years": 10
+                },
+                "exclusion": {
+                    "description": "Applicants already receiving other government pensions are excluded.",
+                    "receiving_other_pension": true
+                },
+                "residency": "WB",
+                "disability": false,
+                "eligibility_criteria": {
+                    "key": [
+                        {
+                            "icon": "fas fa-birthday-cake",
+                            "title": "Age Requirement",
+                            "description": "Minimum 60 years of age for general category, 50 years for specially abled persons"
+                        },
+                        {
+                            "icon": "fas fa-rupee-sign",
+                            "title": "Income Criteria",
+                            "description": "Annual family income should not exceed ₹1,00,000"
+                        },
+                        {
+                            "icon": "fas fa-home",
+                            "title": "Residency",
+                            "description": "Must be a permanent resident of West Bengal for at least 10 years"
+                        },
+                        {
+                            "icon": "fas fa-list",
+                            "title": "Exclusion Criteria",
+                            "description": "Not receiving any other government pension or regular income source"
+                        }
+                    ]
+                }
+            },
+            "quick_stats": {
+                "allocation": "1000000000",
+                "beneficiaries": "25L+",
+                "direct_transfer": "100%",
+                "eligibility_age": "0+",
+                "eligibility_caste": "Scheduled Tribe (ST)",
+                "eligibility_criteria": "Specially Abled"
+            },
+            "scheme_name": "Legacy Old Age Pension for ST",
+            "key_highlight": [
+                "Monthly financial assistance for elderly citizens of ST community",
+                "Direct Benefit Transfer to bank accounts",
+                "No contribution required from beneficiaries",
+                "Coverage across all districts of West Bengal"
+            ]
+        },
+        "rank": 13
+    },
+    {
+        "id": 1,
+        "scheme_name": "Jai Johar (for ST)",
+        "is_active": 1,
+        "slug": "jai-johar",
+        "icon": "fa-solid fa-feather",
+        "department_id": 1,
+        "ref_color": "green",
+        "json_data": {
+            "icon": "fa-feather",
+            "about": {
+                "long": "The Jai Johar scheme is a flagship initiative of the Government of West Bengal aimed at supporting elderly people belonging to the Scheduled Tribe community. Many ST households face financial hardship due to limited income opportunities, especially in rural and forest-based regions. To reduce this vulnerability and promote social security, the State Government provides a monthly pension to eligible ST senior citizens who have no stable source of income.The scheme is designed to ensure dignity and independence for elderly individuals by enabling them to meet their basic needs such as food, medicine, and essential living expenses. Applicants are verified through district authorities, ensuring that assistance reaches the rightful beneficiaries. Jai Johar reflects the government’s commitment to socio-economic empowerment, tribal welfare, and inclusive development. Through steady financial support, the scheme helps protect vulnerable communities from poverty, neglect, and social isolation.",
+                "short": "Jai Johar is a West Bengal Government pension scheme for elderly citizens belonging to the Scheduled Tribe community. It ensures monthly financial support, social protection, and dignity for senior ST beneficiaries who come from economically weaker backgrounds. The scheme aims to promote inclusion and improve their quality of life."
+            },
+            "money": "1000",
+            "benefits": [
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Financial Assistance",
+                    "description": "₹1000/month For beneficiaries between 60 and 79 years."
+                },
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Enhanced Pension",
+                    "description": "₹1200/month For beneficiaries aged 80 years and above."
+                },
+                {
+                    "icon": "fas fa-universal-access",
+                    "title": "Special Category Benefits",
+                    "description": "Additional Support For specially abled senior citizens."
+                },
+                {
+                    "icon": "fas fa-hand-holding-medical",
+                    "title": "Healthcare Support",
+                    "description": "Free health services Includes health camps and medical check-up support."
+                }
+            ],
+            "required": {
+                "documents": [
+                    "Age Proof Certificate",
+                    "Income Certificate",
+                    "Residence Proof",
+                    "Bank Account Details (Passbook Copy)",
+                    "Aadhaar Card",
+                    "Passport Size Photographs",
+                    "BPL Card (if Applicable)"
+                ]
+            },
+            "workflow": {
+                "steps": [
+                    {
+                        "name": "Collect Application Form",
+                        "rank": 1,
+                        "description": "Available at Block Development Office or can be downloaded online."
+                    },
+                    {
+                        "name": "Submit Documents",
+                        "rank": 2,
+                        "description": "Submit age proof, income certificate, residence proof, bank details, etc."
+                    },
+                    {
+                        "name": "Verification",
+                        "rank": 3,
+                        "description": "Local authorities verify the eligibility and documents."
+                    },
+                    {
+                        "name": "Approval & Disbursement",
+                        "rank": 4,
+                        "description": "Pension is approved and directly credited into the bank account monthly."
+                    }
+                ]
+            },
+            "ref_color": "green",
+            "scheme_id": "1",
+            "eligibility": {
+                "age": {
+                    "max": 120,
+                    "min": 60
+                },
+                "caste": [
+                    "ST"
+                ],
+                "gender": [
+                    "Male",
+                    "Female",
+                    "Others"
+                ],
+                "income": {
+                    "max": 100000,
+                    "min": 0
+                },
+                "criteria": {
+                    "aadhaar_required": true,
+                    "bank_account_required": true,
+                    "permanent_residence_years": 10
+                },
+                "exclusion": {
+                    "description": "Applicants already receiving other government pensions are excluded.",
+                    "receiving_other_pension": true
+                },
+                "residency": "WB",
+                "disability": false,
+                "eligibility_criteria": {
+                    "key": [
+                        {
+                            "icon": "fas fa-birthday-cake",
+                            "title": "Age Requirement",
+                            "description": "Minimum 60 years of age for general category, 50 years for specially abled persons"
+                        },
+                        {
+                            "icon": "fas fa-rupee-sign",
+                            "title": "Income Criteria",
+                            "description": "Annual family income should not exceed ₹1,00,000"
+                        },
+                        {
+                            "icon": "fas fa-home",
+                            "title": "Residency",
+                            "description": "Must be a permanent resident of West Bengal for at least 10 years"
+                        },
+                        {
+                            "icon": "fas fa-list",
+                            "title": "Exclusion Criteria",
+                            "description": "Not receiving any other government pension or regular income source"
+                        }
+                    ]
+                }
+            },
+            "quick_stats": {
+                "allocation": "1000000000",
+                "beneficiaries": "25L+",
+                "direct_transfer": "100%",
+                "eligibility_age": "60+",
+                "eligibility_caste": "Scheduled Tribe (ST)"
+            },
+            "scheme_name": "Jai Johar (for ST)",
+            "key_highlight": [
+                "Monthly financial assistance for elderly citizens of ST community",
+                "Direct Benefit Transfer to bank accounts",
+                "No contribution required from beneficiaries",
+                "Coverage across all districts of West Bengal"
+            ]
+        },
+        "rank": 3
+    },
+    {
+        "id": 13,
+        "scheme_name": "Old age Pension for Farmer",
+        "is_active": 1,
+        "slug": "old-age-farmer",
+        "icon": "fa-solid fa-tractor",
+        "department_id": 10,
+        "ref_color": "lime",
+        "json_data": {
+            "icon": "fa-solid fa-tractor",
+            "about": {
+                "long": "The Old Age Pension for Farmers is a welfare initiative designed for elderly individuals who have dedicated their lives to agriculture in West Bengal. Many small and marginal farmers rely on seasonal income and face financial difficulties once age or poor health prevents them from continuing agricultural work.\n To address this issue, the State Government offers a monthly pension to eligible senior farmers who meet specific economic and age-related criteria. The assistance enables them to meet daily expenses, healthcare needs, and essential living costs without depending fully on family members.\n This scheme honors the contribution of farmers who ensure food security and rural economic stability. It aims to reduce vulnerability among aging farmers by providing dependable financial support. Through district-level scrutiny and transparent beneficiary selection, the government ensures equitable distribution of benefits.\n By supporting farmers in their old age, the scheme strengthens rural welfare and reflects the state’s commitment to agriculture-driven development.",
+                "short": "This scheme provides monthly pension support to elderly farmers in West Bengal who lack regular income after retiring from agricultural work. It ensures financial stability, dignity, and basic security for those who served the farming sector for decades."
+            },
+            "money": "1000",
+            "benefits": [
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Financial Assistance",
+                    "description": "₹1000/month For beneficiaries between 60 and 79 years."
+                },
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Enhanced Pension",
+                    "description": "₹1200/month For beneficiaries aged 80 years and above."
+                },
+                {
+                    "icon": "fas fa-universal-access",
+                    "title": "Special Category Benefits",
+                    "description": "Additional Support For specially abled senior citizens."
+                },
+                {
+                    "icon": "fas fa-hand-holding-medical",
+                    "title": "Healthcare Support",
+                    "description": "Free health services Includes health camps and medical check-up support."
+                }
+            ],
+            "required": {
+                "documents": [
+                    "Age Proof Certificate",
+                    "Income Certificate",
+                    "Residence Proof",
+                    "Bank Account Details (Passbook Copy)",
+                    "Aadhaar Card",
+                    "Passport Size Photographs",
+                    "BPL Card (if Applicable)"
+                ]
+            },
+            "workflow": {
+                "steps": [
+                    {
+                        "name": "Collect Application Form",
+                        "rank": 1,
+                        "description": "Available at Block Development Office or can be downloaded online."
+                    },
+                    {
+                        "name": "Submit Documents",
+                        "rank": 2,
+                        "description": "Submit age proof, income certificate, residence proof, bank details, etc."
+                    },
+                    {
+                        "name": "Verification",
+                        "rank": 3,
+                        "description": "Local authorities verify the eligibility and documents."
+                    },
+                    {
+                        "name": "Approval & Disbursement",
+                        "rank": 4,
+                        "description": "Pension is approved and directly credited into the bank account monthly."
+                    }
+                ]
+            },
+            "ref_color": "lime",
+            "scheme_id": 13,
+            "eligibility": {
+                "age": {
+                    "max": 120,
+                    "min": 60
+                },
+                "caste": [
+                    "ST"
+                ],
+                "gender": [
+                    "Male",
+                    "Female",
+                    "Others"
+                ],
+                "income": {
+                    "max": 100000,
+                    "min": 0
+                },
+                "criteria": {
+                    "aadhaar_required": true,
+                    "bank_account_required": true,
+                    "permanent_residence_years": 10
+                },
+                "exclusion": {
+                    "description": "Applicants already receiving other government pensions are excluded.",
+                    "receiving_other_pension": true
+                },
+                "residency": "WB",
+                "disability": false,
+                "eligibility_criteria": {
+                    "key": [
+                        {
+                            "icon": "fas fa-birthday-cake",
+                            "title": "Age Requirement",
+                            "description": "Minimum 60 years of age for general category, 50 years for specially abled persons"
+                        },
+                        {
+                            "icon": "fas fa-rupee-sign",
+                            "title": "Income Criteria",
+                            "description": "Annual family income should not exceed ₹1,00,000"
+                        },
+                        {
+                            "icon": "fas fa-home",
+                            "title": "Residency",
+                            "description": "Must be a permanent resident of West Bengal for at least 10 years"
+                        },
+                        {
+                            "icon": "fas fa-list",
+                            "title": "Exclusion Criteria",
+                            "description": "Not receiving any other government pension or regular income source"
+                        }
+                    ]
+                }
+            },
+            "quick_stats": {
+                "allocation": "1000000000",
+                "beneficiaries": "25L+",
+                "direct_transfer": "100%",
+                "eligibility_age": "0+",
+                "eligibility_caste": "Scheduled Tribe (ST)",
+                "eligibility_criteria": "Specially Abled"
+            },
+            "scheme_name": "Old age Pension for Farmer",
+            "key_highlight": [
+                "Monthly financial assistance for elderly citizens of ST community",
+                "Direct Benefit Transfer to bank accounts",
+                "No contribution required from beneficiaries",
+                "Coverage across all districts of West Bengal"
+            ]
+        },
+        "rank": 5
+    }
+]
