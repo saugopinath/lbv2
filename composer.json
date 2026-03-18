@@ -22,7 +22,8 @@
         "spatie/laravel-activitylog": "^4.11",
         "spatie/laravel-permission": "^6.22",
         "staudenmeir/belongs-to-through": "^2.16",
-        "stevebauman/location": "^7.6"
+        "stevebauman/location": "^7.6",
+        "tymon/jwt-auth": "^2.3"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16",
