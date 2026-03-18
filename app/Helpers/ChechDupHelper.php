@@ -82,4 +82,39 @@ class ChechDupHelper
 
         return "Invalid check type!";
     }
+
+    public static function checkBankMobileDuplicate(string $type, string $value, $schemeId)
+    {
+        $errors = [];
+
+        if ($type === 'mobile') {
+
+            $existsMobile = BeneficiaryPersonalDetail::where('other_details->mobile_no', $value)
+                ->where('scheme_id', $schemeId)
+                ->where('is_final', 1)
+                ->where('next_level_role_id', '!=', -100)
+                ->exists();
+
+            if ($existsMobile) {
+                $errors[] = "Duplicate found for Mobile: {$value}";
+            }
+        }
+
+        if ($type === 'bank') {
+
+            $existsBank = BeneficiaryBankDetail::where('bankaccountnumber', $value)
+                ->whereHas('personal', function ($q) use ($schemeId) {
+                    $q->where('scheme_id', $schemeId)
+                        ->where('is_final', 1)
+                        ->where('next_level_role_id', '!=', -100);
+                })
+                ->exists();
+
+            if ($existsBank) {
+                $errors[] = "Duplicate found for Bank Account: {$value}";
+            }
+        }
+
+        return !empty($errors) ? implode(' | ', $errors) : true;
+    }
 }

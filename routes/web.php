@@ -138,7 +138,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('userDutymanagement.index');
 
 
-         // Incomplete Types
+    // Incomplete Types
     Route::get('/incomplete-types/{stage?}', [IncompleteTypeController::class, 'index'])
         ->name('incomplete.types');
 
@@ -252,3 +252,19 @@ Route::get('application-lists', [Formcontroller::class, 'applicationLists'])
     ->name('application-lists');
 Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])
     ->name('define-workflow1');
+
+Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])
+    ->middleware('permission:update bank details')
+    ->name('bankUpdate');
+
+Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])
+    // ->middleware('permission:search bank update')
+    ->name('bank-update.search-beneficiary');
+
+Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])
+    // ->middleware('permission:update mobile')
+    ->name('update-mobile');
+
+Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
+    // ->middleware('permission:update bank')
+    ->name('update-bank');
