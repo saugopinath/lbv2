@@ -1,3 +1,3 @@
 <x-layouts.app>
-    <livewire:beneficiary-search :displayType="'radio'"   />
+    <livewire:form  />
 </x-layouts.app>
