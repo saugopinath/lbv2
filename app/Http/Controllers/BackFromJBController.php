@@ -50,18 +50,18 @@ class BackFromJBController extends Controller
                 $new_dob = $request->new_dob;
                 $action = $request->action;
                 $record = BackFromJb::with([
-                    'beneficiary.sourceable'
+                    'beneficiary'
                 ])->find($app_id);
                 $msg = '';
-                if ($action == 'verify_and_forward_to_approver') {
+                if ($action == 'verify_and_forward_to_approver' && CheckAuthHelper::isCommmonVerifier()) {
                     $record->new_dob = $new_dob;
                     $record->next_level_role_id = Codemaster::getIdByCode(4402);
                     $msg = 'The request successfully verified!';
-                } elseif ($action == 'approve') {
+                } elseif ($action == 'approve' && CheckAuthHelper::isCommonApprover()) {
                     $record->next_level_role_id = Codemaster::getIdByCode(4403);
                     $msg = 'The request successfully approved!';
-                    $record->beneficiary->sourceable->dob = $record->new_dob;
-                    $record->beneficiary->sourceable->save();
+                    $record->beneficiary->dob = $record->new_dob;
+                    $record->beneficiary->save();
                 }
                 $record->save();
                 DB::commit();
