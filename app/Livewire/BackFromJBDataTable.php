@@ -106,8 +106,7 @@ class BackFromJBDataTable extends DataTableComponent
         $this->district_id = $filters['district_id'];
         $this->rural_urban = $filters['rural_urban'] ?? null;
         $this->blockurban = $filters['blockurban'];
-        $this->gp_ward = $filters['gp_ward'];
-        $this->sub_div = $filters['subdivision_id'];
+        $this->gp_ward = $filters['gpward'];
         $this->next_level_role_id = $filters['application_type'];
         if ($this->next_level_role_id == null) {
             if (CheckAuthHelper::isCommmonVerifier()) {
@@ -188,7 +187,7 @@ class BackFromJBDataTable extends DataTableComponent
             $query->where('next_level_role_id', $this->next_level_role_id);
         }
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->sub_div) {
-            $query = EncryptionArray::applyBackFromJB(
+            $query = EncryptionArray::applyLocationFilters(
                 $query,
                 $this->district_id,
                 $this->rural_urban,

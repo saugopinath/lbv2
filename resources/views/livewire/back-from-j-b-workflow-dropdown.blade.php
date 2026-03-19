@@ -4,7 +4,7 @@
         <option value="{{ $type->id }}">{{ $type->name }}</option>
         @endforeach
     </x-form.select>
-    <livewire:filter-lgd-master />
+    <livewire:filterlgdmasternew :buttonShow="false" />
     <div class="flex gap-3">
         <x-button.primary
             x-on:click="$wire.search();"
