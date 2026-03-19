@@ -332,4 +332,16 @@ class WorkFlowPermissionHelper
     {
         return Auth::user()->can('scheme-capacity-setting');
     }
+    public static function canImportJanmaMrityuData(): bool
+    {
+        return Auth::user()->can('import-janma-mrityu-data');
+    }
+    public static function canReActivateDeathIncident(): bool
+    {
+        return Auth::user()->can('re-activate-death-incident');
+    }
+    public static function canJanmyaMrityuBeneficiaryList(): bool
+    {
+        return Auth::user()->can('janmya-mrityu-beneficiary-list');
+    }
 }

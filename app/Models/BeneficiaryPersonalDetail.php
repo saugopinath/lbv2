@@ -73,6 +73,18 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     {
         return $this->hasOne(Scheme::class, 'id', 'scheme_id');
     }
+    public function jnmp()
+    {
+        return $this->hasOne(JnmpData::class, 'lb_application_id', 'application_id');
+    }
+    public function mapping()
+    {
+        return $this->hasOne(LbMapping::class, 'lb_id', 'application_id');
+    }
+    public function district()
+    {
+        return $this->belongsTo(District::class, 'created_by_dist_code', 'district_code');
+    }
     public function creator()
     {
         $block = Block::where('lgd_code', $this->created_by_local_body_code)->first();
