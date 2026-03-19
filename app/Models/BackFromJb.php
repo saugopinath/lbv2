@@ -12,4 +12,9 @@ class BackFromJb extends Model
     {
         return $this->hasOne(BeneficiaryPersonalDetail::class, 'application_id', 'application_id');
     }
+
+    public function contact()
+    {
+        return $this->hasOne(BeneficiaryContactDetail::class, 'application_id', 'application_id');
+    }
 }

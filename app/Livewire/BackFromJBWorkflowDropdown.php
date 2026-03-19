@@ -12,13 +12,12 @@ class BackFromJBWorkflowDropdown extends Component
     public array $filters = [
         'district_id'     => null,
         'rural_urban'     => null,
-        'subdivision_id'  => null,
         'blockurban'      => null,
-        'gp_ward'         => null,
+        'gpward'         => null,
         'application_type' => null,
     ];
     protected $listeners = [
-        'filtersApplied'       => 'updateGeoFilters',
+        'filter-applied'       => 'updateGeoFilters',
     ];
     public function render()
     {
@@ -54,9 +53,9 @@ class BackFromJBWorkflowDropdown extends Component
         return view('livewire.back-from-j-b-workflow-dropdown');
     }
 
-    public function updateGeoFilters(array $data)
+    public function updateGeoFilters(array $filters)
     {
-        $this->filters = array_merge($this->filters, $data);
+        $this->filters = array_merge($this->filters, $filters);
     }
     public function updatedApplicationType($code)
     {
@@ -71,9 +70,8 @@ class BackFromJBWorkflowDropdown extends Component
         $this->filters = [
             'district_id'     => null,
             'rural_urban'     => null,
-            'subdivision_id'  => null,
             'blockurban'      => null,
-            'gp_ward'         => null,
+            'gpward'         => null,
             'application_type' => null,
         ];
         $this->application_type = null;
