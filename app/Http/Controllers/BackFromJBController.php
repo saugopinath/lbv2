@@ -75,19 +75,19 @@ class BackFromJBController extends Controller
         }
         $applicant_details['applicationId'] = Crypt::decryptString($request->id);
         $record = BackFromJb::with([
-            'beneficiary.sourceable.relationships'
+            'beneficiary'
         ])->find($applicant_details['applicationId']);
         $applicant_details['jb_poposed_dob_show'] = Carbon::parse($record->jb_poposed_dob)->format('d-m-Y');
         $applicant_details['new_dob'] = Carbon::parse($record->new_dob)->format('d-m-Y');
         $applicant_details['jb_poposed_dob'] = $record->jb_poposed_dob;
         $applicant_details['minDOB'] = $this->minDOB;
         $applicant_details['maxDOB'] = $this->maxDOB;
-        $applicant_details['dob'] = Carbon::parse($record->beneficiary->sourceable->dob)->format('d-m-Y');
-        $applicant_details['email'] =  $record->beneficiary->sourceable->email;
+        $applicant_details['dob'] = Carbon::parse($record->beneficiary->dob)->format('d-m-Y');
+        $applicant_details['email'] =  $record->beneficiary->email;
         $applicant_details['name'] = $record->beneficiary->beneficiary_name;
-        $applicant_details['mobileNo'] = $record->beneficiary->mobile_no;
-        $applicant_details['motherName'] = $record->beneficiary->sourceable->relationships->first()->getFullNameByCode(132);
-        $applicant_details['fatherName'] = $record->beneficiary->sourceable->relationships->first()->getFullNameByCode(131);
+        $applicant_details['mobileNo'] = $record->beneficiary->other_details['mobile_no'];
+        $applicant_details['motherName'] = $record->beneficiary->ben_mother_name;
+        $applicant_details['fatherName'] = $record->beneficiary->ben_father_name;
         $role = '';
         $btnAction = '';
         if (CheckAuthHelper::isCommmonVerifier()) {

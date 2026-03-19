@@ -49,7 +49,7 @@ class BackFromJBDataTable extends DataTableComponent
 
     public function configure(): void
     {
-        $this->setPrimaryKey('sourceable_id')
+        $this->setPrimaryKey('application_id')
             ->setPaginationEnabled()
             ->setPerPageAccepted([5, 10])
             ->setPerPage($this->perPage)
@@ -122,28 +122,28 @@ class BackFromJBDataTable extends DataTableComponent
     {
         return [
             Column::make("Application ID", "application_id")
-                ->label(fn($row) => $row->beneficiary->sourceable_id ?? 'N/A')
+                ->label(fn($row) => $row->beneficiary->application_id ?? 'N/A')
                 ->sortable()
                 ->searchable(function ($query, $searchTerm) {
                     $query->whereHas('beneficiary', function ($q) use ($searchTerm) {
-                        $q->where('sourceable_id', 'ILIKE', "%{$searchTerm}%");
+                        $q->where('application_id', 'ILIKE', "%{$searchTerm}%");
                     });
                 }),
 
             Column::make("Applicant Name", "full_name")
-                ->label(fn($row) => $row->beneficiary->sourceable->full_name ?? 'N/A')
+                ->label(fn($row) => $row->beneficiary->beneficiary_name ?? 'N/A')
                 ->searchable(function ($query, $searchTerm) {
-                    $query->whereHas('beneficiary.sourceable', function ($q) use ($searchTerm) {
+                    $query->whereHas('beneficiary', function ($q) use ($searchTerm) {
                         $q->where('full_name', 'ILIKE', "%{$searchTerm}%");
                     });
                 }),
 
             Column::make("Mobile No", "Mobile No")
-                ->label(fn($row) => $row->beneficiary->sourceable->mobile_no
+                ->label(fn($row) => $row->beneficiary->other_details['mobile_no']
                     ?? 'N/A'),
 
             Column::make("Address", "Address")
-                ->label(fn($row) => $row->beneficiary->sourceable->contact->getFullAddress() ?? 'N/A')
+                ->label(fn($row) => $row->beneficiary->contact->getFullAddress() ?? 'N/A')
                 ->html(),
 
             Column::make("Action")
@@ -165,7 +165,7 @@ class BackFromJBDataTable extends DataTableComponent
                     if (!$canEdit) {
                         return $msg;
                     }
-                    $link = route('backfromjbactions') . '?id=' . Crypt::encryptString($row->beneficiary->sourceable->application_id);
+                    $link = route('backfromjbactions') . '?id=' . Crypt::encryptString($row->beneficiary->application_id);
                     return view('coulmn_button.actions', [
                         'link' => $link,
                         'tooltip' => 'Edit',
@@ -197,6 +197,7 @@ class BackFromJBDataTable extends DataTableComponent
                 $this->sub_div
             );
         }
+        // dd($query->get());
         return $query;
     }
 }
