@@ -28,6 +28,8 @@ Route::get('/search', [BeneficiarySearchController::class, 'search']);
 
 Route::get('track-beneficiary', [BeneficiaryTrackController::class, 'trackBeneficiary'])->name('track-beneficiary');
 Route::get('/api/beneficiaries/search', [BeneficiaryTrackController::class, 'trackBeneficiaryData'])->name('beneficiaries.search');
+Route::get('/track-beneficiary/payment-history/{id}', [BeneficiaryTrackController::class, 'trackBeneficiaryPaymentHistory'])->name('beneficiary.payment.history')->middleware('signed')->withoutMiddleware('throttle');
+Route::post('/track-beneficiary/payment-history/error-details', [BeneficiaryTrackController::class, 'getStatusUTRAndErrorFun'])->name('payment.error.details');
 
 Route::get('notifications', [NotificationController::class, 'index'])->name('notifications');
 Route::post('/notifications/datatable', [NotificationController::class, 'datatable'])->name('notifications.datatable');

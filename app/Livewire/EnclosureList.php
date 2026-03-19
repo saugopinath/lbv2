@@ -234,6 +234,7 @@ class EnclosureList extends Component
 
     public function saveSingleDocument()
     {
+        // dd($this->singleDocument);
         if (!$this->singleDocument) {
             $doc = $this->doc_lists->firstWhere('doc_type_id', $this->currentDocId);
             $docName = $doc?->codemaster?->name ?? 'Document';
@@ -269,6 +270,7 @@ class EnclosureList extends Component
             }
             $existingDoc->update($updateData);
         } else {
+            // dd('juhsjh');
             $createData = [
                 'application_id' => $this->application_id,
                 'beneficiary_id' => $beneficiaryId,
@@ -283,6 +285,7 @@ class EnclosureList extends Component
             if ((int) $this->enclosureSource !== 5) {
                 $createData['tab_code'] = $this->tabCode;
             }
+            // dd($createData);
             $model::create($createData);
             // dd($is_upload);
         }
