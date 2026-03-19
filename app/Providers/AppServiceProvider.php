@@ -9,7 +9,8 @@ use App\Services\AuthenticationService;
 
 use App\Interfaces\SendSmsInterface;
 use App\Services\SendSmsService;
-
+use App\Interfaces\JNMPAuthenticationInterface;
+use App\Services\JNMPAuthenticationService;
 use App\Interfaces\UserInterface;
 use App\Services\UserService;
 
@@ -45,6 +46,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ElasticsearchInterface::class, ElasticsearchService::class);
 
         $this->app->bind(CmoAuthenticationInterface::class, CmoAuthenticationService::class);
+
+         $this->app->bind(
+            JNMPAuthenticationInterface::class,
+            JNMPAuthenticationService::class
+        );
 
     }
 

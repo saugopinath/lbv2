@@ -17,6 +17,7 @@ use App\Livewire\Users\Create as UsersCreate;
 use App\Livewire\RoleOfficeTypeMappings\Create;
 use App\Http\Controllers\CMOGrievanceController;
 use App\Http\Controllers\OfficeMastersController;
+use App\Http\Controllers\JnpmController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\IncompleteTypeController;
 use App\Http\Controllers\UserManagementController;
@@ -268,3 +269,24 @@ Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile
 Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
     // ->middleware('permission:update bank')
     ->name('update-bank');
+
+Route::controller(JnpmController::class)->group(function () {
+
+    Route::any('/jnmp/pull', 'pullJnmpData')
+    ->middleware('permission.redirect:canImportJanmaMrityuData')
+    ->name('jnmp.pull');
+
+    Route::post('/jnmp/details-callback', 'detailsCallback')->name('jnmp.details-callback');
+
+    Route::get('/jnmp-stats', 'getJnmpStats');
+    Route::post('/jnmp/mark-as-death', 'markAsDeathProcess')->name('jnmp.mark-as-death');
+
+    Route::get('jnmp-data', 'index')
+    ->middleware('permission.redirect:canReActivateDeathIncident')
+    ->name('jnmp-data');
+
+    // JNMP List at HOD
+    Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')
+    ->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')
+    ->name('jnmp-marked-data');
+});
