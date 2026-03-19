@@ -186,7 +186,6 @@ class BeneficiarySearch extends Component
         // dd($payload);
         $this->dispatch('beneficiary-search', data: $payload);
     }
-
     public function render()
     {
         return view('livewire.beneficiary-search');

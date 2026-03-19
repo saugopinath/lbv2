@@ -54,10 +54,10 @@
                     class="border border-gray-300 hover:border-blue-500 focus:border-cyan-500 focus:ring-cyan-500 outline-none text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:hover:border-blue-400 dark:focus:border-green-400 dark:focus:ring-green-400">
                     <option value="">-- Select --</option>
                     @foreach ($fields as $key => $field)
-                    <option value="{{ $key }}">{{ $field['label'] }}</option>
+                        <option value="{{ $key }}">{{ $field['label'] }}</option>
                     @endforeach
                 </select>
-                @endif
+            @endif
 
                 @error('selectedOption')
                 <span class="text-red-600 text-xs mt-1 font-semibold block">
@@ -81,9 +81,9 @@
                     @error('inputValue') border-red-500 bg-red-50 @enderror">
 
                 @error('inputValue')
-                <span class="text-red-600 text-xs mt-1 font-semibold block">
-                    {{ $message }}
-                </span>
+                    <span class="text-red-600 text-xs mt-1 font-semibold block">
+                        {{ $message }}
+                    </span>
                 @enderror
             </div>
 
