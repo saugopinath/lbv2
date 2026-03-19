@@ -23,9 +23,9 @@ class DynamicWorkflowModule extends BaseAuditableModel
         'is_active' => 'boolean'
     ];
 
-    public function steps(): HasMany
+    public function steps()
     {
-        return $this->hasMany(DynamicWorkflowStep::class, 'module_id')->orderBy('rank');
+        return $this->hasMany(workflowstepRolemapping::class, 'module_id')->orderBy('rank');
     }
 
     public function scheme()

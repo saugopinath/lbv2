@@ -247,3 +247,5 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
 
 // Global Dynamic Workflow Routes
 Route::get('dynamic-workflow-config', App\Livewire\DynamicWorkflow\WorkflowWizard::class)->name('dynamic-workflow-config');
+Route::get('dynamic-workflow-request', App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
+Route::get('dynamic-workflow-action', App\Livewire\DynamicWorkflow\ProcessWorkflow::class)->name('dynamic-workflow-action');

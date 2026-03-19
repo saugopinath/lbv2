@@ -174,6 +174,7 @@ class BeneficiarySearch extends Component
                 });
                 break;
         }
+        // dd($query->toSql());
         $results = $query->get(['application_id', 'beneficiary_id', 'next_level_role_id', 'is_final', 'is_clean', 'scheme_id']);
         $payload = [
             'searchKey'   => $this->selectedOption,
