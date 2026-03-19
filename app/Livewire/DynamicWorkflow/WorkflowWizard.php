@@ -169,13 +169,13 @@ class WorkflowWizard extends Component
                     'is_final_step' => $stepData['is_final']
                 ]);
             }
-
             DB::commit();
-            session()->flash('success', 'Workflow Master & Steps Configured Perfectly!');
+            $this->dispatch('refresh-page');
+            $this->dispatch('toast', 'success', 'Workflow Master & Steps Configured Perfectly!');
             $this->currentTab = 1;
         } catch (\Exception $e) {
             DB::rollBack();
-            session()->flash('error', $e->getMessage());
+            $this->dispatch('toast', 'error', $e->getMessage());
         }
     }
 
@@ -185,7 +185,6 @@ class WorkflowWizard extends Component
             $this->currentTab--;
         }
     }
-
     public function render()
     {
         return view('livewire.dynamic-workflow.workflow-wizard', [
