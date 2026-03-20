@@ -130,7 +130,7 @@
 
                         <div class="bg-gray-50 rounded-xl p-5 border border-gray-200 mb-4">
 
-                            <livewire:enclosure-list :application_id="$applicantId" :doc_type_id_array_list="[169]" :scheme_id="20"
+                            <livewire:enclosure-list :application_id="$applicantId" :doc_type_id_array_list="[153]" :scheme_id="20"
                                 wire:key="enclosure-{{ $applicantId }}" />
 
                             @if ($errors->has('document_upload'))

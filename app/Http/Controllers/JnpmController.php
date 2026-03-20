@@ -136,7 +136,7 @@ class JnpmController extends Controller
         try {
 
             $response = $this->JnmpAuthenticationService->detailsCallBack($request);
-           
+
             $data = $response->getData(true);
 
             // If callback successful

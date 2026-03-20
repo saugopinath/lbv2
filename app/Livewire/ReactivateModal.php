@@ -77,7 +77,7 @@ class ReactivateModal extends Component
         ]);
 
         $uploadedDocsCount = BeneficiaryEnclosure::where('application_id', $this->applicantId)
-            ->whereIn('document_type', [169])
+            ->whereIn('document_type', [153])
             ->count();
 
         if ($uploadedDocsCount < 1) {
@@ -108,6 +108,7 @@ class ReactivateModal extends Component
             AcceptRejectInfo::create([
                 'beneficiary_id' => $personal->beneficiary_id,
                 'application_id' => $this->applicantId,
+                'scheme_id' => 20,
                 'ip_address' => request()->ip(),
                 'user_id' => Auth::id(),
                 'browser' => request()->header('User-Agent'),
@@ -123,10 +124,13 @@ class ReactivateModal extends Component
             $this->dispatch('hide-modal');
             $this->dispatch('refreshDatatable');
 
-            session()->flash('success', 'Beneficiary Activated Successfully!');
+            // session()->flash('success', 'Beneficiary Activated Successfully!');
+            $this->dispatch('toastr', [
+                'type' => 'success',
+                'message' => 'Beneficiary Activated Successfully!'
+            ]);
 
             return redirect()->to('/jnmp-data');
-
         } catch (\Exception $e) {
 
             DB::rollBack();

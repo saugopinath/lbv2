@@ -16,7 +16,7 @@ class JnmpAuthenticationService implements JnmpAuthenticationInterface
     public function __construct()
     {
         if (app()->environment(['local', 'staging'])) {
-            $this->baseurl = 'http://laravel.test/';
+            $this->baseurl = 'http://laravel1.test/';
         } else {
             $this->baseurl = 'http://172.25.152.26:8084/';
         }
@@ -29,7 +29,7 @@ class JnmpAuthenticationService implements JnmpAuthenticationInterface
 
 
     public function getJnmpData($data)
-    {       
+    {
         set_time_limit(0);
 
         try {
