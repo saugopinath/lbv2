@@ -137,17 +137,10 @@ class JnmpDetailsDataTable extends DataTableComponent
                 ->label(fn($row) => $row->beneficiary_name ?? 'N/A'),
 
             Column::make("Father's Name")
-                ->label(function ($row) {
-                    return optional(
-                        $row->relationships->firstWhere(
-                            'relation_type_id',
-                            Codemaster::getIdByCode(131)
-                        )
-                    )->full_name ?? 'N/A';
-                }),
+                ->label(fn($row) => $row->ben_father_name ?? 'N/A'),
 
             Column::make("Address")
-                ->label(fn($row) => $row->contact->getFullAddress() ?? 'N/A')
+                ->label(fn($row) => $row->contact->getFullAddressAttribute() ?? 'N/A')
                 ->html(),
 
             Column::make("Mobile No")
