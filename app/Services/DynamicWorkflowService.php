@@ -13,7 +13,6 @@ class DynamicWorkflowService
 
     public function initiateRequest($moduleId, $refId, $oldData, $newData, $changedFields = [])
     {
-        // 🔥 first step find
         $firstStep = workflowstepRolemapping::where('module_id', $moduleId)
             ->orderBy('rank', 'asc')
             ->orderBy('id', 'asc')
@@ -29,13 +28,9 @@ class DynamicWorkflowService
             'old_data'        => $oldData,
             'new_data'        => $newData,
             'changed_fields'  => $changedFields,
-            // ❌ NO STATUS
-            // 'status' => ❌ remove
             'created_by'      => Auth::id(),
         ]);
     }
-
-
     public function approve($requestId, $remark)
     {
         // dd($requestId, $remark);

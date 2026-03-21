@@ -53,12 +53,7 @@ class RequestUpdateBeneficiary extends Component
         $selectLgd = session('lgd_session');
         // dd($selectLgd);
         $this->requestModuleCode = 'UPP_BEN_01';
-        // $this->moduleCode = DynamicWorkflowModule::where('module_code', $this->requestModuleCode)->pluck('id');
         $this->currentRoleId = Crypt::decryptString($selectLgd['role_id']);
-        // $this->resolveModule();
-
-        // dd($this->moduleCode, $this->currentRoleId);
-
         if (!empty($selectLgd['district_id'])) {
             $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($selectLgd['district_id']);
         }
@@ -69,7 +64,6 @@ class RequestUpdateBeneficiary extends Component
             $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($selectLgd['subdivision_id']);
         }
         $module = DynamicWorkflowModule::where('module_code', $this->requestModuleCode)->first();
-
         if (!$module) {
             abort(404, 'Module not found');
         }
@@ -87,9 +81,7 @@ class RequestUpdateBeneficiary extends Component
             $this->dispatch('toast', 'error', 'No matching approved beneficiary found.');
             return;
         }
-
         $applicationIds = collect($data['results'])->pluck('application_id')->toArray();
-
         $this->items = BeneficiaryPersonalDetail::query()
             ->select(['application_id', 'beneficiary_id', 'scheme_id', 'beneficiary_name', 'other_details'])
             ->with([
@@ -109,81 +101,15 @@ class RequestUpdateBeneficiary extends Component
                 'scheme_id'      => $item->scheme_id,
             ])->toArray();
     }
-
-    // public function selectBeneficiary($appId, $schemeId)
-    // {
-    //     $this->selectedScheme = $schemeId;
-    //     $this->beneficiary = BeneficiaryPersonalDetail::where('application_id', $appId)->first();
-    //     $this->availableModules = DynamicWorkflowModule::where('scheme_id', $this->selectedScheme)->get();
-    //     $this->showFields = false;
-    //     $this->selectedFields = [];
-    //     $this->items = []; // টেবিলটি হাইড করে শুধু আপডেট ফর্মটি রাখার জন্য
-    // }
-
-    // public function updatedSelectedScheme()
-    // {
-    //     $this->availableModules = DynamicWorkflowModule::where('scheme_id', $this->selectedScheme)->get();
-    //     $this->beneficiary = null;
-    // }
-
-    // public function toggleUpdate()
-    // {
-    //     $this->showFields = true;
-    //     // Reset old data from beneficiary object
-    //     foreach ($this->fieldOptions as $key => $label) {
-    //         $this->oldData[$key] = $this->beneficiary->$key ?? '';
-    //         $this->newData[$key] = $this->beneficiary->$key ?? '';
-    //     }
-    // }
-
-    // public function submitRequest()
-    // {
-    //     if (empty($this->selectedFields)) {
-    //         $this->dispatch('toast', 'error', 'Please select at least one field to update!');
-    //         return;
-    //     }
-
-    //     // Get the first step of the module from mapping table
-    //     $firstStep = workflowstepRolemapping::where('module_id', $this->selectedModule)
-    //         ->orderBy('rank', 'asc')
-    //         ->first();
-
-    //     if (!$firstStep) {
-    //         $this->dispatch('toast', 'error', 'Workflow steps not configured for this module!');
-    //         return;
-    //     }
-
-    //     DB::beginTransaction();
-    //     try {
-    //         $service = new \App\Services\DynamicWorkflowService();
-    //         $service->initiateRequest(
-    //             $this->selectedModule,
-    //             $this->beneficiary->id,
-    //             array_intersect_key($this->oldData, array_flip($this->selectedFields)),
-    //             array_intersect_key($this->newData, array_flip($this->selectedFields))
-    //         );
-
-    //         DB::commit();
-    //         $this->dispatch('toast', 'success', 'Update Request Initiated Successfully!');
-    //         $this->reset(['beneficiary', 'searchId', 'showFields', 'selectedFields']);
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         $this->dispatch('toast', 'error', $e->getMessage());
-    //     }
-    // }
-
-
     public function selectBeneficiary($appId)
     {
         // dd($appId);
         $this->resetValidation();
         // $this->selectedFields = [];
-
         $this->beneficiary = BeneficiaryPersonalDetail::with(['bank', 'contact'])
             ->where('application_id', $appId)
             // ->where('scheme_id', $this->moduleSchemeId)
             ->first();
-
         // dd($this->beneficiary);
         if (!$this->beneficiary) {
             $this->dispatch('toast', 'error', 'Beneficiary not found');
@@ -199,14 +125,11 @@ class RequestUpdateBeneficiary extends Component
             $this->dispatch('toast', 'error', 'No beneficiary selected!');
             return;
         }
-
         if (empty($this->selectedFields)) {
             $this->dispatch('toast', 'error', 'Select at least one field!');
             return;
         }
-
         $this->validate($this->rules(), [], $this->validationAttributes());
-
         $payload = $this->prepareWorkflowPayload();
 
         if (empty($payload['new'])) {
@@ -214,10 +137,9 @@ class RequestUpdateBeneficiary extends Component
             return;
         }
 
-        // 🔥 NO STATUS CHECK — workflow based check
         $hasPendingRequest = DynamicWorkflowRequest::where('module_id', $this->moduleId)
             ->where('ref_id', $this->beneficiary->application_id)
-            ->whereNotNull('current_step_id')
+            ->whereNotIn('current_rank', [-100, 0]) // -100 = rejected, 0 = completed
             ->exists();
 
         if ($hasPendingRequest) {
@@ -403,9 +325,6 @@ class RequestUpdateBeneficiary extends Component
             } catch (\Throwable $e) {
             }
         }
-        // return (int) UserRoleSchemeOfficeMapping::where('user_id', Auth::id())
-        //     ->where('is_active', 1)
-        //     ->value('role_id');
     }
 
     protected function getAllowedFieldOptions(DynamicWorkflowModule $module)
@@ -463,11 +382,9 @@ class RequestUpdateBeneficiary extends Component
                 ->where('code', $bank->ifscode)
                 ->first();
         }
-
         $dob = blank($this->beneficiary->dob)
             ? null
             : Carbon::parse($this->beneficiary->dob)->format('Y-m-d');
-
         $this->oldData = [
             'beneficiary_name' => $this->beneficiary->beneficiary_name ?? '',
             'dob' => $dob,
@@ -478,7 +395,6 @@ class RequestUpdateBeneficiary extends Component
             'bank_branch_name' => optional($bank)->bank_branch_name ?: optional($ifscMaster)->branch,
             'bank_account_number' => optional($bank)->bankaccountnumber ?? '',
         ];
-
         $this->newData = $this->oldData;
         $this->newData['confirm_bank_account_number'] = '';
     }
@@ -494,20 +410,16 @@ class RequestUpdateBeneficiary extends Component
 
         $old = [];
         $new = [];
-
         foreach ($this->selectedFields as $selectedField) {
             foreach ($blockFieldMap[$selectedField] ?? [] as $fieldKey) {
                 $oldValue = Arr::get($this->oldData, $fieldKey);
                 $newValue = Arr::get($this->newData, $fieldKey);
-
                 if (is_string($oldValue)) {
                     $oldValue = trim($oldValue);
                 }
-
                 if (is_string($newValue)) {
                     $newValue = trim($newValue);
                 }
-
                 if ($oldValue === $newValue) {
                     continue;
                 }
