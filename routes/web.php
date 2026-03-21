@@ -45,17 +45,11 @@ use App\Http\Controllers\MasterTabCreationController;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Http\Controllers\MisReportController;
 use App\Http\Controllers\SchemeCapacityController;
+use App\Http\Controllers\TrackBeneficiaryDetailsController;
 use App\Http\Controllers\ValidationManagerController;
 use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
 use App\Livewire\CsvSplitter;
-use App\Livewire\DynamicWorkflow\ProcessWorkflow;
-use App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary;
-use App\Livewire\DynamicWorkflow\WorkflowWizard;
-use App\Http\Controllers\DynamicWorkflow\UpdateMarkBeneficiaryDetailsController;
-use App\Http\Controllers\TrackBeneficiaryDetailsController;
-use App\Livewire\DynamicWorkflow\DynamicProcessPage;
-
 require __DIR__ . '/home.php';
 
 
@@ -281,4 +275,17 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
 Route::controller(BackFromJBController::class)->group(function () {
     Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
     Route::any('/backfromjbactions', 'backfromjbactions')->name('backfromjbactions');
+});
+
+
+Route::controller(CmoController::class)->group(function () {
+    Route::any('/pullnewcmo', 'pullnewcmo')->name('pullnewcmo');
+    Route::any('/populatelbportal', 'populatelbportal')->name('populatelbportal');
+    Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')->name('cmo-grievance-workflow');
+    // Route::any('/cmo-grievance-find/{id}', 'cmogrievancefind')->name('cmo-grievance-find');
+    Route::any('/cmo-grievance-find', 'cmogrievancefind')->name('cmo-grievance-find');
+    Route::post('/cmo-grievance-action', 'cmodetailsaction')->name('cmo-grievance-action');
+    Route::post('/cmo-grievance-search', 'cmogrievancesearch')->name('cmo-grievance-search');
+    Route::post('/map-applicant', 'mapapplicant')->name('map-applicant');
+    Route::post('/cmo-add-actions', 'addactions')->name('cmo-add-actions');
 });
