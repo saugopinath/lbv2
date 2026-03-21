@@ -1,26 +1,22 @@
 <div class="max-w-7xl mx-auto px-4 py-8">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
-        <!-- 📋 (LEFT) PENDING REQUESTS LIST -->
         <div class="space-y-4">
             <div class="flex items-center justify-between border-b pb-3 mb-4">
                 <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <i class="fas fa-tasks text-indigo-600"></i> My Pending Actions
+                    <i class="fas fa-tasks text-indigo-600"></i>Pending Applications
                 </h3>
             </div>
-
             @if(count($requests) > 0)
                 @foreach($requests as $req)
                 <div wire:click="viewDetails({{ $req->id }})" class="bg-white rounded-xl shadow-lg border-l-4 {{ $req->status == 'pending' ? 'border-amber-400' : 'border-emerald-400' }} p-5 cursor-pointer hover:shadow-2xl transition-all {{ $selectedRequest && $selectedRequest->id == $req->id ? 'ring-2 ring-indigo-500' : '' }}">
                     <div class="flex justify-between items-start mb-2">
                         <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest">{{ $req->module->module_name }}</span>
                         <div class="flex flex-col items-end">
-                            <span class="bg-indigo-600 text-white px-2 py-0.5 rounded text-[10px] font-black mb-1">Rank {{ $req->current_rank }}</span>
+                            <span class="bg-indigo-600 text-white px-2 py-0.5 rounded text-[10px] font-black mb-1">Rank {{ $req->level->current_rank }}</span>
                             <span class="text-[10px] text-gray-400 font-bold uppercase">{{ $req->step->label->label_name ?? 'N/A' }}</span>
                         </div>
                     </div>
                     <h5 class="font-bold text-gray-900 mb-1">Ref ID: {{ $req->ref_id }}</h5>
-                    <p class="text-xs text-gray-500">Currently with: <span class="font-bold text-indigo-600">{{ $req->step->role->name ?? 'Unknown Role' }}</span></p>
                 </div>
                 @endforeach
             @else
@@ -37,8 +33,7 @@
             <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100 animate__animated animate__fadeInRight">
                 <div class="bg-dark px-8 py-5 flex items-center justify-between text-white border-b border-gray-700">
                     <div class="flex flex-col">
-                        <h5 class="font-black uppercase tracking-widest text-xs">Action Console</h5>
-                        <p class="text-[10px] text-gray-400 font-bold">CURRENT STEP: <span class="text-emerald-400">{{ $selectedRequest->step->label->label_name ?? 'N/A' }}</span></p>
+                        <h5 class="font-black uppercase tracking-widest text-xs">Requested Changes</h5>
                     </div>
                     <button wire:click="$set('selectedRequest', null)" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
                 </div>
@@ -71,15 +66,13 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 pt-6">
-                        
-
                         <button wire:click="processAction('approve')" class="col-span-1 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-xl transition-all active:scale-95 uppercase tracking-tighter shadow-emerald-100-md">
                             <i class="fas fa-check-circle mr-2"></i>
-                            {{ $selectedRequest->step->is_final_step ? 'Approve & Update DB' : 'Approve & Forward' }}
+                            {{ $selectedRequest->step->is_final_step ? 'Process' : 'Approve' }}
                         </button>
 
                         <button wire:click="processAction('reject')" class="col-span-2 py-4 bg-red-100 text-red-600 font-bold rounded-xl hover:bg-red-200 transition-all transition-all active:scale-95 uppercase">
-                             Reject & Close
+                             Cancel
                         </button>
                     </div>
                 </div>
