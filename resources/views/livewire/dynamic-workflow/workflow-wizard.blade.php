@@ -260,7 +260,7 @@
                                 <tr>
                                     <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
                                     <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Step Name</th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assign Role</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assign Roles</th>
                                     <th scope="col" class="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Final Step</th>
                                 </tr>
                             </thead>
@@ -274,12 +274,14 @@
                                         <span class="text-sm font-medium text-gray-900">{{ $cfg['label'] }}</span>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <select wire:model="finalSteps.{{ $index }}.role_id" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">
-                                            <option value="">-- Select Role --</option>
-                                            @foreach ($roles as $role)
-                                            <option value="{{ $role->id }}">{{ $role->name }}</option>
-                                            @endforeach
-                                        </select>
+                                        <div wire:key="workflow-step-roles-{{ $index }}">
+                                            <x-form.multiselect
+                                                label="Assign Roles"
+                                                wire:model="finalSteps.{{ $index }}.role_ids"
+                                                :options="$roles"
+                                                required
+                                            />
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
                                         <label class="inline-flex items-center cursor-pointer">

@@ -13,6 +13,7 @@ class DynamicWorkflowModule extends BaseAuditableModel
         'scheme_id',
         'module_code',
         'module_name',
+        'step_count',
         'allowed_fields',
         'is_active',
         'created_by'

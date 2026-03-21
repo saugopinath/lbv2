@@ -46,6 +46,9 @@ use App\Http\Controllers\ValidationManagerController;
 use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
 use App\Livewire\CsvSplitter;
+use App\Livewire\DynamicWorkflow\ProcessWorkflow;
+use App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary;
+use App\Livewire\DynamicWorkflow\WorkflowWizard;
 
 require __DIR__ . '/home.php';
 
@@ -245,7 +248,7 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
         ->name('beneficiary.deActivebeneficiary');
 });
 
-// Global Dynamic Workflow Routes
-Route::get('dynamic-workflow-config', App\Livewire\DynamicWorkflow\WorkflowWizard::class)->name('dynamic-workflow-config');
-Route::get('dynamic-workflow-request', App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
-Route::get('dynamic-workflow-action', App\Livewire\DynamicWorkflow\ProcessWorkflow::class)->name('dynamic-workflow-action');
+/// Global Dynamic Workflow Routes
+Route::get('dynamic-workflow-config',WorkflowWizard::class)->name('dynamic-workflow-config');
+Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
+Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');

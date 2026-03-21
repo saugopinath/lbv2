@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class DynamicWorkflowRequest extends BaseAuditableModel
 {
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_REVERTED = 'reverted';
+    public const STATUS_REJECTED = 'rejected';
+
     protected $table = 'dynamic_workflow_requests';
 
     protected $fillable = [

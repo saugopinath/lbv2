@@ -2,20 +2,20 @@
 
 namespace App\Livewire\DynamicWorkflow;
 
-use App\Models\Scheme;
-use App\Models\Role;
-use App\Models\DynamicWorkflowModule;
 use App\Models\DynamicWorkflowLabel;
-use Livewire\Component;
-use Illuminate\Support\Facades\DB;
+use App\Models\DynamicWorkflowModule;
+use App\Models\workflowstepRolemapping;
+use App\Models\Role;
+use App\Models\Scheme;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 class WorkflowWizard extends Component
 {
     public $currentTab = 1;
     public $totalTabs = 3;
 
-    // Tab 1: Module Management
     public $selectedScheme;
     public $selectedModule;
     public $isNewModule = false;
@@ -23,17 +23,15 @@ class WorkflowWizard extends Component
     public $newModuleCode;
     public $moduleList = [];
 
-    // Tab 2: Step Count & Naming
     public $stepCount = 1;
     public $stepNames = [];
 
-    // Tab 3: Detailed Config
     public $finalSteps = [];
     public $roles = [];
 
     public function mount()
     {
-        $this->roles = Role::orderBy('name')->get();
+        $this->roles = Role::orderBy('name')->pluck('name', 'id')->toArray();
     }
 
     public function updatedSelectedScheme()
@@ -47,13 +45,15 @@ class WorkflowWizard extends Component
     {
         if ($value && $value != 'new') {
             $module = DynamicWorkflowModule::with('steps.module')->find($value);
+
             if ($module) {
                 $this->stepCount = $module->step_count;
-                // লেবেলগুলো লোড করা
+
                 $labels = DynamicWorkflowLabel::where('module_id', $module->id)
                     ->orderBy('id', 'asc')
                     ->pluck('label_name')
                     ->toArray();
+
                 $this->stepNames = $labels;
             }
         }
@@ -83,13 +83,20 @@ class WorkflowWizard extends Component
 
     protected function updateStepNames()
     {
-        if ($this->stepCount < 1) $this->stepCount = 1;
-        if ($this->stepCount > 10) $this->stepCount = 10;
+        if ($this->stepCount < 1) {
+            $this->stepCount = 1;
+        }
+
+        if ($this->stepCount > 10) {
+            $this->stepCount = 10;
+        }
 
         $newStepNames = [];
+
         for ($i = 0; $i < $this->stepCount; $i++) {
             $newStepNames[$i] = $this->stepNames[$i] ?? '';
         }
+
         $this->stepNames = $newStepNames;
     }
 
@@ -98,12 +105,14 @@ class WorkflowWizard extends Component
         if ($this->isNewModule) {
             $this->validate([
                 'newModuleName' => 'required|min:3',
-                'newModuleCode' => 'required'
+                'newModuleCode' => 'required',
             ]);
         } else {
             $this->validate(['selectedModule' => 'required']);
         }
+
         $this->currentTab = 2;
+
         if (empty($this->stepNames)) {
             $this->stepNames = array_fill(0, $this->stepCount, '');
         }
@@ -113,31 +122,38 @@ class WorkflowWizard extends Component
     {
         $this->validate([
             'stepCount' => 'required|integer|min:1',
-            'stepNames.*' => 'required'
+            'stepNames.*' => 'required',
         ]);
 
         $this->currentTab = 3;
-        
-        $existingMappings = [];
-        if (!$this->isNewModule) {
-            $existingMappings = \App\Models\workflowstepRolemapping::where('module_id', $this->selectedModule)
+
+        $existingMappings = collect();
+
+        if (! $this->isNewModule) {
+            $existingMappings = workflowstepRolemapping::where('module_id', $this->selectedModule)
                 ->orderBy('rank', 'asc')
                 ->get()
-                ->keyBy('rank');
+                ->groupBy('rank');
         }
 
         $this->finalSteps = [];
+
         foreach ($this->stepNames as $index => $label) {
             $rank = ($index + 1) * 10;
-            $mapping = $existingMappings[$rank] ?? null;
+            $mappings = $existingMappings->get($rank, collect());
+            $firstMapping = $mappings->first();
 
             $this->finalSteps[$index] = [
                 'rank' => (int) $rank,
                 'label' => $label,
-                'role_id' => $mapping ? $mapping->role_id : '',
+                'role_ids' => $mappings
+                    ->pluck('role_id')
+                    ->map(fn ($roleId) => (string) $roleId)
+                    ->values()
+                    ->all(),
                 'is_final' => ($index == $this->stepCount - 1),
-                'success_rank' => ($index < $this->stepCount - 1) ? ($index + 2) * 10 : null,
-                'revert_rank' => ($index > 0) ? $index * 10 : null
+                'success_rank' => $firstMapping?->next_label_role_id ?? (($index < $this->stepCount - 1) ? ($index + 2) * 10 : null),
+                'revert_rank' => $firstMapping?->same_label_role_id ?? (($index > 0) ? $index * 10 : null),
             ];
         }
     }
@@ -146,18 +162,18 @@ class WorkflowWizard extends Component
     {
         $this->validate([
             'selectedScheme' => 'required',
-            'finalSteps.*.role_id' => 'required'
+            'finalSteps.*.role_ids' => 'required|array|min:1',
+            'finalSteps.*.role_ids.*' => 'exists:roles,id',
         ]);
 
-        // DEBUG: ইস্যু দেখার জন্য ডাটা চেক করা
-        // dd($this->finalSteps, $this->selectedModule, $this->isNewModule);
-
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             session()->flash('error', 'Authentication session expired. Please login again.');
+
             return;
         }
 
         DB::beginTransaction();
+
         try {
             if ($this->isNewModule) {
                 $module = DynamicWorkflowModule::create([
@@ -165,14 +181,16 @@ class WorkflowWizard extends Component
                     'module_code' => strtoupper($this->newModuleCode),
                     'module_name' => $this->newModuleName,
                     'step_count' => $this->stepCount,
-                    'created_by' => Auth::id()
+                    'created_by' => Auth::id(),
                 ]);
             } else {
                 $module = DynamicWorkflowModule::find($this->selectedModule);
                 $module->update(['step_count' => $this->stepCount]);
             }
+
             $module->steps()->delete();
             DynamicWorkflowLabel::where('module_id', $module->id)->delete();
+
             foreach ($this->finalSteps as $index => $stepData) {
                 $rank = ($index + 1) * 10;
                 $successRank = ($index < count($this->finalSteps) - 1) ? ($index + 2) * 10 : null;
@@ -181,29 +199,29 @@ class WorkflowWizard extends Component
                 $label = DynamicWorkflowLabel::create([
                     'scheme_id' => $this->selectedScheme,
                     'module_id' => $module->id,
-                    'label_name' => $stepData['label']
+                    'label_name' => $stepData['label'],
                 ]);
 
-                \App\Models\workflowstepRolemapping::updateOrCreate(
-                    [
+                foreach ($stepData['role_ids'] as $roleId) {
+                    workflowstepRolemapping::create([
                         'scheme_id' => $this->selectedScheme,
                         'module_id' => $module->id,
-                        'rank' => $rank
-                    ],
-                    [
                         'workflow_step_id' => $label->id,
-                        'role_id' => $stepData['role_id'],
+                        'rank' => $rank,
+                        'role_id' => $roleId,
                         'next_label_role_id' => $successRank,
                         'same_label_role_id' => $revertRank,
                         'is_final_step' => ($index == count($this->finalSteps) - 1),
-                        'action_type' => null
-                    ]
-                );
+                        'action_type' => null,
+                    ]);
+                }
             }
+
             DB::commit();
-            // $this->dispatch('refresh-page');
             $this->dispatch('toast', 'success', 'Workflow Master & Steps Configured Perfectly!');
+            $this->reset(['selectedScheme', 'selectedModule', 'isNewModule', 'newModuleName', 'newModuleCode', 'stepCount', 'stepNames', 'finalSteps']);
             $this->currentTab = 1;
+            $this->moduleList = [];
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('toast', 'error', $e->getMessage());
@@ -216,10 +234,11 @@ class WorkflowWizard extends Component
             $this->currentTab--;
         }
     }
+
     public function render()
     {
         return view('livewire.dynamic-workflow.workflow-wizard', [
-            'schemes' => Scheme::where('is_active', true)->get()
+            'schemes' => Scheme::where('is_active', true)->get(),
         ]);
     }
 }

@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignId('module_id')->constrained('dynamic_workflow_modules');
             $table->unsignedBigInteger('ref_id')->index(); // e.g. application_id
             $table->unsignedInteger('current_rank')->index();
-            $table->foreignId('current_step_id')->constrained('dynamic_workflow_steps');
+            $table->foreignId('current_step_id');
             $table->jsonb('old_data')->nullable(); // JSON formatted old values
             $table->jsonb('new_data')->nullable(); // JSON formatted new values
             $table->jsonb('changed_fields')->nullable();

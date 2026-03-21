@@ -2,10 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\BeneficiaryPersonalDetail;
 use App\Models\DynamicWorkflowRequest;
 use App\Models\workflowstepRolemapping;
-use App\Models\BeneficiaryPersonalDetail;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class DynamicWorkflowService
@@ -18,11 +17,13 @@ class DynamicWorkflowService
         // DynamicWorkflowStep এর বদলে workflowstepRolemapping ব্যবহার করা হলো
         $firstStep = workflowstepRolemapping::where('module_id', $moduleId)
             ->orderBy('rank', 'asc')
+            ->orderBy('id', 'asc')
             ->first();
 
-        if (!$firstStep) {
-            throw new \Exception("Workflow steps not configured for this module.");
+        if (! $firstStep) {
+            throw new \Exception('Workflow steps not configured for this module.');
         }
+
         return DynamicWorkflowRequest::create([
             'module_id' => $moduleId,
             'ref_id' => $refId,
@@ -30,8 +31,8 @@ class DynamicWorkflowService
             'current_step_id' => $firstStep->id,
             'old_data' => $oldData,
             'new_data' => $newData,
-            'status' => 'pending',
-            'created_by' => Auth::id()
+            'status' => DynamicWorkflowRequest::STATUS_PENDING,
+            'created_by' => Auth::id(),
         ]);
     }
 
@@ -41,7 +42,7 @@ class DynamicWorkflowService
     public function approve($requestId, $remark = '')
     {
         $request = DynamicWorkflowRequest::findOrFail($requestId);
-        $currentStep = workflowstepRolemapping::findOrFail($request->current_step_id);
+        $currentStep = $this->getStepForRank($request->module_id, $request->current_rank);
 
         // যদি নেক্সট র‍্যাঙ্ক ০ হয়, তবে এটিই ফাইনাল স্টেপ হতে পারে অথবা কোড রিড করবে handles
         if ($currentStep->is_final_step || $currentStep->next_label_role_id == 0) {
@@ -53,17 +54,11 @@ class DynamicWorkflowService
         }
 
         // পরবর্তী র্যাঙ্ক-এ পাঠানো
-        $nextStep = workflowstepRolemapping::where('module_id', $request->module_id)
-            ->where('rank', $currentStep->next_label_role_id)
-            ->first();
-
-        if (!$nextStep) {
-             throw new \Exception("Next rank (" . $currentStep->next_label_role_id . ") not found in configuration.");
-        }
+        $nextStep = $this->getStepForRank($request->module_id, $currentStep->next_label_role_id);
 
         $request->update([
             'current_rank' => $nextStep->rank,
-            'current_step_id' => $nextStep->id
+            'current_step_id' => $nextStep->id,
         ]);
 
         return ['status' => 'forwarded', 'message' => 'Request forwarded to rank ' . $nextStep->rank];
@@ -75,20 +70,18 @@ class DynamicWorkflowService
     public function revert($requestId, $remark = '')
     {
         $request = DynamicWorkflowRequest::findOrFail($requestId);
-        $currentStep = workflowstepRolemapping::findOrFail($request->current_step_id);
+        $currentStep = $this->getStepForRank($request->module_id, $request->current_rank);
 
         // পেছনের র্যাঙ্ক-এ পাঠানো (same_label_role_id ব্যবহার করে)
-        $prevStep = workflowstepRolemapping::where('module_id', $request->module_id)
-            ->where('rank', $currentStep->same_label_role_id)
-            ->first();
-
-        if (!$prevStep) {
-            throw new \Exception("Revert target rank configuration missing.");
-        }
+        $prevStep = $this->getStepForRank(
+            $request->module_id,
+            $currentStep->same_label_role_id,
+            'Revert target rank configuration missing.'
+        );
 
         $request->update([
             'current_rank' => $prevStep->rank,
-            'current_step_id' => $prevStep->id
+            'current_step_id' => $prevStep->id,
         ]);
 
         return ['status' => 'reverted', 'message' => 'Request reverted to rank ' . $prevStep->rank];
@@ -97,7 +90,25 @@ class DynamicWorkflowService
     public function reject($requestId, $remark = '')
     {
         $request = DynamicWorkflowRequest::findOrFail($requestId);
-        $request->update(['status' => 'rejected']);
+        $request->update(['status' => DynamicWorkflowRequest::STATUS_REJECTED]);
         return ['status' => 'rejected', 'message' => 'Request rejected and closed.'];
+    }
+
+    protected function getStepForRank(int $moduleId, ?int $rank, ?string $errorMessage = null): workflowstepRolemapping
+    {
+        if ($rank === null) {
+            throw new \Exception($errorMessage ?? 'Workflow rank configuration missing.');
+        }
+
+        $step = workflowstepRolemapping::where('module_id', $moduleId)
+            ->where('rank', $rank)
+            ->orderBy('id', 'asc')
+            ->first();
+
+        if (! $step) {
+            throw new \Exception($errorMessage ?? "Next rank ({$rank}) not found in configuration.");
+        }
+
+        return $step;
     }
 }
