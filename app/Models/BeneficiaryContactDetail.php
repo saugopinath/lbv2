@@ -27,25 +27,25 @@ class BeneficiaryContactDetail extends BaseAuditableModel
         return $this->belongsTo(Municipality::class, 'blockurban', 'id');
     }
 
-     public function district()
-    {
-        return $this->belongsTo(District::class, 'district_id', 'id');
-    }
+    //  public function district()
+    // {
+    //     return $this->belongsTo(District::class, 'district_id', 'id');
+    // }
 
-    public function block()
-    {
-        return $this->belongsTo(Block::class, 'blockurban', 'id');
-    }
+    // public function block()
+    // {
+    //     return $this->belongsTo(Block::class, 'blockurban', 'id');
+    // }
 
-    public function panchayat()
-    {
-        return $this->belongsTo(Panchayat::class, 'gpward', 'id');
-    }
+    // public function panchayat()
+    // {
+    //     return $this->belongsTo(Panchayat::class, 'gpward', 'id');
+    // }
 
-    public function ward()
-    {
-        return $this->belongsTo(Ward::class, 'gpward', 'id');
-    }
+    // public function ward()
+    // {
+    //     return $this->belongsTo(Ward::class, 'gpward', 'id');
+    // }
 
     // public function personal()
     // {
