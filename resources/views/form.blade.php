@@ -1,3 +1,3 @@
 <x-layouts.app>
-    <livewire:form />
+    <livewire:form  />
 </x-layouts.app>

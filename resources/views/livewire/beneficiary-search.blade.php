@@ -1,6 +1,6 @@
 <div>
     <div x-data="{
-        selectedOption: @entangle('selectedOption').live,
+        selectedOption: @entangle('selectedOption'),
         inputValue: @entangle('inputValue'),
         displayType: @js($displayType),
         fields: @js($fields),
@@ -18,7 +18,7 @@
     }" x-init="$watch('selectedOption', () => resetInput())" class="bg-white p-4 rounded shadow border border-gray-200">
         @if ($isShownScheme)
             <div class="mb-4">
-                <x-form.select name="selectedScheme" label="selectedScheme" wire:model.live="selectedScheme"
+                <x-form.select name="selectedScheme" label="Select Scheme" wire:model.live="selectedScheme"
                     class="border rounded px-3 py-2 w-full" required>
                     <option value="">-- Select --</option>
                     @foreach ($schemes as $scheme)

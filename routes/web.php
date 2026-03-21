@@ -19,6 +19,7 @@ use App\Http\Controllers\CMOGrievanceController;
 use App\Http\Controllers\OfficeMastersController;
 use App\Http\Controllers\JnpmController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\BackFromJBController;
 use App\Http\Controllers\IncompleteTypeController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\BeneficiaryListController;
@@ -289,4 +290,22 @@ Route::controller(JnpmController::class)->group(function () {
     Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')
     ->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')
     ->name('jnmp-marked-data');
+});
+//Reject Approved Beneficiary
+Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
+    Route::get('/reject-approved-beneficiary',  'index')
+        // ->middleware('permission.redirect:canRejectApprovedBeneficiary')
+        ->name('reject-approved-beneficiary');
+    Route::get('/reject-approved-beneficiary/de-activate', 'editview')
+        // ->middleware('permission.redirect:canViewDetailsToReject')
+        ->name('reject-approved-beneficiary.de-activate');
+    Route::post('/deActivebeneficiary', 'deActiveBeneficiary')
+        // ->middleware('permission.redirect:canRejectBeneficiary')
+        ->name('beneficiary.deActivebeneficiary');
+});
+
+
+Route::controller(BackFromJBController::class)->group(function () {
+    Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
+    Route::any('/backfromjbactions', 'backfromjbactions')->name('backfromjbactions');
 });

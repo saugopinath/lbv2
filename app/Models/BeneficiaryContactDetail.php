@@ -107,4 +107,66 @@ class BeneficiaryContactDetail extends BaseAuditableModel
             'updated_at' => $this->updated_at,
         ];
     }
+    public function block()
+    {
+        return $this->belongsTo(Block::class, 'blockurban');
+    }
+
+    public function panchayat()
+    {
+        return $this->belongsTo(Panchayat::class, 'gpward');
+    }
+
+    public function ward()
+    {
+        return $this->belongsTo(Ward::class, 'gpward');
+    }
+    public function district()
+    {
+        return $this->belongsTo(District::class, 'district_id', 'id');
+    }
+    public function subdivision()
+    {
+        return $this->belongsTo(Subdivision::class, 'sub_division_id', 'id');
+    }
+    public function getFullAddress(): string
+    {
+        $district = optional($this->district)->name;
+        $subdivision = optional($this->subdivision)->name;
+        $block = optional($this->block)->name;
+        $panchayat = optional($this->panchayat)->name;
+        $municipality = optional($this->municipality)->name;
+        $ward = optional($this->ward)->name;
+
+        $parts = [];
+
+        if ($district) {
+            $parts[] = "District - " . strtoupper($district);
+        }
+
+        // Rural
+        if ($this->rural_urban == 2) {
+            if ($block) {
+                $parts[] = "Block - " . strtoupper($block);
+            }
+            if ($panchayat) {
+                $parts[] = "GP - " . strtoupper($panchayat);
+            }
+        }
+        // Urban
+        else {
+            if ($subdivision) {
+                $parts[] = "Subdivision - " . strtoupper($subdivision);
+            }
+            if ($municipality) {
+                $parts[] = "Municipality - " . strtoupper($municipality);
+            }
+            if ($ward) {
+                $parts[] = "Ward - " . strtoupper($ward);
+            }
+        }
+
+        // Use <br> for line breaks in HTML
+        return !empty($parts) ? implode('<br>', $parts) : 'N/A';
+    }
 }
