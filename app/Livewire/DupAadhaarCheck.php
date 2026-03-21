@@ -12,7 +12,7 @@ use App\Attributes\Loggable;
 
 class DupAadhaarCheck extends Component
 {
-    public $aadhaar, $grievanceId;
+    public $aadhaar;
     public $error = null;
     public $schemeId;
     // public function checkDuplicate()
@@ -43,9 +43,6 @@ class DupAadhaarCheck extends Component
     public function mount($schemeId = null)
     {
         $this->schemeId = $schemeId;
-        if (request()->has('id')) {
-            $this->grievanceId = request()->query('id');
-        }
     }
     public function checkDuplicate()
     {
@@ -73,8 +70,7 @@ class DupAadhaarCheck extends Component
 
         $this->dispatch('aadhaarChecked', [
             'encoded' => $encoded_aadhar,
-            'hash' => $aadhaar_hash,
-            'grievance_id' => $this->grievanceId,
+            'hash' => $aadhaar_hash
         ]);
 
         $this->dispatch('hideLoader');

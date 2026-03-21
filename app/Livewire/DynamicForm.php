@@ -47,7 +47,7 @@ class DynamicForm extends Component
 
     public $nextTab = null;
 
-    public $ram, $grievance_id;
+    public $ram, $grievanceId;
 
     public $form_preview;
 
@@ -98,7 +98,7 @@ class DynamicForm extends Component
         'aadhaarCheckedReset' => 'onAadhaarCheckedReset',
     ];
 
-    public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null)
+    public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null)
     {
 
         if (!WorkFlowPermissionHelper::canCreateEntry()) {
@@ -140,7 +140,9 @@ class DynamicForm extends Component
                 $this->maxDOB = now()->subYears($ageConfig['min_age'])->format('Y-m-d');
             }
         }
-
+        if ($grievanceId) {
+            $this->grievanceId = $grievanceId;
+        }
         $select_lgd = session('lgd_session');
 
         if (!empty($select_lgd['district_id'])) {
@@ -374,7 +376,6 @@ class DynamicForm extends Component
             'encoded' => $data['encoded'],
             'hash' => $data['hash'],
         ];
-        $this->grievance_id = $data['grievance_id'];
         $this->navMessage = null;
         $this->navMessageType = 'success';
         $this->applicationId = null;
@@ -686,9 +687,9 @@ class DynamicForm extends Component
                                 'aadhar_vault' => $this->aadhaarPayload['hash'],
                             ]
                         );
-                        if ($this->grievance_id) {
-                            $grievance_id = Crypt::decryptString($this->grievance_id);
-                            $CmoSmData = CmoSmData::find($grievance_id);
+                        if ($this->grievanceId) {
+                            $grievanceId = Crypt::decryptString($this->grievanceId);
+                            $CmoSmData = CmoSmData::find($grievanceId);
                             $CmoSmData->lb_application_id = $this->applicationId;
                             $CmoSmData->is_mark = 1;
                             $CmoSmData->save();
