@@ -193,7 +193,7 @@ class WorkflowWizard extends Component
 
             foreach ($this->finalSteps as $index => $stepData) {
                 $rank = ($index + 1) * 10;
-                $successRank = ($index < count($this->finalSteps) - 1) ? ($index + 2) * 10 : null;
+                $successRank = ($index < count($this->finalSteps) - 1) ? ($index + 2) * 10 : 0;
                 $revertRank = ($index > 0) ? $index * 10 : null;
 
                 $label = DynamicWorkflowLabel::create([

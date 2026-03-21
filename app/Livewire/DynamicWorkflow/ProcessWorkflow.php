@@ -23,69 +23,92 @@ ProcessWorkflow extends Component
     }
 
     public function loadRequests()
-    {
-        $lgd_session = session('lgd_session');
-        $userRoleId = 0;
+{
+    $lgd_session = session('lgd_session');
+    $userRoleId = 0;
 
-        if (!empty($lgd_session['role_id'])) {
-            try {
-                $userRoleId = (int) \Illuminate\Support\Facades\Crypt::decryptString($lgd_session['role_id']);
-            } catch (\Exception $e) {
-                $userRoleId = 0;
-            }
-        }
-
-        // ব্যাকআপ হিসেবে ম্যাপিং টেবিল থেকে নেয়া (যদি সেশনে না থাকে)
-        if (!$userRoleId) {
-            $userRoleId = (int) \App\Models\UserRoleSchemeOfficeMapping::where('user_id', Auth::id())
-                ->where('is_active', 1)
-                ->value('role_id') ?? 0;
-        }
-
-        // রিক্যুয়েস্টগুলো লোড করা—যেখানে বর্তমান ধাপটি ইউজারের রোলের সাথে ম্যাচ করে
-        // এখানে কোনো 'pending' বা 'approved' শব্দ আমরা ব্যবহার করছি না
-        $this->requests = DynamicWorkflowRequest::whereNotNull('current_step_id')
-            /* ->whereHas('step', function ($query) use ($userRoleId) {
-                $query->where('role_id', $userRoleId);
-            }) */
-            ->with(['module', 'step.label', 'step.role'])
-            ->get();
+    if (!empty($lgd_session['role_id'])) {
+        try {
+            $userRoleId = (int) \Illuminate\Support\Facades\Crypt::decryptString($lgd_session['role_id']);
+        } catch (\Exception $e) {}
     }
 
+    if (!$userRoleId) {
+        $userRoleId = (int) \App\Models\UserRoleSchemeOfficeMapping::where('user_id', Auth::id())
+            ->where('is_active', 1)
+            ->value('role_id') ?? 0;
+    }
+
+    // 🔥 user এর সব rank
+    $userRanks = workflowstepRolemapping::where('role_id', $userRoleId)
+        ->pluck('rank')
+        ->toArray();
+
+    if (empty($userRanks)) {
+        $this->requests = [];
+        return;
+    }
+
+    // ✅ ONLY current_rank দিয়ে filter
+    $this->requests = DynamicWorkflowRequest::whereIn('current_rank', $userRanks)
+        ->with(['module', 'step.label', 'step.role'])
+        ->get();
+}
     public function viewDetails($requestId)
     {
-        $this->selectedRequest = DynamicWorkflowRequest::with(['module', 'step'])->find($requestId);
+        $this->selectedRequest = DynamicWorkflowRequest::with(['module', 'step.label', 'step.role'])
+            ->find($requestId);
     }
 
     public function processAction($action)
     {
-        $this->validate(['remark' => 'required|min:5']);
+        $this->validate([
+            'remark' => 'required|min:5'
+        ]);
 
-        $request = $this->selectedRequest;
-        $currentStep = $request->step;
+        if (!$this->selectedRequest) {
+            $this->dispatch('toast', 'error', 'No request selected');
+            return;
+        }
 
         DB::beginTransaction();
         try {
             $service = new \App\Services\DynamicWorkflowService();
 
-            if ($action == 'approve') {
-                $result = $service->approve($request->id, $this->remark);
-            } elseif ($action == 'revert') {
-                $result = $service->revert($request->id, $this->remark);
-            } elseif ($action == 'reject') {
-                $result = $service->reject($request->id, $this->remark);
+            switch ($action) {
+                case 'approve':
+                    $result = $service->approve($this->selectedRequest->id, $this->remark);
+                    break;
+
+                case 'revert':
+                    $result = $service->revert($this->selectedRequest->id, $this->remark);
+                    break;
+
+                case 'reject':
+                    $result = $service->reject($this->selectedRequest->id, $this->remark);
+                    break;
+
+                default:
+                    throw new \Exception('Invalid action');
             }
 
             DB::commit();
-            $this->dispatch('toast', 'success', $result['message'] ?? 'Action saved!');
+
+            $this->dispatch('toast', 'success', $result['message'] ?? 'Action successful');
+
+            // 🔥 reset
             $this->selectedRequest = null;
+            $this->remark = null;
+
+            // 🔥 reload list
             $this->loadRequests();
+
         } catch (\Exception $e) {
-            dd($e);
             DB::rollBack();
             $this->dispatch('toast', 'error', $e->getMessage());
         }
     }
+
 
     public function render()
     {

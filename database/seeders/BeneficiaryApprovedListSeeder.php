@@ -34,9 +34,9 @@ class BeneficiaryApprovedListSeeder extends Seeder
         try {
 
 
-            for ($i = 0; $i < 600; $i++) {
+            for ($i = 0; $i < 100; $i++) {
                 // 🔹 Random Scheme
-                $schemeId = $schemes[array_rand($schemes)];
+                $schemeId = 20;
 
                 // Office & User তথ্য
                 $office = OfficeMaster::where('district_id', 318)
@@ -98,7 +98,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
                     'dob' => '2000-01-01',
                     'mar_statu' => 1,
                     'caste' => 2,
-                    'next_level_role_id' => 1,
+                    'next_level_role_id' => 2,
                     'is_final' => 1,
                     'created_by_dist_code' => $dist,
                     'ben_father_name' => "Sanjoy",

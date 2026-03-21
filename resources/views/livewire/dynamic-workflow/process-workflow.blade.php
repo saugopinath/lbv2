@@ -71,11 +71,7 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 pt-6">
-                        @if($selectedRequest->step->same_label_role_id)
-                        <button wire:click="processAction('revert')" class="py-4 bg-amber-500 hover:bg-amber-600 text-white font-black rounded-xl shadow-lg transition-all active:scale-95 uppercase tracking-tighter">
-                            <i class="fas fa-undo mr-2"></i> Revert Back
-                        </button>
-                        @endif
+                        
 
                         <button wire:click="processAction('approve')" class="col-span-1 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-xl transition-all active:scale-95 uppercase tracking-tighter shadow-emerald-100-md">
                             <i class="fas fa-check-circle mr-2"></i>

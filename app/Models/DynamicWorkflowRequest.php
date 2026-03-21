@@ -6,10 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class DynamicWorkflowRequest extends BaseAuditableModel
 {
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_APPROVED = 'approved';
-    public const STATUS_REVERTED = 'reverted';
-    public const STATUS_REJECTED = 'rejected';
+   
 
     protected $table = 'dynamic_workflow_requests';
 
@@ -37,7 +34,11 @@ class DynamicWorkflowRequest extends BaseAuditableModel
     }
 
     public function step()
-    {
-        return $this->belongsTo(workflowstepRolemapping::class, 'current_step_id');
-    }
+{
+    return $this->belongsTo(
+        workflowstepRolemapping::class,
+        'current_step_id',     // FK in request table
+        'workflow_step_id'     // column in mapping table
+    );
+}
 }
