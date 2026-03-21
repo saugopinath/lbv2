@@ -26,7 +26,7 @@ class CmoWorkFlowDataTable extends DataTableComponent
     public string $reportType;
     public string $login_type = '';
     public string $search = '';
-
+    public $greCat, $chemeName;
     public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id, $revertrejectAction, $revertrejectCauses, $sub_div, $district;
     // protected $listeners = ['filtersApplied'];
 
@@ -48,8 +48,17 @@ class CmoWorkFlowDataTable extends DataTableComponent
             }
         }
     }
-    public function mount(): void
+
+    public function greCat($schemeId)
     {
+        if ($schemeId = 20) {
+            return 127;
+        }
+    }
+
+    public function mount($schemeId = null, $schemeName = null): void
+    {
+        $this->greCat = $this->greCat($schemeId);
         $user = auth()->user();
         if (CheckAuthHelper::isCommmonVerifier()) {
             $this->process_type = [Codemaster::getIdByCode(3301)];
@@ -227,7 +236,7 @@ class CmoWorkFlowDataTable extends DataTableComponent
     }
     public function builder(): Builder
     {
-        $query = CmoSmData::query();
+        $query = CmoSmData::where('grievance_category', $this->greCat);
         if (!empty($this->process_type)) {
             $query->wherein('redressed_status', $this->process_type);
         }
