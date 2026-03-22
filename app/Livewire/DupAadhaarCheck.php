@@ -81,7 +81,11 @@ class DupAadhaarCheck extends Component
     }
     public function DsMark()
     {
-        Session::put('dup_aadhaar', md5(trim($this->aadhaar)));
+        // Session::put('dup_aadhaar', md5(trim($this->aadhaar)));
+
+        $this->dispatch('aadhaarCheckedds', [
+            'aadhar_hash' => md5(trim($this->aadhaar))
+        ]);
         return [
             'status' => true
         ];
