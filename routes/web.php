@@ -48,6 +48,10 @@ use App\Http\Controllers\ValidationManagerController;
 use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
 use App\Livewire\CsvSplitter;
+use App\Livewire\DynamicWorkflow\ProcessWorkflow;
+use App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary;
+use App\Livewire\DynamicWorkflow\WorkflowWizard;
+
 require __DIR__ . '/home.php';
 
 
