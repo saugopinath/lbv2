@@ -6,7 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use Illuminate\Support\Carbon;
 use App\Models\DsPhase;
-use App\Models\BeneficiaryCommonList;
+use App\Models\BeneficiaryPersonalDetail;
 use App\Models\DsMapRecord;
 use App\Models\Codemaster;
 
@@ -42,14 +42,14 @@ class DuplicateApplicantDSMarkModal extends Component
     public function saveDsMark()
     {
         $validated = $this->validate($this->rules());
-        $targatedModel = BeneficiaryCommonList::find($this->applicantId)->sourceable;
+        $targatedModel = BeneficiaryPersonalDetail::find($this->applicantId);
         $olddsres = $targatedModel->ds_registration_no;
         $olddsdate = $targatedModel->ds_date;
         $olddsphase = $targatedModel->ds_phase;
         $targatedModel->ds_date = $validated['ds_date'];
         $targatedModel->ds_registration_no = $validated['reg_no'];
         $targatedModel->ds_phase = $this->cdsphase;
-        $targatedModel->entry_type = Codemaster::getIdByCode(42);
+        $targatedModel->application_type = 2;
         $targatedModel->save();
         $DsMapRecord = new DsMapRecord;
         $DsMapRecord->application_id = $this->applicantId;
