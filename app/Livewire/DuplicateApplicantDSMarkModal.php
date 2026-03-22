@@ -9,7 +9,7 @@ use App\Models\DsPhase;
 use App\Models\BeneficiaryPersonalDetail;
 use App\Models\DsMapRecord;
 use App\Models\Codemaster;
-
+use Illuminate\Support\Facades\DB;
 class DuplicateApplicantDSMarkModal extends Component
 {
     public $applicantId, $open;
@@ -41,6 +41,8 @@ class DuplicateApplicantDSMarkModal extends Component
     }
     public function saveDsMark()
     {
+        DB::beginTransaction();
+        try {
         $validated = $this->validate($this->rules());
         $targatedModel = BeneficiaryPersonalDetail::find($this->applicantId);
         $olddsres = $targatedModel->ds_registration_no;
@@ -60,6 +62,10 @@ class DuplicateApplicantDSMarkModal extends Component
         $DsMapRecord->old_ds_date = $olddsdate;
         $DsMapRecord->old_ds_registration_no = $olddsres;
         $DsMapRecord->save();
+        DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+        }
         $this->dispatch('hide-modal');
         $this->dispatch('refreshDatatable');
     }
