@@ -11,7 +11,8 @@ class Scheme extends Model
         'name',
         'short_name',
         'description',
-        'department_id'
+        'department_id',
+        'is_active'
     ];
 
 
