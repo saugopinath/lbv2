@@ -15,6 +15,7 @@ use App\Models\DsPhase;
 class DuplicateApplicantDataTable extends DataTableComponent
 {
     public ?int $perPage = 5;
+    public $key,$value;
     public function mount(): void {}
     public function configure(): void
     {
@@ -119,30 +120,49 @@ class DuplicateApplicantDataTable extends DataTableComponent
     //     $benData = BeneficiaryCommonList::find($id);
     //     dd($benData);
     // }
-    public function builder(): Builder
-    {
-        $query = BeneficiaryPersonalDetail::with('contact');
-        $filters = [
-            'dup_aadhaar' => 'encoded_aadhar',
-            'dup_bank'    => 'bank_account_number',
-            'dup_mobile'  => 'mobile_no',
-            'dup_name'    => 'full_name',
-        ];
-        $sessionUsed = false;
-        foreach ($filters as $sessionKey => $column) {
-            if (Session::has($sessionKey)) {
-                $value = Session::get($sessionKey);
-                if (!empty($value)) {
-                    $query->where($column, $value);
-                    $sessionUsed = true;
-                }
-            }
-        }
-        if ($sessionUsed) {
-            foreach (array_keys($filters) as $key) {
-                Session::forget($key);
-            }
-        }
-        return $query;
+#[On('aadhaarCheckedds')]
+public function dsMark($benData)
+{
+    $this->key = key($benData);
+    $this->value = current($benData);
+}
+
+public function builder(): Builder
+{
+    $query = BeneficiaryPersonalDetail::with(['contact', 'aadhar']);
+    if (!empty($this->value)) {
+        $query->whereHas('aadhar', function ($q) {
+            $q->where('aadhar_hash', $this->value);
+        });
     }
+
+    return $query;
+}
+
+    // public function builder(): Builder
+    // {
+    //     $query = BeneficiaryPersonalDetail::with('contact');
+    //     $filters = [
+    //         'dup_aadhaar' => 'encoded_aadhar',
+    //         'dup_bank'    => 'bank_account_number',
+    //         'dup_mobile'  => 'mobile_no',
+    //         'dup_name'    => 'full_name',
+    //     ];
+    //     $sessionUsed = false;
+    //     foreach ($filters as $sessionKey => $column) {
+    //         if (Session::has($sessionKey)) {
+    //             $value = Session::get($sessionKey);
+    //             if (!empty($value)) {
+    //                 $query->where($column, $value);
+    //                 $sessionUsed = true;
+    //             }
+    //         }
+    //     }
+    //     if ($sessionUsed) {
+    //         foreach (array_keys($filters) as $key) {
+    //             Session::forget($key);
+    //         }
+    //     }
+    //     return $query;
+    // }
 }
