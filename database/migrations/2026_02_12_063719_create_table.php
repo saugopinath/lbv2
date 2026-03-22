@@ -49,6 +49,7 @@ return new class extends Migration {
                 application_date date,
                 ds_registration_no varchar(100),
                 ds_date date,
+                ds_phase integer,
                 beneficiary_name varchar(250),
                 age integer,
                 email varchar(250),
