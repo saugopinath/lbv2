@@ -7,7 +7,9 @@ use App\Helpers\WorkFlowPermissionHelper;
 use App\Models\AcceptRejectInfo;
 use App\Models\BeneficiaryCommonList;
 use App\Models\BeneficiaryEnclosure;
+use App\Models\BeneficiaryPersonalDetail;
 use App\Models\Codemaster;
+use App\Models\Scheme;
 use App\Models\SchemeAttachedDocMappings;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -24,19 +26,19 @@ class RejectApprovedBeneficiaryController extends Controller
     }
     public function index()
     {
-        // $user = auth()->user();
+        $user = Auth::user();
         // $user->hasRole('Operator');
 
         // dd('caste modification info');
         // if ($user->hasRole('Operator')) {}
 
-        // if (CheckAuthHelper::isApprover()) {
+        if (CheckAuthHelper::isApprover()) {
             $header = 'Reject Approved Beneficiary Information';
             return view('RejectApprovedBeneficiaryView.reject_approved_beneficiary_index', compact('header'));
-        // } else {
-        //     $header = 'Opps! you are not able to perform any action';
-        //     return view('CommonRestictedpage\index', compact('header'));
-        // }
+        } else {
+            $header = 'Opps! you are not able to perform any action';
+            return view('CommonRestictedpage\index', compact('header'));
+        }
     }
     public function editview(Request $request)
     {
@@ -44,19 +46,23 @@ class RejectApprovedBeneficiaryController extends Controller
             $header = 'De-Activate Beneficiary Details';
             $application_id = Crypt::decryptString($request->application_id);
             $beneficiary_id = Crypt::decryptString($request->beneficiary_id);
+            $scheme_id = Crypt::decryptString($request->scheme_id);
+            $schemeName = Scheme::where('id', $scheme_id)->first()->name;
             $reportType = 3;
-            $BenDetails = BeneficiaryCommonList::where('sourceable_id', $application_id)->with('sourceable')->firstOrFail();
+            $BenDetails = BeneficiaryPersonalDetail::where('application_id', $application_id)->firstOrFail();
             $rejectRevertCause = Codemaster::where('code', 12)->first()->children()->get();
             // $doctypes=SchemeAttachedDocMappings::with('codemaster')->get();
-            $doctypes = Codemaster::where('code', 16)->first()->children()->get();
+            $doctypes = $this->doctype;
+            // 1634
             // dd($doctypes);
-            return view('RejectApprovedBeneficiaryView.reject_approved_beneficiary_processed', compact('application_id', 'beneficiary_id', 'header', 'reportType', 'rejectRevertCause', 'doctypes'));
+            return view('RejectApprovedBeneficiaryView.reject_approved_beneficiary_processed', compact('application_id', 'beneficiary_id', 'scheme_id', 'header', 'reportType', 'rejectRevertCause', 'doctypes', 'schemeName'));
         }
         $header = 'Oops! You do not have permission to view users.';
         return view('CommonRestictedpage.index', compact('header'));
     }
     public function deActiveBeneficiary(Request $request)
     {
+        // dd($request->all());
         if (!Auth::check()) {
             return redirect()->route('login')->with('error', 'Please login first!');
         }
@@ -66,10 +72,11 @@ class RejectApprovedBeneficiaryController extends Controller
         }
         if (WorkFlowPermissionHelper::canRejectBeneficiary()) {
             $userId = Auth::id();
-            $nextLevelRoleId = Codemaster::getIdByCode(-1);
+            $nextLevelRoleId = -100;
             $applicationId = Crypt::decryptString($request->application_id);
+            $schemeId = Crypt::decryptString($request->scheme_id);
             $doctype = $this->doctype;
-
+            // dd($doctype, $nextLevelRoleId, $applicationId, $schemeId);
             // Create validator instance
             $validator = Validator::make($request->all(), [
                 'application_id' => 'required|string',
@@ -82,7 +89,7 @@ class RejectApprovedBeneficiaryController extends Controller
                 'reject_reason.required'  => 'Please select a reason.',
                 'remark.required'         => 'Please enter a remark.',
             ]);
-            $uploadedDocsCount = BeneficiaryEnclosure::where('application_id', $applicationId)
+            $uploadedDocsCount = BeneficiaryEnclosure::where('application_id', $applicationId)->where('scheme_id', $schemeId)
                 ->whereIn('document_type', [$doctype])
                 ->count();
 
@@ -98,10 +105,8 @@ class RejectApprovedBeneficiaryController extends Controller
                     ->withErrors($validator)
                     ->withInput();
             }
-
             // Get validated data
             $validatedData = $validator->validated();
-
             try {
                 $applicationId = Crypt::decryptString($validatedData['application_id']);
             } catch (\Exception $e) {
@@ -114,19 +119,17 @@ class RejectApprovedBeneficiaryController extends Controller
                 $beneficiaryIdFromForm = null;
             }
 
-            $beneficiary = BeneficiaryCommonList::where('sourceable_id', $applicationId)
-                ->with('sourceable')
+            $beneficiary = BeneficiaryPersonalDetail::where('application_id', $applicationId)->where('scheme_id', $schemeId)
                 ->first();
-
-            if (!$beneficiary || !$beneficiary->sourceable) {
+            if (!$beneficiary) {
                 return back()->with('error', 'Beneficiary not found!');
             }
-
             DB::beginTransaction();
             try {
                 $logdetails = new AcceptRejectInfo;
-                $logdetails->application_id         = $beneficiary->sourceable_id;
+                $logdetails->application_id         = $beneficiary->application_id;
                 $logdetails->beneficiary_id         = $beneficiary->beneficiary_id;
+                $logdetails->scheme_id              = $beneficiary->scheme_id;
                 $logdetails->ip_address             = request()->ip();
                 $logdetails->user_id                = $userId;
                 $logdetails->browser                = request()->header('User-Agent');
@@ -135,13 +138,12 @@ class RejectApprovedBeneficiaryController extends Controller
                 $logdetails->revert_reason_cause_id = $validatedData['reject_reason'];
                 $logdetails->revert_reason_remarks  = $validatedData['remark'];
                 $logdetails->parent_id              = null;
-
                 $logdetailsSaved = $logdetails->save();
 
-                $updatepersonal = $beneficiary->sourceable->update([
+                $updatepersonal = $beneficiary->update([
                     'next_level_role_id' => $nextLevelRoleId,
+                    'is_clean' => 10,
                 ]);
-
                 if ($logdetailsSaved && $updatepersonal) {
                     DB::commit();
                     return redirect()->route('reject-approved-beneficiary')->with('success', 'Beneficiary De-Activated Successfully!');
@@ -151,9 +153,8 @@ class RejectApprovedBeneficiaryController extends Controller
                 }
             } catch (\Exception $e) {
                 DB::rollBack();
+                // dd($e->getMessage());
                 // Log the exception for debugging (optional)
-
-
                 return back()->with('error', 'Something went wrong!');
             }
         }
