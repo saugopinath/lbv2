@@ -19,7 +19,7 @@ use App\Services\ElasticsearchService;
 
 use App\Interfaces\CmoAuthenticationInterface;
 use App\Services\CmoAuthenticationService;
-
+use App\Services\MenuService;
 use App\Models\User;
 use App\Observers\UserObserver;
 use App\Models\AcceptRejectInfo;
@@ -51,6 +51,10 @@ class AppServiceProvider extends ServiceProvider
             JNMPAuthenticationInterface::class,
             JNMPAuthenticationService::class
         );
+
+         $this->app->singleton(MenuService::class, function ($app) {
+            return new MenuService();
+        });
 
     }
 

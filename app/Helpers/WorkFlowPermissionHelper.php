@@ -10,6 +10,19 @@ use Illuminate\Support\Facades\Cache;
 
 class WorkFlowPermissionHelper
 {
+
+ // Add this method if not exists
+    public static function hasPermission($permissionKey)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return false;
+        }
+
+        // Check if user has permission
+        return $user->can($permissionKey);
+    }
+    
     public static function getUserId(): ?int
     {
         return session('lgd_session')

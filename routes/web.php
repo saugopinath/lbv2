@@ -47,6 +47,8 @@ use App\Http\Controllers\ValidationManagerController;
 use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
 use App\Livewire\CsvSplitter;
+use App\Livewire\MenuManagement;
+use App\Livewire\DynamicSidebar;
 
 require __DIR__ . '/home.php';
 
@@ -289,4 +291,11 @@ Route::controller(JnpmController::class)->group(function () {
     Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')
     ->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')
     ->name('jnmp-marked-data');
+});
+
+Route::middleware(['auth'])->group(function () {
+    // Menu Management Routes
+    Route::get('/menu-management', MenuManagement::class)->name('menu-management');
+
+    // Other routes...
 });

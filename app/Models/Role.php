@@ -61,6 +61,12 @@ class Role extends SpatieRole implements Auditable
     {
         return $this->hasMany(RoleOfficeTypeMapping::class);
     }
+    public function menus(): BelongsToMany
+    {
+        return $this->belongsToMany(Menu::class, 'menu_role')
+            ->withPivot('order', 'is_active')
+            ->withTimestamps();
+    }
     public function mappedPermissions(): BelongsToMany
     {
         return $this->belongsToMany(

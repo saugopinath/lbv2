@@ -33,7 +33,8 @@
         <div class="flex flex-1 bg-[#def0f4] dark:bg-dark text-dark dark:text-white">
 
             <!-- Sidebar -->
-            <x-layouts.das_side_menu />
+            {{--  <x-layouts.das_side_menu />  --}}
+             <livewire:dynamic-sidebar />
 
             <!-- Content Area -->
             <div class="flex-1 flex flex-col">
