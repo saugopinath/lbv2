@@ -255,6 +255,8 @@ class CmoWorkFlowDataTable extends DataTableComponent
     }
     public function bulkpush()
     {
+        DB::beginTransaction();
+        try {
         $ids = $this->getSelected();
         foreach ($ids as $grievance_id) {
             $CmoSmData = CmoSmData::where('grievance_id', $grievance_id)
@@ -297,6 +299,10 @@ class CmoWorkFlowDataTable extends DataTableComponent
                 $CmoSmData->response_back_date = date('Y-m-d H:i:s');
                 $CmoSmData->save();
             }
+        }
+        DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
         }
         $this->dispatch('toastr', [
             'type' => 'success',

@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
-class CmoSmData extends Model implements Auditable
+// use Illuminate\Database\Eloquent\Model;
+// use OwenIt\Auditing\Contracts\Auditable;
+class CmoSmData extends extends BaseAuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
+    // use \OwenIt\Auditing\Auditable;
     protected $table = 'cmo.cmo_sm_data';
     public $timestamps = false;
     protected $guarded = [];
