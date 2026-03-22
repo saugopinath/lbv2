@@ -3,7 +3,8 @@
         errorMessage: '',
         successMessage: '',
         disableCheckBtn: false,
-
+dsMark: false,
+        dsData: false,
         async validateAndSubmit() {
             this.errorMessage = '';
             this.successMessage = '';
@@ -33,13 +34,24 @@
                 this.successMessage = result.message;
                 this.disableCheckBtn = true;
             }      
-
+if(result.status === 'duplicate') {
+                this.disableCheckBtn = true;
+                this.dsMark = result.ds_entry;
+            }
+        }
+        ,
+        async DsMark() {
+            let val = this.aadhaar.replace(/\s+/g, '');
+            $wire.aadhaar = val;
+            let result = await $wire.DsMark();
+            this.dsData = result.status;
         }
     }" x-init="$watch('aadhaar', value => {
     errorMessage = '';
     successMessage = '';
     disableCheckBtn = false;
-
+ dsMark = false;
+        dsData = false;
     Livewire.dispatch('aadhaarCheckedReset');
 })">
     <div class="grid gap-6 md:grid-cols-3 mb-6 p-4 border-b border-gray-200 dark:border-gray-700">
@@ -69,4 +81,14 @@
         <template x-if="successMessage">
             <div class="mt-8 text-green-600 text-sm" x-text="successMessage"></div>
         </template>
+        <template x-if="dsMark">
+            <x-button.gradient-button type="button" @click="DsMark()">
+                <span>Ds Mark</span>
+            </x-button.gradient-button>
+        </template>
+    </div>
+    <div x-show="dsData" x-transition x-cloak>
+        <livewire:duplicate-applicant-data-table />
+        <livewire:duplicate-applicant-d-s-mark-modal />
+    </div>
     </div>
