@@ -11,6 +11,7 @@ class Form extends Component
     public bool $schemeData = false;
     public $schemeId, $schemeName = null;
     public $showSchemeDropdown = true;
+    public $grievanceId;
     public function mount($hideSchemeDropdown = false)
     {
         if ($hideSchemeDropdown) {
@@ -19,6 +20,9 @@ class Form extends Component
             $this->schemeId = $schemeData->id;
             $this->schemeData = true;
             $this->schemeName = $schemeData->name;
+        }
+        if (request()->has('id')) {
+            $this->grievanceId = request()->query('id');
         }
     }
     #[On('selectedScheme')]

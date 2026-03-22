@@ -49,6 +49,7 @@ return new class extends Migration {
                 application_date date,
                 ds_registration_no varchar(100),
                 ds_date date,
+                ds_phase integer,
                 beneficiary_name varchar(250),
                 age integer,
                 email varchar(250),
@@ -67,10 +68,6 @@ return new class extends Migration {
                 created_by integer,
                 updated_by integer,
                 is_clean smallint NOT NULL DEFAULT 1,
-                marked_data smallint,
-                jnmp_marked smallint,
-                jnmp_remarks varchar(255),
-                reactive_reason varchar(255),
                 created_at timestamp without time zone,
                 updated_at timestamp without time zone
             ) PARTITION BY LIST (scheme_id)
