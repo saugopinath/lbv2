@@ -52,7 +52,7 @@ class RequestUpdateBeneficiary extends Component
         // dd('here');
         $selectLgd = session('lgd_session');
         // dd($selectLgd);
-        $this->requestModuleCode = 'UPP_BEN_01';
+        $this->requestModuleCode = 'UPP_MARK_02';
         $this->currentRoleId = Crypt::decryptString($selectLgd['role_id']);
         if (!empty($selectLgd['district_id'])) {
             $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($selectLgd['district_id']);

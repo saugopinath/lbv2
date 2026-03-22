@@ -12,8 +12,6 @@
                     <div class="flex justify-between items-start mb-2">
                         <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest">{{ $req->module->module_name }}</span>
                         <div class="flex flex-col items-end">
-                            <span class="bg-indigo-600 text-white px-2 py-0.5 rounded text-[10px] font-black mb-1">Rank {{ $req->level->current_rank }}</span>
-                            <span class="text-[10px] text-gray-400 font-bold uppercase">{{ $req->step->label->label_name ?? 'N/A' }}</span>
                         </div>
                     </div>
                     <h5 class="font-bold text-gray-900 mb-1">Ref ID: {{ $req->ref_id }}</h5>

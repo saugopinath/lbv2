@@ -4,6 +4,7 @@ namespace App\Livewire\DynamicWorkflow;
 
 use App\Models\DynamicWorkflowLabel;
 use App\Models\DynamicWorkflowModule;
+use App\Models\Permission;
 use App\Models\workflowstepRolemapping;
 use App\Models\Role;
 use App\Models\Scheme;
@@ -148,7 +149,7 @@ class WorkflowWizard extends Component
                 'label' => $label,
                 'role_ids' => $mappings
                     ->pluck('role_id')
-                    ->map(fn ($roleId) => (string) $roleId)
+                    ->map(fn($roleId) => (string) $roleId)
                     ->values()
                     ->all(),
                 'is_final' => ($index == $this->stepCount - 1),
@@ -214,6 +215,17 @@ class WorkflowWizard extends Component
                         'is_final_step' => ($index == count($this->finalSteps) - 1),
                         'action_type' => null,
                     ]);
+
+                    $labelSlug = strtolower(str_replace(' ', '_', $stepData['label']));
+                    $permissionName = "{$module->module_code}.{$labelSlug}";
+                    $permission = Permission::firstOrCreate([
+                        'name' => $permissionName,
+                        'guard_name' => 'web'
+                    ]);
+                    $role = Role::find($roleId);
+                    if ($role && !$role->hasPermissionTo($permissionName)) {
+                        $role->givePermissionTo($permission);
+                    }
                 }
             }
 
@@ -234,7 +246,6 @@ class WorkflowWizard extends Component
             $this->currentTab--;
         }
     }
-
     public function render()
     {
         return view('livewire.dynamic-workflow.workflow-wizard', [
