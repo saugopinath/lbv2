@@ -56,7 +56,7 @@ class MenuManagement extends Component
         $this->permissions = Permission::all();
 
         $this->departments =Department::with('schemes')->where('id',1)->get();
-        dd($this->departments);
+        // dd($this->departments);
         $this->schemes = Scheme::all();
         $this->roles = Role::all();
     }
