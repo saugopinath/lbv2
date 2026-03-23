@@ -19,6 +19,7 @@ use App\Http\Controllers\CMOGrievanceController;
 use App\Http\Controllers\OfficeMastersController;
 use App\Http\Controllers\JnpmController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\BackFromJBController;
 use App\Http\Controllers\IncompleteTypeController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\BeneficiaryListController;
@@ -310,3 +311,8 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
 Route::get('dynamic-workflow-config', WorkflowWizard::class)->name('dynamic-workflow-config');
 Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
 Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
+
+Route::controller(BackFromJBController::class)->group(function () {
+    Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
+    Route::any('/backfromjbactions', 'backfromjbactions')->name('backfromjbactions');
+});
