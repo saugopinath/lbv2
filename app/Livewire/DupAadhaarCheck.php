@@ -16,6 +16,7 @@ class DupAadhaarCheck extends Component
     public $aadhaar;
     public $error = null;
     public $schemeId;
+    public $showDsTable = false;
     // public function checkDuplicate()
     // {
     //     $this->error = null;
@@ -66,8 +67,11 @@ class DupAadhaarCheck extends Component
         if ($exists) {
             $this->error = "Duplicate Aadhaar found for this scheme!";
             $this->dispatch('hideLoader');
-            return ['status' => 'duplicate', 'message' => $this->error,
-                'ds_entry' => WorkFlowPermissionHelper::canDuareSarkarEntryAllow()];
+            return [
+                'status' => 'duplicate',
+                'message' => $this->error,
+                'ds_entry' => WorkFlowPermissionHelper::canDuareSarkarEntryAllow()
+            ];
         }
 
         $this->dispatch('aadhaarChecked', [
@@ -82,7 +86,7 @@ class DupAadhaarCheck extends Component
     public function DsMark()
     {
         // Session::put('dup_aadhaar', md5(trim($this->aadhaar)));
-
+        $this->showDsTable = true;
         $this->dispatch('aadhaarCheckedds', [
             'aadhar_hash' => md5(trim($this->aadhaar))
         ]);
