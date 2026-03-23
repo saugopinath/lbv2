@@ -8,12 +8,12 @@ class BeneficiaryEnclosure extends BaseAuditableModel
 {
     use Searchable;
     protected $table = 'pension.beneficiary_documents';
-    protected $primaryKey = 'application_id';
+    protected $primaryKey = 'id';
     public $incrementing = false;
     protected $guarded = [];
     public function personal()
     {
-        return $this->belongsTo(BeneficiaryPersonalDetail::class, 'application_id');
+        return $this->belongsTo(BeneficiaryPersonalDetail::class, 'application_id', 'application_id');
     }
 
     // public function documentType()
