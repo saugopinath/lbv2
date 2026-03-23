@@ -6,6 +6,7 @@ namespace App\Helpers;
 use App\Models\Menu;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\WorkFlowPermissionHelper;
 
 class MenuHelper
 {
@@ -16,20 +17,20 @@ class MenuHelper
     {
         $userId = Auth::id();
         $cacheKey = "user_menus_{$userId}";
-        
+
         if ($refresh) {
             Cache::forget($cacheKey);
         }
-        
+
         return Cache::remember($cacheKey, 3600, function () use ($userId) {
             $user = Auth::user();
-            
+
             // Get all root menus
             $rootMenus = Menu::active()
                 ->root()
                 ->orderBy('menu_rank')
                 ->get();
-            
+
             // Filter based on user permissions
             return $rootMenus->filter(function ($menu) use ($user) {
                 return self::hasMenuAccess($menu, $user);
@@ -39,26 +40,109 @@ class MenuHelper
             });
         });
     }
-    
+
     /**
      * Check if user has access to menu
      */
+
+
     private static function hasMenuAccess($menu, $user)
     {
-        if (empty($menu->permission_id)) {
-            return true;
+        if (!$user) {
+            return false;
         }
-        
-        foreach ($menu->permission_id as $permissionId) {
-            $permission = \App\Models\Permission::find($permissionId);
-            if ($permission && $user->hasPermission($permission->name)) {
-                return true;
+
+        /*
+        ======================
+        Department Check
+        ======================
+        */
+
+        if (!empty($menu->department_id)) {
+
+            if (
+                $user->department_id &&
+                !in_array(
+                    $user->department_id,
+                    (array) $menu->department_id
+                )
+            ) {
+                return false;
             }
+
         }
-        
-        return false;
+
+        /*
+        ======================
+        Scheme Check
+        ======================
+        */
+
+        if (!empty($menu->scheme_id)) {
+
+            if (
+                $user->scheme_id &&
+                !in_array(
+                    $user->scheme_id,
+                    (array) $menu->scheme_id
+                )
+            ) {
+                return false;
+            }
+
+        }
+
+        /*
+        ======================
+        Role Check
+        ======================
+        */
+
+        if (!empty($menu->role_id)) {
+
+            if (
+                $user->role_id &&
+                !in_array(
+                    $user->role_id,
+                    (array) $menu->role_id
+                )
+            ) {
+                return false;
+            }
+
+        }
+
+        /*
+        ======================
+        Permission Check
+        ======================
+        */
+
+        if (!empty($menu->permission_id)) {
+
+            foreach ($menu->permission_id as $permissionId) {
+
+                $permission = \App\Models\Permission::find($permissionId);
+
+                if (
+                    $permission &&
+                    WorkFlowPermissionHelper::hasPermission(
+                        $permission->name
+                    )
+                ) {
+
+                    return true;
+
+                }
+
+            }
+
+            return false;
+
+        }
+
+        return true;
     }
-    
     /**
      * Get filtered children menus
      */
@@ -71,7 +155,7 @@ class MenuHelper
             return $child;
         });
     }
-    
+
     /**
      * Get all menus for admin management
      */
@@ -82,7 +166,7 @@ class MenuHelper
             ->orderBy('menu_rank')
             ->get();
     }
-    
+
     /**
      * Build menu tree for management
      */
@@ -91,11 +175,11 @@ class MenuHelper
         $menus = Menu::all();
         return self::buildTree($menus);
     }
-    
+
     private static function buildTree($menus, $parentId = null)
     {
         $result = [];
-        
+
         foreach ($menus as $menu) {
             if ($menu->parent_id == $parentId) {
                 $children = self::buildTree($menus, $menu->id);
@@ -105,10 +189,10 @@ class MenuHelper
                 $result[] = $menu;
             }
         }
-        
+
         return $result;
     }
-    
+
     /**
      * Clear menu cache for user
      */

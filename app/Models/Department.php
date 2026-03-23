@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Department extends Model
 {
-     protected $fillable = [
+    protected $fillable = [
         'name',
         'short_name',
         'state_id',
@@ -14,5 +14,9 @@ class Department extends Model
     public function State(): BelongsTo
     {
         return $this->belongsTo(State::class);
+    }
+    public function schemes()
+    {
+        return $this->hasMany(Scheme::class);
     }
 }
