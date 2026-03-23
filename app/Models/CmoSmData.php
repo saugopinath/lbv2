@@ -4,7 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Database\Eloquent\Model;
 // use OwenIt\Auditing\Contracts\Auditable;
-class CmoSmData extends extends BaseAuditableModel
+class CmoSmData  extends BaseAuditableModel
 {
     // use \OwenIt\Auditing\Auditable;
     protected $table = 'cmo.cmo_sm_data';
