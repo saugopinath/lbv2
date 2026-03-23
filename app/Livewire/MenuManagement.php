@@ -22,6 +22,8 @@ class MenuManagement extends Component
     public $is_active = true;
     public $permission_key;
     public $selectedRoles = [];
+    public $scheme_id;
+    public $department_id;
     public $showForm = false;
     public $isEditing = false;
     public $showJson = false;
@@ -36,7 +38,9 @@ class MenuManagement extends Component
         'order' => 'nullable|integer',
         'is_active' => 'boolean',
         'permission_key' => 'nullable|max:100',
-        'selectedRoles' => 'array'
+        'selectedRoles' => 'array',
+        'scheme_id' => 'required|exists:schemes,id',
+        'department_id' => 'required|exists:departments,id'
     ];
     
     protected $menuService;
@@ -48,18 +52,27 @@ class MenuManagement extends Component
     
     public function render()
     {
-        $menus = Menu::with('children', 'roles')
+        // For sidebar and JSON mode, show from JSON files (not DB directly)
+        $menusJson = $this->menuService->getUserMenus();
+
+        // Keep DB listing for editing management
+        $menusDb = Menu::with('children', 'roles', 'scheme', 'department')
             ->whereNull('parent_id')
             ->orderBy('order')
             ->paginate(20);
-            
+
         $roles = Role::orderBy('name')->get();
         $parentMenus = Menu::orderBy('order')->get();
-        
+        $schemes = \App\Models\Scheme::orderBy('name')->get();
+        $departments = \App\Models\Department::orderBy('name')->get();
+
         return view('livewire.menu-management', [
-            'menus' => $menus,
+            'menusDb' => $menusDb,
+            'menusJson' => $menusJson,
             'roles' => $roles,
-            'parentMenus' => $parentMenus
+            'parentMenus' => $parentMenus,
+            'schemes' => $schemes,
+            'departments' => $departments
         ]);
     }
     
@@ -84,39 +97,66 @@ class MenuManagement extends Component
         $this->is_active = $menu->is_active;
         $this->permission_key = $menu->permission_key;
         $this->selectedRoles = $menu->roles->pluck('id')->toArray();
+        $this->scheme_id = $menu->scheme_id;
+        $this->department_id = $menu->department_id;
         
         $this->showForm = true;
         $this->isEditing = true;
     }
     
+    private function normalizeIcon($icon)
+    {
+        $icon = trim($icon);
+        if (empty($icon)) {
+            return null;
+        }
+
+        // Normalize legacy Font Awesome helpers.
+        $icon = preg_replace('/\bfa\s+(?=fa-)/', 'fas ', $icon);
+        $icon = str_replace(
+            ['fa-solid', 'fa-regular', 'fa-light', 'fa-duotone', 'fa-brands', 'fa'],
+            ['fas', 'far', 'fal', 'fad', 'fab', 'fas'],
+            $icon
+        );
+        $icon = preg_replace('/\s+/', ' ', $icon);
+
+        return trim($icon);
+    }
+
     public function save()
     {
         $this->validate();
-        
+
+        $icon = $this->normalizeIcon($this->icon);
+
         if ($this->isEditing) {
             $menu = Menu::findOrFail($this->menuId);
             $menu->update([
                 'name' => $this->name,
-                'icon' => $this->icon,
+                'icon' => $icon,
                 'route' => $this->route,
                 'url' => $this->url,
                 'parent_id' => $this->parent_id,
                 'order' => $this->order ?? 0,
                 'is_active' => $this->is_active,
-                'permission_key' => $this->permission_key
+                'permission_key' => $this->permission_key,
+                'scheme_id' => $this->scheme_id,
+                'department_id' => $this->department_id
             ]);
             
             $message = 'Menu updated successfully!';
         } else {
             $menu = Menu::create([
                 'name' => $this->name,
-                'icon' => $this->icon,
+                'icon' => $icon,
                 'route' => $this->route,
                 'url' => $this->url,
                 'parent_id' => $this->parent_id,
                 'order' => $this->order ?? 0,
                 'is_active' => $this->is_active,
-                'permission_key' => $this->permission_key
+                'permission_key' => $this->permission_key,
+                'scheme_id' => $this->scheme_id,
+                'department_id' => $this->department_id
             ]);
             
             $message = 'Menu created successfully!';
@@ -168,7 +208,7 @@ class MenuManagement extends Component
     
     public function generateJson()
     {
-        $this->generatedJson = json_encode($this->menuService->getUserMenus(), JSON_PRETTY_PRINT);
+        $this->generatedJson = json_encode($this->menuService->getUserMenus(), JSON_PRETTY_PRINT);    
         $this->showJson = true;
     }
     
@@ -182,7 +222,8 @@ class MenuManagement extends Component
     {
         $this->reset([
             'menuId', 'name', 'icon', 'route', 'url', 
-            'parent_id', 'order', 'permission_key', 'selectedRoles'
+            'parent_id', 'order', 'permission_key', 'selectedRoles',
+            'scheme_id', 'department_id'
         ]);
         $this->is_active = true;
         $this->resetValidation();

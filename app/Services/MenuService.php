@@ -19,36 +19,41 @@ class MenuService
         if (!$user) {
             return [];
         }
-        
+
         $roleIds = $user->roles->pluck('id')->toArray();
         $cacheKey = 'user_menus_' . implode('_', $roleIds);
-        
+
         return Cache::remember($cacheKey, 3600, function () use ($roleIds) {
-            // Get menus from database
-            $menus = Menu::whereHas('roles', function($query) use ($roleIds) {
-                    $query->whereIn('role_id', $roleIds)
-                          ->where('menu_role.is_active', true);
-                })
-                ->where('is_active', true)
-                ->whereNull('parent_id')
-                ->with(['children' => function($query) use ($roleIds) {
-                    $query->whereHas('roles', function($q) use ($roleIds) {
-                        $q->whereIn('role_id', $roleIds)
-                          ->where('menu_role.is_active', true);
-                    })
-                    ->where('is_active', true)
-                    ->orderBy('order');
-                }])
-                ->orderBy('order')
-                ->get();
-            
-            $formattedMenus = [];
-            foreach ($menus as $menu) {
-                $formattedMenus[] = $this->formatMenu($menu);
+            $menus = [];
+
+            // Always load from JSON storage (storage/app/menus) in sidebar.
+            $baseMenus = $this->loadJsonMenus('base.json');
+            if ($baseMenus) {
+                $menus = array_merge($menus, $baseMenus);
             }
-            
-            return $formattedMenus;
+
+            foreach ($roleIds as $roleId) {
+                $roleMenus = $this->loadJsonMenus('role_' . $roleId . '.json');
+                if ($roleMenus) {
+                    $menus = array_merge($menus, $roleMenus);
+                }
+            }
+
+            return $menus;
         });
+    }
+    
+    /**
+     * Load menus from JSON file
+     */
+    protected function loadJsonMenus($filename)
+    {
+        $path = storage_path('app/menus/' . $filename);
+        if (file_exists($path)) {
+            $json = file_get_contents($path);
+            return json_decode($json, true) ?? [];
+        }
+        return [];
     }
     
     /**

@@ -19,7 +19,9 @@ class Menu extends Model
         'order',
         'is_active',
         'permission_key',
-        'json_data'
+        'json_data',
+        'scheme_id',
+        'department_id'
     ];
 
     protected $casts = [
@@ -44,6 +46,16 @@ class Menu extends Model
         return $this->belongsToMany(Role::class, 'menu_role')
             ->withPivot('order', 'is_active')
             ->withTimestamps();
+    }
+
+    public function scheme(): BelongsTo
+    {
+        return $this->belongsTo(Scheme::class);
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
     }
 
     // Generate JSON data for this menu and its children

@@ -293,9 +293,6 @@ Route::controller(JnpmController::class)->group(function () {
     ->name('jnmp-marked-data');
 });
 
-Route::middleware(['auth'])->group(function () {
-    // Menu Management Routes
-    Route::get('/menu-management', MenuManagement::class)->name('menu-management');
-
-    // Other routes...
+Route::middleware(['auth'])->group(function () { 
+    Route::get('/menu-management', MenuManagement::class)->name('menu-management');  
 });

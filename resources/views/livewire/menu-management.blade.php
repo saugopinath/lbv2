@@ -47,14 +47,15 @@
                 <form wire:submit.prevent="save">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium mb-2">Menu Name *</label>
+                            <label class="block text-sm font-medium mb-2">Menu Name <span class="text-red-500">*</span></label>
                             <input type="text" wire:model="name" class="w-full px-3 py-2 border rounded-md">
                             @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium mb-2">Icon Class</label>
-                            <input type="text" wire:model="icon" placeholder="fas fa-home" class="w-full px-3 py-2 border rounded-md">
+                            <input type="text" wire:model="icon" placeholder="fa-solid fa-house" class="w-full px-3 py-2 border rounded-md">
+                            <!-- <p class="text-xs text-gray-500 mt-1">Use FontAwesome classes, e.g. <code>fa-solid fa-house</code> or <code>fas fa-home</code>.</p> -->
                             @error('icon') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
 
@@ -83,8 +84,25 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium mb-2">Order</label>
-                            <input type="number" wire:model="order" class="w-full px-3 py-2 border rounded-md">
+                            <label class="block text-sm font-medium mb-2">Scheme <span class="text-red-500">*</span></label>
+                            <select wire:model="scheme_id" class="w-full px-3 py-2 border rounded-md">
+                                <option value="">Select Scheme</option>
+                                @foreach($schemes as $scheme)
+                                    <option value="{{ $scheme->id }}">{{ $scheme->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('scheme_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Department <span class="text-red-500">*</span></label>
+                            <select wire:model="department_id" class="w-full px-3 py-2 border rounded-md">
+                                <option value="">Select Department</option>
+                                @foreach($departments as $department)
+                                    <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('department_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
@@ -122,7 +140,7 @@
                     </div>
                 </form>
             </div>
-        @endif
+        @endif        
 
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200">
@@ -131,18 +149,20 @@
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Name</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Icon</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Type</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Order</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Scheme</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Department</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Order</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
-                    @foreach($menus as $menu)
+                    @foreach($menusDb as $menu)
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     @if($menu->icon)
-                                        <i class="{{ $menu->icon }} mr-2"></i>
+                                        <i class="{{ $menu->icon }} text-lg mr-2"></i>
                                     @endif
                                     <span>{{ $menu->name }}</span>
                                 </div>
@@ -161,6 +181,12 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 {{ $menu->route ? 'Route' : ($menu->url ? 'URL' : 'Parent') }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {{ $menu->scheme ? $menu->scheme->name : '-' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {{ $menu->department ? $menu->department->name : '-' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 {{ $menu->order }}
@@ -182,7 +208,7 @@
             </table>
 
             <div class="px-6 py-4">
-                {{ $menus->links() }}
+                {{ $menusDb->links() }}
             </div>
         </div>
     </div>
