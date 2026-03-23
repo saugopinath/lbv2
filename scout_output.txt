@@ -1,0 +1,13 @@
+App\Models\AcceptRejectInfo => pension_accept_reject_infos
+App\Models\BenFailedPaymentDetailsJB => payment_ben_failed_payment_details_jbs
+App\Models\BenFailedPaymentDetailsLB => lb_main_ben_failed_payment_details_lbs
+App\Models\BenPaymentDetailsJB => payment_ben_payment_details_jbs
+App\Models\BenPaymentDetailsLB => payment_ben_payment_details_lbs
+App\Models\BenTransactionDetailsJB => payment_ben_transaction_details_jbs
+App\Models\BenTransactionDetailsLB => payment_ben_transaction_details_lbs
+App\Models\BeneficiaryAadhaar => pension_beneficiary_aadhars
+App\Models\BeneficiaryBankDetail => pension_beneficiary_banks
+App\Models\BeneficiaryContactDetail => pension_beneficiary_contacts
+App\Models\BeneficiaryEnclosure => pension_beneficiary_documents
+App\Models\BeneficiaryPersonalDetail => pension_beneficiary_personals
+App\Models\BeneficiarySelfDeclaration => pension_beneficiary_self_declarations

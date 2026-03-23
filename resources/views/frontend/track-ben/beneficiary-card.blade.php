@@ -139,7 +139,7 @@
     </div>
 
     <div class="relative flex gap-3">
-        <button onclick="viewDetails('{{ $applicationId }}')"
+        <a href="{{ $beneficiaryDetailsUrl }}"
             class="flex-[1.6] group/btn relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-700 px-4 py-4 transition-all duration-300 hover:from-indigo-500 hover:to-indigo-600 active:scale-[0.96] shadow-lg shadow-indigo-700/40 border border-indigo-400/30 hover:border-indigo-300/50">
             <div
                 class="absolute inset-0 w-1/2 h-full bg-white/20 skew-x-[-25deg] -translate-x-full group-hover/btn:animate-[shine_0.8s_ease-in-out]">
@@ -153,14 +153,15 @@
                 <span class="text-sm font-black text-white uppercase tracking-wider drop-shadow-sm">Full
                     Profile</span>
             </div>
-        </button>
+        </a>
 
         <a href="{{ $paymentUrl }}"
             class="flex-1 rounded-2xl bg-white/10 border border-white/20 px-4 py-4 transition-all duration-300 hover:bg-white/20 hover:border-white/30 active:scale-[0.96] flex items-center justify-center gap-2 group/hist backdrop-blur-sm shadow-md hover:shadow-white/10">
             <i
-                class="fas fa-clock-rotate-left text-indigo-300 group-hover/hist:rotate-[-30deg] transition-transform duration-400 drop-shadow"></i>
+                class="fa-solid fa-indian-rupee-sign text-indigo-300 group-hover/hist:rotate-[-30deg] transition-transform duration-400 drop-shadow"></i>
             <span
-                class="text-sm font-bold text-white/80 tracking-wide group-hover/hist:text-white transition-colors">History</span>
+                class="text-sm font-bold text-white/80 tracking-wide group-hover/hist:text-white transition-colors">Payment
+                History</span>
             <div
                 class="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-500/0 via-indigo-500/10 to-indigo-500/0 opacity-0 group-hover/hist:opacity-100 transition-opacity -z-10">
             </div>

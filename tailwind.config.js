@@ -16,6 +16,7 @@ export default {
     safelist: [
         "bg-pink-500",
         "bg-indigo-500",
+        "bg-indigo-700",
         "bg-green-500",
         "bg-orange-500",
         "border-pink-500",

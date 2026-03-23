@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Home;
 
 use App\Http\Controllers\Controller;
+use App\Models\AcceptRejectInfo;
 use App\Models\BenDocs;
 use App\Models\Beneficiary;
 use App\Models\BeneficiaryBankDetail;
@@ -10,11 +11,13 @@ use App\Models\BeneficiaryEnclosure;
 use App\Models\BeneficiaryJBLB;
 use App\Models\BeneficiaryPersonalDetail;
 use App\Models\BenEntry;
+use App\Models\BenFailedPaymentDetailsLB;
 use App\Models\BenPaymentDetailsJB;
 use App\Models\BenPaymentDetailsLB;
 use App\Models\BenTransactionDetailsJB;
 use App\Models\BenTransactionDetailsLB;
 use App\Models\Block;
+use App\Models\Codemaster;
 use App\Models\District;
 use App\Models\GP;
 use App\Models\Scheme;
@@ -125,6 +128,7 @@ class BeneficiaryTrackController extends Controller
                     $data = $this->getBeneficiaryDetails($b);
 
                     $paymentUrl = URL::signedRoute('beneficiary.payment.history', ['id' => $data['applicationId']]);
+                    $BenDetailsUrl = URL::signedRoute('beneficiary.details', ['id' => $data['applicationId']]);
 
                     $html .= view('frontend.track-ben.beneficiary-card', [
                         'status' => $data['status'],
@@ -138,6 +142,7 @@ class BeneficiaryTrackController extends Controller
                         'location' => $data['location'],
                         'mobile' => $data['mobile'],
                         'paymentUrl' => $paymentUrl,
+                        'beneficiaryDetailsUrl' => $BenDetailsUrl,
                     ])->render();
                 }
 
@@ -161,28 +166,89 @@ class BeneficiaryTrackController extends Controller
 
     public function trackBeneficiaryPaymentHistory($id)
     {
+        $ben_status = NULL;
+        $ben_status_color = NULL;
+        $ben_status_reason = NULL;
         $application_id = $id;
 
         $benPersonal = BeneficiaryPersonalDetail::where('application_id', $application_id)->first();
+
+        if (empty($benPersonal)) {
+            return redirect()->back()->with([
+                'toastr' => [
+                    'type' => 'error',
+                    'message' => 'Beneficiary details not found.'
+                ]
+            ]);
+        }
         if ($benPersonal->scheme_id == 20) {
             $paymentDetails = BenPaymentDetailsLB::where('ben_id', $benPersonal->beneficiary_id)->first();
             $transactionDetails = BenTransactionDetailsLB::where('ben_id', $benPersonal->beneficiary_id)->get();
-            $ben_status = NULL;
+        } else {
+            $paymentDetails = BenPaymentDetailsJB::where('ben_id', $benPersonal->beneficiary_id)->first();
+            $transactionDetails = BenTransactionDetailsJB::where('ben_id', $benPersonal->beneficiary_id)->get();
+        }
+
+        if (empty($paymentDetails)) {
+            return redirect()->back()->with([
+                'toastr' => [
+                    'type' => 'error',
+                    'message' => 'Payment details not found.'
+                ]
+            ]);
+        }
+        if ($benPersonal->scheme_id == 20) {
+            $paymentDetails = BenPaymentDetailsLB::where('ben_id', $benPersonal->beneficiary_id)->first();
+            $transactionDetails = BenTransactionDetailsLB::where('ben_id', $benPersonal->beneficiary_id)->get();
+
 
             if ($paymentDetails->ben_status == 1) {
                 $ben_status = 'Active';
+                $ben_status_color = 'green';
             } else {
                 $ben_status = 'Inactive';
+                $ben_status_color = 'red';
+                if ($paymentDetails->ben_status == 0) {
+                    $ben_status_reason = 'Duplicate Aadhar Beneficiary';
+                } elseif ($paymentDetails->ben_status == 9) {
+                    $ben_status_reason = 'DOB or name or ss_card is null';
+                } elseif ($paymentDetails->ben_status == 77) {
+                    $ben_status_reason = 'Duplicate faulty beneficiary with lot not generated';
+                } elseif ($paymentDetails->ben_status == 88) {
+                    $ben_status_reason = 'Temporary disabled for MCC';
+                } elseif ($paymentDetails->ben_status == -30) {
+                    $ben_status_reason = 'The beneficiary which are rejected but still getting payment in the payment server';
+                } elseif ($paymentDetails->ben_status == -94) {
+                    $ben_status_reason = 'Deactivated Due To Death As Per Janma Mrityu Portal';
+                } elseif ($paymentDetails->ben_status == -96) {
+                    $ben_status_reason = 'Ready For Correction From DDO End';
+                } elseif ($paymentDetails->ben_status == -97) {
+                    $ben_status_reason = 'Duplicate Bank Account And IFSC';
+                } elseif ($paymentDetails->ben_status == -98) {
+                    $ben_status_reason = 'Duplicate Bank Account Beneficiary';
+                } elseif ($paymentDetails->ben_status == -99) {
+                    $ben_status_reason = 'Deactivate Stop Beneficiary';
+                } elseif ($paymentDetails->ben_status == -102) {
+                    $ben_status_reason = 'Caste category change';
+                } elseif ($paymentDetails->ben_status == -400) {
+                    $ben_status_reason = 'Application rejected due to major mismatch account';
+                } else {
+                    $ben_status_reason = 'Invalid Beneficiary';
+                }
             }
         } else {
             $paymentDetails = BenPaymentDetailsJB::where('ben_id', $benPersonal->beneficiary_id)->first();
             $transactionDetails = BenTransactionDetailsJB::where('ben_id', $benPersonal->beneficiary_id)->get();
-            $ben_status = NULL;
+
 
             if ($paymentDetails->ben_status == 1) {
                 $ben_status = 'Active';
+                $ben_status_color = 'green';
             } else {
                 $ben_status = 'Inactive';
+                $ben_status_color = 'red';
+
+
             }
         }
 
@@ -192,7 +258,85 @@ class BeneficiaryTrackController extends Controller
         $encryptBankCode = $this->maskValue($benBankDetails->bankaccountnumber);
         $schemename = Scheme::where('id', $benPersonal->scheme_id)->first()->name;
 
+        $acc_validation_txt = NULL;
+        $acc_validation_txt_1 = NULL;
+        $acc_validation_txt_2 = NULL;
+        $acc_validation_txt_name_1 = NULL;
+        $acc_validation_txt_name_2 = NULL;
+        $acc_validation_txt_name = NULL;
+        $acc_validation_icon = NULL;
+        $acc_validation_class = NULL;
+        $acc_validation_color = NULL;
 
+
+        if ($benPersonal->scheme_id == 20) {
+            if ($paymentDetails->ben_status == 1) {
+                $acc_validation_icon = 'fa-solid fa-circle-check';
+                $acc_validation_color = 'emerald';
+                if ($paymentDetails->acc_validated == 0) {
+                    $acc_validation_txt_1 = 'Ready for account validation';
+                } elseif ($paymentDetails->acc_validated == 1) {
+                    $acc_validation_txt_1 = 'Account Validation Lot Generated';
+                } elseif ($paymentDetails->acc_validated == 2) {
+                    $acc_validation_txt_1 = 'Validation Success.';
+                    $acc_validation_txt_2 = 'Ready For Payment';
+                } elseif ($paymentDetails->acc_validated == 3) {
+                    $acc_validation_txt_1 = 'Validation Failed.';
+                    $acc_validation_txt_2 = 'Please Update Bank Details';
+                    $acc_validation_icon = 'fa-solid fa-circle-xmark';
+                    $acc_validation_color = 'red';
+
+                    $BenFailedPaymentDetailsLB = BenFailedPaymentDetailsLB::where('ben_id', $benPersonal->beneficiary_id)->orderBy('created_at', 'desc')->wherein('edited_status', [0, 1, 2])->first();
+                    if ($BenFailedPaymentDetailsLB->failed_type == 1) {
+                        $acc_validation_txt_name_1 = 'Account Validation Failed';
+                    } elseif ($BenFailedPaymentDetailsLB->failed_type == 3) {
+                        $acc_validation_txt_name_1 = 'Name Validation Failed';
+                        $acc_validation_txt_name_2 = $BenFailedPaymentDetailsLB->matching_score;
+                    } else {
+                        $acc_validation_txt_name_1 = NULL;
+                    }
+
+                } elseif ($paymentDetails->acc_validated == 4) {
+                    $acc_validation_txt_1 = 'Payment Transaction Failed.';
+                    $acc_validation_txt_2 = 'Please Update Bank Details';
+                    $acc_validation_icon = 'fa-solid fa-circle-xmark';
+                    $acc_validation_color = 'red';
+                } else {
+                    $acc_validation_txt = NULL;
+                    $acc_validation_txt_1 = NULL;
+                    $acc_validation_txt_2 = NULL;
+                    $acc_validation_icon = NULL;
+                    $acc_validation_class = NULL;
+                    $acc_validation_color = NULL;
+                    $acc_validation_txt_name_1 = NULL;
+                    $acc_validation_txt_name_2 = NULL;
+                }
+
+                $acc_validation_txt = $acc_validation_txt_1 . $acc_validation_txt_2;
+            } else {
+
+                $acc_validation_txt = 'Inactive Beneficiary';
+                $acc_validation_icon = 'fa-solid fa-circle-xmark';
+                $acc_validation_color = 'red';
+            }
+
+
+        } else {
+            $acc_validation_txt = NULL;
+            $acc_validation_icon = NULL;
+            $acc_validation_class = NULL;
+            $acc_validation_color = NULL;
+        }
+
+        $acc_validated = array();
+        $acc_validated['txt'] = $acc_validation_txt;
+        $acc_validated['icon'] = $acc_validation_icon;
+        $acc_validated['color'] = $acc_validation_color;
+        $acc_validated['txt_name_1'] = $acc_validation_txt_name_1;
+        $acc_validated['txt_name_2'] = $acc_validation_txt_name_2;
+
+
+        // dd($acc_validated);
 
         return view('frontend.track-ben.ben-payment-status', [
             'application_id' => $application_id,
@@ -205,6 +349,9 @@ class BeneficiaryTrackController extends Controller
             'encryptBankCode' => $encryptBankCode,
             'schemename' => $schemename,
             'ben_status' => $ben_status,
+            'ben_status_reason' => $ben_status_reason,
+            'ben_status_color' => $ben_status_color,
+            'acc_validated' => $acc_validated,
         ]);
     }
 
@@ -308,13 +455,13 @@ class BeneficiaryTrackController extends Controller
             $scheme_id = $request->schemeId;
             $fin_year = $request->fin_year;
             $lot_no = $request->lot_no;
-            
+
             $lotObj = DB::connection('pgsql_paywrite')->table('payment.failed_payment_details')
                 ->where('ben_id', $pension_id)
                 ->where('scheme_id', $scheme_id)
                 ->whereIn('failed_type', [3, 4, 5])
                 ->first();
-                
+
             if (!$lotObj) {
                 return response()->json([
                     'status' => 0,
@@ -344,5 +491,61 @@ class BeneficiaryTrackController extends Controller
                 'exception_message' => 'Error! Please try again.',
             ], 400);
         }
+    }
+
+    public function trackBeneficiaryDetails($id)
+    {
+        // dd($id);
+        $applicationId = $id;
+
+        $benPersonal = BeneficiaryPersonalDetail::where('application_id', $id)->first();
+
+
+        if (empty($benPersonal)) {
+            return redirect()->back()->with([
+                'toastr' => [
+                    'type' => 'error',
+                    'message' => 'Beneficiary details not found.'
+                ]
+            ]);
+        }
+
+        $schemeId = $benPersonal->scheme_id;
+        $schemename = Scheme::where('id', $schemeId)->first()->name;
+
+        $benDetailsData = $this->getBeneficiaryDetails($benPersonal);
+        $status = $benDetailsData['status'];
+        $statusClass = $benDetailsData['statusClass'];
+
+        $activityLogData = $this->benActivityLog($applicationId);
+
+        return view('frontend.track-ben.ben-details-status', [
+            'benPersonal' => $benPersonal,
+            'application_id' => $applicationId,
+            'scheme_id' => $schemeId,
+            'schemename' => $schemename,
+            'status' => $status,
+            'statusClass' => $statusClass,
+            'activityLogData' => $activityLogData,
+        ]);
+
+    }
+
+    public function benActivityLog($application_id)
+    {
+        $benPersonal = BeneficiaryPersonalDetail::where('application_id', $application_id)->first();
+        $activityLog = AcceptRejectInfo::where('application_id', $application_id)->get();
+
+
+        $activityLogData = [];
+        foreach ($activityLog as $key => $value) {
+            $activityLogData[$key]['operation'] = Codemaster::where('id', $value->op_type)->first()->name;
+            $activityLogData[$key]['action_date'] = $value->created_at->format('d-m-Y H:i:s');
+            $activityLogData[$key]['action_by'] = $value->user->name ?? 'System';
+            $activityLogData[$key]['new_data'] = $value->new_data;
+            $activityLogData[$key]['old_data'] = $value->old_data;
+        }
+
+        return $activityLogData;
     }
 }

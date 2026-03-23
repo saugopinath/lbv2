@@ -123,6 +123,16 @@
         });
     </script>
 
+    @if(session()->has('toastr'))
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            window.dispatchEvent(new CustomEvent('toastr', {
+                detail: [@json(session('toastr'))]
+            }));
+        });
+    </script>
+    @endif
+
     @stack('scripts')
 </body>
 
