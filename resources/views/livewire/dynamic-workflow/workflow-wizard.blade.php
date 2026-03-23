@@ -8,7 +8,7 @@
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                         </svg>
-                        Global Dynamic Workflow Designer
+                        Global Dynamic Workflow Management
                     </h2>
                     <p class="text-indigo-100 text-sm mt-1">Configure and manage your workflow steps</p>
                 </div>
@@ -26,7 +26,6 @@
                 </div>
             </div>
         </div>
-
         @if (session()->has('success'))
         <div class="mx-6 mt-6 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-lg p-4" role="alert">
             <div class="flex items-center text-emerald-700">
@@ -34,7 +33,6 @@
             </div>
         </div>
         @endif
-
         @if (session()->has('error'))
         <div class="mx-6 mt-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg p-4" role="alert">
             <div class="flex items-center text-red-700">
@@ -135,7 +133,7 @@
                         </div>
 
                         <label class="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-xl cursor-pointer">
-                            <input type="checkbox" wire:model="isNewModule" class="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500">
+                            <input type="checkbox" wire:model.live="isNewModule" class="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500">
                             <span class="text-sm font-medium text-gray-700">Create a new module instead</span>
                         </label>
 
@@ -174,15 +172,14 @@
             <!-- TAB 2: STEP COUNT & NAMES -->
             @if($currentTab == 2)
             <div class="space-y-8">
-                <div class="text-center mb-8">
+                <div class="text-center mb-4">
                     <span class="inline-flex items-center px-4 py-1.5 bg-sky-50 text-sky-700 rounded-full text-sm font-medium mb-3">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
                         Step 2: Configuration
                     </span>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Define Transaction Complexity</h3>
-                    <p class="text-gray-500">Set the number of steps and customize their names</p>
+                    <p class="text-gray-500">Set the number of steps and customize</p>
                 </div>
 
                 <div class="max-w-md mx-auto">
@@ -279,8 +276,7 @@
                                                 label="Assign Roles"
                                                 wire:model="finalSteps.{{ $index }}.role_ids"
                                                 :options="$roles"
-                                                required
-                                            />
+                                                required />
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">

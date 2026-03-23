@@ -6,19 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class DynamicWorkflowRequest extends BaseAuditableModel
 {
-   
+
 
     protected $table = 'dynamic_workflow_requests';
 
     protected $fillable = [
         'module_id',
         'ref_id',
+        'scheme_id',
         'current_rank',
         'current_step_id',
         'old_data',
         'new_data',
         'changed_fields',
-        'status',
         'created_by'
     ];
 
@@ -34,11 +34,11 @@ class DynamicWorkflowRequest extends BaseAuditableModel
     }
 
     public function step()
-{
-    return $this->belongsTo(
-        workflowstepRolemapping::class,
-        'current_step_id',     // FK in request table
-        'workflow_step_id'     // column in mapping table
-    );
-}
+    {
+        return $this->belongsTo(
+            workflowstepRolemapping::class,
+            'current_step_id',     // FK in request table
+            'workflow_step_id'     // column in mapping table
+        );
+    }
 }

@@ -1,10 +1,9 @@
 <div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-auto mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900">Beneficiary Update Request</h1>
             <p class="text-sm text-gray-600 mt-1">Search and update beneficiary information with workflow approval</p>
             <div class="mt-3 flex flex-wrap gap-2 text-xs">
-
                 <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-700">
                     Code: {{ $moduleCode }}
                 </span>

@@ -33,6 +33,7 @@ class RequestUpdateBeneficiary extends Component
     public $oldData = [];
     public $newData = [];
     public $items = [];
+    public $RoleId;
     public $filter_condition = [];
     public $requestModuleCode;
 
@@ -52,7 +53,7 @@ class RequestUpdateBeneficiary extends Component
         // dd('here');
         $selectLgd = session('lgd_session');
         // dd($selectLgd);
-        $this->requestModuleCode = 'UPP_MARK_02';
+        $this->requestModuleCode = 'UP_MB_D_01';
         $this->currentRoleId = Crypt::decryptString($selectLgd['role_id']);
         if (!empty($selectLgd['district_id'])) {
             $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($selectLgd['district_id']);
@@ -63,11 +64,14 @@ class RequestUpdateBeneficiary extends Component
         if (!empty($selectLgd['subdivision_id'])) {
             $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($selectLgd['subdivision_id']);
         }
+        if (!empty($selectLgd['role_id'])) {
+            $this->RoleId = Crypt::decryptString($selectLgd['role_id']);
+        }
+
         $module = DynamicWorkflowModule::where('module_code', $this->requestModuleCode)->first();
         if (!$module) {
             abort(404, 'Module not found');
         }
-
         $this->moduleId = $module->id;
         $this->moduleCode = $module->module_code;
         $this->moduleSchemeId = $module->scheme_id;
@@ -121,6 +125,7 @@ class RequestUpdateBeneficiary extends Component
 
     public function submitRequest()
     {
+        // dd('dfsf');
         if (!$this->beneficiary) {
             $this->dispatch('toast', 'error', 'No beneficiary selected!');
             return;
@@ -131,7 +136,7 @@ class RequestUpdateBeneficiary extends Component
         }
         $this->validate($this->rules(), [], $this->validationAttributes());
         $payload = $this->prepareWorkflowPayload();
-
+        // dd($payload);
         if (empty($payload['new'])) {
             $this->dispatch('toast', 'error', 'No changes detected for submission.');
             return;
@@ -149,26 +154,28 @@ class RequestUpdateBeneficiary extends Component
         DB::beginTransaction();
         try {
             $service = new DynamicWorkflowService();
-            $service->initiateRequest(
+            $newRequest = $service->initiateRequest(
                 $this->moduleId,
                 $this->beneficiary->application_id,
+                $this->beneficiary->scheme_id,
                 $payload['old'],
                 $payload['new'],
                 $payload['changed_fields']
             );
+
             DB::commit();
-            $this->dispatch('toast', 'success', 'Request submitted successfully!');
-            // reset
-            $this->reset([
-                'beneficiary',
-                'showFields',
-                'selectedFields',
-                'oldData',
-                'newData'
-            ]);
+            $message = "Request submitted successfully! Request ID: " . $newRequest->id;
+            session()->flash('success', $message);
+            return redirect()->route('dynamic-workflow-request');
         } catch (\Exception $e) {
+            dd($e);
             DB::rollBack();
-            $this->dispatch('toast', 'error', $e->getMessage());
+            session()->flash('error', 'Something went wrong!');
+            return redirect()->route('dynamic-workflow-request');
+            // $this->dispatch('toastr', [
+            //     'type' => 'error',
+            //     'message' => 'Something went wrong!'
+            // ]);
         }
     }
 
@@ -268,7 +275,7 @@ class RequestUpdateBeneficiary extends Component
             $rules['newData.bank_ifsc'] = ['required', 'string', 'size:11'];
             $rules['newData.bank_name'] = ['required', 'string', 'max:150'];
             $rules['newData.bank_branch_name'] = ['required', 'string', 'max:150'];
-            $rules['newData.bank_account_number'] = ['required', 'digits_between:9,18'];
+            $rules['newData.bank_account_number'] = ['required'];
             $rules['newData.confirm_bank_account_number'] = ['required', 'same:newData.bank_account_number'];
         }
 

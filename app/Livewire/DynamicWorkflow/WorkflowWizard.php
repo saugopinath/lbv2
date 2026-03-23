@@ -4,6 +4,7 @@ namespace App\Livewire\DynamicWorkflow;
 
 use App\Models\DynamicWorkflowLabel;
 use App\Models\DynamicWorkflowModule;
+use App\Models\Codemaster;
 use App\Models\Permission;
 use App\Models\workflowstepRolemapping;
 use App\Models\Role;
@@ -197,10 +198,36 @@ class WorkflowWizard extends Component
                 $successRank = ($index < count($this->finalSteps) - 1) ? ($index + 2) * 10 : 0;
                 $revertRank = ($index > 0) ? $index * 10 : null;
 
+                // Find the parent ID for dynamic_op_type
+                $parent = Codemaster::where('short_name', 'dynamic_op_type')->first();
+                $opTypeId = null;
+
+                if ($parent) {
+                    $labelSlug = strtolower(str_replace(' ', '_', $stepData['label']));
+                    // Check if a codemaster already exists for this label under the parent
+                    $codemaster = Codemaster::where('parent_id', $parent->id)
+                        ->where('short_name', $labelSlug)
+                        ->first();
+
+                    if (!$codemaster) {
+                        $maxCode = Codemaster::max('code') ?? 0;
+                        $codemaster = Codemaster::create([
+                            'name' => strtoupper($module->module_code) . " - " . strtoupper($stepData['label']),
+                            'short_name' => $labelSlug,
+                            'parent_id' => $parent->id,
+                            'parent_short_code' => $parent->short_name,
+                            'code' => (int)$maxCode + 1,
+                            'is_active' => 1,
+                        ]);
+                    }
+                    $opTypeId = $codemaster->id;
+                }
+
                 $label = DynamicWorkflowLabel::create([
                     'scheme_id' => $this->selectedScheme,
                     'module_id' => $module->id,
                     'label_name' => $stepData['label'],
+                    'op_type_id' => $opTypeId,
                 ]);
 
                 foreach ($stepData['role_ids'] as $roleId) {
