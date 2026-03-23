@@ -1,4 +1,4 @@
-<div x-data="{ 
+<div x-data="{
     showModal: @entangle('showModal')
 }" class="min-h-screen bg-gray-50">
 
@@ -12,7 +12,7 @@
 
                 <h1 class="text-2xl font-bold text-gray-900">
                     Menu Management
-                </h1>             
+                </h1>
 
             </div>
 
@@ -243,7 +243,7 @@
 
                                 <label class="flex items-center space-x-2 mb-1">
 
-                                    <input type="checkbox" value="{{ $department->id }}" wire:model="selectedDepartments"
+                                    <input type="checkbox" value="{{ $department->id }}" wire:model.live="selectedDepartments"
                                         class="rounded border-gray-300 text-blue-600">
 
                                     <span class="text-sm">

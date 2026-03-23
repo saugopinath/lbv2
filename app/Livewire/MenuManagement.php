@@ -15,7 +15,6 @@ class MenuManagement extends Component
 {
     public $menus = [];
     public $permissions = [];
-
     public $departments = [];
     public $schemes = [];
     public $roles = [];
@@ -23,16 +22,11 @@ class MenuManagement extends Component
     public $selectedDepartments = [];
     public $selectedSchemes = [];
     public $selectedRoles = [];
-
     public $selectedPermissions = [];
 
     public $selectedMenu = null;
-
     public $isEditing = false;
-
     public $showModal = false;
-
-    // form
 
     public $menu_name = '';
     public $icon = '';
@@ -43,10 +37,10 @@ class MenuManagement extends Component
     public $is_active = true;
 
     protected $rules = [
-
         'menu_name' => 'required',
         'menu_rank' => 'required|integer',
-
+        'selectedDepartments' => 'required|array',
+        'selectedSchemes' => 'required|array',
     ];
 
     public function mount()
@@ -54,11 +48,19 @@ class MenuManagement extends Component
         $this->loadMenus();
 
         $this->permissions = Permission::all();
-
-        $this->departments =Department::with('schemes')->where('id',1)->get();
-        // dd($this->departments);
-        $this->schemes = Scheme::all();
+        $this->departments = Department::all();
         $this->roles = Role::all();
+        $this->schemes = collect();
+    }
+
+    public function updatedSelectedDepartments()
+    {
+        $this->schemes = Scheme::whereIn(
+            'department_id',
+            $this->selectedDepartments
+        )->get();
+
+        $this->selectedSchemes = [];
     }
 
     public function loadMenus()
@@ -69,9 +71,7 @@ class MenuManagement extends Component
     public function createMenu()
     {
         $this->resetForm();
-
         $this->isEditing = false;
-
         $this->showModal = true;
     }
 
@@ -85,28 +85,18 @@ class MenuManagement extends Component
         $this->icon = $menu->icon;
         $this->route = $menu->route;
         $this->url = $menu->url;
-
         $this->parent_id = $menu->parent_id;
         $this->menu_rank = $menu->menu_rank;
-
         $this->is_active = $menu->is_active;
 
-        // JSON Load
+        $this->selectedDepartments = $menu->department_id ?? [];
+        $this->updatedSelectedDepartments();
+        $this->selectedSchemes = $menu->scheme_id ?? [];
 
-        $this->selectedDepartments =
-            $menu->department_id ?? [];
-
-        $this->selectedSchemes =
-            $menu->scheme_id ?? [];
-
-        $this->selectedRoles =
-            $menu->role_id ?? [];
-
-        $this->selectedPermissions =
-            $menu->permission_id ?? [];
+        $this->selectedRoles = $menu->role_id ?? [];
+        $this->selectedPermissions = $menu->permission_id ?? [];
 
         $this->isEditing = true;
-
         $this->showModal = true;
     }
 
@@ -119,50 +109,34 @@ class MenuManagement extends Component
         try {
 
             $data = [
-
                 'menu_name' => $this->menu_name,
                 'icon' => $this->icon,
                 'route' => $this->route,
                 'url' => $this->url,
-
                 'parent_id' => $this->parent_id ?: null,
-
                 'menu_rank' => $this->menu_rank,
-
                 'department_id' => $this->selectedDepartments,
                 'scheme_id' => $this->selectedSchemes,
                 'role_id' => $this->selectedRoles,
-
                 'permission_id' => $this->selectedPermissions,
-
                 'is_active' => $this->is_active,
-
             ];
 
             if ($this->isEditing) {
-
                 $this->selectedMenu->update($data);
-
             } else {
-
                 Menu::create($data);
-
             }
 
             DB::commit();
 
             MenuHelper::clearCache();
-
             $this->loadMenus();
-
             $this->resetForm();
-
             $this->showModal = false;
 
         } catch (\Exception $e) {
-
             DB::rollBack();
-
             dd($e->getMessage());
         }
     }
@@ -173,26 +147,21 @@ class MenuManagement extends Component
         $this->icon = '';
         $this->route = '';
         $this->url = '';
-
         $this->parent_id = '';
-
         $this->menu_rank = 0;
-
         $this->is_active = true;
 
         $this->selectedDepartments = [];
         $this->selectedSchemes = [];
         $this->selectedRoles = [];
         $this->selectedPermissions = [];
+        $this->schemes = collect();
     }
 
     public function render()
     {
         $parentMenus = Menu::whereNull('parent_id')->get();
 
-        return view(
-            'livewire.menu-management',
-            compact('parentMenus')
-        );
+        return view('livewire.menu-management', compact('parentMenus'));
     }
 }
