@@ -11,9 +11,7 @@ class BeneficiaryEnclosure extends BaseAuditableModel
 
     protected $table = 'pension.beneficiary_documents';
     protected $primaryKey = 'id';
-    protected $keyType = 'int';
-    public $incrementing = true;
-
+    public $incrementing = false;
     protected $guarded = [];
 
     protected $casts = [
@@ -27,7 +25,7 @@ class BeneficiaryEnclosure extends BaseAuditableModel
      */
     public function personal()
     {
-        return $this->belongsTo(BeneficiaryPersonalDetail::class, 'application_id');
+        return $this->belongsTo(BeneficiaryPersonalDetail::class, 'application_id', 'application_id');
     }
 
     /**
