@@ -1,102 +1,115 @@
 <?php
 // app/Models/Menu.php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 class Menu extends Model
 {
     protected $fillable = [
-        'name',
-        'icon',
-        'route',
-        'url',
-        'parent_id',
-        'order',
-        'is_active',
-        'permission_key',
-        'json_data',
-        'scheme_id',
-        'department_id'
+        'menu_name', 'icon', 'route', 'url', 'parent_id', 
+        'menu_rank', 'department_id', 'scheme_id', 'role_id', 
+        'permission_id', 'is_active'
     ];
 
     protected $casts = [
+        'department_id' => 'array',
+        'scheme_id' => 'array',
+        'role_id' => 'array',
+        'permission_id' => 'array',
         'is_active' => 'boolean',
-        'parent_id' => 'integer',
-        'order' => 'integer',
-        'json_data' => 'array'
+        'menu_rank' => 'integer',
     ];
 
-    public function children(): HasMany
-    {
-        return $this->hasMany(Menu::class, 'parent_id')->orderBy('order');
-    }
+    protected $appends = ['has_children', 'permission_names'];
 
-    public function parent(): BelongsTo
+    /**
+     * Parent menu relationship
+     */
+    public function parent()
     {
         return $this->belongsTo(Menu::class, 'parent_id');
     }
 
-    public function roles(): BelongsToMany
+    /**
+     * Child menus relationship
+     */
+    public function children()
     {
-        return $this->belongsToMany(Role::class, 'menu_role')
-            ->withPivot('order', 'is_active')
-            ->withTimestamps();
+        return $this->hasMany(Menu::class, 'parent_id')
+                    ->orderBy('menu_rank', 'asc');
     }
 
-    public function scheme(): BelongsTo
+    /**
+     * Get permission names from permission IDs
+     */
+    public function getPermissionNamesAttribute()
     {
-        return $this->belongsTo(Scheme::class);
-    }
-
-    public function department(): BelongsTo
-    {
-        return $this->belongsTo(Department::class);
-    }
-
-    // Generate JSON data for this menu and its children
-    public function generateJson()
-    {
-        $menuData = [
-            'id' => $this->id,
-            'name' => $this->name,
-            'icon' => $this->icon,
-            'route' => $this->route,
-            'url' => $this->url,
-            'permission_key' => $this->permission_key,
-            'children' => []
-        ];
-
-        foreach ($this->children()->where('is_active', true)->orderBy('order')->get() as $child) {
-            $menuData['children'][] = $child->generateJson();
+        if (empty($this->permission_id)) {
+            return [];
         }
 
-        return $menuData;
+        return Permission::whereIn('id', $this->permission_id)
+                         ->pluck('name')
+                         ->toArray();
     }
 
-    // Generate and save JSON for all menus
-    public static function generateAllJson()
+    /**
+     * Check if menu has children
+     */
+    public function getHasChildrenAttribute()
     {
-        $menus = self::whereNull('parent_id')
-            ->where('is_active', true)
-            ->orderBy('order')
-            ->get();
+        return $this->children()->exists();
+    }
 
-        $jsonData = [];
-        foreach ($menus as $menu) {
-            $jsonData[] = $menu->generateJson();
+    /**
+     * Scope for active menus
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope for root menus
+     */
+    public function scopeRoot($query)
+    {
+        return $query->whereNull('parent_id');
+    }
+
+    /**
+     * Get all permissions assigned to this menu
+     */
+    public function permissions()
+    {
+        return Permission::whereIn('id', $this->permission_id ?? [])->get();
+    }
+
+    /**
+     * Check if user has access to this menu
+     */
+    public function userHasAccess($user = null)
+    {
+        $user = $user ?? auth()->user();
+        
+        if (!$user) return false;
+        
+        // If no permissions required, allow access
+        if (empty($this->permission_id)) {
+            return true;
         }
-
-        Storage::disk('local')->put(
-            'menus.json',
-            json_encode($jsonData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-        );
-
-
-        return $jsonData;
+        
+        // Check if user has any of the required permissions
+        foreach ($this->permission_id as $permissionId) {
+            $permission = Permission::find($permissionId);
+            if ($permission && $user->hasPermission($permission->name)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }

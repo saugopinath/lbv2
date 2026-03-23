@@ -1,242 +1,194 @@
 <?php
 // app/Livewire/MenuManagement.php
+
 namespace App\Livewire;
 
-use App\Models\Menu;
-use App\Models\Role;
-use App\Services\MenuService;
 use Livewire\Component;
-use Livewire\WithPagination;
+use App\Models\Menu;
+use App\Models\Permission;
+use App\Helpers\MenuHelper;
+use Illuminate\Support\Facades\DB;
 
 class MenuManagement extends Component
 {
-    use WithPagination;
-    
-    public $menuId;
-    public $name;
-    public $icon;
-    public $route;
-    public $url;
-    public $parent_id;
-    public $order;
-    public $is_active = true;
-    public $permission_key;
-    public $selectedRoles = [];
-    public $scheme_id;
-    public $department_id;
-    public $showForm = false;
+    public $menus = [];
+    public $permissions = [];
+    public $selectedMenu = null;
     public $isEditing = false;
-    public $showJson = false;
-    public $generatedJson = '';
+    public $search = '';
+    public $showModal = false;
+    public $showDeleteModal = false;
+    public $menuToDelete = null;
+    
+    // Form fields
+    public $menu_name = '';
+    public $icon = '';
+    public $route = '';
+    public $url = '';
+    public $parent_id = '';
+    public $menu_rank = 0;
+    public $is_active = true;
+    public $selectedPermissions = [];
     
     protected $rules = [
-        'name' => 'required|min:2|max:100',
-        'icon' => 'nullable|max:50',
-        'route' => 'nullable|max:100',
-        'url' => 'nullable|max:200',
+        'menu_name' => 'required|string|max:255',
+        'icon' => 'nullable|string|max:100',
+        'route' => 'nullable|string|max:255',
+        'url' => 'nullable|string|max:255',
         'parent_id' => 'nullable|exists:menus,id',
-        'order' => 'nullable|integer',
+        'menu_rank' => 'required|integer',
         'is_active' => 'boolean',
-        'permission_key' => 'nullable|max:100',
-        'selectedRoles' => 'array',
-        'scheme_id' => 'required|exists:schemes,id',
-        'department_id' => 'required|exists:departments,id'
+        'selectedPermissions' => 'array',
     ];
     
-    protected $menuService;
-    
-    public function boot(MenuService $menuService)
+    public function mount()
     {
-        $this->menuService = $menuService;
+        $this->loadMenus();
+        $this->loadPermissions();
+    }
+    
+    public function loadMenus()
+    {
+        $this->menus = MenuHelper::getMenuTree();
+    }
+    
+    public function loadPermissions()
+    {
+        // Get all permissions
+        $this->permissions = Permission::orderBy('name')->get();
+    }
+    
+    public function editMenu($menuId)
+    {
+        $this->selectedMenu = Menu::find($menuId);
+        $this->menu_name = $this->selectedMenu->menu_name;
+        $this->icon = $this->selectedMenu->icon;
+        $this->route = $this->selectedMenu->route;
+        $this->url = $this->selectedMenu->url;
+        $this->parent_id = $this->selectedMenu->parent_id;
+        $this->menu_rank = $this->selectedMenu->menu_rank;
+        $this->is_active = $this->selectedMenu->is_active;
+        $this->selectedPermissions = $this->selectedMenu->permission_id ?? [];
+        $this->isEditing = true;
+        $this->showModal = true;
+        
+        $this->dispatch('open-modal');
+    }
+    
+    public function createMenu()
+    {
+        $this->resetForm();
+        $this->isEditing = false;
+        $this->showModal = true;
+        
+        $this->dispatch('open-modal');
+    }
+    
+    public function saveMenu()
+    {
+        $this->validate();
+        
+        DB::beginTransaction();
+        try {
+            $data = [
+                'menu_name' => $this->menu_name,
+                'icon' => $this->icon,
+                'route' => $this->route,
+                'url' => $this->url,
+                'parent_id' => $this->parent_id ?: null,
+                'menu_rank' => $this->menu_rank,
+                'is_active' => $this->is_active,
+                'permission_id' => $this->selectedPermissions,
+            ];
+            
+            if ($this->isEditing && $this->selectedMenu) {
+                $this->selectedMenu->update($data);
+                $message = 'Menu updated successfully';
+            } else {
+                Menu::create($data);
+                $message = 'Menu created successfully';
+            }
+            
+            DB::commit();
+            
+            $this->loadMenus();
+            MenuHelper::clearCache();
+            $this->resetForm();
+            $this->showModal = false;
+            
+            $this->dispatch('close-modal');
+            $this->dispatch('show-message', ['message' => $message, 'type' => 'success']);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('show-message', ['message' => 'Error: ' . $e->getMessage(), 'type' => 'error']);
+        }
+    }
+    
+    public function confirmDelete($menuId)
+    {
+        $this->menuToDelete = Menu::find($menuId);
+        
+        if ($this->menuToDelete->children()->count() > 0) {
+            $this->dispatch('show-message', [
+                'message' => 'Cannot delete menu with children. Delete child menus first.',
+                'type' => 'error'
+            ]);
+            return;
+        }
+        
+        $this->showDeleteModal = true;
+        $this->dispatch('open-delete-modal');
+    }
+    
+    public function deleteMenu()
+    {
+        if ($this->menuToDelete) {
+            $this->menuToDelete->delete();
+            $this->loadMenus();
+            MenuHelper::clearCache();
+            $this->showDeleteModal = false;
+            $this->dispatch('show-message', ['message' => 'Menu deleted successfully', 'type' => 'success']);
+        }
+    }
+    
+    public function toggleStatus($menuId)
+    {
+        $menu = Menu::find($menuId);
+        $menu->is_active = !$menu->is_active;
+        $menu->save();
+        
+        $this->loadMenus();
+        MenuHelper::clearCache();
+        
+        $this->dispatch('show-message', [
+            'message' => 'Menu ' . ($menu->is_active ? 'activated' : 'deactivated'),
+            'type' => 'success'
+        ]);
+    }
+    
+    private function resetForm()
+    {
+        $this->menu_name = '';
+        $this->icon = '';
+        $this->route = '';
+        $this->url = '';
+        $this->parent_id = '';
+        $this->menu_rank = 0;
+        $this->is_active = true;
+        $this->selectedPermissions = [];
+        $this->selectedMenu = null;
     }
     
     public function render()
     {
-        // For sidebar and JSON mode, show from JSON files (not DB directly)
-        $menusJson = $this->menuService->getUserMenus();
-
-        // Keep DB listing for editing management
-        $menusDb = Menu::with('children', 'roles', 'scheme', 'department')
-            ->whereNull('parent_id')
-            ->orderBy('order')
-            ->paginate(20);
-
-        $roles = Role::orderBy('name')->get();
-        $parentMenus = Menu::orderBy('order')->get();
-        $schemes = \App\Models\Scheme::orderBy('name')->get();
-        $departments = \App\Models\Department::orderBy('name')->get();
-
+        $parentMenus = Menu::whereNull('parent_id')
+            ->orderBy('menu_rank')
+            ->with('children')
+            ->get();
+        
         return view('livewire.menu-management', [
-            'menusDb' => $menusDb,
-            'menusJson' => $menusJson,
-            'roles' => $roles,
             'parentMenus' => $parentMenus,
-            'schemes' => $schemes,
-            'departments' => $departments
-        ]);
-    }
-    
-    public function create()
-    {
-        $this->resetForm();
-        $this->showForm = true;
-        $this->isEditing = false;
-    }
-    
-    public function edit($id)
-    {
-        $menu = Menu::with('roles')->findOrFail($id);
-        
-        $this->menuId = $menu->id;
-        $this->name = $menu->name;
-        $this->icon = $menu->icon;
-        $this->route = $menu->route;
-        $this->url = $menu->url;
-        $this->parent_id = $menu->parent_id;
-        $this->order = $menu->order;
-        $this->is_active = $menu->is_active;
-        $this->permission_key = $menu->permission_key;
-        $this->selectedRoles = $menu->roles->pluck('id')->toArray();
-        $this->scheme_id = $menu->scheme_id;
-        $this->department_id = $menu->department_id;
-        
-        $this->showForm = true;
-        $this->isEditing = true;
-    }
-    
-    private function normalizeIcon($icon)
-    {
-        $icon = trim($icon);
-        if (empty($icon)) {
-            return null;
-        }
-
-        // Normalize legacy Font Awesome helpers.
-        $icon = preg_replace('/\bfa\s+(?=fa-)/', 'fas ', $icon);
-        $icon = str_replace(
-            ['fa-solid', 'fa-regular', 'fa-light', 'fa-duotone', 'fa-brands', 'fa'],
-            ['fas', 'far', 'fal', 'fad', 'fab', 'fas'],
-            $icon
-        );
-        $icon = preg_replace('/\s+/', ' ', $icon);
-
-        return trim($icon);
-    }
-
-    public function save()
-    {
-        $this->validate();
-
-        $icon = $this->normalizeIcon($this->icon);
-
-        if ($this->isEditing) {
-            $menu = Menu::findOrFail($this->menuId);
-            $menu->update([
-                'name' => $this->name,
-                'icon' => $icon,
-                'route' => $this->route,
-                'url' => $this->url,
-                'parent_id' => $this->parent_id,
-                'order' => $this->order ?? 0,
-                'is_active' => $this->is_active,
-                'permission_key' => $this->permission_key,
-                'scheme_id' => $this->scheme_id,
-                'department_id' => $this->department_id
-            ]);
-            
-            $message = 'Menu updated successfully!';
-        } else {
-            $menu = Menu::create([
-                'name' => $this->name,
-                'icon' => $icon,
-                'route' => $this->route,
-                'url' => $this->url,
-                'parent_id' => $this->parent_id,
-                'order' => $this->order ?? 0,
-                'is_active' => $this->is_active,
-                'permission_key' => $this->permission_key,
-                'scheme_id' => $this->scheme_id,
-                'department_id' => $this->department_id
-            ]);
-            
-            $message = 'Menu created successfully!';
-        }
-        
-        // Sync roles
-        if (!empty($this->selectedRoles)) {
-            $menu->roles()->sync($this->selectedRoles);
-        }
-        
-        // Generate JSON for all roles
-        $this->menuService->clearMenuCache();
-        
-        session()->flash('message', $message);
-        
-        $this->resetForm();
-        $this->showForm = false;
-    }
-    
-    public function delete($id)
-    {
-        $menu = Menu::findOrFail($id);
-        
-        // Check if menu has children
-        if ($menu->children()->count() > 0) {
-            session()->flash('error', 'Cannot delete menu with child items. Delete children first.');
-            return;
-        }
-        
-        $menu->roles()->detach();
-        $menu->delete();
-        
-        // Generate JSON for all roles
-        $this->menuService->clearMenuCache();
-        
-        session()->flash('message', 'Menu deleted successfully!');
-    }
-    
-    public function toggleActive($id)
-    {
-        $menu = Menu::findOrFail($id);
-        $menu->update(['is_active' => !$menu->is_active]);
-        
-        // Generate JSON for all roles
-        $this->menuService->clearMenuCache();
-        
-        session()->flash('message', 'Menu status updated!');
-    }
-    
-    public function generateJson()
-    {
-        $this->generatedJson = json_encode($this->menuService->getUserMenus(), JSON_PRETTY_PRINT);    
-        $this->showJson = true;
-    }
-    
-    public function regenerateAllJson()
-    {
-        $this->menuService->generateJsonForAllRoles();
-        session()->flash('message', 'JSON files regenerated for all roles!');
-    }
-    
-    public function resetForm()
-    {
-        $this->reset([
-            'menuId', 'name', 'icon', 'route', 'url', 
-            'parent_id', 'order', 'permission_key', 'selectedRoles',
-            'scheme_id', 'department_id'
-        ]);
-        $this->is_active = true;
-        $this->resetValidation();
-    }
-    
-    public function cancelForm()
-    {
-        $this->showForm = false;
-        $this->resetForm();
-    }
-    
-    public function closeJson()
-    {
-        $this->showJson = false;
+         ])->layout('components.layouts.app');
     }
 }

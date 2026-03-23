@@ -1,45 +1,70 @@
 {{-- resources/views/livewire/partials/menu-row.blade.php --}}
-<tr>
-    <td class="px-6 py-4 whitespace-nowrap">
-        <div style="padding-left: {{ $level * 20 }}px" class="flex items-center">
-            @if($menu->icon)
-                <i class="{{ $menu->icon }} mr-2"></i>
-            @endif
-            <span class="text-sm text-gray-900 dark:text-white">{{ $menu->name }}</span>
+<tr class="menu-row" data-level="{{ $level }}">
+    <td>
+        <div class="d-flex align-items-center">
+            <i class="fas fa-grip-vertical text-muted me-2" style="cursor: move;"></i>
+            <span class="badge bg-light text-dark">{{ $menu->menu_rank }}</span>
         </div>
     </td>
-    <td class="px-6 py-4 whitespace-nowrap">
-        <code class="text-xs">{{ $menu->icon ?? '-' }}</code>
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap">
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-            {{ $menu->route ? 'Route' : ($menu->url ? 'URL' : 'Parent') }}
-        </span>
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-        {{ $menu->parent ? $menu->parent->name : '-' }}
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-        {{ $menu->order }}
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap">
-        <button wire:click="toggleStatus({{ $menu->id }})"
-            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $menu->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-            {{ $menu->is_active ? 'Active' : 'Inactive' }}
-        </button>
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-        <button wire:click="edit({{ $menu->id }})" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</button>
-        <button wire:click="manageRoles({{ $menu->id }})" class="text-green-600 hover:text-green-900 mr-3">Roles</button>
-        @if($menu->children->count() == 0)
-            <button wire:click="delete({{ $menu->id }})"
-                wire:confirm="Are you sure you want to delete this menu?"
-                class="text-red-600 hover:text-red-900">Delete</button>
+    <td>
+        @if($menu->icon)
+            <i class="{{ $menu->icon }} fa-lg"></i>
+        @else
+            <i class="fas fa-link text-muted"></i>
         @endif
     </td>
+    <td>
+        <div style="margin-left: {{ $level * 20 }}px">
+            @if($level > 0)
+                <i class="fas fa-level-down-alt text-muted me-2" style="font-size: 12px;"></i>
+            @endif
+            <span class="fw-bold">{{ $menu->menu_name }}</span>
+        </div>
+    </td>
+    <td>
+        @if($menu->route)
+            <code class="text-primary">{{ $menu->route }}</code>
+        @elseif($menu->url)
+            <span class="text-info">{{ $menu->url }}</span>
+        @else
+            <span class="text-muted">—</span>
+        @endif
+    </td>
+    <td>
+        @forelse($menu->permission_names as $perm)
+            <span class="badge bg-info me-1 mb-1">{{ $perm }}</span>
+        @empty
+            <span class="badge bg-secondary">No permissions required</span>
+        @endforelse
+    </td>
+    <td>
+        <span class="badge {{ $menu->is_active ? 'bg-success' : 'bg-danger' }} px-3 py-2">
+            <i class="fas fa-{{ $menu->is_active ? 'check-circle' : 'times-circle' }} me-1"></i>
+            {{ $menu->is_active ? 'Active' : 'Inactive' }}
+        </span>
+    </td>
+    <td>
+        <div class="btn-group" role="group">
+            <button class="btn btn-sm btn-outline-primary" 
+                    wire:click="editMenu({{ $menu->id }})"
+                    title="Edit Menu">
+                <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-{{ $menu->is_active ? 'warning' : 'success' }}" 
+                    wire:click="toggleStatus({{ $menu->id }})"
+                    title="{{ $menu->is_active ? 'Deactivate' : 'Activate' }}">
+                <i class="fas fa-{{ $menu->is_active ? 'ban' : 'check' }}"></i>
+            </button>
+            @if($menu->children->count() == 0)
+                <button class="btn btn-sm btn-outline-danger" 
+                        wire:click="confirmDelete({{ $menu->id }})"
+                        title="Delete Menu">
+                    <i class="fas fa-trash"></i>
+                </button>
+            @endif
+        </div>
+    </td>
 </tr>
-@if($menu->children->count())
-    @foreach($menu->children as $child)
-        @include('livewire.partials.menu-row', ['menu' => $child, 'level' => $level + 1])
-    @endforeach
-@endif
+@foreach($menu->children as $child)
+    @include('livewire.partials.menu-row', ['menu' => $child, 'level' => $level + 1])
+@endforeach

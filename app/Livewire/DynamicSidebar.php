@@ -1,22 +1,17 @@
 <?php
 // app/Livewire/DynamicSidebar.php
+
 namespace App\Livewire;
 
-use App\Services\MenuService;
 use Livewire\Component;
+use App\Helpers\MenuHelper;
 
 class DynamicSidebar extends Component
 {
-    public $sidebar = true;
-    public $activeMenu = null;
     public $menus = [];
+    public $expandedMenus = [];
     
-    protected $menuService;
-    
-    public function boot(MenuService $menuService)
-    {
-        $this->menuService = $menuService;
-    }
+    protected $listeners = ['refreshSidebar' => 'loadMenus'];
     
     public function mount()
     {
@@ -25,18 +20,21 @@ class DynamicSidebar extends Component
     
     public function loadMenus()
     {
-        $this->menus = $this->menuService->getUserMenus();
+        $this->menus = MenuHelper::getMenus();
     }
     
-    public function toggleSidebar()
+    public function toggleMenu($menuId)
     {
-        $this->sidebar = !$this->sidebar;
-        $this->activeMenu = null;
+        if (in_array($menuId, $this->expandedMenus)) {
+            $this->expandedMenus = array_diff($this->expandedMenus, [$menuId]);
+        } else {
+            $this->expandedMenus[] = $menuId;
+        }
     }
     
-    public function setActiveMenu($menuId)
+    public function isMenuExpanded($menuId)
     {
-        $this->activeMenu = $this->activeMenu === $menuId ? null : $menuId;
+        return in_array($menuId, $this->expandedMenus);
     }
     
     public function render()

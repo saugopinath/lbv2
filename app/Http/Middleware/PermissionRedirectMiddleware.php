@@ -1,11 +1,12 @@
 <?php
+// app/Http/Middleware/PermissionRedirectMiddleware.php
 
 namespace App\Http\Middleware;
 
-use App\Helpers\WorkFlowPermissionHelper;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\WorkFlowPermissionHelper;
 
 class PermissionRedirectMiddleware
 {
@@ -14,22 +15,28 @@ class PermissionRedirectMiddleware
         if (!Auth::check()) {
             return redirect()->route('session.expired');
         }
+        
+        $user = Auth::user();
+        
+        // Check if the permission is a method in WorkFlowPermissionHelper
         if (method_exists(WorkFlowPermissionHelper::class, $permission)) {
-
-            // Helper function call dynamically
+            // Call the helper method dynamically
             if (!WorkFlowPermissionHelper::$permission()) {
                 return redirect()
                     ->route('dashboard')
                     ->with('error', 'You do not have permission to access this page.');
             }
-        } else {
-            // Helper এ method না থাকলে fallback Laravel permission check            
-            if (!Auth::check() || !Auth::user()->can($permission)) {
+        } 
+        // Check if it's a simple permission name
+        else {
+            // Check if user has the permission directly
+            if (!$user->can($permission)) {
                 return redirect()
                     ->route('dashboard')
                     ->with('error', 'You do not have permission to access this page.');
             }
         }
+        
         return $next($request);
     }
 }

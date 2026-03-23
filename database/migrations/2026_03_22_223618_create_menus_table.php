@@ -10,23 +10,35 @@ return new class extends Migration
     {
         Schema::create('menus', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+
+            // Menu Info
+            $table->string('menu_name'); // fixed (no space)
             $table->string('icon')->nullable();
             $table->string('route')->nullable();
             $table->string('url')->nullable();
 
-            // parent menu for nested menus
-            $table->foreignId('parent_id')
-                  ->nullable()
-                  ->constrained('menus')
-                  ->cascadeOnDelete();
+            // Hierarchy
+            $table->unsignedBigInteger('parent_id')->nullable();
 
-            $table->integer('order')->default(0);
+            // Ordering
+            $table->integer('menu_rank')->default(0);
+
+            // JSON Fields
+            $table->json('department_id')->nullable();
+            $table->json('scheme_id')->nullable();
+            $table->json('role_id')->nullable();
+            $table->json('permission_id')->nullable();
+
+            // Status
             $table->boolean('is_active')->default(true);
-            $table->string('permission_key')->nullable();
-            $table->json('json_data')->nullable();
 
             $table->timestamps();
+
+            // Self reference (parent menu)
+            $table->foreign('parent_id')
+                  ->references('id')
+                  ->on('menus')
+                  ->onDelete('cascade');
         });
     }
 
