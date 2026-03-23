@@ -103,25 +103,7 @@ class BeneficiaryContactDetail extends BaseAuditableModel
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
-    }
-    public function block()
-    {
-        return $this->belongsTo(Block::class, 'blockurban');
-    }
-
-    public function panchayat()
-    {
-        return $this->belongsTo(Panchayat::class, 'gpward');
-    }
-
-    public function ward()
-    {
-        return $this->belongsTo(Ward::class, 'gpward');
-    }
-    public function district()
-    {
-        return $this->belongsTo(District::class, 'district_id', 'id');
-    }
+    }   
     public function subdivision()
     {
         return $this->belongsTo(Subdivision::class, 'sub_division_id', 'id');
