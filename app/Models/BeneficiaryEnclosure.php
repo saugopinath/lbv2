@@ -9,7 +9,7 @@ class BeneficiaryEnclosure extends BaseAuditableModel
     use Searchable;
     protected $table = 'pension.beneficiary_documents';
     protected $primaryKey = 'id';
-    public $incrementing = false;
+    // public $incrementing = false;
     protected $guarded = [];
     public function personal()
     {
