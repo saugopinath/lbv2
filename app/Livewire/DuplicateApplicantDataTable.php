@@ -129,9 +129,9 @@ public function dsMark($benData)
 
 public function builder(): Builder
 {
-    $query = BeneficiaryPersonalDetail::with(['contact', 'aadhar']);
+    $query = BeneficiaryPersonalDetail::with(['contact', 'aadhaar']);
     if (!empty($this->value)) {
-        $query->whereHas('aadhar', function ($q) {
+        $query->whereHas('aadhaar', function ($q) {
             $q->where('aadhar_hash', $this->value);
         });
     }
