@@ -49,6 +49,7 @@ use App\Livewire\CsvSplitter;
 use App\Livewire\DynamicWorkflow\ProcessWorkflow;
 use App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary;
 use App\Livewire\DynamicWorkflow\WorkflowWizard;
+use App\Http\Controllers\DynamicWorkflow\UpdateMarkBeneficiaryDetailsController;
 
 require __DIR__ . '/home.php';
 
@@ -252,3 +253,4 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
 Route::get('dynamic-workflow-config', WorkflowWizard::class)->name('dynamic-workflow-config');
 Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
 Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
+Route::get('update-mark-beneficiary-details', [UpdateMarkBeneficiaryDetailsController::class, 'index'])->name('update-mark-beneficiary-details');

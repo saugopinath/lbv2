@@ -12,8 +12,7 @@ use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
-class
-ProcessWorkflow extends Component
+class ProcessWorkflow extends Component
 {
     public $requests = [];
     public $selectedRequest = null;

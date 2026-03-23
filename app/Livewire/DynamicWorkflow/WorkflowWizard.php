@@ -210,13 +210,16 @@ class WorkflowWizard extends Component
                         ->first();
 
                     if (!$codemaster) {
-                        $maxCode = Codemaster::max('code') ?? 0;
+                        $maxCode = Codemaster::where('parent_short_code', 'dynamic_op_type')->max('code');
+                        if (!$maxCode) {
+                            $maxCode = ($parent->code * 10);
+                        }
                         $codemaster = Codemaster::create([
                             'name' => strtoupper($module->module_code) . " - " . strtoupper($stepData['label']),
                             'short_name' => $labelSlug,
                             'parent_id' => $parent->id,
                             'parent_short_code' => $parent->short_name,
-                            'code' => (int)$maxCode + 1,
+                            'code' => $maxCode + 1,
                             'is_active' => 1,
                         ]);
                     }
