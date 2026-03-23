@@ -10,6 +10,7 @@ class WorkflowsteproleMapping extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
     protected $table = "workflowstep_rolemappings";
+    protected $guarded = [];
     public static function getLabelRoleIdsByRole($schemeId, $roleId, $rank = null)
     {
         $query = self::query();
@@ -25,8 +26,8 @@ class WorkflowsteproleMapping extends Model implements Auditable
     public static function getMinMaxWorkflowStep(int $schemeId): array
     {
         return [
-            'min' => self::where('scheme_id', $schemeId)->min('workflow_step_id'),
-            'max' => self::where('scheme_id', $schemeId)->max('workflow_step_id'),
+            'min' => self::where('scheme_id', $schemeId)->where('module_id', null)->min('workflow_step_id'),
+            'max' => self::where('scheme_id', $schemeId)->where('module_id', null)->max('workflow_step_id'),
         ];
     }
     public function transformAudit(array $data): array
@@ -58,5 +59,20 @@ class WorkflowsteproleMapping extends Model implements Auditable
         }
 
         return $data;
+    }
+
+    public function module()
+    {
+        return $this->belongsTo(DynamicWorkflowModule::class, 'module_id');
+    }
+
+    public function label()
+    {
+        return $this->belongsTo(DynamicWorkflowLabel::class, 'workflow_step_id');
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
     }
 }

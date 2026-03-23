@@ -47,6 +47,9 @@ use App\Http\Controllers\ValidationManagerController;
 use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
 use App\Livewire\CsvSplitter;
+use App\Livewire\DynamicWorkflow\ProcessWorkflow;
+use App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary;
+use App\Livewire\DynamicWorkflow\WorkflowWizard;
 
 require __DIR__ . '/home.php';
 
@@ -290,3 +293,20 @@ Route::controller(JnpmController::class)->group(function () {
     ->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')
     ->name('jnmp-marked-data');
 });
+//Reject Approved Beneficiary
+Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
+    Route::get('/reject-approved-beneficiary',  'index')
+        ->middleware('permission.redirect:canRejectApprovedBeneficiary')
+        ->name('reject-approved-beneficiary');
+    Route::get('/reject-approved-beneficiary/BeneficiaryDetails', 'editview')
+        ->middleware('permission.redirect:canViewDetailsToReject')
+        ->name('reject-approved-beneficiary.BeneficiaryDetails');
+    Route::post('/deActivebeneficiary', 'deActiveBeneficiary')
+        ->middleware('permission.redirect:canRejectBeneficiary')
+        ->name('beneficiary.deActivebeneficiary');
+});
+
+/// Global Dynamic Workflow Routes
+Route::get('dynamic-workflow-config', WorkflowWizard::class)->name('dynamic-workflow-config');
+Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
+Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
