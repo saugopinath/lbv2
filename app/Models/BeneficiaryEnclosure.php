@@ -11,7 +11,7 @@ class BeneficiaryEnclosure extends BaseAuditableModel
 
     protected $table = 'pension.beneficiary_documents';
     protected $primaryKey = 'id';
-    public $incrementing = false;
+    // public $incrementing = false;
     protected $guarded = [];
 
     protected $casts = [
