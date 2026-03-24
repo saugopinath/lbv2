@@ -48,6 +48,7 @@ use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
 use App\Livewire\CsvSplitter;
 use App\Livewire\MenuManagement;
+use App\Livewire\RoleMenuMappingManagement;
 use App\Livewire\DynamicSidebar;
 
 require __DIR__ . '/home.php';
@@ -299,5 +300,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/menu-management', MenuManagement::class)
         ->middleware('permission.redirect:manage-menus')
         ->name('menu-management');   
+        
+    Route::get('/role-menu-mapping', RoleMenuMappingManagement::class)
+        ->name('role-menu-mapping');
   
 });

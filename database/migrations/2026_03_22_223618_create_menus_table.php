@@ -9,32 +9,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('menus', function (Blueprint $table) {
-            $table->id();
-
-            // Menu Info
-            $table->string('menu_name'); // fixed (no space)
+            $table->id();          
+            $table->string('menu_name'); 
             $table->string('icon')->nullable();
             $table->string('route')->nullable();
-            $table->string('url')->nullable();
-
-            // Hierarchy
-            $table->unsignedBigInteger('parent_id')->nullable();
-
-            // Ordering
-            $table->integer('menu_rank')->default(0);
-
-            // JSON Fields
+            $table->string('url')->nullable();            
+            $table->unsignedBigInteger('parent_id')->nullable();           
+            $table->integer('menu_rank')->default(0);         
             $table->json('department_id')->nullable();
             $table->json('scheme_id')->nullable();
             $table->json('role_id')->nullable();
-            $table->json('permission_id')->nullable();
-
-            // Status
+            $table->json('permission_id')->nullable();            
             $table->boolean('is_active')->default(true);
-
-            $table->timestamps();
-
-            // Self reference (parent menu)
+            $table->timestamps();      
             $table->foreign('parent_id')
                   ->references('id')
                   ->on('menus')
