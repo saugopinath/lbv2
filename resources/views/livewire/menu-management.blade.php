@@ -134,6 +134,23 @@
 
             <form wire:submit.prevent="saveMenu">
 
+                <!-- Is Dependent Toggle -->
+                <div class="mb-4 bg-gray-50 border rounded p-4">
+                    <label class="block text-sm font-bold mb-3 text-gray-700">
+                        Is Dependent Menu?
+                    </label>
+                    <div class="flex items-center space-x-6">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" wire:model.live="is_dependent" value="yes" class="text-blue-600 focus:ring-blue-500 h-4 w-4">
+                            <span class="text-sm font-medium text-gray-700">Yes (Select existing menu to copy)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" wire:model.live="is_dependent" value="no" class="text-blue-600 focus:ring-blue-500 h-4 w-4">
+                            <span class="text-sm font-medium text-gray-700">No (Create new menu)</span>
+                        </label>
+                    </div>
+                </div>
+
                 <!-- Basic Fields -->
 
                 <div class="grid grid-cols-2 gap-4 mb-4">
@@ -144,7 +161,16 @@
                             Menu Name
                         </label>
 
-                        <input type="text" wire:model="menu_name" class="w-full border rounded px-3 py-2">
+                        @if($is_dependent === 'yes')
+                            <select wire:model.live="menu_name" class="w-full border rounded px-3 py-2 bg-white">
+                                <option value="">-- Select an existing menu --</option>
+                                @foreach(\App\Models\Menu::orderBy('menu_name')->get() as $existingMenu)
+                                    <option value="{{ $existingMenu->menu_name }}">{{ $existingMenu->menu_name }}</option>
+                                @endforeach
+                            </select>
+                        @else
+                            <input type="text" wire:model="menu_name" class="w-full border rounded px-3 py-2">
+                        @endif
 
                         @error('menu_name')
 
@@ -174,17 +200,7 @@
 
                         <input type="text" wire:model="route" class="w-full border rounded px-3 py-2">
 
-                    </div>
-
-                    <div>
-
-                        <label class="block text-sm font-medium mb-1">
-                            URL
-                        </label>
-
-                        <input type="text" wire:model="url" class="w-full border rounded px-3 py-2">
-
-                    </div>
+                    </div>                 
 
                     <div>
 

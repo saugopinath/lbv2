@@ -27,6 +27,7 @@ class MenuManagement extends Component
     public $selectedMenu = null;
     public $isEditing = false;
     public $showModal = false;
+    public $is_dependent = 'no';
 
     public $menu_name = '';
     public $icon = '';
@@ -61,6 +62,27 @@ class MenuManagement extends Component
         )->get();
 
         $this->selectedSchemes = [];
+    }
+
+    public function updatedMenuName($value)
+    {
+        if ($this->is_dependent === 'yes' && !empty($value)) {
+            $menu = Menu::where('menu_name', $value)->first();
+            if ($menu) {
+                $this->icon = $menu->icon;
+                $this->route = $menu->route;
+                $this->url = $menu->url;
+                $this->parent_id = $menu->parent_id;
+                $this->menu_rank = $menu->menu_rank;
+                $this->is_active = $menu->is_active;
+
+                $this->selectedDepartments = $menu->department_id ?? [];
+                $this->updatedSelectedDepartments();
+                $this->selectedSchemes = $menu->scheme_id ?? [];
+                $this->selectedRoles = $menu->role_id ?? [];
+                $this->selectedPermissions = $menu->permission_id ?? [];
+            }
+        }
     }
 
     public function loadMenus()
@@ -111,8 +133,7 @@ class MenuManagement extends Component
             $data = [
                 'menu_name' => $this->menu_name,
                 'icon' => $this->icon,
-                'route' => $this->route,
-                'url' => $this->url,
+                'route' => $this->route,               
                 'parent_id' => $this->parent_id ?: null,
                 'menu_rank' => $this->menu_rank,
                 'department_id' => $this->selectedDepartments,
@@ -158,6 +179,7 @@ class MenuManagement extends Component
         $this->selectedRoles = [];
         $this->selectedPermissions = [];
         $this->schemes = collect();
+        $this->is_dependent = 'no';
     }
 
     private function generateHelperAndRoute()

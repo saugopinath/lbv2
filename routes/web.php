@@ -6,6 +6,7 @@ use App\Http\Controllers\SchemeController;
 use App\Http\Controllers\workflowmanagementController;
 use App\Livewire\ApplicationView;
 use App\Livewire\IncompletTypePage;
+use App\Livewire\RoleMenuMappingManagement;
 use App\Livewire\SchemeDropdown;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LBController;
@@ -298,16 +299,16 @@ Route::controller(JnpmController::class)->group(function () {
 });
 
 
-// Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     // Menu Management
     Route::get('/menu-management', MenuManagement::class)
         ->middleware('permission.redirect:manage-menus')
         ->name('menu-management');   
         
-    // Route::get('/role-menu-mapping', RoleMenuMappingManagement::class)
-    //     ->name('role-menu-mapping');
+    Route::get('/role-menu-mapping', RoleMenuMappingManagement::class)
+        ->name('role-menu-mapping');
   
-// });
+});
 //Reject Approved Beneficiary
 Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
     Route::get('/reject-approved-beneficiary',  'index')
