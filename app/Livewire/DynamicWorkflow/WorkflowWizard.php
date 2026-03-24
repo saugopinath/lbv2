@@ -9,6 +9,8 @@ use App\Models\Permission;
 use App\Models\workflowstepRolemapping;
 use App\Models\Role;
 use App\Models\Scheme;
+use App\Models\User;
+use App\Models\UserRoleSchemeOfficeMapping;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -126,9 +128,7 @@ class WorkflowWizard extends Component
             'stepCount' => 'required|integer|min:1',
             'stepNames.*' => 'required',
         ]);
-
         $this->currentTab = 3;
-
         $existingMappings = collect();
 
         if (! $this->isNewModule) {
@@ -137,14 +137,11 @@ class WorkflowWizard extends Component
                 ->get()
                 ->groupBy('rank');
         }
-
         $this->finalSteps = [];
-
         foreach ($this->stepNames as $index => $label) {
             $rank = ($index + 1) * 10;
             $mappings = $existingMappings->get($rank, collect());
             $firstMapping = $mappings->first();
-
             $this->finalSteps[$index] = [
                 'rank' => (int) $rank,
                 'label' => $label,
@@ -167,15 +164,12 @@ class WorkflowWizard extends Component
             'finalSteps.*.role_ids' => 'required|array|min:1',
             'finalSteps.*.role_ids.*' => 'exists:roles,id',
         ]);
-
         if (! Auth::check()) {
             session()->flash('error', 'Authentication session expired. Please login again.');
 
             return;
         }
-
         DB::beginTransaction();
-
         try {
             if ($this->isNewModule) {
                 $module = DynamicWorkflowModule::create([
@@ -189,26 +183,21 @@ class WorkflowWizard extends Component
                 $module = DynamicWorkflowModule::find($this->selectedModule);
                 $module->update(['step_count' => $this->stepCount]);
             }
-
             $module->steps()->delete();
             DynamicWorkflowLabel::where('module_id', $module->id)->delete();
-
             foreach ($this->finalSteps as $index => $stepData) {
                 $rank = ($index + 1) * 10;
                 $successRank = ($index < count($this->finalSteps) - 1) ? ($index + 2) * 10 : 0;
                 $revertRank = ($index > 0) ? $index * 10 : null;
-
                 // Find the parent ID for dynamic_op_type
                 $parent = Codemaster::where('short_name', 'dynamic_op_type')->first();
                 $opTypeId = null;
-
                 if ($parent) {
                     $labelSlug = strtolower(str_replace(' ', '_', $stepData['label']));
                     // Check if a codemaster already exists for this label under the parent
                     $codemaster = Codemaster::where('parent_id', $parent->id)
                         ->where('short_name', $labelSlug)
                         ->first();
-
                     if (!$codemaster) {
                         $maxCode = Codemaster::where('parent_short_code', 'dynamic_op_type')->max('code');
                         if (!$maxCode) {
@@ -232,7 +221,6 @@ class WorkflowWizard extends Component
                     'label_name' => $stepData['label'],
                     'op_type_id' => $opTypeId,
                 ]);
-
                 foreach ($stepData['role_ids'] as $roleId) {
                     workflowstepRolemapping::create([
                         'scheme_id' => $this->selectedScheme,
@@ -255,6 +243,18 @@ class WorkflowWizard extends Component
                     $role = Role::find($roleId);
                     if ($role && !$role->hasPermissionTo($permissionName)) {
                         $role->givePermissionTo($permission);
+                    }
+                    // Assign permission to users mapped to this role and scheme
+                    $userIds = UserRoleSchemeOfficeMapping::where('role_id', $roleId)
+                        ->where('scheme_id', $this->selectedScheme)
+                        ->where('is_active', 1)
+                        ->pluck('user_id');
+
+                    foreach ($userIds as $userId) {
+                        $user = User::find($userId);
+                        if ($user && !$user->hasPermissionTo($permissionName)) {
+                            $user->givePermissionTo($permission);
+                        }
                     }
                 }
             }

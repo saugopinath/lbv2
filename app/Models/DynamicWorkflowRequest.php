@@ -41,4 +41,9 @@ class DynamicWorkflowRequest extends BaseAuditableModel
             'workflow_step_id'     // column in mapping table
         );
     }
+
+    public function beneficiary()
+    {
+        return $this->belongsTo(BeneficiaryPersonalDetail::class, 'ref_id', 'application_id');
+    }
 }

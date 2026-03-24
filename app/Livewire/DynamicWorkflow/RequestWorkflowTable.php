@@ -2,6 +2,7 @@
 
 namespace App\Livewire\DynamicWorkflow;
 
+use App\Models\BeneficiaryPersonalDetail;
 use App\Models\DynamicWorkflowRequest;
 use App\Models\workflowstepRolemapping;
 use App\Models\DynamicWorkflowModule;
@@ -18,6 +19,8 @@ class RequestWorkflowTable extends DataTableComponent
     public $moduleCode;
     public $scheme_id;
     public $module_id;
+    public $filter_condition = [];
+    public $RoleId;
 
     public function mount($moduleCode, $schemeId)
     {
@@ -26,6 +29,20 @@ class RequestWorkflowTable extends DataTableComponent
         $this->module_id = DynamicWorkflowModule::where('module_code', $this->moduleCode)
             ->where('scheme_id', $this->scheme_id)
             ->value('id');
+
+        $selectLgd = session('lgd_session');
+        if (!empty($selectLgd['district_id'])) {
+            $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($selectLgd['district_id']);
+        }
+        if (!empty($selectLgd['block_id'])) {
+            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($selectLgd['block_id']);
+        }
+        if (!empty($selectLgd['subdivision_id'])) {
+            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($selectLgd['subdivision_id']);
+        }
+        if (!empty($selectLgd['role_id'])) {
+            $this->RoleId = Crypt::decryptString($selectLgd['role_id']);
+        }
     }
 
     #[On('refreshDatatable')]
@@ -77,6 +94,11 @@ class RequestWorkflowTable extends DataTableComponent
             Column::make("Reference ID", "id")
                 ->format(fn($value) => 'REF NO-' . $value),
             Column::make("Application ID", "ref_id"),
+            Column::make('Name')
+                ->label(
+                    fn($row) =>
+                    $row->beneficiary?->beneficiary_name ?? 'N/A'
+                ),
             Column::make("Changed Fields", "changed_fields")
                 ->format(function ($value) {
                     if (empty($value) || !is_array($value)) {
@@ -110,36 +132,46 @@ class RequestWorkflowTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $lgd_session = session('lgd_session');
-        $userRoleId = 0;
+        $userRoleId = $this->RoleId;
 
-        if (!empty($lgd_session['role_id'])) {
-            try {
-                $userRoleId = (int) Crypt::decryptString($lgd_session['role_id']);
-            } catch (\Exception $e) {
-            }
-        }
         if (!$userRoleId) {
             $userRoleId = (int) \App\Models\UserRoleSchemeOfficeMapping::where('user_id', Auth::id())
                 ->where('is_active', 1)
                 ->value('role_id') ?? 0;
         }
-        $module = DynamicWorkflowModule::where('module_code', $this->moduleCode)->where('scheme_id', $this->scheme_id)->first();
+
+        $module = DynamicWorkflowModule::where('module_code', $this->moduleCode)
+            ->where('scheme_id', $this->scheme_id)
+            ->first();
+
         if (!$module) {
             return DynamicWorkflowRequest::query()->whereRaw('1=0');
         }
+
         $userRanks = workflowstepRolemapping::where('role_id', $userRoleId)
             ->where('module_id', $module->id)
             ->where('scheme_id', $this->scheme_id)
             ->pluck('rank')
             ->toArray();
+
+        /** @var Builder $result */
         $result = DynamicWorkflowRequest::query()
             ->with(['module', 'step.label', 'step.role'])
             ->where('module_id', $module->id)
             ->whereIn('current_rank', $userRanks)
-            ->where('scheme_id', $this->scheme_id)
-            ->orderBy('created_at', 'desc');
-        // dd($result->toSql(), $result->getBindings());
-        return $result;
+            ->where('scheme_id', $this->scheme_id);
+
+        if (!empty($this->filter_condition['created_by_dist_code'])) {
+            $result->whereHas('beneficiary', function ($q) {
+                $q->where('created_by_dist_code', $this->filter_condition['created_by_dist_code']);
+            });
+        }
+        if (!empty($this->filter_condition['created_by_local_body_code'])) {
+            $result->whereHas('beneficiary', function ($q) {
+                $q->where('created_by_local_body_code', $this->filter_condition['created_by_local_body_code']);
+            });
+        }
+
+        return $result->orderBy('created_at', 'desc');
     }
 }

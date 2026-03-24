@@ -11,6 +11,7 @@ use App\Models\DynamicWorkflowRequest;
 use App\Models\workflowstepRolemapping;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+// use App\Helpers\DuplicateChecker;
 
 class DynamicWorkflowService
 {
@@ -38,11 +39,9 @@ class DynamicWorkflowService
                 ->orderBy('rank', 'asc')
                 ->orderBy('id', 'asc')
                 ->first();
-
             if (!$firstStep) {
                 throw new \Exception('You are not authorized to initiate this workflow or steps are not configured.');
             }
-
             $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $refId)->value('beneficiary_id');
             $parentId = AcceptRejectInfo::where('application_id', $refId)->latest('id')->value('id');
             $log = AcceptRejectInfo::create([
@@ -221,30 +220,38 @@ class DynamicWorkflowService
             throw $e;
         }
     }
-
+    // private function checkDuplicateEntries($scheme_id, $ref_id, $formData): bool
+    // {
+    //     $result = DuplicateChecker::check(
+    //         $scheme_id,
+    //         $ref_id,
+    //         $formData
+    //     );
+    //     if (is_array($result)) {
+    //         return false;
+    //     }
+    //     return true;
+    // }
     protected function applyApprovedChanges(DynamicWorkflowRequest $request): void
     {
         $beneficiary = BeneficiaryPersonalDetail::where('application_id', $request->ref_id)->firstOrFail();
+        // $formData['mobile_no'] =  $newData['mobile_no'];
+        // $formData['bankaccountnumber'] =  $newData['bank_account_number'];
+        // $this->checkDuplicateEntries($beneficiary->scheme_id, $request->ref_id, $formData);
         $newData = $request->new_data ?? [];
-
         $personalData = [];
-
         if (array_key_exists('beneficiary_name', $newData)) {
             $personalData['beneficiary_name'] = $newData['beneficiary_name'];
         }
-
         if (array_key_exists('dob', $newData)) {
             $personalData['dob'] = $newData['dob'];
         }
-
         if (array_key_exists('age', $newData)) {
             $personalData['age'] = $newData['age'];
         }
-
         if (!empty($personalData)) {
             $beneficiary->update($personalData);
         }
-
         if (array_key_exists('mobile_no', $newData)) {
             $otherDetails = $beneficiary->other_details ?? [];
             if (is_string($otherDetails)) {
@@ -253,10 +260,8 @@ class DynamicWorkflowService
             $otherDetails['mobile_no'] = $newData['mobile_no'];
             $beneficiary->update(['other_details' => $otherDetails]);
         }
-
         $bankColumns = ['bank_ifsc', 'bank_name', 'bank_branch_name', 'bank_account_number'];
         $hasBankUpdate = collect($bankColumns)->contains(fn($column) => array_key_exists($column, $newData));
-
         if ($hasBankUpdate) {
             BeneficiaryBankDetail::updateOrCreate(
                 ['application_id' => $beneficiary->application_id],
@@ -272,7 +277,6 @@ class DynamicWorkflowService
             );
         }
     }
-
     protected function getStepForRank(int $moduleId, ?int $rank, ?string $errorMessage = null): workflowstepRolemapping
     {
         if ($rank === null) {
