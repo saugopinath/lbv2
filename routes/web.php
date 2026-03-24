@@ -47,6 +47,8 @@ use App\Http\Controllers\ValidationManagerController;
 use App\Livewire\RolerankManagement;
 use App\Livewire\SchemeTabFieldManager;
 use App\Livewire\CsvSplitter;
+use App\Livewire\MenuManagement;
+use App\Livewire\DynamicSidebar;
 use App\Livewire\DynamicWorkflow\ProcessWorkflow;
 use App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary;
 use App\Livewire\DynamicWorkflow\WorkflowWizard;
@@ -296,16 +298,16 @@ Route::controller(JnpmController::class)->group(function () {
 });
 
 
-Route::middleware(['auth'])->group(function () {
+// Route::middleware(['auth'])->group(function () {
     // Menu Management
     Route::get('/menu-management', MenuManagement::class)
         ->middleware('permission.redirect:manage-menus')
         ->name('menu-management');   
         
-    Route::get('/role-menu-mapping', RoleMenuMappingManagement::class)
-        ->name('role-menu-mapping');
+    // Route::get('/role-menu-mapping', RoleMenuMappingManagement::class)
+    //     ->name('role-menu-mapping');
   
-});
+// });
 //Reject Approved Beneficiary
 Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
     Route::get('/reject-approved-beneficiary',  'index')

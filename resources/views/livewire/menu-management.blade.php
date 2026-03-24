@@ -16,10 +16,7 @@
 
             </div>
 
-            <div class="flex space-x-2">
-                <a href="{{ route('role-menu-mapping') }}" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-                    Assign Menu
-                </a>
+            <div class="flex space-x-2">               
                 <button wire:click="createMenu" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                     + Add New Menu
                 </button>
