@@ -2,7 +2,10 @@
 
 namespace App\Helpers;
 
-use Illuminate\Support\Facades\DB;
+use App\Models\BeneficiaryAadhaar;
+use App\Models\BeneficiaryBankDetail;
+use App\Models\BeneficiaryPersonalDetail;
+use App\Models\DupcheckschemeconfigSetting;
 
 class DuplicateChecker
 {
@@ -15,47 +18,46 @@ class DuplicateChecker
      */
     public static function check($schemeId, $applicationId, array $formData, array $aadhaarPayload = [])
     {
-        $configs = DB::table('public.dupcheckschemeconfig_settings')
-            ->where('scheme_id', $schemeId)
+        $configs = DupCheckSchemeConfigSetting::where('scheme_id', $schemeId)
             ->orderByRaw("CASE 
-                WHEN check_with = 'Aadhar' THEN 1 
-                WHEN check_with = 'Mobile' THEN 2 
-                WHEN check_with = 'Bank' THEN 3 
-                ELSE 4 END ASC")
+            WHEN check_with = 'Aadhar' THEN 1 
+            WHEN check_with = 'Mobile' THEN 2 
+            WHEN check_with = 'Bank' THEN 3 
+            ELSE 4 END ASC")
             ->get();
         foreach ($configs as $config) {
             $type = $config->check_with;
-            $inputValue = null;
-            $table = '';
+            $model = null;
             $column = '';
+            $inputValue = null;
             $formFieldName = '';
             if ($type === 'Aadhar') {
-                $table = 'pension.beneficiary_aadhars';
+                $model = new BeneficiaryAadhaar();
                 $column = 'encoded_aadhar';
                 $inputValue = $aadhaarPayload['encoded'] ?? null;
                 $formFieldName = 'aadhar_no';
             } elseif ($type === 'Mobile') {
-                $table = 'pension.beneficiary_personals';
-                $inputValue = trim($formData['mobile_no'] ?? '');
+                $model = new BeneficiaryPersonalDetail();
                 $formFieldName = 'mobile_no';
+                $inputValue = trim($formData['mobile_no'] ?? '');
             } elseif ($type === 'Bank') {
-                $table = 'pension.beneficiary_banks';
+                $model = new BeneficiaryBankDetail();
                 $column = 'bankaccountnumber';
-                $inputValue = trim($formData['bankaccountnumber'] ?? '');
                 $formFieldName = 'bankaccountnumber';
+                $inputValue = trim($formData['bankaccountnumber'] ?? '');
             }
-            if (empty($inputValue)) continue;
+            if (empty($inputValue) || !$model) continue;
+            $queryBuilder = function ($query) use ($type, $column, $inputValue) {
+                if ($type === 'Mobile') {
+                    $query->where('other_details->mobile_no', $inputValue);
+                } else {
+                    $query->where($column, $inputValue);
+                }
+            };
             if ($config->is_same) {
-                $existsSame = DB::table($table)
-                    ->where('scheme_id', $schemeId)
-                    ->where(function ($query) use ($type, $column, $inputValue) {
-                        if ($type === 'Mobile') {
-                            $query->whereRaw("other_details->>'mobile_no' = ?", [$inputValue]);
-                        } else {
-                            $query->whereRaw("TRIM(CAST($column AS TEXT)) = ?", [$inputValue]);
-                        }
-                    })
-                    ->where('application_id', '!=', (int)$applicationId)
+                $existsSame = $model::where('scheme_id', $schemeId)
+                    ->where($queryBuilder)
+                    ->where('application_id', '!=', $applicationId)
                     ->exists();
                 if ($existsSame) {
                     return [
@@ -66,22 +68,7 @@ class DuplicateChecker
             }
             if ($config->is_cross && !empty($config->scheme_lists)) {
                 $otherSchemes = json_decode($config->scheme_lists, true);
-                $existsCross = DB::table($table)
-                    ->whereIn('scheme_id', $otherSchemes)
-                    ->where(function ($query) use ($type, $column, $inputValue) {
-                        if ($type === 'Mobile') {
-                            $query->whereRaw("other_details->>'mobile_no' = ?", [$inputValue]);
-                        } else {
-                            $query->whereRaw("TRIM(CAST($column AS TEXT)) = ?", [$inputValue]);
-                        }
-                    })
-                    ->exists();
-                if ($existsCross) {
-                    return [
-                        'field' => "formData.{$formFieldName}",
-                        'message' => "This $type is already registered in another scheme."
-                    ];
-                }
+                
             }
         }
         return true;
