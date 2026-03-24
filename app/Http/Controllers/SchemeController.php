@@ -62,11 +62,14 @@ class SchemeController extends Controller
     public function draftedit(Request $request)
     {
 
+            // dd($request->all());
         // if (WorkFlowPermissionHelper::canEditDraft()) {
         // if (Auth::user()->can('edit draft')) {
             $app_id = Crypt::decryptString($request->app_id);
             $ben_id = Crypt::decryptString($request->ben_id);
-            return view('schemesblade.draftedit', compact('app_id','ben_id'));
+            $scheme_id = Crypt::decryptString($request->scheme_id);
+            $schemeName = Scheme::find($scheme_id)->name;
+            return view('schemesblade.draftedit', compact('app_id','ben_id','scheme_id','schemeName'));
         // }
 
         $header = 'Oops! You do not have permission to edit draft.';

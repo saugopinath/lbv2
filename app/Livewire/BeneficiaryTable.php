@@ -199,7 +199,7 @@ class BeneficiaryTable extends DataTableComponent
                     ])->render();
                 } elseif ((($this->reportType == '1') || ($this->reportType == '6') || ($this->reportType == '5')) && (CheckAuthHelper::isCommonOperator())) {
                     return view('coulmn_button.actions', [
-                        'link' => route('draftedit') . '?app_id=' . Crypt::encryptString($row->application_id) . '&ben_id=' . Crypt::encryptString($row->beneficiary_id),
+                        'link' => route('draftedit') . '?app_id=' . Crypt::encryptString($row->application_id) . '&ben_id=' . Crypt::encryptString($row->beneficiary_id) . '&scheme_id=' . Crypt::encryptString($row->scheme_id),
                         'tooltip' => 'Edit Application',
                     ])->render();
                 } else {
