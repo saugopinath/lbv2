@@ -133,6 +133,7 @@ class BeneficiaryTrackController extends Controller
                     $html .= view('frontend.track-ben.beneficiary-card', [
                         'status' => $data['status'],
                         'statusClass' => $data['statusClass'],
+                        'statusColor' => $data['statusColor'],
                         'applicationId' => $data['applicationId'],
                         'beneficiaryId' => $data['beneficiaryId'],
                         'name' => $data['name'],
@@ -143,6 +144,7 @@ class BeneficiaryTrackController extends Controller
                         'mobile' => $data['mobile'],
                         'paymentUrl' => $paymentUrl,
                         'beneficiaryDetailsUrl' => $BenDetailsUrl,
+                        'ben_profile_pic' => $data['ben_profile_pic'],
                     ])->render();
                 }
 
@@ -376,22 +378,27 @@ class BeneficiaryTrackController extends Controller
         if ($b->is_final == 0 && $b->next_level_role_id == NULL) {
             $status = 'Application Partial Entry';
             $statusClass = 'status-pending';
+            $statusColor = 'yellow';
             $beneficiaryId = NULL;
         } elseif ($b->is_final == 1 && $b->next_level_role_id == 0) {
             $status = 'Application Final Submitted';
             $statusClass = 'status-active';
+            $statusColor = 'orange';
             $beneficiaryId = NULL;
         } elseif ($b->is_final == 1 && $b->next_level_role_id == WorkflowStep::where('scheme_id', $b->scheme_id)->where('rank', 2)->first()->next_level_roleid) {
             $status = 'Verified';
             $statusClass = 'status-active';
+            $statusColor = 'blue';
             $beneficiaryId = NULL;
         } elseif ($b->is_final == 1 && $b->next_level_role_id == WorkflowStep::where('scheme_id', $b->scheme_id)->where('rank', 3)->first()->next_level_roleid) {
             $status = 'Approved';
             $statusClass = 'status-active';
+            $statusColor = 'green';
             $beneficiaryId = $b->beneficiary_id;
         } else {
             $status = 'Rejected';
             $statusClass = 'status-rejected';
+            $statusColor = 'red';
             $beneficiaryId = NULL;
         }
 
@@ -412,6 +419,11 @@ class BeneficiaryTrackController extends Controller
             $relationName = 'N/A';
         }
 
+
+        $ben_profile_pic = array();
+        $ben_profile_pic = BeneficiaryEnclosure::where('application_id', (int) $b->application_id)->where('document_type', 103)->first()->toArray();
+        // dd($ben_profile_pic);
+
         $returnData['status'] = $status;
         $returnData['statusClass'] = $statusClass;
         $returnData['applicationId'] = $b->application_id;
@@ -422,6 +434,8 @@ class BeneficiaryTrackController extends Controller
         $returnData['location'] = $districtName . ', West Bengal';
         $returnData['mobile'] = $b->other_details['mobile_no'] ?? 'N/A';
         $returnData['beneficiaryId'] = $beneficiaryId;
+        $returnData['statusColor'] = $statusColor;
+        $returnData['ben_profile_pic'] = $ben_profile_pic;
 
         // $ben_profile_pic = BeneficiaryEnclosure::where('application_id', $b->application_id)->where('document_type', 103)->first();
         // $returnData['ben_profile_pic'] = NULL;
@@ -516,6 +530,8 @@ class BeneficiaryTrackController extends Controller
         $benDetailsData = $this->getBeneficiaryDetails($benPersonal);
         $status = $benDetailsData['status'];
         $statusClass = $benDetailsData['statusClass'];
+        $ben_profile_pic = $benDetailsData['ben_profile_pic'];
+        // dd($ben_profile_pic);
 
         $activityLogData = $this->benActivityLog($applicationId);
 
@@ -527,6 +543,7 @@ class BeneficiaryTrackController extends Controller
             'status' => $status,
             'statusClass' => $statusClass,
             'activityLogData' => $activityLogData,
+            'ben_profile_pic' => $ben_profile_pic,
         ]);
 
     }

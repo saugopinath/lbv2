@@ -158,6 +158,20 @@
                 background-position: -200% 0;
             }
         }
+
+        /* Filter highlight styling */
+        .filter-field-highlight {
+            border-color: #4f46e5 !important;
+            background-color: #f5f3ff !important;
+            box-shadow: 0 0 0 1px #4f46e5 !important;
+            font-weight: 500 !important;
+        }
+
+        .filter-label-highlight {
+            color: #4f46e5 !important;
+            transform: scale(1.02);
+            transition: all 0.2s ease;
+        }
     </style>
 @endpush
 
@@ -504,6 +518,8 @@
                     if (muncidSelect) muncidSelect.innerHTML = '<option value="">All</option>';
                     if (gpWardSelect) gpWardSelect.innerHTML = '<option value="">All</option>';
 
+                    updateSidebarHighlights();
+
                     hide('#blk_sub_div');
                     hide('#municipality_div');
                     hide('#gp_ward_div');
@@ -572,6 +588,7 @@
                         }
                     }
                     if (blockSelect) blockSelect.innerHTML = htmlOption;
+                    updateSidebarHighlights();
                 });
             }
 
@@ -667,9 +684,39 @@
                         }
                         if (gpWardSelect) gpWardSelect.innerHTML = htmlOption;
                     }
+                    updateSidebarHighlights();
                 });
             }
+
+            // Add change listeners to all sidebar selects for automatic highlighting
+            $$('.filter-sidebar select').forEach(select => {
+                select.addEventListener('change', updateSidebarHighlights);
+            });
+
+            // Initialization of highlights
+            updateSidebarHighlights();
         });
+
+        // Function to update highlights on sidebar filters
+        function updateSidebarHighlights() {
+            const selects = ['#scheme', '#district', '#block', '#muncid', '#gp_ward',];
+            selects.forEach(id => {
+                const el = $(id);
+                if (!el) return;
+
+                // Look for the label inside the parent div
+                const parent = el.closest('div');
+                const label = parent ? parent.querySelector('label') : null;
+
+                if (el.value !== '') {
+                    el.classList.add('filter-field-highlight');
+                    if (label) label.classList.add('filter-label-highlight');
+                } else {
+                    el.classList.remove('filter-field-highlight');
+                    if (label) label.classList.remove('filter-label-highlight');
+                }
+            });
+        }
 
         // Utility Functions
         function show(selector) {
@@ -765,17 +812,17 @@
 
                     if (totalRecords === 0 && resultArea) {
                         resultArea.innerHTML = `
-                                                                                                                                    <div class="col-span-full empty-state">
-                                                                                                                                        <svg class="w-20 h-20 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                                                                                                        </svg>
-                                                                                                                                        <h3 class="text-xl font-semibold text-gray-700 mb-2">No beneficiaries found</h3>
-                                                                                                                                        <p class="text-gray-500 mb-4">Try adjusting your search or filters</p>
-                                                                                                                                        <button onclick="resetFilters()" class="btn-primary px-6 py-2 rounded-lg">
-                                                                                                                                            Reset Filters
-                                                                                                                                        </button>
-                                                                                                                                    </div>
-                                                                                                                                `;
+                                                                                                                                                                    <div class="col-span-full empty-state">
+                                                                                                                                                                        <svg class="w-20 h-20 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                                                                                                                                        </svg>
+                                                                                                                                                                        <h3 class="text-xl font-semibold text-gray-700 mb-2">No beneficiaries found</h3>
+                                                                                                                                                                        <p class="text-gray-500 mb-4">Try adjusting your search or filters</p>
+                                                                                                                                                                        <button onclick="resetFilters()" class="btn-primary px-6 py-2 rounded-lg">
+                                                                                                                                                                            Reset Filters
+                                                                                                                                                                        </button>
+                                                                                                                                                                    </div>
+                                                                                                                                                                `;
                     }
                 })
                 .catch(error => {
@@ -785,17 +832,17 @@
 
                     if (resultArea) {
                         resultArea.innerHTML = `
-                                                                                                                                    <div class="col-span-full empty-state">
-                                                                                                                                        <svg class="w-20 h-20 text-red-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                                                                                                        </svg>
-                                                                                                                                        <h3 class="text-xl font-semibold text-gray-700 mb-2">Something went wrong</h3>
-                                                                                                                                        <p class="text-gray-500 mb-4">Unable to load beneficiaries</p>
-                                                                                                                                        <button onclick="resetAndLoad()" class="btn-primary px-6 py-2 rounded-lg">
-                                                                                                                                            Try Again
-                                                                                                                                        </button>
-                                                                                                                                    </div>
-                                                                                                                                `;
+                                                                                                                                                                    <div class="col-span-full empty-state">
+                                                                                                                                                                        <svg class="w-20 h-20 text-red-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                                                                                                                                        </svg>
+                                                                                                                                                                        <h3 class="text-xl font-semibold text-gray-700 mb-2">Something went wrong</h3>
+                                                                                                                                                                        <p class="text-gray-500 mb-4">Unable to load beneficiaries</p>
+                                                                                                                                                                        <button onclick="resetAndLoad()" class="btn-primary px-6 py-2 rounded-lg">
+                                                                                                                                                                            Try Again
+                                                                                                                                                                        </button>
+                                                                                                                                                                    </div>
+                                                                                                                                                                `;
                     }
                 });
         }
@@ -835,6 +882,8 @@
             if (statusFilter) statusFilter.value = '';
             if (searchText) searchText.value = '';
 
+            updateSidebarHighlights();
+
             // Hide conditional divs
             hide('#blk_sub_div');
             hide('#municipality_div');
@@ -852,12 +901,14 @@
             }
 
             // Remove active class from all buttons
-            $$('.area-btn').forEach(btn => btn.classList.remove('active'));
+            $$('.area-btn').forEach(btn => {
+                btn.classList.remove('active', 'filter-field-highlight');
+            });
 
             // Add active class to selected button
-            if (type === '') addClass('#areaAll', 'active');
-            if (type === '2') addClass('#areaRural', 'active');
-            if (type === '1') addClass('#areaUrban', 'active');
+            if (type === '') { addClass('#areaAll', 'active'); addClass('#areaAll', 'filter-field-highlight'); }
+            if (type === '2') { addClass('#areaRural', 'active'); addClass('#areaRural', 'filter-field-highlight'); }
+            if (type === '1') { addClass('#areaUrban', 'active'); addClass('#areaUrban', 'filter-field-highlight'); }
         }
 
         // ================= UI HELPERS =================
@@ -953,16 +1004,16 @@
             }
 
             const notificationHTML = `
-                                                                                                                        <div class="custom-notification fixed top-6 right-6 px-6 py-4 rounded-xl shadow-2xl z-[100] transform transition-all duration-300 ${bgClass} text-white flex items-center gap-3 max-w-md" style="opacity: 0; transform: translateX(100px);">
-                                                                                                                            ${icon}
-                                                                                                                            <span class="flex-1">${message}</span>
-                                                                                                                            <button class="ml-2 text-white hover:text-gray-200 transition-colors" onclick="this.parentElement.remove()">
-                                                                                                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                                                                                                </svg>
-                                                                                                                            </button>
-                                                                                                                        </div>
-                                                                                                                    `;
+                                                                                                                                                        <div class="custom-notification fixed top-6 right-6 px-6 py-4 rounded-xl shadow-2xl z-[100] transform transition-all duration-300 ${bgClass} text-white flex items-center gap-3 max-w-md" style="opacity: 0; transform: translateX(100px);">
+                                                                                                                                                            ${icon}
+                                                                                                                                                            <span class="flex-1">${message}</span>
+                                                                                                                                                            <button class="ml-2 text-white hover:text-gray-200 transition-colors" onclick="this.parentElement.remove()">
+                                                                                                                                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                                                                                                                </svg>
+                                                                                                                                                            </button>
+                                                                                                                                                        </div>
+                                                                                                                                                    `;
 
             document.body.insertAdjacentHTML('beforeend', notificationHTML);
 

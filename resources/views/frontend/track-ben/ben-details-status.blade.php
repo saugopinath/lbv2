@@ -13,7 +13,22 @@
                     <!-- Beneficiary Name Section -->
                     <div class="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 flex items-center gap-3">
-                            <i class="fa-solid fa-circle-user text-indigo-600 text-3xl md:text-4xl"></i>
+                            @if ($ben_profile_pic && ($ben_profile_pic['document_mime_type'] == 'image/jpeg' || $ben_profile_pic['document_mime_type'] == 'image/png'))
+                                @php
+                                    $document_mime_type = $ben_profile_pic['document_mime_type'];
+                                    if ($document_mime_type == 'image/jpeg') {
+                                        $image_extension = 'jpg';
+                                    } else if ($document_mime_type == 'image/png') {
+                                        $image_extension = 'png';
+                                    } else if ($document_mime_type == 'application/pdf') {
+                                        $image_extension = 'pdf';
+                                    }
+                                    $row_image = "data:image/" . $image_extension . ";base64," . $ben_profile_pic['attched_document']; 
+                                @endphp
+                                <img src="{{ $row_image }}" alt="Profile Picture" class="w-20 h-20 rounded-full">
+                            @else
+                                <i class="fa-solid fa-circle-user text-indigo-600 text-3xl md:text-4xl"></i>
+                            @endif
                             <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                                 {{ $benPersonal->beneficiary_name ?? 'Beneficiary Details' }}
                             </span>
@@ -379,60 +394,60 @@
 @endsection
 
 @push('styles')
-  <style>
-                /* Custom Scrollbar */
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 6px;
-                }
+    <style>
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
 
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: #f1f1f1;
-                    border-radius: 10px;
-                }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
 
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #c7d2fe;
-                    border-radius: 10px;
-                }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c7d2fe;
+            border-radius: 10px;
+        }
 
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: #818cf8;
-                }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #818cf8;
+        }
 
-                /* Animation for expand/collapse */
-                .log-details {
-                    transition: all 0.3s ease-out;
-                }
+        /* Animation for expand/collapse */
+        .log-details {
+            transition: all 0.3s ease-out;
+        }
 
-                .log-details:not(.hidden) {
-                    display: block;
-                    animation: slideDown 0.3s ease-out;
-                }
+        .log-details:not(.hidden) {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
 
-                @keyframes slideDown {
-                    from {
-                        opacity: 0;
-                        transform: translateY(-10px);
-                    }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
 
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-                /* Hover effect improvements */
-                .log-header:hover {
-                    background: linear-gradient(to right, #f9fafb, #ffffff);
-                }
+        /* Hover effect improvements */
+        .log-header:hover {
+            background: linear-gradient(to right, #f9fafb, #ffffff);
+        }
 
-                /* Responsive adjustments */
-                @media (max-width: 640px) {
-                    .custom-scrollbar {
-                        max-height: 450px;
-                    }
-                }
-            </style>
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .custom-scrollbar {
+                max-height: 450px;
+            }
+        }
+    </style>
     <style>
         /* Custom animations and improvements */
         .hover\:shadow-xl:hover {
@@ -464,96 +479,96 @@
         }
     </style>
 @endpush
-    @push('scripts')
-        <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    // Toggle individual log details
-                    const logHeaders = document.querySelectorAll('.log-header');
-                    const toggleIcons = document.querySelectorAll('.log-toggle-icon');
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Toggle individual log details
+            const logHeaders = document.querySelectorAll('.log-header');
+            const toggleIcons = document.querySelectorAll('.log-toggle-icon');
 
-                    function toggleLogDetails(logId) {
-                        const detailsDiv = document.querySelector(`.log-details[data-log-id="${logId}"]`);
-                        const icon = document.querySelector(`.log-toggle-icon[data-log-id="${logId}"]`);
+            function toggleLogDetails(logId) {
+                const detailsDiv = document.querySelector(`.log-details[data-log-id="${logId}"]`);
+                const icon = document.querySelector(`.log-toggle-icon[data-log-id="${logId}"]`);
 
-                        if (detailsDiv) {
-                            detailsDiv.classList.toggle('hidden');
-                            if (icon) {
-                                icon.style.transform = detailsDiv.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
-                            }
-                        }
+                if (detailsDiv) {
+                    detailsDiv.classList.toggle('hidden');
+                    if (icon) {
+                        icon.style.transform = detailsDiv.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
                     }
+                }
+            }
 
-                    logHeaders.forEach(header => {
-                        header.addEventListener('click', function (e) {
-                            e.stopPropagation();
-                            const logId = this.getAttribute('data-log-id');
-                            toggleLogDetails(logId);
-                        });
-                    });
-
-                    toggleIcons.forEach(icon => {
-                        icon.addEventListener('click', function (e) {
-                            e.stopPropagation();
-                            const logId = this.getAttribute('data-log-id');
-                            toggleLogDetails(logId);
-                        });
-                    });
-
-                    // Expand All functionality
-                    const expandAllBtn = document.getElementById('expandAllLogs');
-                    if (expandAllBtn) {
-                        expandAllBtn.addEventListener('click', function () {
-                            const allDetails = document.querySelectorAll('.log-details');
-                            const allIcons = document.querySelectorAll('.log-toggle-icon');
-
-                            allDetails.forEach(detail => {
-                                detail.classList.remove('hidden');
-                            });
-                            allIcons.forEach(icon => {
-                                icon.style.transform = 'rotate(180deg)';
-                            });
-                        });
-                    }
-
-                    // Collapse All functionality
-                    const collapseAllBtn = document.getElementById('collapseAllLogs');
-                    if (collapseAllBtn) {
-                        collapseAllBtn.addEventListener('click', function () {
-                            const allDetails = document.querySelectorAll('.log-details');
-                            const allIcons = document.querySelectorAll('.log-toggle-icon');
-
-                            allDetails.forEach(detail => {
-                                detail.classList.add('hidden');
-                            });
-                            allIcons.forEach(icon => {
-                                icon.style.transform = 'rotate(0deg)';
-                            });
-                        });
-                    }
-
-                    // Load More functionality (if needed)
-                    const loadMoreBtn = document.getElementById('loadMoreLogs');
-                    if (loadMoreBtn) {
-                        loadMoreBtn.addEventListener('click', function () {
-                            // Add your AJAX call here to load more logs
-                            this.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading...';
-                            // Simulate loading
-                            setTimeout(() => {
-                                this.innerHTML = '<i class="fa-solid fa-arrow-down mr-2"></i>Load More Activities';
-                                // Add new logs to the timeline
-                            }, 1000);
-                        });
-                    }
-
-                    // Auto-expand if there are changes (optional)
-                    const logsWithChanges = document.querySelectorAll('.log-details');
-                    if (logsWithChanges.length === 1) {
-                        // If only one log, expand it automatically
-                        const singleLogId = logsWithChanges[0].getAttribute('data-log-id');
-                        if (singleLogId) {
-                            setTimeout(() => toggleLogDetails(singleLogId), 500);
-                        }
-                    }
+            logHeaders.forEach(header => {
+                header.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const logId = this.getAttribute('data-log-id');
+                    toggleLogDetails(logId);
                 });
-        </script>
-    @endpush
+            });
+
+            toggleIcons.forEach(icon => {
+                icon.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const logId = this.getAttribute('data-log-id');
+                    toggleLogDetails(logId);
+                });
+            });
+
+            // Expand All functionality
+            const expandAllBtn = document.getElementById('expandAllLogs');
+            if (expandAllBtn) {
+                expandAllBtn.addEventListener('click', function () {
+                    const allDetails = document.querySelectorAll('.log-details');
+                    const allIcons = document.querySelectorAll('.log-toggle-icon');
+
+                    allDetails.forEach(detail => {
+                        detail.classList.remove('hidden');
+                    });
+                    allIcons.forEach(icon => {
+                        icon.style.transform = 'rotate(180deg)';
+                    });
+                });
+            }
+
+            // Collapse All functionality
+            const collapseAllBtn = document.getElementById('collapseAllLogs');
+            if (collapseAllBtn) {
+                collapseAllBtn.addEventListener('click', function () {
+                    const allDetails = document.querySelectorAll('.log-details');
+                    const allIcons = document.querySelectorAll('.log-toggle-icon');
+
+                    allDetails.forEach(detail => {
+                        detail.classList.add('hidden');
+                    });
+                    allIcons.forEach(icon => {
+                        icon.style.transform = 'rotate(0deg)';
+                    });
+                });
+            }
+
+            // Load More functionality (if needed)
+            const loadMoreBtn = document.getElementById('loadMoreLogs');
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', function () {
+                    // Add your AJAX call here to load more logs
+                    this.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading...';
+                    // Simulate loading
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fa-solid fa-arrow-down mr-2"></i>Load More Activities';
+                        // Add new logs to the timeline
+                    }, 1000);
+                });
+            }
+
+            // Auto-expand if there are changes (optional)
+            const logsWithChanges = document.querySelectorAll('.log-details');
+            if (logsWithChanges.length === 1) {
+                // If only one log, expand it automatically
+                const singleLogId = logsWithChanges[0].getAttribute('data-log-id');
+                if (singleLogId) {
+                    setTimeout(() => toggleLogDetails(singleLogId), 500);
+                }
+            }
+        });
+    </script>
+@endpush

@@ -70,8 +70,8 @@ class HomeController extends Controller
             $scheme_id[] = $value; // value itself is the ID
         }
 
-        $ben_count_all = 1000000000000000000000;
-        $ben_count_approved = 1000000000000000000000;
+        $ben_count_all = BeneficiaryPersonalDetail::whereIn('is_clean', [1, 2])->count();
+        $ben_count_approved = BeneficiaryPersonalDetail::whereIn('is_clean', [1, 2])->where('is_approved', 1)->count();
 
         $onboard_scheme_count = count($onboard_scheme);
 
