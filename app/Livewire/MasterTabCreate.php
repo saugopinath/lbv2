@@ -626,7 +626,7 @@ class MasterTabCreate extends Component
             ]);
             return redirect()->route('master-tab-creation');
         } catch (\Throwable $e) {
-            dd($e);
+            // dd($e);
             DB::rollBack();
 
             $this->dispatch('toastr', [
