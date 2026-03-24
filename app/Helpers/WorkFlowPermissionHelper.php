@@ -418,4 +418,9 @@ class WorkFlowPermissionHelper
     {
         return Auth::user()->can('janmya-mrityu-beneficiary-list');
     }
+
+    public static function canDutyAssignManagement(): bool
+    {
+        return Auth::user() && Auth::user()->can('DutyAssignManagement');
+    }
 }

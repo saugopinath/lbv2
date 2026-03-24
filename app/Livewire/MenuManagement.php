@@ -128,6 +128,8 @@ class MenuManagement extends Component
                 Menu::create($data);
             }
 
+            $this->generateHelperAndRoute();
+
             DB::commit();
 
             MenuHelper::clearCache();
@@ -156,6 +158,80 @@ class MenuManagement extends Component
         $this->selectedRoles = [];
         $this->selectedPermissions = [];
         $this->schemes = collect();
+    }
+
+    private function generateHelperAndRoute()
+    {
+        try {
+            if ($this->menu_name) {
+                $permissionName = $this->menu_name;
+                
+                // Fetch existing permission name if mapped
+                if (!empty($this->selectedPermissions)) {
+                     $permId = is_array($this->selectedPermissions) ? $this->selectedPermissions[0] : $this->selectedPermissions;
+                     $perm = \App\Models\Permission::find($permId);
+                     if ($perm) {
+                         $permissionName = $perm->name;
+                     }
+                } else {
+                     // Auto create permission in db if no permission selected
+                     if (class_exists(\App\Models\Permission::class)) {
+                         \App\Models\Permission::firstOrCreate(['name' => $permissionName]);
+                     }
+                }
+
+                // Generate method name based on the permission name, not the menu name
+                $baseName = preg_replace('/[^a-zA-Z0-9]+/', ' ', $permissionName);
+                $methodName = 'can' . \Illuminate\Support\Str::studly($baseName);
+
+                $helperPath = app_path('Helpers/WorkFlowPermissionHelper.php');
+                $methodExists = false;
+
+                if (file_exists($helperPath)) {
+                    $helperContent = file_get_contents($helperPath);
+                    $permissionNameQuoted = preg_quote($permissionName, '/');
+                    
+                    // Check if any existing method already checks for this exact permission
+                    $pattern = '/public static function\s+([A-Za-z0-9_]+)\(\)\s*:\s*bool\s*\{[^}]*can\([\'"]' . $permissionNameQuoted . '[\'"]\)[^}]*\}/i';
+                    
+                    if (preg_match($pattern, $helperContent, $matches)) {
+                        $methodName = $matches[1];
+                        $methodExists = true;
+                    } elseif (strpos($helperContent, "function {$methodName}(") !== false) {
+                        // The generated method name already exists
+                        $methodExists = true;
+                    }
+
+                    // Auto update WorkFlowPermissionHelper
+                    if (!$methodExists) {
+                        $helperContent = preg_replace('/}[ \n\t\r]*$/', '', $helperContent);
+                        $newMethod = "\n    public static function {$methodName}(): bool\n    {\n        return Auth::user() && Auth::user()->can('{$permissionName}');\n    }\n}\n";
+                        file_put_contents($helperPath, $helperContent . $newMethod);
+                    }
+                }
+
+                // Auto update routes/web.php
+                if (!empty($this->route) && !empty($this->url) && $this->route !== '#') {
+                    $routePath = base_path('routes/web.php');
+                    if (file_exists($routePath)) {
+                        $routeContent = file_get_contents($routePath);
+                        if (strpos($routeContent, "->name('{$this->route}')") === false) {
+                            $url = ltrim($this->url, '/');
+                            $newRoute = "\n// Auto-generated route for {$this->menu_name}\n";
+                            $newRoute .= "Route::middleware(['auth', 'verified'])->group(function () {\n";
+                            $newRoute .= "    Route::get('/{$url}', \App\Livewire\ApplicationView::class) // TODO: Update to correct Component Class\n";
+                            $newRoute .= "        ->middleware('permission.redirect:{$methodName}')\n";
+                            $newRoute .= "        ->name('{$this->route}');\n";
+                            $newRoute .= "});\n";
+                            
+                            file_put_contents($routePath, $routeContent . $newRoute);
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Menu auto string generation error: ' . $e->getMessage());
+        }
     }
 
     public function render()
