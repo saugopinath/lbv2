@@ -142,12 +142,12 @@ class WorkflowWizard extends Component
         $existingLabels = collect();
 
         if (! $this->isNewModule) {
-            $existingMappings = workflowstepRolemapping::where('module_id', $this->selectedModule)
+            $existingMappings = workflowstepRolemapping::where('module_id', $this->selectedModule)->where('scheme_id', $this->selectedScheme)
                 ->orderBy('rank', 'asc')
                 ->get()
                 ->groupBy('rank');
 
-            $existingLabels = DynamicWorkflowLabel::where('module_id', $this->selectedModule)
+            $existingLabels = DynamicWorkflowLabel::where('module_id', $this->selectedModule)->where('scheme_id', $this->selectedScheme)
                 ->get()
                 ->keyBy('label_name');
         }
