@@ -589,6 +589,7 @@
                 </a>
             </div>
         @endif
+        @if (\App\Helpers\WorkFlowPermissionHelper::canCMODataFetch())
         <div>
             <a href="{{ route('pullnewcmo') }}"
                 class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -604,7 +605,8 @@
                 <span x-show="sidebar" class="mr-2 truncate">CMO Data Fetch</span>
             </a>
         </div>
-        @if ($user->hasAnyRole(['Verifier', 'Delegated Verifier', 'Approver', 'Delegated Approver', 'Operator', 'HOD']))
+        @endif
+          @if (\App\Helpers\WorkFlowPermissionHelper::canSarasoriMukhyamantri())      
             <div>
                 <button
                     @click="activeMenu === 'Sarasori Mukhyamantri' ? activeMenu = null : activeMenu = 'Sarasori Mukhyamantri'"
@@ -626,7 +628,7 @@
                     </svg>
                 </button>
                 <!-- Sub-menu -->
-
+                @if (\App\Helpers\WorkFlowPermissionHelper::canCMOGrievanceMark())
                 <div id="list_menu" x-show="activeMenu === 'Sarasori Mukhyamantri'" x-collapse x-transition class="pl-4">
                     <ul>
                         <li>
@@ -645,8 +647,10 @@
                         </li>
                     </ul>
                 </div>
+                @endif
             </div>
         @endif
+        @if (\App\Helpers\WorkFlowPermissionHelper::canBackFromJb())
         <div>
             <a href="{{ route('backfromjb') }}"
                 class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -662,5 +666,6 @@
                 <span x-show="sidebar" class="mr-2 truncate">Back From JB</span>
             </a>
         </div>
+        @endif
     </nav>
 </aside>

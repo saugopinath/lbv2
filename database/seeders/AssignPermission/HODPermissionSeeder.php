@@ -8,32 +8,19 @@ use Spatie\Permission\Models\Permission;
 use App\Models\User;
 use App\Models\UserRoleSchemeOfficeMapping;
 
-class OperatorPermissionSeeder extends Seeder
+class HODPermissionSeeder extends Seeder
 {
     public function run(): void
     {
         $permissions = [
-            'submit lb form',
-            'view draft list',
-            'edit draft',
-            'view beneficiaries',
-            'view reports',
-            'Duare Sarkar Entry',
-            'Normal Entry',
-            'modify caste',
-            'submit-lb-form',
-            'view caste modification list',
-            'edit caste',
-            'update caste',
-            'cmo-grievance-mark',
-            'sarasori-mukhyamantri'
+            'sarasori-mukhyamantri',
         ];
 
         // 1) find role
         try {
-            $role = Role::findByName('Operator');
+            $role = Role::findByName('HOD');
         } catch (\Exception $e) {
-            $this->command->error('Role "operator" not found. Seeder aborted.');
+            $this->command->error('Role "HOD" not found. Seeder aborted.');
             return;
         }
 

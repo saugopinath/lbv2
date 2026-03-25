@@ -51,7 +51,11 @@ class ApproverPermissionSeeder extends Seeder
             'Normal Entry Revert Allow',
             'Normal Entry Approver Allow',
             'Normal Entry Reject Allow',
-            're-activate-death-incident'
+            're-activate-death-incident',
+            'back-from-jb',
+            'cmo-grievance-mark',
+            'sarasori-mukhyamantri',
+            'back-from-jb-approver-button'
         ];
         try {
             $role = Role::findByName('Approver');
