@@ -66,7 +66,7 @@ class WorkflowsteproleMapping extends Model implements Auditable
 
     public function module()
     {
-        return $this->belongsTo(DynamicWorkflowModule::class, 'module_id');
+        return $this->belongsTo(DynamicWorkflowSchemeModule::class, 'module_id');
     }
 
     public function label()

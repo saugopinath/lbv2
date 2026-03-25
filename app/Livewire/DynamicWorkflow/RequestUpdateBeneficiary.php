@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use App\Helpers\DuplicateChecker;
 
 class RequestUpdateBeneficiary extends Component
 {
@@ -50,9 +51,7 @@ class RequestUpdateBeneficiary extends Component
 
     public function mount($moduleCode = null)
     {
-        // dd('here');
         $selectLgd = session('lgd_session');
-        // dd($selectLgd);
         $this->requestModuleCode = 'UP_MB_D_01';
         $this->currentRoleId = Crypt::decryptString($selectLgd['role_id']);
         if (!empty($selectLgd['district_id'])) {
@@ -112,7 +111,7 @@ class RequestUpdateBeneficiary extends Component
         // $this->selectedFields = [];
         $this->beneficiary = BeneficiaryPersonalDetail::with(['bank', 'contact'])
             ->where('application_id', $appId)
-            // ->where('scheme_id', $this->moduleSchemeId)
+            //->where('scheme_id', $this->moduleSchemeId)
             ->first();
         // dd($this->beneficiary);
         if (!$this->beneficiary) {
@@ -136,17 +135,33 @@ class RequestUpdateBeneficiary extends Component
         }
         $this->validate($this->rules(), [], $this->validationAttributes());
         $payload = $this->prepareWorkflowPayload();
-        // dd($payload);
         if (empty($payload['new'])) {
-            $this->dispatch('toast', 'error', 'No changes detected for submission.');
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'No changes detected for submission.'
+            ]);
             return;
         }
-
+        $checkData = [
+            'mobile_no' => $this->newData['mobile_no'] ?? null,
+            'bankaccountnumber' => $this->newData['bank_account_number'] ?? null,
+        ];
+        $duplicateResult = DuplicateChecker::check(
+            (int)$this->beneficiary->scheme_id,
+            (int)$this->beneficiary->application_id,
+            $checkData
+        );
+        if ($duplicateResult !== true) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => $duplicateResult['message']
+            ]);
+            return;
+        }
         $hasPendingRequest = DynamicWorkflowRequest::where('module_id', $this->moduleId)
             ->where('ref_id', $this->beneficiary->application_id)
             ->whereNotIn('current_rank', [-100, 0]) // -100 = rejected, 0 = completed
             ->exists();
-
         if ($hasPendingRequest) {
             $this->dispatch('toast', 'error', 'A pending request already exists.');
             return;
@@ -162,7 +177,6 @@ class RequestUpdateBeneficiary extends Component
                 $payload['new'],
                 $payload['changed_fields']
             );
-
             DB::commit();
             $message = "Request submitted successfully! Request ID: " . $newRequest->id;
             session()->flash('success', $message);

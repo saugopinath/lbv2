@@ -4,6 +4,7 @@ namespace App\Livewire\DynamicWorkflow;
 
 use App\Models\DynamicWorkflowLabel;
 use App\Models\DynamicWorkflowModule;
+use App\Models\DynamicWorkflowSchemeModule;
 use App\Models\Codemaster;
 use App\Models\Permission;
 use App\Models\workflowstepRolemapping;
@@ -42,7 +43,8 @@ class WorkflowWizard extends Component
 
     public function updatedSelectedScheme()
     {
-        $this->moduleList = DynamicWorkflowModule::where('scheme_id', $this->selectedScheme)->get();
+        // $this->moduleList = DynamicWorkflowModule::where('scheme_id', $this->selectedScheme)->get();
+        $this->moduleList = DynamicWorkflowModule::all();
         $this->selectedModule = null;
         $this->isNewModule = false;
     }
@@ -50,17 +52,22 @@ class WorkflowWizard extends Component
     public function updatedSelectedModule($value)
     {
         if ($value && $value != 'new') {
-            $module = DynamicWorkflowModule::with('steps.module')->find($value);
+            $schemeModule = DynamicWorkflowSchemeModule::where('module_id', $value)
+                ->where('scheme_id', $this->selectedScheme)
+                ->first();
 
-            if ($module) {
-                $this->stepCount = $module->step_count;
+            if ($schemeModule) {
+                $this->stepCount = $schemeModule->step_count;
 
-                $labels = DynamicWorkflowLabel::where('module_id', $module->id)
+                $labels = DynamicWorkflowLabel::where('module_id', $schemeModule->id)
                     ->orderBy('id', 'asc')
                     ->pluck('label_name')
                     ->toArray();
 
                 $this->stepNames = $labels;
+            } else {
+                $this->stepCount = 1;
+                $this->stepNames = [];
             }
         }
     }
@@ -111,7 +118,7 @@ class WorkflowWizard extends Component
         if ($this->isNewModule) {
             $this->validate([
                 'newModuleName' => 'required|min:3',
-                'newModuleCode' => 'required',
+                'newModuleCode' => 'required|unique:dynamic_workflow_modules,module_code',
             ]);
         } else {
             $this->validate(['selectedModule' => 'required']);
@@ -183,22 +190,35 @@ class WorkflowWizard extends Component
         try {
             if ($this->isNewModule) {
                 $module = DynamicWorkflowModule::create([
-                    'scheme_id' => $this->selectedScheme,
-                    'module_code' => strtoupper($this->newModuleCode),
+                    'module_code' => $this->newModuleCode,
                     'module_name' => $this->newModuleName,
-                    'step_count' => $this->stepCount,
                     'created_by' => Auth::id(),
+                ]);
+                $schemeModule = DynamicWorkflowSchemeModule::create([
+                    'scheme_id' => $this->selectedScheme,
+                    'module_id' => $module->id,
+                    'main_module_code' => $this->newModuleCode,
+                    'step_count' => $this->stepCount,
                 ]);
             } else {
                 $module = DynamicWorkflowModule::find($this->selectedModule);
-                $module->update(['step_count' => $this->stepCount]);
+                $schemeModule = DynamicWorkflowSchemeModule::updateOrCreate(
+                    [
+                        'scheme_id' => $this->selectedScheme,
+                        'module_id' => $module->id,
+                    ],
+                    [
+                        'main_module_code' => $module->module_code,
+                        'step_count' => $this->stepCount,
+                    ]
+                );
             }
-            $module->steps()->delete();
-            DynamicWorkflowLabel::where('module_id', $module->id)->delete();
+            $schemeModule->steps()->delete();
+            DynamicWorkflowLabel::where('module_id', $schemeModule->id)->delete();
             foreach ($this->finalSteps as $index => $stepData) {
                 $rank = ($index + 1) * 10;
                 $successRank = ($index < count($this->finalSteps) - 1) ? ($index + 2) * 10 : 0;
-                $revertRank = ($index > 0) ? $index * 10 : null;
+                $revertRank = ($index > 0) ? $index * 10 : - ($this->selectedScheme);
                 // Find the parent ID for dynamic_op_type
                 $parent = Codemaster::where('short_name', 'dynamic_op_type')->first();
                 $opTypeId = null;
@@ -227,7 +247,7 @@ class WorkflowWizard extends Component
 
                 $label = DynamicWorkflowLabel::create([
                     'scheme_id' => $this->selectedScheme,
-                    'module_id' => $module->id,
+                    'module_id' => $schemeModule->id,
                     'label_name' => $stepData['label'],
                     'op_type_id' => $opTypeId,
                 ]);
@@ -235,7 +255,7 @@ class WorkflowWizard extends Component
                 foreach ($stepData['role_ids'] as $roleId) {
                     workflowstepRolemapping::create([
                         'scheme_id' => $this->selectedScheme,
-                        'module_id' => $module->id,
+                        'module_id' => $schemeModule->id,
                         'workflow_step_id' => $label->id,
                         'rank' => $rank,
                         'role_id' => $roleId,
@@ -286,13 +306,19 @@ class WorkflowWizard extends Component
             }
 
             DB::commit();
-            $this->dispatch('toast', 'success', 'Workflow Master & Steps Configured Perfectly!');
+            $this->dispatch('toastr', [
+                'type' => 'success',
+                'message' => 'Workflow Master & Steps Configured Perfectly!'
+            ]);
             $this->reset(['selectedScheme', 'selectedModule', 'isNewModule', 'newModuleName', 'newModuleCode', 'stepCount', 'stepNames', 'finalSteps']);
             $this->currentTab = 1;
             $this->moduleList = [];
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->dispatch('toast', 'error', $e->getMessage());
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => $e->getMessage()
+            ]);
         }
     }
 
