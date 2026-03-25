@@ -37,17 +37,14 @@ class BeneficiaryApprovedListSeeder extends Seeder
             for ($i = 0; $i < 100; $i++) {
                 // 🔹 Random Scheme
                 $schemeId = 20;
-
                 // Office & User তথ্য
                 $office = OfficeMaster::where('district_id', 318)
                     ->where('block_id', 2979)
                     ->first();
-
                 if (!$office) {
                     $this->command->error("Office not found for District 318, Block 2979.");
                     continue;
                 }
-
                 $mapping = UserRoleSchemeOfficeMapping::where('office_id', $office->id)
                     ->where('role_id', 8)
                     ->first();

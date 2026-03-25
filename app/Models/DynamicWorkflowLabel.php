@@ -17,7 +17,7 @@ class DynamicWorkflowLabel extends BaseAuditableModel
 
     public function module()
     {
-        return $this->belongsTo(DynamicWorkflowModule::class, 'module_id');
+        return $this->belongsTo(DynamicWorkflowSchemeModule::class, 'module_id');
     }
 
     public static function getOpTypeId($labelId)
