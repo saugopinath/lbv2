@@ -313,15 +313,15 @@ Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('d
 Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
 
 Route::controller(BackFromJBController::class)->group(function () {
-    Route::any('/backfromjb', 'backfromjb')->name('backfromjb');
+    Route::any('/backfromjb', 'backfromjb')->middleware('permission.redirect:canBackFromJb')->name('backfromjb');
     Route::any('/backfromjbactions', 'backfromjbactions')->name('backfromjbactions');
 });
 
 
 Route::controller(CmoController::class)->group(function () {
-    Route::any('/pullnewcmo', 'pullnewcmo')->name('pullnewcmo');
+    Route::any('/pullnewcmo', 'pullnewcmo')->middleware('permission.redirect:canCMODataFetch')->name('pullnewcmo');
     Route::any('/populatelbportal', 'populatelbportal')->name('populatelbportal');
-    Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')->name('cmo-grievance-workflow');
+    Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')->middleware('permission.redirect:canCMOGrievanceMark')->name('cmo-grievance-workflow');
     // Route::any('/cmo-grievance-find/{id}', 'cmogrievancefind')->name('cmo-grievance-find');
     Route::any('/cmo-grievance-find', 'cmogrievancefind')->name('cmo-grievance-find');
     Route::post('/cmo-grievance-action', 'cmodetailsaction')->name('cmo-grievance-action');
