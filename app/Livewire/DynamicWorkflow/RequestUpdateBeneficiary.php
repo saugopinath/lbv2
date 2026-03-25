@@ -82,10 +82,26 @@ class RequestUpdateBeneficiary extends Component
     {
         if (empty($data['results'])) {
             $this->items = [];
-            $this->dispatch('toast', 'error', 'No matching approved beneficiary found.');
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'No matching approved beneficiary found.'
+            ]);
             return;
         }
         $applicationIds = collect($data['results'])->pluck('application_id')->toArray();
+
+        $SubmittedRequest = DynamicWorkflowRequest::where('ref_id', $applicationIds)
+            // ->where('scheme_id', $this->scheme_id)
+            ->whereNotIn('current_rank', [-100, 0])
+            ->get();
+        // dd($SubmittedRequest);
+        if ($SubmittedRequest->count() > 0) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Request already Pending!'
+            ]);
+            return;
+        }
         $this->items = BeneficiaryPersonalDetail::query()
             ->select(['application_id', 'beneficiary_id', 'scheme_id', 'beneficiary_name', 'other_details'])
             ->with([
@@ -143,11 +159,17 @@ class RequestUpdateBeneficiary extends Component
         $this->moduleCode = $module->module_code;
         // $this->moduleSchemeId = $module->scheme_id;
         if (!$this->beneficiary) {
-            $this->dispatch('toast', 'error', 'No beneficiary selected!');
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'No beneficiary selected!'
+            ]);
             return;
         }
         if (empty($this->selectedFields)) {
-            $this->dispatch('toast', 'error', 'Select at least one field!');
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Select at least one field!'
+            ]);
             return;
         }
         $this->validate($this->rules(), [], $this->validationAttributes());
