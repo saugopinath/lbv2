@@ -135,10 +135,10 @@ class RequestUpdateBeneficiary extends Component
         }
         $this->validate($this->rules(), [], $this->validationAttributes());
         $payload = $this->prepareWorkflowPayload();
-        if (empty($payload['new'])) {
+        if (count($payload['actual_changed_blocks']) !== count($this->selectedFields)) {
             $this->dispatch('toastr', [
                 'type' => 'error',
-                'message' => 'No changes detected for submission.'
+                'message' => 'Operation stopped: All selected fields must be updated with new values.'
             ]);
             return;
         }
@@ -424,29 +424,32 @@ class RequestUpdateBeneficiary extends Component
     {
         $blockFieldMap = [
             'beneficiary_name' => ['beneficiary_name'],
-            'dob_age' => ['dob', 'age'],
-            'mobile_no' => ['mobile_no'],
-            'bank_details' => ['bank_ifsc', 'bank_name', 'bank_branch_name', 'bank_account_number'],
+            'dob_age'          => ['dob', 'age'],
+            'mobile_no'        => ['mobile_no'],
+            'bank_details'     => ['bank_ifsc', 'bank_name', 'bank_branch_name', 'bank_account_number'],
         ];
 
         $old = [];
         $new = [];
-        foreach ($this->selectedFields as $selectedField) {
-            foreach ($blockFieldMap[$selectedField] ?? [] as $fieldKey) {
-                $oldValue = Arr::get($this->oldData, $fieldKey);
-                $newValue = Arr::get($this->newData, $fieldKey);
-                if (is_string($oldValue)) {
-                    $oldValue = trim($oldValue);
-                }
-                if (is_string($newValue)) {
-                    $newValue = trim($newValue);
-                }
-                if ($oldValue === $newValue) {
-                    continue;
-                }
+        $actualChangedBlocks = [];
 
-                $old[$fieldKey] = $oldValue;
-                $new[$fieldKey] = $newValue;
+        foreach ($this->selectedFields as $selectedField) {
+            $blockHasChange = false;
+
+            foreach ($blockFieldMap[$selectedField] ?? [] as $fieldKey) {
+                $oldValue = trim((string)Arr::get($this->oldData, $fieldKey));
+                $newValue = trim((string)Arr::get($this->newData, $fieldKey));
+
+                if ($oldValue !== $newValue) {
+                    $old[$fieldKey] = $oldValue;
+                    $new[$fieldKey] = $newValue;
+                    $blockHasChange = true;
+                }
+            }
+
+            // Only add to this list if at least one sub-field in the block changed
+            if ($blockHasChange) {
+                $actualChangedBlocks[] = $selectedField;
             }
         }
 
@@ -454,6 +457,7 @@ class RequestUpdateBeneficiary extends Component
             'old' => $old,
             'new' => $new,
             'changed_fields' => array_values($this->selectedFields),
+            'actual_changed_blocks' => $actualChangedBlocks,
         ];
     }
 
