@@ -12,7 +12,12 @@ class DynamicWorkflowLabel extends BaseAuditableModel
         'scheme_id',
         'module_id',
         'op_type_id',
-        'label_name'
+        'label_name',
+        'permissions'
+    ];
+
+    protected $casts = [
+        'permissions' => 'array'
     ];
 
     public function module()
