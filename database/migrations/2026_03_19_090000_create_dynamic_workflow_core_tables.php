@@ -21,7 +21,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // ২. স্টেপের নাম সংরক্ষণের জন্য আলাদা মাস্টার টেবিল
         Schema::create('dynamic_workflow_labels', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('scheme_id')->index();

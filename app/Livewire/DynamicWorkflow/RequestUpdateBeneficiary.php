@@ -51,9 +51,7 @@ class RequestUpdateBeneficiary extends Component
 
     public function mount($moduleCode = null)
     {
-        // dd('here');
         $selectLgd = session('lgd_session');
-        // dd($selectLgd);
         $this->requestModuleCode = 'UP_MB_D_01';
         $this->currentRoleId = Crypt::decryptString($selectLgd['role_id']);
         if (!empty($selectLgd['district_id'])) {
@@ -113,7 +111,7 @@ class RequestUpdateBeneficiary extends Component
         // $this->selectedFields = [];
         $this->beneficiary = BeneficiaryPersonalDetail::with(['bank', 'contact'])
             ->where('application_id', $appId)
-            // ->where('scheme_id', $this->moduleSchemeId)
+            //->where('scheme_id', $this->moduleSchemeId)
             ->first();
         // dd($this->beneficiary);
         if (!$this->beneficiary) {
@@ -164,7 +162,6 @@ class RequestUpdateBeneficiary extends Component
             ->where('ref_id', $this->beneficiary->application_id)
             ->whereNotIn('current_rank', [-100, 0]) // -100 = rejected, 0 = completed
             ->exists();
-
         if ($hasPendingRequest) {
             $this->dispatch('toast', 'error', 'A pending request already exists.');
             return;
@@ -180,7 +177,6 @@ class RequestUpdateBeneficiary extends Component
                 $payload['new'],
                 $payload['changed_fields']
             );
-
             DB::commit();
             $message = "Request submitted successfully! Request ID: " . $newRequest->id;
             session()->flash('success', $message);

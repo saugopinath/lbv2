@@ -6,10 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class DynamicWorkflowRequest extends BaseAuditableModel
 {
-
-
     protected $table = 'dynamic_workflow_requests';
-
     protected $fillable = [
         'module_id',
         'ref_id',
@@ -30,7 +27,7 @@ class DynamicWorkflowRequest extends BaseAuditableModel
 
     public function module()
     {
-        return $this->belongsTo(DynamicWorkflowModule::class, 'module_id');
+        return $this->belongsTo(DynamicWorkflowSchemeModule::class, 'module_id');
     }
 
     public function step()
