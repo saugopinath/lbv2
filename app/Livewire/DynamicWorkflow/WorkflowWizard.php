@@ -33,10 +33,12 @@ class WorkflowWizard extends Component
 
     public $finalSteps = [];
     public $roles = [];
+    public $permissionsList = [];
 
     public function mount()
     {
         $this->roles = Role::orderBy('name')->pluck('name', 'id')->toArray();
+        $this->permissionsList = Permission::orderBy('name')->pluck('name', 'id')->toArray();
     }
 
     public function updatedSelectedScheme()
@@ -137,28 +139,28 @@ class WorkflowWizard extends Component
         ]);
         $this->currentTab = 3;
         $existingMappings = collect();
+        $existingLabels = collect();
 
         if (! $this->isNewModule) {
-            $schemeModule = DynamicWorkflowSchemeModule::where('module_id', $this->selectedModule)
-                ->where('scheme_id', $this->selectedScheme)
-                ->first();
-
-            if ($schemeModule) {
-                $existingMappings = workflowstepRolemapping::where('module_id', $schemeModule->id)
-                    ->where('scheme_id', $this->selectedScheme)
-                    ->orderBy('rank', 'asc')
-                    ->get()
-                    ->groupBy('rank');
-            }
+            $existingMappings = workflowstepRolemapping::where('module_id', $this->selectedModule)
+                ->orderBy('rank', 'asc')
+                ->get()
+                ->groupBy('rank');
+                
+            $existingLabels = DynamicWorkflowLabel::where('module_id', $this->selectedModule)
+                ->get()
+                ->keyBy('label_name');
         }
         $this->finalSteps = [];
         foreach ($this->stepNames as $index => $label) {
             $rank = ($index + 1) * 10;
             $mappings = $existingMappings->get($rank, collect());
-            $firstMapping = $mappings->first();
+            
+            $existingLabel = $existingLabels->get($label);
             $this->finalSteps[$index] = [
                 'rank' => (int) $rank,
                 'label' => $label,
+                'permissions' => $existingLabel ? (array) ($existingLabel->permissions ?? []) : [],
                 'role_ids' => $mappings
                     ->pluck('role_id')
                     ->map(fn($roleId) => (string) $roleId)
@@ -177,6 +179,7 @@ class WorkflowWizard extends Component
             'selectedScheme' => 'required',
             'finalSteps.*.role_ids' => 'required|array|min:1',
             'finalSteps.*.role_ids.*' => 'exists:roles,id',
+            'finalSteps.*.permissions' => 'required|array|min:1',
         ]);
         if (! Auth::check()) {
             session()->flash('error', 'Authentication session expired. Please login again.');
@@ -248,6 +251,7 @@ class WorkflowWizard extends Component
                     'label_name' => $stepData['label'],
                     'op_type_id' => $opTypeId,
                 ]);
+                $savedPermissionIds = [];
                 foreach ($stepData['role_ids'] as $roleId) {
                     workflowstepRolemapping::create([
                         'scheme_id' => $this->selectedScheme,
@@ -261,29 +265,44 @@ class WorkflowWizard extends Component
                         'action_type' => null,
                     ]);
 
-                    // $labelSlug = strtolower(str_replace(' ', '_', $stepData['label']));
-                    // $permissionName = "{$module->module_code}.{$labelSlug}";
-                    // $permission = Permission::firstOrCreate([
-                    //     'name' => $permissionName,
-                    //     'guard_name' => 'web'
-                    // ]);
-                    // $role = Role::find($roleId);
-                    // if ($role && !$role->hasPermissionTo($permissionName)) {
-                    //     $role->givePermissionTo($permission);
-                    // }
-                    // // Assign permission to users mapped to this role and scheme
-                    // $userIds = UserRoleSchemeOfficeMapping::where('role_id', $roleId)
-                    //     ->where('scheme_id', $this->selectedScheme)
-                    //     ->where('is_active', 1)
-                    //     ->pluck('user_id');
+                    foreach ($stepData['permissions'] as $permissionValue) {
+                        if (!empty($permissionValue)) {
+                            // If it's a numeric ID, find by ID, otherwise it might be a new name
+                            if (is_numeric($permissionValue)) {
+                                $permission = Permission::find($permissionValue);
+                            } else {
+                                $permission = Permission::firstOrCreate([
+                                    'name' => $permissionValue,
+                                    'guard_name' => 'web'
+                                ]);
+                            }
 
-                    // foreach ($userIds as $userId) {
-                    //     $user = User::find($userId);
-                    //     if ($user && !$user->hasPermissionTo($permissionName)) {
-                    //         $user->givePermissionTo($permission);
-                    //     }
-                    // }
+                            if ($permission) {
+                                if (!in_array((string)$permission->id, $savedPermissionIds)) {
+                                    $savedPermissionIds[] = (string)$permission->id;
+                                }
+                                $role = Role::find($roleId);
+                                if ($role && !$role->hasPermissionTo($permission->name)) {
+                                    $role->givePermissionTo($permission);
+                                }
+                                // Assign permission to users mapped to this role and scheme
+                                $userIds = UserRoleSchemeOfficeMapping::where('role_id', $roleId)
+                                    ->where('scheme_id', $this->selectedScheme)
+                                    ->where('is_active', 1)
+                                    ->pluck('user_id');
+
+                                foreach ($userIds as $userId) {
+                                    $user = User::find($userId);
+                                    if ($user && !$user->hasPermissionTo($permission->name)) {
+                                        $user->givePermissionTo($permission);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
+                // Finally update the label with the exact list of chosen permission IDs
+                $label->update(['permissions' => $savedPermissionIds]);
             }
 
             DB::commit();
