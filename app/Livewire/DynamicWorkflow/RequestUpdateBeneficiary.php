@@ -67,7 +67,6 @@ class RequestUpdateBeneficiary extends Component
         if (!empty($selectLgd['role_id'])) {
             $this->RoleId = Crypt::decryptString($selectLgd['role_id']);
         }
-
         // $module = DynamicWorkflowModule::where('module_code', $this->requestModuleCode)->first();
         // if (!$module) {
         //     abort(404, 'Module not found');
@@ -80,6 +79,7 @@ class RequestUpdateBeneficiary extends Component
 
     public function handleSearch($data)
     {
+        // dd($data);
         if (empty($data['results'])) {
             $this->items = [];
             $this->dispatch('toastr', [
@@ -89,9 +89,40 @@ class RequestUpdateBeneficiary extends Component
             return;
         }
         $applicationIds = collect($data['results'])->pluck('application_id')->toArray();
+        $this->moduleSchemeId = $data['results'][0]['scheme_id'];
+        // dd($this->moduleSchemeId);
+        $Mainmodule = DynamicWorkflowModule::where('module_code', $this->requestModuleCode)->first();
+        if (!$Mainmodule) {
+            abort(404, 'Module not found');
+        }
+        $module = DynamicWorkflowSchemeModule::where('module_id', $Mainmodule->id)->where('scheme_id', $this->moduleSchemeId)->first();
 
+        if (!$module) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Steps are not configured for this scheme!'
+            ]);
+            return;
+        }
+        $firstStep = workflowstepRolemapping::where([
+            'module_id' => $module->id,
+            'scheme_id' => $this->moduleSchemeId,
+            'role_id' => $this->RoleId,
+        ])
+            ->orderBy('rank', 'asc')
+            ->orderBy('id', 'asc')
+            ->first();
+        if (!$firstStep) {
+            // dd($firstStep);
+            // throw new \Exception('You are not authorized to initiate this workflow or steps are not configured.');
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'You are not authorized to initiate this workflow or steps are not configured.'
+            ]);
+            return;
+        }
         $SubmittedRequest = DynamicWorkflowRequest::where('ref_id', $applicationIds)
-            // ->where('scheme_id', $this->scheme_id)
+            ->where('scheme_id', $this->moduleSchemeId)
             ->whereNotIn('current_rank', [-100, 0])
             ->get();
         // dd($SubmittedRequest);
