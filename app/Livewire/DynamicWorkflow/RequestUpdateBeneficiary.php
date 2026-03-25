@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use App\Helpers\DuplicateChecker;
 
 class RequestUpdateBeneficiary extends Component
 {
@@ -136,12 +137,29 @@ class RequestUpdateBeneficiary extends Component
         }
         $this->validate($this->rules(), [], $this->validationAttributes());
         $payload = $this->prepareWorkflowPayload();
-        // dd($payload);
         if (empty($payload['new'])) {
-            $this->dispatch('toast', 'error', 'No changes detected for submission.');
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'No changes detected for submission.'
+            ]);
             return;
         }
-
+        $checkData = [
+            'mobile_no' => $this->newData['mobile_no'] ?? null,
+            'bankaccountnumber' => $this->newData['bank_account_number'] ?? null,
+        ];
+        $duplicateResult = DuplicateChecker::check(
+            (int)$this->beneficiary->scheme_id,
+            (int)$this->beneficiary->application_id,
+            $checkData
+        );
+        if ($duplicateResult !== true) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => $duplicateResult['message']
+            ]);
+            return;
+        }
         $hasPendingRequest = DynamicWorkflowRequest::where('module_id', $this->moduleId)
             ->where('ref_id', $this->beneficiary->application_id)
             ->whereNotIn('current_rank', [-100, 0]) // -100 = rejected, 0 = completed
