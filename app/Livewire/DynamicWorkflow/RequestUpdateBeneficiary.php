@@ -6,6 +6,7 @@ use App\Models\AgeManagements;
 use App\Models\BeneficiaryPersonalDetail;
 use App\Models\DynamicWorkflowModule;
 use App\Models\DynamicWorkflowRequest;
+use App\Models\DynamicWorkflowSchemeModule;
 use App\Models\Ifsccodemaster;
 use App\Models\Scheme;
 use App\Models\UserRoleSchemeOfficeMapping;
@@ -66,13 +67,13 @@ class RequestUpdateBeneficiary extends Component
             $this->RoleId = Crypt::decryptString($selectLgd['role_id']);
         }
 
-        $module = DynamicWorkflowModule::where('module_code', $this->requestModuleCode)->first();
-        if (!$module) {
-            abort(404, 'Module not found');
-        }
-        $this->moduleId = $module->id;
-        $this->moduleCode = $module->module_code;
-        $this->moduleSchemeId = $module->scheme_id;
+        // $module = DynamicWorkflowModule::where('module_code', $this->requestModuleCode)->first();
+        // if (!$module) {
+        //     abort(404, 'Module not found');
+        // }
+        // $this->moduleId = $module->id;
+        // $this->moduleCode = $module->module_code;
+        // $this->moduleSchemeId = $module->scheme_id;
         $this->fieldOptions = $this->baseFieldOptions;
     }
 
@@ -124,6 +125,22 @@ class RequestUpdateBeneficiary extends Component
     public function submitRequest()
     {
         // dd('dfsf');
+        $Mainmodule = DynamicWorkflowModule::where('module_code', $this->requestModuleCode)->first();
+        if (!$Mainmodule) {
+            abort(404, 'Module not found');
+        }
+        $module = DynamicWorkflowSchemeModule::where('module_id', $Mainmodule->id)->where('scheme_id', $this->beneficiary->scheme_id)->first();
+
+        if (!$module) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Steps are not configured for this scheme!'
+            ]);
+            return;
+        }
+        $this->moduleId = $module->id;
+        $this->moduleCode = $module->module_code;
+        // $this->moduleSchemeId = $module->scheme_id;
         if (!$this->beneficiary) {
             $this->dispatch('toast', 'error', 'No beneficiary selected!');
             return;
@@ -141,6 +158,7 @@ class RequestUpdateBeneficiary extends Component
         }
         $hasPendingRequest = DynamicWorkflowRequest::where('module_id', $this->moduleId)
             ->where('ref_id', $this->beneficiary->application_id)
+            ->where('scheme_id', $this->beneficiary->scheme_id)
             ->whereNotIn('current_rank', [-100, 0]) // -100 = rejected, 0 = completed
             ->exists();
         if ($hasPendingRequest) {
@@ -160,17 +178,19 @@ class RequestUpdateBeneficiary extends Component
             );
             DB::commit();
             $message = "Request submitted successfully! Request ID: " . $newRequest->id;
-            session()->flash('success', $message);
-            return redirect()->route('dynamic-workflow-request');
+            $this->dispatch('toastr', [
+                'type' => 'success',
+                'message' => $message
+            ]);
+            // return redirect()->route('dynamic-workflow-request');
         } catch (\Exception $e) {
-            dd($e);
             DB::rollBack();
-            session()->flash('error', 'Something went wrong!');
-            return redirect()->route('dynamic-workflow-request');
-            // $this->dispatch('toastr', [
-            //     'type' => 'error',
-            //     'message' => 'Something went wrong!'
-            // ]);
+            // $e->getMessage() দিয়ে Exception-এর ভেতরের মেসেজটি দেখানো হচ্ছে
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => $e->getMessage()
+            ]);
+            // return redirect()->route('dynamic-workflow-request');
         }
     }
 

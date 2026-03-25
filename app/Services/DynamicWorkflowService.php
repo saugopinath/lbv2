@@ -29,17 +29,20 @@ class DynamicWorkflowService
     }
     public function initiateRequest($moduleId, $refId, $schemeId, $oldData, $newData, $changedFields = [])
     {
+        // dd($moduleId, $refId, $schemeId, $oldData, $newData, $changedFields);
         $roleId = $this->getCurrentUserRoleId();
         DB::beginTransaction();
         try {
             $firstStep = workflowstepRolemapping::where([
                 'module_id' => $moduleId,
-                'scheme_id' => $schemeId
+                'scheme_id' => $schemeId,
+                'role_id' => $roleId,
             ])
                 ->orderBy('rank', 'asc')
                 ->orderBy('id', 'asc')
                 ->first();
             if (!$firstStep) {
+                // dd($firstStep);
                 throw new \Exception('You are not authorized to initiate this workflow or steps are not configured.');
             }
             $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $refId)->value('beneficiary_id');
