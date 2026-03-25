@@ -146,7 +146,7 @@ class WorkflowWizard extends Component
                 ->orderBy('rank', 'asc')
                 ->get()
                 ->groupBy('rank');
-                
+
             $existingLabels = DynamicWorkflowLabel::where('module_id', $this->selectedModule)
                 ->get()
                 ->keyBy('label_name');
@@ -155,7 +155,7 @@ class WorkflowWizard extends Component
         foreach ($this->stepNames as $index => $label) {
             $rank = ($index + 1) * 10;
             $mappings = $existingMappings->get($rank, collect());
-            
+
             $existingLabel = $existingLabels->get($label);
             $this->finalSteps[$index] = [
                 'rank' => (int) $rank,

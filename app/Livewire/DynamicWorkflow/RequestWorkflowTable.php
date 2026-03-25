@@ -6,6 +6,7 @@ use App\Models\BeneficiaryPersonalDetail;
 use App\Models\DynamicWorkflowRequest;
 use App\Models\workflowstepRolemapping;
 use App\Models\DynamicWorkflowModule;
+use App\Models\DynamicWorkflowSchemeModule;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -26,10 +27,22 @@ class RequestWorkflowTable extends DataTableComponent
     {
         $this->moduleCode = $moduleCode;
         $this->scheme_id = (int) $schemeId;
-        $this->module_id = DynamicWorkflowModule::where('module_code', $this->moduleCode)
-            ->where('scheme_id', $this->scheme_id)
-            ->value('id');
-
+        // $this->module_id = DynamicWorkflowModule::where('module_code', $this->moduleCode)
+        //     ->where('scheme_id', $this->scheme_id)
+        //     ->value('id');
+        $Mainmodule = DynamicWorkflowModule::where('module_code', $this->moduleCode)->first();
+        if (!$Mainmodule) {
+            abort(404, 'Module not found');
+        }
+        $module = DynamicWorkflowSchemeModule::where('module_id', $Mainmodule->id)->where('scheme_id', $this->scheme_id)->first();
+        $this->module_id = $module->id;
+        if (!$module) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Steps are not configured for this scheme!'
+            ]);
+            return;
+        }
         $selectLgd = session('lgd_session');
         if (!empty($selectLgd['district_id'])) {
             $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($selectLgd['district_id']);
@@ -140,10 +153,14 @@ class RequestWorkflowTable extends DataTableComponent
                 ->value('role_id') ?? 0;
         }
 
-        $module = DynamicWorkflowModule::where('module_code', $this->moduleCode)
-            ->where('scheme_id', $this->scheme_id)
-            ->first();
-
+        // $module = DynamicWorkflowModule::where('module_code', $this->moduleCode)
+        //     ->where('scheme_id', $this->scheme_id)
+        //     ->first();
+        $Mainmodule = DynamicWorkflowModule::where('module_code', $this->moduleCode)->first();
+        if (!$Mainmodule) {
+            abort(404, 'Module not found');
+        }
+        $module = DynamicWorkflowSchemeModule::where('module_id', $Mainmodule->id)->where('scheme_id', $this->scheme_id)->first();
         if (!$module) {
             return DynamicWorkflowRequest::query()->whereRaw('1=0');
         }

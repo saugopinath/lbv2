@@ -197,11 +197,12 @@ class RequestUpdateBeneficiary extends Component
             );
             DB::commit();
             $message = "Request submitted successfully! Request ID: " . $newRequest->id;
+
             $this->dispatch('toastr', [
                 'type' => 'success',
                 'message' => $message
             ]);
-            // return redirect()->route('dynamic-workflow-request');
+            return redirect()->route('dynamic-workflow-request');
         } catch (\Exception $e) {
             DB::rollBack();
             // $e->getMessage() দিয়ে Exception-এর ভেতরের মেসেজটি দেখানো হচ্ছে
