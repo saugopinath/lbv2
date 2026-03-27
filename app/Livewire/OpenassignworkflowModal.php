@@ -1,11 +1,14 @@
 <?php
+
 namespace App\Livewire;
+
 use App\Models\Role;
 use App\Models\WorkflowStep;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Attributes\Loggable;
+
 class OpenassignworkflowModal extends Component
 {
     public bool $isOpen = false;
@@ -59,6 +62,8 @@ class OpenassignworkflowModal extends Component
                 'scheme_id' => $this->workflowStep->scheme_id,
                 'same_label_role_id' => $sameLabelRoleId,
                 'next_label_role_id' => $nextLabelRoleId,
+                'is_first_step'      => $this->workflowStep->is_first,
+                'is_final_step'      => $this->workflowStep->is_last,
             ];
         }
         $this->workflowStep->roles()->sync($syncData);
