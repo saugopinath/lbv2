@@ -61,7 +61,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         }
     }
     public function filtersApplied($filters)
-    {       
+    {
         $this->district_id = $filters['district_id'];
         $this->rural_urban = $filters['rural_urban'] ?? null;
         $this->blockurban = $filters['blockurban'];
@@ -115,35 +115,36 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $actions = [
             'exportSelected' => 'Export',
         ];
-      
+        $workflowService = app(WorkflowService::class);
+        $data = $workflowService->getLabelRoles($this->schemeId);
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'verification', true) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true)) && CheckAuthHelper::isCommmonVerifier()
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true)) && !$data->is_final_step && !$data->is_first_step
         ) {
             $actions['bulkverify'] = 'Verify';
         }
-       
+
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'approver', true) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'approver', true)) && CheckAuthHelper::isCommonApprover()
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'approver', true)) && $data->is_final_step
         ) {
             $actions['bulkapprove'] = 'Approve';
         }
-       
+
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'reject', true) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'reject', true)) && CheckAuthHelper::isCommonWorkFlow2ndStep()
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'reject', true)) && !$data->is_first_step
         ) {
             $actions['bulkreject'] = 'Reject';
         }
-      
+
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'revert', true) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'revert', true)) && CheckAuthHelper::isCommonWorkFlow2ndStep()
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'revert', true)) && !$data->is_first_step
         ) {
             $actions['bulkrevert'] = 'Revert';
         }
-        
+
         return $actions;
     }
 
@@ -208,7 +209,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 $this->sub_div ? (int) $this->sub_div : null
             );
         }
-        $this->dispatch('hideLoader');      
+        $this->dispatch('hideLoader');
         return $query;
     }
 
@@ -265,15 +266,15 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     ->get();
 
                 foreach ($records as $record) {
-                   
+
                     $record->update([
                         'next_level_role_id' => $next_level_role_id
                     ]);
-                 
+
                     $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
                         ->latest('id')
                         ->value('id');
-                  
+
                     AcceptRejectInfo::create([
                         'application_id' => $record->application_id,
                         'beneficiary_id' => $record->beneficiary_id,
@@ -297,7 +298,6 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
                 $this->clearSelected();
                 $this->dispatch('actionPerformedAndRedirect');
-
             } catch (\Throwable $e) {
 
                 DB::rollBack();
@@ -320,16 +320,16 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     ->get();
 
                 foreach ($records as $record) {
-                  
+
                     $record->update([
                         'next_level_role_id' => $this->nextLabelRoleId,
                         'is_clean' => 10,
                     ]);
-                  
+
                     $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
                         ->latest('id')
                         ->value('id');
-                   
+
                     AcceptRejectInfo::create([
                         'application_id' => $record->application_id,
                         'beneficiary_id' => $record->beneficiary_id,
@@ -353,7 +353,6 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
                 $this->clearSelected();
                 $this->dispatch('actionPerformedAndRedirect');
-
             } catch (\Throwable $e) {
 
                 DB::rollBack();
@@ -363,7 +362,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $ids = $this->getSelected();
             if (empty($ids))
                 return;
-            $check =SchemeCapacityHelper::checkBulk($this->schemeId, $this->nextLabelRoleId, $ids);
+            $check = SchemeCapacityHelper::checkBulk($this->schemeId, $this->nextLabelRoleId, $ids);
             if (!$check['is_processed']) {
                 $this->dispatch('toastr', [
                     'type' => 'error',
@@ -378,15 +377,15 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     ->get();
 
                 foreach ($records as $record) {
-                    
+
                     $record->update([
                         'next_level_role_id' => $this->nextLabelRoleId
                     ]);
-                  
+
                     $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
                         ->latest('id')
                         ->value('id');
-                   
+
                     AcceptRejectInfo::create([
                         'application_id' => $record->application_id,
                         'beneficiary_id' => $record->beneficiary_id,
@@ -414,7 +413,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 return;
             }
 
-            $check =SchemeCapacityHelper::checkBulk(
+            $check = SchemeCapacityHelper::checkBulk(
                 $this->schemeId,
                 $this->nextLabelRoleId,
                 $ids
@@ -431,22 +430,22 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             DB::beginTransaction();
 
             try {
-              
+
                 $records = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
                     ->select('application_id', 'beneficiary_id', 'next_level_role_id', 'is_clean')
                     ->get();
 
                 foreach ($records as $record) {
-                   
+
                     $record->update([
                         'next_level_role_id' => $this->nextLabelRoleId,
                         'is_clean' => 1,
                     ]);
-                  
+
                     $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
                         ->latest('id')
                         ->value('id');
-                   
+
                     AcceptRejectInfo::create([
                         'application_id' => $record->application_id,
                         'beneficiary_id' => $record->beneficiary_id,
@@ -468,7 +467,6 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 ]);
 
                 $this->clearSelected();
-
             } catch (\Throwable $e) {
 
                 DB::rollBack();
