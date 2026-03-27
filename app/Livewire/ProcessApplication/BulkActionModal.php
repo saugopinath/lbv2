@@ -84,19 +84,19 @@ class BulkActionModal extends Component
         }
 
         if ($entryType) {
-            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'verification') && CheckAuthHelper::isCommmonVerifier()) {
-                $this->availableActions['V'] = 'Verify';
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'verification') && ((!$labelRoles->is_final_step && !$labelRoles->is_first_step) || ($labelRoles->is_final_step && $labelRoles->is_first_step))) {
+                $this->availableActions['V'] = $labelRoles->workflowstep->label;
             }
 
-            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'approver') && CheckAuthHelper::isCommonApprover()) {
-                $this->availableActions['A'] = 'Approve';
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'approver') && $labelRoles->is_final_step) {
+                $this->availableActions['A'] = $labelRoles->workflowstep->label;
             }
 
-            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'reject') && CheckAuthHelper::isCommonWorkFlow2ndStep()) {
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'reject') && (!$labelRoles->is_first_step || ($labelRoles->is_final_step && $labelRoles->is_first_step))) {
                 $this->availableActions['R'] = 'Reject';
             }
 
-            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'revert') && CheckAuthHelper::isCommonWorkFlow2ndStep()) {
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'revert') && (!$labelRoles->is_first_step || ($labelRoles->is_final_step && $labelRoles->is_first_step))) {
                 $this->availableActions['T'] = 'Revert';
             }
         }
