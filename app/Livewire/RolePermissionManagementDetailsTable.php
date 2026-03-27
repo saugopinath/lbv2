@@ -16,12 +16,6 @@ class RolePermissionManagementDetailsTable extends DataTableComponent
 
     protected $listeners = ['refreshDatatable' => '$refresh'];
     public int $rowNumberOffset = 0;
-    public $schemeId;
-
-    public function mount($schemeId = null)
-    {
-        $this->schemeId = $schemeId;
-    }
 
     public function configure(): void
     {
@@ -58,13 +52,6 @@ class RolePermissionManagementDetailsTable extends DataTableComponent
     }
     public function builder(): Builder
     {
-        $schemeId = $this->schemeId ?? \App\Helpers\WorkFlowPermissionHelper::getSchemeId();
-
-        if ($schemeId) {
-            app(\Spatie\Permission\PermissionRegistrar::class)
-                ->setPermissionsTeamId($schemeId);
-        }
-
         $query = Role::query()
             ->with(['mappedPermissions']);
 
@@ -122,7 +109,7 @@ class RolePermissionManagementDetailsTable extends DataTableComponent
                 ->label(
                     fn($row) =>
                     view('coulmn_button.actions', [
-                        'wireClick' => " \$dispatch('UpdateRolePermission', { roleId: {$row->id}, schemeId: {$this->schemeId} })",
+                        'wireClick' => " \$dispatch('UpdateRolePermission', { roleId: {$row->id} })",
                         'tooltip'   => 'Update Permissions',
                     ])->render()
                 )

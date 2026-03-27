@@ -17,22 +17,10 @@ class RolePermissionManagementEditModal extends Component
     public $roleName;
     public $permissions = [];
     public $selectedPermissions = [];
-    public $schemeId;
-
     protected $listeners = ['UpdateRolePermission' => 'open'];
 
-    public function mount($schemeId = null)
+    public function open($roleId)
     {
-        $this->schemeId = $schemeId;
-    }
-
-    public function open($roleId, $schemeId = null)
-    {
-        if ($schemeId) {
-            $this->schemeId = $schemeId;
-        }
-
-        app(PermissionRegistrar::class)->setPermissionsTeamId($this->schemeId);
         // dd($userId);
         $this->resetValidation();
         $this->resetExcept(['isOpen']);
@@ -46,7 +34,6 @@ class RolePermissionManagementEditModal extends Component
     #[Loggable(level: 'C', nickname: 'Role Permission Management')]
     public function updateRolePermission()
     {
-        app(PermissionRegistrar::class)->setPermissionsTeamId($this->schemeId);
 
         $role = Role::find($this->roleId);
 
