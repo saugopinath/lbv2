@@ -50,6 +50,7 @@ use App\Livewire\DynamicWorkflow\ProcessWorkflow;
 use App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary;
 use App\Livewire\DynamicWorkflow\WorkflowWizard;
 use App\Http\Controllers\DynamicWorkflow\UpdateMarkBeneficiaryDetailsController;
+use App\Livewire\DynamicWorkflow\DynamicProcessPage;
 
 require __DIR__ . '/home.php';
 
@@ -254,3 +255,6 @@ Route::get('dynamic-workflow-config', WorkflowWizard::class)->name('dynamic-work
 Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
 Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
 Route::get('update-mark-beneficiary-details', [UpdateMarkBeneficiaryDetailsController::class, 'index'])->name('update-mark-beneficiary-details');
+Route::get('dynamic-process-workflow', DynamicProcessPage::class)->name('dynamic-process-workflow');
+Route::get('update-beneficiary-list', [UpdateMarkBeneficiaryDetailsController::class, 'listdetails'])->name('update-beneficiary-list');
+

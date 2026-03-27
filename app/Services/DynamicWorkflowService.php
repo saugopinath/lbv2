@@ -41,10 +41,13 @@ class DynamicWorkflowService
                 ->orderBy('rank', 'asc')
                 ->orderBy('id', 'asc')
                 ->first();
+            // dd($firstStep);
             if (!$firstStep) {
                 // dd($firstStep);
                 throw new \Exception('You are not authorized to initiate this workflow or steps are not configured.');
             }
+            $optype = DynamicWorkflowLabel::getOpTypeId($firstStep->workflow_step_id);
+            // dd($optype);
             $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $refId)->value('beneficiary_id');
             $parentId = AcceptRejectInfo::where('application_id', $refId)->latest('id')->value('id');
             $log = AcceptRejectInfo::create([
@@ -54,7 +57,7 @@ class DynamicWorkflowService
                 'user_id'        => Auth::id(),
                 'ip_address'     => request()->ip(),
                 'browser'        => request()->userAgent(),
-                'op_type'        => DynamicWorkflowLabel::getOpTypeId($firstStep->workflow_step_id),
+                'op_type'        => $optype,
                 'model_name'     => optional($firstStep->module)->module_name ?? 'null',
                 'parent_id'      => $parentId,
                 'old_value'      => $oldData,
