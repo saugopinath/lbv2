@@ -252,9 +252,9 @@ class BulkActionModal extends Component
                         ->latest('id')
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
-                    BeneficiaryPersonalDetail::where('application_id', $id)->update([
-                        'next_level_role_id' => $this->nextLabelRoleId,
-                    ]);
+                    // BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                    //     'next_level_role_id' => $this->nextLabelRoleId,
+                    // ]);
                     DB::commit();
                     $this->dispatch('toastr', [
                         'type' => 'warning',
