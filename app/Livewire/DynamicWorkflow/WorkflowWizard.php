@@ -59,7 +59,7 @@ class WorkflowWizard extends Component
             if ($schemeModule) {
                 $this->stepCount = $schemeModule->step_count;
 
-                $labels = DynamicWorkflowLabel::where('module_id', $schemeModule->id)
+                $labels = DynamicWorkflowLabel::where('module_id', $schemeModule->id)->where('scheme_id', $this->selectedScheme)
                     ->orderBy('id', 'asc')
                     ->pluck('label_name')
                     ->toArray();
@@ -142,19 +142,26 @@ class WorkflowWizard extends Component
         $existingLabels = collect();
 
         if (! $this->isNewModule) {
-            $existingMappings = workflowstepRolemapping::where('module_id', $this->selectedModule)->where('scheme_id', $this->selectedScheme)
-                ->orderBy('rank', 'asc')
-                ->get()
-                ->groupBy('rank');
+            $schemeModule = DynamicWorkflowSchemeModule::where('module_id', $this->selectedModule)
+                ->where('scheme_id', $this->selectedScheme)
+                ->first();
 
-            $existingLabels = DynamicWorkflowLabel::where('module_id', $this->selectedModule)->where('scheme_id', $this->selectedScheme)
-                ->get()
-                ->keyBy('label_name');
+            if ($schemeModule) {
+                $existingMappings = workflowstepRolemapping::where('module_id', $schemeModule->id)->where('scheme_id', $this->selectedScheme)
+                    ->orderBy('rank', 'asc')
+                    ->get()
+                    ->groupBy('rank');
+
+                $existingLabels = DynamicWorkflowLabel::where('module_id', $schemeModule->id)->where('scheme_id', $this->selectedScheme)
+                    ->get()
+                    ->keyBy('label_name');
+            }
         }
         $this->finalSteps = [];
         foreach ($this->stepNames as $index => $label) {
             $rank = ($index + 1) * 10;
             $mappings = $existingMappings->get($rank, collect());
+            $firstMapping = $mappings->first();
 
             $existingLabel = $existingLabels->get($label);
             $this->finalSteps[$index] = [
