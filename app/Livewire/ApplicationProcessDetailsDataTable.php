@@ -119,28 +119,28 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $data = $workflowService->getLabelRoles($this->schemeId);
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'verification', true) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true)) && !$data->is_final_step && !$data->is_first_step
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true)) && ((!$data->is_final_step && !$data->is_first_step) || ($data->is_final_step && $data->is_first_step))
         ) {
-            $actions['bulkverify'] = 'Verify';
+            $actions['bulkverify'] = $data->workflowstep->label;
         }
 
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'approver', true) ||
                 WorkFlowPermissionHelper::canBulkActionAllow(2, 'approver', true)) && $data->is_final_step
         ) {
-            $actions['bulkapprove'] = 'Approve';
+            $actions['bulkapprove'] = $data->workflowstep->label;
         }
 
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'reject', true) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'reject', true)) && !$data->is_first_step
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'reject', true)) && (!$data->is_first_step || ($data->is_final_step && $data->is_first_step))
         ) {
             $actions['bulkreject'] = 'Reject';
         }
 
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'revert', true) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'revert', true)) && !$data->is_first_step
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'revert', true)) && (!$data->is_first_step || ($data->is_final_step && $data->is_first_step))
         ) {
             $actions['bulkrevert'] = 'Revert';
         }
@@ -268,7 +268,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 foreach ($records as $record) {
 
                     $record->update([
-                        'next_level_role_id' => $next_level_role_id
+                        'next_level_role_id' => $this->nextLabelRoleId
                     ]);
 
                     $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
