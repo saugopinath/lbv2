@@ -17,11 +17,22 @@ class RolePermissionManagementEditModal extends Component
     public $roleName;
     public $permissions = [];
     public $selectedPermissions = [];
+    public $schemeId;
 
     protected $listeners = ['UpdateRolePermission' => 'open'];
 
-    public function open($roleId)
+    public function mount($schemeId = null)
     {
+        $this->schemeId = $schemeId;
+    }
+
+    public function open($roleId, $schemeId = null)
+    {
+        if ($schemeId) {
+            $this->schemeId = $schemeId;
+        }
+
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->schemeId);
         // dd($userId);
         $this->resetValidation();
         $this->resetExcept(['isOpen']);
@@ -35,6 +46,8 @@ class RolePermissionManagementEditModal extends Component
     #[Loggable(level: 'C', nickname: 'Role Permission Management')]
     public function updateRolePermission()
     {
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->schemeId);
+
         $role = Role::find($this->roleId);
 
         if (!$role) {
@@ -51,7 +64,7 @@ class RolePermissionManagementEditModal extends Component
         // $this->dispatch('refreshDatatable');
         // $this->dispatch('notify', ['message' => 'Permissions updated successfully!']);
         // Selected permissions (array of ids) coming from UI
-        $selectedIds = is_array($this->selectedPermissions) ? $this->selectedPermissions : [];
+        $selectedIds = is_array($this->selectedPermissions) ? array_map('intval', $this->selectedPermissions) : [];
         // dd($selectedIds);
         // Current permission ids already attached to the role
         $currentIds = $role->permissions->pluck('id')->toArray();

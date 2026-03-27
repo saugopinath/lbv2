@@ -8,18 +8,40 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Cache;
-
+use Spatie\Permission\PermissionRegistrar;
 class WorkFlowPermissionHelper
 {
     // Add this method if not exists
-    public static function hasPermission($permissionKey)
+    public static function getSchemeId()
+    {
+        $schemeId = session('scheme_id');
+
+        if (!$schemeId && session()->has('lgd_session.scheme_id')) {
+            try {
+                $schemeId = Crypt::decryptString(session('lgd_session.scheme_id'));
+            } catch (\Exception $e) {
+                $schemeId = null;
+            }
+        }
+
+        return $schemeId;
+    }
+
+    public static function hasPermission($permissionKey, $schemeId = null)
     {
         $user = auth()->user();
+
         if (!$user) {
             return false;
         }
 
-        // Check if user has permission
+        $schemeId = $schemeId ?? self::getSchemeId();
+
+        if ($schemeId) {
+            app(PermissionRegistrar::class)
+                ->setPermissionsTeamId($schemeId);
+        }
+
         return $user->can($permissionKey);
     }
     
@@ -30,69 +52,69 @@ class WorkFlowPermissionHelper
             : null;
     }
 
-    public static function canEntry(): bool
+    public static function canEntry($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('submit-lb-form');
+        return self::hasPermission('submit-lb-form', $schemeId);
     }
     
-    public static function canViewUser(): bool
+    public static function canViewUser($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('view users');
+        return self::hasPermission('view users', $schemeId);
     }
     
-    public static function canDraftList(): bool
+    public static function canDraftList($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('view draft list');
+        return self::hasPermission('view draft list', $schemeId);
     }
     
-    public static function canEditDraft(): bool
+    public static function canEditDraft($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('edit draft');
+        return self::hasPermission('edit draft', $schemeId);
     }
     
-    public static function canViewBeneficiaries(): bool
+    public static function canViewBeneficiaries($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('view beneficiaries');
+        return self::hasPermission('view beneficiaries', $schemeId);
     }
     
-    public static function canViewReport(): bool
+    public static function canViewReport($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('view reports');
+        return self::hasPermission('view reports', $schemeId);
     }
     
-    public static function canRoleMappings(): bool
+    public static function canRoleMappings($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('create role mappings');
+        return self::hasPermission('create role mappings', $schemeId);
     }
     
-    public static function canApproveApplication(): bool
+    public static function canApproveApplication($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('approve application');
+        return self::hasPermission('approve application', $schemeId);
     }
     
-    public static function canRevertApplication(): bool
+    public static function canRevertApplication($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('revert application');
+        return self::hasPermission('revert application', $schemeId);
     }
     
-    public static function canCreateUsers(): bool
+    public static function canCreateUsers($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('create users');
+        return self::hasPermission('create users', $schemeId);
     }
     
-    public static function canNormalEntryAllow(): bool
+    public static function canNormalEntryAllow($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('Normal Entry');
+        return self::hasPermission('Normal Entry', $schemeId);
     }
     
-    public static function canDuareSarkarEntryAllow(): bool
+    public static function canDuareSarkarEntryAllow($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('Duare Sarkar Entry');
+        return self::hasPermission('Duare Sarkar Entry', $schemeId);
     }
     
-    public static function canEntryAllow(): bool
+    public static function canEntryAllow($schemeId = null): bool
     {
-        return self::canNormalEntryAllow() || self::canDuareSarkarEntryAllow();
+        return self::canNormalEntryAllow($schemeId) || self::canDuareSarkarEntryAllow($schemeId);
     }
     
     public static function getAllowedEntryTypes()
@@ -112,183 +134,183 @@ class WorkFlowPermissionHelper
         return $entryTypes;
     }
     
-    public static function canModifyCaste(): bool
+    public static function canModifyCaste($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('modify caste');
+        return self::hasPermission('modify caste', $schemeId);
     }
     
-    public static function canEditCaste(): bool
+    public static function canEditCaste($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('edit caste');
+        return self::hasPermission('edit caste', $schemeId);
     }
     
-    public static function canUpdateCaste(): bool
+    public static function canUpdateCaste($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('update caste');
+        return self::hasPermission('update caste', $schemeId);
     }
     
-    public static function canCasteModification(): bool
+    public static function canCasteModification($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('view caste modification list');
+        return self::hasPermission('view caste modification list', $schemeId);
     }
     
-    public static function canBeneficiaryDetails(): bool
+    public static function canBeneficiaryDetails($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('view beneficiary details');
+        return self::hasPermission('view beneficiary details', $schemeId);
     }
     
-    public static function canVerifierIncomplet(): bool
+    public static function canVerifierIncomplet($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('view verifier incomplete');
+        return self::hasPermission('view verifier incomplete', $schemeId);
     }
     
-    public static function canApproverIncomplet(): bool
+    public static function canApproverIncomplet($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('view approver incomplete');
+        return self::hasPermission('view approver incomplete', $schemeId);
     }
     
-    public static function canUpdateIncomplet(): bool
+    public static function canUpdateIncomplet($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('update incomplete');
+        return self::hasPermission('update incomplete', $schemeId);
     }
     
-    public static function canRevertIncomplet(): bool
+    public static function canRevertIncomplet($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('revert incomplete');
+        return self::hasPermission('revert incomplete', $schemeId);
     }
     
-    public static function canViewOffices(): bool
-    {
-        return Auth::user() && Auth::user()->can('view offices');
+    public static function canViewOffices($schemeId = null): bool
+    {       
+        return self::hasPermission('view offices', $schemeId);
     }
     
-    public static function canRoleMapping(): bool
+    public static function canRoleMapping($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('manage role mappings');
+        return self::hasPermission('manage role mappings', $schemeId);
     }
     
-    public static function canViewPermission(): bool
+    public static function canViewPermission($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('view permission');
+        return self::hasPermission('view permission', $schemeId);
     }
     
-    public static function canUpdateBankDetails(): bool
+    public static function canUpdateBankDetails($schemeId = null): bool
     {
-        return Auth::user()->can('update bank details');
+        return self::hasPermission('update bank details', $schemeId);
     }
     
-    public static function canSearchBankUpdate(): bool
+    public static function canSearchBankUpdate($schemeId = null): bool
     {
-        return Auth::user()->can('search bank update');
+        return self::hasPermission('search bank update', $schemeId);
     }
     
-    public static function canUpdateMobile(): bool
+    public static function canUpdateMobile($schemeId = null): bool
     {
-        return Auth::user()->can('update mobile');
+        return self::hasPermission('update mobile', $schemeId);
     }
     
-    public static function canUpdateBank(): bool
+    public static function canUpdateBank($schemeId = null): bool
     {
-        return Auth::user()->can('update bank');
+        return self::hasPermission('update bank', $schemeId);
     }
     
-    public static function canViewUserPermisson(): bool
+    public static function canViewUserPermisson($schemeId = null): bool
     {
-        return Auth::user()->can('view user permission');
+        return self::hasPermission('view user permission', $schemeId);
     }
     
-    public static function canRolePermissionManagement(): bool
+    public static function canRolePermissionManagement($schemeId = null): bool
     {
-        return Auth::user()->can('role-permission-management');
+        return self::hasPermission('role-permission-management', $schemeId);
     }
     
-    public static function canViewLbApplications(): bool
+    public static function canViewLbApplications($schemeId = null): bool
     {
-        return Auth::user()->can('lb-application-list');
+        return self::hasPermission('lb-application-list', $schemeId);
     }
     
-    public static function canViewApplication(): bool
+    public static function canViewApplication($schemeId = null): bool
     {
-        return Auth::user()->can('view application');
+        return self::hasPermission('view application', $schemeId);
     }
     
-    public static function canViewApprovedList(): bool
+    public static function canViewApprovedList($schemeId = null): bool
     {
-        return Auth::user()->can('view approved list');
+        return self::hasPermission('view approved list', $schemeId);
     }
     
-    public static function canViewIncompleteList(): bool
+    public static function canViewIncompleteList($schemeId = null): bool
     {
-        return Auth::user()->can('view incomplete applications');
+        return self::hasPermission('view incomplete applications', $schemeId);
     }
     
-    public static function canCreateOffices(): bool
+    public static function canCreateOffices($schemeId = null): bool
     {
-        return Auth::user()->can('create offices');
+        return self::hasPermission('create offices', $schemeId);
     }
     
-    public static function canApprovedWise(): bool
+    public static function canApprovedWise($schemeId = null): bool
     {
-        return Auth::user()->can('view approved ba wise');
+        return self::hasPermission('view approved ba wise', $schemeId);
     }
     
-    public static function canWorkflowPermission(): bool
+    public static function canWorkflowPermission($schemeId = null): bool
     {
-        return Auth::user()->can('Workflow Permission');
+        return self::hasPermission('Workflow Permission', $schemeId);
     }
     
-    public static function canVerificationAllow(): bool
+    public static function canVerificationAllow($schemeId = null): bool
     {
-        return Auth::user()->can('Verification Allow');
+        return self::hasPermission('Verification Allow', $schemeId);
     }
     
-    public static function canApproverAllow(): bool
+    public static function canApproverAllow($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('Approver Allow');
+        return self::hasPermission('Approver Allow', $schemeId);
     }
     
-    public static function canRejectAllow(): bool
+    public static function canRejectAllow($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('Reject Allow');
+        return self::hasPermission('Reject Allow', $schemeId);
     }
     
-    public static function canRevertAllow(): bool
+    public static function canRevertAllow($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('Revert Allow');
+        return self::hasPermission('Revert Allow', $schemeId);
     }
     
-    public static function canAnyLbMenu(): bool
+    public static function canAnyLbMenu($schemeId = null): bool
     {
-        return Auth::user() && (Auth::user()->can('lb-application-list') || Auth::user()->can('submit-lb-form'));
+        return self::hasPermission('lb-application-list', $schemeId) || self::hasPermission('submit-lb-form', $schemeId);
     }
     
-    public static function canIncomplete(): bool
+    public static function canIncomplete($schemeId = null): bool
     {
-        return Auth::user() && (Auth::user()->can('view verifier incomplete')
-            || Auth::user()->can('view approver incomplete'));
+        return self::hasPermission('view verifier incomplete', $schemeId)
+            || self::hasPermission('view approver incomplete', $schemeId);
     }
     
-    public static function canDutyManagement(): bool
+    public static function canDutyManagement($schemeId = null): bool
     {
-        return Auth::user() && (Auth::user()->can('view users')
-            || Auth::user()->can('view offices') || Auth::user()->can('manage role mappings'));
+        return self::hasPermission('view users', $schemeId)
+            || self::hasPermission('view offices', $schemeId) || self::hasPermission('manage role mappings', $schemeId);
     }
     
-    public static function canCaste(): bool
+    public static function canCaste($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('view caste modification list')
-            || Auth::user()->can('modify caste');
+        return self::hasPermission('view caste modification list', $schemeId)
+            || self::hasPermission('modify caste', $schemeId);
     }
     
-    public static function canUserPermission(): bool
+    public static function canUserPermission($schemeId = null): bool
     {
-        return Auth::user()->can('view user permission')
-            || Auth::user()->can('view permission');
+        return self::hasPermission('view user permission', $schemeId)
+            || self::hasPermission('view permission', $schemeId);
     }
     
-    public static function canManageMenus(): bool
+    public static function canManageMenus($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('manage-menus');
+        return self::hasPermission('manage-menus', $schemeId);
     }
 
     public static function canBulkActionAllow(int $entryType, string $action, bool $isBulk = false): bool
@@ -328,99 +350,99 @@ class WorkFlowPermissionHelper
         return $user->can($permission);
     }
 
-    public static function canVerifyCastApplication(): bool
+    public static function canVerifyCastApplication($schemeId = null): bool
     {
-        return Auth::user()->can('VerifyCasteApplication');
+        return self::hasPermission('VerifyCasteApplication', $schemeId);
     }
     
-    public static function canApproveCastApplication(): bool
+    public static function canApproveCastApplication($schemeId = null): bool
     {
-        return Auth::user()->can('ApproveCasteApplication');
+        return self::hasPermission('ApproveCasteApplication', $schemeId);
     }
 
-    public static function canViewCastApplication(): bool
+    public static function canViewCastApplication($schemeId = null): bool
     {
-        return Auth::user()->can('ViewCastApplication');
+        return self::hasPermission('ViewCastApplication', $schemeId);
     }
     
-    public static function canTakeActionForCaste(): bool
+    public static function canTakeActionForCaste($schemeId = null): bool
     {
-        return Auth::user()->can('TakeActionForCaste');
+        return self::hasPermission('TakeActionForCaste', $schemeId);
     }
     
-    public static function canRevertCastApplication(): bool
+    public static function canRevertCastApplication($schemeId = null): bool
     {
-        return Auth::user()->can('RevertCasteApplication');
+        return self::hasPermission('RevertCasteApplication', $schemeId);
     }
     
-    public static function canEditRevertApplication(): bool
+    public static function canEditRevertApplication($schemeId = null): bool
     {
-        return Auth::user()->can('EditRevertApplication');
+        return self::hasPermission('EditRevertApplication', $schemeId);
     }
     
-    public static function canRejectApprovedBeneficiary(): bool
+    public static function canRejectApprovedBeneficiary($schemeId = null): bool
     {
-        return Auth::user()->can('RejectApprovedBeneficiary');
+        return self::hasPermission('RejectApprovedBeneficiary', $schemeId);
     }
     
-    public static function canFilterApplicantToReject(): bool
+    public static function canFilterApplicantToReject($schemeId = null): bool
     {
-        return Auth::user()->can('Filter Applicant To Reject');
+        return self::hasPermission('Filter Applicant To Reject', $schemeId);
     }
     
-    public static function canViewDetailsToReject(): bool
+    public static function canViewDetailsToReject($schemeId = null): bool
     {
-        return Auth::user()->can('View Details To Reject');
+        return self::hasPermission('View Details To Reject', $schemeId);
     }
     
-    public static function canRejectBeneficiary(): bool
+    public static function canRejectBeneficiary($schemeId = null): bool
     {
-        return Auth::user()->can('Reject Beneficiary');
+        return self::hasPermission('Reject Beneficiary', $schemeId);
     }
 
-    public static function canMasterTab(): bool
+    public static function canMasterTab($schemeId = null): bool
     {
-        return Auth::user()->can('master-tab');
+        return self::hasPermission('master-tab', $schemeId);
     }
     
-    public static function canRoleRankManagement(): bool
+    public static function canRoleRankManagement($schemeId = null): bool
     {
-        return Auth::user()->can('role-rank-management');
+        return self::hasPermission('role-rank-management', $schemeId);
     }
     
-    public static function canDefineWorkflow(): bool
+    public static function canDefineWorkflow($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('define-workflow');
+        return self::hasPermission('define-workflow', $schemeId);
     }
 
-    public static function canSchemeOnboard(): bool
+    public static function canSchemeOnboard($schemeId = null): bool
     {
-        return Auth::user()->can('master-tab')
-            || Auth::user()->can('role-rank-management') || Auth::user()->can('define-workflow');
+        return self::hasPermission('master-tab', $schemeId)
+            || self::hasPermission('role-rank-management', $schemeId) || self::hasPermission('define-workflow', $schemeId);
     }
     
-    public static function canSchemeCapacitySetting(): bool
+    public static function canSchemeCapacitySetting($schemeId = null): bool
     {
-        return Auth::user()->can('scheme-capacity-setting');
+        return self::hasPermission('scheme-capacity-setting', $schemeId);
     }
     
-    public static function canImportJanmaMrityuData(): bool
+    public static function canImportJanmaMrityuData($schemeId = null): bool
     {
-        return Auth::user()->can('import-janma-mrityu-data');
+        return self::hasPermission('import-janma-mrityu-data', $schemeId);
     }
     
-    public static function canReActivateDeathIncident(): bool
+    public static function canReActivateDeathIncident($schemeId = null): bool
     {
-        return Auth::user()->can('re-activate-death-incident');
+        return self::hasPermission('re-activate-death-incident', $schemeId);
     }
     
-    public static function canJanmyaMrityuBeneficiaryList(): bool
+    public static function canJanmyaMrityuBeneficiaryList($schemeId = null): bool
     {
-        return Auth::user()->can('janmya-mrityu-beneficiary-list');
+        return self::hasPermission('janmya-mrityu-beneficiary-list', $schemeId);   
     }
 
-    public static function canDutyAssignManagement(): bool
+    public static function canDutyAssignManagement($schemeId = null): bool
     {
-        return Auth::user() && Auth::user()->can('DutyAssignManagement');
+        return self::hasPermission('DutyAssignManagement', $schemeId);
     }
 }

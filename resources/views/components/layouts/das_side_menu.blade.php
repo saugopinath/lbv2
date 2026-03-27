@@ -331,7 +331,7 @@
             </div>
         </div>
         @endif
-        @if (\App\Helpers\WorkFlowPermissionHelper::canUserPermission())
+        {{-- @if (\App\Helpers\WorkFlowPermissionHelper::canUserPermission()) --}}
         <div>
             <button @click="activeMenu === 'CreatePermission' ? activeMenu = null : activeMenu = 'CreatePermission'"
                 class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -355,7 +355,7 @@
 
             <div id="list_menu" x-show="activeMenu === 'CreatePermission'" x-collapse x-transition class="pl-4">
                 <ul>
-                    @if (\App\Helpers\WorkFlowPermissionHelper::canRoleRankManagement())
+                    {{-- @if (\App\Helpers\WorkFlowPermissionHelper::canRoleRankManagement()) --}}
                     <li>
                         <a href="{{ route('role-rank-management') }}"
                             class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
@@ -370,9 +370,9 @@
                             </svg><span x-show="sidebar" class="truncate" svg="truncate">Role Rank
                                 Management</span></a>
                     </li>
-                    @endif
+                    {{-- @endif --}}
                     {{-- @can('view permission') --}}
-                    @if (\App\Helpers\WorkFlowPermissionHelper::canViewPermission())
+                    {{-- @if (\App\Helpers\WorkFlowPermissionHelper::canViewPermission()) --}}
                     <li>
                         <a href="{{ route('permission') }}"
                             class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
@@ -388,8 +388,8 @@
                                 Permission</span></a>
                     </li>
                     {{-- @endcan --}}
-                    @endif
-                    @if (\App\Helpers\WorkFlowPermissionHelper::canViewUserPermisson())
+                    {{-- @endif --}}
+                    {{-- @if (\App\Helpers\WorkFlowPermissionHelper::canViewUserPermisson()) --}}
                     {{-- @can('view user permission') --}}
                     <li>
                         <a href="{{ route('user-permission') }}"
@@ -406,8 +406,8 @@
                                 Permission</span></a>
                     </li>
                     {{-- @endcan --}}
-                    @endif
-                    @if (\App\Helpers\WorkFlowPermissionHelper::canRolePermissionManagement())
+                    {{-- @endif --}}
+                    {{-- @if (\App\Helpers\WorkFlowPermissionHelper::canRolePermissionManagement()) --}}
                     <li>
                         <a href="{{ route('role-permission-management') }}"
                             class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
@@ -423,13 +423,13 @@
                                 Management</span>
                         </a>
                     </li>
-                    @endcan
+                    {{-- @endcan --}}
 
                 </ul>
             </div>
         </div>
 
-        @endif
+        {{-- @endif --}}
         <div>
             <a href="{{ route('beneficiaries_selection.index') }}"
                 class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">

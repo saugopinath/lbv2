@@ -46,6 +46,12 @@ class SchemeDropdown extends Component
     {
         $scheme = Scheme::find($value);
         $this->schemeName = $scheme?->name;
+
+        if ($value) {
+            session(['scheme_id' => $value]);
+            app(\Spatie\Permission\PermissionRegistrar::class)
+                ->setPermissionsTeamId($value);
+        }
     }
     public function render()
     {

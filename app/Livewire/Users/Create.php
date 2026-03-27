@@ -2,31 +2,64 @@
 
 namespace App\Livewire\Users;
 
-use Carbon\Carbon;
-use App\Models\Role;
-use App\Models\User;
-use App\Models\State;
-use App\Models\Scheme;
-use Livewire\Component;
-use App\Models\District;
-use App\Models\Codemaster;
-use App\Models\ModelHasPermission;
-use App\Models\OfficeMaster;
-use App\Models\Permission;
-use App\Models\UserPersonal;
-use Illuminate\Support\Facades\Hash;
-use App\Models\RoleOfficeTypeMapping;
-use Illuminate\Support\Facades\Config;
-use App\Models\UserRoleSchemeOfficeMapping;
-use Illuminate\Support\Facades\DB;
 use App\Attributes\Loggable;
+use App\Models\District;
+use App\Models\OfficeMaster;
+use App\Models\Role;
+use App\Models\RoleOfficeTypeMapping;
+use App\Models\Scheme;
+use App\Models\State;
+use App\Models\User;
+use App\Models\UserPersonal;
+use App\Models\UserRoleSchemeOfficeMapping;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Livewire\Component;
+use Spatie\Permission\PermissionRegistrar;
+
 class Create extends Component
 {
-    public $name, $email, $password, $mobile;
-    public $role, $mapping_level, $selectscheme, $office, $selectedMappingLevel, $selectedState, $selectedDistrict, $Role, $role_id;
+    public $name;
 
-    public $roles = [], $offices = [], $states = [], $mapping_levels = [], $districts = [];
-    public $scheme = [], $schemes = [];
+    public $email;
+
+    public $password;
+
+    public $mobile;
+
+    public $role;
+
+    public $mapping_level;
+
+    public $selectscheme;
+
+    public $office;
+
+    public $selectedMappingLevel;
+
+    public $selectedState;
+
+    public $selectedDistrict;
+
+    public $Role;
+
+    public $role_id;
+
+    public $roles = [];
+
+    public $offices = [];
+
+    public $states = [];
+
+    public $mapping_levels = [];
+
+    public $districts = [];
+
+    public $scheme = [];
+
+    public $schemes = [];
 
     protected $rules = [
         'name' => 'required|string|max:255',
@@ -50,6 +83,7 @@ class Create extends Component
             ->get();
         $this->districts = District::orderBy('name', 'asc')->get();
     }
+
     public function updatedRole($value)
     {
         $this->mapping_level = null;
@@ -68,7 +102,7 @@ class Create extends Component
                 ->unique('office_type_id');
         }
 
-        if (!in_array($value, [153, 154])) {
+        if (! in_array($value, [153, 154])) {
             $this->selectedDistrict = null;
         }
     }
@@ -82,7 +116,7 @@ class Create extends Component
             $this->offices = OfficeMaster::where('office_type_id', $value)->get();
         }
 
-        if (!in_array($value, [153, 154])) {
+        if (! in_array($value, [153, 154])) {
             $this->selectedDistrict = null;
         }
     }
@@ -98,7 +132,8 @@ class Create extends Component
                 ->get();
         }
     }
-  #[Loggable(level: 'C', nickname: 'Create User')]
+
+    #[Loggable(level: 'C', nickname: 'Create User')]
     public function submit()
     {
         $rules = $this->rules;
@@ -135,15 +170,29 @@ class Create extends Component
 
             $role = Role::find($this->role);
 
-            if ($role) {
-                $user->assignRole($role);
-                $permissions = $role->permissions;
-                if ($permissions->isNotEmpty()) {
-                    $user->givePermissionTo($permissions);
-                }
-            }
-
             foreach ($this->scheme as $schemeId) {
+
+                // 🚀 MOST IMPORTANT
+                app(PermissionRegistrar::class)
+                    ->setPermissionsTeamId($schemeId);
+
+                if ($role) {
+
+                    // assign role per scheme
+                    $user->assignRole($role);
+
+                    // assign permissions per scheme
+                    $permissions = $role->permissions;
+
+                    if ($permissions->isNotEmpty()) {
+
+                        $user->givePermissionTo(
+                            $permissions
+                        );
+                    }
+                }
+
+                // Save mapping
                 UserRoleSchemeOfficeMapping::create([
                     'user_id' => $user->id,
                     'scheme_id' => $schemeId,
@@ -152,18 +201,18 @@ class Create extends Component
                 ]);
             }
 
-
             DB::commit();
 
             session()->flash('success', 'User created successfully!');
+
             return redirect()->route('user-managements');
         } catch (\Exception $e) {
+            dd($e);
             DB::rollBack();
 
-            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
+            return redirect()->back()->with('error', 'Something went wrong: '.$e->getMessage())->withInput();
         }
     }
-
 
     public function updateReset()
     {
@@ -178,7 +227,7 @@ class Create extends Component
             'selectedMappingLevel',
             'selectedState',
             'scheme',
-            'selectedDistrict'
+            'selectedDistrict',
         ]);
 
         $this->resetValidation();

@@ -10,6 +10,12 @@ class RoleCreateModal extends Component
 {
 
     public $name;
+    public $schemeId;
+
+    public function mount($schemeId = null)
+    {
+        $this->schemeId = $schemeId;
+    }
 
     public function rules()
     {

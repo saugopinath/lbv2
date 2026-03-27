@@ -61,13 +61,13 @@ class SchemeController extends Controller
 
     public function draftedit(Request $request)
     {
+        $schemeId = $request->scheme_id ? Crypt::decryptString($request->scheme_id) : \App\Helpers\WorkFlowPermissionHelper::getSchemeId();
 
-        // if (WorkFlowPermissionHelper::canEditDraft()) {
-        // if (Auth::user()->can('edit draft')) {
+        if (\App\Helpers\WorkFlowPermissionHelper::canEditDraft($schemeId)) {
             $app_id = Crypt::decryptString($request->app_id);
             $ben_id = Crypt::decryptString($request->ben_id);
             return view('schemesblade.draftedit', compact('app_id','ben_id'));
-        // }
+        }
 
         $header = 'Oops! You do not have permission to edit draft.';
         return view('CommonRestictedpage.index', compact('header'));
@@ -75,17 +75,15 @@ class SchemeController extends Controller
 
     public function applicationView(Request $request)
     {
-        // dd($request->all());
-        // if (WorkFlowPermissionHelper::canEditDraft()) {
-        // if (Auth::user()->can('edit draft')) {
-            $app_id = Crypt::decryptString($request['id']);
-            $scheme_id = Crypt::decryptString($request['scheme_id']);
-            $schemeName = Scheme::find($scheme_id)->name;
-            // dd( $app_id,$scheme_id,$schemeName);
-            return view('schemesblade.applicationview', compact('app_id','scheme_id', 'schemeName'));
-        // }
+        $scheme_id = Crypt::decryptString($request['scheme_id']);
 
-        $header = 'Oops! You do not have permission to edit draft.';
+        if (\App\Helpers\WorkFlowPermissionHelper::canViewApplication($scheme_id)) {
+            $app_id = Crypt::decryptString($request['id']);
+            $schemeName = Scheme::find($scheme_id)->name;
+            return view('schemesblade.applicationview', compact('app_id', 'scheme_id', 'schemeName'));
+        }
+
+        $header = 'Oops! You do not have permission to view application.';
         return view('CommonRestictedpage.index', compact('header'));
     }
 
