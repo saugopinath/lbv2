@@ -19,8 +19,8 @@ Route::get('portlet', [MapController::class, 'index'])->name('portlet');
 Route::post('/map-district-count', [MapController::class, 'wbDistrictCount'])->name('map.district.count');
 
 Route::get('/', [HomeController::class, 'index'])->name('/');
-Route::get('scheme_info', [HomeController::class, 'scheme_index'])->name('scheme_info');
-Route::get('department', [HomeController::class, 'department_index'])->name('department');
+Route::get('scheme_info/{scheme}', [HomeController::class, 'scheme_index'])->name('scheme_info');
+Route::get('department_info/{department}', [HomeController::class, 'department_index'])->name('department_info');
 
 Route::get('track-applicant', [BeneficiarySearchController::class, 'index'])->name('track-applicant');
 Route::get('/search', [BeneficiarySearchController::class, 'search']);

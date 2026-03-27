@@ -46,11 +46,15 @@
             <div class="flex-1 marquee">
                 <div id="marqueeContent" class="marquee-content">
 
-                    <!-- Notifications (add as many as you want) -->
-                    @include('frontend.components.notification-item-h')
-                    @include('frontend.components.notification-item-h')
-                    @include('frontend.components.notification-item-h')
-                    @include('frontend.components.notification-item-h')
+                    <!-- Notifications (dynamic) -->
+                    @forelse($notifications as $notification)
+                        @include('frontend.components.notification-item-h', ['notification' => $notification])
+                    @empty
+                        <div
+                            class="inline-flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-sm border-l-4 border-gray-400">
+                            <span class="font-medium text-gray-800">No new notifications at this moment.</span>
+                        </div>
+                    @endforelse
 
                 </div>
             </div>

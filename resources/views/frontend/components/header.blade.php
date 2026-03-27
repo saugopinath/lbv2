@@ -1,189 +1,113 @@
-<header class="bg-white shadow sticky top-0 z-50">
-  <div class="ms-5 me-5 px-4 py-3">
-    <!-- Top row with branding -->
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div>
-          <img class="w-1/3 h-1/2" src="{{ asset('images/home/header_logo.png') }}" alt="jai bangla" />
-          <!-- <p class="text-xs text-gray-500">Government of West Bengal</p> -->
+<header class="bg-white shadow top-0 z-50">
+    <div class="ms-2 me-2 md:ms-5 md:me-5 px-2 md:px-4 py-3">
+
+        <!-- Top row -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+
+            <!-- Logo -->
+            <div class="flex items-center justify-center md:justify-start">
+                @if(config('app.app_portal') == 'jb')
+                    <img class="w-80 md:w-100 lg:w-120 h-auto" src="{{ asset('images/home/header_logo.png') }}"
+                        alt="jai bangla" />
+                @else
+                    <img class="w-80 md:w-100 lg:w-120 h-auto" src="{{ asset('images/home/lb_header_logo.png') }}"
+                        alt="swasthya sathi" />
+                @endif
+            </div>
+
+            <!-- Icon Navigation -->
+            <div class="overflow-x-auto">
+                <div class="flex items-center gap-4 md:gap-8 px-2 md:px-4 py-2 min-w-max">
+
+                    <!-- Home -->
+                    <a href="{{ url('/') }}"
+                        class="flex flex-col items-center text-gray-700 hover:text-indigo-600 transition">
+                        <div
+                            class="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-gray-100 rounded-full shadow-sm mb-1">
+                            <i class="fa-solid fa-house-user text-sm md:text-lg"></i>
+                        </div>
+                        <span class="text-[10px] md:text-xs">Home</span>
+                    </a>
+
+                    <!-- Notification -->
+                    <a href="{{ route('notifications') }}"
+                        class="flex flex-col items-center text-gray-700 hover:text-indigo-600 transition">
+                        <div
+                            class="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-gray-100 rounded-full shadow-sm mb-1">
+                            <i class="fa-solid fa-bell text-sm md:text-lg"></i>
+                        </div>
+                        <span class="text-[10px] md:text-xs">Notification</span>
+                    </a>
+
+                    <!-- Track -->
+                    <a href="{{ route('track-beneficiary') }}"
+                        class="flex flex-col items-center text-gray-700 hover:text-indigo-600 transition">
+                        <div
+                            class="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-gray-100 rounded-full shadow-sm mb-1">
+                            <i class="fa-solid fa-magnifying-glass text-sm md:text-lg"></i>
+                        </div>
+                        <span class="text-[10px] md:text-xs text-center">Track</span>
+                    </a>
+
+                    <!-- Dashboard -->
+                    <a href="{{ route('dashboard') }}"
+                        class="flex flex-col items-center text-gray-700 hover:text-indigo-600 transition">
+                        <div
+                            class="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-gray-100 rounded-full shadow-sm mb-1">
+                            <i class="fa-solid fa-hand-holding-heart text-sm md:text-lg"></i>
+                        </div>
+                        <span class="text-[10px] md:text-xs text-center">Dashboard</span>
+                    </a>
+
+                    <!-- Portlet -->
+                    <a href="{{ route('portlet') }}"
+                        class="flex flex-col items-center text-gray-700 hover:text-indigo-600 transition">
+                        <div
+                            class="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-gray-100 rounded-full shadow-sm mb-1">
+                            <i class="fa-solid fa-book-open text-sm md:text-lg"></i>
+                        </div>
+                        <span class="text-[10px] md:text-xs text-center">Portlet</span>
+                    </a>
+
+                    <!-- Login -->
+                    <a href="{{ route('login') }}" target="_blank"
+                        class="flex flex-col items-center text-gray-700 hover:text-indigo-600 transition">
+                        <div
+                            class="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-gray-100 rounded-full shadow-sm mb-1">
+                            <i class="fa-solid fa-key text-sm md:text-lg"></i>
+                        </div>
+                        <span class="text-[10px] md:text-xs">Login</span>
+                    </a>
+
+                </div>
+            </div>
         </div>
-      </div>
 
-      <div class="flex items-center gap-4">
-        <!-- Icon Navigation Bar -->
-        <div class="flex items-center gap-8 px-4 py-2">
+        <!-- Navigation -->
+        <nav class="flex flex-col md:flex-row md:items-center md:justify-between border-t pt-2 gap-2">
 
-          <!-- Home -->
-          <a href="{{ url('/') }}" class="flex flex-col items-center text-gray-700 hover:text-indigo-600 transition">
-            <div class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full shadow-sm mb-1">
-              <i class="fa-solid fa-house-user text-lg"></i>
+            <!-- Title -->
+            <div
+                class="text-xs md:text-sm font-semibold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent text-center md:text-left">
+                @if(config('app.app_portal') == 'jb')
+                    {{ config('constants.jb') }} | One Umbrella Scheme | Department of Finance | Government of West Bengal
+                @else
+                    {{ config('constants.lb') }} | Department of Women & Child Development and Social Welfare | Government
+                    of West Bengal
+                @endif
             </div>
-            <span class="text-xs">Home</span>
-          </a>
 
-          <!-- Notification -->
-          <a href="{{ route('notifications') }}"
-            class="flex flex-col items-center text-gray-700 hover:text-indigo-600 transition">
-            <div class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full shadow-sm mb-1">
-              <i class="fa-solid fa-bell text-lg"></i>
+            <!-- Menu -->
+            <div class="flex flex-wrap justify-center md:justify-end gap-3 md:gap-6 text-xs md:text-sm font-medium">
+                <a href="#about" class="hover:text-indigo-600">About</a>
+                <a href="#objectives" class="hover:text-indigo-600">Objectives</a>
+                <a href="#guidelines" class="hover:text-indigo-600">Guidelines</a>
+                <a href="#resources" class="hover:text-indigo-600">Resources</a>
+                <a href="#contact" class="hover:text-indigo-600">Contact</a>
+                <a href="#department" class="hover:text-indigo-600">Department</a>
+                <a href="#scheme" class="hover:text-indigo-600">Schemes</a>
             </div>
-            <span class="text-xs">Notification</span>
-          </a>
 
-          <!-- Track Application -->
-          <a href="{{ route('track-beneficiary') }}"
-            class="flex flex-col items-center text-gray-700 hover:text-indigo-600 transition">
-            <div class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full shadow-sm mb-1">
-              <i class="fa-solid fa-magnifying-glass text-lg"></i>
-            </div>
-            <span class="text-xs">Track Application</span>
-          </a>
-
-          <!-- Visual Dashboard -->
-          <a href="{{ route('dashboard') }}"
-            class="flex flex-col items-center text-gray-700 hover:text-indigo-600 transition">
-            <div class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full shadow-sm mb-1">
-              <i class="fa-solid fa-hand-holding-heart text-lg"></i>
-            </div>
-            <span class="text-xs">Visual Dashboard</span>
-          </a>
-
-          <!-- District Portlet -->
-          <a href="{{ route('portlet') }}"
-            class="flex flex-col items-center text-gray-700 hover:text-indigo-600 transition">
-            <div class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full shadow-sm mb-1">
-              <i class="fa-solid fa-book-open text-lg"></i>
-            </div>
-            <span class="text-xs">District Portlet</span>
-          </a>
-
-          <!-- Login -->
-          <a href="{{ route('login') }}" target="_blank"
-            class="flex flex-col items-center text-gray-700 hover:text-indigo-600 transition">
-            <div class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full shadow-sm mb-1">
-              <i class="fa-solid fa-key text-lg"></i>
-            </div>
-            <span class="text-xs">Login</span>
-          </a>
-
-        </div>
-      </div>
-
+        </nav>
     </div>
-
-    <!-- Navigation -->
-    <nav class="flex items-center justify-between border-t pt-2">
-      <div
-        class="text-sm font-semibold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent animate-pulse">
-        <span>Jai Bangla | One Umbrella Scheme | Department of Finance | Government of West Bengal</span>
-      </div>
-      <div class="flex gap-6 text-sm font-medium relative">
-        <a href="#about" class="hover:text-indigo-600">About</a>
-        <a href="#objectives" class="hover:text-indigo-600">Objectives</a>
-        <a href="#guidelines" class="hover:text-indigo-600">Guidelines</a>
-        <a href="#resources" class="hover:text-indigo-600">Resources</a>
-        <a href="#contact" class="hover:text-indigo-600">Contact</a>
-        <a href="#department" class="hover:text-indigo-600">Department</a>
-        <a href="#scheme" class="hover:text-indigo-600">Schemes</a>
-
-        <!-- Department Dropdown -->
-        <!-- <div class="relative group">
-                      <button class="hover:text-indigo-600 flex items-center gap-1">
-                        Department
-                        <svg
-                          class="w-4 h-4 mt-[2px] transition-transform duration-200 group-hover:rotate-180"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                      </button>
-                      <div
-                        class="absolute hidden group-hover:block bg-white shadow-lg rounded-lg py-2 mt-2 w-48 border border-gray-100"
-                      >
-                        <a
-                          href="#dept1"
-                          class="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
-                          >Agriculture</a
-                        >
-                        <a
-                          href="#dept2"
-                          class="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
-                          >Education</a
-                        >
-                        <a
-                          href="#dept3"
-                          class="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
-                          >Health</a
-                        >
-                        <a
-                          href="#dept4"
-                          class="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
-                          >Finance</a
-                        >
-                        <a
-                          href="#dept5"
-                          class="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
-                          >Rural Development</a
-                        >
-                      </div>
-                    </div> -->
-
-        <!-- Schemes Dropdown -->
-        <!-- <div class="relative group">
-                      <button class="hover:text-indigo-600 flex items-center gap-1">
-                        Schemes
-                        <svg
-                          class="w-4 h-4 mt-[2px] transition-transform duration-200 group-hover:rotate-180"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                      </button>
-                      <div
-                        class="absolute hidden group-hover:block bg-white shadow-lg rounded-lg py-2 mt-2 w-30 border border-gray-100"
-                      >
-                        <a
-                          href="#scheme1"
-                          class="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
-                          >Jai
-                        </a>
-                        <a
-                          href="#scheme2"
-                          class="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
-                          >Kanya</a
-                        >
-                        <a
-                          href="#scheme3"
-                          class="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
-                          >Swasthya</a
-                        >
-                        <a
-                          href="#scheme4"
-                          class="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
-                          >Aikyas</a
-                        >
-                        <a
-                          href="#scheme5"
-                          class="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
-                          >Krishak</a
-                        >
-                      </div>
-                    </div> -->
-      </div>
-    </nav>
-  </div>
 </header>

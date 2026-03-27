@@ -9,4 +9,8 @@ class Notification extends Model
     protected $primaryKey = 'id';
 
     protected $table = 'public.notifications';
+    
+    protected $casts = [
+        'notified_at' => 'datetime',
+    ];
 }

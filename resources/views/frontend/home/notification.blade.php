@@ -196,11 +196,22 @@
                         <i class="fas fa-bell text-xl mr-3"></i>
                         <h2 class="text-2xl font-bold">Notifications</h2>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm bg-indigo-800 px-3 py-1 rounded-full">Latest Updates</span>
-                        <button class="bg-indigo-800 hover:bg-indigo-900 px-3 py-1 rounded-lg text-sm transition-colors">
-                            <i class="fas fa-cog mr-1"></i> Settings
-                        </button>
+                    <div class="flex flex-col md:flex-row md:items-center gap-2">
+                        @if($latest)
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs bg-red-600 px-2 py-0.5 rounded-full animate-pulse shadow-sm">
+                                    <i class="fas fa-bolt text-[10px] mr-1"></i> NEWS
+                                </span>
+                                <span class="text-sm font-medium text-indigo-100 hidden sm:inline-block">
+                                    {{ str($latest->title)->limit(50) }}
+                                </span>
+                                <span class="text-[10px] text-indigo-300 ml-2">
+                                    {{ $latest->notified_at ? $latest->notified_at->diffForHumans() : '' }}
+                                </span>
+                            </div>
+                        @else
+                             <span class="text-sm bg-indigo-800 px-3 py-1 rounded-full">Updates</span>
+                        @endif
                     </div>
                 </div>
             </div>

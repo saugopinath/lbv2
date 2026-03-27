@@ -1,7 +1,10 @@
 @extends('frontend.layouts.app-template')
 
-@push('styles')
+@push('meta')
     <meta name="map-district-count-url" content="{{ route('map.district.count') }}">
+@endpush
+
+@push('styles')
     <style>
         /* SVG Map Styles */
         .district {
@@ -26,7 +29,6 @@
 
         .tooltip {
             position: fixed;
-            /* 🔥 important */
             background: rgba(15, 23, 42, 0.95);
             color: #fff;
             padding: 8px 12px;
@@ -37,10 +39,8 @@
             z-index: 1000;
             box-shadow: 0 4px 6px rgb(0 0 0 / 10%);
             transform: translate(12px, -12px);
-            /* 👈 near cursor */
             user-select: none;
         }
-
 
         .loading-spinner {
             border: 3px solid #f3f4f6;
@@ -86,11 +86,11 @@
 
             <!-- ================= GRID LAYOUT ================= -->
             <div class="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[auto_650px_auto] gap-8" style="
-                                                                                                        grid-template-areas:
-                                                                                                            'cards cards cards'
-                                                                                                            'map map info'
-                                                                                                            'full full full';
-                                                                                                    ">
+                                                                                                                grid-template-areas:
+                                                                                                                    'cards cards cards'
+                                                                                                                    'map map info'
+                                                                                                                    'full full full';
+                                                                                                            ">
 
                 <!-- ================= STATS CARDS ================= -->
                 <div style="grid-area: cards;">
@@ -106,7 +106,7 @@
                             <p class="text-gray-500 text-sm uppercase font-semibold">
                                 Total Districts
                             </p>
-                            <h3 class="text-3xl font-bold mt-2" id="district-count">0</h3>
+                            <h3 class="text-3xl font-bold mt-2" id="district-count">{{ $districtCount }}</h3>
                         </div>
 
                         <div class="bg-white rounded-2xl p-6 border shadow-sm">
@@ -148,7 +148,7 @@
                         </div>
 
                         <!-- SVG -->
-                        <div id="map-svg-wrapper" class="flex-1 hidden flex items-center justify-center overflow-hidden">
+                        <div id="map-svg-wrapper" class="flex-1 hidden items-center justify-center overflow-hidden">
                             @include('frontend.maps.west_bengal')
                         </div>
 
@@ -220,6 +220,10 @@
                         body: JSON.stringify({})
                     });
 
+                    if (!response.ok) {
+                        throw new Error(`HTTP error: ${response.status}`);
+                    }
+
                     districtData = await response.json();
 
                     document.getElementById('loading').style.display = 'none';
@@ -233,11 +237,11 @@
                 } catch (err) {
                     console.error(err);
                     document.getElementById('loading').innerHTML = `
-                            <div class="text-center">
-                                <i class="fa-solid fa-triangle-exclamation text-red-500 text-3xl mb-2"></i>
-                                <p class="text-red-600 font-bold">Failed to load district data</p>
-                            </div>
-                        `;
+                                    <div class="text-center">
+                                        <i class="fa-solid fa-triangle-exclamation text-red-500 text-3xl mb-2"></i>
+                                        <p class="text-red-600 font-bold">Failed to load district data</p>
+                                    </div>
+                                `;
                 }
             }
 
@@ -260,9 +264,10 @@
 
             function setColor(d, count) {
                 let c = '#e0e7ff';
-                if (count > 500) c = '#1e293b';
-                else if (count > 200) c = '#334155';
-                else if (count > 50) c = '#6366f1';
+                if (count > 500) c = '#3730a3';
+                else if (count > 200) c = '#4f46e5';
+                else if (count > 50) c = '#818cf8';
+                else if (count > 0) c = '#c7d2fe';
                 d.style.fill = c;
             }
 
@@ -279,30 +284,30 @@
 
                 setTimeout(() => {
                     infoEl.innerHTML = `
-                            <div class="w-full">
-                                <div class="text-center mb-8">
-                                    <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">District Selected</span>
-                                    <h4 class="text-3xl font-black text-gray-900 mt-4">${name}</h4>
-                                    <div class="w-12 h-1 bg-indigo-500 mx-auto mt-4 rounded-full"></div>
-                                </div>
-                                <div class="space-y-4">
-                                    <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                                        <p class="text-gray-500 text-xs font-bold uppercase mb-1">Total Beneficiaries</p>
-                                        <p class="text-4xl font-black text-indigo-600">${count.toLocaleString()}</p>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 text-left">
-                                            <p class="text-gray-500 text-[10px] font-bold uppercase">State Share</p>
-                                            <p class="text-xl font-bold text-gray-800">${pct}%</p>
+                                    <div class="w-full">
+                                        <div class="text-center mb-8">
+                                            <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">District Selected</span>
+                                            <h4 class="text-3xl font-black text-gray-900 mt-4">${name}</h4>
+                                            <div class="w-12 h-1 bg-indigo-500 mx-auto mt-4 rounded-full"></div>
                                         </div>
-                                        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 text-left">
-                                            <p class="text-gray-500 text-[10px] font-bold uppercase">Status</p>
-                                            <p class="text-xl font-bold text-green-600 truncate">Active</p>
+                                        <div class="space-y-4">
+                                            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                                                <p class="text-gray-500 text-xs font-bold uppercase mb-1">Total Beneficiaries</p>
+                                                <p class="text-4xl font-black text-indigo-600">${count.toLocaleString()}</p>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 text-left">
+                                                    <p class="text-gray-500 text-[10px] font-bold uppercase">State Share</p>
+                                                    <p class="text-xl font-bold text-gray-800">${pct}%</p>
+                                                </div>
+                                                <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 text-left">
+                                                    <p class="text-gray-500 text-[10px] font-bold uppercase">Status</p>
+                                                    <p class="text-xl font-bold text-green-600 truncate">Active</p>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        `;
+                                `;
                     infoEl.style.opacity = '1';
                 }, 150);
             }
@@ -322,7 +327,6 @@
                 });
 
                 document.getElementById('total-count').textContent = t.toLocaleString();
-                document.getElementById('district-count').textContent = d;
                 document.getElementById('avg-count').textContent = avg.toLocaleString();
                 document.getElementById('highest-district').textContent = highest.name;
             }
@@ -333,11 +337,11 @@
 
             function showTooltip(e, name, count) {
                 document.getElementById('tooltip-content').innerHTML = `
-                        <div class="font-bold border-b border-gray-700 pb-1 mb-1">${name}</div>
-                        <div class="text-indigo-400">
-                            Beneficiaries: <span class="text-white">${count.toLocaleString()}</span>
-                        </div>
-                    `;
+                                <div class="font-bold border-b border-gray-700 pb-1 mb-1">${name}</div>
+                                <div class="text-indigo-400">
+                                    Beneficiaries: <span class="text-white">${count.toLocaleString()}</span>
+                                </div>
+                            `;
                 document.getElementById('custom-tooltip').style.display = 'block';
                 moveTooltip(e);
             }
@@ -355,14 +359,14 @@
             document.getElementById('reset-btn').addEventListener('click', () => {
                 document.querySelectorAll('.district').forEach(el => el.classList.remove('selected'));
                 document.getElementById('district-info').innerHTML = `
-                        <div class="p-8 bg-gray-50 rounded-full mb-4">
-                            <i class="fa-solid fa-hand-pointer text-4xl text-gray-300"></i>
-                        </div>
-                        <h4 class="text-gray-800 font-bold text-lg">No Selection</h4>
-                        <p class="text-gray-500 max-w-xs mt-2">
-                            Please click on a district within the map to view specific beneficiary statistics.
-                        </p>
-                    `;
+                                <div class="p-8 bg-gray-50 rounded-full mb-4">
+                                    <i class="fa-solid fa-hand-pointer text-4xl text-gray-300"></i>
+                                </div>
+                                <h4 class="text-gray-800 font-bold text-lg">No Selection</h4>
+                                <p class="text-gray-500 max-w-xs mt-2">
+                                    Please click on a district within the map to view specific beneficiary statistics.
+                                </p>
+                            `;
             });
 
             initMap();

@@ -65,7 +65,7 @@
                 "line2": "Nurturing Children",
                 "line3": "Building Stronger Communities"
             },
-            "ref_color": "green",
+            "ref_color": "emerald",
             "very_short": "Leads welfare, livelihood, and development initiatives for tribal communities in West Bengal.",
             "quick_stats": [
                 {
@@ -153,8 +153,7 @@
                     "description": "Integrated Child Development Services across all blocks."
                 }
             ],
-            "ref_grident_color": "purple",
-            "ref_gradient_color": "emerald",
+            "ref_gradient_color": "teal",
             "orgnizational_structure": [
                 {
                     "icon": "fa-user-tie",
@@ -231,7 +230,7 @@
                 "line2": "Nurturing Children",
                 "line3": "Building Stronger Communities"
             },
-            "ref_color": "sky",
+            "ref_color": "blue",
             "very_short": "Develops fisheries, aquaculture, and supports fishing communities.",
             "quick_stats": [
                 {
@@ -319,8 +318,7 @@
                     "description": "Integrated Child Development Services across all blocks."
                 }
             ],
-            "ref_grident_color": "purple",
-            "ref_gradient_color": "blue",
+            "ref_gradient_color": "sky",
             "orgnizational_structure": [
                 {
                     "icon": "fa-user-tie",
@@ -485,7 +483,6 @@
                     "description": "Integrated Child Development Services across all blocks."
                 }
             ],
-            "ref_grident_color": "purple",
             "ref_gradient_color": "orange",
             "orgnizational_structure": [
                 {
@@ -651,7 +648,6 @@
                     "description": "Integrated Child Development Services across all blocks."
                 }
             ],
-            "ref_grident_color": "purple",
             "ref_gradient_color": "violet",
             "orgnizational_structure": [
                 {
@@ -729,7 +725,7 @@
                 "line2": "Nurturing Children",
                 "line3": "Building Stronger Communities"
             },
-            "ref_color": "orange",
+            "ref_color": "green",
             "very_short": "Supports farmers, modern farming, and crop development.",
             "quick_stats": [
                 {
@@ -817,8 +813,7 @@
                     "description": "Integrated Child Development Services across all blocks."
                 }
             ],
-            "ref_grident_color": "purple",
-            "ref_gradient_color": "amber",
+            "ref_gradient_color": "lime",
             "orgnizational_structure": [
                 {
                     "icon": "fa-user-tie",
@@ -1148,8 +1143,7 @@
                     "description": "Integrated Child Development Services across all blocks."
                 }
             ],
-            "ref_grident_color": "purple",
-            "ref_gradient_color": "purple",
+            "ref_gradient_color": "pink",
             "orgnizational_structure": [
                 {
                     "icon": "fa-user-tie",
@@ -1226,7 +1220,7 @@
                 "line2": "Nurturing Children",
                 "line3": "Building Stronger Communities"
             },
-            "ref_color": "emerald",
+            "ref_color": "teal",
             "very_short": "Supports MSMEs through loans, subsidies, training, and policies.",
             "quick_stats": [
                 {
@@ -1314,8 +1308,7 @@
                     "description": "Integrated Child Development Services across all blocks."
                 }
             ],
-            "ref_grident_color": "purple",
-            "ref_gradient_color": "teal",
+            "ref_gradient_color": "emerald",
             "orgnizational_structure": [
                 {
                     "icon": "fa-user-tie",

@@ -10,6 +10,9 @@ class NotificationController extends Controller
 {
     public function index()
     {
-        return view('frontend.home.notification');
+        $latest = Notification::where('status', 'active')->orderBy('notified_at', 'desc')->first();
+        return view('frontend.home.notification', [
+            'latest' => $latest
+        ]);
     }
 }

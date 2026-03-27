@@ -48,7 +48,14 @@
                         </div>
                     </div>
 
-
+                    @if($benPayComment['comment'])
+                        <div class="mt-4">
+                            <span class="text-xs text-grey-500 uppercase tracking-wide">Comment : </span>
+                            <span class="font-mono font-semibold text-{{ $benPayComment['color'] }}-800 text-sm md:text-base">
+                                {{ $benPayComment['comment'] }}
+                            </span>
+                        </div>
+                    @endif
                     <!-- --------------------------------------------------------------------- -->
                 </div>
                 <!-- right side: bank status & account summary (pill style) -->
@@ -141,6 +148,7 @@
 
                     </div>
                 </div>
+
             </div>
         </div>
         <!-- Header -->

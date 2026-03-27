@@ -191,17 +191,12 @@
             <div
                 class="flex items-center justify-between p-5 border-b bg-gradient-to-r from-indigo-50 via-indigo-25 to-white sticky top-0 z-10">
                 <h2 class="font-bold text-xl text-gray-800 flex items-center">
-                    <svg class="w-5 h-5 mr-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                    </svg>
+                    <i class="fa-solid fa-filter text-indigo-600 mr-2"></i>
                     Filters
                 </h2>
                 <button id="toggleSidebar" class="p-2 rounded-lg hover:bg-indigo-100 transition-colors duration-200"
                     title="Collapse sidebar">
-                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
+                    <i class="fa-solid fa-angle-left text-indigo-600"></i>
                 </button>
             </div>
 
@@ -209,10 +204,7 @@
                 <!-- Scheme -->
                 <div>
                     <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                        <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
+                        <i class="fa-solid fa-clipboard-list w-4 h-4 mr-2 text-indigo-500"></i>
                         Scheme
                     </label>
                     <select id="scheme" class="mt-1 input">
@@ -226,12 +218,7 @@
                 <!-- District -->
                 <div>
                     <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                        <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
+                        <i class="fa-solid fa-location-dot w-4 h-4 mr-2 text-indigo-500"></i>
                         District
                     </label>
                     <select id="district" class="mt-1 input">
@@ -245,32 +232,20 @@
                 <!-- Area Type -->
                 <div>
                     <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                        <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
+                        <i class="fa-solid fa-layer-group w-4 h-4 mr-2 text-indigo-500"></i>
                         Area Type
                     </label>
                     <div class="grid grid-cols-3 gap-2 mt-2">
                         <button type="button" onclick="setArea('')" class="area-btn active" id="areaAll">
-                            <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                            <i class="fa-solid fa-earth-asia w-4 h-4 inline-block mr-1 text-indigo-500"></i>
                             All
                         </button>
                         <button type="button" onclick="setArea('2')" class="area-btn" id="areaRural">
-                            <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
+                            <i class="fa-solid fa-city mr-2 text-indigo-500"></i>
                             Rural
                         </button>
                         <button type="button" onclick="setArea('1')" class="area-btn" id="areaUrban">
-                            <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
+                            <i class="fa-solid fa-city mr-2 text-indigo-500"></i>
                             Urban
                         </button>
                     </div>
@@ -280,10 +255,7 @@
                 <!-- Block / Subdivision -->
                 <div id="blk_sub_div" style="display: none;">
                     <label id="blk_sub_txt" class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                        <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                        </svg>
+                        <i class="fa-solid fa-map-location-dot mr-2 text-indigo-500"></i>
                         Block / Subdivision
                     </label>
                     <select id="block" class="mt-1 input">
@@ -294,10 +266,7 @@
                 <!-- Municipality -->
                 <div id="municipality_div" style="display: none;">
                     <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                        <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
+                        <i class="fa-solid fa-city mr-2 text-indigo-500"></i>
                         Municipality
                     </label>
                     <select id="muncid" class="mt-1 input">
@@ -308,10 +277,7 @@
                 <!-- GP / Ward -->
                 <div id="gp_ward_div" style="display: none;">
                     <label id="gp_ward_txt" class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                        <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        </svg>
+                        <i class="fa-solid fa-location-dot w-4 h-4 mr-2 text-indigo-500"></i>
                         GP / Ward
                     </label>
                     <select id="gp_ward" class="mt-1 input">
@@ -320,33 +286,24 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="pt-4 space-y-3">
-                    <button type="button" onclick="applyFilters()"
-                        class="w-full btn-primary py-3 rounded-xl flex items-center justify-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                        </svg>
-                        Apply Filters
-                    </button>
+                <div class="pt-4 space-y-3 grid grid-cols-1 md:grid-cols-2 gap-4">
 
                     <button type="button" onclick="resetFilters()"
-                        class="w-full btn-secondary py-3 rounded-xl flex items-center justify-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
+                        class="w-full btn-secondary bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-refresh mr-2"></i>
                         Reset Filters
+                    </button>
+                    <button type="button" onclick="applyFilters()"
+                        class="w-full btn-primary bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-filter mr-2"></i>
+                        Apply Filters
                     </button>
                 </div>
 
                 <!-- Results Info -->
                 <div class="mt-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
                     <div class="flex items-center text-blue-700">
-                        <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <i class="fa-solid fa-circle-info w-5 h-5 mr-2 flex-shrink-0"></i>
                         <span class="text-sm font-medium">
                             Showing <span id="resultCount" class="font-bold">{{ $results }}</span> beneficiaries
                         </span>
@@ -369,20 +326,14 @@
                     <!-- Sidebar toggle button (visible when sidebar is collapsed) -->
                     <button type="button" id="showSidebar"
                         class="hidden btn-primary px-4 py-2 rounded-xl flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                        </svg>
+                        <i class="fa-solid fa-filter w-5 h-5 mr-2"></i>
                         Filters
                     </button>
 
                     <!-- Mobile filter toggle -->
                     <button type="button" id="mobileToggleSidebar"
                         class="md:hidden btn-primary px-4 py-2 rounded-xl flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                        </svg>
+                        <i class="fa-solid fa-sliders w-5 h-5 mr-2"></i>
                         Filters
                     </button>
                 </div>
@@ -391,21 +342,15 @@
             <!-- SEARCH BAR -->
             <div class="max-w-4xl mx-auto mb-8 md:mb-10">
                 <div class="relative">
-                    <svg class="w-5 h-5 absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <i
+                        class="fa-solid fa-magnifying-glass w-5 h-5 absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                     <input id="searchText" type="text"
                         placeholder="Search by Beneficiary ID, Name, Mobile Number or Address"
                         class="w-full pl-14 pr-4 md:pr-36 py-3.5 md:py-4 rounded-2xl border border-gray-300 focus:ring-3 focus:ring-indigo-300 focus:border-indigo-500 shadow-sm transition-all duration-300 text-sm md:text-base">
 
                     <button type="button" onclick="searchBeneficiary()"
                         class="hidden md:flex absolute right-2 top-2 btn-primary px-6 md:px-8 py-2.5 md:py-3 rounded-xl items-center justify-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+                        <i class="fa-solid fa-magnifying-glass w-5 h-5 mr-2"></i>
                         Search
                     </button>
                 </div>
@@ -426,9 +371,7 @@
             <div class="text-center mt-8 md:mt-10">
                 <button type="button" id="viewMoreBtn" onclick="loadMore()"
                     class="hidden btn-primary px-8 py-3 rounded-xl font-semibold inline-flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <i class="fa-solid fa-angle-down w-5 h-5 mr-2"></i>
                     Load More
                 </button>
             </div>
@@ -811,18 +754,7 @@
                     }
 
                     if (totalRecords === 0 && resultArea) {
-                        resultArea.innerHTML = `
-                                                                                                                                                                    <div class="col-span-full empty-state">
-                                                                                                                                                                        <svg class="w-20 h-20 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                                                                                                                                        </svg>
-                                                                                                                                                                        <h3 class="text-xl font-semibold text-gray-700 mb-2">No beneficiaries found</h3>
-                                                                                                                                                                        <p class="text-gray-500 mb-4">Try adjusting your search or filters</p>
-                                                                                                                                                                        <button onclick="resetFilters()" class="btn-primary px-6 py-2 rounded-lg">
-                                                                                                                                                                            Reset Filters
-                                                                                                                                                                        </button>
-                                                                                                                                                                    </div>
-                                                                                                                                                                `;
+                        resultArea.innerHTML = `<div class="col-span-full empty-state"><i class="fa-solid fa-face-frown w-50 h-50 text-gray-300 mb-4"></i><h3 class="text-xl font-semibold text-gray-700 mb-2">No beneficiaries found</h3><p class="text-gray-500 mb-4">Try adjusting your search or filters</p><button onclick="resetFilters()" class="btn-primary px-6 py-2 rounded-lg">Reset Filters</button></div>`;
                     }
                 })
                 .catch(error => {
@@ -831,18 +763,7 @@
                     showNotification('Error loading beneficiaries. Please try again.', 'error');
 
                     if (resultArea) {
-                        resultArea.innerHTML = `
-                                                                                                                                                                    <div class="col-span-full empty-state">
-                                                                                                                                                                        <svg class="w-20 h-20 text-red-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                                                                                                                                        </svg>
-                                                                                                                                                                        <h3 class="text-xl font-semibold text-gray-700 mb-2">Something went wrong</h3>
-                                                                                                                                                                        <p class="text-gray-500 mb-4">Unable to load beneficiaries</p>
-                                                                                                                                                                        <button onclick="resetAndLoad()" class="btn-primary px-6 py-2 rounded-lg">
-                                                                                                                                                                            Try Again
-                                                                                                                                                                        </button>
-                                                                                                                                                                    </div>
-                                                                                                                                                                `;
+                        resultArea.innerHTML = `<div class="col-span-full empty-state"><i class="fa-solid fa-triangle-exclamation w-20 h-20 text-red-300 mb-4"></i><h3 class="text-xl font-semibold text-gray-700 mb-2">Something went wrong</h3><p class="text-gray-500 mb-4">Unable to load beneficiaries</p><button onclick="resetAndLoad()" class="btn-primary px-6 py-2 rounded-lg">Try Again</button></div>`;
                     }
                 });
         }
@@ -927,7 +848,7 @@
                 sidebar.style.overflow = 'hidden';
                 sidebar.style.opacity = '0';
 
-                toggleBtn.innerHTML = '<svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>';
+                toggleBtn.innerHTML = '<i class="fa-solid fa-angle-left text-indigo-600"></i>';
                 toggleBtn.setAttribute('title', 'Expand sidebar');
                 showSidebarBtn.classList.remove('hidden');
             } else {
@@ -935,7 +856,7 @@
                 sidebar.style.overflow = 'visible';
                 sidebar.style.opacity = '1';
 
-                toggleBtn.innerHTML = '<svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>';
+                toggleBtn.innerHTML = '<i class="fa-solid fa-angle-left text-indigo-600"></i>';
                 toggleBtn.setAttribute('title', 'Collapse sidebar');
                 showSidebarBtn.classList.add('hidden');
             }
@@ -952,7 +873,7 @@
             sidebar.style.overflow = 'visible';
             sidebar.style.opacity = '1';
 
-            toggleBtn.innerHTML = '<svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>';
+            toggleBtn.innerHTML = '<i class="fa-solid fa-angle-left text-indigo-600"></i>';
             toggleBtn.setAttribute('title', 'Collapse sidebar');
             showSidebarBtn.classList.add('hidden');
             sidebarCollapsed = false;
@@ -988,32 +909,30 @@
             existingNotifications.forEach(notif => notif.remove());
 
             let bgClass = 'bg-indigo-600';
-            let icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+            let icon = '<i class="fa-solid fa-circle-info w-5 h-5"></i>';
 
             if (type === 'warning') {
                 bgClass = 'bg-yellow-500';
-                icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
+                icon = '<i class="fa-solid fa-triangle-exclamation w-5 h-5"></i>';
             }
             if (type === 'error') {
                 bgClass = 'bg-red-500';
-                icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+                icon = '<i class="fa-solid fa-circle-xmark w-5 h-5"></i>';
             }
             if (type === 'success') {
                 bgClass = 'bg-green-500';
-                icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+                icon = '<i class="fa-solid fa-circle-check w-5 h-5"></i>';
             }
 
             const notificationHTML = `
-                                                                                                                                                        <div class="custom-notification fixed top-6 right-6 px-6 py-4 rounded-xl shadow-2xl z-[100] transform transition-all duration-300 ${bgClass} text-white flex items-center gap-3 max-w-md" style="opacity: 0; transform: translateX(100px);">
-                                                                                                                                                            ${icon}
-                                                                                                                                                            <span class="flex-1">${message}</span>
-                                                                                                                                                            <button class="ml-2 text-white hover:text-gray-200 transition-colors" onclick="this.parentElement.remove()">
-                                                                                                                                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                                                                                                                                </svg>
-                                                                                                                                                            </button>
-                                                                                                                                                        </div>
-                                                                                                                                                    `;
+                                                                                                                                                                                                                                                                                                                            <div class="custom-notification fixed top-6 right-6 px-6 py-4 rounded-xl shadow-2xl z-[100] transform transition-all duration-300 ${bgClass} text-white flex items-center gap-3 max-w-md" style="opacity: 0; transform: translateX(100px);">
+                                                                                                                                                                                                                                                                                                                                ${icon}
+                                                                                                                                                                                                                                                                                                                                <span class="flex-1">${message}</span>
+                                                                                                                                                                                                                                                                                                                                <button class="ml-2 text-white hover:text-gray-200 transition-colors" onclick="this.parentElement.remove()">
+                                                                                                                                                                                                                                                                                                                                    <i class="fa-solid fa-xmark w-5 h-5"></i>
+                                                                                                                                                                                                                                                                                                                                </button>
+                                                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                                                        `;
 
             document.body.insertAdjacentHTML('beforeend', notificationHTML);
 

@@ -18,9 +18,7 @@
 
             <div id="hero-carousel" class="relative h-full">
 
-                @php
-    $data = json_decode(Storage::get('data/master_data.json'), true);
-                @endphp
+              
 
                 @foreach ($data['home_image'] as $key => $value)
                     @include('frontend.components.carousel-img', [

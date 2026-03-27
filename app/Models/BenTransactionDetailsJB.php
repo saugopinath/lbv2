@@ -10,7 +10,8 @@ class BenTransactionDetailsJB extends Model
     use Searchable;
     protected $connection = 'pgsql_jbpayread';
     protected $table = 'payment.ben_transaction_details';
-    protected $primaryKey = 'ben_id';
+    protected $primaryKey = 'id';
+    public $incrementing = true;
 
     protected $fillable = [
         "dist_code",
@@ -106,6 +107,7 @@ class BenTransactionDetailsJB extends Model
     public function toSearchableArray()
     {
         return [
+            "id" => $this->id,
             "dist_code" => $this->dist_code,
             "ben_id" => $this->ben_id,
             "scheme_id" => $this->scheme_id,
