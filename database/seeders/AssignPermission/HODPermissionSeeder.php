@@ -2,11 +2,14 @@
 
 namespace Database\Seeders\AssignPermission;
 
-use App\Models\Role;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\DB;
+
+use App\Models\Role;
 use App\Models\User;
 use App\Models\UserRoleSchemeOfficeMapping;
+
+use Spatie\Permission\Models\Permission;
 
 class HODPermissionSeeder extends Seeder
 {
@@ -16,7 +19,7 @@ class HODPermissionSeeder extends Seeder
             'sarasori-mukhyamantri',
         ];
 
-        // 1) find role
+        // 1️⃣ Find Role
         try {
             $role = Role::findByName('HOD');
         } catch (\Exception $e) {
@@ -24,41 +27,81 @@ class HODPermissionSeeder extends Seeder
             return;
         }
 
-        // Ensure permission records exist and collect Permission models
+        // 2️⃣ Ensure permission exists
         $permissionModels = [];
+
         foreach ($permissions as $permName) {
+
             $permissionModels[] = Permission::firstOrCreate(
-                ['name' => $permName],
-                ['guard_name' => 'web']
+                [
+                    'name' => $permName,
+                    'guard_name' => 'web'
+                ]
             );
         }
-        // Get user_ids from mapping table for that role
-        $adminUserIds = UserRoleSchemeOfficeMapping::where('role_id', $role->id)
-            ->pluck('user_id')
-            ->unique()
-            ->values();
-        if ($adminUserIds->isEmpty()) {
-            $this->command->info('No users found in UserRoleSchemeOfficeMapping for role "Operator".');
+
+        // 3️⃣ Get mappings (WITH scheme_id)
+        $mappings = UserRoleSchemeOfficeMapping::where('role_id', $role->id)
+            ->get();
+
+        if ($mappings->isEmpty()) {
+
+            $this->command->info(
+                'No users found in UserRoleSchemeOfficeMapping for role "HOD".'
+            );
+
             return;
         }
-        // 4) Loop users and assign permissions, printing a message for each assign (or skip)
-        foreach ($adminUserIds as $userId) {
-            $user = User::find($userId);
-            if (! $user) {
-                $this->command->warn("User id={$userId} not found (skipping).");
+
+        // 4️⃣ Assign permissions WITH scheme_id
+        foreach ($mappings as $mapping) {
+
+            $user = User::find($mapping->user_id);
+
+            if (!$user) {
+
+                $this->command->warn(
+                    "User id={$mapping->user_id} not found (skipping)."
+                );
+
                 continue;
             }
+
             foreach ($permissionModels as $permission) {
-                // check if user already has this permission
-                if ($user->hasPermissionTo($permission->name)) {
-                    $this->command->info("User id={$user->id} already has permission '{$permission->name}' (id={$permission->id}).");
+
+                // Check if permission already exists
+                $exists = DB::table('model_has_permissions')
+                    ->where('permission_id', $permission->id)
+                    ->where('model_id', $user->id)
+                    ->where('model_type', User::class)
+                    ->where('scheme_id', $mapping->scheme_id)
+                    ->exists();
+
+                if ($exists) {
+
+                    $this->command->info(
+                        "User id={$user->id} already has permission '{$permission->name}' with scheme_id={$mapping->scheme_id}."
+                    );
+
                     continue;
                 }
-                // assign and print message
-                $user->givePermissionTo($permission->name);
-                $this->command->info("Assigned permission '{$permission->name}' (id={$permission->id}) to user id={$user->id}.");
+
+                // Insert manually with scheme_id
+                DB::table('model_has_permissions')->insert([
+
+                    'permission_id' => $permission->id,
+                    'model_type' => User::class,
+                    'model_id' => $user->id,
+                    'scheme_id' => $mapping->scheme_id,
+
+                ]);
+
+                $this->command->info(
+                    "Assigned permission '{$permission->name}' to user id={$user->id} with scheme_id={$mapping->scheme_id}."
+                );
             }
         }
-        $this->command->info('GivePermissionToOperatorSeeder finished.');
+
+        $this->command->info('HODPermissionSeeder finished successfully.');
     }
 }

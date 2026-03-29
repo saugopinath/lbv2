@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Config;
 use App\Models\UserRoleSchemeOfficeMapping;
 use Illuminate\Support\Facades\DB;
 use App\Attributes\Loggable;
+use Spatie\Permission\PermissionRegistrar;
 class Create extends Component
 {
     public $name, $email, $password, $mobile;
@@ -98,7 +99,7 @@ class Create extends Component
                 ->get();
         }
     }
-  #[Loggable(level: 'C', nickname: 'Create User')]
+    #[Loggable(level: 'C', nickname: 'Create User')]
     public function submit()
     {
         $rules = $this->rules;
@@ -135,15 +136,29 @@ class Create extends Component
 
             $role = Role::find($this->role);
 
-            if ($role) {
-                $user->assignRole($role);
-                $permissions = $role->permissions;
-                if ($permissions->isNotEmpty()) {
-                    $user->givePermissionTo($permissions);
-                }
-            }
-
             foreach ($this->scheme as $schemeId) {
+
+                // 🚀 MOST IMPORTANT
+                app(PermissionRegistrar::class)
+                    ->setPermissionsTeamId($schemeId);
+
+                if ($role) {
+
+                    // assign role per scheme
+                    $user->assignRole($role);
+
+                    // assign permissions per scheme
+                    $permissions = $role->permissions;
+
+                    if ($permissions->isNotEmpty()) {
+
+                        $user->givePermissionTo(
+                            $permissions
+                        );
+                    }
+                }
+
+                // Save mapping
                 UserRoleSchemeOfficeMapping::create([
                     'user_id' => $user->id,
                     'scheme_id' => $schemeId,
@@ -158,6 +173,7 @@ class Create extends Component
             session()->flash('success', 'User created successfully!');
             return redirect()->route('user-managements');
         } catch (\Exception $e) {
+            dd($e);
             DB::rollBack();
 
             return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();

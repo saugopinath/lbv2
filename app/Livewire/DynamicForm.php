@@ -101,7 +101,7 @@ class DynamicForm extends Component
     public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null)
     {
 
-        if (!WorkFlowPermissionHelper::canCreateEntry()) {
+        if (!WorkFlowPermissionHelper::canEntry()) {
             abort(403, 'You are not authorized to create entry.');
         }
         $this->loadAppTypeOptions();
@@ -470,7 +470,9 @@ class DynamicForm extends Component
         }
     }
 
-    public function onDocumentTabFailed() {}
+    public function onDocumentTabFailed()
+    {
+    }
 
     private function markTabCompleted(string $tabCode): void
     {

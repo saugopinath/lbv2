@@ -92,7 +92,7 @@ class User extends Authenticatable implements Auditable, JWTSubject
             'model_has_permissions',
             'model_id',
             'permission_id'
-        );
+        )->withPivot('scheme_id');
     }
 
     public function transformAudit(array $data): array
