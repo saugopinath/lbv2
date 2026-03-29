@@ -12,17 +12,52 @@ use Livewire\Component;
 
 class FilterUserPermission extends Component
 {
-    public $role, $mapping_level, $selectscheme, $office, $selectedMappingLevel, $selectedState, $scheme, $selectedDistrict, $Role, $role_id, $ml;
+    public $role;
 
-    public $roles = [], $schemes = [], $offices = [], $states = [], $mapping_levels = [], $districts = [];
+    public $mapping_level;
+
+    public $selectscheme;
+
+    public $office;
+
+    public $selectedMappingLevel;
+
+    public $selectedState;
+
+    public $scheme;
+
+    public $selectedDistrict;
+
+    public $Role;
+
+    public $role_id;
+
+    public $ml;
+
+    public $roles = [];
+
+    public $schemes = [];
+
+    public $offices = [];
+
+    public $states = [];
+
+    public $mapping_levels = [];
+
+    public $districts = [];
 
     public function mount()
     {
         $this->roles = Role::all();
+
         $this->schemes = Scheme::all();
-        $this->states = State::where('is_active', 1)->where('lgd_code',  19)->get();
-        // $this->districts = District::orderBy('name', 'asc')->get();
+
+        $this->states =
+            State::where('is_active', 1)
+                ->where('lgd_code', 19)
+                ->get();
     }
+
     public function updatedRole($value)
     {
         $this->mapping_level = null;
@@ -33,19 +68,26 @@ class FilterUserPermission extends Component
         $this->selectedDistrict = null;
         $this->selectedState = null;
 
-
         if ($value) {
 
-            $this->mapping_levels = RoleOfficeTypeMapping::with('officeType')
-                ->where('role_id', $value)
-                ->whereHas('officeType', function ($q) {
-                    $q->whereIn('code', [151, 152, 153, 154]);
-                })
-                ->get()
-                ->unique('office_type_id');
+            $this->mapping_levels =
+                RoleOfficeTypeMapping::with('officeType')
+                    ->where('role_id', $value)
+                    ->whereHas('officeType', function ($q) {
+
+                        $q->whereIn('code', [
+                            151,
+                            152,
+                            153,
+                            154,
+                        ]);
+                    })
+                    ->get()
+                    ->unique('office_type_id');
         }
 
         if (!in_array($value, [153, 154])) {
+
             $this->selectedDistrict = null;
         }
     }
@@ -54,53 +96,113 @@ class FilterUserPermission extends Component
     {
         $this->office = null;
         $this->offices = [];
+
         $this->ml = $value;
+
         if ($value) {
-            $this->offices = OfficeMaster::where('office_type_id', $value)->get();
+
+            $this->offices =
+                OfficeMaster::where(
+                    'office_type_id',
+                    $value
+                )->get();
         }
 
         if (!in_array($value, [153, 154])) {
+
             $this->selectedDistrict = null;
         }
     }
+
     public function updatedSelectedState($value)
     {
         $this->selectedDistrict = null;
         $this->districts = [];
 
         if ($value) {
-            $this->districts = District::where('state_id', $value)->orderBy('name', 'asc')->get();
+
+            $this->districts =
+                District::where(
+                    'state_id',
+                    $value
+                )
+                    ->orderBy('name', 'asc')
+                    ->get();
         }
     }
+
     public function updatedSelectedDistrict($value)
     {
         if ($value) {
-            $this->offices = OfficeMaster::where('office_type_id', $this->ml)->where('district_id', $value)->get();
+
+            $this->offices =
+                OfficeMaster::where(
+                    'office_type_id',
+                    $this->ml
+                )
+                    ->where(
+                        'district_id',
+                        $value
+                    )
+                    ->get();
         }
     }
 
     public function applyFilters()
     {
+        // 🚀 MOST IMPORTANT PART
+        if (!$this->selectscheme) {
+
+            session()->flash(
+                'error',
+                'Please select scheme first.'
+            );
+
+            return;
+        }
+
+        // STORE scheme_id in session
+        session([
+            'scheme_id' => $this->selectscheme,
+        ]);
+
+        // Dispatch filter event
         $this->dispatch('userFilter', [
+
             'scheme' => $this->selectscheme,
+
             'role' => $this->role,
+
             'mapping_level' => $this->selectedMappingLevel,
+
             'state' => $this->selectedState,
+
             'district' => $this->selectedDistrict,
+
             'office' => $this->office,
         ]);
     }
 
     public function resetFilters()
     {
-         $this->selectscheme = null;
+        $this->selectscheme = null;
+
         $this->role = null;
+
         $this->selectedMappingLevel = null;
+
         $this->selectedState = null;
+
         $this->selectedDistrict = null;
+
         $this->office = null;
+
         $this->districts = [];
+
         $this->offices = [];
+
+        // Remove session scheme
+        session()->forget('scheme_id');
 
         $this->dispatch('userFilter', []);
     }
@@ -108,6 +210,9 @@ class FilterUserPermission extends Component
     public function render()
     {
         $this->dispatch('hideLoader');
-        return view('livewire.user-permission-filter.filter-user-permission');
+
+        return view(
+            'livewire.user-permission-filter.filter-user-permission'
+        );
     }
 }

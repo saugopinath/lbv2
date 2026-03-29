@@ -31,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\PageVisitlog::class,
             \App\Http\Middleware\DetectSessionTimeout::class,
+            \App\Http\Middleware\SetPermissionTeamId::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
