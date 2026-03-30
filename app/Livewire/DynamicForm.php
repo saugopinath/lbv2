@@ -341,6 +341,7 @@ class DynamicForm extends Component
         if (!WorkFlowPermissionHelper::canDuareSarkarEntryAllow($this->schemeId)) {
             unset($options[2]);
         }
+        // dd($options);
         $this->appTypeOptions = $options;
     }
 
