@@ -229,19 +229,19 @@ Route::get('/Caste-modification-info', [CasteModificationController::class, 'ind
     ->name('Caste-modification-info');
 
 Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])
-    // ->middleware('permission.redirect:canEditCaste')
+    ->middleware('permission.redirect:canEditCaste')
     ->name('caste-modification.edit');
 
 Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
-    // ->middleware('permission.redirect:canUpdateCaste')
+    ->middleware('permission.redirect:canUpdateCaste')
     ->name('beneficiary.updateCaste');
 
 Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])
-    // ->middleware('permission.redirect:canCasteModification')
+    ->middleware('permission.redirect:canCasteModification')
     ->name('caste-modification-list');
 
 Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
-    // ->middleware('permission.redirect:canBeneficiaryDetails')
+    ->middleware('permission.redirect:canBeneficiaryDetails')
     ->name('view-beneficiary-details');
 
 Route::get('/scheme-capacity', [SchemeCapacityController::class, 'index'])
@@ -264,15 +264,15 @@ Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])
     ->name('bankUpdate');
 
 Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])
-    // ->middleware('permission:search bank update')
+    ->middleware('permission:search bank update')
     ->name('bank-update.search-beneficiary');
 
 Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])
-    // ->middleware('permission:update mobile')
+    ->middleware('permission:update mobile')
     ->name('update-mobile');
 
 Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
-    // ->middleware('permission:update bank')
+    ->middleware('permission:update bank')
     ->name('update-bank');
 
 Route::controller(JnpmController::class)->group(function () {
