@@ -14,13 +14,16 @@ class WorkflowsteproleMapping extends Model implements Auditable
     protected $casts = [
         'is_final_step' => 'boolean',
     ];
-    public static function getLabelRoleIdsByRole($schemeId, $roleId, $rank = null)
+    public static function getLabelRoleIdsByRole($schemeId, $roleId, $rank = null, $module = null)
     {
         $query = self::query();
         if ($rank !== null) {
             $query->where('workflow_step_id', $rank);
         } else {
             $query->where('role_id', $roleId);
+        }
+        if ($module !== null) {
+            $query->where('module_id', $module);
         }
         return $query->where('scheme_id', $schemeId)
             ->first(['same_label_role_id', 'next_label_role_id']);
