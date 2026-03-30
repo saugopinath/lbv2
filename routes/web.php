@@ -1,70 +1,58 @@
 <?php
 
-use App\Http\Controllers\Formcontroller;
-use App\Http\Controllers\RejectApprovedBeneficiaryController;
-use App\Http\Controllers\SchemeController;
-use App\Http\Controllers\workflowmanagementController;
-use App\Livewire\ApplicationView;
-use App\Livewire\IncompletTypePage;
-use App\Livewire\SchemeDropdown;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\LBController;
-use App\Http\Controllers\UsersController;
-use App\Http\Controllers\DesignController;
-use App\Http\Controllers\WorkFlowController;
-use App\Http\Controllers\DashboardController;
-use App\Livewire\Users\Create as UsersCreate;
-use App\Livewire\RoleOfficeTypeMappings\Create;
-use App\Http\Controllers\CMOGrievanceController;
-use App\Http\Controllers\OfficeMastersController;
-use App\Http\Controllers\JnpmController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\BackFromJBController;
-use App\Http\Controllers\IncompleteTypeController;
-use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\BeneficiaryListController;
+use App\Http\Controllers\CaptchaController;
 use App\Http\Controllers\CasteModificationController;
-use App\Http\Controllers\UpdateBankDetailsController;
-use App\Http\Controllers\UserDutyManagementController;
-use App\Livewire\UserPermission\AssignPermissionsPage;
-use App\Http\Controllers\UserPermissionController;
-use App\Http\Controllers\PermissionController;
-use App\Livewire\ProcessApplication\DraftApplicationView;
-use App\Http\Controllers\MasterParameterSettingController;
-use App\Http\Controllers\RoleOfficeTypeMappingsController;
-use App\Http\Controllers\BeneficiaryApprovedListController;
 use App\Http\Controllers\CmoController;
 use App\Http\Controllers\CreateAssignOtherFormFieldController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DesignController;
 use App\Http\Controllers\DynamicFormController;
-use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\ElasticSearchController;
-use App\Http\Controllers\MarkedUpdateBeneficiary;
-use App\Http\Controllers\MarkedUpdateBeneficiaryController;
+use App\Http\Controllers\Formcontroller;
+use App\Http\Controllers\IncompleteTypeController;
+use App\Http\Controllers\JnpmController;
 use App\Http\Controllers\MasterTabCreationController;
-use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
-use App\Http\Controllers\MisReportController;
+use App\Http\Controllers\OfficeMastersController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RejectApprovedBeneficiaryController;
+use App\Http\Controllers\RoleOfficeTypeMappingsController;
+use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\SchemeCapacityController;
+use App\Http\Controllers\SchemeController;
+use App\Http\Controllers\UpdateBankDetailsController;
+use App\Http\Controllers\UserDutyManagementController;
+use App\Http\Controllers\UserPermissionController;
+use App\Http\Controllers\UsersController;
 use App\Http\Controllers\ValidationManagerController;
-use App\Livewire\RolerankManagement;
-use App\Livewire\SchemeTabFieldManager;
+use App\Http\Controllers\workflowmanagementController;
 use App\Livewire\CsvSplitter;
 use App\Livewire\DynamicWorkflow\ProcessWorkflow;
 use App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary;
 use App\Livewire\DynamicWorkflow\WorkflowWizard;
+use App\Livewire\IncompletTypePage;
+use App\Livewire\MasterTabManager;
+use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
+use App\Livewire\ProcessApplication\DraftApplicationView;
+use App\Livewire\RoleOfficeTypeMappings\Create;
+use App\Livewire\RolerankManagement;
+use App\Livewire\SchemeDropdown;
+use App\Livewire\SchemeTabFieldManager;
+use App\Livewire\UserPermission\AssignPermissionsPage;
+use App\Livewire\Users\Create as UsersCreate;
+use Illuminate\Support\Facades\Route;
 
-require __DIR__ . '/home.php';
-
+require __DIR__.'/home.php';
 
 // Guest Routes
 Route::get('/session-expired', function () {
-    return view('auth.session-expired', [
-        'expired_at' => now()->format('h:i:s A')
-    ]);
+    return view('auth.session-expired', ['expired_at' => now()->format('h:i:s A')]);
 })->name('session.expired');
 
 // Route::get('/', fn() => view('welcome'));
-Route::get('refresh-captcha', [App\Http\Controllers\CaptchaController::class, 'refreshCaptcha'])
-    ->name('refresh-captcha');
+Route::get('refresh-captcha', [CaptchaController::class, 'refreshCaptcha'])->name('refresh-captcha');
 
 Route::controller(AuthenticationController::class)->group(function () {
     Route::get('/login', 'login')->name('login');
@@ -85,116 +73,68 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])
-        ->name('lb-application-list');
+    Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])->name('lb-application-list');
 
-    Route::get('/lb-application-list/{scheme_id?}', SchemeDropdown::class)
-        ->name('lb-application-list');
+    Route::get('/lb-application-list/{scheme_id?}', SchemeDropdown::class)->name('lb-application-list');
 
-    Route::get('/application', DraftApplicationView::class)
-        ->name('draft-application.view');
+    Route::get('/application', DraftApplicationView::class)->name('draft-application.view');
 
     // User Management
-    Route::get('/user-managements', [UsersController::class, 'index'])
-        ->middleware('permission.redirect:canViewUser')
-        ->name('user-managements');
+    Route::get('/user-managements', [UsersController::class, 'index'])->middleware('permission.redirect:canViewUser')->name('user-managements');
 
-    Route::get('/users/create', UsersCreate::class)
-        ->middleware('permission.redirect:canCreateUsers')
-        ->name('users');
+    Route::get('/users/create', UsersCreate::class)->middleware('permission.redirect:canCreateUsers')->name('users');
 
     // Role & Office Mappings
-    Route::get('role-office-master-mappings', [RoleOfficeTypeMappingsController::class, 'index'])
-        ->middleware('permission.redirect:canRoleMapping')
-        ->name('role-office-master-mappings');
+    Route::get('role-office-master-mappings', [RoleOfficeTypeMappingsController::class, 'index'])->middleware('permission.redirect:canRoleMapping')->name('role-office-master-mappings');
 
-    Route::get('/role-office-type-mappings-create', Create::class)
-        ->middleware('permission.redirect:canRoleMappings')
-        ->name('role-office-type-mappings-create');
+    Route::get('/role-office-type-mappings-create', Create::class)->middleware('permission.redirect:canRoleMappings')->name('role-office-type-mappings-create');
 
     // Office Masters
-    Route::get('officemasters', [OfficeMastersController::class, 'index'])
-        ->middleware('permission.redirect:canViewOffices')
-        ->name('officemasters');
+    Route::get('officemasters', [OfficeMastersController::class, 'index'])->middleware('permission.redirect:canViewOffices')->name('officemasters');
 
-    Route::get('/office-masters-create', OfficeMasterCreate::class)
-        ->middleware('permission.redirect:canCreateOffices')
-        ->name('office-masters-create');
+    Route::get('/office-masters-create', OfficeMasterCreate::class)->middleware('permission.redirect:canCreateOffices')->name('office-masters-create');
 
     // Permissions Management
-    Route::get('/permission', [PermissionController::class, 'index'])
-        ->middleware('permission.redirect:canViewPermission')
-        ->name('permission');
+    Route::get('/permission', [PermissionController::class, 'index'])->middleware('permission.redirect:canViewPermission')->name('permission');
 
-    Route::get('/user-permission', [UserPermissionController::class, 'index'])
-        ->middleware('permission.redirect:canViewUserPermisson')
-        ->name('user-permission');
+    Route::get('/user-permission', [UserPermissionController::class, 'index'])->middleware('permission.redirect:canViewUserPermisson')->name('user-permission');
 
-    Route::get('/assign-users-permissions', AssignPermissionsPage::class)
-        ->name('assign-users-permissions');
+    Route::get('/assign-users-permissions', AssignPermissionsPage::class)->name('assign-users-permissions');
 
-    Route::get('/role-permission-management', [RolePermisssionManagementController::class, 'index'])
-        ->middleware('permission.redirect:canRolePermissionManagement')
-        ->name('role-permission-management');
+    Route::get('/role-permission-management', [RolePermisssionManagementController::class, 'index'])->middleware('permission.redirect:canRolePermissionManagement')->name('role-permission-management');
 
     // Duty Management
-    Route::get('/userDutymanagement', [UserDutyManagementController::class, 'index'])
-        // ->middleware('permission.redirect:manage user duties')
-        ->name('userDutymanagement.index');
-
+    Route::get('/userDutymanagement', [UserDutyManagementController::class, 'index'])->middleware('permission.redirect:manage user duties')->name('userDutymanagement.index');
 
     // Incomplete Types
-    Route::get('/incomplete-types/{stage?}', [IncompleteTypeController::class, 'index'])
-        ->name('incomplete.types');
+    Route::get('/incomplete-types/{stage?}', [IncompleteTypeController::class, 'index'])->name('incomplete.types');
 
-    // Route::get('/incomplete-types/{stage?}', [SchemeController::class, 'finalSubmitted'])
-    //     ->name('incomplete.types');
+    Route::get('/incomplet-type/{id}/{stage}/{schemeId}', IncompletTypePage::class)->name('incomplet-type.view');
 
-    Route::get('/incomplet-type/{id}/{stage}/{schemeId}', IncompletTypePage::class)
-        ->name('incomplet-type.view');
+    Route::post('/incomplete/update/{id}/{schemeId}', [IncompleteTypeController::class, 'fullUpdate'])->middleware('permission.redirect:canUpdateIncomplet')->name('incomplete-full-deatils-update');
 
-    Route::post('/incomplete/update/{id}/{schemeId}', [IncompleteTypeController::class, 'fullUpdate'])
-        // ->middleware('permission.redirect:canUpdateIncomplet')
-        ->name('incomplete-full-deatils-update');
-
-    Route::post('/incomplete/revert/{id}/{schemeId}', [IncompleteTypeController::class, 'revertVerify'])
-        // ->middleware('permission.redirect:canRevertIncomplet')
-        ->name('incomplete-revert-update');
-    // Route::get('/incomplete-details-mis-report', [IncompleteTypeController::class, 'incompleteDetails'])
-    //     ->name('incomplete.details.mis.report');
-
+    Route::post('/incomplete/revert/{id}/{schemeId}', [IncompleteTypeController::class, 'revertVerify'])->middleware('permission.redirect:canRevertIncomplet')->name('incomplete-revert-update');
 
     // Design Pages (Dev Only – Remove in Prod)
     Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');
     Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
     Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
-    // Route::get('/custom_application/{id}', ApplicationView::class)->name('custom_application.view');
     Route::get('/getelsticsearchIndex', [ElasticSearchController::class, 'index'])->name('getelsticsearchIndex');
 });
 
 Route::controller(CreateAssignOtherFormFieldController::class)->group(function () {
-    Route::get('/create-dynamicformfield', 'createdynamicformfield')
-        ->name('create-dynamicformfield');
+    Route::get('/create-dynamicformfield', 'createdynamicformfield')->name('create-dynamicformfield');
 });
 
-Route::get(
-    '/dynamic-form-page',
-    [DynamicFormController::class, 'show']
-)->name('dynamic-form-page');
+Route::get('/dynamic-form-page', [DynamicFormController::class, 'show'])->name('dynamic-form-page');
 
-Route::get('/master-tab', App\Livewire\MasterTabManager::class)
-    ->middleware('permission.redirect:canMasterTab')
-    ->name('master-tab');
-// Route::get('/tab-filed-manage', App\Livewire\SchemeTabFieldManager::class)->name('tab-filed-manage');
+Route::get('/master-tab', MasterTabManager::class)->middleware('permission.redirect:canMasterTab')->name('master-tab');
 Route::get('/tab-field-manager', SchemeTabFieldManager::class)->name('tab-field-manager');
-// Route::get('/menu-tab', App\Livewire\MenuTabManager::class)->name(name: 'menu-tab');
 
 Route::get('/edit-validation', [ValidationManagerController::class, 'index'])->name('edit-validation');
 Route::get('/master-tab-creation', [MasterTabCreationController::class, 'index'])->name('master-tab-creation');
 
-Route::get('/schemes-final-submitted', [SchemeController::class, 'finalSubmitted'])
-    ->middleware('permission.redirect:canEntry')
-    ->name('schemes.final-submitted');
+Route::get('/schemes-final-submitted', [SchemeController::class, 'finalSubmitted'])->middleware('permission.redirect:canEntry')->name('schemes.final-submitted');
 
 Route::get('/duplicate-checks', [SchemeController::class, 'finalSubmitted'])->name('duplicate-checks');
 Route::get('/age-management', [SchemeController::class, 'finalSubmitted'])->name('age-management');
@@ -204,111 +144,67 @@ Route::controller(workflowmanagementController::class)->group(function () {
     Route::any('/assign-workflow', 'assignWorkflow')->name('assign-workflow');
 });
 
-Route::get('/role-rank-management', RolerankManagement::class)
-    ->middleware('permission.redirect:canRoleRankManagement')
-    ->name('role-rank-management');
+Route::get('/role-rank-management', RolerankManagement::class)->middleware('permission.redirect:canRoleRankManagement')->name('role-rank-management');
 
-Route::get('/define-workflow', [SchemeController::class, 'finalSubmitted'])
-    ->middleware('permission.redirect:canDefineWorkflow')
-    ->name('define-workflow');
+Route::get('/define-workflow', [SchemeController::class, 'finalSubmitted'])->middleware('permission.redirect:canDefineWorkflow')->name('define-workflow');
 
-Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])
-    ->name('beneficiaries_selection.index');
+Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])->name('beneficiaries_selection.index');
 
-Route::get('/report', [BeneficiaryListController::class, 'show'])
-    ->name('report.show');
+Route::get('/report', [BeneficiaryListController::class, 'show'])->name('report.show');
 
-Route::any('draftedit', [SchemeController::class, 'draftedit'])
-    ->name('draftedit');
+Route::any('draftedit', [SchemeController::class, 'draftedit'])->name('draftedit');
 
 Route::any('/custom_application', [SchemeController::class, 'applicationView'])->name('custom_application.view');
 
 // Caste Update
-Route::get('/Caste-modification-info', [CasteModificationController::class, 'index'])
-    ->middleware('permission.redirect:canModifyCaste')
-    ->name('Caste-modification-info');
+Route::get('/Caste-modification-info', [CasteModificationController::class, 'index'])->middleware('permission.redirect:canModifyCaste')->name('Caste-modification-info');
 
-Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])
-    ->middleware('permission.redirect:canEditCaste')
-    ->name('caste-modification.edit');
+Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])->middleware('permission.redirect:canEditCaste')->name('caste-modification.edit');
 
-Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
-    ->middleware('permission.redirect:canUpdateCaste')
-    ->name('beneficiary.updateCaste');
+Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])->middleware('permission.redirect:canUpdateCaste')->name('beneficiary.updateCaste');
 
-Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])
-    ->middleware('permission.redirect:canCasteModification')
-    ->name('caste-modification-list');
+Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])->middleware('permission.redirect:canCasteModification')->name('caste-modification-list');
 
-Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
-    ->middleware('permission.redirect:canBeneficiaryDetails')
-    ->name('view-beneficiary-details');
+Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])->middleware('permission.redirect:canBeneficiaryDetails')->name('view-beneficiary-details');
 
-Route::get('/scheme-capacity', [SchemeCapacityController::class, 'index'])
-    ->name('scheme-capacity');
+Route::get('/scheme-capacity', [SchemeCapacityController::class, 'index'])->name('scheme-capacity');
 
-Route::get('/csv-splitter', CsvSplitter::class)
-    ->name('csv-splitter');
+Route::get('/csv-splitter', CsvSplitter::class)->name('csv-splitter');
 
+Route::get('/form', [Formcontroller::class, 'index'])->middleware('permission.redirect:canEntry')->name('form');
+Route::get('application-lists', [Formcontroller::class, 'applicationLists'])->name('application-lists');
+Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])->name('define-workflow1');
 
-Route::get('/form', [Formcontroller::class, 'index'])
-  ->middleware('permission.redirect:canEntry')
-    ->name('form');
-Route::get('application-lists', [Formcontroller::class, 'applicationLists'])
-    ->name('application-lists');
-Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])
-    ->name('define-workflow1');
+Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])->middleware('permission:update bank details')->name('bankUpdate');
 
-Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])
-    ->middleware('permission:update bank details')
-    ->name('bankUpdate');
+Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])->middleware('permission:search bank update')->name('bank-update.search-beneficiary');
 
-Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])
-    ->middleware('permission:search bank update')
-    ->name('bank-update.search-beneficiary');
+Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])->middleware('permission:update mobile')->name('update-mobile');
 
-Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])
-    ->middleware('permission:update mobile')
-    ->name('update-mobile');
-
-Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
-    ->middleware('permission:update bank')
-    ->name('update-bank');
+Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])->middleware('permission:update bank')->name('update-bank');
 
 Route::controller(JnpmController::class)->group(function () {
 
-    Route::any('/jnmp/pull', 'pullJnmpData')
-    ->middleware('permission.redirect:canImportJanmaMrityuData')
-    ->name('jnmp.pull');
+    Route::any('/jnmp/pull', 'pullJnmpData')->middleware('permission.redirect:canImportJanmaMrityuData')->name('jnmp.pull');
 
     Route::post('/jnmp/details-callback', 'detailsCallback')->name('jnmp.details-callback');
 
     Route::get('/jnmp-stats', 'getJnmpStats');
     Route::post('/jnmp/mark-as-death', 'markAsDeathProcess')->name('jnmp.mark-as-death');
 
-    Route::get('jnmp-data', 'index')
-    ->middleware('permission.redirect:canReActivateDeathIncident')
-    ->name('jnmp-data');
+    Route::get('jnmp-data', 'index')->middleware('permission.redirect:canReActivateDeathIncident')->name('jnmp-data');
 
     // JNMP List at HOD
-    Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')
-    ->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')
-    ->name('jnmp-marked-data');
+    Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')->name('jnmp-marked-data');
 });
-//Reject Approved Beneficiary
+// Reject Approved Beneficiary
 Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
-    Route::get('/reject-approved-beneficiary',  'index')
-        ->middleware('permission.redirect:canRejectApprovedBeneficiary')
-        ->name('reject-approved-beneficiary');
-    Route::get('/reject-approved-beneficiary/BeneficiaryDetails', 'editview')
-        ->middleware('permission.redirect:canViewDetailsToReject')
-        ->name('reject-approved-beneficiary.BeneficiaryDetails');
-    Route::post('/deActivebeneficiary', 'deActiveBeneficiary')
-        ->middleware('permission.redirect:canRejectBeneficiary')
-        ->name('beneficiary.deActivebeneficiary');
+    Route::get('/reject-approved-beneficiary', 'index')->middleware('permission.redirect:canRejectApprovedBeneficiary')->name('reject-approved-beneficiary');
+    Route::get('/reject-approved-beneficiary/BeneficiaryDetails', 'editview')->middleware('permission.redirect:canViewDetailsToReject')->name('reject-approved-beneficiary.BeneficiaryDetails');
+    Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->middleware('permission.redirect:canRejectBeneficiary')->name('beneficiary.deActivebeneficiary');
 });
 
-/// Global Dynamic Workflow Routes
+// / Global Dynamic Workflow Routes
 Route::get('dynamic-workflow-config', WorkflowWizard::class)->name('dynamic-workflow-config');
 Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
 Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
@@ -318,12 +214,10 @@ Route::controller(BackFromJBController::class)->group(function () {
     Route::any('/backfromjbactions', 'backfromjbactions')->name('backfromjbactions');
 });
 
-
 Route::controller(CmoController::class)->group(function () {
     Route::any('/pullnewcmo', 'pullnewcmo')->middleware('permission.redirect:canCMODataFetch')->name('pullnewcmo');
     Route::any('/populatelbportal', 'populatelbportal')->name('populatelbportal');
     Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')->middleware('permission.redirect:canCMOGrievanceMark')->name('cmo-grievance-workflow');
-    // Route::any('/cmo-grievance-find/{id}', 'cmogrievancefind')->name('cmo-grievance-find');
     Route::any('/cmo-grievance-find', 'cmogrievancefind')->name('cmo-grievance-find');
     Route::post('/cmo-grievance-action', 'cmodetailsaction')->name('cmo-grievance-action');
     Route::post('/cmo-grievance-search', 'cmogrievancesearch')->name('cmo-grievance-search');

@@ -26,11 +26,7 @@ class RejectApprovedBeneficiaryController extends Controller
     }
     public function index()
     {
-        $user = Auth::user();
-        // $user->hasRole('Operator');
-
-        // dd('caste modification info');
-        // if ($user->hasRole('Operator')) {}
+        $user = Auth::user();       
 
         if (CheckAuthHelper::isApprover()) {
             $header = 'Reject Approved Beneficiary Information';
@@ -51,10 +47,9 @@ class RejectApprovedBeneficiaryController extends Controller
             $reportType = 3;
             $BenDetails = BeneficiaryPersonalDetail::where('application_id', $application_id)->firstOrFail();
             $rejectRevertCause = Codemaster::where('code', 12)->first()->children()->get();
-            // $doctypes=SchemeAttachedDocMappings::with('codemaster')->get();
+          
             $doctypes = $this->doctype;
-            // 1634
-            // dd($doctypes);
+            
             return view('RejectApprovedBeneficiaryView.reject_approved_beneficiary_processed', compact('application_id', 'beneficiary_id', 'scheme_id', 'header', 'reportType', 'rejectRevertCause', 'doctypes', 'schemeName'));
         }
         $header = 'Oops! You do not have permission to view users.';
@@ -62,7 +57,7 @@ class RejectApprovedBeneficiaryController extends Controller
     }
     public function deActiveBeneficiary(Request $request)
     {
-        // dd($request->all());
+       
         if (!Auth::check()) {
             return redirect()->route('login')->with('error', 'Please login first!');
         }
@@ -75,9 +70,7 @@ class RejectApprovedBeneficiaryController extends Controller
             $nextLevelRoleId = -100;
             $applicationId = Crypt::decryptString($request->application_id);
             $schemeId = Crypt::decryptString($request->scheme_id);
-            $doctype = $this->doctype;
-            // dd($doctype, $nextLevelRoleId, $applicationId, $schemeId);
-            // Create validator instance
+            $doctype = $this->doctype;           
             $validator = Validator::make($request->all(), [
                 'application_id' => 'required|string',
                 'beneficiary_id' => 'required|string',
@@ -98,9 +91,7 @@ class RejectApprovedBeneficiaryController extends Controller
                     $validator->errors()->add('document', 'Please upload the required document.');
                 }
             });
-            if ($validator->fails()) {
-                // dd('validation fails');
-                // dd($validator->errors());
+            if ($validator->fails()) {              
                 return back()
                     ->withErrors($validator)
                     ->withInput();
@@ -152,9 +143,7 @@ class RejectApprovedBeneficiaryController extends Controller
                     return redirect()->route('reject-approved-beneficiary')->with('error', 'Something went wrong!');
                 }
             } catch (\Exception $e) {
-                DB::rollBack();
-                // dd($e->getMessage());
-                // Log the exception for debugging (optional)
+                DB::rollBack();                
                 return back()->with('error', 'Something went wrong!');
             }
         }
