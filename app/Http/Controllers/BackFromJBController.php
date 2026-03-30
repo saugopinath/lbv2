@@ -17,7 +17,7 @@ class BackFromJBController extends Controller
     protected $minDOB;
 
     protected $maxDOB;
-
+    protected $isAuthorized = false;
     public function __construct()
     {
         if (CheckAuthHelper::isCommonWorkFlow2ndStep()) {
@@ -59,7 +59,7 @@ class BackFromJBController extends Controller
             $validator->sometimes(
                 'new_dob',
                 "required|date|after_or_equal:{$this->minDOB}|before_or_equal:{$this->maxDOB}",
-                fn ($input) => $input->action === 'verify_and_forward_to_approver'
+                fn($input) => $input->action === 'verify_and_forward_to_approver'
             );
             $validator->validate();
             DB::beginTransaction();
