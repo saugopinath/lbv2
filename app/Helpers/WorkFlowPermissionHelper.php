@@ -25,66 +25,29 @@ class WorkFlowPermissionHelper
         return $schemeId ? (int) $schemeId : null;
     }
 
-    //     public static function hasPermission($permissionKey, $schemeId = null)
-    //     {
-    //         $user = auth()->user();
-
-    //         if (! $user) {
-    //             return false;
-    //         }
-    // // dump($schemeId);
-    //         // $schemeId = $schemeId ?? self::getSchemeId();
-
-    //         if ($schemeId) {
-    //             app(PermissionRegistrar::class)->setPermissionsTeamId((int) $schemeId);
-    //         }
-
-    //         return $user->can($permissionKey);
-    //     }
-    public static function hasPermission(
-        $permissionKey,
-        $schemeId = null
-    ) {
-
+    public static function hasPermission($permissionKey, $schemeId = null)
+    {
         $user = auth()->user();
 
         if (! $user) {
             return false;
         }
 
-        // CASE-1:
-        // specific scheme passed
-
         if ($schemeId) {
-
-            app(PermissionRegistrar::class)
-                ->setPermissionsTeamId(
-                    (int) $schemeId
-                );
+            app(PermissionRegistrar::class)->setPermissionsTeamId((int) $schemeId);
 
             return $user->can($permissionKey);
         }
 
-        // CASE-2:
-        // multiple scheme check
-
-        $userSchemes =
-            self::getUserSchemes();
+        $userSchemes = self::getUserSchemes();
 
         if (empty($userSchemes)) {
-
             return false;
         }
 
         foreach ($userSchemes as $scheme) {
-
-            app(PermissionRegistrar::class)
-                ->setPermissionsTeamId(
-                    (int) $scheme
-                );
-
+            app(PermissionRegistrar::class)->setPermissionsTeamId((int) $scheme);
             if ($user->can($permissionKey)) {
-
                 return true;
             }
         }
@@ -99,29 +62,9 @@ class WorkFlowPermissionHelper
             : null;
     }
 
-    // private static function getUserSchemes(): array
-    // {
-    //     $schemes =
-    //         Session::get('scheme_ids');
-
-    //     $schemeList = [];
-
-    //     if (! $schemes) {
-    //         return [];
-    //     }
-
-    //     foreach ($schemes as $scheme) {
-
-    //         $schemeList[] =
-    //             Crypt::decryptString($scheme);
-    //     }
-
-    //     return $schemeList;
-    // }
     private static function getUserSchemes(): array
     {
-        $schemes =
-            Session::get('lgd_session.scheme_id');
+        $schemes = Session::get('lgd_session.scheme_id');
 
         $schemeList = [];
 
@@ -130,9 +73,7 @@ class WorkFlowPermissionHelper
         }
 
         foreach ($schemes as $scheme) {
-
-            $schemeList[] =
-                Crypt::decryptString($scheme);
+            $schemeList[] = Crypt::decryptString($scheme);
         }
 
         return $schemeList;
@@ -399,41 +340,83 @@ class WorkFlowPermissionHelper
             || self::hasPermission('view permission', $schemeId);
     }
 
-    public static function canBulkActionAllow(int $entryType, string $action, bool $isBulk = false): bool
-    {
-        $user = Auth::user();
+    // public static function canBulkActionAllow(int $entryType, string $action, bool $isBulk = false): bool
+    // {
+    //     $user = Auth::user();
+
+    //     switch ($entryType) {
+    //         case 1:
+    //             $prefix = 'Normal Entry';
+    //             break;
+    //         case 2:
+    //             $prefix = 'Duare Sarkar Entry';
+    //             break;
+    //         default:
+    //             return false;
+    //     }
+
+    //     switch (strtolower($action)) {
+    //         case 'verification':
+    //             $suffix = 'Verification Allow';
+    //             break;
+    //         case 'approver':
+    //             $suffix = 'Approver Allow';
+    //             break;
+    //         case 'reject':
+    //             $suffix = 'Reject Allow';
+    //             break;
+    //         case 'revert':
+    //             $suffix = 'Revert Allow';
+    //             break;
+    //         default:
+    //             return false;
+    //     }
+
+    //     $permission = $isBulk ? "Bulk Actions {$prefix} {$suffix}" : "{$prefix} {$suffix}";
+
+    //     return $user->can($permission);
+    // }
+
+    public static function canBulkActionAllow(int $entryType, string $action, bool $isBulk = false, $schemeId = null): bool {
 
         switch ($entryType) {
             case 1:
                 $prefix = 'Normal Entry';
                 break;
+
             case 2:
                 $prefix = 'Duare Sarkar Entry';
                 break;
+
             default:
                 return false;
         }
 
         switch (strtolower($action)) {
+
             case 'verification':
                 $suffix = 'Verification Allow';
                 break;
+
             case 'approver':
                 $suffix = 'Approver Allow';
                 break;
+
             case 'reject':
                 $suffix = 'Reject Allow';
                 break;
+
             case 'revert':
                 $suffix = 'Revert Allow';
                 break;
+
             default:
                 return false;
         }
 
-        $permission = $isBulk ? "Bulk Actions {$prefix} {$suffix}" : "{$prefix} {$suffix}";
+        $permission = $isBulk ? "Bulk Actions {$prefix} {$suffix}" : "{$prefix} {$suffix}";       
 
-        return $user->can($permission);
+        return self::hasPermission($permission, $schemeId);
     }
 
     public static function canVerifyCastApplication($schemeId = null): bool

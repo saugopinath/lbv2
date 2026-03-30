@@ -118,29 +118,29 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $workflowService = app(WorkflowService::class);
         $data = $workflowService->getLabelRoles($this->schemeId);
         if (
-            (WorkFlowPermissionHelper::canBulkActionAllow(1, 'verification', true) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true)) && ((!$data->is_final_step && !$data->is_first_step) || ($data->is_final_step && $data->is_first_step))
+            (WorkFlowPermissionHelper::canBulkActionAllow(1, 'verification', true, $this->schemeId) ||
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true, $this->schemeId)) && ((!$data->is_final_step && !$data->is_first_step) || ($data->is_final_step && $data->is_first_step))
         ) {
             $actions['bulkverify'] = $data->workflowstep->label;
         }
 
         if (
-            (WorkFlowPermissionHelper::canBulkActionAllow(1, 'approver', true) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'approver', true)) && $data->is_final_step
+            (WorkFlowPermissionHelper::canBulkActionAllow(1, 'approver', true, $this->schemeId) ||
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'approver', true, $this->schemeId)) && $data->is_final_step
         ) {
             $actions['bulkapprove'] = $data->workflowstep->label;
         }
 
         if (
-            (WorkFlowPermissionHelper::canBulkActionAllow(1, 'reject', true) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'reject', true)) && (!$data->is_first_step || ($data->is_final_step && $data->is_first_step))
+            (WorkFlowPermissionHelper::canBulkActionAllow(1, 'reject', true, $this->schemeId) ||
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'reject', true, $this->schemeId)) && (!$data->is_first_step || ($data->is_final_step && $data->is_first_step))
         ) {
             $actions['bulkreject'] = 'Reject';
         }
 
         if (
-            (WorkFlowPermissionHelper::canBulkActionAllow(1, 'revert', true) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'revert', true)) && (!$data->is_first_step || ($data->is_final_step && $data->is_first_step))
+            (WorkFlowPermissionHelper::canBulkActionAllow(1, 'revert', true, $this->schemeId) ||
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'revert', true, $this->schemeId)) && (!$data->is_first_step || ($data->is_final_step && $data->is_first_step))
         ) {
             $actions['bulkrevert'] = 'Revert';
         }

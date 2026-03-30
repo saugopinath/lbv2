@@ -18,32 +18,7 @@ class PermissionRedirectMiddleware
         }
 
         $user = Auth::user();
-
-        // // scheme id from session or route
-        // $schemeId =
-        //     session('scheme_id') ??
-        //     $request->route('schemeId') ??
-        //     $request->route('scheme_id');
-
-        // // Fallback to lgd_session if scheme_id is not set in root session or route
-        // if (!$schemeId && session()->has('lgd_session.scheme_id')) {
-        //     try {
-        //         $schemeId = Crypt::decryptString(session('lgd_session.scheme_id'));
-        //     } catch (\Exception $e) {
-        //         $schemeId = null;
-        //     }
-        // }
-
-        // // Always set the team ID (even if null) to ensure strict scoping and avoid leakage
-        // app(PermissionRegistrar::class)
-        //     ->setPermissionsTeamId($schemeId);
-
-        // // Clear cached permissions so Spatie re-queries with the correct team scope
-        // app(PermissionRegistrar::class)->forgetCachedPermissions();
-        // $user->unsetRelation('permissions');
-        // $user->unsetRelation('roles');
-
-        // helper method check
+       
         if (method_exists(WorkFlowPermissionHelper::class,$permission)) {
 
             if (!WorkFlowPermissionHelper::$permission()) {
