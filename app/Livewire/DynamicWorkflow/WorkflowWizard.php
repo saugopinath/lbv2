@@ -220,8 +220,8 @@ class WorkflowWizard extends Component
                     ]
                 );
             }
-            $schemeModule->steps()->delete();
-            DynamicWorkflowLabel::where('module_id', $schemeModule->id)->delete();
+            workflowstepRolemapping::where('module_id', $schemeModule->id)->where('scheme_id', $this->selectedScheme)->delete();
+            DynamicWorkflowLabel::where('module_id', $schemeModule->id)->where('scheme_id', $this->selectedScheme)->delete();
             foreach ($this->finalSteps as $index => $stepData) {
                 $rank = ($index + 1) * 10;
                 $successRank = ($index < count($this->finalSteps) - 1) ? ($index + 2) * 10 : 0;
@@ -264,8 +264,8 @@ class WorkflowWizard extends Component
                         'scheme_id' => $this->selectedScheme,
                         'module_id' => $schemeModule->id,
                         'workflow_step_id' => $label->id,
-                        'rank' => $rank,
                         'role_id' => $roleId,
+                        'rank' => $rank,
                         'next_label_role_id' => $successRank,
                         'same_label_role_id' => $revertRank,
                         'is_final_step' => ($index == count($this->finalSteps) - 1),
