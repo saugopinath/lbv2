@@ -5,6 +5,7 @@ namespace App\Helpers;
 use App\Models\Codemaster;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Session;
 use Spatie\Permission\PermissionRegistrar;
 
 class WorkFlowPermissionHelper
@@ -24,21 +25,71 @@ class WorkFlowPermissionHelper
         return $schemeId ? (int) $schemeId : null;
     }
 
-    public static function hasPermission($permissionKey, $schemeId = null)
-    {
+    //     public static function hasPermission($permissionKey, $schemeId = null)
+    //     {
+    //         $user = auth()->user();
+
+    //         if (! $user) {
+    //             return false;
+    //         }
+    // // dump($schemeId);
+    //         // $schemeId = $schemeId ?? self::getSchemeId();
+
+    //         if ($schemeId) {
+    //             app(PermissionRegistrar::class)->setPermissionsTeamId((int) $schemeId);
+    //         }
+
+    //         return $user->can($permissionKey);
+    //     }
+    public static function hasPermission(
+        $permissionKey,
+        $schemeId = null
+    ) {
+
         $user = auth()->user();
 
         if (! $user) {
             return false;
         }
-// dump($schemeId);
-        // $schemeId = $schemeId ?? self::getSchemeId();
+
+        // CASE-1:
+        // specific scheme passed
 
         if ($schemeId) {
-            app(PermissionRegistrar::class)->setPermissionsTeamId((int) $schemeId);
+
+            app(PermissionRegistrar::class)
+                ->setPermissionsTeamId(
+                    (int) $schemeId
+                );
+
+            return $user->can($permissionKey);
         }
 
-        return $user->can($permissionKey);
+        // CASE-2:
+        // multiple scheme check
+
+        $userSchemes =
+            self::getUserSchemes();
+
+        if (empty($userSchemes)) {
+
+            return false;
+        }
+
+        foreach ($userSchemes as $scheme) {
+
+            app(PermissionRegistrar::class)
+                ->setPermissionsTeamId(
+                    (int) $scheme
+                );
+
+            if ($user->can($permissionKey)) {
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static function getUserId(): ?int
@@ -48,9 +99,47 @@ class WorkFlowPermissionHelper
             : null;
     }
 
+    // private static function getUserSchemes(): array
+    // {
+    //     $schemes =
+    //         Session::get('scheme_ids');
+
+    //     $schemeList = [];
+
+    //     if (! $schemes) {
+    //         return [];
+    //     }
+
+    //     foreach ($schemes as $scheme) {
+
+    //         $schemeList[] =
+    //             Crypt::decryptString($scheme);
+    //     }
+
+    //     return $schemeList;
+    // }
+    private static function getUserSchemes(): array
+    {
+        $schemes =
+            Session::get('lgd_session.scheme_id');
+
+        $schemeList = [];
+
+        if (! $schemes) {
+            return [];
+        }
+
+        foreach ($schemes as $scheme) {
+
+            $schemeList[] =
+                Crypt::decryptString($scheme);
+        }
+
+        return $schemeList;
+    }
+
     public static function canEntry($schemeId = null): bool
     {
-        // dd($schemeId);
         return self::hasPermission('submit-lb-form', $schemeId);
     }
 
