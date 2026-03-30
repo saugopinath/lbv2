@@ -39,7 +39,7 @@ class CmoWorkFlowDataTable extends DataTableComponent
     {
         $this->district = $type['district'];
         $process_type = $type['process_type'];
-        $user = auth()->user();
+        // $user = auth()->user();
         if ($process_type) {
             if ($process_type == Codemaster::getIdByCode(3302) && (CheckAuthHelper::isCommonApprover())) {
                 $this->process_type = [Codemaster::getIdByCode(3302), Codemaster::getIdByCode(3304)];
@@ -59,7 +59,7 @@ class CmoWorkFlowDataTable extends DataTableComponent
     public function mount($schemeId = null, $schemeName = null): void
     {
         $this->greCat = $this->greCat($schemeId);
-        $user = auth()->user();
+        // $user = auth()->user();
         if (CheckAuthHelper::isCommmonVerifier()) {
             $this->process_type = [Codemaster::getIdByCode(3301)];
         } elseif (CheckAuthHelper::isCommonOperator()) {
@@ -89,7 +89,7 @@ class CmoWorkFlowDataTable extends DataTableComponent
         if ($this->builder()->count() == 0) {
             return [];
         }
-        $user = auth()->user();
+        // $user = auth()->user();
         $actions = [];
         if (CheckAuthHelper::isCommonHOD() && $this->process_type == [Codemaster::getIdByCode(3303)]) {
             $actions['bulkpush'] = 'Push To CMO';
@@ -202,7 +202,7 @@ class CmoWorkFlowDataTable extends DataTableComponent
             //     ->html(),
             Column::make("Action")
                 ->label(function ($row) {
-                    $user = auth()->user();
+                    // $user = auth()->user();
                     $processType = $this->process_type;
                     $canEdit = false;
                     if (
