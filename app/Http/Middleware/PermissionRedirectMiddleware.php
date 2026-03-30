@@ -38,6 +38,11 @@ class PermissionRedirectMiddleware
         app(PermissionRegistrar::class)
             ->setPermissionsTeamId($schemeId);
 
+        // Clear cached permissions so Spatie re-queries with the correct team scope
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $user->unsetRelation('permissions');
+        $user->unsetRelation('roles');
+
         // helper method check
         if (
             method_exists(

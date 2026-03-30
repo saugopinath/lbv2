@@ -101,7 +101,7 @@ class DynamicForm extends Component
     public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null)
     {
 
-        if (!WorkFlowPermissionHelper::canEntry()) {
+        if (!WorkFlowPermissionHelper::canEntry($schemeId)) {
             abort(403, 'You are not authorized to create entry.');
         }
         $this->loadAppTypeOptions();
@@ -184,7 +184,7 @@ class DynamicForm extends Component
     {
         $type = $this->formData['application_type'] ?? null;
 
-        if ($type == 1 && !WorkFlowPermissionHelper::canNormalEntryAllow()) {
+        if ($type == 1 && !WorkFlowPermissionHelper::canNormalEntryAllow($this->schemeId)) {
 
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -194,7 +194,7 @@ class DynamicForm extends Component
             return false;
         }
 
-        if ($type == 2 && !WorkFlowPermissionHelper::canDuareSarkarEntryAllow()) {
+        if ($type == 2 && !WorkFlowPermissionHelper::canDuareSarkarEntryAllow($this->schemeId)) {
 
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -335,10 +335,10 @@ class DynamicForm extends Component
                 }
             }
         }
-        if (!WorkFlowPermissionHelper::canNormalEntryAllow()) {
+        if (!WorkFlowPermissionHelper::canNormalEntryAllow($this->schemeId)) {
             unset($options[1]);
         }
-        if (!WorkFlowPermissionHelper::canDuareSarkarEntryAllow()) {
+        if (!WorkFlowPermissionHelper::canDuareSarkarEntryAllow($this->schemeId)) {
             unset($options[2]);
         }
         $this->appTypeOptions = $options;

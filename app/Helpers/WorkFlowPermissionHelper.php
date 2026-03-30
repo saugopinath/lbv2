@@ -6,13 +6,14 @@ use App\Models\Codemaster;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Spatie\Permission\PermissionRegistrar;
+
 class WorkFlowPermissionHelper
 {
     public static function getSchemeId()
     {
         $schemeId = session('scheme_id');
 
-        if (!$schemeId && session()->has('lgd_session.scheme_id')) {
+        if (! $schemeId && session()->has('lgd_session.scheme_id')) {
             try {
                 $schemeId = Crypt::decryptString(session('lgd_session.scheme_id'));
             } catch (\Exception $e) {
@@ -27,11 +28,11 @@ class WorkFlowPermissionHelper
     {
         $user = auth()->user();
 
-        if (!$user) {
+        if (! $user) {
             return false;
         }
-
-        $schemeId = $schemeId ?? self::getSchemeId();
+// dump($schemeId);
+        // $schemeId = $schemeId ?? self::getSchemeId();
 
         if ($schemeId) {
             app(PermissionRegistrar::class)->setPermissionsTeamId((int) $schemeId);
@@ -49,6 +50,7 @@ class WorkFlowPermissionHelper
 
     public static function canEntry($schemeId = null): bool
     {
+        // dd($schemeId);
         return self::hasPermission('submit-lb-form', $schemeId);
     }
 
@@ -281,19 +283,19 @@ class WorkFlowPermissionHelper
 
     public static function canAnyLbMenu($schemeId = null): bool
     {
-        return (self::hasPermission('lb-application-list', $schemeId) || self::hasPermission('submit-lb-form', $schemeId));
+        return self::hasPermission('lb-application-list', $schemeId) || self::hasPermission('submit-lb-form', $schemeId);
     }
 
     public static function canIncomplete($schemeId = null): bool
     {
-        return (self::hasPermission('view verifier incomplete', $schemeId)
-            || self::hasPermission('view approver incomplete', $schemeId));
+        return self::hasPermission('view verifier incomplete', $schemeId)
+            || self::hasPermission('view approver incomplete', $schemeId);
     }
 
     public static function canDutyManagement($schemeId = null): bool
     {
-        return (self::hasPermission('view users', $schemeId)
-            || self::hasPermission('view offices', $schemeId) || self::hasPermission('manage role mappings', $schemeId));
+        return self::hasPermission('view users', $schemeId)
+            || self::hasPermission('view offices', $schemeId) || self::hasPermission('manage role mappings', $schemeId);
     }
 
     public static function canCaste($schemeId = null): bool
