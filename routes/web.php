@@ -229,19 +229,19 @@ Route::get('/Caste-modification-info', [CasteModificationController::class, 'ind
     ->name('Caste-modification-info');
 
 Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])
-    // ->middleware('permission.redirect:canEditCaste')
+    ->middleware('permission.redirect:canEditCaste')
     ->name('caste-modification.edit');
 
 Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])
-    // ->middleware('permission.redirect:canUpdateCaste')
+    ->middleware('permission.redirect:canUpdateCaste')
     ->name('beneficiary.updateCaste');
 
 Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])
-    // ->middleware('permission.redirect:canCasteModification')
+    ->middleware('permission.redirect:canCasteModification')
     ->name('caste-modification-list');
 
 Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
-    // ->middleware('permission.redirect:canBeneficiaryDetails')
+    ->middleware('permission.redirect:canBeneficiaryDetails')
     ->name('view-beneficiary-details');
 
 Route::get('/scheme-capacity', [SchemeCapacityController::class, 'index'])
@@ -259,6 +259,42 @@ Route::get('application-lists', [Formcontroller::class, 'applicationLists'])
 Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])
     ->name('define-workflow1');
 
+Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])
+    ->middleware('permission:update bank details')
+    ->name('bankUpdate');
+
+Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])
+    ->middleware('permission:search bank update')
+    ->name('bank-update.search-beneficiary');
+
+Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])
+    ->middleware('permission:update mobile')
+    ->name('update-mobile');
+
+Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
+    ->middleware('permission:update bank')
+    ->name('update-bank');
+
+Route::controller(JnpmController::class)->group(function () {
+
+    Route::any('/jnmp/pull', 'pullJnmpData')
+    ->middleware('permission.redirect:canImportJanmaMrityuData')
+    ->name('jnmp.pull');
+
+    Route::post('/jnmp/details-callback', 'detailsCallback')->name('jnmp.details-callback');
+
+    Route::get('/jnmp-stats', 'getJnmpStats');
+    Route::post('/jnmp/mark-as-death', 'markAsDeathProcess')->name('jnmp.mark-as-death');
+
+    Route::get('jnmp-data', 'index')
+    ->middleware('permission.redirect:canReActivateDeathIncident')
+    ->name('jnmp-data');
+
+    // JNMP List at HOD
+    Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')
+    ->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')
+    ->name('jnmp-marked-data');
+});
 //Reject Approved Beneficiary
 Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
     Route::get('/reject-approved-beneficiary',  'index')
