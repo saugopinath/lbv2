@@ -33,7 +33,7 @@ class UserPermissionEditModal extends Component
         }
 
         $this->resetValidation();
-        $this->resetExcept(['isOpen']);
+        $this->resetExcept(['isOpen', 'schemeId']);
 
         $this->userId = $userId;
 
