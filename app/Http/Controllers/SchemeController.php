@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\WorkFlowPermissionHelper;
 use App\Models\Scheme;
 use App\Models\SchemeFinalSubmitCheck;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 
 class SchemeController extends Controller
 {
-    public function finalSubmitted($stage=null)
+    public function finalSubmitted($stage = null)
     {
         $schemes = '';
         $route = Route::currentRouteName();
@@ -25,7 +26,8 @@ class SchemeController extends Controller
         } else {
             $schemes = Scheme::all();
         }
-        return view('schemesblade.dropdown', compact('schemes','stage'));
+
+        return view('schemesblade.dropdown', compact('schemes', 'stage'));
     }
 
     public function defineWorkflow()
@@ -56,39 +58,38 @@ class SchemeController extends Controller
                 'step' => 4,
             ],
         ];
+
         return view('workflow.mastercon', compact('steps'));
     }
 
     public function draftedit(Request $request)
     {
-
-            // dd($request->all());
-        // if (WorkFlowPermissionHelper::canEditDraft()) {
-        // if (Auth::user()->can('edit draft')) {
+        if (WorkFlowPermissionHelper::canEditDraft()) {
             $app_id = Crypt::decryptString($request->app_id);
             $ben_id = Crypt::decryptString($request->ben_id);
             $scheme_id = Crypt::decryptString($request->scheme_id);
             $schemeName = Scheme::find($scheme_id)->name;
-            return view('schemesblade.draftedit', compact('app_id','ben_id','scheme_id','schemeName'));
-        // }
+
+            return view('schemesblade.draftedit', compact('app_id', 'ben_id', 'scheme_id', 'schemeName'));
+        }
 
         $header = 'Oops! You do not have permission to edit draft.';
+
         return view('CommonRestictedpage.index', compact('header'));
     }
 
     public function applicationView(Request $request)
     {
-        // dd($request->all());
-        // if (WorkFlowPermissionHelper::canEditDraft()) {
-        // if (Auth::user()->can('edit draft')) {
+        if (WorkFlowPermissionHelper::canEditDraft()) {
             $app_id = Crypt::decryptString($request['id']);
             $scheme_id = Crypt::decryptString($request['scheme_id']);
             $schemeName = Scheme::find($scheme_id)->name;
-            // dd( $app_id,$scheme_id,$schemeName);
-            return view('schemesblade.applicationview', compact('app_id','scheme_id', 'schemeName'));
-        // }
+
+            return view('schemesblade.applicationview', compact('app_id', 'scheme_id', 'schemeName'));
+        }
 
         $header = 'Oops! You do not have permission to edit draft.';
+
         return view('CommonRestictedpage.index', compact('header'));
     }
 
@@ -96,5 +97,4 @@ class SchemeController extends Controller
     {
         return view('schemesblade.lgd');
     }
-
 }

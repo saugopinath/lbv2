@@ -21,8 +21,7 @@ class PermissionController extends Controller
     }
      public function index()
     {
-        if (WorkFlowPermissionHelper::canViewPermission()) {
-        // if (Auth::user()->can('view permission')) {
+        if (WorkFlowPermissionHelper::canViewPermission()) {       
             return view('permissions.permission_index');
         }
 

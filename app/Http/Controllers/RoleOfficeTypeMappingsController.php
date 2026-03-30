@@ -23,8 +23,7 @@ class RoleOfficeTypeMappingsController extends Controller
 
     public function index()
     {
-        if (WorkFlowPermissionHelper::canRoleMapping()) {
-            // if (Auth::user()->can('manage role mappings')) {
+        if (WorkFlowPermissionHelper::canRoleMapping()) {          
             return view('roleofficeTypemappings.index');
 
         }

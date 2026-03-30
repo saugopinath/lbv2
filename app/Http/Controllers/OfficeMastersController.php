@@ -23,8 +23,7 @@ class OfficeMastersController extends Controller
 
     public function index()
     {
-        if (WorkFlowPermissionHelper::canViewOffices()) {
-            // if (Auth::user()->can('view offices')) {
+        if (WorkFlowPermissionHelper::canViewOffices()) {          
             return view('officemasters.index');
         }
         $header = 'Oops! You do not have permission to view offices.';

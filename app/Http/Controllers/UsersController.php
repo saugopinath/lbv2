@@ -22,8 +22,7 @@ class UsersController extends Controller
     }
     public function index()
     {
-        if (WorkFlowPermissionHelper::canViewUser()) {
-        // if (Auth::user()->can('view users')) {
+        if (WorkFlowPermissionHelper::canViewUser()) {      
             return view('users.index');
         }
         $header = 'Oops! You do not have permission to view users.';
