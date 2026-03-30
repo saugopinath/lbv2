@@ -96,6 +96,7 @@ class DynamicWorkflowService
             $currentStep = workflowstepRolemapping::where('module_id', $request->module_id)
                 ->where('rank', $request->current_rank)
                 ->where('role_id', $roleId)
+                ->where('scheme_id', $request->scheme_id)
                 ->first();
             if (!$currentStep) {
                 throw new \Exception('Step not found');

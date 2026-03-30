@@ -24,14 +24,12 @@ class UpdateMarkBeneficiaryList extends Component
     public ?int    $selectedModuleId   = null;   // This will store the scheme_module_id
     public ?string $selectedModuleCode = null;
     public ?string $selectedModuleName = null;
-    public ?int    $selectedStepId     = null;   // Added: to filter by a specific step/label
+    public ?int    $selectedStepId     = null;
+    public ?int    $confirmedStepId    = null;
     public ?string $selectedStepName   = null;
     public ?string $stage              = null;
-
-    // --- Data ---
     public array $stepOptions = []; // Changed from moduleOptions to stepOptions
 
-    // --- Internal ---
     protected ?int $userRoleId = null;
 
     public function mount($stage = null, $moduleCode = null, $moduleName = null)
@@ -81,7 +79,7 @@ class UpdateMarkBeneficiaryList extends Component
             $this->selectedModuleCode = null;
             $this->selectedStepId     = null;
             $this->selectedStepName   = null;
-            
+
             $this->loadStepOptions();
         } else {
             $this->reset(['schemeData', 'schemeId', 'schemeName', 'stepOptions', 'showTable', 'selectedStepId', 'selectedStepName']);
@@ -90,14 +88,12 @@ class UpdateMarkBeneficiaryList extends Component
 
     public function loadStepOptions(): void
     {
-        // 1. Get module ID for the fixed module code
         $mainModuleId = DynamicWorkflowModule::where('module_code', $this->moduleCode)->value('id');
 
         if (!$mainModuleId) {
             $this->stepOptions = [];
             return;
         }
-        // 2. Get the specific scheme_module record
         $sm = DynamicWorkflowSchemeModule::where('module_id', $mainModuleId)
             ->where('scheme_id', $this->schemeId)
             ->first();
@@ -108,13 +104,10 @@ class UpdateMarkBeneficiaryList extends Component
         $this->selectedModuleId   = $sm->id;
         $this->selectedModuleCode = $this->moduleCode;
         $this->selectedModuleName = $sm->module?->module_name ?? $sm->main_module_code;
-
-        // 3. Get labels for thi scheme_module and scheme
-        $this->stepOptions = \App\Models\DynamicWorkflowLabel::where('module_id', $sm->id)
+        $this->stepOptions = DynamicWorkflowLabel::where('module_id', $sm->id)
             ->where('scheme_id', $this->schemeId)
             ->pluck('label_name', 'id')
             ->toArray();
-        // If only one step exists, auto-select it
         if (count($this->stepOptions) === 1) {
             $this->selectedStepId = array_key_first($this->stepOptions);
         }
@@ -129,6 +122,7 @@ class UpdateMarkBeneficiaryList extends Component
 
         $label = DynamicWorkflowLabel::find($this->selectedStepId);
         if ($label) {
+            $this->confirmedStepId = $this->selectedStepId;
             $this->selectedStepName = $label->label_name;
             $this->showTable = true;
         } else {

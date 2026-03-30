@@ -14,8 +14,6 @@
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">1. Select Scheme</label>
                     <livewire:scheme-dropdown-new />
                 </div>
-
-                {{-- Step 2: Workflow Step --}}
                 <div class="space-y-2">
                     <label for="step_id" class="block text-xs font-bold text-gray-500 uppercase tracking-wider">2. Select Application Type</label>
                     <div class="relative">
@@ -76,8 +74,8 @@
                     :moduleCode="$selectedModuleCode"
                     :schemeId="$schemeId"
                     :schemeModuleId="$selectedModuleId"
-                    :selectedStepId="$selectedStepId"
-                    wire:key="{{ 'drt-' . $schemeId . '-' . $selectedModuleId . '-' . $selectedStepId }}" />
+                    :selectedStepId="$confirmedStepId"
+                    wire:key="{{ 'drt-' . $schemeId . '-' . $selectedModuleId . '-' . $confirmedStepId }}" />
             </div>
         </div>
     </div>

@@ -1,6 +1,8 @@
 <div class="w-full space-y-6">
     @if ($showSchemeDropdown && !$schemeData)
-    <livewire:scheme-dropdown-new :isFinal="true" />
+    <div class="max-w-3xl mx-auto bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+        <livewire:scheme-dropdown-new :isFinal="true" />
+    </div>
     @endif
     @if ($schemeData)
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-4 space-y-4">
@@ -9,7 +11,7 @@
         </div>
     </div>
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-4 space-y-4">
-        <livewire:dynamic-workflow.request-workflow-table :scheme-id="$schemeId" :moduleCode="$moduleCode" :wire:key="'request-workflow-table-'.$schemeId.'-'.$moduleCode"/>
+        <livewire:dynamic-workflow.request-workflow-table :scheme-id="$schemeId" :moduleCode="$moduleCode" :wire:key="'request-workflow-table-'.$schemeId.'-'.$moduleCode" />
     </div>
     <!-- Modal Container -->
     <livewire:dynamic-workflow.process-workflow-modal />

@@ -22,7 +22,20 @@ class UpdateMarkBeneficiaryDetailsController extends Controller
         }
         $moduleName = $module->module_name;
         $moduleId = $module->id;
-        
+
         return view('dynamic-workflow.ListDetails-page', compact('moduleCode', 'module', 'moduleName', 'moduleId'));
+    }
+    public function updateRequest()
+    {
+        $moduleCode = 'UP_MB_D_01';
+        $module = DynamicWorkflowModule::where('module_code', $moduleCode)->first();
+        if (!$module) {
+            // dd('module not found');
+            abort(404, 'Module not found');
+        }
+        $moduleName = $module->module_name;
+        $moduleId = $module->id;
+
+        return view('dynamic-workflow.beneficiary-details-update', compact('moduleCode', 'module', 'moduleName', 'moduleId'));
     }
 }

@@ -5,6 +5,7 @@ namespace App\Livewire\DynamicWorkflow;
 use App\Models\DynamicWorkflowRequest;
 use App\Models\workflowstepRolemapping;
 use App\Models\DynamicWorkflowModule;
+use App\Models\Scheme;
 use App\Services\DynamicWorkflowService;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,7 @@ class ProcessWorkflowModal extends Component
 {
     public $isOpen = false;
     public $selectedRequest = null;
-    public $remark;
+    public $remark, $SchemeName;
     public $button_status;
 
     #[On('openProcessModal')]
@@ -37,7 +38,7 @@ class ProcessWorkflowModal extends Component
             ->where('module_id', $this->selectedRequest->module_id)
             ->where('scheme_id', $this->selectedRequest->scheme_id)
             ->first();
-
+        $this->SchemeName = Scheme::where('id', $scheme_id)->first()->name;
         $this->selectedRequest->step = $step;
         $this->button_status = ($step && $step->is_final_step == 1) ? 1 : 0;
         $this->remark = null;

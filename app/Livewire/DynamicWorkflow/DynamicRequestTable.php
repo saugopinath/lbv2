@@ -19,17 +19,12 @@ class DynamicRequestTable extends DataTableComponent
 {
     protected $model = DynamicWorkflowRequest::class;
 
-    // ── Inputs passed from parent ────────────────────────────────────────────
     public string $moduleCode;   // main_module_code / module_code
     public int    $schemeId;
     public int    $schemeModuleId; // DynamicWorkflowSchemeModule.id
     public ?int   $selectedStepId = null; // Added: to filter by a specific step/label
-
-    // ── Internal state ───────────────────────────────────────────────────────
     public int    $userRoleId = 0;
     public array  $filterCondition = [];
-
-    // ─────────────────────────────────────────────────────────────────────────
 
     public function mount(string $moduleCode, int $schemeId, int $schemeModuleId, ?int $selectedStepId = null): void
     {
@@ -38,7 +33,6 @@ class DynamicRequestTable extends DataTableComponent
         $this->schemeModuleId  = $schemeModuleId;
         $this->selectedStepId  = $selectedStepId;
 
-        // ── Resolve role from session or DB ───────────────────────────────────
         $lgd = session('lgd_session');
         if (!empty($lgd['role_id'])) {
             try {
@@ -51,7 +45,6 @@ class DynamicRequestTable extends DataTableComponent
                 ->where('is_active', 1)
                 ->value('role_id') ?? 0;
         }
-
         if (!empty($lgd['district_id'])) {
             try {
                 $this->filterCondition['created_by_dist_code'] = Crypt::decryptString($lgd['district_id']);
@@ -116,18 +109,13 @@ class DynamicRequestTable extends DataTableComponent
         ]);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Columns
-    // ─────────────────────────────────────────────────────────────────────────
 
     public function columns(): array
     {
         return [
             Column::make('Sl. No.', 'id')
                 ->format(fn($value) => 'REF-' . $value),
-
             Column::make('Application ID', 'ref_id'),
-
             Column::make('Name')
                 ->label(fn($row) => $row->beneficiary?->beneficiary_name ?? 'N/A'),
             Column::make('Changed Fields', 'changed_fields')
@@ -156,7 +144,6 @@ class DynamicRequestTable extends DataTableComponent
                         . '</span>';
                 })
                 ->html(),
-
         ];
     }
     public function builder(): Builder

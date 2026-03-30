@@ -18,7 +18,8 @@
                         </div>
                         <div>
                             <h2 class="text-lg font-bold text-white tracking-tight">Request Processing</h2>
-                            <p class="text-indigo-200 text-xs">Ref ID: {{ $selectedRequest->ref_id }}</p>
+                            <p class="text-indigo-200 text-xs">Scheme Name: {{ $SchemeName }}</p>
+                            <p class="text-indigo-200 text-xs">Application ID: {{ $selectedRequest->ref_id }}</p>
                         </div>
                     </div>
                     <button
@@ -40,9 +41,9 @@
                                 <svg class="h-4 w-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1.5 4 4 4h8c2.5 0 4-2 4-4V7c0-2-1.5-4-4-4H8c-2.5 0-4 2-4 4z"></path>
                                 </svg>
-                                <span class="text-xs font-semibold text-indigo-600 uppercase tracking-wide">Module Name</span>
+                                <span class="text-xs font-semibold text-indigo-600 uppercase tracking-wide">Application Date</span>
                             </div>
-                            <p class="text-sm font-medium text-gray-900">{{ $selectedRequest->module->module_name }}</p>
+                            <p class="text-sm font-medium text-gray-900">{{ $selectedRequest->created_at->format('M d, Y h:i A') }}</p>
                         </div>
 
                         <!-- Current Step Card -->
@@ -56,17 +57,6 @@
                             <span class="inline-flex rounded-full bg-amber-200 px-3 py-1 text-xs font-semibold text-amber-800">
                                 {{ $selectedRequest->step->label->label_name ?? 'Processing' }}
                             </span>
-                        </div>
-
-                        <!-- Submission Date Card -->
-                        <div class="rounded-xl border border-indigo-200 bg-indigo-50/50 p-4 md:col-span-2">
-                            <div class="flex items-center gap-2 mb-2">
-                                <svg class="h-4 w-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                <span class="text-xs font-semibold text-indigo-600 uppercase tracking-wide">Submission Date</span>
-                            </div>
-                            <p class="text-sm font-medium text-gray-900">{{ $selectedRequest->created_at->format('M d, Y h:i A') }}</p>
                         </div>
                     </div>
 
@@ -129,21 +119,22 @@
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="border-t border-gray-200 bg-gray-50 px-6 py-4 shrink-0">
-                    <div class="flex gap-3">
+                <div class="border-t border-white/20 bg-gradient-to-r from-gray-50/90 to-white/90 backdrop-blur-sm px-6 py-5 shrink-0">
+                    <div class="flex gap-4">
                         <button
                             wire:click="processAction('approve')"
-                            class="flex-1 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all duration-200 active:scale-95">
-                            <svg class="inline h-4 w-4 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            class="flex-1 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:from-emerald-700 hover:to-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0">
+                            <svg class="inline h-4 w-4 mr-2 -mt-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            {{ $button_status == 1 ? 'Approve' : 'Process' }}
+                            {{ $selectedRequest->step->label->label_name ?? 'Processing' }}
                         </button>
+
                         <button
                             wire:click="processAction('reject')"
-                            class="flex-1 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 active:scale-95">
-                            <svg class="inline h-4 w-4 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            class="flex-1 rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0">
+                            <svg class="inline h-4 w-4 mr-2 -mt-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                             Reject
                         </button>
