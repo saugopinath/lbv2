@@ -26,8 +26,7 @@ class WorkFLowController extends Controller
 
     public function index()
     {
-        if (WorkFlowPermissionHelper::canViewLbApplications()) {
-            // if (Auth::user()->can('view lb applications')) {
+        if (WorkFlowPermissionHelper::canViewLbApplications()) {           
             $button_show = 1;
             return view('WorkFLow.SubmittedList', compact('button_show'));
         }

@@ -26,11 +26,7 @@ class RejectApprovedBeneficiaryController extends Controller
     }
     public function index()
     {
-        $user = Auth::user();
-        // $user->hasRole('Operator');
-
-        // dd('caste modification info');
-        // if ($user->hasRole('Operator')) {}
+        $user = Auth::user();      
 
         if (CheckAuthHelper::isApprover()) {
             $header = 'Reject Approved Beneficiary Information';

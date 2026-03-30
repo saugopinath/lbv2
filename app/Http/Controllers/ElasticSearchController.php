@@ -24,7 +24,7 @@ class ElasticSearchController extends Controller
             ]);
          $indexName='accept_reject_infos';
          $elasticsearchService=new ElasticsearchService();
-         //dd($elasticsearchService->verifyIndex($indexName));
+        
          if(!$elasticsearchService->verifyIndex($indexName)){
            $elasticsearchService->createIndex($indexName);
          }
