@@ -226,9 +226,9 @@ Route::controller(CmoController::class)->group(function () {
     Route::post('/map-applicant', 'mapapplicant')->name('map-applicant');
     Route::post('/cmo-add-actions', 'addactions')->name('cmo-add-actions');
 });
-Route::get('dynamic-process-workflow', DynamicProcessPage::class)->name('dynamic-process-workflow');
+Route::get('dynamic-process-workflow', DynamicProcessPage::class)->middleware('permission.redirect:canDynamicProcessWorkflow')->name('dynamic-process-workflow');
 
-Route::get('request-update-beneficiary', [UpdateMarkBeneficiaryDetailsController::class, 'updateRequest'])->name('request-update-beneficiary');
-Route::get('update-mark-beneficiary-details', [UpdateMarkBeneficiaryDetailsController::class, 'index'])->name('update-mark-beneficiary-details');
-Route::get('update-beneficiary-list', [UpdateMarkBeneficiaryDetailsController::class, 'listdetails'])->name('update-beneficiary-list');
+Route::get('request-update-beneficiary', [UpdateMarkBeneficiaryDetailsController::class, 'updateRequest'])->middleware('permission.redirect:canRequestUpdateBeneficiary')->name('request-update-beneficiary');
+Route::get('update-mark-beneficiary-details', [UpdateMarkBeneficiaryDetailsController::class, 'index'])->middleware('permission.redirect:canUpdateMarkBeneficiaryDetails')->name('update-mark-beneficiary-details');
+Route::get('update-beneficiary-list', [UpdateMarkBeneficiaryDetailsController::class, 'listdetails'])->middleware('permission.redirect:canUpdateBeneficiaryList')->name('update-beneficiary-list');
 

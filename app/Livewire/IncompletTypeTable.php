@@ -3,36 +3,49 @@
 namespace App\Livewire;
 
 use App\Helpers\CheckAuthHelper;
-use App\Models\Ward;
-use App\Models\Block;
-use App\Models\District;
-use App\Models\Panchayat;
-use App\Models\Subdivision;
-use App\Models\Municipality;
-use App\Models\Codemaster;
 use App\Helpers\EncryptionArray;
-use Illuminate\Support\Facades\Crypt;
 use App\Models\ApplicantIncompletDeatil;
+use App\Services\TableExportService;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\Views\Column;
+use Illuminate\Support\Facades\Crypt;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
-
+use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class IncompletTypeTable extends DataTableComponent
 {
     public ?int $perPage = 5;
+
     public string $search = '';
+
     public string $stage = '';
+
     public ?int $schemeId = null;
-    public $district_id, $rural_urban, $blockurban, $gpward, $selectedSubdivision, $filterCode;
+
+    public $district_id;
+
+    public $rural_urban;
+
+    public $blockurban;
+
+    public $gpward;
+
+    public $selectedSubdivision;
+
+    public $filterCode;
 
     // protected $listeners = ['doSearch' => 'doSearch'];
     protected $listeners = [
         'doSearch' => 'updateFilters',
     ];
 
-    public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
+    public $loginDistrictCode;
+
+    public $loginSubdivisionCode;
+
+    public $loginBlockCode;
+
     public array $filter_condition = [];
+
     public function mount(?int $schemeId = null, string $stage = ''): void
     {
         $this->stage = $stage;
@@ -40,15 +53,15 @@ class IncompletTypeTable extends DataTableComponent
 
         $select_lgd = session('lgd_session');
 
-        if (!empty($select_lgd['district_id'])) {
+        if (! empty($select_lgd['district_id'])) {
             $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
         }
 
-        if (!empty($select_lgd['block_id'])) {
+        if (! empty($select_lgd['block_id'])) {
             $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
         }
 
-        if (!empty($select_lgd['subdivision_id'])) {
+        if (! empty($select_lgd['subdivision_id'])) {
             $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
@@ -64,6 +77,7 @@ class IncompletTypeTable extends DataTableComponent
 
         $this->resetPage();
     }
+
     public function configure(): void
     {
         $this->setPrimaryKey('application_id')
@@ -77,7 +91,9 @@ class IncompletTypeTable extends DataTableComponent
 
         $this->setHideBulkActionsWhenEmptyEnabled();
 
-
+        $this->setConfigurableAreas([
+            'toolbar-left-start' => 'livewire.export_excel_buttons',
+        ]);
 
         $this->setTableWrapperAttributes([
             'class' => 'overflow-x-auto overflow-y-auto max-h-[500px] border rounded-lg shadow-sm',
@@ -112,6 +128,7 @@ class IncompletTypeTable extends DataTableComponent
         $this->setSearch($value);
         $this->resetPage();
     }
+
     public function updatedPerPage($value): void
     {
         $this->perPage = (int) $value;
@@ -122,44 +139,40 @@ class IncompletTypeTable extends DataTableComponent
     public function columns(): array
     {
         $columns = [
-            Column::make("Application ID", "application_id")
+            Column::make('Application ID', 'application_id')
                 ->searchable(),
 
-            Column::make("Incomplete Types")
-                ->label(fn($row) => $row->incomplete_types_names ?? 'N/A')
+            Column::make('Incomplete Types')
+                ->label(fn ($row) => $row->incomplete_types_names ?? 'N/A')
                 ->html(),
 
-            Column::make("Name")
+            Column::make('Name')
                 ->label(
-                    fn($row) =>
-                    $row->personaldetails?->beneficiary_name ?? 'N/A'
+                    fn ($row) => $row->personaldetails?->beneficiary_name ?? 'N/A'
                 ),
 
             Column::make("Father's Name")
                 ->label(
-                    fn($row) =>
-                    $row->personaldetails?->ben_father_name ?? 'N/A'
+                    fn ($row) => $row->personaldetails?->ben_father_name ?? 'N/A'
                 ),
-            Column::make("Address")
+            Column::make('Address')
                 ->label(
-                    fn($row) =>
-                    $row->contactdetails?->full_address ?? 'N/A'
+                    fn ($row) => $row->contactdetails?->full_address ?? 'N/A'
                 )
                 ->html(),
         ];
 
         if ($this->stage === 'revert') {
-            $columns[] = Column::make("Revert Reason")
-                ->label(fn($row) => $row->acceptRejectInfo?->revertReason?->name ?? 'N/A')
+            $columns[] = Column::make('Revert Reason')
+                ->label(fn ($row) => $row->acceptRejectInfo?->revertReason?->name ?? 'N/A')
                 ->sortable();
 
-
-            $columns[] = Column::make("Revert Remarks")
-                ->label(fn($row) => $row->acceptRejectInfo?->revert_reason_remarks ?? 'N/A')
+            $columns[] = Column::make('Revert Remarks')
+                ->label(fn ($row) => $row->acceptRejectInfo?->revert_reason_remarks ?? 'N/A')
                 ->sortable();
         }
 
-        $columns[] = Column::make("Actions")
+        $columns[] = Column::make('Actions')
             ->label(function ($row) {
                 $stage = request()->get('stage');
 
@@ -191,7 +204,7 @@ class IncompletTypeTable extends DataTableComponent
 
         $stage = $this->stage ?? null;
 
-        if (!$stage) {
+        if (! $stage) {
 
             if (CheckAuthHelper::isCommmonVerifier()) {
                 $stage = 'verifier';
@@ -215,11 +228,11 @@ class IncompletTypeTable extends DataTableComponent
                     ->with([
                         'acceptRejectInfo' => function ($q) {
                             $q->latest('id');
-                        }
+                        },
                     ]);
                 break;
         }
-        if (!empty($this->filter_condition)) {
+        if (! empty($this->filter_condition)) {
             $query->whereHas('personaldetails', function ($q) {
                 $q->where($this->filter_condition);
             });
@@ -237,6 +250,15 @@ class IncompletTypeTable extends DataTableComponent
             );
         }
         $this->dispatch('hideLoader');
+
         return $query;
+    }
+
+    public function exportExcel(TableExportService $exportService)
+    {
+        return $exportService->export(
+            $this,
+            'applications_all.xlsx'
+        );
     }
 }
