@@ -66,6 +66,10 @@ class ApproverPermissionSeeder extends Seeder
             'manage-users',
             'manage-departments',
             'manage-schemes',
+            'update-beneficiary-list',
+            'update-mark-beneficiary-details',
+            'request-update-beneficiary',
+            'dynamic-process-workflow',
         ];
         try {
             $role = Role::findByName('Approver');

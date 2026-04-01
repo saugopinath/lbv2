@@ -17,6 +17,10 @@ class HODPermissionSeeder extends Seeder
     {
         $permissions = [
             'sarasori-mukhyamantri',
+            'update-beneficiary-list',
+            'update-mark-beneficiary-details',
+            'request-update-beneficiary',
+            'dynamic-process-workflow',
         ];
 
         // 1️⃣ Find Role
