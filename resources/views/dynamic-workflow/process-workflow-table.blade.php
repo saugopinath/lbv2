@@ -1,4 +1,4 @@
 
 <x-layouts.app>
-    <livewire:process-workflow  />
+    <livewire:process-workflow/>
 </x-layouts.app>

@@ -221,7 +221,6 @@
                             </div>
                         </div>
                         @endif
-
                         @if(in_array('bank_details', $selectedFields, true))
                         <div class="rounded-xl border border-gray-200 p-4">
                             <h4 class="text-sm font-semibold text-gray-800 mb-4">Bank Update</h4>
