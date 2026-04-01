@@ -174,7 +174,7 @@ class BeneficiarySearch extends Component
                 $query->where('other_details->mobile_no', $searchValue);
                 break;
             case 'aadhaar_number':
-                $query->whereHas('aadhar', function ($q) use ($searchValue) {
+                $query->whereHas('aadhaar', function ($q) use ($searchValue) {
                     $q->where('aadhar_vault', md5($searchValue));
                 });
                 break;

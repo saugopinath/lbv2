@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\CheckAuthHelper;
 use App\Helpers\WorkFlowPermissionHelper;
+use App\Models\Scheme;
 use App\Models\SchemeFinalSubmitCheck;
 use Illuminate\Http\Request;
 
@@ -17,13 +18,19 @@ class BeneficiaryListController extends Controller
 
     public function __construct()
     {
-        $this->schemes = SchemeFinalSubmitCheck::where('is_final_submitted', true)
-            ->whereHas('scheme')
-            ->with('scheme')
-            ->get()
-            ->pluck('scheme')
-            ->unique('id')
-            ->values();
+        // $this->schemes = SchemeFinalSubmitCheck::where('is_final_submitted', true)
+        //     ->whereHas('scheme')
+        //     ->with('scheme')
+        //     ->get()
+        //     ->pluck('scheme')
+        //     ->unique('id')
+        //     ->values();
+
+        $this->schemes = Scheme::where('is_active', true)
+            ->whereHas('schemeFinalSubmitChecks', fn ($q) => $q->where('is_final_submitted', true)
+            )
+            ->get();
+
         $verifier = CheckAuthHelper::isCommmonVerifier();
         $approver = CheckAuthHelper::isCommonApprover();
         $this->reportTypes = [];
@@ -71,7 +78,7 @@ class BeneficiaryListController extends Controller
 
         return view('CommonRestictedpage.index', compact('header'));
     }
-    
+
     public function show(Request $request)
     {
         $validated = $request->validate([
