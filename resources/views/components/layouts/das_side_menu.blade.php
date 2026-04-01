@@ -461,7 +461,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M17 20h5v-2a2 2 0 00-2-2h-3m-2-2H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v7m-7 4v5m-7-5h12" />
                 </svg>
-                <span x-show="sidebar" class="mr-2 truncate">Beneficiary List</span>
+                <span x-show="sidebar" class="mr-2 truncate">Dynamic Process Workflow</span>
             </a>
         </div>
     @endif
@@ -478,7 +478,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M17 20h5v-2a2 2 0 00-2-2h-3m-2-2H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v7m-7 4v5m-7-5h12" />
                 </svg>
-                <span x-show="sidebar" class="mr-2 truncate">Beneficiary List</span>
+                <span x-show="sidebar" class="mr-2 truncate">Request Update Beneficiary</span>
             </a>
         </div>
     @endif
@@ -494,7 +494,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M17 20h5v-2a2 2 0 00-2-2h-3m-2-2H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v7m-7 4v5m-7-5h12" />
                 </svg>
-                <span x-show="sidebar" class="mr-2 truncate">Beneficiary List</span>
+                <span x-show="sidebar" class="mr-2 truncate">Update Mark Beneficiary Details</span>
             </a>
         </div>
     @endif
@@ -510,7 +510,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M17 20h5v-2a2 2 0 00-2-2h-3m-2-2H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v7m-7 4v5m-7-5h12" />
                 </svg>
-                <span x-show="sidebar" class="mr-2 truncate">Beneficiary List</span>
+                <span x-show="sidebar" class="mr-2 truncate">Update Beneficiary List</span>
             </a>
         </div>
     @endif
