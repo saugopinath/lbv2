@@ -6,13 +6,14 @@ use App\Helpers\CheckAuthHelper;
 use App\Helpers\EncryptionArray;
 use App\Models\BeneficiaryPersonalDetail;
 use App\Models\Codemaster;
+use App\Models\WorkflowsteproleMapping;
 use App\Services\TableExportService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Crypt;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filters\TextFilter;
-
+use App\Services\WorkflowService;
 class BeneficiaryTable extends DataTableComponent
 {
     public ?int $perPage = 5;
@@ -196,12 +197,16 @@ class BeneficiaryTable extends DataTableComponent
 
     public function builder(): Builder
     {
+        $workflowService = new WorkflowService();
+        $minMaxWorkflowStep = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->schemeId);
+        $maxData = $workflowService->getLabelRoles($this->schemeId,$minMaxWorkflowStep['max']);
+        $minData = $workflowService->getLabelRoles($this->schemeId,$minMaxWorkflowStep['min']);
         // Status Constants
-        $STATUS_VERIFIED = 1;
-        $STATUS_APPROVED = 2;
-        $STATUS_FINAL = 0;
+        $STATUS_VERIFIED = $maxData->same_label_role_id;
+        $STATUS_APPROVED = $maxData->next_label_role_id;
+        $STATUS_FINAL = $minData->next_label_role_id;
         $STATUS_REJECT = -100;
-        $STATUS_REVERT = -20;
+        $STATUS_REVERT = $minData->same_label_role_id;
         $STATUS_PARTIAL = null;
 
         $nextLevelRoleId = null;
