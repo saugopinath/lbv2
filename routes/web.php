@@ -43,6 +43,8 @@ use App\Livewire\SchemeTabFieldManager;
 use App\Livewire\UserPermission\AssignPermissionsPage;
 use App\Livewire\Users\Create as UsersCreate;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DynamicWorkflow\UpdateMarkBeneficiaryDetailsController;
+use App\Livewire\DynamicWorkflow\DynamicProcessPage;
 
 require __DIR__.'/home.php';
 
@@ -224,3 +226,9 @@ Route::controller(CmoController::class)->group(function () {
     Route::post('/map-applicant', 'mapapplicant')->name('map-applicant');
     Route::post('/cmo-add-actions', 'addactions')->name('cmo-add-actions');
 });
+Route::get('dynamic-process-workflow', DynamicProcessPage::class)->name('dynamic-process-workflow');
+
+Route::get('request-update-beneficiary', [UpdateMarkBeneficiaryDetailsController::class, 'updateRequest'])->name('request-update-beneficiary');
+Route::get('update-mark-beneficiary-details', [UpdateMarkBeneficiaryDetailsController::class, 'index'])->name('update-mark-beneficiary-details');
+Route::get('update-beneficiary-list', [UpdateMarkBeneficiaryDetailsController::class, 'listdetails'])->name('update-beneficiary-list');
+

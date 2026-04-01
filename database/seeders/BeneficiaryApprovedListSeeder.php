@@ -42,10 +42,18 @@ class BeneficiaryApprovedListSeeder extends Seeder
                 $office = OfficeMaster::where('district_id', 318)
                     ->where('block_id', 2979)
                     ->first();
-
+                if (!$office) {
+                    $this->command->error("Office not found for District 318, Block 2979.");
+                    continue;
+                }
                 $mapping = UserRoleSchemeOfficeMapping::where('office_id', $office->id)
                     ->where('role_id', 8)
                     ->first();
+
+                if (!$mapping) {
+                    $this->command->error("User mapping not found for Office {$office->id}, Role 8.");
+                    continue;
+                }
 
                 $user_id = $mapping->user_id;
 
@@ -83,6 +91,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
                     'scheme_id' => $schemeId,
                     'application_id' => $applicationId,
                     'beneficiary_id' => $beneficiaryId,
+                ], [
                     'encode_key' => null,
                     'encoded_aadhar' => Crypt::encryptString($aadharNumber),
                     'aadhar_hash' => md5($aadharNumber),
@@ -92,12 +101,16 @@ class BeneficiaryApprovedListSeeder extends Seeder
                     'scheme_id' => $schemeId,
                     'application_id' => $applicationId,
                     'beneficiary_id' => $beneficiaryId,
+                ], [
                     'application_date' => now(),
                     'beneficiary_name' => "Test User $i",
                     'age' => rand(18, 65),
                     'dob' => '2000-01-01',
                     'mar_statu' => 1,
                     'caste' => 2,
+                    'other_details' => [
+                        'mobile_no' => (string)rand(6000000000, 9999999999),
+                    ],
                     'next_level_role_id' => 2,
                     'is_final' => 1,
                     'created_by_dist_code' => $dist,
@@ -110,6 +123,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
                     'scheme_id' => $schemeId,
                     'application_id' => $applicationId,
                     'beneficiary_id' => $beneficiaryId,
+                ], [
                     'state' => 'West Bengal',
                     'district_id' => $dist,
                     'rural_urban' => 2,
@@ -125,10 +139,11 @@ class BeneficiaryApprovedListSeeder extends Seeder
                     'scheme_id' => $schemeId,
                     'application_id' => $applicationId,
                     'beneficiary_id' => $beneficiaryId,
+                ], [
                     'ifscode' => 'BKID0004264',
                     'bankname' => 'BANK OF INDIA',
                     'bank_branch_name' => 'PANCHAL',
-                    'bankaccountnumber' => rand(1000000000, 9999999999),
+                    'bankaccountnumber' => (string)rand(1000000000, 9999999999),
                 ]);
                 $docs = [
                     ['name' => 'aadhar_card_enc', 'type' => 104],
