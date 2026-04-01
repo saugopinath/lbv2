@@ -451,7 +451,7 @@
 
     @if (\App\Helpers\WorkFlowPermissionHelper::canDynamicProcessWorkflow())
         <div>
-            <a href="{{ route('dynamic-process-workflow') }}"
+            <a href="{{ route('dynamic-workflow-config') }}"
                 class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
                 <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">

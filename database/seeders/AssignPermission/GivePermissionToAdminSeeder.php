@@ -33,7 +33,7 @@ class GivePermissionToAdminSeeder extends Seeder
             'role-permission-management',
             'scheme-capacity-setting',
             'import-janma-mrityu-data',
-            'dynamic-process-workflow'
+            'dynamic-workflow-config'
         ];
         // 1) find role
         try {

@@ -3,145 +3,168 @@
 namespace App\Livewire\DynamicWorkflow;
 
 use App\Models\DynamicWorkflowRequest;
+use App\Models\Scheme;
 use App\Models\workflowstepRolemapping;
-use App\Models\DynamicWorkflowLog;
-use App\Models\BeneficiaryPersonalDetail;
-use App\Models\DynamicWorkflowModule;
 use App\Services\DynamicWorkflowService;
-use Livewire\Component;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
-class ProcessWorkflow extends Component
+class ProcessWorkflowModal extends Component
 {
-    public $requests = [];
+    public $isOpen = false;
+
     public $selectedRequest = null;
+
     public $remark;
-    public $module_code;
-    public $module_id;
-    public $module_scheme_id;
+
+    public $SchemeName;
+
     public $button_status;
-    public function mount()
-    {
-        // $this->module_code=request()->module_code;
-        $this->module_code = 'UP_MB_D_01';
-        $module = DynamicWorkflowModule::where('module_code', $this->module_code)->first();
-        if ($module) {
-            $this->module_id = $module->id;
-            $this->module_scheme_id = $module->scheme_id;
-        }
-        $this->loadRequests();
-    }
 
-    public function loadRequests()
-    {
-        $lgd_session = session('lgd_session');
-        $userRoleId = 0;
-
-        if (!empty($lgd_session['role_id'])) {
-            try {
-                $userRoleId = (int) \Illuminate\Support\Facades\Crypt::decryptString($lgd_session['role_id']);
-            } catch (\Exception $e) {
-            }
-        }
-        if (!$userRoleId) {
-            $userRoleId = (int) \App\Models\UserRoleSchemeOfficeMapping::where('user_id', Auth::id())
-                ->where('is_active', 1)
-                ->value('role_id') ?? 0;
-        }
-        $userRanks = workflowstepRolemapping::where('role_id', $userRoleId)
-            ->where('module_id', $this->module_id)
-            ->pluck('rank')
-            ->toArray();
-        if (empty($userRanks)) {
-            $this->requests = [];
-            return;
-        }
-        $this->requests = DynamicWorkflowRequest::whereIn('current_rank', $userRanks)
-            ->where('module_id', $this->module_id)
-            ->where('scheme_id', $this->module_scheme_id)
-            ->with(['module', 'step.label', 'step.role'])
-            ->get();
-
-        // $this->requests = DynamicWorkflowRequest::whereIn('current_rank', $userRanks)
-        //     ->where('module_id', $this->module_id)
-        //     ->where('scheme_id', $this->module_scheme_id)
-        //     ->get()
-        //     ->map(function ($req) {
-        //         $req->step = workflowstepRolemapping::where('rank', $req->current_rank)
-        //             ->where('module_id', $req->module_id)
-        //             ->where('scheme_id', $req->scheme_id)
-        //             ->first();
-
-        //         return $req;
-        //     });
-    }
-    public function viewDetails($requestId)
+    #[On('openProcessModal')]
+    public function openModal($requestId, $scheme_id, $module_id)
     {
         $this->selectedRequest = DynamicWorkflowRequest::with(['module', 'step.label', 'step.role'])
+            ->where('scheme_id', $scheme_id)
+            ->where('module_id', $module_id)
             ->find($requestId);
-        // dd($this->selectedRequest);
+        // dd($this->selectedRequest->toSql(), $this->selectedRequest->getBindings(), $requestId);
+        if (! $this->selectedRequest) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Request not found',
+            ]);
+
+            return;
+        }
         $step = workflowstepRolemapping::where('rank', $this->selectedRequest->current_rank)
             ->where('module_id', $this->selectedRequest->module_id)
             ->where('scheme_id', $this->selectedRequest->scheme_id)
             ->first();
-        $this->selectedRequest->step = $step;
-        $this->button_status = 0;
-        if ($this->selectedRequest->step->is_final_step == 1) {
-            $this->button_status = 1;
+        $this->SchemeName = Scheme::where('id', $scheme_id)->first()->name;
+
+        if (! $step) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Step not found',
+            ]);
+
+            return;
         }
-        // dd($this->button_status);
+
+        $this->selectedRequest->setRelation('step', $step);
+        $this->button_status = ($step && $step->is_final_step == 1) ? 1 : 0;
+        $this->remark = null;
+        $this->isOpen = true;
     }
+
+    public function closeModal()
+    {
+        $this->isOpen = false;
+        $this->selectedRequest = null;
+        $this->remark = null;
+    }
+
     public function processAction($action)
     {
         $this->validate([
-            'remark' => 'required'
+            'remark' => 'required',
         ]);
-        if (!$this->selectedRequest) {
+
+        if (! $this->selectedRequest) {
             $this->dispatch('toastr', [
                 'type' => 'error',
-                'message' => 'No request selected'
+                'message' => 'No request selected',
             ]);
+
             return;
         }
+
         DB::beginTransaction();
         try {
-            $service = new DynamicWorkflowService();
+            $service = new DynamicWorkflowService;
 
             switch ($action) {
                 case 'approve':
                     $result = $service->approve($this->selectedRequest->id, $this->remark);
                     break;
-
-                case 'revert':
-                    $result = $service->revert($this->selectedRequest->id, $this->remark);
-                    break;
-
                 case 'reject':
                     $result = $service->reject($this->selectedRequest->id, $this->remark);
                     break;
-
                 default:
                     throw new \Exception('Invalid action');
             }
+
             DB::commit();
+
             $this->dispatch('toastr', [
                 'type' => 'success',
-                'message' => $result['message'] ?? 'Action successful'
+                'message' => $result['message'] ?? 'Action successful',
             ]);
-            $this->selectedRequest = null;
-            $this->remark = null;
-            $this->loadRequests();
+            $this->closeModal();
+            $this->dispatch('refreshDatatable');
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('toastr', [
                 'type' => 'error',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         }
     }
+
+    private function getGroupedChanges()
+    {
+        if (! $this->selectedRequest) {
+            return [];
+        }
+
+        $fieldGroups = [
+            'Name Update' => ['beneficiary_name'],
+            'Date of Birth / Age Update' => ['dob', 'age'],
+            'Mobile Update' => ['mobile_no'],
+            'Bank Update' => ['bank_ifsc', 'bank_name', 'bank_branch_name', 'bank_account_number'],
+        ];
+
+        $newData = $this->selectedRequest->new_data ?? [];
+        $oldData = $this->selectedRequest->old_data ?? [];
+        $grouped = [];
+        $processedFields = [];
+
+        foreach ($fieldGroups as $groupName => $fields) {
+            $groupChanges = array_intersect_key($newData, array_flip($fields));
+            if (! empty($groupChanges)) {
+                $grouped[$groupName] = [];
+                foreach ($groupChanges as $field => $newValue) {
+                    $grouped[$groupName][] = [
+                        'label' => str_replace(['_', 'ifsc'], [' ', 'IFSC'], (string) $field),
+                        'old' => $oldData[$field] ?? 'N/A',
+                        'new' => $newValue,
+                    ];
+                    $processedFields[] = $field;
+                }
+            }
+        }
+
+        $otherChanges = array_diff_key($newData, array_flip($processedFields));
+        if (! empty($otherChanges)) {
+            $grouped['Other Changes'] = [];
+            foreach ($otherChanges as $field => $newValue) {
+                $grouped['Other Changes'][] = [
+                    'label' => str_replace('_', ' ', (string) $field),
+                    'old' => $oldData[$field] ?? 'N/A',
+                    'new' => $newValue,
+                ];
+            }
+        }
+
+        return $grouped;
+    }
+
     public function render()
     {
-        return view('livewire.dynamic-workflow.process-workflow');
+        return view('livewire.dynamic-workflow.process-workflow-modal', [
+            'groupedChanges' => $this->getGroupedChanges(),
+        ]);
     }
 }

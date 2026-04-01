@@ -542,7 +542,7 @@ class WorkFlowPermissionHelper
 
     public static function canDynamicProcessWorkflow($schemeId = null): bool
     {
-        return self::hasPermission('dynamic-process-workflow', $schemeId);
+        return self::hasPermission('dynamic-workflow-config', $schemeId);
     }
     public static function canRequestUpdateBeneficiary($schemeId = null): bool
     {
