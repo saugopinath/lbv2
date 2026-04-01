@@ -22,7 +22,9 @@ class CmoController extends Controller
 {
     protected $cmoAuthenticationService;
 
-    public function __construct(CmoAuthenticationInterface $cmoAuthenticationService,Request $request) {
+    protected $isAuthorized = false;
+    public function __construct(CmoAuthenticationInterface $cmoAuthenticationService, Request $request)
+    {
 
         $currentRoute = $request->route() ? $request->route()->getName() : '';
 
@@ -35,7 +37,7 @@ class CmoController extends Controller
             if (CheckAuthHelper::isCommonReportChecker()) {
                 $this->isAuthorized = true;
             } else {
-                redirect()->route('dashboard')->with('error','Oops! You are not authorized to perform this action.')->send();
+                redirect()->route('dashboard')->with('error', 'Oops! You are not authorized to perform this action.')->send();
             }
         }
 
@@ -44,7 +46,7 @@ class CmoController extends Controller
             if (CheckAuthHelper::isSuperAdmin()) {
                 $this->isAuthorized = true;
             } else {
-                redirect()->route('dashboard')->with('error','Oops! You are not authorized to perform this action.')->send();
+                redirect()->route('dashboard')->with('error', 'Oops! You are not authorized to perform this action.')->send();
             }
         }
 
@@ -88,7 +90,7 @@ class CmoController extends Controller
                     }
                 } catch (\Exception $e) {
                     DB::rollBack();
-                    session()->flash('error', 'An error occurred: '.$e->getMessage());
+                    session()->flash('error', 'An error occurred: ' . $e->getMessage());
 
                     return redirect()->back()->withInput();
                 }
@@ -146,7 +148,7 @@ class CmoController extends Controller
             session()->flash('success', 'Data populated lbportal successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-            session()->flash('error', 'Failed to populate lbportal: '.$e->getMessage());
+            session()->flash('error', 'Failed to populate lbportal: ' . $e->getMessage());
         }
 
         return redirect()->route('pullnewcmo');
@@ -156,7 +158,7 @@ class CmoController extends Controller
     {
         if (WorkFlowPermissionHelper::canCMOGrievanceMark()) {
             $header = 'Sarasori Mukhyamantri (CMO Grievance) List';
-            $user = auth()->user();
+            // $user = auth()->user();
             if (CheckAuthHelper::isCommonOperator()) {
                 $workflow_dropdown_show = 0;
             } else {
@@ -197,7 +199,7 @@ class CmoController extends Controller
             ];
         }
         $isaddvisible = 0;
-        $user = auth()->user();
+        // $user = auth()->user();
         if (CheckAuthHelper::isCommmonVerifier()) {
             $isaddvisible = 1;
             $isaddbutton = 0;
@@ -270,7 +272,7 @@ class CmoController extends Controller
             session()->flash('success', $msg);
         } catch (\Exception $e) {
             DB::rollBack();
-            session()->flash('error', 'Action failed: '.$e->getMessage());
+            session()->flash('error', 'Action failed: ' . $e->getMessage());
 
             return redirect()->back()->withInput();
         }
@@ -302,7 +304,7 @@ class CmoController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            session()->flash('error', 'Action failed: '.$e->getMessage());
+            session()->flash('error', 'Action failed: ' . $e->getMessage());
 
             return redirect()->back()->withInput();
         }
@@ -333,7 +335,7 @@ class CmoController extends Controller
             return redirect()->route('cmo-grievance-workflow');
         } catch (\Exception $e) {
             DB::rollBack();
-            session()->flash('error', 'Action failed: '.$e->getMessage());
+            session()->flash('error', 'Action failed: ' . $e->getMessage());
 
             return redirect()->back()->withInput();
         }
@@ -417,7 +419,7 @@ class CmoController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return redirect()->back()->withErrors(['error' => 'Something went wrong: '.$e->getMessage()]);
+            return redirect()->back()->withErrors(['error' => 'Something went wrong: ' . $e->getMessage()]);
         }
     }
 }
