@@ -9,38 +9,56 @@ class TableExportService
 {
     public function export($component, $fileName = 'export.xlsx')
     {
-        // Skip Actions column
         $columns = collect($component->columns())
             ->filter(fn ($col) => $col->getTitle() !== 'Actions')
-            ->map(fn ($col) => [
-                'title' => $col->getTitle(),
-                'field' => $col->getField(),
-            ])
             ->values();
-
-        $rows = $component->builder()->get();
+       
+        $rows = $component->getRows();
 
         $data = $rows->map(function ($row) use ($columns) {
 
             $rowData = [];
 
-            foreach ($columns as $col) {
+            foreach ($columns as $column) {
 
-                $field = $col['field'];
-                $title = $col['title'];
+                $title = $column->getTitle();
 
-                $rowData[$title] = $row->$field ?? 'N/A';
+                $labelCallback = $column->getLabelCallback();
+
+                if ($labelCallback) {
+
+                    $value = call_user_func(
+                        $labelCallback,
+                        $row,
+                        $column
+                    );
+
+                } else {
+
+                    $field = $column->getField();
+
+                    $value = $row->$field ?? 'N/A';
+                }
+
+                $rowData[$title] = strip_tags($value);
             }
 
             return $rowData;
         });
 
-        $fileNameWithTime = pathinfo($fileName, PATHINFO_FILENAME).'_'.now()->format('Y_m_d_H_i_s').'.xlsx';
+        $headings = $columns
+            ->map(fn ($col) => $col->getTitle())
+            ->toArray();
+
+        $fileNameWithTime =
+            pathinfo($fileName, PATHINFO_FILENAME)
+            .'_'.now()->format('Y_m_d_H_i_s')
+            .'.xlsx';
 
         return Excel::download(
             new DynamicTableExport(
                 $data,
-                $columns->pluck('title')->toArray()
+                $headings
             ),
             $fileNameWithTime
         );
