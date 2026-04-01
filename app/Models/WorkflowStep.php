@@ -59,4 +59,12 @@ class WorkflowStep extends Model implements Auditable
 
         return $data;
     }
+    public function roleMappings()
+    {
+        return $this->hasMany(
+            WorkflowStepRoleMapping::class,
+            'workflow_step_id',
+            'id'
+        );
+    }
 }

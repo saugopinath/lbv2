@@ -5,7 +5,7 @@ namespace App\Livewire;
 use App\Services\WorkflowService;
 use Livewire\Attributes\On;
 use Livewire\Component;
-
+use App\Models\WorkflowStep;
 class ApplicationLists extends Component
 {
     public bool $schemeData = false;
@@ -18,8 +18,8 @@ class ApplicationLists extends Component
     public function updateschemeData($schemeData, WorkflowService $workflowService)
     {
         if ($schemeData) {
-            $data = $workflowService->getLabelRoles($schemeData['scheme_id']);
-            if ($data) {
+            $missingSteps = WorkflowStep::doesntHave('roleMappings')->where('scheme_id', $schemeData['scheme_id'])->get();
+            if ($missingSteps->isEmpty()) {
                 $this->schemeData = true;
                 $this->schemeId = $schemeData['scheme_id'];
                 $this->schemeName = $schemeData['scheme_name'];
