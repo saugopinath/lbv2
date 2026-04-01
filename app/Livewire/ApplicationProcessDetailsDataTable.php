@@ -3,40 +3,67 @@
 namespace App\Livewire;
 
 use App\Helpers\EncryptionArray;
-use App\Exports\BeneficiariesExport;
-use App\Helpers\CheckAuthHelper;
 use App\Helpers\SchemeCapacityHelper;
 use App\Helpers\WorkFlowPermissionHelper;
-use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use App\Models\Codemaster;
-use Carbon\Carbon;
 use App\Models\AcceptRejectInfo;
 use App\Models\BeneficiaryPersonalDetail;
-use Livewire\Attributes\On;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use App\Models\Codemaster;
+use App\Services\TableExportService;
 use App\Services\WorkflowService;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class ApplicationProcessDetailsDataTable extends DataTableComponent
 {
     public ?int $perPage = 5;
+
     public string $reportType;
+
     public string $login_type = '';
+
     public string $search = '';
+
     public $schemeId;
 
-    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id, $revertrejectAction, $revertrejectCauses, $sub_div;
+    public $district_id;
+
+    public $rural_urban;
+
+    public $blockurban;
+
+    public $gp_ward;
+
+    public $next_level_role_id;
+
+    public $revertrejectAction;
+
+    public $revertrejectCauses;
+
+    public $sub_div;
+
     protected $listeners = ['filtersApplied'];
 
-    public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
+    public $loginDistrictCode;
+
+    public $loginSubdivisionCode;
+
+    public $loginBlockCode;
+
     public array $filter_condition = [];
-    public $sameLabelRoleId, $nextLabelRoleId;
+
+    public $sameLabelRoleId;
+
+    public $nextLabelRoleId;
+
     public $isFinal;
-    public function mount($schemeId = null, WorkflowService $workflowService): void
+
+    public function mount($schemeId, WorkflowService $workflowService): void
     {
         $this->schemeId = $schemeId;
         $this->isFinal = 1;
@@ -48,18 +75,19 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
         $select_lgd = session('lgd_session');
 
-        if (!empty($select_lgd['district_id'])) {
+        if (! empty($select_lgd['district_id'])) {
             $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
         }
 
-        if (!empty($select_lgd['block_id'])) {
+        if (! empty($select_lgd['block_id'])) {
             $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
         }
 
-        if (!empty($select_lgd['subdivision_id'])) {
+        if (! empty($select_lgd['subdivision_id'])) {
             $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
+
     public function filtersApplied($filters)
     {
         $this->district_id = $filters['district_id'];
@@ -68,6 +96,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $this->gp_ward = $filters['gp_ward'];
         $this->sub_div = $filters['subdivision_id'];
     }
+
     public function configure(): void
     {
         $this->setPrimaryKey('application_id')
@@ -81,7 +110,9 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
         $this->setHideBulkActionsWhenEmptyEnabled();
 
-
+        $this->setConfigurableAreas([
+            'toolbar-left-start' => 'livewire.export_excel_buttons',
+        ]);
 
         $this->setTableWrapperAttributes([
             'class' => 'overflow-x-auto overflow-y-auto max-h-[500px] border rounded-lg shadow-sm',
@@ -110,16 +141,17 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             'class' => 'px-4 py-3 divide-y divide-gray-200 bg-white overflow-y-auto',
         ]);
     }
+
     public function bulkActions(): array
     {
         $actions = [
-            'exportSelected' => 'Export',
+            // 'exportExcel' => 'Export',
         ];
         $workflowService = app(WorkflowService::class);
         $data = $workflowService->getLabelRoles($this->schemeId);
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'verification', true, $this->schemeId) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true, $this->schemeId)) && ((!$data->is_final_step && !$data->is_first_step) || ($data->is_final_step && $data->is_first_step))
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true, $this->schemeId)) && ((! $data->is_final_step && ! $data->is_first_step) || ($data->is_final_step && $data->is_first_step))
         ) {
             $actions['bulkverify'] = $data->workflowstep->label;
         }
@@ -133,14 +165,14 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'reject', true, $this->schemeId) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'reject', true, $this->schemeId)) && (!$data->is_first_step || ($data->is_final_step && $data->is_first_step))
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'reject', true, $this->schemeId)) && (! $data->is_first_step || ($data->is_final_step && $data->is_first_step))
         ) {
             $actions['bulkreject'] = 'Reject';
         }
 
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'revert', true, $this->schemeId) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'revert', true, $this->schemeId)) && (!$data->is_first_step || ($data->is_final_step && $data->is_first_step))
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'revert', true, $this->schemeId)) && (! $data->is_first_step || ($data->is_final_step && $data->is_first_step))
         ) {
             $actions['bulkrevert'] = 'Revert';
         }
@@ -153,6 +185,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $this->setSearch($value);
         $this->resetPage();
     }
+
     public function updatedPerPage($value): void
     {
         $this->perPage = (int) $value;
@@ -163,22 +196,22 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make("Application ID", "application_id")
-                ->label(fn($row) => $row->application_id ?? 'N/A'),
-            Column::make("Application Type", "application_type")
-                ->label(fn($row) => $row->application_type ?? 'N/A'),
-            Column::make("Applicant Name")
-                ->label(fn($row) => $row->beneficiary_name ?? 'N/A'),
+            Column::make('Application ID', 'application_id')
+                ->label(fn ($row) => $row->application_id ?? 'N/A'),
+            Column::make('Application Type', 'application_type')
+                ->label(fn ($row) => $row->application_type ?? 'N/A'),
+            Column::make('Applicant Name')
+                ->label(fn ($row) => $row->beneficiary_name ?? 'N/A'),
 
             Column::make("Father's Name")
-                ->label(fn($row) => $row->ben_father_name ?? 'N/A'),
+                ->label(fn ($row) => $row->ben_father_name ?? 'N/A'),
 
-            Column::make("Date of Birth")
-                ->label(fn($row) => $row->dob ?? 'N/A'),
-            Column::make("Age", "age")
-                ->label(fn($row) => Carbon::parse($row->dob)->age
+            Column::make('Date of Birth')
+                ->label(fn ($row) => $row->dob ?? 'N/A'),
+            Column::make('Age', 'age')
+                ->label(fn ($row) => Carbon::parse($row->dob)->age
                     ?? 'N/A'),
-            Column::make("Actions")
+            Column::make('Actions')
                 ->label(function ($row) {
                     return view('coulmn_button.view', [
                         'link' => route('draft-application.view', ['application_id' => Crypt::encryptString($row->application_id)]),
@@ -196,7 +229,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             ->where('next_level_role_id', $this->sameLabelRoleId)
             ->where('scheme_id', $this->schemeId)
             ->where('is_final', $this->isFinal);
-        if (!empty($this->filter_condition)) {
+        if (! empty($this->filter_condition)) {
             $query->where($this->filter_condition);
         }
         if ($this->district_id || $this->sub_div || $this->rural_urban || $this->blockurban || $this->gp_ward) {
@@ -210,6 +243,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             );
         }
         $this->dispatch('hideLoader');
+
         return $query;
     }
 
@@ -222,20 +256,24 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     {
         $this->handleBulkAction('approver');
     }
+
     public function bulkrevert()
     {
         $this->handleBulkAction('revert');
     }
+
     public function bulkreject()
     {
         $this->handleBulkAction('reject');
     }
+
     public function handleBulkAction($action)
     {
         $this->revertrejectCauses = Codemaster::where('code', 12)->first()->children()->get();
         $this->revertrejectAction = $action;
         $this->dispatch('open-bulk-revert-modal', action: $action, revertrejectCauses: $this->revertrejectCauses);
     }
+
     #[On('confirm-bulk-revert')]
     public function confirmBulkRevert($validated, WorkflowService $workflowService)
     {
@@ -268,7 +306,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 foreach ($records as $record) {
 
                     $record->update([
-                        'next_level_role_id' => $this->nextLabelRoleId
+                        'next_level_role_id' => $this->nextLabelRoleId,
                     ]);
 
                     $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
@@ -293,7 +331,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
                 $this->dispatch('toastr', [
                     'type' => 'warning',
-                    'message' => 'All applications reverted successfully!'
+                    'message' => 'All applications reverted successfully!',
                 ]);
 
                 $this->clearSelected();
@@ -348,7 +386,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
                 $this->dispatch('toastr', [
                     'type' => 'error',
-                    'message' => 'All applications rejected successfully!'
+                    'message' => 'All applications rejected successfully!',
                 ]);
 
                 $this->clearSelected();
@@ -360,14 +398,16 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             }
         } elseif ($this->revertrejectAction === 'verification') {
             $ids = $this->getSelected();
-            if (empty($ids))
+            if (empty($ids)) {
                 return;
+            }
             $check = SchemeCapacityHelper::checkBulk($this->schemeId, $this->nextLabelRoleId, $ids);
-            if (!$check['is_processed']) {
+            if (! $check['is_processed']) {
                 $this->dispatch('toastr', [
                     'type' => 'error',
-                    'message' => "Capacity exceeded for {$check['model']}! Available: {$check['remaining_capacity']}"
+                    'message' => "Capacity exceeded for {$check['model']}! Available: {$check['remaining_capacity']}",
                 ]);
+
                 return;
             }
             DB::beginTransaction();
@@ -379,7 +419,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 foreach ($records as $record) {
 
                     $record->update([
-                        'next_level_role_id' => $this->nextLabelRoleId
+                        'next_level_role_id' => $this->nextLabelRoleId,
                     ]);
 
                     $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
@@ -419,11 +459,12 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 $ids
             );
 
-            if (!$check['is_processed']) {
+            if (! $check['is_processed']) {
                 $this->dispatch('toastr', [
                     'type' => 'error',
-                    'message' => "Capacity exceeded for {$check['model']}! Available: {$check['remaining_capacity']}"
+                    'message' => "Capacity exceeded for {$check['model']}! Available: {$check['remaining_capacity']}",
                 ]);
+
                 return;
             }
 
@@ -463,7 +504,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
                 $this->dispatch('toastr', [
                     'type' => 'success',
-                    'message' => 'Applications approved successfully!'
+                    'message' => 'Applications approved successfully!',
                 ]);
 
                 $this->clearSelected();
@@ -474,23 +515,12 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             }
         }
     }
-    public function exportExcel()
-    {
-        $data = $this->builder()->get()->map(function ($row) {
-            return [
-                'Application ID' => $row->sourceable->application_id ?? 'N/A',
-                'Applicant Name' => $row->sourceable->full_name ?? 'N/A',
-                'Father Name' => optional(
-                    $row->sourceable->relationships->firstWhere(
-                        'relation_type_id',
-                        Codemaster::getIdByCode(131)
-                    )
-                )->full_name ?? 'N/A',
-                'DOB' => $row->sourceable->dob ?? 'N/A',
-                'Mobile' => $row->sourceable->mobile_no ?? 'N/A',
-            ];
-        });
 
-        return Excel::download(new BeneficiariesExport($data), 'applications_all.xlsx');
+    public function exportExcel(TableExportService $exportService)
+    {
+        return $exportService->export(
+            $this,
+            'applications_all.xlsx'
+        );
     }
 }

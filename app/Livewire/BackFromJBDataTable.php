@@ -2,26 +2,44 @@
 
 namespace App\Livewire;
 
-use App\Models\BeneficiaryCommonList;
-use App\Exports\BeneficiariesExport;
-use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use App\Models\Codemaster;
-use App\Models\BackFromJb;
 use App\Helpers\CheckAuthHelper;
 use App\Helpers\EncryptionArray;
+use App\Models\BackFromJb;
+use App\Models\Codemaster;
+use App\Services\TableExportService;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Crypt;
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class BackFromJBDataTable extends DataTableComponent
 {
     public ?int $perPage = 5;
+
     protected $listeners = [
         'doSearch' => 'updateFilters',
     ];
-    public $district_id, $rural_urban, $blockurban, $gp_ward, $next_level_role_id, $revertrejectAction, $revertrejectCauses, $sub_div, $is_filtered_reset;
+
+    public $district_id;
+
+    public $rural_urban;
+
+    public $blockurban;
+
+    public $gp_ward;
+
+    public $next_level_role_id;
+
+    public $revertrejectAction;
+
+    public $revertrejectCauses;
+
+    public $sub_div;
+
+    public $is_filtered_reset;
+
     public array $filter_condition = [];
+
     public function mount(): void
     {
         // if ($this->is_filtered_reset) {
@@ -34,15 +52,15 @@ class BackFromJBDataTable extends DataTableComponent
 
         $select_lgd = session('lgd_session');
 
-        if (!empty($select_lgd['district_id'])) {
+        if (! empty($select_lgd['district_id'])) {
             $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
         }
 
-        if (!empty($select_lgd['block_id'])) {
+        if (! empty($select_lgd['block_id'])) {
             $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
         }
 
-        if (!empty($select_lgd['subdivision_id'])) {
+        if (! empty($select_lgd['subdivision_id'])) {
             $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
@@ -56,8 +74,11 @@ class BackFromJBDataTable extends DataTableComponent
             ->setPerPageVisibilityEnabled()
             ->setSearchEnabled()
             ->setSearchLive()
-            ->setColumnSelectDisabled()
-        ;
+            ->setColumnSelectDisabled();
+
+        $this->setConfigurableAreas([
+            'toolbar-left-start' => 'livewire.export_excel_buttons',
+        ]);
         $this->setTableWrapperAttributes([
             'class' => 'overflow-x-auto overflow-y-auto max-h-[500px] border rounded-lg shadow-sm',
         ]);
@@ -95,12 +116,14 @@ class BackFromJBDataTable extends DataTableComponent
         $this->setSearch($value);
         $this->resetPage();
     }
+
     public function updatedPerPage($value): void
     {
-        $this->perPage = (int)$value;
-        $this->setPerPage((int)$value);
+        $this->perPage = (int) $value;
+        $this->setPerPage((int) $value);
         $this->resetPage();
     }
+
     public function updateFilters($filters)
     {
         $this->district_id = $filters['district_id'];
@@ -120,8 +143,8 @@ class BackFromJBDataTable extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make("Application ID", "application_id")
-                ->label(fn($row) => $row->beneficiary->application_id ?? 'N/A')
+            Column::make('Application ID', 'application_id')
+                ->label(fn ($row) => $row->beneficiary->application_id ?? 'N/A')
                 ->sortable()
                 ->searchable(function ($query, $searchTerm) {
                     $query->whereHas('beneficiary', function ($q) use ($searchTerm) {
@@ -129,23 +152,23 @@ class BackFromJBDataTable extends DataTableComponent
                     });
                 }),
 
-            Column::make("Applicant Name", "full_name")
-                ->label(fn($row) => $row->beneficiary->beneficiary_name ?? 'N/A')
+            Column::make('Applicant Name', 'full_name')
+                ->label(fn ($row) => $row->beneficiary->beneficiary_name ?? 'N/A')
                 ->searchable(function ($query, $searchTerm) {
                     $query->whereHas('beneficiary', function ($q) use ($searchTerm) {
                         $q->where('full_name', 'ILIKE', "%{$searchTerm}%");
                     });
                 }),
 
-            Column::make("Mobile No", "Mobile No")
-                ->label(fn($row) => $row->beneficiary->other_details['mobile_no']
+            Column::make('Mobile No', 'Mobile No')
+                ->label(fn ($row) => $row->beneficiary->other_details['mobile_no']
                     ?? 'N/A'),
 
-            Column::make("Address", "Address")
-                ->label(fn($row) => $row->beneficiary->contact->getFullAddress() ?? 'N/A')
+            Column::make('Address', 'Address')
+                ->label(fn ($row) => $row->beneficiary->contact->getFullAddress() ?? 'N/A')
                 ->html(),
 
-            Column::make("Action")
+            Column::make('Action')
                 ->label(function ($row) {
                     $next_level_role_id = $row->next_level_role_id;
                     $msg = '';
@@ -161,10 +184,11 @@ class BackFromJBDataTable extends DataTableComponent
                     ) {
                         $canEdit = true;
                     }
-                    if (!$canEdit) {
+                    if (! $canEdit) {
                         return $msg;
                     }
-                    $link = route('backfromjbactions') . '?id=' . Crypt::encryptString($row->beneficiary->application_id);
+                    $link = route('backfromjbactions').'?id='.Crypt::encryptString($row->beneficiary->application_id);
+
                     return view('coulmn_button.actions', [
                         'link' => $link,
                         'tooltip' => 'Edit',
@@ -177,13 +201,13 @@ class BackFromJBDataTable extends DataTableComponent
     public function builder(): Builder
     {
         $query = BackFromJb::with([
-            'beneficiary.contact'
+            'beneficiary.contact',
         ])->whereHas('beneficiary', function ($q) {
             foreach ($this->filter_condition as $col => $val) {
                 $q->where($col, $val);
             }
         });
-        if (!empty($this->next_level_role_id)) {
+        if (! empty($this->next_level_role_id)) {
             $query->where('next_level_role_id', $this->next_level_role_id);
         }
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward || $this->sub_div) {
@@ -196,7 +220,16 @@ class BackFromJBDataTable extends DataTableComponent
                 $this->sub_div
             );
         }
+
         // dd($query->get());
         return $query;
+    }
+
+    public function exportExcel(TableExportService $exportService)
+    {
+        return $exportService->export(
+            $this,
+            'applications_all.xlsx'
+        );
     }
 }
