@@ -264,4 +264,11 @@ Route::get('update-beneficiary-list', [UpdateMarkBeneficiaryDetailsController::c
 
 Route::get('caste-management', [CasteManagementController::class, 'index'])->name('caste-management');
 Route::get('caste-management-request-list', [CasteManagementController::class, 'requestdedlistdetails'])->name('caste-management-request-list');
+// Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
+//     // ->middleware('permission.redirect:canBeneficiaryDetails')
+//     ->name('view-beneficiary-details');
 
+    // Route::controller(CasteManagementController::class)->group(function () {
+    //     Route::get('caste-management', 'index')->name('caste-management');
+    //     Route::get('caste-management-request-list', 'requestdedlistdetails')->name('caste-management-request-list');
+    // });
