@@ -2,11 +2,15 @@
     class="transition-all duration-300 bg-gradient-to-r from-cyan-800 to-cyan-600 dark:bg-gray-800 shadow-lg flex flex-col h-screen"
     x-data="{ activeMenu: null }">
     <!-- Logo -->
-    <div class="flex flex-col items-center p-2 border-b border-gray-700 dark:border-gray-700">
-        <img src="{{ asset('/images/biswo.png') }}" alt="Lakshmir Bhandar" class="w-8 mb-1" />
+    <div class="flex flex-col items-center p-1 border-b border-gray-700 dark:border-gray-700 bg-white">
+        @if (config('app.jblb_logo') == 1)
+        <img src="{{ asset('/images/jb_logo.png') }}" alt="Lakshmir Bhandar" class="w-20" />
+        @else
+        <img src="{{ asset('/images/biswo.png') }}" alt="Lakshmir Bhandar" class="w-8" />
         <template x-if="sidebar">
-            <div class="text-center font-bold text-sm text-white">Lakshmir Bhandar</div>
+            <div class="text-center font-bold text-sm text-blue-600">Lakshmir Bhandar</div>
         </template>
+        @endif
     </div>
 
     <!-- Menu -->

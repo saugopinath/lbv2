@@ -10,7 +10,11 @@
     <meta name="author" content="Webonzer" />
 
     <!-- Site Tiltle -->
+    @if(config('app.jblb_logo') == 1)
+    <title>Jai Bangla Portal | Government of West Bengal</title>
+    @else
     <title>Lakshmir Bhandar | Government of West Bengal</title>
+    @endif
 
 
     <!-- Favicon Icon -->
@@ -34,7 +38,12 @@
                 </div>
                 <!-- <img class="w-64 mb-6" src="https://c.animaapp.com/mdn4r47eB5hzlO/img/biswo-1.png" alt="Logo"> -->
                 <div class="flex justify-center items-center ">
-                    <img class="w-48 sm:w-64 mb-4" src="images/biswo-1.png" alt="Logo">
+                    @if(config('app.jblb_logo') == 1)
+                    <img class="w-56 sm:w-64 mb-4" src="{{ asset('images/jb_logo.png') }}" alt="Logo">
+                    @else
+                    <img class="w-48 sm:w-64 mb-4" src="{{ asset('images/biswo-1.png') }}" alt="Logo">
+                    @endif
+
                 </div>
                 <div class="flex justify-center items-center ">
                     <!-- <div class="w-48 sm:w-64 mb-4 flex items-center justify-center text-center text-2xl sm:text-3xl font-bold text-green-800">
@@ -59,11 +68,19 @@
           </div> -->
                 <!-- Top Right Logo -->
                 <div class="w-full flex justify-center mb-2">
-                    <img src="images/biswo_bangla.png" alt="Centered Logo" class="w-24 h-auto sm:block">
+                    @if(config('app.jblb_logo') == 1)
+                    <img src="{{ asset('images/biswo_bangla.png') }}" alt="Centered Logo" class="w-24 h-auto sm:block">
+                    @else
+                    <img src="{{ asset('images/biswo-1.png') }}" alt="Centered Logo" class="w-24 h-auto sm:block">
+                    @endif
                     <!-- <h2 class="text-2xl lg:text-3xl text-center text-[#003974] font-bold">Lakshmir Bhandar Portal</h2> -->
                 </div>
                 <div class="text-center mb-2">
+                    @if(config('app.jblb_logo')==1)
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Jai Bangla Portal</h1>
+                    @else
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Lakshmir Bhandar Portal</h1>
+                    @endif
                 </div>
                 {{ $slot }}
             </div>

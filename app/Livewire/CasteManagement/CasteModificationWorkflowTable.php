@@ -130,7 +130,8 @@ class CasteModificationWorkflowTable extends DataTableComponent
                     ]),
                     'tooltip' => ($row->current_rank < 0) ? 'View Details' : 'Verify/Approve',
                 ])->render())
-                ->html(),
+                ->html()
+                ->hideIf($this->selectedStepId == -1),
         ];
     }
 

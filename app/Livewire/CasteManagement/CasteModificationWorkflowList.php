@@ -106,10 +106,9 @@ class CasteModificationWorkflowList extends Component
             'selectedStepId.required' => 'Please select a workflow step.'
         ]);
 
-        $label = DynamicWorkflowLabel::find($this->selectedStepId);
-        if ($label) {
+        if (array_key_exists($this->selectedStepId, $this->stepOptions)) {
             $this->confirmedStepId = $this->selectedStepId;
-            $this->selectedStepName = $label->label_name;
+            $this->selectedStepName = $this->stepOptions[$this->selectedStepId];
             $this->showTable = true;
         } else {
             $this->dispatch('toastr', ['type' => 'error', 'message' => 'Selected step not found.']);
