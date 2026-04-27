@@ -1,222 +1,230 @@
-<!-- 
-    ⚡ UPGRADED UI/UX – all original tailwind classes RETAINED, same structure 
-        enhancements: 
-        • refined glass texture, backdrop blur depth 
-        • elegant hover micro-transitions, data readability 
-        • gradient border glow, polished spacing 
-        • animated status pulse, icon finesse 
-        • full a11y contrast, modern luxurious atmosphere 
-        • zero removal — only additive classnames & subtle DOM tweaks 
-  -->
-<div
-    class="beneficiary-card group relative bg-slate-900 rounded-[2.5rem] p-7 shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(79,70,229,0.3)] border border-white/10 overflow-hidden backdrop-blur-sm">
+<div class="beneficiary-card group relative rounded-[2.5rem] p-7 shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_60px_rgba(37,99,235,0.18)] border border-blue-200/60 overflow-hidden"
+    style="background: linear-gradient(145deg, #dbeafe 0%, #e0f2fe 30%, #f0f9ff 60%, #eff6ff 100%); font-family: 'Plus Jakarta Sans', sans-serif;">
 
-    <!-- Enhanced Dynamic Background Mesh — upgraded with extra depth and gradient layers (preserved + refined) -->
-    <div
-        class="absolute -top-24 -right-24 w-48 h-48 bg-indigo-600/20 rounded-full blur-[80px] group-hover:bg-indigo-500/40 transition-all duration-700">
-    </div>
-    <div
-        class="absolute -bottom-24 -left-24 w-48 h-48 bg-sky-500/10 rounded-full blur-[80px] group-hover:bg-sky-400/30 transition-all duration-700">
-    </div>
-    <!-- ✦ ADDITIONAL subtle ambient layer for richer glow – does not conflict, enhances UX -->
-    <div
-        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/5 rounded-full blur-[120px] group-hover:bg-indigo-500/20 transition-all duration-1000">
-    </div>
+    {{-- Decorative ambient blobs --}}
+    <div class="absolute -top-16 -right-16 w-48 h-48 rounded-full pointer-events-none"
+        style="background: radial-gradient(circle, rgba(99,179,237,0.22) 0%, transparent 70%);"></div>
+    <div class="absolute -bottom-16 -left-14 w-44 h-44 rounded-full pointer-events-none"
+        style="background: radial-gradient(circle, rgba(147,197,253,0.18) 0%, transparent 70%);"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full pointer-events-none"
+        style="background: radial-gradient(circle, rgba(186,230,255,0.12) 0%, transparent 70%);"></div>
 
-    <!-- Header: Status & ID — upgraded status badge with softer ping, better tracking -->
-    <div class="relative flex justify-between items-center mb-8">
-        <!-- status pill with richer glass & elevated contrast -->
+    {{-- Top shimmer line --}}
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px"
+        style="background: linear-gradient(90deg, transparent, rgba(99,179,237,0.7), transparent);"></div>
+    {{-- Bottom shimmer line --}}
+    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/3 h-px"
+        style="background: linear-gradient(90deg, transparent, rgba(99,179,237,0.4), transparent);"></div>
+
+    {{-- ── HEADER ROW: Status pill + IDs ── --}}
+    <div class="relative flex justify-between items-start mb-7 gap-3 flex-wrap">
+
+        {{-- Status pill --}}
         <div
-            class="backdrop-blur-xl @if($status == 'Approved') bg-emerald-500/10 border-emerald-500/20 @else bg-orange-500/10 border-orange-500/20 @endif border px-4 py-1.5 rounded-full shadow-sm group/status">
-            <div class="flex items-center gap-2.5">
-                <span class="relative flex h-2 w-2">
-                    @if($status == 'Approved')
-                        <!-- upgraded ping animation: softer and more premium -->
-                        <span
-                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/80 opacity-75"></span>
-                        <span
-                            class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
-                    @else
-                        <!-- pending/orange gets subtle pulse as well (more intuitive) -->
-                        <span
-                            class="animate-pulse absolute inline-flex h-full w-full rounded-full bg-orange-400/60 opacity-70"></span>
-                        <span
-                            class="relative inline-flex rounded-full h-2 w-2 bg-orange-500 shadow-sm shadow-orange-500/40"></span>
-                    @endif
-                </span>
+            class="flex items-center gap-2.5 px-4 py-1.5 rounded-full border bg-{{ $statusColor }}-100/90 border-{{ $statusColor }}-200 shadow-sm backdrop-blur-md">
+            <span class="relative flex h-2 w-2">
                 <span
-                    class="text-[10px] font-black uppercase tracking-[0.18em] @if($status == 'Approved') text-emerald-400 @else text-orange-400 @endif">
-                    {{ $status }}
-                </span>
-            </div>
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-{{ $statusColor }}-400"></span>
+                <span
+                    class="relative inline-flex rounded-full h-2 w-2 bg-{{ $statusColor }}-500 shadow-sm shadow-{{ $statusColor }}-500/50"></span>
+            </span>
+            <span class="text-[10px] font-black uppercase tracking-[0.15em] text-{{ $statusColor }}-700">
+                {{ $status }}
+            </span>
         </div>
 
-        <!-- ID badge — upgraded with subtle monowidth, refined backdrop -->
-        <div class="flex flex-col items-end">
-            <div
-                class="flex items-center gap-2 bg-white/10 border border-white/20 px-3 py-1.5 rounded-xl backdrop-blur-md shadow-sm group/id">
-                <span class="text-[9px] text-white/50 uppercase font-bold tracking-widest">ID:</span>
-                <span
-                    class="text-indigo-300 font-mono font-bold text-xs tracking-wider drop-shadow-sm">{{ $beneficiaryId }}</span>
+        {{-- IDs --}}
+        <div class="flex flex-col gap-1.5 items-end">
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border"
+                style="background: rgba(255,255,255,0.65); border-color: rgba(147,197,253,0.5); backdrop-filter: blur(8px);">
+                <span class="text-[9px] font-bold uppercase tracking-widest" style="color: #6b7280;">Application
+                    ID:</span>
+                <span class="font-mono font-bold text-xs tracking-wider"
+                    style="color: #2563eb; font-family: 'JetBrains Mono', monospace;">{{ $applicationId }}</span>
             </div>
+            @if ($beneficiaryId)
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border"
+                    style="background: rgba(255,255,255,0.65); border-color: rgba(147,197,253,0.5); backdrop-filter: blur(8px);">
+                    <span class="text-[9px] font-bold uppercase tracking-widest" style="color: #6b7280;">Beneficiary
+                        ID:</span>
+                    <span class="font-mono font-bold text-xs tracking-wider"
+                        style="color: #2563eb; font-family: 'JetBrains Mono', monospace;">{{ $beneficiaryId }}</span>
+                </div>
+            @endif
         </div>
     </div>
 
-    <!-- Beneficiary Identity — enhanced with micro animations, richer avatar depth -->
-    <div class="relative mb-8">
-        <div class="flex items-center gap-5">
-            <div class="relative shrink-0">
-                <!-- upgraded blur glow with more dimension -->
-                <div
-                    class="absolute inset-0 bg-indigo-500 blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-700 scale-90 group-hover:scale-110">
-                </div>
-                <!-- avatar with extra glass sheen and corner detail -->
-                <div
-                    class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-500 to-purple-600 flex items-center justify-center shadow-2xl border border-white/40 transform group-hover:scale-110 group-hover:rotate-2 transition-all duration-500 ease-out">
+    {{-- ── PROFILE ROW: Avatar + Name + Relation ── --}}
+    <div class="relative flex items-center gap-5 mb-6">
+        {{-- Avatar --}}
+        <div class="relative shrink-0">
+            {{-- Glow halo --}}
+            <div class="absolute -inset-1 rounded-[20px] opacity-0 group-hover:opacity-60 transition-opacity duration-500 -z-10"
+                style="background: linear-gradient(135deg, #60a5fa, #818cf8); filter: blur(8px);"></div>
+            {{-- Avatar box --}}
+            @if ($ben_profile_pic && ($ben_profile_pic['document_mime_type'] == 'image/jpeg' || $ben_profile_pic['document_mime_type'] == 'image/png'))
+                @php
+                    $document_mime_type = $ben_profile_pic['document_mime_type'];
+                    if ($document_mime_type == 'image/jpeg') {
+                        $image_extension = 'jpg';
+                    } else if ($document_mime_type == 'image/png') {
+                        $image_extension = 'png';
+                    } else if ($document_mime_type == 'application/pdf') {
+                        $image_extension = 'pdf';
+                    }
+                    $row_image = "data:image/" . $image_extension . ";base64," . $ben_profile_pic['attched_document']; 
+                @endphp
+                <img src="{{ $row_image }}" alt="Profile Picture" class="w-20 h-20 rounded-full">
+            @else
+                <div class="relative w-16 h-16 rounded-[18px] flex items-center justify-center border-2 border-white/80 transform group-hover:scale-110 group-hover:rotate-2 transition-all duration-500"
+                    style="background: linear-gradient(135deg, #3b82f6, #6366f1); box-shadow: 0 4px 16px rgba(59,130,246,0.3);">
                     <i class="fas fa-user text-white text-2xl drop-shadow-md"></i>
-                    <!-- Decorative corner — more refined -->
-                    <div
-                        class="absolute -bottom-1 -right-1 w-4 h-4 bg-slate-900 rounded-tl-lg border-t border-l border-white/20">
-                    </div>
                 </div>
-                <!-- subtle ring that appears on hover (UX upgrade) -->
-                <div
-                    class="absolute -inset-1 rounded-3xl bg-gradient-to-r from-indigo-500/30 to-purple-600/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10">
-                </div>
-            </div>
+            @endif
+        </div>
 
-            <div class="flex-1 min-w-0">
-                <h3
-                    class="text-2xl font-extrabold text-white truncate tracking-tight group-hover:text-indigo-100 transition-colors drop-shadow-sm">
-                    {{ $name }}
-                </h3>
-                <div class="flex items-center gap-2 mt-2.5">
-                    <!-- relation badge with subtle inner glow -->
-                    <span
-                        class="px-2.5 py-0.5 rounded-md bg-white/10 text-[10px] font-bold text-indigo-300 uppercase tracking-tight border border-indigo-400/40 shadow-sm">
-                        {{ $relation }}
-                    </span>
-                    <span class="text-sm text-white/60 font-medium truncate">{{ $relationName }}</span>
-                </div>
+        {{-- Name + relation --}}
+        <div class="flex-1 min-w-0">
+            <h3 class="text-2xl font-extrabold truncate tracking-tight transition-colors duration-200 group-hover:text-blue-700"
+                style="color: #1e3a5f; letter-spacing: -0.02em;">
+                {{ $name }}
+            </h3>
+            <div class="flex items-center gap-2 mt-2">
+                <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-tight border"
+                    style="background: rgba(219,234,254,0.9); color: #1d4ed8; border-color: rgba(147,197,253,0.6);">
+                    {{ $relation }}
+                </span>
+                <span class="text-sm truncate font-medium" style="color: #64748b;">{{ $relationName }}</span>
             </div>
         </div>
     </div>
 
-    <!-- Information Grid — upgraded card feel, micro-interactions, refined spacing -->
-    <div class="relative space-y-4 mb-8">
-        <!-- Scheme Row — elevated with soft glow and better contrast -->
-        <div
-            class="group/item flex items-center p-4 rounded-[1.5rem] bg-white/[0.04] border border-white/10 hover:border-indigo-500/40 hover:bg-white/[0.08] transition-all duration-300 backdrop-blur-sm shadow-sm hover:shadow-md hover:shadow-indigo-500/10">
-            <div
-                class="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center mr-4 border border-indigo-500/30 group-hover/item:scale-110 transition-transform duration-300 shadow-inner">
-                <i class="fas fa-shield-alt text-indigo-300 text-sm drop-shadow"></i>
+    {{-- Divider --}}
+    <div class="mb-5 h-px" style="background: linear-gradient(90deg, transparent, rgba(147,197,253,0.5), transparent);">
+    </div>
+
+    {{-- ── SCHEME INFO ITEM ── --}}
+    <div class="relative space-y-3 mb-5">
+        <div class="flex items-center gap-4 p-4 rounded-[1.4rem] border transition-all duration-300 hover:translate-x-1"
+            style="background: rgba(255,255,255,0.55); border-color: rgba(147,197,253,0.35); backdrop-filter: blur(8px);">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-transform duration-300 group-hover:scale-110"
+                style="background: rgba(219,234,254,0.9); border-color: rgba(147,197,253,0.5);">
+                <i class="fas fa-shield-alt text-sm" style="color: #2563eb;"></i>
             </div>
             <div class="overflow-hidden">
-                <p class="text-[9px] text-white/40 uppercase font-black tracking-[0.12em] mb-0.5">Program Scheme</p>
-                <p
-                    class="text-sm text-white/90 font-bold truncate group-hover:text-white transition-colors tracking-wide">
-                    {{ $schemeName }}
-                </p>
+                <p class="text-[9px] font-black uppercase tracking-[0.14em] mb-0.5" style="color: #94a3b8;">Applied
+                    Scheme</p>
+                <p class="text-sm font-bold truncate" style="color: #1e293b;">{{ $schemeName }}</p>
             </div>
         </div>
 
-        <!-- Location & Contact Grid — upgraded with more defined cards, better tap target, glossy effect -->
-        <div class="grid grid-cols-2 gap-4">
-            <!-- location card -->
-            <div
-                class="p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.07] transition-all duration-300 backdrop-blur-sm group/loc hover:border-sky-400/30 hover:shadow-lg hover:shadow-sky-500/10">
+        {{-- Grid: Location + Contact --}}
+        <div class="grid grid-cols-2 gap-3">
+            {{-- Location --}}
+            <div class="p-4 rounded-[1.4rem] border transition-all duration-300 hover:translate-x-1 group/loc"
+                style="background: rgba(255,255,255,0.50); border-color: rgba(147,197,253,0.30); backdrop-filter: blur(8px);">
                 <div class="flex items-center gap-2 mb-2.5">
-                    <i class="fas fa-map-marker-alt text-sky-400 text-xs drop-shadow"></i>
-                    <p class="text-[9px] text-white/40 uppercase font-black tracking-widest">Location</p>
+                    <span class="w-2 h-2 rounded-full shrink-0" style="background: #38bdf8;"></span>
+                    <p class="text-[9px] font-black uppercase tracking-widest" style="color: #94a3b8;">Location</p>
                 </div>
-                <p
-                    class="text-[13px] text-white/90 font-bold leading-snug line-clamp-1 group-hover/loc:text-white transition-colors">
+                <p class="text-[13px] font-bold leading-snug line-clamp-1 transition-colors" style="color: #1e293b;">
                     {{ $location }}
                 </p>
-                <!-- subtle decorative line (UX upgrade – better perceived hierarchy) -->
-                <div class="mt-2 w-6 h-0.5 bg-sky-400/30 rounded-full group-hover/loc:w-10 transition-all duration-300">
-                </div>
+                <div class="mt-2 h-0.5 rounded-full w-6 group-hover/loc:w-10 transition-all duration-300"
+                    style="background: rgba(56,189,248,0.35);"></div>
             </div>
-            <!-- contact card -->
-            <div
-                class="p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.07] transition-all duration-300 backdrop-blur-sm group/cont hover:border-emerald-400/30 hover:shadow-lg hover:shadow-emerald-500/10">
+
+            {{-- Contact --}}
+            <div class="p-4 rounded-[1.4rem] border transition-all duration-300 hover:translate-x-1 group/cont"
+                style="background: rgba(255,255,255,0.50); border-color: rgba(147,197,253,0.30); backdrop-filter: blur(8px);">
                 <div class="flex items-center gap-2 mb-2.5">
-                    <i class="fas fa-phone-alt text-emerald-400 text-xs drop-shadow"></i>
-                    <p class="text-[9px] text-white/40 uppercase font-black tracking-widest">Contact</p>
+                    <span class="w-2 h-2 rounded-full shrink-0" style="background: #34d399;"></span>
+                    <p class="text-[9px] font-black uppercase tracking-widest" style="color: #94a3b8;">Contact</p>
                 </div>
-                <p
-                    class="text-[13px] text-white/90 font-bold tracking-wider group-hover/cont:text-white transition-colors">
+                <p class="text-[13px] font-bold tracking-wider transition-colors" style="color: #1e293b;">
                     {{ $mobile }}
                 </p>
-                <div
-                    class="mt-2 w-6 h-0.5 bg-emerald-400/30 rounded-full group-hover/cont:w-10 transition-all duration-300">
-                </div>
+                <div class="mt-2 h-0.5 rounded-full w-6 group-hover/cont:w-10 transition-all duration-300"
+                    style="background: rgba(52,211,153,0.35);"></div>
             </div>
         </div>
     </div>
 
-    <!-- Actions — upgraded: better shine effect, smoother active state, semantic icons, micro details -->
+    {{-- ── ACTION BUTTONS ── --}}
     <div class="relative flex gap-3">
-        <!-- FULL PROFILE button — enhanced shine, better contrast, luxurious feel -->
-        <button onclick="viewDetails('{{ $beneficiaryId }}')"
-            class="flex-[1.6] group/btn relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-700 px-4 py-4 transition-all duration-300 hover:from-indigo-500 hover:to-indigo-600 active:scale-[0.96] shadow-lg shadow-indigo-700/40 border border-indigo-400/30 hover:border-indigo-300/50">
-            <!-- Button Shine Effect — preserved + amplified with white shimmer -->
-            <div
-                class="absolute inset-0 w-1/2 h-full bg-white/20 skew-x-[-25deg] -translate-x-full group-hover/btn:animate-[shine_0.8s_ease-in-out]">
-            </div>
-            <!-- subtle inner gradient for depth -->
-            <div
-                class="absolute inset-0 opacity-0 group-hover/btn:opacity-100 bg-white/5 transition-opacity rounded-2xl">
-            </div>
-            <div class="relative flex items-center justify-center gap-2.5">
-                <i
-                    class="fas fa-address-card text-white/90 group-hover/btn:rotate-12 transition-transform drop-shadow"></i>
-                <span class="text-sm font-black text-white uppercase tracking-wider drop-shadow-sm">Full
-                    Profile</span>
-            </div>
-        </button>
-
-        <!-- HISTORY button — refined glass, better hover feedback, icon animation -->
-        <button onclick="viewPayments('{{ $beneficiaryId }}')"
-            class="flex-1 rounded-2xl bg-white/10 border border-white/20 px-4 py-4 transition-all duration-300 hover:bg-white/20 hover:border-white/30 active:scale-[0.96] flex items-center justify-center gap-2 group/hist backdrop-blur-sm shadow-md hover:shadow-white/10">
+        {{-- Full Profile CTA --}}
+        <a href="{{ $beneficiaryDetailsUrl }}"
+            class="flex-[1.6] group/btn relative overflow-hidden rounded-2xl px-4 py-4 transition-all duration-300 active:scale-[0.96] flex items-center justify-center gap-2.5"
+            style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: 1px solid rgba(147,197,253,0.3); box-shadow: 0 6px 20px rgba(37,99,235,0.3);"
+            onmouseover="this.style.boxShadow='0 10px 28px rgba(37,99,235,0.38)'; this.style.background='linear-gradient(135deg,#3b82f6,#2563eb)'"
+            onmouseout="this.style.boxShadow='0 6px 20px rgba(37,99,235,0.3)'; this.style.background='linear-gradient(135deg,#2563eb,#1d4ed8)'">
+            {{-- Shine sweep --}}
+            <div class="absolute top-0 left-[-40px] w-8 h-full skew-x-[-20deg] opacity-0 group-hover/btn:opacity-100 pointer-events-none btn-shine-el"
+                style="background: rgba(255,255,255,0.22); animation: none;"></div>
             <i
-                class="fas fa-clock-rotate-left text-indigo-300 group-hover/hist:rotate-[-30deg] transition-transform duration-400 drop-shadow"></i>
-            <span
-                class="text-sm font-bold text-white/80 tracking-wide group-hover/hist:text-white transition-colors">History</span>
-            <!-- subtle background accent on hover -->
-            <div
-                class="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-500/0 via-indigo-500/10 to-indigo-500/0 opacity-0 group-hover/hist:opacity-100 transition-opacity -z-10">
-            </div>
-        </button>
+                class="fas fa-address-card text-white/90 drop-shadow group-hover/btn:rotate-12 transition-transform duration-300"></i>
+            <span class="text-sm font-black text-white uppercase tracking-wider drop-shadow-sm">Full Profile</span>
+        </a>
+
+        {{-- Payment History --}}
+        <a href="{{ $paymentUrl }}"
+            class="flex-1 group/hist relative rounded-2xl px-4 py-4 transition-all duration-300 active:scale-[0.96] flex items-center justify-center gap-2"
+            style="background: rgba(255,255,255,0.55); border: 1px solid rgba(147,197,253,0.45); backdrop-filter: blur(8px);"
+            onmouseover="this.style.background='rgba(255,255,255,0.85)'; this.style.borderColor='rgba(99,179,237,0.6)'"
+            onmouseout="this.style.background='rgba(255,255,255,0.55)'; this.style.borderColor='rgba(147,197,253,0.45)'">
+            <i class="fa-solid fa-indian-rupee-sign group-hover/hist:-rotate-[30deg] transition-transform duration-300 drop-shadow"
+                style="color: #6366f1;"></i>
+            <span class="text-sm font-bold tracking-wide transition-colors" style="color: #334155;">Payment
+                History</span>
+        </a>
     </div>
 
-    <!-- Decorative Top Edge — refined: more luminous gradient -->
-    <div
-        class="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-r from-transparent via-indigo-400/80 to-transparent">
-    </div>
-    <!-- bottom edge glow for balance — premium addition, keeps composition intact -->
-    <div
-        class="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/3 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent">
-    </div>
 </div>
 
-<!-- keep original keyframe (already defined) — no alteration -->
-<style>
-    /* ensure shine keyframe exists (duplicate safe) */
-    @keyframes shine {
-        100% {
-            translate: 250% 0;
-        }
-    }
+@once
+    @push('styles')
+        <style>
+            @keyframes shine-sweep {
+                0% {
+                    transform: translateX(-40px) skewX(-20deg);
+                    opacity: 0;
+                }
 
-    /* smooth performance */
-    .beneficiary-card {
-        backface-visibility: hidden;
-    }
-</style>
+                20% {
+                    opacity: 1;
+                }
+
+                100% {
+                    transform: translateX(320px) skewX(-20deg);
+                    opacity: 0;
+                }
+            }
+
+            .beneficiary-card {
+                backface-visibility: hidden;
+                animation: bc-fade-up 0.5s ease both;
+            }
+
+            @keyframes bc-fade-up {
+                from {
+                    opacity: 0;
+                    transform: translateY(16px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .beneficiary-card .group\/btn:hover .btn-shine-el {
+                animation: shine-sweep 0.65s ease forwards;
+            }
+        </style>
+    @endpush
+@endonce
 
 <script>
-    // dummy functions to prevent console errors (preserved from original)
     window.viewDetails = (id) => console.log('view details', id);
     window.viewPayments = (id) => console.log('view payments', id);
 </script>

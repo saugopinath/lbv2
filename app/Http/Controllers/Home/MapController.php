@@ -7,24 +7,34 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use App\Models\BeneficiaryPersonalDetail;
+use App\Models\District;
 
 class MapController extends Controller
 {
     public function index()
     {
-        return view('pension.map');
+        $districtCount = Cache::remember('map.district.total_count', 600, fn () => District::count());
+        return view('frontend.pension.map', compact('districtCount'));
     }
 
 
 
 
-    public function wbDistrictCount(Request $request)
+    public function wbDistrictCount(Request $request): JsonResponse
     {
-        return DB::connection('pgsql_app_read')->table('pension.beneficiaries')
-            ->select('created_by_dist_code as district_code', DB::raw('count(*) total'))
-            ->where('next_level_role_id', '=', 0)
-            ->groupBy('district_code')
-            ->pluck('total', 'district_code');
+        $data = Cache::remember('map.district.beneficiary_counts', 600, function () {
+            return BeneficiaryPersonalDetail::select(
+                    'created_by_dist_code',
+                    DB::raw('COUNT(*) as total')
+                )
+                ->whereIn('is_clean', [1, 2])
+                ->whereNotNull('created_by_dist_code')
+                ->groupBy('created_by_dist_code')
+                ->pluck('total', 'created_by_dist_code');
+        });
+
+        return response()->json($data);
     }
 
 

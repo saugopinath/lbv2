@@ -2,12 +2,14 @@
 
 namespace App\Helpers;
 
-use App\Models\BeneficiaryCommonList;
+use App\Models\BeneficiaryAadhaar;
 use App\Models\ApplicantIncompletDeatil;
+use App\Models\BeneficiaryBankDetail;
+use App\Models\BeneficiaryPersonalDetail;
 
 class ChechDupHelper
 {
-    public static function checkDuplicate(string $type, string $value, string $incompleteType)
+    public static function checkDuplicate(string $type, string $value, string $incompleteType, string $schemeId)
     {
         if (!$value) {
             return true;
@@ -15,8 +17,12 @@ class ChechDupHelper
 
         if ($type === 'aadhaar') {
             $aadhar = md5($value);
-            $existsInCommonList = BeneficiaryCommonList::where('encoded_aadhar', $aadhar)
-                ->where('is_reject', false)->exists();
+
+            $existsInCommonList = BeneficiaryAadhaar::where('encoded_aadhar', $aadhar)
+                ->whereRelation('personal', 'scheme_id', $schemeId)
+                ->whereRelation('personal', 'is_final', 1)
+                ->whereRelation('personal', 'next_level_role_id', '!=', -100)
+                ->exists();
 
             $existsInIncomplete = ApplicantIncompletDeatil::whereJsonContains('new_value->aadhaar_no', $value)
                 ->whereHas('incompleteType', function ($q) use ($incompleteType) {
@@ -32,9 +38,14 @@ class ChechDupHelper
         }
 
         if ($type === 'mobile') {
-            $existsInCommonList = BeneficiaryCommonList::where('mobile_no', $value)
-                ->where('is_reject', false)->exists();
 
+            $existsInCommonList = BeneficiaryPersonalDetail::where('other_details->mobile_no', $value)
+                ->where('scheme_id', $schemeId)
+                ->where('is_final', 1)
+                ->where('next_level_role_id', '!=', -100)
+                ->exists();
+
+            // dd($existsInCommonList);
             $existsInIncomplete = ApplicantIncompletDeatil::whereJsonContains('new_value->mobile_no', $value)
                 ->whereHas('incompleteType', function ($q) use ($incompleteType) {
                     $q->where('table_column', 'LIKE', "%{$incompleteType}%");
@@ -49,8 +60,12 @@ class ChechDupHelper
         }
 
         if ($type === 'bank') {
-            $existsInCommonList = BeneficiaryCommonList::where('bank_account_number', $value)
-                ->where('is_reject', false)->exists();
+
+            $existsInCommonList = BeneficiaryBankDetail::where('bankaccountnumber', $value)
+                ->whereRelation('personal', 'scheme_id', $schemeId)
+                ->whereRelation('personal', 'is_final', 1)
+                ->whereRelation('personal', 'next_level_role_id', '!=', -100)
+                ->exists();
 
             $existsInIncomplete = ApplicantIncompletDeatil::whereJsonContains('new_value->account_number', $value)
                 ->whereHas('incompleteType', function ($q) use ($incompleteType) {
@@ -68,14 +83,16 @@ class ChechDupHelper
         return "Invalid check type!";
     }
 
-    public static function checkBankMobileDuplicate(string $type, string $value)
+    public static function checkBankMobileDuplicate(string $type, string $value, $schemeId)
     {
         $errors = [];
 
         if ($type === 'mobile') {
-            // dd($value);
-            $existsMobile = BeneficiaryCommonList::where('mobile_no', $value)
-                ->where('is_reject', false)
+
+            $existsMobile = BeneficiaryPersonalDetail::where('other_details->mobile_no', $value)
+                ->where('scheme_id', $schemeId)
+                ->where('is_final', 1)
+                ->where('next_level_role_id', '!=', -100)
                 ->exists();
 
             if ($existsMobile) {
@@ -84,9 +101,13 @@ class ChechDupHelper
         }
 
         if ($type === 'bank') {
-            // dd($value);
-            $existsBank = BeneficiaryCommonList::where('bank_account_number', $value)
-                ->where('is_reject', false)
+
+            $existsBank = BeneficiaryBankDetail::where('bankaccountnumber', $value)
+                ->whereHas('personal', function ($q) use ($schemeId) {
+                    $q->where('scheme_id', $schemeId)
+                        ->where('is_final', 1)
+                        ->where('next_level_role_id', '!=', -100);
+                })
                 ->exists();
 
             if ($existsBank) {
@@ -94,10 +115,6 @@ class ChechDupHelper
             }
         }
 
-        if (!empty($errors)) {
-            return implode(' | ', $errors); 
-        }
-
-        return true; 
+        return !empty($errors) ? implode(' | ', $errors) : true;
     }
 }

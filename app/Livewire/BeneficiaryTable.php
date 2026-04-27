@@ -114,8 +114,8 @@ class BeneficiaryTable extends DataTableComponent
     }
     public function updatedPerPage($value): void
     {
-        $this->perPage = (int)$value;
-        $this->setPerPage((int)$value);
+        $this->perPage = (int) $value;
+        $this->setPerPage((int) $value);
         $this->resetPage();
     }
     public function columns(): array
@@ -192,7 +192,7 @@ class BeneficiaryTable extends DataTableComponent
                 if (($this->reportType == '3') || ($this->reportType == '2')) {
                     return view('coulmn_button.view', [
                         'link' => route('custom_application.view', [
-                            'id'        => Crypt::encryptString($row->application_id),
+                            'id' => Crypt::encryptString($row->application_id),
                             'scheme_id' => Crypt::encryptString($row->scheme_id)
                         ]),
                         'tooltip' => 'View Application',
@@ -300,10 +300,10 @@ class BeneficiaryTable extends DataTableComponent
         // Status Constants
         $STATUS_VERIFIED = 1;
         $STATUS_APPROVED = 2;
-        $STATUS_FINAL    = 0;
-        $STATUS_REJECT   = -100;
-        $STATUS_REVERT   = -20;
-        $STATUS_PARTIAL  = null;
+        $STATUS_FINAL = 0;
+        $STATUS_REJECT = -100;
+        $STATUS_REVERT = -20;
+        $STATUS_PARTIAL = null;
 
         $nextLevelRoleId = null;
 

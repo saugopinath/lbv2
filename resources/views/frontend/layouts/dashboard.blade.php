@@ -243,10 +243,12 @@
 
     <!-- Sidebar Active Link Handler -->
     <script>
-        $(document).ready(function () {
-            $('.sidebar-link').on('click', function () {
-                $('.sidebar-link').removeClass('active');
-                $(this).addClass('active');
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.sidebar-link').forEach(function (link) {
+                link.addEventListener('click', function () {
+                    document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+                    this.classList.add('active');
+                });
             });
         });
     </script>

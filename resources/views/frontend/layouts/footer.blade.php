@@ -1,79 +1,17 @@
-@push('styles')
-    <style>
-        .floating-icon {
-            position: absolute;
-            animation: float 6s ease-in-out infinite;
-            opacity: 0.15;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .icon-1 {
-            top: 20%;
-            left: 10%;
-            animation-duration: 7s;
-            font-size: 3rem;
-        }
-
-        .icon-2 {
-            top: 40%;
-            left: 80%;
-            animation-duration: 9s;
-            font-size: 2.5rem;
-        }
-
-        .icon-3 {
-            top: 70%;
-            left: 30%;
-            animation-duration: 8s;
-            font-size: 3rem;
-        }
-
-        .icon-4 {
-            top: 85%;
-            left: 60%;
-            animation-duration: 10s;
-            font-size: 2.5rem;
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-20px);
-            }
-
-            100% {
-                transform: translateY(0px);
-            }
-        }
-
-        footer {
-            position: relative;
-            overflow: hidden;
-            /* ensures icons stay inside */
-        }
-    </style>
-
-
-@endpush
+{{-- Footer floating icon and float animation styles are now in resources/css/app.css --}}
 
 <footer class="footer-decoration bg-gray-800 text-gray-300 py-10 relative overflow-hidden">
 
     <!-- Decorative floating icons -->
-    <i class="floating-icon icon-1 fas fa-leaf text-4xl text-green-400"></i>
-    <i class="floating-icon icon-2 fas fa-heart text-3xl text-pink-400"></i>
-    <i class="floating-icon icon-3 fas fa-star text-4xl text-yellow-400"></i>
-    <i class="floating-icon icon-4 fas fa-seedling text-3xl text-emerald-400"></i>
+    <i class="floating-icon icon-1 fas fa-leaf text-green-400"></i>
+    <i class="floating-icon icon-2 fas fa-heart text-pink-400"></i>
+    <i class="floating-icon icon-3 fas fa-star text-yellow-400"></i>
+    <i class="floating-icon icon-4 fas fa-seedling text-emerald-400"></i>
 
     <div class="max-w-7xl mx-auto px-4 relative z-10">
         <!-- Government Seals and Logos -->
         <div class="flex flex-col md:flex-row justify-between items-center mb-8 pb-6 border-b border-gray-700">
             <div class="flex items-center space-x-6 mb-4 md:mb-0">
-                <!-- <img src="img/emblem.jpg" alt="National Emblem" class="h-16 w-16 object-contain">
-                <img src="img/west-bengal-logo.jpeg" alt="West Bengal Government" class="h-14 w-14 object-contain"> -->
                 <img src="{{asset('images/home/biswo.jpeg')}}" alt="West Bengal Government"
                     class="h-14 w-20 object-contain">
                 <img src="{{asset('images/home/biswo_logo.png')}}" alt="West Bengal Government"
@@ -84,7 +22,7 @@
             <div class="flex flex-wrap justify-center gap-4 text-sm">
                 <a href="#" class="hover:text-amber-400 transition-colors duration-300">Accessibility</a>
                 <a href="#" class="hover:text-amber-400 transition-colors duration-300">Privacy Policy</a>
-                <a href="#" class="hover:text-amber-400 transition-colors duration-300">Terms & Conditions</a>
+                <a href="#" class="hover:text-amber-400 transition-colors duration-300">Terms &amp; Conditions</a>
                 <a href="#" class="hover:text-amber-400 transition-colors duration-300">Sitemap</a>
                 <a href="#" class="hover:text-amber-400 transition-colors duration-300">Help</a>
             </div>
@@ -145,7 +83,7 @@
             <!-- Contact & Helpline -->
             <div>
                 <h4 class="font-bold text-lg mb-4 text-amber-400 border-b border-amber-400 pb-2">
-                    Contact & Support
+                    Contact &amp; Support
                 </h4>
                 <div class="space-y-3 text-sm">
                     <div class="flex items-start hover:text-white transition-colors duration-300">
@@ -231,7 +169,7 @@
                     <img src="{{asset('images/home/biswo_logo.png')}}"
                         class="w-12 h-12 mb-3 opacity-80 group-hover:opacity-100 transition-all object-contain">
                     <span class="text-gray-200 group-hover:text-amber-400 leading-tight text-center">
-                        Women & Child Development & Social Welfare
+                        Women &amp; Child Development &amp; Social Welfare
                     </span>
                 </a>
 
@@ -289,7 +227,7 @@
         <!-- Copyright and Disclaimer -->
         <div class="text-center pt-6 border-t border-gray-700">
             <div
-                class="text-xs text-gray-400 mb-2 bg-gradient-to-r from-amber-400 via-pink-500 to-purple-500 bg-clip-text text-transparent animate-gradient-x font-semibold">
+                class="text-xs text-gray-400 mb-2 bg-gradient-to-r from-amber-400 via-pink-500 to-purple-500 bg-clip-text text-transparent font-semibold">
                 © 2025 | <a href="www.wb.nic.in" target="_blank">National Informatics Centre | West Bengal State
                     Centre</a>
             </div>

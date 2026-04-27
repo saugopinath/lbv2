@@ -71,6 +71,8 @@ class AppServiceProvider extends ServiceProvider
                 'district_id',
                 'created_at',
                 'updated_at',
+                'beneficiary_id',
+                'application_id',
             ]);
 
             // ✅ Filterable attributes (must exist in searchable array)
@@ -80,7 +82,9 @@ class AppServiceProvider extends ServiceProvider
                 'rural_urban',
                 'blockurban',
                 'gpward',
-                'next_level_role_id'
+                'next_level_role_id',
+                'application_id',
+                'beneficiary_id',
             ]);
         }
     }

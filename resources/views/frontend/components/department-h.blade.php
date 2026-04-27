@@ -36,7 +36,7 @@
                 class="card-back absolute w-full h-full bg-white rounded-xl shadow-lg p-6 flex flex-col justify-center text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
                 <h3 class="font-bold text-xl mb-3 text-gray-800">{{ $name }}</h3>
                 <p class="text-gray-600 mb-4">{{ $about }}</p>
-                <a href="{{ route('department', ['dept' => $slug]) }}" class="font-semibold hover:underline"
+                <a href="{{ route('department_info', ['department' => $slug]) }}" class="font-semibold hover:underline"
                     style="color: {{ $textColor }};">
                     Learn More →
                 </a>

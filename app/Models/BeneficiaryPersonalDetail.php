@@ -17,6 +17,10 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
         'other_details' => 'array',
     ];
 
+    public function contact()
+    {
+        return $this->hasOne(BeneficiaryContactDetail::class, 'application_id', 'application_id');
+    }
     public function documents()
     {
         return $this->hasMany(BeneficiaryEnclosure::class, 'application_id');
@@ -45,6 +49,30 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     //     return $data;
     // }
 
+    public function aadhaar()
+    {
+        return $this->hasOne(BeneficiaryAadhaar::class, 'application_id');
+    }
+    public function banks()
+    {
+        return $this->hasOne(BeneficiaryBankDetail::class, 'application_id', 'application_id');
+    }
+    public function enclosers()
+    {
+        return $this->hasMany(BeneficiaryEnclosure::class, 'application_id', 'application_id');
+    }
+    public function failedPaymentDetails()
+    {
+        return $this->hasOne(FailedPaymentDetails::class, 'ben_id', 'beneficiary_id');
+    }
+    public function benPaymentDetails()
+    {
+        return $this->hasOne(BenPaymentDetails::class, 'ben_id', 'beneficiary_id');
+    }
+    public function scheme()
+    {
+        return $this->hasOne(Scheme::class, 'id', 'scheme_id');
+    }
     public function creator()
     {
         $block = Block::where('lgd_code', $this->created_by_local_body_code)->first();
@@ -56,7 +84,6 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
             return 2;
         }
     }
-
 
     public function toSearchableArray()
     {
