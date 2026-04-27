@@ -19,6 +19,11 @@ class OpTypeSeeder extends Seeder
                 "short_name" => "op_type",
                 "code" => "210",
             ),
+            array(
+                "name" => "DYNAMIC OP TYPE",
+                "short_name" => "dynamic_op_type",
+                "code" => "510",
+            ),
         );
         foreach ($codemasterParents as $codemasterParent_item) {
             Codemaster::updateOrCreate([
@@ -58,7 +63,7 @@ class OpTypeSeeder extends Seeder
                 "parent_short_code" => "op_type",
                 "code" => "2105",
             ),
-             array(
+            array(
                 "name" => "Application Partial",
                 "short_name" => "application_partial",
                 "parent_short_code" => "op_type",

@@ -12,16 +12,17 @@ return new class extends Migration
         Schema::create('dynamic_workflow_requests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('module_id')->constrained('dynamic_workflow_modules');
+            $table->foreignId('scheme_id')->constrained('schemes');
             $table->unsignedBigInteger('ref_id')->index(); // e.g. application_id
             $table->unsignedInteger('current_rank')->index();
             $table->foreignId('current_step_id');
             $table->jsonb('old_data')->nullable(); // JSON formatted old values
             $table->jsonb('new_data')->nullable(); // JSON formatted new values
             $table->jsonb('changed_fields')->nullable();
-            $table->enum('status', ['pending', 'approved', 'reverted', 'rejected'])->default('pending');
+            // $table->enum('status', ['pending', 'approved', 'reverted', 'rejected'])->default('pending');
             $table->unsignedBigInteger('created_by');
+            $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();
-            
             $table->index(['module_id', 'ref_id'], 'dwr_module_ref_idx');
         });
 
@@ -36,7 +37,7 @@ return new class extends Migration
         //     $table->unsignedBigInteger('user_id');
         //     $table->unsignedBigInteger('role_id');
         //     $table->timestamps();
-            
+
         //     $table->index(['request_id', 'action']);
         // });
     }

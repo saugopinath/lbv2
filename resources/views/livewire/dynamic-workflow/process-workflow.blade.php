@@ -7,21 +7,21 @@
                 </h3>
             </div>
             @if(count($requests) > 0)
-                @foreach($requests as $req)
-                <div wire:click="viewDetails({{ $req->id }})" class="bg-white rounded-xl shadow-lg border-l-4 {{ $req->status == 'pending' ? 'border-amber-400' : 'border-emerald-400' }} p-5 cursor-pointer hover:shadow-2xl transition-all {{ $selectedRequest && $selectedRequest->id == $req->id ? 'ring-2 ring-indigo-500' : '' }}">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest">{{ $req->module->module_name }}</span>
-                        <div class="flex flex-col items-end">
-                        </div>
+            @foreach($requests as $req)
+            <div wire:click="viewDetails({{ $req->id }})" class="bg-white rounded-xl shadow-lg border-l-4 {{ $req->status == 'pending' ? 'border-amber-400' : 'border-emerald-400' }} p-5 cursor-pointer hover:shadow-2xl transition-all {{ $selectedRequest && $selectedRequest->id == $req->id ? 'ring-2 ring-indigo-500' : '' }}">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest">{{ $req->module->module_name }}</span>
+                    <div class="flex flex-col items-end">
                     </div>
-                    <h5 class="font-bold text-gray-900 mb-1">Ref ID: {{ $req->ref_id }}</h5>
                 </div>
-                @endforeach
+                <h5 class="font-bold text-gray-900 mb-1">Ref ID: {{ $req->ref_id }}</h5>
+            </div>
+            @endforeach
             @else
-                <div class="p-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 text-center text-gray-400">
-                    <i class="fas fa-check-circle text-4xl mb-3 text-emerald-300"></i>
-                    <p>No pending workflow actions found for your role.</p>
-                </div>
+            <div class="p-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 text-center text-gray-400">
+                <i class="fas fa-check-circle text-4xl mb-3 text-emerald-300"></i>
+                <p>No pending workflow actions found for your role.</p>
+            </div>
             @endif
         </div>
 
@@ -38,7 +38,7 @@
 
                 <div class="p-8 space-y-8">
                     <h4 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Proposed Data Changes</h4>
-                    
+
                     <div class="space-y-4">
                         @foreach($selectedRequest->new_data as $field => $newValue)
                         <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
@@ -66,11 +66,11 @@
                     <div class="grid grid-cols-2 gap-4 pt-6">
                         <button wire:click="processAction('approve')" class="col-span-1 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-xl transition-all active:scale-95 uppercase tracking-tighter shadow-emerald-100-md">
                             <i class="fas fa-check-circle mr-2"></i>
-                            {{ $selectedRequest->step->is_final_step ? 'Process' : 'Approve' }}
+                            {{ $button_status == 1 ? 'Approve' : 'Process' }}
                         </button>
 
-                        <button wire:click="processAction('reject')" class="col-span-2 py-4 bg-red-100 text-red-600 font-bold rounded-xl hover:bg-red-200 transition-all transition-all active:scale-95 uppercase">
-                             Cancel
+                        <button wire:click="processAction('reject')" class="col-span-1 py-4 bg-red-100 text-red-600 font-bold rounded-xl hover:bg-red-200 transition-all transition-all active:scale-95 uppercase">
+                            Cancel
                         </button>
                     </div>
                 </div>

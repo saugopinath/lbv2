@@ -10,10 +10,8 @@ class DynamicWorkflowModule extends BaseAuditableModel
     protected $table = 'dynamic_workflow_modules';
     
     protected $fillable = [
-        'scheme_id',
         'module_code',
         'module_name',
-        'step_count',
         'allowed_fields',
         'is_active',
         'created_by'
@@ -24,13 +22,8 @@ class DynamicWorkflowModule extends BaseAuditableModel
         'is_active' => 'boolean'
     ];
 
-    public function steps()
+    public function schemeModules()
     {
-        return $this->hasMany(workflowstepRolemapping::class, 'module_id')->orderBy('rank');
-    }
-
-    public function scheme()
-    {
-        return $this->belongsTo(Scheme::class, 'scheme_id');
+        return $this->hasMany(DynamicWorkflowSchemeModule::class, 'module_id');
     }
 }

@@ -11,6 +11,9 @@ class WorkflowsteproleMapping extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
     protected $table = "workflowstep_rolemappings";
     protected $guarded = [];
+    protected $casts = [
+        'is_final_step' => 'boolean',
+    ];
     public static function getLabelRoleIdsByRole($schemeId, $roleId, $rank = null)
     {
         $query = self::query();
@@ -64,7 +67,7 @@ class WorkflowsteproleMapping extends Model implements Auditable
 
     public function module()
     {
-        return $this->belongsTo(DynamicWorkflowModule::class, 'module_id');
+        return $this->belongsTo(DynamicWorkflowSchemeModule::class, 'module_id');
     }
 
     public function label()

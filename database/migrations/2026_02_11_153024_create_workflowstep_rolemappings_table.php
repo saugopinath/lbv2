@@ -12,19 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('workflowstep_rolemappings', function (Blueprint $table) {
-            $table->id();   
-               $table->foreignId('scheme_id')
+            $table->id();
+            $table->foreignId('scheme_id')
                 ->constrained('schemes')
-                ->cascadeOnDelete();        
-            $table->foreignId('workflow_step_id')
-                ->constrained('workflow_steps')
                 ->cascadeOnDelete();
+            $table->integer('workflow_step_id');
             $table->bigInteger('rank')->nullable();
             $table->foreignId('role_id')
                 ->constrained('roles')
                 ->cascadeOnDelete();
-            $table->bigInteger('same_label_role_id');
-            $table->bigInteger('next_label_role_id');         
+            $table->bigInteger('same_label_role_id')->nullable();
+            $table->bigInteger('next_label_role_id')->nullable();
             $table->timestamps();
         });
     }

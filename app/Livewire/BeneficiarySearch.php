@@ -110,6 +110,16 @@ class BeneficiarySearch extends Component
         }
     }
 
+    public function updatedSelectedScheme()
+    {
+        $this->dispatch('reset-beneficiary-search');
+    }
+
+    public function updatedSelectedOption()
+    {
+        $this->dispatch('reset-beneficiary-search');
+    }
+
     private function getValidationRules($key)
     {
         return $this->fields[$key]['rules'] ?? 'required';

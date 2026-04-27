@@ -24,7 +24,14 @@ class AcceptRejectInfo extends Model implements Auditable
         'op_type',
         'revert_reason_cause_id',
         'revert_reason_remarks',
-        'parent_id'
+        'parent_id',
+        'critical_changes',
+        'old_value',
+        'new_value',
+    ];
+    protected $casts = [
+        'old_value' => 'array',
+        'new_value' => 'array',
     ];
     public function transformAudit(array $data): array
     {

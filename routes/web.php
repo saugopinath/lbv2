@@ -10,6 +10,8 @@ use App\Http\Controllers\CreateAssignOtherFormFieldController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignController;
 use App\Http\Controllers\DynamicFormController;
+use App\Http\Controllers\DynamicWorkflow\CasteManagementController;
+use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\ElasticSearchController;
 use App\Http\Controllers\Formcontroller;
 use App\Http\Controllers\IncompleteTypeController;
@@ -19,7 +21,6 @@ use App\Http\Controllers\OfficeMastersController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RejectApprovedBeneficiaryController;
 use App\Http\Controllers\RoleOfficeTypeMappingsController;
-use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\SchemeCapacityController;
 use App\Http\Controllers\SchemeController;
 use App\Http\Controllers\UpdateBankDetailsController;
@@ -43,6 +44,8 @@ use App\Livewire\SchemeTabFieldManager;
 use App\Livewire\UserPermission\AssignPermissionsPage;
 use App\Livewire\Users\Create as UsersCreate;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DynamicWorkflow\UpdateMarkBeneficiaryDetailsController;
+use App\Livewire\DynamicWorkflow\DynamicProcessPage;
 
 require __DIR__.'/home.php';
 
@@ -224,3 +227,22 @@ Route::controller(CmoController::class)->group(function () {
     Route::post('/map-applicant', 'mapapplicant')->name('map-applicant');
     Route::post('/cmo-add-actions', 'addactions')->name('cmo-add-actions');
 });
+// Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
+// Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
+// Route::get('dynamic-process-workflow', DynamicProcessPage::class)->name('dynamic-process-workflow');
+
+Route::get('request-update-beneficiary', [UpdateMarkBeneficiaryDetailsController::class, 'updateRequest'])->name('request-update-beneficiary');
+Route::get('update-mark-beneficiary-details', [UpdateMarkBeneficiaryDetailsController::class, 'index'])->name('update-mark-beneficiary-details');
+Route::get('update-beneficiary-list', [UpdateMarkBeneficiaryDetailsController::class, 'listdetails'])->name('update-beneficiary-list');
+
+
+Route::get('caste-management', [CasteManagementController::class, 'index'])->name('caste-management');
+Route::get('caste-management-request-list', [CasteManagementController::class, 'requestdedlistdetails'])->name('caste-management-request-list');
+// Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
+//     // ->middleware('permission.redirect:canBeneficiaryDetails')
+//     ->name('view-beneficiary-details');
+
+    // Route::controller(CasteManagementController::class)->group(function () {
+    //     Route::get('caste-management', 'index')->name('caste-management');
+    //     Route::get('caste-management-request-list', 'requestdedlistdetails')->name('caste-management-request-list');
+    // });
