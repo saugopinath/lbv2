@@ -11,7 +11,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignController;
 use App\Http\Controllers\DynamicFormController;
 use App\Http\Controllers\DynamicWorkflow\CasteManagementController;
-use App\Http\Controllers\RolePermisssionManagementController;
+use App\Http\Controllers\DynamicWorkflow\UpdateMarkBeneficiaryDetailsController;
 use App\Http\Controllers\ElasticSearchController;
 use App\Http\Controllers\Formcontroller;
 use App\Http\Controllers\IncompleteTypeController;
@@ -21,6 +21,7 @@ use App\Http\Controllers\OfficeMastersController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RejectApprovedBeneficiaryController;
 use App\Http\Controllers\RoleOfficeTypeMappingsController;
+use App\Http\Controllers\RolePermisssionManagementController;
 use App\Http\Controllers\SchemeCapacityController;
 use App\Http\Controllers\SchemeController;
 use App\Http\Controllers\UpdateBankDetailsController;
@@ -30,6 +31,7 @@ use App\Http\Controllers\UsersController;
 use App\Http\Controllers\ValidationManagerController;
 use App\Http\Controllers\workflowmanagementController;
 use App\Livewire\CsvSplitter;
+use App\Livewire\DynamicWorkflow\DynamicProcessPage;
 use App\Livewire\DynamicWorkflow\ProcessWorkflow;
 use App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary;
 use App\Livewire\DynamicWorkflow\WorkflowWizard;
@@ -44,8 +46,6 @@ use App\Livewire\SchemeTabFieldManager;
 use App\Livewire\UserPermission\AssignPermissionsPage;
 use App\Livewire\Users\Create as UsersCreate;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DynamicWorkflow\UpdateMarkBeneficiaryDetailsController;
-use App\Livewire\DynamicWorkflow\DynamicProcessPage;
 
 require __DIR__.'/home.php';
 
@@ -178,9 +178,9 @@ Route::get('/form', [Formcontroller::class, 'index'])->middleware('permission.re
 Route::get('application-lists', [Formcontroller::class, 'applicationLists'])->name('application-lists');
 Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])->name('define-workflow1');
 
-Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])->middleware('permission:update bank details')->name('bankUpdate');
+Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])->middleware('permission.redirect:canUpdateBankDetailsPermission')->name('bankUpdate');
 
-Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])->middleware('permission:search bank update')->name('bank-update.search-beneficiary');
+Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])->middleware('permission.redirect:canSearchBankUpdate')->name('bank-update.search-beneficiary');
 
 Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])->middleware('permission:update mobile')->name('update-mobile');
 
@@ -209,8 +209,8 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
 
 // / Global Dynamic Workflow Routes
 Route::get('dynamic-workflow-config', WorkflowWizard::class)->name('dynamic-workflow-config');
-Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
-Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
+// Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
+// Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
 
 Route::controller(BackFromJBController::class)->group(function () {
     Route::any('/backfromjb', 'backfromjb')->middleware('permission.redirect:canBackFromJb')->name('backfromjb');
@@ -235,14 +235,14 @@ Route::get('request-update-beneficiary', [UpdateMarkBeneficiaryDetailsController
 Route::get('update-mark-beneficiary-details', [UpdateMarkBeneficiaryDetailsController::class, 'index'])->name('update-mark-beneficiary-details');
 Route::get('update-beneficiary-list', [UpdateMarkBeneficiaryDetailsController::class, 'listdetails'])->name('update-beneficiary-list');
 
-
-Route::get('caste-management', [CasteManagementController::class, 'index'])->name('caste-management');
-Route::get('caste-management-request-list', [CasteManagementController::class, 'requestdedlistdetails'])->name('caste-management-request-list');
+// Route::get('caste-management', [CasteManagementController::class, 'index'])->name('caste-management');
+// Route::get('caste-management-request-list', [CasteManagementController::class, 'requestdedlistdetails'])->name('caste-management-request-list');
 // Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
 //     // ->middleware('permission.redirect:canBeneficiaryDetails')
 //     ->name('view-beneficiary-details');
-
-    // Route::controller(CasteManagementController::class)->group(function () {
-    //     Route::get('caste-management', 'index')->name('caste-management');
-    //     Route::get('caste-management-request-list', 'requestdedlistdetails')->name('caste-management-request-list');
-    // });
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::controller(CasteManagementController::class)->group(function () {
+        Route::get('caste-management', 'index')->name('caste-management');
+        Route::get('caste-management-request-list', 'requestdedlistdetails')->name('caste-management-request-list');
+    });
+});

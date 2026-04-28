@@ -4,12 +4,12 @@
     <!-- Logo -->
     <div class="flex flex-col items-center p-1 border-b border-gray-700 dark:border-gray-700 bg-white">
         @if (config('app.jblb_logo') == 1)
-        <img src="{{ asset('/images/jb_logo.png') }}" alt="Lakshmir Bhandar" class="w-20" />
+            <img src="{{ asset('/images/jb_logo.png') }}" alt="Lakshmir Bhandar" class="w-20" />
         @else
-        <img src="{{ asset('/images/biswo.png') }}" alt="Lakshmir Bhandar" class="w-8" />
-        <template x-if="sidebar">
-            <div class="text-center font-bold text-sm text-blue-600">Lakshmir Bhandar</div>
-        </template>
+            <img src="{{ asset('/images/biswo.png') }}" alt="Lakshmir Bhandar" class="w-8" />
+            <template x-if="sidebar">
+                <div class="text-center font-bold text-sm text-blue-600">Lakshmir Bhandar</div>
+            </template>
         @endif
     </div>
 
@@ -184,7 +184,7 @@
 
         @endif
         <!-- Update Bank Details -->
-        @if ($user->hasAnyRole(['Approver', 'Delegated Approver']))
+        @if (\App\Helpers\WorkFlowPermissionHelper::canUpdateBankDetailsPermission())
             <div>
                 <a href="{{ route('bankUpdate') }}"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
