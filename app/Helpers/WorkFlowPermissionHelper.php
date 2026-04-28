@@ -229,12 +229,7 @@ class WorkFlowPermissionHelper
     public static function canUpdateBankDetails($schemeId = null): bool
     {
         return self::hasPermission('update bank details', $schemeId);
-    }
-
-    public static function canSearchBankUpdate($schemeId = null): bool
-    {
-        return self::hasPermission('search bank update', $schemeId);
-    }
+    }    
 
     public static function canUpdateMobile($schemeId = null): bool
     {
@@ -304,6 +299,16 @@ class WorkFlowPermissionHelper
     public static function canRejectAllow($schemeId = null): bool
     {
         return self::hasPermission('Reject Allow', $schemeId);
+    }   
+    
+    public static function canUpdateBankDetailsPermission($schemeId = null): bool
+    {
+        return self::hasPermission('update bank details', $schemeId);
+    }
+
+    public static function canSearchBankUpdate($schemeId = null): bool
+    {
+        return self::hasPermission('search bank update', $schemeId);
     }
 
     public static function canRevertAllow($schemeId = null): bool
