@@ -212,7 +212,7 @@ Route::controller(RejectApprovedBeneficiaryController::class)->group(function ()
 });
 
 // / Global Dynamic Workflow Routes
-Route::get('dynamic-workflow-config', WorkflowWizard::class)->name('dynamic-workflow-config');
+Route::get('dynamic-workflow-config', WorkflowWizard::class)->middleware('permission.redirect:canDynamicWorkflowManagement')->name('dynamic-workflow-config');
 // Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
 // Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
 
@@ -235,9 +235,11 @@ Route::controller(CmoController::class)->group(function () {
 // Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
 // Route::get('dynamic-process-workflow', DynamicProcessPage::class)->name('dynamic-process-workflow');
 
-Route::get('request-update-beneficiary', [UpdateMarkBeneficiaryDetailsController::class, 'updateRequest'])->name('request-update-beneficiary');
-Route::get('update-mark-beneficiary-details', [UpdateMarkBeneficiaryDetailsController::class, 'index'])->name('update-mark-beneficiary-details');
-Route::get('update-beneficiary-list', [UpdateMarkBeneficiaryDetailsController::class, 'listdetails'])->name('update-beneficiary-list');
+Route::controller(UpdateMarkBeneficiaryDetailsController::class)->group(function () {
+    Route::get('request-update-beneficiary', 'updateRequest')->name('request-update-beneficiary');
+    Route::get('update-mark-beneficiary-details', 'index')->name('update-mark-beneficiary-details');
+    Route::get('update-beneficiary-list', 'listdetails')->name('update-beneficiary-list');
+});
 
 // Route::get('caste-management', [CasteManagementController::class, 'index'])->name('caste-management');
 // Route::get('caste-management-request-list', [CasteManagementController::class, 'requestdedlistdetails'])->name('caste-management-request-list');

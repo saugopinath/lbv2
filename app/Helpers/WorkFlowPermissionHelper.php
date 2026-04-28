@@ -84,6 +84,11 @@ class WorkFlowPermissionHelper
         return self::hasPermission('submit-lb-form', $schemeId);
     }
 
+    public static function canDynamicWorkflowManagement($schemeId = null): bool
+    {
+        return self::hasPermission('dynamic-workflow-management', $schemeId);
+    }
+
     public static function canViewUser($schemeId = null): bool
     {
         return self::hasPermission('view users', $schemeId);
