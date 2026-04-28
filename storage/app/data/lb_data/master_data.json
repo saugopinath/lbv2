@@ -1,0 +1,72 @@
+{
+    "contact": {
+        "phone": "1234567890",
+        "email": "rj4mY@example.com",
+        "address": "123 Main Street, City, State, Country"
+    },
+    "gender": {
+        "Male": "Male",
+        "Female": "Female",
+        "Other": "Other"
+    },
+    "departments": {
+        "1": {
+            "slug": "fuchsia",
+            "name": "Women and Child Development Department",
+            "about": "Ensures policy planning and welfare programs for women, children, and vulnerable groups."
+        }
+    },
+    "schemes": {
+        "1": {
+            "id": 1,
+            "name": "Lakshmir Bhandar",
+            "icon": "fa-solid fa-feather",
+            "slug": "lakshmir-bhandar",
+            "color": "green"
+        }
+    },
+    "home_image": {
+        "1": {
+            "image": "images/home/home/image_1.jpg",
+            "title": " Empowering citizens of West Bengal under one umbrella scheme",
+            "header": "Jai Bangla"
+        },
+        "2": {
+            "image": "images/home/home/image_2.jpg",
+            "title": "Promoting education and growth for every child across Bengal.",
+            "header": ""
+        },
+        "3": {
+            "image": "images/home/home/image_3.jpeg",
+            "title": "Advancing healthcare and social welfare for every citizen.",
+            "header": ""
+        },
+        "4": {
+            "image": "images/home/home/image_4.jpeg",
+            "title": "Strengthening rural livelihoods through inclusive development.",
+            "header": ""
+        }
+    },
+    "lb_home_image": {
+        "1": {
+            "image": "images/home/home/lb_1.png",
+            "title": "Empowering women of West Bengal through assured monthly income support.",
+            "header": "Lakshmir Bhandar"
+        },
+        "2": {
+            "image": "images/home/home/image_2.jpg",
+            "title": "Promoting financial independence and dignity for women across rural and urban Bengal.",
+            "header": ""
+        },
+        "3": {
+            "image": "images/home/home/image_3.jpeg",
+            "title": "Direct Benefit Transfer ensuring transparent and timely financial assistance.",
+            "header": ""
+        },
+        "4": {
+            "image": "images/home/home/image_4.jpeg",
+            "title": "Strengthening families by supporting women-led households.",
+            "header": ""
+        }
+    }
+}

@@ -26,7 +26,7 @@
    Global Base Styles
    ============================================================ */
 .bg-login-cover {
-    background-image: url("/images/background-cover.jpg");
+    /* Background image is set in the layout file via inline style */
 }
 
 [x-cloak] {

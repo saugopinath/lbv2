@@ -10,11 +10,7 @@
     <meta name="author" content="Webonzer" />
 
     <!-- Site Tiltle -->
-    @if(config('app.jblb_logo') == 1)
-    <title>Jai Bangla Portal | Government of West Bengal</title>
-    @else
-    <title>Lakshmir Bhandar | Government of West Bengal</title>
-    @endif
+    <title>{{ config('jblbConf.title') }}</title>
 
 
     <!-- Favicon Icon -->
@@ -22,6 +18,11 @@
     <!-- Style Css -->
     @livewireStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        .bg-login-cover {
+            background-image: url("{{ asset('images/' . config('jblbConf.bg_image')) }}");
+        }
+    </style>
 </head>
 
 <body class="min-h-screen bg-cover bg-center bg-no-repeat bg-white bg-login-cover">
@@ -30,20 +31,15 @@
 
             <!-- Left Image Section -->
             <div class="lg:flex lg:w-1/2 flex-col justify-center items-center p-4 relative rounded-l-2xl">
-                <div class="absolute top-4 left-4 bg-[#003974] p-3 rounded-full">
+                <a href="{{ route('/') }}" class="absolute top-4 left-4 bg-[#003974] p-3 rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="w-5 h-5 fill-white text-white">
                         <path
                             d="M341.8 72.6C329.5 61.2 310.5 61.2 298.3 72.6L74.3 280.6C64.7 289.6 61.5 303.5 66.3 315.7C71.1 327.9 82.8 336 96 336L112 336L112 512C112 547.3 140.7 576 176 576L464 576C499.3 576 528 547.3 528 512L528 336L544 336C557.2 336 569 327.9 573.8 315.7C578.6 303.5 575.4 289.5 565.8 280.6L341.8 72.6zM304 384L336 384C362.5 384 384 405.5 384 432L384 528L256 528L256 432C256 405.5 277.5 384 304 384z" />
                     </svg>
-                </div>
+                </a>
                 <!-- <img class="w-64 mb-6" src="https://c.animaapp.com/mdn4r47eB5hzlO/img/biswo-1.png" alt="Logo"> -->
                 <div class="flex justify-center items-center ">
-                    @if(config('app.jblb_logo') == 1)
-                    <img class="w-56 sm:w-64 mb-4" src="{{ asset('images/jb_logo.png') }}" alt="Logo">
-                    @else
-                    <img class="w-48 sm:w-64 mb-4" src="{{ asset('images/biswo-1.png') }}" alt="Logo">
-                    @endif
-
+                    <img src="{{ asset('images/' . config('jblbConf.logo')) }}" alt="Logo" class="{{ config('jblbConf.logo_class') }}">
                 </div>
                 <div class="flex justify-center items-center ">
                     <!-- <div class="w-48 sm:w-64 mb-4 flex items-center justify-center text-center text-2xl sm:text-3xl font-bold text-green-800">
@@ -68,19 +64,21 @@
           </div> -->
                 <!-- Top Right Logo -->
                 <div class="w-full flex justify-center mb-2">
-                    @if(config('app.jblb_logo') == 1)
+                    <!-- @if(config('app.jblb_logo') == 1)
                     <img src="{{ asset('images/biswo_bangla.png') }}" alt="Centered Logo" class="w-24 h-auto sm:block">
                     @else
                     <img src="{{ asset('images/biswo-1.png') }}" alt="Centered Logo" class="w-24 h-auto sm:block">
-                    @endif
+                    @endif -->
                     <!-- <h2 class="text-2xl lg:text-3xl text-center text-[#003974] font-bold">Lakshmir Bhandar Portal</h2> -->
+                    <img src="{{ asset('images/' . config('jblbConf.headerlogo')) }}" alt="Centered Logo" class="w-24 h-auto sm:block">
                 </div>
                 <div class="text-center mb-2">
-                    @if(config('app.jblb_logo')==1)
+                    <!-- @if(config('app.jblb_logo')==1)
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Jai Bangla Portal</h1>
                     @else
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Lakshmir Bhandar Portal</h1>
-                    @endif
+                    @endif -->
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">{{ config('jblbConf.headLine') }}</h1>
                 </div>
                 {{ $slot }}
             </div>

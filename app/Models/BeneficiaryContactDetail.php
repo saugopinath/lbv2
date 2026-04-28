@@ -24,13 +24,14 @@ class BeneficiaryContactDetail extends BaseAuditableModel
         return $this->belongsTo(Municipality::class, 'blockurban', 'id');
     }
 
-    public function block()
-    {
-        return $this->belongsTo(Block::class, 'blockurban');
-     public function district()
-    {
-        return $this->belongsTo(District::class, 'district_id', 'id');
-    }
+    // public function block()
+    // {
+    //     return $this->belongsTo(Block::class, 'blockurban');
+    // }
+        // public function district()
+        // {
+        //     return $this->belongsTo(District::class, 'district_id', 'id');
+        // }
 
     public function block()
     {

@@ -1,126 +1,141 @@
 @push('styles')
-    <style>
-        /* Accessibility option active state */
-        .acc-active {
-            background: #f0fdf4;
-            color: #16a34a;
-            font-weight: 600;
+<style>
+    /* Accessibility option active state */
+    .acc-active {
+        background: #f0fdf4;
+        color: #16a34a;
+        font-weight: 600;
+    }
+
+    /* Body accessibility overrides */
+    body.big-text {
+        font-size: 1.2rem;
+    }
+
+    body.large-line-height {
+        line-height: 2;
+    }
+
+    body.large-cursor,
+    body.large-cursor * {
+        cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><circle cx='16' cy='16' r='10' fill='black'/></svg>") 16 16, auto !important;
+    }
+
+    body.text-spacing * {
+        letter-spacing: 0.08em;
+    }
+
+    body.highlight-links a {
+        text-decoration: underline !important;
+        background: #fef08a !important;
+        color: #1e3a5f !important;
+        border-radius: 2px;
+    }
+
+    body.dyslexia-mode {
+        font-family: 'Courier New', monospace !important;
+    }
+
+    body.hide-images img {
+        visibility: hidden !important;
+    }
+
+    body.invert-colors {
+        filter: invert(1) hue-rotate(180deg);
+    }
+
+    body.dark-mode {
+        filter: brightness(0.85) contrast(1.1);
+    }
+
+    /* Accessibility dropdown panel */
+    #acc-panel {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: calc(100% + 8px);
+        width: 280px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+        border: 1px solid #e5e7eb;
+        z-index: 9999;
+        overflow: hidden;
+    }
+
+    #acc-panel.open {
+        display: block;
+        animation: fadeSlideDown 0.18s ease;
+    }
+
+    @keyframes fadeSlideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-8px);
         }
 
-        /* Body accessibility overrides */
-        body.big-text {
-            font-size: 1.2rem;
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
+    }
 
-        body.large-line-height {
-            line-height: 2;
-        }
+    .acc-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        font-size: 13px;
+        color: #374151;
+        border: none;
+        background: none;
+        text-align: left;
+        cursor: pointer;
+        border-bottom: 1px solid #f3f4f6;
+        transition: background 0.15s;
+    }
 
-        body.large-cursor,
-        body.large-cursor * {
-            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><circle cx='16' cy='16' r='10' fill='black'/></svg>") 16 16, auto !important;
-        }
+    .acc-btn:last-child {
+        border-bottom: none;
+    }
 
-        body.text-spacing * {
-            letter-spacing: 0.08em;
-        }
+    .acc-btn:hover {
+        background: #f9fafb;
+    }
 
-        body.highlight-links a {
-            text-decoration: underline !important;
-            background: #fef08a !important;
-            color: #1e3a5f !important;
-            border-radius: 2px;
-        }
+    .acc-btn i {
+        width: 18px;
+        text-align: center;
+        color: #6b7280;
+    }
 
-        body.dyslexia-mode {
-            font-family: 'Courier New', monospace !important;
-        }
+    .dark-mode {
+        background-color: #121212 !important;
+        color: #e0e0e0 !important;
+    }
 
-        body.hide-images img {
-            visibility: hidden !important;
-        }
+    .dark-mode .bg-black,
+    .dark-mode .bg-gradient-to-r {
+        background-color: #000000 !important;
+        background-image: none !important;
+    }
 
-        body.invert-colors {
-            filter: invert(1) hue-rotate(180deg);
-        }
+    .dark-mode .border-gray-700 {
+        border-color: #333 !important;
+    }
 
-        body.dark-mode {
-            filter: brightness(0.85) contrast(1.1);
-        }
-
-        /* Accessibility dropdown panel */
-        #acc-panel {
+    /* Mobile: hide date on very small screens */
+    @media (max-width: 480px) {
+        #currentDateTime {
             display: none;
-            position: absolute;
-            right: 0;
-            top: calc(100% + 8px);
-            width: 280px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
-            border: 1px solid #e5e7eb;
-            z-index: 9999;
-            overflow: hidden;
         }
 
-        #acc-panel.open {
-            display: block;
-            animation: fadeSlideDown 0.18s ease;
+        #dateTimeWrapper {
+            display: none;
         }
-
-        @keyframes fadeSlideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-8px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .acc-btn {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
-            font-size: 13px;
-            color: #374151;
-            border: none;
-            background: none;
-            text-align: left;
-            cursor: pointer;
-            border-bottom: 1px solid #f3f4f6;
-            transition: background 0.15s;
-        }
-
-        .acc-btn:last-child {
-            border-bottom: none;
-        }
-
-        .acc-btn:hover {
-            background: #f9fafb;
-        }
-
-        .acc-btn i {
-            width: 18px;
-            text-align: center;
-            color: #6b7280;
-        }
-
-        /* Mobile: hide date on very small screens */
-        @media (max-width: 480px) {
-            #currentDateTime {
-                display: none;
-            }
-
-            #dateTimeWrapper {
-                display: none;
-            }
-        }
-    </style>
+    }
+</style>
 @endpush
 
 {{-- ─── Top Header Bar ─────────────────────────────────────────────── --}}
@@ -210,72 +225,91 @@
 </div>
 
 @push('scripts')
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
 
-            /* ── Live Date & Time ─────────────────────────── */
-            const dtEl = document.getElementById("currentDateTime");
-            function updateDateTime() {
-                if (!dtEl) return;
-                dtEl.textContent = new Date().toLocaleString("en-IN", {
-                    day: "2-digit", month: "short", year: "numeric",
-                    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true
-                });
-            }
-            updateDateTime();
-            setInterval(updateDateTime, 1000);
+        /* ── Live Date & Time ─────────────────────────── */
+        const dtEl = document.getElementById("currentDateTime");
 
-            /* ── Accessibility Dropdown ───────────────────── */
-            const toggle = document.getElementById("accToggle");
-            const panel = document.getElementById("acc-panel");
-            const chevron = document.getElementById("accChevron");
-
-            function openPanel() { panel.classList.add("open"); toggle.setAttribute("aria-expanded", "true"); chevron.style.transform = "rotate(180deg)"; }
-            function closePanel() { panel.classList.remove("open"); toggle.setAttribute("aria-expanded", "false"); chevron.style.transform = ""; }
-            function isOpen() { return panel.classList.contains("open"); }
-
-            toggle.addEventListener("click", function (e) {
-                e.stopPropagation();
-                isOpen() ? closePanel() : openPanel();
+        function updateDateTime() {
+            if (!dtEl) return;
+            dtEl.textContent = new Date().toLocaleString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true
             });
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
 
-            document.addEventListener("click", function (e) {
-                if (!document.getElementById("accWrapper").contains(e.target)) closePanel();
-            });
+        /* ── Accessibility Dropdown ───────────────────── */
+        const toggle = document.getElementById("accToggle");
+        const panel = document.getElementById("acc-panel");
+        const chevron = document.getElementById("accChevron");
 
-            document.addEventListener("keydown", function (e) {
-                if (e.key === "Escape") closePanel();
-            });
+        function openPanel() {
+            panel.classList.add("open");
+            toggle.setAttribute("aria-expanded", "true");
+            chevron.style.transform = "rotate(180deg)";
+        }
 
-            /* ── Helper: toggle body class + active style ── */
-            function bodyToggle(cls, btnId) {
-                document.body.classList.toggle(cls);
-                const btn = document.getElementById(btnId);
-                if (btn) btn.classList.toggle("acc-active", document.body.classList.contains(cls));
-            }
+        function closePanel() {
+            panel.classList.remove("open");
+            toggle.setAttribute("aria-expanded", "false");
+            chevron.style.transform = "";
+        }
 
-            /* ── Accessibility Actions ─────────────────────── */
-            window.toggleBigText = () => bodyToggle("big-text", "btn-big-text");
-            window.toggleTextSpacing = () => bodyToggle("text-spacing", "btn-text-spacing");
-            window.toggleLineHeight = () => bodyToggle("large-line-height", "btn-line-height");
-            window.toggleHighlightLinks = () => bodyToggle("highlight-links", "btn-highlight-links");
-            window.toggleDyslexia = () => bodyToggle("dyslexia-mode", "btn-dyslexia");
-            window.toggleImages = () => bodyToggle("hide-images", "btn-hide-images");
-            window.toggleCursor = () => bodyToggle("large-cursor", "btn-cursor");
-            window.toggleDark = () => bodyToggle("dark-mode", "btn-dark");
-            window.toggleInvert = () => bodyToggle("invert-colors", "btn-invert");
+        function isOpen() {
+            return panel.classList.contains("open");
+        }
 
-            window.toggleScreenReader = function () {
-                alert("Screen reader support depends on your browser/OS settings (e.g. NVDA, JAWS, TalkBack). Please enable it from your system settings.");
-            };
-
-            window.resetAccessibility = function () {
-                const classes = ["big-text", "text-spacing", "large-line-height", "highlight-links",
-                    "dyslexia-mode", "hide-images", "large-cursor", "dark-mode", "invert-colors"];
-                classes.forEach(c => document.body.classList.remove(c));
-                document.querySelectorAll(".acc-btn").forEach(b => b.classList.remove("acc-active"));
-            };
-
+        toggle.addEventListener("click", function(e) {
+            e.stopPropagation();
+            isOpen() ? closePanel() : openPanel();
         });
-    </script>
+
+        document.addEventListener("click", function(e) {
+            if (!document.getElementById("accWrapper").contains(e.target)) closePanel();
+        });
+
+        document.addEventListener("keydown", function(e) {
+            if (e.key === "Escape") closePanel();
+        });
+
+        /* ── Helper: toggle body class + active style ── */
+        function bodyToggle(cls, btnId) {
+            document.body.classList.toggle(cls);
+            const btn = document.getElementById(btnId);
+            if (btn) btn.classList.toggle("acc-active", document.body.classList.contains(cls));
+        }
+
+        /* ── Accessibility Actions ─────────────────────── */
+        window.toggleBigText = () => bodyToggle("big-text", "btn-big-text");
+        window.toggleTextSpacing = () => bodyToggle("text-spacing", "btn-text-spacing");
+        window.toggleLineHeight = () => bodyToggle("large-line-height", "btn-line-height");
+        window.toggleHighlightLinks = () => bodyToggle("highlight-links", "btn-highlight-links");
+        window.toggleDyslexia = () => bodyToggle("dyslexia-mode", "btn-dyslexia");
+        window.toggleImages = () => bodyToggle("hide-images", "btn-hide-images");
+        window.toggleCursor = () => bodyToggle("large-cursor", "btn-cursor");
+        window.toggleDark = () => bodyToggle("dark-mode", "btn-dark");
+        window.toggleInvert = () => bodyToggle("invert-colors", "btn-invert");
+
+        window.toggleScreenReader = function() {
+            alert("Screen reader support depends on your browser/OS settings (e.g. NVDA, JAWS, TalkBack). Please enable it from your system settings.");
+        };
+
+        window.resetAccessibility = function() {
+            const classes = ["big-text", "text-spacing", "large-line-height", "highlight-links",
+                "dyslexia-mode", "hide-images", "large-cursor", "dark-mode", "invert-colors"
+            ];
+            classes.forEach(c => document.body.classList.remove(c));
+            document.querySelectorAll(".acc-btn").forEach(b => b.classList.remove("acc-active"));
+        };
+
+    });
+</script>
 @endpush

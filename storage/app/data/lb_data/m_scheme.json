@@ -1,0 +1,141 @@
+[
+    {
+        "id": 20,
+        "scheme_name": "Lakshmir Bhandar",
+        "is_active": 1,
+        "slug": "lakshmir_bhandar",
+        "icon": "fa-solid fa-hand-holding-heart",
+        "department_id": 9,
+        "ref_color": "blue",
+        "json_data": {
+            "icon": "fa-solid fa-hand-holding-heart",
+            "about": {
+                "long": "The Manabik scheme, implemented by the Department of Women & Child Development and Social Welfare, offers financial assistance to persons with disabilities across West Bengal. Many differently-abled individuals face lifelong challenges in accessing employment, healthcare, and social participation. To address this, the State Government provides a monthly pension to those with 40% or more disability, ensuring that they receive continuous financial support regardless of their socio-economic condition.\n The scheme covers various types of disabilities, including physical, intellectual, sensory, and developmental disabilities. Eligible applicants are verified by medical boards and district authorities to ensure accurate assessment. The pension helps beneficiaries manage essential living expenses, buy medicines, and maintain a more secure and dignified life.\n By reducing the financial burden on families and strengthening social protection for vulnerable individuals, the Manabik scheme reinforces the government’s commitment to welfare, inclusion, and equal opportunity. It plays a critical role in improving the quality of life and independence of thousands of differently-abled residents in West Bengal.",
+                "short": "WCD Manabik is a disability pension scheme by the West Bengal Government that provides monthly financial assistance to persons with 40% or more disability. It aims to support their basic needs, reduce economic stress on families, and promote inclusion for differently-abled individuals across the state."
+            },
+            "money": "1000",
+            "benefits": [
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Financial Assistance",
+                    "description": "₹1000/month For beneficiaries between 60 and 79 years."
+                },
+                {
+                    "icon": "fas fa-money-bill-wave",
+                    "title": "Enhanced Pension",
+                    "description": "₹1200/month For beneficiaries aged 80 years and above."
+                },
+                {
+                    "icon": "fas fa-universal-access",
+                    "title": "Special Category Benefits",
+                    "description": "Additional Support For specially abled senior citizens."
+                },
+                {
+                    "icon": "fas fa-hand-holding-medical",
+                    "title": "Healthcare Support",
+                    "description": "Free health services Includes health camps and medical check-up support."
+                }
+            ],
+            "required": {
+                "documents": [
+                    "Age Proof Certificate",
+                    "Income Certificate",
+                    "Residence Proof",
+                    "Bank Account Details (Passbook Copy)",
+                    "Aadhaar Card",
+                    "Passport Size Photographs",
+                    "BPL Card (if Applicable)"
+                ]
+            },
+            "workflow": {
+                "steps": [
+                    {
+                        "name": "Collect Application Form",
+                        "rank": 1,
+                        "description": "Available at Block Development Office or can be downloaded online."
+                    },
+                    {
+                        "name": "Submit Documents",
+                        "rank": 2,
+                        "description": "Submit age proof, income certificate, residence proof, bank details, etc."
+                    },
+                    {
+                        "name": "Verification",
+                        "rank": 3,
+                        "description": "Local authorities verify the eligibility and documents."
+                    },
+                    {
+                        "name": "Approval & Disbursement",
+                        "rank": 4,
+                        "description": "Pension is approved and directly credited into the bank account monthly."
+                    }
+                ]
+            },
+            "ref_color": "pink",
+            "scheme_id": "2",
+            "eligibility": {
+                "age": {
+                    "max": 120,
+                    "min": 60
+                },
+                "caste": ["ST"],
+                "gender": ["Male", "Female", "Others"],
+                "income": {
+                    "max": 100000,
+                    "min": 0
+                },
+                "criteria": {
+                    "aadhaar_required": true,
+                    "bank_account_required": true,
+                    "permanent_residence_years": 10
+                },
+                "exclusion": {
+                    "description": "Applicants already receiving other government pensions are excluded.",
+                    "receiving_other_pension": true
+                },
+                "residency": "WB",
+                "disability": false,
+                "eligibility_criteria": {
+                    "key": [
+                        {
+                            "icon": "fas fa-birthday-cake",
+                            "title": "Age Requirement",
+                            "description": "Minimum 60 years of age for general category, 50 years for specially abled persons"
+                        },
+                        {
+                            "icon": "fas fa-rupee-sign",
+                            "title": "Income Criteria",
+                            "description": "Annual family income should not exceed ₹1,00,000"
+                        },
+                        {
+                            "icon": "fas fa-home",
+                            "title": "Residency",
+                            "description": "Must be a permanent resident of West Bengal for at least 10 years"
+                        },
+                        {
+                            "icon": "fas fa-list",
+                            "title": "Exclusion Criteria",
+                            "description": "Not receiving any other government pension or regular income source"
+                        }
+                    ]
+                }
+            },
+            "quick_stats": {
+                "allocation": "1000000000",
+                "beneficiaries": "25L+",
+                "direct_transfer": "100%",
+                "eligibility_age": "0+",
+                "eligibility_caste": "Scheduled Tribe (ST)",
+                "eligibility_criteria": "Specially Abled"
+            },
+            "scheme_name": "Manabik (WCD)",
+            "key_highlight": [
+                "Monthly financial assistance for elderly citizens of ST community",
+                "Direct Benefit Transfer to bank accounts",
+                "No contribution required from beneficiaries",
+                "Coverage across all districts of West Bengal"
+            ]
+        },
+        "rank": 1
+    }
+]

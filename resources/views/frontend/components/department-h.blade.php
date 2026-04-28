@@ -1,23 +1,23 @@
 @php
-    // Map color names to their hex values
-    $colorMap = [
-        'pink' => '#ec4899',
-        'indigo' => '#6366f1',
-        'green' => '#22c55e',
-        'orange' => '#f97316',
-        'violet' => '#8b5cf6',
-        'lime' => '#84cc16',
-        'sky' => '#0ea5e9',
-        'amber' => '#f59e0b',
-        'fuchsia' => '#d946ef',
-        'rose' => '#f43f5e',
-        'emerald' => '#10b981',
-        'blue' => '#3b82f6',
-        'teal' => '#14b8a6',
-    ];
+// Map color names to their hex values
+$colorMap = [
+'blue' => '#3b82f6',
+'pink' => '#ec4899',
+'indigo' => '#6366f1',
+'green' => '#22c55e',
+'orange' => '#f97316',
+'violet' => '#8b5cf6',
+'lime' => '#84cc16',
+'sky' => '#0ea5e9',
+'amber' => '#f59e0b',
+'fuchsia' => '#d946ef',
+'rose' => '#f43f5e',
+'emerald' => '#10b981',
+'teal' => '#14b8a6',
+];
 
-    $bgColor = $colorMap[$ref_color] ?? '#6366f1'; // Default to indigo
-    $textColor = $colorMap[$ref_color] ?? '#6366f1';
+$bgColor = $colorMap[$ref_color] ?? '#6366f1'; // Default to indigo
+$textColor = $colorMap[$ref_color] ?? '#6366f1';
 @endphp
 
 <div class="card-carousel-item original-item flex-shrink-0  w-full sm:w-1/2 lg:w-1/3 px-4 mb-8">

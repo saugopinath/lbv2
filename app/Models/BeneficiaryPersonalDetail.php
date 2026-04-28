@@ -33,10 +33,10 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     {
         return $this->hasOne(BeneficiaryAadhaar::class, 'application_id', 'application_id');
     }
-    public function contact()
-    {
-        return $this->hasOne(BeneficiaryContactDetail::class, 'application_id', 'application_id');
-    }
+    // public function contact()
+    // {
+    //     return $this->hasOne(BeneficiaryContactDetail::class, 'application_id', 'application_id');
+    // }
 
     // public function transformAudit(array $data): array
     // {

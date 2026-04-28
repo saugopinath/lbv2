@@ -30,6 +30,21 @@
         <!-- Main Footer Content -->
         <div class="grid md:grid-cols-4 gap-8 mb-8">
             <!-- Scheme Information -->
+            @if(config('jblbConf.is_lb'))
+            <div>
+                <h4 class="font-bold text-lg mb-4 text-amber-400 border-b border-amber-400 pb-2">
+                    Lakshmir Bhandar
+                </h4>
+                <p class="text-sm text-gray-300 mb-4">
+                    A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic
+                    development and welfare.
+                </p>
+                <div class="flex items-center text-sm text-gray-400">
+                    <i class="fas fa-shield-alt mr-2 text-amber-400"></i>
+                    <span>Official Government Portal</span>
+                </div>
+            </div>
+            @else
             <div>
                 <h4 class="font-bold text-lg mb-4 text-amber-400 border-b border-amber-400 pb-2">
                     Jai Bangla | One Umbrella Scheme
@@ -43,6 +58,8 @@
                     <span>Official Government Portal</span>
                 </div>
             </div>
+            @endif
+
             <!-- Important Links -->
             <div>
                 <h4 class="font-bold text-lg mb-4 text-amber-400 border-b border-amber-400 pb-2">
@@ -98,7 +115,7 @@
                         <i class="fas fa-envelope mt-1 mr-3 text-amber-400 text-xs"></i>
                         <div>
                             <div class="font-semibold">Email</div>
-                            <div class="text-gray-300">support@joybangla.wb.gov.in</div>
+                            <div class="text-gray-300">support@lakshmirBhandar.wb.gov.in</div>
                         </div>
                     </div>
                     <div class="flex items-start hover:text-white transition-colors duration-300">

@@ -12,38 +12,73 @@ class HomeController extends Controller
 {
     public static function index(Request $request)
     {
-        $monthly_disbursement = 7000000000; // 70 crore
-        $ben_count = BeneficiaryPersonalDetail::count();
-        $scheme_info = Storage::get('data/m_scheme.json');
-        $data = json_decode($scheme_info, true);
-        $activeSchemes = array_filter($data, function ($item) {
-            return $item['is_active'] == 1;
-        });
-        $department_info = Storage::get('data/m_department.json');
-        $data = json_decode($department_info, true);
-        $activeDepartment = array_filter($data, function ($item) {
-            return $item['is_active'] == 1;
-        });
-
-        $total_dept = count($activeDepartment);
-        $total_schemes = count($activeSchemes);
-        $data = json_decode(Storage::get('data/master_data.json'), true);
-        $notifications = Notification::where('status', 'active')
-            ->orderBy('notified_at', 'desc')
-            ->take(10)
-            ->get();
-
+        // dd(config('jblbConf.is_jb'));
+        // $monthly_disbursement = 7000000000; // 70 crore
+        // $ben_count = BeneficiaryPersonalDetail::count();
+        if (config('jblbConf.is_lb')) {
+            // dd('sfefe');
+            $monthly_disbursement = 7000000000; // 70 crore
+            $ben_count = BeneficiaryPersonalDetail::count();
+            $scheme_info = Storage::get('data/lb_data/m_scheme.json');
+            // dd($scheme_info);
+            $data = json_decode($scheme_info, true);
+            $activeSchemes = array_filter($data, function ($item) {
+                return $item['is_active'] == 1;
+            });
+            $department_info = Storage::get('data/lb_data/m_department.json');
+            $data = json_decode($department_info, true);
+            $activeDepartment = array_filter($data, function ($item) {
+                return $item['is_active'] == 1;
+            });
+            $total_dept = count($activeDepartment);
+            $total_schemes = count($activeSchemes);
+            $data = json_decode(Storage::get('data/lb_data/master_data.json'), true);
+            $notifications = Notification::where('status', 'active')
+                ->orderBy('notified_at', 'desc')
+                ->take(10)
+                ->get();
+            return view('frontend.lb_home.home', [
+                'ben_count' => $ben_count,
+                'total_dept' => $total_dept,
+                'total_schemes' => $total_schemes,
+                'monthly_disbursement' => $monthly_disbursement,
+                'scheme_info' => $activeSchemes,
+                'department' => $activeDepartment,
+                'data' => $data,
+                'notifications' => $notifications
+            ]);
+        } else {
+            $monthly_disbursement = 7000000000; // 70 crore
+            $ben_count = BeneficiaryPersonalDetail::count();
+            $scheme_info = Storage::get('data/m_scheme.json');
+            $data = json_decode($scheme_info, true);
+            $activeSchemes = array_filter($data, function ($item) {
+                return $item['is_active'] == 1;
+            });
+            $department_info = Storage::get('data/m_department.json');
+            $data = json_decode($department_info, true);
+            $activeDepartment = array_filter($data, function ($item) {
+                return $item['is_active'] == 1;
+            });
+            $total_dept = count($activeDepartment);
+            $total_schemes = count($activeSchemes);
+            $data = json_decode(Storage::get('data/master_data.json'), true);
+            $notifications = Notification::where('status', 'active')
+                ->orderBy('notified_at', 'desc')
+                ->take(10)
+                ->get();
+            return view('frontend.home.home', [
+                'ben_count' => $ben_count,
+                'total_dept' => $total_dept,
+                'total_schemes' => $total_schemes,
+                'monthly_disbursement' => $monthly_disbursement,
+                'scheme_info' => $activeSchemes,
+                'department' => $activeDepartment,
+                'data' => $data,
+                'notifications' => $notifications
+            ]);
+        }
         // dd($department);
-        return view('frontend.home.home', [
-            'ben_count' => $ben_count,
-            'total_dept' => $total_dept,
-            'total_schemes' => $total_schemes,
-            'monthly_disbursement' => $monthly_disbursement,
-            'scheme_info' => $activeSchemes,
-            'department' => $activeDepartment,
-            'data' => $data,
-            'notifications' => $notifications
-        ]);
     }
     public static function scheme_index(Request $request)
     {
@@ -85,8 +120,13 @@ class HomeController extends Controller
 
     public static function department_index($department)
     {
-        // Decode departments as objects so Blade -> syntax works
-        $departments = json_decode(Storage::get('data/m_department.json'));
+        if (config('jblbConf.is_lb')) {
+            $departments = json_decode(Storage::get('data/lb_data/m_department.json'));
+            $all_schemes = json_decode(Storage::get('data/lb_data/m_scheme.json'));
+        } else {
+            $departments = json_decode(Storage::get('data/m_department.json'));
+            $all_schemes = json_decode(Storage::get('data/m_scheme.json'));
+        }
 
         $dept_matched = array_values(array_filter($departments, function ($item) use ($department) {
             return $item->slug == $department;
@@ -98,16 +138,10 @@ class HomeController extends Controller
 
         $department_info = $dept_matched[0];
         $dept_id = $department_info->id;
-
-        // json_data is already a stdClass (decoded above without `true`) — no need to json_decode again
         $department_json = $department_info->json_data;
-
-        // Fetch onboard schemes from JSON (consistent — no DB call needed)
-        $all_schemes = json_decode(Storage::get('data/m_scheme.json'));
         $onboard_scheme = array_values(array_filter($all_schemes, function ($item) use ($dept_id) {
             return $item->is_active == 1 && $item->department_id == $dept_id;
         }));
-
         $ben_count_all = BeneficiaryPersonalDetail::whereIn('is_clean', [1, 2])->count();
         $ben_count_approved = BeneficiaryPersonalDetail::whereIn('is_clean', [1, 2])->count();
 
