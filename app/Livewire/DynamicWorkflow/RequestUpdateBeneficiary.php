@@ -193,7 +193,7 @@ class RequestUpdateBeneficiary extends Component
             abort(404, 'Module not found');
         }
         $module = DynamicWorkflowSchemeModule::where('module_id', $Mainmodule->id)->where('scheme_id', $this->beneficiary->scheme_id)->first();
-
+        // dd($module);
         if (!$module) {
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -204,6 +204,7 @@ class RequestUpdateBeneficiary extends Component
         $this->moduleId = $module->id;
         $this->moduleCode = $module->module_code;
         // $this->moduleSchemeId = $module->scheme_id;
+      
         if (!$this->beneficiary) {
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -211,6 +212,7 @@ class RequestUpdateBeneficiary extends Component
             ]);
             return;
         }
+       
         if (empty($this->selectedFields)) {
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -218,7 +220,9 @@ class RequestUpdateBeneficiary extends Component
             ]);
             return;
         }
+          
         $this->validate($this->rules(), [], $this->validationAttributes());
+        
         $payload = $this->prepareWorkflowPayload();
         if (count($payload['actual_changed_blocks']) !== count($this->selectedFields)) {
             $this->dispatch('toastr', [
@@ -227,6 +231,7 @@ class RequestUpdateBeneficiary extends Component
             ]);
             return;
         }
+        
         $checkData = [
             'mobile_no' => $this->newData['mobile_no'] ?? null,
             'bankaccountnumber' => $this->newData['bank_account_number'] ?? null,
@@ -236,6 +241,7 @@ class RequestUpdateBeneficiary extends Component
             (int)$this->beneficiary->application_id,
             $checkData
         );
+      
         if ($duplicateResult !== true) {
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -243,15 +249,18 @@ class RequestUpdateBeneficiary extends Component
             ]);
             return;
         }
+         
         $hasPendingRequest = DynamicWorkflowRequest::where('module_id', $this->moduleId)
             ->where('ref_id', $this->beneficiary->application_id)
             ->where('scheme_id', $this->beneficiary->scheme_id)
             ->whereNotIn('current_rank', [-100, 0]) // -100 = rejected, 0 = completed
             ->exists();
+            //    dd($hasPendingRequest);
         if ($hasPendingRequest) {
             $this->dispatch('toast', 'error', 'A pending request already exists.');
             return;
         }
+        
         DB::beginTransaction();
         try {
             $service = new DynamicWorkflowService();
@@ -270,10 +279,9 @@ class RequestUpdateBeneficiary extends Component
                 'type' => 'success',
                 'message' => $message
             ]);
-            return redirect()->route('dynamic-workflow-request');
+            return redirect()->route('request-update-beneficiary');
         } catch (\Exception $e) {
             DB::rollBack();
-            // $e->getMessage() দিয়ে Exception-এর ভেতরের মেসেজটি দেখানো হচ্ছে
             $this->dispatch('toastr', [
                 'type' => 'error',
                 'message' => $e->getMessage()

@@ -4,6 +4,7 @@ namespace App\Livewire\DynamicWorkflow;
 
 use App\Models\BeneficiaryPersonalDetail;
 use App\Models\DynamicWorkflowRequest;
+use App\Models\UserRoleSchemeOfficeMapping;
 use App\Models\workflowstepRolemapping;
 use App\Models\DynamicWorkflowModule;
 use App\Models\DynamicWorkflowSchemeModule;
@@ -148,11 +149,10 @@ class RequestWorkflowTable extends DataTableComponent
         $userRoleId = $this->RoleId;
 
         if (!$userRoleId) {
-            $userRoleId = (int) \App\Models\UserRoleSchemeOfficeMapping::where('user_id', Auth::id())
+            $userRoleId = (int) UserRoleSchemeOfficeMapping::where('user_id', Auth::id())
                 ->where('is_active', 1)
                 ->value('role_id') ?? 0;
-        }
-
+        }        
         // $module = DynamicWorkflowModule::where('module_code', $this->moduleCode)
         //     ->where('scheme_id', $this->scheme_id)
         //     ->first();
@@ -160,22 +160,22 @@ class RequestWorkflowTable extends DataTableComponent
         if (!$Mainmodule) {
             abort(404, 'Module not found');
         }
-        $module = DynamicWorkflowSchemeModule::where('module_id', $Mainmodule->id)->where('scheme_id', $this->scheme_id)->first();
+        $module = DynamicWorkflowSchemeModule::where('module_id', $Mainmodule->id)->where('scheme_id', $this->scheme_id)->first();       
         if (!$module) {
             return DynamicWorkflowRequest::query()->whereRaw('1=0');
         }
-
-        $userRanks = workflowstepRolemapping::where('role_id', $userRoleId)
+    
+        $userStepIds = workflowstepRolemapping::where('role_id', $userRoleId)
             ->where('module_id', $module->id)
             ->where('scheme_id', $this->scheme_id)
-            ->pluck('rank')
+            ->pluck('workflow_step_id')
             ->toArray();
 
         /** @var Builder $result */
         $result = DynamicWorkflowRequest::query()
             ->with(['module', 'step.label', 'step.role'])
             ->where('module_id', $module->id)
-            ->whereIn('current_rank', $userRanks)
+            ->whereIn('current_step_id', $userStepIds)
             ->where('scheme_id', $this->scheme_id);
 
         if (!empty($this->filter_condition['created_by_dist_code'])) {
