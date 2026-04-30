@@ -258,19 +258,7 @@ class CasteWorkflowService
             throw $e;
         }
     }
-
-    // private function checkDuplicateEntries($scheme_id, $application_id, $formData): bool
-    // {
-    //     $result = DuplicateChecker::check(
-    //         $scheme_id,
-    //         $application_id,
-    //         $formData
-    //     );
-    //     if (is_array($result)) {
-    //         return false;
-    //     }
-    //     return true;
-    // }
+    
     protected function applyApprovedChanges(CasteModificationInfo $request): void
     {
         DB::transaction(function () use ($request) {
