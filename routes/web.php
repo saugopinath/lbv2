@@ -245,6 +245,7 @@ Route::controller(UpdateMarkBeneficiaryDetailsController::class)->group(function
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::controller(CasteManagementController::class)->group(function () {
         Route::get('caste-management', 'index')->name('caste-management');
+        Route::get('update-caste-management-details', 'updateDetails')->name('update-caste-management-details');
         Route::get('caste-management-request-list', 'requestdedlistdetails')->name('caste-management-request-list');
     });
 });

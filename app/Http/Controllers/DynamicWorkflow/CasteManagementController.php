@@ -55,4 +55,9 @@ class CasteManagementController extends Controller
 
         return view('CommonRestictedpage.index', compact('header'));
     }
+
+    public function updateDetails()
+    {
+        return view('dynamic-workflow.caste-managment.updateDetails');
+    }
 }

@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -12,29 +11,49 @@ class CasteModificationInfo extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
 
     protected $table = 'pension.caste_modification_infos';
+
     protected $guarded = ['id'];
+
     protected $casts = [
         'old_data' => 'array',
         'new_data' => 'array',
     ];
+
     public function beneficiaryPersonal()
     {
         return $this->hasOne(BeneficiaryPersonalDetail::class, 'application_id', 'application_id');
     }
+
     public function casteRequestType()
     {
         return $this->belongsTo(Codemaster::class, 'caste_request_type', 'id');
     }
+
     public function nextLevelRequested()
     {
         return $this->belongsTo(Codemaster::class, 'next_level_requested_id', 'id');
     }
+
+    public function module()
+    {
+        return $this->belongsTo(DynamicWorkflowSchemeModule::class, 'module_id');
+    }
+
+    public function step()
+    {
+        return $this->belongsTo(
+            workflowstepRolemapping::class,
+            'current_step_id',     // FK in request table
+            'workflow_step_id'     // column in mapping table
+        );
+    }
+
     public function transformAudit(array $data): array
     {
         $userId = Auth::id();
         $userRole = UserRoleSchemeOfficeMapping::where('user_id', $userId)
             ->value('role_id');
-        $data['tags'] = class_basename($this) . '_' . $data['event'];
+        $data['tags'] = class_basename($this).'_'.$data['event'];
         $data['session_id'] = session()->getId();
         // $data['other_details'] = [
         //     'updated_by_role' => $userRole,
@@ -49,9 +68,8 @@ class CasteModificationInfo extends Model implements Auditable
             'url' => request()->fullUrl(),
             'method' => request()->method(),
             'referrer' => request()->header('referer'),
-            
-        ]);
 
+        ]);
 
         return $data;
     }

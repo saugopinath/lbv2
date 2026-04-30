@@ -2,11 +2,13 @@
 
 namespace App\Livewire\DynamicWorkflow;
 
+use App\Models\CasteModificationInfo;
 use App\Models\DynamicWorkflowModule;
 use App\Models\DynamicWorkflowRequest;
 use App\Models\DynamicWorkflowSchemeModule;
 use App\Models\UserRoleSchemeOfficeMapping;
 use App\Models\workflowstepRolemapping;
+use App\Helpers\FormOptionHelper;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -14,9 +16,9 @@ use Livewire\Attributes\On;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-class RequestWorkflowTable extends DataTableComponent
+class CasteWorkflowTable extends DataTableComponent
 {
-    protected $model = DynamicWorkflowRequest::class;
+    protected $model = CasteModificationInfo::class;
 
     public $moduleCode;
 
@@ -32,14 +34,12 @@ class RequestWorkflowTable extends DataTableComponent
     {
         $this->moduleCode = $moduleCode;
         $this->scheme_id = (int) $schemeId;
-        // $this->module_id = DynamicWorkflowModule::where('module_code', $this->moduleCode)
-        //     ->where('scheme_id', $this->scheme_id)
-        //     ->value('id');
         $Mainmodule = DynamicWorkflowModule::where('module_code', $this->moduleCode)->first();
         if (! $Mainmodule) {
             abort(404, 'Module not found');
         }
         $module = DynamicWorkflowSchemeModule::where('module_id', $Mainmodule->id)->where('scheme_id', $this->scheme_id)->first();
+        // dd($module);
         $this->module_id = $module->id;
         if (! $module) {
             $this->dispatch('toastr', [
@@ -113,35 +113,20 @@ class RequestWorkflowTable extends DataTableComponent
         return [
             Column::make('Reference ID', 'id')
                 ->format(fn ($value) => 'REF NO-'.$value),
-            Column::make('Application ID', 'ref_id'),
+            Column::make('Application ID', 'application_id'),
             Column::make('Name')
                 ->label(
-                    fn ($row) => $row->beneficiary?->beneficiary_name ?? 'N/A'
+                    fn ($row) => $row->beneficiaryPersonal?->beneficiary_name ?? 'N/A'
                 ),
-            Column::make('Changed Fields', 'changed_fields')
-                ->format(function ($value) {
-                    if (empty($value) || ! is_array($value)) {
-                        return '-';
-                    }
-                    $labels = [
-                        'beneficiary_name' => 'Name Update',
-                        'dob_age' => 'DOB / Age Update',
-                        'mobile_no' => 'Mobile Update',
-                        'bank_details' => 'Bank Details Update',
-                    ];
-                    $formatted = [];
-                    foreach ($value as $index => $slug) {
-                        $displayLabel = $labels[$slug] ?? ucfirst(str_replace('_', ' ', $slug));
-                        $formatted[] = '<span class="font-medium">'.($index + 1).'. '.$displayLabel.'</span>';
-                    }
+            Column::make('Old Caste', 'old_data')
+                ->format(fn ($value) => FormOptionHelper::label('Caste', $value['caste'] ?? null)),
+            Column::make('New Caste', 'new_data')
+                ->format(fn ($value) => FormOptionHelper::label('Caste', $value['caste'] ?? null)),
 
-                    return implode('<br>', $formatted);
-                })
-                ->html(),
             Column::make('Created At', 'created_at'),
             Column::make('Action')
                 ->label(function ($row) {
-                    return '<button wire:click="$dispatch(\'openProcessModal\', { requestId: '.$row->id.', scheme_id: '.$this->scheme_id.', module_id: '.$this->module_id.' })" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all transform active:scale-95 shadow-md font-bold text-xs uppercase">
+                    return '<button wire:click="$dispatch(\'openCasteWorkflowModal\', { requestId: '.$row->id.', scheme_id: '.$this->scheme_id.', module_id: '.$this->module_id.' })" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all transform active:scale-95 shadow-md font-bold text-xs uppercase">
                                 <i class="fas fa-eye mr-1"></i> View
                             </button>';
                 })
@@ -158,39 +143,34 @@ class RequestWorkflowTable extends DataTableComponent
                 ->where('is_active', 1)
                 ->value('role_id') ?? 0;
         }
-
-        // $module = DynamicWorkflowModule::where('module_code', $this->moduleCode)
-        //     ->where('scheme_id', $this->scheme_id)
-        //     ->first();
         $Mainmodule = DynamicWorkflowModule::where('module_code', $this->moduleCode)->first();
         if (! $Mainmodule) {
             abort(404, 'Module not found');
         }
         $module = DynamicWorkflowSchemeModule::where('module_id', $Mainmodule->id)->where('scheme_id', $this->scheme_id)->first();
         if (! $module) {
-            return DynamicWorkflowRequest::query()->whereRaw('1=0');
+            return CasteModificationInfo::query()->whereRaw('1=0');
         }
-
         $userRanks = workflowstepRolemapping::where('role_id', $userRoleId)
             ->where('module_id', $module->id)
             ->where('scheme_id', $this->scheme_id)
             ->pluck('rank')
             ->toArray();
-
+        // dd($userRanks);
         /** @var Builder $result */
-        $result = DynamicWorkflowRequest::query()
+        $result = CasteModificationInfo::query()
             ->with(['module', 'step.label', 'step.role'])
             ->where('module_id', $module->id)
             ->whereIn('current_rank', $userRanks)
             ->where('scheme_id', $this->scheme_id);
-
+        // dd($result->get());
         if (! empty($this->filter_condition['created_by_dist_code'])) {
-            $result->whereHas('beneficiary', function ($q) {
+            $result->whereHas('beneficiaryPersonal', function ($q) {
                 $q->where('created_by_dist_code', $this->filter_condition['created_by_dist_code']);
             });
         }
         if (! empty($this->filter_condition['created_by_local_body_code'])) {
-            $result->whereHas('beneficiary', function ($q) {
+            $result->whereHas('beneficiaryPersonal', function ($q) {
                 $q->where('created_by_local_body_code', $this->filter_condition['created_by_local_body_code']);
             });
         }
