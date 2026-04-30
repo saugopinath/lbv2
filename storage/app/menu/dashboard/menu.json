@@ -1,0 +1,142 @@
+{
+    "sidebar": {
+        "title": "LB Dashboard",
+        "subtitle": "Admin Portal",
+        "menus": [
+            {
+                "type": "single",
+                "key": "home",
+                "label": "Dashboard",
+                "icon": "fas fa-tachometer-alt",
+                "route": "/dashboard",
+                "badge": null
+            },
+            {
+                "type": "single",
+                "key": "beneficiaries",
+                "label": "Beneficiaries",
+                "icon": "fas fa-users",
+                "route": "/dashboard/beneficiaries",
+                "badge": "New"
+            },
+            {
+                "type": "parent",
+                "key": "schemes",
+                "label": "Schemes",
+                "icon": "fas fa-layer-group",
+                "route": null,
+                "badge": "3",
+                "children": [
+                    {
+                        "label": "Lakshmir Bhandar",
+                        "route": "/dashboard/schemes/lakshmir-bhandar",
+                        "badge": null
+                    },
+                    {
+                        "label": "Rupashree",
+                        "route": "/dashboard/schemes/rupashree",
+                        "badge": null
+                    },
+                    {
+                        "label": "Kanyashree",
+                        "route": "/dashboard/schemes/kanyashree",
+                        "badge": null
+                    }
+                ]
+            },
+            {
+                "type": "parent",
+                "key": "payments",
+                "label": "Payments",
+                "icon": "fas fa-money-bill-wave",
+                "route": null,
+                "badge": null,
+                "children": [
+                    {
+                        "label": "Payment Lots",
+                        "route": "/dashboard/payments/lots",
+                        "badge": null
+                    },
+                    {
+                        "label": "Transaction History",
+                        "route": "/dashboard/payments/transactions",
+                        "badge": null
+                    },
+                    {
+                        "label": "Failed Transactions",
+                        "route": "/dashboard/payments/failed",
+                        "badge": "5"
+                    }
+                ]
+            },
+            {
+                "type": "parent",
+                "key": "workflow",
+                "label": "Workflow",
+                "icon": "fas fa-sitemap",
+                "route": null,
+                "badge": null,
+                "children": [
+                    {
+                        "label": "Pending Requests",
+                        "route": "/dashboard/workflow/pending",
+                        "badge": "12"
+                    },
+                    {
+                        "label": "Approved",
+                        "route": "/dashboard/workflow/approved",
+                        "badge": null
+                    },
+                    {
+                        "label": "Rejected",
+                        "route": "/dashboard/workflow/rejected",
+                        "badge": null
+                    }
+                ]
+            },
+            {
+                "type": "single",
+                "key": "reports",
+                "label": "Reports",
+                "icon": "fas fa-chart-bar",
+                "route": "/dashboard/reports",
+                "badge": null
+            },
+            {
+                "type": "single",
+                "key": "settings",
+                "label": "Settings",
+                "icon": "fas fa-cog",
+                "route": "/dashboard/settings",
+                "badge": null
+            }
+        ],
+        "categories": [
+            {
+                "label": "Bandhan Bank",
+                "icon": "fas fa-university",
+                "color": "blue"
+            },
+            {
+                "label": "Aadhaar eKYC",
+                "icon": "fas fa-fingerprint",
+                "color": "indigo"
+            },
+            {
+                "label": "PFMS",
+                "icon": "fas fa-coins",
+                "color": "emerald"
+            },
+            {
+                "label": "NREGS",
+                "icon": "fas fa-briefcase",
+                "color": "amber"
+            },
+            {
+                "label": "SMS Gateway",
+                "icon": "fas fa-sms",
+                "color": "violet"
+            }
+        ]
+    }
+}

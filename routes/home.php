@@ -35,22 +35,25 @@ Route::post('/track-beneficiary/payment-history/error-details', [BeneficiaryTrac
 Route::get('notifications', [NotificationController::class, 'index'])->name('notifications');
 Route::post('/notifications/datatable', [NotificationController::class, 'datatable'])->name('notifications.datatable');
 
-Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-Route::get('/dashboard/scheme-wise-applications', [DashboardController::class, 'schemeWiseApplications'])->name('dashboard.schemeWiseApplications');
-Route::get('/dashboard/district-wise-beneficiaries', [DashboardController::class, 'districtWiseBeneficiaries'])->name('dashboard.districtWiseBeneficiaries');
-Route::get('/age-distribution', [DashboardController::class, 'getAgeDistribution']);
-Route::get('/dashboard/consolidated-fy-payments', [DashboardController::class, 'consolidatedFyPayments'])->name('dashboard.fy.consolidated');
+Route::prefix('dashboard')->group(function () {
+    Route::get('home', [DashboardController::class, 'index'])->name('home');
+    Route::get('/scheme-wise-applications', [DashboardController::class, 'schemeWiseApplications'])->name('dashboard.schemeWiseApplications');
+    Route::get('/district-wise-beneficiaries', [DashboardController::class, 'districtWiseBeneficiaries'])->name('dashboard.districtWiseBeneficiaries');
+    Route::get('/age-distribution', [DashboardController::class, 'getAgeDistribution'])->name('dashboard.ageDistribution');
+    Route::get('/consolidated-fy-payments', [DashboardController::class, 'consolidatedFyPayments'])->name('dashboard.fy.consolidated');
 
-// routes/web.php or api.php
+    Route::post('/refresh-scheme-status', function () {
+        DB::connection('pgsql_app_read')->statement('REFRESH MATERIALIZED VIEW CONCURRENTLY pension.mv_scheme_status_summary');
+        return response()->json(['status' => 'success']);
+    })->name('dashboard.refreshSchemeStatus');
+});
+
+// Scheme-status chart
 Route::get('/chart/scheme-status', function () {
-    return DB::connection('pgsql_app_read')->table('home.mv_scheme_status_summary')
+    return DB::connection('pgsql_app_read')->table('pension.mv_scheme_status_summary')
         ->orderBy('scheme_id')
         ->get();
-});
-Route::post('/dashboard/refresh-scheme-status', function () {
-    DB::connection('pgsql_app_read')->statement('REFRESH MATERIALIZED VIEW CONCURRENTLY home.mv_scheme_status_summary');
-    return response()->json(['status' => 'success']);
-})->name('dashboard.refreshSchemeStatus');
+})->name('dashboard.schemeStatus');
 
 
 

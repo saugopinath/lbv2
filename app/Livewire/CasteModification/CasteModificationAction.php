@@ -243,6 +243,7 @@ class CasteModificationAction extends Component
                             $deleteprevious->delete();
                         }
                     }
+                    
                     // Update CasteModification  after applying changes
                     $casteModification->is_active = false;
                     $casteModification->updated_by = Auth::id();
