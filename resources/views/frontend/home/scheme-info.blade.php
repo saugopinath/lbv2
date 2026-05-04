@@ -25,9 +25,7 @@ $primaryRgb = $scheme_json->ref_color_rgb ?? $colors['rgb'];
 <style>
     :root {
         --primary-color: #{{ $primaryHex }};
-        --primary-soft: rgba(
-            $primaryRgb
-        , 0.1);
+        --primary-soft: rgba($primaryRgb, 0.1);
     }
 
     body {
@@ -212,6 +210,16 @@ $primaryRgb = $scheme_json->ref_color_rgb ?? $colors['rgb'];
         background-color: var(--primary-color);
     }
 
+    .prose a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .prose a:hover {
+        text-decoration: underline;
+    }
+
     @media (max-width: 768px) {
         .hero-section {
             border-radius: 0 0 2rem 2rem;
@@ -313,12 +321,12 @@ $primaryRgb = $scheme_json->ref_color_rgb ?? $colors['rgb'];
             <!-- About -->
             <div class="content-card animate-up" style="animation-delay: 0.6s">
                 <div class="flex items-center gap-4 mb-6">
-                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background: var(--primary-soft); color: var(--primary-color);">
                         <i class="fas fa-info-circle text-xl"></i>
                     </div>
                     <h2 class="text-2xl font-bold text-gray-800">About the Scheme</h2>
                 </div>
-                <div class="prose prose-indigo max-w-none text-gray-700 leading-relaxed text-base md:text-lg">
+                <div class="prose prose-slate max-w-none text-gray-700 leading-relaxed text-base md:text-lg">
                     {{ $scheme_json->about->long ?? 'No detailed description available.' }}
                 </div>
             </div>
@@ -330,7 +338,7 @@ $primaryRgb = $scheme_json->ref_color_rgb ?? $colors['rgb'];
                     <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                         <i class="fas fa-check-double text-xl"></i>
                     </div>
-                    <h2 class="text-2xl font-bold text-gray-800">Who is Eligible?</h2>
+                    <h2 class="text-2xl font-bold text-gray-800">Eligible Cita</h2>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -392,7 +400,7 @@ $primaryRgb = $scheme_json->ref_color_rgb ?? $colors['rgb'];
             @if(isset($scheme_json->workflow->steps))
             <div class="content-card animate-up" style="animation-delay: 0.8s">
                 <div class="flex items-center gap-4 mb-8">
-                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background: var(--primary-soft); color: var(--primary-color);">
                         <i class="fas fa-list-ol text-xl"></i>
                     </div>
                     <h2 class="text-2xl font-bold text-gray-800">How to Apply</h2>
@@ -416,32 +424,36 @@ $primaryRgb = $scheme_json->ref_color_rgb ?? $colors['rgb'];
                 <div class="mt-10">
                     <a href="#" class="cta-button w-full justify-center">
                         <i class="fas fa-download"></i>
-                        Download Form
+                        Download Application Form
                     </a>
-                    <p class="text-center text-gray-400 text-xs mt-4 italic">
-                        Available in English and Bengali
-                    </p>
                 </div>
             </div>
             @endif
 
             <!-- Support Card -->
-            <div class="content-card bg-gradient-to-br from-indigo-600 to-purple-700 text-white animate-up border-none overflow-hidden relative" style="animation-delay: 0.9s">
+            <div class="content-card text-white animate-up border-none overflow-hidden relative bg-gradient-to-br from-indigo-600 to-slate-800" style="animation-delay: 0.9s">
+                <!-- Background decorative blur -->
                 <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+
                 <div class="relative z-10">
+                    <!-- Header with icon -->
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center">
                             <i class="fas fa-headset"></i>
                         </div>
                         <div>
-                            <span class="text-xs font-bold uppercase tracking-widest text-indigo-100">Support / সহায়তা কেন্দ্র</span>
+                            <span class="text-xs font-bold uppercase tracking-widest text-indigo-600">24/7 Support Center</span>
                         </div>
                     </div>
-                    <h3 class="text-2xl font-bold mb-2">Need Assistance?</h3>
-                    <p class="text-indigo-100 mb-8 text-sm leading-relaxed">
-                        আমাদের হেল্পডেস্ক আপনার সহায়তার জন্য ২৪/৭ উপলব্ধ। যেকোনো প্রশ্নের জন্য কল করুন।
+
+                    <!-- Main text -->
+                    <h3 class="text-2xl font-bold mb-2 text-gray-700">Need Assistance?</h3>
+                    <p class="text-indigo-600 mb-8 text-sm leading-relaxed">
+                        Our support team is available around the clock to help you. Call us for any questions or concerns.
                     </p>
-                    <a href="tel:1800" class="flex items-center justify-between font-bold text-lg bg-white text-indigo-700 p-4 rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-xl">
+
+                    <!-- Call button -->
+                    <a href="tel:1800" class="flex items-center justify-between font-bold text-lg bg-white text-indigo-600 p-4 rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-xl">
                         <span class="flex items-center gap-3">
                             <i class="fas fa-phone-alt group-hover:rotate-12 transition-transform"></i>
                             1800-XXX-XXXX
