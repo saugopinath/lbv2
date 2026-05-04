@@ -156,24 +156,40 @@
     },
     "home_image": {
         "1": {
-            "image": "images/home/home/image_1.jpg",
+            "image": "images/home/home/image_1.png",
             "title": " Empowering citizens of West Bengal under one umbrella scheme",
-            "header": "Jai Bangla"
+            "header": "Jai Bangla",
+            "object_position": "object-center"
         },
         "2": {
-            "image": "images/home/home/image_2.jpg",
+            "image": "images/home/home/image_2.png",
             "title": "Promoting education and growth for every child across Bengal.",
-            "header": ""
+            "header": "Jai Bangla",
+            "object_position": "object-center"
         },
         "3": {
-            "image": "images/home/home/image_3.jpeg",
+            "image": "images/home/home/image_3.png",
             "title": "Advancing healthcare and social welfare for every citizen.",
-            "header": ""
+            "header": "Jai Bangla",
+            "object_position": "object-center"
         },
         "4": {
-            "image": "images/home/home/image_4.jpeg",
+            "image": "images/home/home/image_4.png",
             "title": "Strengthening rural livelihoods through inclusive development.",
-            "header": ""
+            "header": "Jai Bangla",
+            "object_position": "object-center"
+        },
+        "5": {
+            "image": "images/home/home/image_11.png",
+            "title": "Ensuring transparent and timely financial assistance to women.",
+            "header": "Jai Bangla",
+            "object_position": "object-center"
+        },
+        "6": {
+            "image": "images/home/home/image_21.png",
+            "title": "Delivering government services at your doorstep through technology.",
+            "header": "Jai Bangla",
+            "object_position": "object-center"
         }
     }
 }

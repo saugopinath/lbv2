@@ -68,6 +68,34 @@ $gradientColor = $department_json->ref_gradient_color ?? 'emerald';
         }
     }
 
+    @keyframes shimmer {
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    /* .animate-gradient {
+        background-size: 200% 200%;
+        animation: gradientShift 8s ease infinite;
+    } */
+    /* .animate-gradient {
+        background-size: 200% 200%;
+        animation: gradientShift 8s ease infinite;
+    } */
+    @keyframes gradientShift {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
     .animate-gradient {
         background-size: 200% 200%;
         animation: gradientShift 8s ease infinite;
@@ -181,46 +209,51 @@ $gradientColor = $department_json->ref_gradient_color ?? 'emerald';
 <section id="wcd-department" class="max-w-8xl mx-auto px-4 py-8 font-poppins">
 
     {{-- Hero Header Card --}}
-    <div class="group relative mb-12 overflow-hidden rounded-2xl bg-white shadow-xl transition-all duration-500 hover:shadow-2xl">
-        {{-- Animated gradient background --}}
-        <div class="absolute inset-0 bg-gradient-to-r from-{{ $baseColor }}-600 via-{{ $gradientColor }}-500 to-{{ $baseColor }}-600 animate-gradient"></div>
-        <div class="absolute inset-0 bg-black/10"></div>
+    {{-- Hero Header Card --}}
+    <div class="group relative mb-12 overflow-hidden rounded-2xl shadow-xl transition-all duration-500 hover:shadow-2xl bg-{{ $baseColor }}-600">
+        {{-- Perfectly looping animated gradient background --}}
+        <div class="absolute inset-0 bg-gradient-to-r from-{{ $baseColor }}-400 via-{{ $gradientColor }}-500 to-{{ $baseColor }}-400 animate-gradient"></div>
+        <div class="absolute inset-0 bg-black/20 backdrop-blur-[1px]"></div>
 
         {{-- Decorative patterns --}}
-        <div class="absolute top-0 right-0 -mt-20 -mr-20 h-40 w-40 rounded-full bg-white/10 blur-3xl"></div>
-        <div class="absolute bottom-0 left-0 -mb-20 -ml-20 h-40 w-40 rounded-full bg-white/10 blur-3xl"></div>
+        <!-- <div class="absolute top-0 right-0 -mt-20 -mr-20 h-40 w-40 rounded-full bg-white/10 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 -mb-20 -ml-20 h-40 w-40 rounded-full bg-white/10 blur-3xl"></div> -->
 
-        <div class="relative px-6 py-10 md:px-12 md:py-12">
+        <div class="relative px-6 py-8 md:px-12 md:py-8">
             <div class="flex flex-col items-center justify-between gap-8 md:flex-row">
                 <div class="flex items-center gap-6">
                     {{-- Animated logo container --}}
                     <div class="relative">
                         <div class="absolute inset-0 rounded-full bg-white/30 animate-ping"></div>
-                        <div class="relative flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                            <i class="fas fa-child text-4xl text-{{ $baseColor }}-600"></i>
+                        <div class="relative flex h-24 w-24 items-center justify-center rounded-full bg-white/95 shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                            <i class="fas fa-landmark text-4xl text-{{ $baseColor }}-600"></i>
                         </div>
                     </div>
                     <div class="text-white">
-                        <h1 class="text-4xl font-extrabold tracking-tight md:text-5xl drop-shadow-lg">{{ $department_json->department_name }}</h1>
-                        <p class="mt-2 text-white/90 flex items-center gap-2">
-                            <i class="fas fa-building text-sm"></i>
-                            Government of West Bengal
-                        </p>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider mb-2 border border-white/30">
+                            <i class="fas fa-building text-xs"></i>
+                            <span>Government of West Bengal</span>
+                        </div>
+                        <h1 class="text-3xl font-black tracking-tight md:text-5xl drop-shadow-[0_5px_15px_rgba(0,0,0,0.3)]">
+                            {{ $department_json->department_name }}
+                        </h1>
                     </div>
                 </div>
                 {{-- Tagline with glassmorphism --}}
-                <div class="rounded-xl bg-white/20 backdrop-blur-md px-6 py-4 text-center shadow-lg ring-1 ring-white/30 transition-all duration-300 hover:bg-white/30">
-                    <div class="text-2xl font-bold text-white">{{ $department_json->tagline->line1 }}</div>
-                    <div class="text-white/90">{{ $department_json->tagline->line2 }}</div>
-                    <div class="text-sm text-white/70">{{ $department_json->tagline->line3 }}</div>
+                <div class="rounded-xl bg-white/20 backdrop-blur-md px-6 py-4 text-center shadow-lg ring-1 ring-white/30 transition-all duration-300 hover:bg-white/30 hover:scale-105">
+                    <div class="text-xl font-bold text-white drop-shadow-md">{{ $department_json->tagline->line1 }}</div>
+                    <div class="text-white/90 mt-1">{{ $department_json->tagline->line2 }}</div>
+                    <div class="text-sm text-white/70 mt-1">{{ $department_json->tagline->line3 }}</div>
                 </div>
             </div>
         </div>
-
-        {{-- Decorative corner elements --}}
-        <div class="absolute bottom-0 left-0 h-20 w-20 rounded-tr-3xl bg-white/10"></div>
-        <div class="absolute right-0 top-0 h-20 w-20 rounded-bl-3xl bg-white/10"></div>
+        <div class="absolute inset-0 rounded-2xl border border-white/20 pointer-events-none"></div>
+        <div class="absolute top-4 left-4 h-12 w-12 border-t-2 border-l-2 border-white/30 rounded-tl-2xl"></div>
+        <div class="absolute bottom-4 right-4 h-12 w-12 border-b-2 border-r-2 border-white/30 rounded-br-2xl"></div>
     </div>
+
+    {{-- Tailwind Safelist (Hidden) --}}
+    <div class="hidden bg-blue-600 bg-pink-600 bg-indigo-600 bg-green-600 bg-orange-600 bg-violet-600 bg-lime-600 bg-sky-600 bg-amber-600 bg-fuchsia-600 bg-rose-600 bg-emerald-600 bg-teal-600 from-blue-500 from-pink-500 from-indigo-500 from-green-500 from-orange-500 from-violet-500 from-lime-500 from-sky-500 from-amber-500 from-fuchsia-500 from-rose-500 from-emerald-500 from-teal-500 via-blue-600 via-pink-600 via-indigo-600 via-green-600 via-orange-600 via-violet-600 via-lime-600 via-sky-600 via-amber-600 via-fuchsia-600 via-rose-600 via-emerald-600 via-teal-600 to-blue-700 to-pink-700 to-indigo-700 to-green-700 to-orange-700 to-violet-700 to-lime-700 to-sky-700 to-amber-700 to-fuchsia-700 to-rose-700 to-emerald-700 to-teal-700 text-blue-600 text-pink-600 text-indigo-600 text-green-600 text-orange-600 text-violet-600 text-lime-600 text-sky-600 text-amber-600 text-fuchsia-600 text-rose-600 text-emerald-600 text-teal-600 border-blue-500 border-pink-500 border-indigo-500 border-green-500 border-orange-500 border-violet-500 border-lime-500 border-sky-500 border-amber-500 border-fuchsia-500 border-rose-500 border-emerald-500 border-teal-500 hover:bg-blue-100 hover:bg-pink-100 hover:bg-indigo-100 hover:bg-green-100 hover:bg-orange-100 hover:bg-violet-100 hover:bg-lime-100 hover:bg-sky-100 hover:bg-amber-100 hover:bg-fuchsia-100 hover:bg-rose-100 hover:bg-emerald-100 hover:bg-teal-100"></div>
 
     {{-- Quick Stats Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -345,7 +378,7 @@ $gradientColor = $department_json->ref_gradient_color ?? 'emerald';
 
                     <div class="grid grid-cols-1 gap-5">
                         @foreach($department_json->key_functions as $key_func)
-                        <div class="group/function flex items-start gap-4 rounded-xl p-4 transition-all duration-300 hover:bg-{{ $baseColor }}-50 hover:shadow-md">
+                        <div class="group/function flex items-start gap-4 rounded-xl p-4 transition-all duration-300 hover:bg-{{ $baseColor }}-100 hover:shadow-md">
                             <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-{{ $baseColor }}-200 to-{{ $gradientColor }}-200 shadow-sm transition-transform duration-300 group-hover/function:scale-110">
                                 <i class="fas {{ $key_func->icon }} text-{{ $baseColor }}-700 text-lg"></i>
                             </div>
@@ -382,11 +415,12 @@ $gradientColor = $department_json->ref_gradient_color ?? 'emerald';
                         @endphp
                         <div class="group/card relative rounded-xl p-5 bg-white border-2 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl overflow-hidden"
                             style="border-color: {{ ${$itemColor . 'Hex'} ?? '#e2e8f0' }};">
-                            {{-- Animated gradient background on hover --}}
-                            <div class="absolute inset-0 bg-gradient-to-br from-{{ $itemColor }}-50 to-white opacity-0 transition-opacity duration-300 group-hover/card:opacity-100"></div>
 
-                            {{-- Decorative corner icon --}}
-                            <div class="absolute -right-3 -top-3 h-12 w-12 rounded-full bg-{{ $itemColor }}-100 opacity-0 transition-all duration-300 group-hover/card:opacity-100 group-hover/card:scale-150"></div>
+                            {{-- Animated gradient background - Always visible (not just on hover) --}}
+                            <div class="absolute inset-0 bg-gradient-to-br from-{{ $itemColor }}-50 to-white opacity-100"></div>
+
+                            {{-- Decorative corner icon - Always visible --}}
+                            <div class="absolute -right-3 -top-3 h-12 w-12 rounded-full bg-{{ $itemColor }}-100 opacity-100 transition-all duration-300 group-hover/card:scale-150"></div>
 
                             <div class="relative z-4">
                                 <div class="flex items-start gap-3">
@@ -397,8 +431,8 @@ $gradientColor = $department_json->ref_gradient_color ?? 'emerald';
                                 </div>
                                 <p class="text-sm mt-3 text-gray-600 leading-relaxed pl-13 transition-colors duration-300 group-hover/card:text-gray-700">{{ $major->description }}</p>
 
-                                {{-- Subtle indicator line --}}
-                                <div class="mt-2 h-0.5 w-0 bg-gradient-to-r from-{{ $itemColor }}-400 to-{{ $itemColor }}-600 transition-all duration-300 group-hover/card:w-full"></div>
+                                {{-- Subtle indicator line - Always visible with full width --}}
+                                <div class="mt-2 h-0.5 w-full bg-gradient-to-r from-{{ $itemColor }}-400 to-{{ $itemColor }}-600"></div>
                             </div>
                         </div>
                         @endforeach
@@ -432,11 +466,12 @@ $gradientColor = $department_json->ref_gradient_color ?? 'emerald';
                         @endforeach
                     </div>
                     <button id="viewAllSchemes"
-                        class="group/btn mt-6 w-full overflow-hidden relative rounded-xl bg-gradient-to-r from-{{ $baseColor }}-600 to-{{ $gradientColor }}-600 px-4 py-3 font-semibold text-white transition-all duration-300 hover:shadow-lg">
+                        class="group/btn mt-6 w-full relative overflow-hidden rounded-xl bg-{{ $baseColor }}-600 px-4 py-3 font-bold text-white transition-all duration-300 hover:bg-{{ $baseColor }}-700 hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]">
                         <span class="relative z-10 flex items-center justify-center gap-2">
-                            <i class="fas fa-list"></i> View All Schemes
+                            <i class="fas fa-list-ul"></i> View All Schemes
                         </span>
-                        <div class="absolute inset-0 -translate-x-full bg-white/20 transition-transform duration-300 group-hover/btn:translate-x-0"></div>
+                        {{-- Glossy effect --}}
+                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_1.5s_infinite]"></div>
                     </button>
                 </div>
             </div>
@@ -454,11 +489,11 @@ $gradientColor = $department_json->ref_gradient_color ?? 'emerald';
                     </div>
                     <ul class="space-y-3">
                         @foreach($department_json->orgnizational_structure as $org)
-                        <li class="flex items-center gap-3 rounded-lg p-2 transition-all duration-200 hover:bg-gray-50">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-{{ $baseColor }}-100">
+                        <li class="flex items-center gap-3 rounded-lg p-2 transition-all duration-200 hover:bg-{{ $baseColor }}-100 group/item">
+                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-{{ $baseColor }}-100 transition-colors duration-200 group-hover/item:bg-{{ $baseColor }}-200">
                                 <i class="fas {{ $org->icon }} text-{{ $baseColor }}-600 text-sm"></i>
                             </div>
-                            <span class="text-gray-700">{{ $org->title }}</span>
+                            <span class="text-gray-700 font-medium group-hover/item:text-{{ $baseColor }}-700 transition-colors">{{ $org->title }}</span>
                         </li>
                         @endforeach
                     </ul>

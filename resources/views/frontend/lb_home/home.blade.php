@@ -22,7 +22,8 @@
         @include('frontend.components.carousel-img', [
         'image' => $value['image'],
         'title' => $value['title'],
-        'header' => $value['header']
+        'header' => $value['header'],
+        'object_position' => $value['object_position'] ?? 'object-center'
         ])
         @endforeach
         @else
@@ -30,7 +31,8 @@
         @include('frontend.components.carousel-img', [
         'image' => $value['image'],
         'title' => $value['title'],
-        'header' => $value['header']
+        'header' => $value['header'],
+        'object_position' => $value['object_position'] ?? 'object-center'
         ])
         @endforeach
         @endif
