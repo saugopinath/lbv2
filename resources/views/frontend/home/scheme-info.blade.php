@@ -25,7 +25,7 @@ $primaryRgb = $scheme_json->ref_color_rgb ?? $colors['rgb'];
 <style>
     :root {
         --primary-color: #{{ $primaryHex }};
-        --primary-soft: rgba($primaryRgb, 0.1);
+        --primary-soft: rgba({{ $primaryRgb }}, 0.3);
     }
 
     body {
@@ -202,27 +202,143 @@ $primaryRgb = $scheme_json->ref_color_rgb ?? $colors['rgb'];
         }
     }
 
-    .text-custom {
+    /* Premium Modern Tabs */
+    .premium-tabs-nav {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 0.6rem;
+        border-radius: 9999px;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        width: fit-content;
+        margin: 0 auto 3rem;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+    }
+
+    .premium-tab {
+        padding: 0.8rem 1.8rem;
+        border-radius: 9999px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        color: #64748b;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+    }
+
+    .premium-tab i {
+        font-size: 1rem;
+        transition: transform 0.4s ease;
+    }
+
+    .premium-tab:hover {
         color: var(--primary-color);
+        background: rgba(255, 255, 255, 0.5);
     }
 
-    .bg-custom {
-        background-color: var(--primary-color);
+    .premium-tab.active {
+        background: var(--primary-color);
+        color: white;
+        box-shadow: 0 10px 20px -5px var(--primary-soft);
     }
 
-    .prose a {
+    .premium-tab.active i {
+        transform: scale(1.1);
+    }
+
+    /* Premium Content Card */
+    .premium-card {
+        background: white;
+        border-radius: 3.5rem;
+        padding: 4.5rem;
+        box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(241, 245, 249, 0.8);
+        position: relative;
+        overflow: hidden;
+        min-height: 400px;
+    }
+
+    .mesh-gradient {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 80% 20%, var(--primary-soft) 0%, transparent 40%),
+            radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.8) 0%, transparent 40%);
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    /* Elegant List Items */
+    .elegant-list-item {
+        background: white;
+        padding: 1.5rem 2rem;
+        border-radius: 1.5rem;
+        margin-bottom: 1.25rem;
+        border: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        transition: all 0.4s ease;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    }
+
+    .elegant-list-item:hover {
+        transform: translateX(10px) scale(1.01);
+        border-color: var(--primary-color);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    }
+
+    .elegant-icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 1rem;
+        background: var(--primary-soft);
         color: var(--primary-color);
-        text-decoration: none;
-        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
     }
 
-    .prose a:hover {
-        text-decoration: underline;
+    .elegant-list-item:hover .elegant-icon-box {
+        background: var(--primary-color);
+        color: white;
+        transform: rotate(5deg);
     }
 
-    @media (max-width: 768px) {
-        .hero-section {
-            border-radius: 0 0 2rem 2rem;
+    .illustration-glow {
+        position: absolute;
+        right: -10%;
+        bottom: -10%;
+        width: 50%;
+        opacity: 0.08;
+        pointer-events: none;
+        z-index: 0;
+        filter: blur(20px);
+    }
+
+    @keyframes fadeInSlide {
+        from {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
         }
     }
 </style>
@@ -276,17 +392,25 @@ $primaryRgb = $scheme_json->ref_color_rgb ?? $colors['rgb'];
     <!-- Stats Grid -->
     <section class="max-w-7xl mx-auto px-4 mb-12 relative z-20">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
             <!-- Age -->
-            <div class="stat-card animate-up" style="animation-delay: 0.2s">
-                <div class="icon-box mb-4"><i class="fas fa-calendar-alt"></i></div>
-                <div class="text-2xl font-bold text-gray-800">{{ $scheme_json->quick_stats->eligibility_age ?? 'All Ages' }}</div>
-                <div class="text-gray-500 font-medium">Eligible Age</div>
+            <div class="group stat-card bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 p-6 text-center border border-gray-100 animate-up" style="animation-delay: 0.2s">
+                <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-110">
+                    <i class="fas fa-calendar-alt text-white text-2xl"></i>
+                </div>
+                <div class="text-3xl font-extrabold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                    {{ $scheme_json->quick_stats->eligibility_age ?? 'All Ages' }}
+                </div>
+                <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-2">Eligible Age</div>
+                <div class="mt-3 h-1 w-12 bg-blue-500 rounded-full mx-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
 
             <!-- Caste/Criteria -->
-            <div class="stat-card animate-up" style="animation-delay: 0.3s">
-                <div class="icon-box mb-4"><i class="fas fa-users"></i></div>
-                <div class="text-2xl font-bold text-gray-800">
+            <div class="group stat-card bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 p-6 text-center border border-gray-100 animate-up" style="animation-delay: 0.3s">
+                <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-110">
+                    <i class="fas fa-users text-white text-2xl"></i>
+                </div>
+                <div class="text-xl font-extrabold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent line-clamp-2">
                     @if(isset($scheme_id) && in_array($scheme_id, [1, 3, 19]))
                     {{ $scheme_json->quick_stats->eligibility_caste ?? 'All' }}
                     @elseif (isset($scheme_id) && $scheme_id == 2)
@@ -295,172 +419,226 @@ $primaryRgb = $scheme_json->ref_color_rgb ?? $colors['rgb'];
                     {{ $scheme_json->quick_stats->eligibility_criteria ?? 'Universal' }}
                     @endif
                 </div>
-                <div class="text-gray-500 font-medium">Criteria</div>
+                <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-2">Criteria</div>
+                <div class="mt-3 h-1 w-12 bg-purple-500 rounded-full mx-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
-
-            <!-- Beneficiaries -->
-            <div class="stat-card animate-up" style="animation-delay: 0.4s">
-                <div class="icon-box mb-4"><i class="fas fa-heart"></i></div>
-                <div id="beneficiariesCounter" class="text-2xl font-bold text-gray-800" data-target="{{ $ben_count ?? 0 }}">0</div>
-                <div class="text-gray-500 font-medium">Beneficiaries</div>
-            </div>
-
             <!-- Allocation -->
-            <div class="stat-card animate-up" style="animation-delay: 0.5s">
-                <div class="icon-box mb-4"><i class="fas fa-chart-line"></i></div>
-                <div id="allocationCounter" class="text-2xl font-bold text-gray-800" data-target="{{ $scheme_json->quick_stats->allocation ?? 0 }}">0</div>
-                <div class="text-gray-500 font-medium">Monthly Outlay</div>
+            <div class="group stat-card bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 p-6 text-center border border-gray-100 animate-up" style="animation-delay: 0.5s">
+                <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-110">
+                    <i class="fas fa-chart-line text-white text-2xl"></i>
+                </div>
+                <div class="text-3xl font-extrabold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                    <span id="allocationCounter" data-target="{{ $scheme_json->quick_stats->allocation ?? 0 }}">0</span>
+                    <span class="text-lg">₹</span>
+                </div>
+                <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-2">Monthly Outlay</div>
+                <div class="mt-3 h-1 w-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full mx-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
+            <div class="group stat-card bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 p-6 text-center border border-gray-100 animate-up" style="animation-delay: 0.4s">
+                <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-110">
+                    <i class="fas fa-heart text-white text-2xl"></i>
+                </div>
+                <div class="text-3xl font-extrabold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                    <span id="beneficiariesCounter" data-target="{{ $ben_count ?? 0 }}">0</span>
+                    <span class="text-lg">+</span>
+                </div>
+                <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-2">Beneficiaries</div>
+                <div class="mt-3 h-1 w-12 bg-green-500 rounded-full mx-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
+
         </div>
     </section>
 
-    <!-- Main Content -->
-    <section class="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-20">
-        <!-- Left Side -->
-        <div class="lg:col-span-2 space-y-8">
-            <!-- About -->
-            <div class="content-card animate-up" style="animation-delay: 0.6s">
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background: var(--primary-soft); color: var(--primary-color);">
-                        <i class="fas fa-info-circle text-xl"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-800">About the Scheme</h2>
-                </div>
-                <div class="prose prose-slate max-w-none text-gray-700 leading-relaxed text-base md:text-lg">
-                    {{ $scheme_json->about->long ?? 'No detailed description available.' }}
-                </div>
+    <!-- Premium Tabbed Info Section -->
+    <section class="max-w-7xl mx-auto px-4 mb-24 relative z-20">
+        <!-- Pill-style Navigation -->
+        <div class="premium-tabs-nav">
+            <div id="tab-overview" class="premium-tab active" onclick="switchTab('overview')">
+                <i class="fas fa-info-circle"></i> Overview
             </div>
-
-            <!-- Eligibility -->
-            @if(isset($scheme_json->eligibility->eligibility_criteria->key) || isset($scheme_json->eligibility->criteria))
-            <div class="content-card animate-up" style="animation-delay: 0.7s">
-                <div class="flex items-center gap-4 mb-8">
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                        <i class="fas fa-check-double text-xl"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-800">Eligible Cita</h2>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    @if(isset($scheme_json->eligibility->eligibility_criteria->key))
-                    @foreach ($scheme_json->eligibility->eligibility_criteria->key as $criteria)
-                    <div class="flex items-start gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-colors group">
-                        <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600 group-hover:bg-white group-hover:shadow-md transition-all">
-                            <i class="{{ $criteria->icon ?? 'fas fa-check' }}"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-gray-800 mb-1">{{ $criteria->title ?? 'Criterion' }}</h3>
-                            <p class="text-gray-500 text-sm leading-snug">{{ $criteria->description ?? '' }}</p>
-                        </div>
-                    </div>
-                    @endforeach
-                    @elseif(isset($scheme_json->eligibility->criteria))
-                    @foreach((array)$scheme_json->eligibility->criteria as $key => $value)
-                    @if(is_bool($value) && $value)
-                    <div class="flex items-start gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-colors group">
-                        <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600 group-hover:bg-white group-hover:shadow-md transition-all">
-                            <i class="fas fa-check"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-gray-800 mb-1">{{ ucwords(str_replace('_', ' ', $key)) }}</h3>
-                            <p class="text-gray-500 text-sm leading-snug">Required for application.</p>
-                        </div>
-                    </div>
-                    @endif
-                    @endforeach
-                    @endif
-                </div>
+            <div id="tab-eligibility" class="premium-tab" onclick="switchTab('eligibility')">
+                <i class="fas fa-user-check"></i> Eligibility
             </div>
-            @endif
-
-            <!-- Required Documents -->
-            @if(isset($scheme_json->required->documents) && count((array)$scheme_json->required->documents) > 0)
-            <div class="content-card animate-up" style="animation-delay: 0.75s">
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                        <i class="fas fa-file-invoice text-xl"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-800">Required Documents</h2>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    @foreach((array)$scheme_json->required->documents as $doc)
-                    <div class="flex items-center gap-3 p-3 rounded-xl border border-dashed border-gray-200 bg-gray-50/50">
-                        <i class="fas fa-file-alt text-amber-500"></i>
-                        <span class="text-gray-700 font-medium text-sm">{{ $doc }}</span>
-                    </div>
-                    @endforeach
-                </div>
+            <div id="tab-ineligibility" class="premium-tab" onclick="switchTab('ineligibility')">
+                <i class="fas fa-user-times"></i> Ineligibility
             </div>
-            @endif
+            <div id="tab-benefits" class="premium-tab" onclick="switchTab('benefits')">
+                <i class="fas fa-gift"></i> Benefits
+            </div>
+            <div id="tab-implementation" class="premium-tab" onclick="switchTab('implementation')">
+                <i class="fas fa-route"></i> Implementation
+            </div>
+            <div id="tab-instructions" class="premium-tab" onclick="switchTab('instructions')">
+                <i class="fas fa-file-signature"></i> Instructions
+            </div>
         </div>
 
-        <!-- Right Side -->
-        <div class="space-y-8">
-            <!-- Application Process -->
-            @if(isset($scheme_json->workflow->steps))
-            <div class="content-card animate-up" style="animation-delay: 0.8s">
-                <div class="flex items-center gap-4 mb-8">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background: var(--primary-soft); color: var(--primary-color);">
-                        <i class="fas fa-list-ol text-xl"></i>
+        <!-- Main Content Card -->
+        <div class="premium-card">
+            <div class="mesh-gradient"></div>
+            <img src="{{ asset('images/jb_logo.png') }}" class="illustration-glow" alt="Decorative Illustration">
+            <!-- Overview Panel -->
+            <div id="panel-overview" class="tab-panel relative z-10 animate-up">
+                <div class="max-w-4xl">
+                    <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-6" style="background-color: var(--primary-soft); color: var(--primary-color);">
+                        <span class="w-2 h-2 rounded-full animate-pulse" style="background-color: var(--primary-color);"></span> Scheme Overview
                     </div>
-                    <h2 class="text-2xl font-bold text-gray-800">How to Apply</h2>
-                </div>
-
-                <div class="space-y-8 relative ml-2">
-                    <!-- Connecting Line -->
-                    <div class="absolute left-[15px] top-[40px] bottom-[40px] w-[2px] bg-gray-100"></div>
-
-                    @foreach($scheme_json->workflow->steps as $step)
-                    <div class="flex items-start gap-6 relative z-10 group/step">
-                        <div class="step-number shadow-md group-hover/step:scale-110 transition-transform">{{ $step->rank ?? $loop->iteration }}</div>
-                        <div class="flex-1 pt-0.5">
-                            <h3 class="font-bold text-gray-800 mb-1 group-hover/step:text-custom transition-colors leading-tight">{{ $step->name ?? 'Step' }}</h3>
-                            <p class="text-gray-500 text-sm leading-relaxed">{{ $step->description ?? '' }}</p>
-                        </div>
+                    <h2 class="text-4xl font-extrabold text-gray-900 mb-8 leading-tight">Empowering Citizens through <br><span style="color: var(--primary-color);">Dedicated Welfare</span></h2>
+                    <div class="prose prose-slate prose-lg max-w-none text-gray-600 leading-relaxed space-y-4">
+                        {!! nl2br(e($scheme_json->about->long ?? 'No detailed description available.')) !!}
                     </div>
-                    @endforeach
-                </div>
-
-                <div class="mt-10">
-                    <a href="#" class="cta-button w-full justify-center">
-                        <i class="fas fa-download"></i>
-                        Download Application Form
-                    </a>
                 </div>
             </div>
-            @endif
 
-            <!-- Support Card -->
-            <div class="content-card text-white animate-up border-none overflow-hidden relative bg-gradient-to-br from-indigo-600 to-slate-800" style="animation-delay: 0.9s">
-                <!-- Background decorative blur -->
-                <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-
-                <div class="relative z-10">
-                    <!-- Header with icon -->
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center">
-                            <i class="fas fa-headset"></i>
+            <!-- Eligibility Panel -->
+            <div id="panel-eligibility" class="tab-panel hidden relative z-10">
+                <div class="max-w-4xl">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-10">Who can Apply?</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @if(isset($scheme_json->eligibility->eligibility_criteria->key))
+                        @foreach ($scheme_json->eligibility->eligibility_criteria->key as $criteria)
+                        <div class="elegant-list-item" style="animation-delay: {{ $loop->index * 0.1 }}s">
+                            <div class="elegant-icon-box"><i class="{{ $criteria->icon ?? 'fas fa-check' }}"></i></div>
+                            <div>
+                                <h4 class="font-bold text-gray-800 text-sm mb-1 uppercase tracking-wider">{{ $criteria->title ?? '' }}</h4>
+                                <p class="text-gray-500 text-sm">{{ $criteria->description ?? '' }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <span class="text-xs font-bold uppercase tracking-widest text-indigo-600">24/7 Support Center</span>
+                        @endforeach
+                        @else
+                        <div class="elegant-list-item">
+                            <div class="elegant-icon-box"><i class="fas fa-home"></i></div>
+                            <div class="text-gray-700 font-medium">Permanent Resident of West Bengal</div>
                         </div>
+                        @if(isset($scheme_json->eligibility->age))
+                        <div class="elegant-list-item" style="animation-delay: 0.1s">
+                            <div class="elegant-icon-box"><i class="fas fa-id-card"></i></div>
+                            <div class="text-gray-700 font-medium">Age between {{ $scheme_json->eligibility->age->min ?? '0' }} - {{ $scheme_json->eligibility->age->max ?? '100' }} Years</div>
+                        </div>
+                        @endif
+                        @endif
                     </div>
-
-                    <!-- Main text -->
-                    <h3 class="text-2xl font-bold mb-2 text-gray-700">Need Assistance?</h3>
-                    <p class="text-indigo-600 mb-8 text-sm leading-relaxed">
-                        Our support team is available around the clock to help you. Call us for any questions or concerns.
-                    </p>
-
-                    <!-- Call button -->
-                    <a href="tel:1800" class="flex items-center justify-between font-bold text-lg bg-white text-indigo-600 p-4 rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-xl">
-                        <span class="flex items-center gap-3">
-                            <i class="fas fa-phone-alt group-hover:rotate-12 transition-transform"></i>
-                            1800-XXX-XXXX
-                        </span>
-                        <i class="fas fa-arrow-right text-sm opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
-                    </a>
                 </div>
+            </div>
+
+            <!-- Ineligibility Panel -->
+            <div id="panel-ineligibility" class="tab-panel hidden relative z-10">
+                <div class="max-w-4xl">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-10">Exclusion Criteria</h2>
+                    @php
+                    $exclusionDesc = $scheme_json->eligibility->exclusion->description ?? 'Applicants receiving other government pensions or working in regular government jobs.';
+                    $exclusions = explode('.', $exclusionDesc);
+                    @endphp
+                    <div class="space-y-4">
+                        @foreach($exclusions as $ex)
+                        @if(trim($ex))
+                        <div class="elegant-list-item" style="animation-delay: {{ $loop->index * 0.1 }}s">
+                            <div class="elegant-icon-box !bg-red-50 !text-red-500"><i class="fas fa-times"></i></div>
+                            <div class="text-gray-600 font-medium">{{ trim($ex) }}.</div>
+                        </div>
+                        @endif
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <!-- Benefits Panel -->
+            <div id="panel-benefits" class="tab-panel hidden relative z-10">
+                <div class="max-w-4xl">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-10">Key Benefits</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        @if(isset($scheme_json->benefits))
+                        @foreach($scheme_json->benefits as $benefit)
+                        <div class="group/benefit p-8 rounded-[2.5rem] bg-gray-50 transition-all duration-500 border border-transparent hover:border-gray-200" onmouseover="this.style.backgroundColor='var(--primary-color)'" onmouseout="this.style.backgroundColor=''">
+                            <div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-6 shadow-sm group-hover/benefit:scale-110 transition-transform" style="color: var(--primary-color);">
+                                <i class="{{ $benefit->icon ?? 'fas fa-shield-heart' }} text-xl"></i>
+                            </div>
+                            <h4 class="text-xl font-bold text-gray-800 mb-3 group-hover/benefit:text-white transition-colors">{{ $benefit->title ?? '' }}</h4>
+                            <p class="text-gray-500 text-sm leading-relaxed group-hover/benefit:text-white/80 transition-colors">{{ $benefit->description ?? '' }}</p>
+                        </div>
+                        @endforeach
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Implementation Panel -->
+            <div id="panel-implementation" class="tab-panel hidden relative z-10">
+                <div class="max-w-4xl">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-10">Process Workflow</h2>
+                    <div class="relative space-y-12 ml-6">
+                        <div class="absolute left-[-24px] top-4 bottom-4 w-px bg-dashed bg-gray-200"></div>
+                        @if(isset($scheme_json->workflow->steps))
+                        @foreach($scheme_json->workflow->steps as $step)
+                        <div class="relative flex items-start gap-8 group/step">
+                            <div class="absolute left-[-36px] w-6 h-6 rounded-full bg-white border-4 z-10 group-hover/step:scale-125 transition-transform" style="border-color: var(--primary-color);"></div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs" style="color: var(--primary-color);">{{ $step->name ?? 'Step' }}</h4>
+                                <p class="text-gray-600 font-medium leading-relaxed">{{ $step->description ?? '' }}</p>
+                            </div>
+                        </div>
+                        @endforeach
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions Panel -->
+            <div id="panel-instructions" class="tab-panel hidden relative z-10">
+                <div class="max-w-4xl">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-10">Documents Required</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        @if(isset($scheme_json->required->documents))
+                        @foreach((array)$scheme_json->required->documents as $doc)
+                        <div class="flex items-center gap-4 p-5 rounded-2xl bg-gray-50 border border-gray-100 hover:bg-white hover:shadow-md transition-all">
+                            <div class="w-10 h-10 rounded-xl bg-white text-orange-500 flex items-center justify-center shadow-sm">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <span class="text-gray-700 font-bold text-sm">{{ $doc }}</span>
+                        </div>
+                        @endforeach
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+
+        <!-- Scaled Support & Download Section -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-2 p-8 rounded-3xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group" style="background-color: var(--primary-color); box-shadow: 0 10px 25px -5px var(--primary-soft);">
+
+                <div class="relative z-10 text-white">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-[0.2em] mb-4 shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> 24/7 Live Support
+                    </div>
+                    <h3 class="text-2xl font-black mb-2 tracking-tight">Technical Queries?</h3>
+                    <p class="text-white/90 font-medium text-sm max-w-sm leading-relaxed">
+                        Encountering issues with your application? Our dedicated helpdesk is ready to assist you.
+                    </p>
+                </div>
+
+                <a href="tel:1800" class="relative z-10 bg-white px-6 py-4 rounded-2xl font-black text-xl flex items-center gap-4 hover:scale-105 active:scale-95 transition-all duration-300 shadow-xl group/btn border-2 border-transparent hover:border-white/50" style="color: var(--primary-color);">
+                    <i class="fas fa-phone-alt animate-bounce text-xl"></i>
+                    <div class="flex flex-col items-start leading-none text-gray-800">
+                        <span class="text-[9px] uppercase tracking-widest opacity-60 mb-1 font-bold">Toll Free</span>
+                        1800-XXX-XXXX
+                    </div>
+                </a>
+            </div>
+
+            <!-- Download Form Card -->
+            <div class="bg-white p-8 rounded-3xl shadow-lg shadow-gray-200/50 flex flex-col items-center justify-center text-center border border-gray-100 group transition-all duration-500 relative overflow-hidden hover:border-gray-300">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 relative" style="background-color: var(--primary-soft);">
+                    <i class="fas fa-cloud-download-alt text-3xl relative z-10" style="color: var(--primary-color);"></i>
+                </div>
+                <h3 class="font-black text-xl text-gray-800 mb-1">Application Form</h3>
+                <p class="text-gray-400 font-medium text-xs mb-6">Official PDF Document <br> (Size: 1.2 MB)</p>
+                
+                <a href="#" class="w-full py-3.5 rounded-xl bg-gray-900 text-white font-black text-sm transition-all duration-300 shadow-lg flex items-center justify-center gap-2 hover:opacity-90 hover:scale-105" style="box-shadow: 0 5px 15px -3px var(--primary-soft);">
+                    <i class="fas fa-file-pdf"></i>
+                    Get Form
+                </a>
             </div>
         </div>
     </section>
@@ -506,7 +684,30 @@ $primaryRgb = $scheme_json->ref_color_rgb ?? $colors['rgb'];
         }, duration / steps);
     }
 
+    function switchTab(tabId) {
+        // Hide all panels
+        document.querySelectorAll('.tab-panel').forEach(p => {
+            p.classList.add('hidden');
+            p.classList.remove('animate-up');
+        });
+
+        // Show selected panel
+        const panel = document.getElementById('panel-' + tabId);
+        if (panel) {
+            panel.classList.remove('hidden');
+            // Trigger reflow for animation
+            void panel.offsetWidth;
+            panel.classList.add('animate-up');
+        }
+
+        // Update tab buttons
+        document.querySelectorAll('.premium-tab').forEach(b => b.classList.remove('active'));
+        const activeTab = document.getElementById('tab-' + tabId);
+        if (activeTab) activeTab.classList.add('active');
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+        // ... (existing counter code)
         const counters = [{
                 id: 'beneficiariesCounter',
                 formatter: formatIndianCompact

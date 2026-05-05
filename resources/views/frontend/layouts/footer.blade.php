@@ -3,10 +3,10 @@
 <footer class="footer-decoration bg-gray-800 text-gray-300 py-10 relative overflow-hidden">
 
     <!-- Decorative floating icons -->
-    <i class="floating-icon icon-1 fas fa-leaf text-green-400"></i>
+    <i class="floating-icon icon-1 fa-thin fa-flower text-green-400"></i>
     <i class="floating-icon icon-2 fas fa-heart text-pink-400"></i>
     <i class="floating-icon icon-3 fas fa-star text-yellow-400"></i>
-    <i class="floating-icon icon-4 fas fa-seedling text-emerald-400"></i>
+    <i class="floating-icon icon-4 fa-thin fa-flower text-emerald-400"></i>
 
     <div class="max-w-7xl mx-auto px-4 relative z-10">
         <!-- Government Seals and Logos -->

@@ -52,7 +52,7 @@
                     {
                         "name": "Collect Application Form",
                         "rank": 1,
-                        "description": "Available at Block Development Office or can be downloaded online."
+                        "description": "Available at Block & Subdivision Development Office or can be downloaded online."
                     },
                     {
                         "name": "Submit Documents",
@@ -83,14 +83,8 @@
                     "max": 120,
                     "min": 60
                 },
-                "caste": [
-                    "ST"
-                ],
-                "gender": [
-                    "Male",
-                    "Female",
-                    "Others"
-                ],
+                "caste": ["ST"],
+                "gender": ["Male", "Female", "Others"],
                 "income": {
                     "max": 100000,
                     "min": 0
@@ -279,7 +273,7 @@
                     {
                         "name": "Collect Application Form",
                         "rank": 1,
-                        "description": "Available at Block Development Office or can be downloaded online."
+                        "description": "Available at Block & Subdivision Development Office or can be downloaded online."
                     },
                     {
                         "name": "Submit Documents",
@@ -305,14 +299,8 @@
                     "max": 120,
                     "min": 60
                 },
-                "caste": [
-                    "ST"
-                ],
-                "gender": [
-                    "Male",
-                    "Female",
-                    "Others"
-                ],
+                "caste": ["ST"],
+                "gender": ["Male", "Female", "Others"],
                 "income": {
                     "max": 100000,
                     "min": 0
@@ -424,7 +412,7 @@
                     {
                         "name": "Collect Application Form",
                         "rank": 1,
-                        "description": "Available at Block Development Office or can be downloaded online."
+                        "description": "Available at Block & Subdivision Development Office or can be downloaded online."
                     },
                     {
                         "name": "Submit Documents",
@@ -450,14 +438,8 @@
                     "max": 120,
                     "min": 60
                 },
-                "caste": [
-                    "ST"
-                ],
-                "gender": [
-                    "Male",
-                    "Female",
-                    "Others"
-                ],
+                "caste": ["SC"],
+                "gender": ["Male", "Female", "Others"],
                 "income": {
                     "max": 100000,
                     "min": 0
@@ -502,8 +484,8 @@
                 "allocation": "1000000000",
                 "beneficiaries": "25L+",
                 "direct_transfer": "100%",
-                "eligibility_age": "0+",
-                "eligibility_caste": "Scheduled Tribe (ST)",
+                "eligibility_age": "60+",
+                "eligibility_caste": "Scheduled Caste (SC)",
                 "eligibility_criteria": "Specially Abled"
             },
             "scheme_name": "Taposili Bandhu(for SC)",
@@ -569,7 +551,7 @@
                     {
                         "name": "Collect Application Form",
                         "rank": 1,
-                        "description": "Available at Block Development Office or can be downloaded online."
+                        "description": "Available at Block & Subdivision Development Office or can be downloaded online."
                     },
                     {
                         "name": "Submit Documents",
@@ -595,14 +577,8 @@
                     "max": 120,
                     "min": 60
                 },
-                "caste": [
-                    "ST"
-                ],
-                "gender": [
-                    "Male",
-                    "Female",
-                    "Others"
-                ],
+                "caste": ["ST"],
+                "gender": ["Male", "Female", "Others"],
                 "income": {
                     "max": 100000,
                     "min": 0
@@ -714,7 +690,7 @@
                     {
                         "name": "Collect Application Form",
                         "rank": 1,
-                        "description": "Available at Block Development Office or can be downloaded online."
+                        "description": "Available at Block & Subdivision Development Office or can be downloaded online."
                     },
                     {
                         "name": "Submit Documents",
@@ -740,14 +716,8 @@
                     "max": 120,
                     "min": 60
                 },
-                "caste": [
-                    "ST"
-                ],
-                "gender": [
-                    "Male",
-                    "Female",
-                    "Others"
-                ],
+                "caste": ["ST"],
+                "gender": ["Male", "Female", "Others"],
                 "income": {
                     "max": 100000,
                     "min": 0
@@ -859,7 +829,7 @@
                     {
                         "name": "Collect Application Form",
                         "rank": 1,
-                        "description": "Available at Block Development Office or can be downloaded online."
+                        "description": "Available at Block & Subdivision Development Office or can be downloaded online."
                     },
                     {
                         "name": "Submit Documents",
@@ -885,14 +855,8 @@
                     "max": 120,
                     "min": 60
                 },
-                "caste": [
-                    "ST"
-                ],
-                "gender": [
-                    "Male",
-                    "Female",
-                    "Others"
-                ],
+                "caste": ["ST"],
+                "gender": ["Male", "Female", "Others"],
                 "income": {
                     "max": 100000,
                     "min": 0
@@ -1004,7 +968,7 @@
                     {
                         "name": "Collect Application Form",
                         "rank": 1,
-                        "description": "Available at Block Development Office or can be downloaded online."
+                        "description": "Available at Block & Subdivision Development Office or can be downloaded online."
                     },
                     {
                         "name": "Submit Documents",
@@ -1030,14 +994,8 @@
                     "max": 120,
                     "min": 60
                 },
-                "caste": [
-                    "ST"
-                ],
-                "gender": [
-                    "Male",
-                    "Female",
-                    "Others"
-                ],
+                "caste": ["ST"],
+                "gender": ["Male", "Female", "Others"],
                 "income": {
                     "max": 100000,
                     "min": 0
@@ -1149,7 +1107,7 @@
                     {
                         "name": "Collect Application Form",
                         "rank": 1,
-                        "description": "Available at Block Development Office or can be downloaded online."
+                        "description": "Available at Block & Subdivision Development Office or can be downloaded online."
                     },
                     {
                         "name": "Submit Documents",
@@ -1175,14 +1133,8 @@
                     "max": 120,
                     "min": 60
                 },
-                "caste": [
-                    "ST"
-                ],
-                "gender": [
-                    "Male",
-                    "Female",
-                    "Others"
-                ],
+                "caste": ["ST"],
+                "gender": ["Male", "Female", "Others"],
                 "income": {
                     "max": 100000,
                     "min": 0
@@ -1294,7 +1246,7 @@
                     {
                         "name": "Collect Application Form",
                         "rank": 1,
-                        "description": "Available at Block Development Office or can be downloaded online."
+                        "description": "Available at Block & Subdivision Development Office or can be downloaded online."
                     },
                     {
                         "name": "Submit Documents",
@@ -1320,14 +1272,8 @@
                     "max": 120,
                     "min": 60
                 },
-                "caste": [
-                    "ST"
-                ],
-                "gender": [
-                    "Male",
-                    "Female",
-                    "Others"
-                ],
+                "caste": ["ST"],
+                "gender": ["Male", "Female", "Others"],
                 "income": {
                     "max": 100000,
                     "min": 0
@@ -1439,7 +1385,7 @@
                     {
                         "name": "Collect Application Form",
                         "rank": 1,
-                        "description": "Available at Block Development Office or can be downloaded online."
+                        "description": "Available at Block & Subdivision Development Office or can be downloaded online."
                     },
                     {
                         "name": "Submit Documents",
@@ -1465,14 +1411,8 @@
                     "max": 120,
                     "min": 60
                 },
-                "caste": [
-                    "ST"
-                ],
-                "gender": [
-                    "Male",
-                    "Female",
-                    "Others"
-                ],
+                "caste": ["ST"],
+                "gender": ["Male", "Female", "Others"],
                 "income": {
                     "max": 100000,
                     "min": 0
@@ -1584,7 +1524,7 @@
                     {
                         "name": "Collect Application Form",
                         "rank": 1,
-                        "description": "Available at Block Development Office or can be downloaded online."
+                        "description": "Available at Block & Subdivision Development Office or can be downloaded online."
                     },
                     {
                         "name": "Submit Documents",
@@ -1610,14 +1550,8 @@
                     "max": 120,
                     "min": 60
                 },
-                "caste": [
-                    "ST"
-                ],
-                "gender": [
-                    "Male",
-                    "Female",
-                    "Others"
-                ],
+                "caste": ["ST"],
+                "gender": ["Male", "Female", "Others"],
                 "income": {
                     "max": 100000,
                     "min": 0
@@ -1729,7 +1663,7 @@
                     {
                         "name": "Collect Application Form",
                         "rank": 1,
-                        "description": "Available at Block Development Office or can be downloaded online."
+                        "description": "Available at Block & Subdivision Development Office or can be downloaded online."
                     },
                     {
                         "name": "Submit Documents",
@@ -1755,14 +1689,8 @@
                     "max": 120,
                     "min": 60
                 },
-                "caste": [
-                    "ST"
-                ],
-                "gender": [
-                    "Male",
-                    "Female",
-                    "Others"
-                ],
+                "caste": ["ST"],
+                "gender": ["Male", "Female", "Others"],
                 "income": {
                     "max": 100000,
                     "min": 0
@@ -1873,7 +1801,7 @@
                     {
                         "name": "Collect Application Form",
                         "rank": 1,
-                        "description": "Available at Block Development Office or can be downloaded online."
+                        "description": "Available at Block & Subdivision Development Office or can be downloaded online."
                     },
                     {
                         "name": "Submit Documents",
@@ -1899,14 +1827,8 @@
                     "max": 120,
                     "min": 60
                 },
-                "caste": [
-                    "ST"
-                ],
-                "gender": [
-                    "Male",
-                    "Female",
-                    "Others"
-                ],
+                "caste": ["ST"],
+                "gender": ["Male", "Female", "Others"],
                 "income": {
                     "max": 100000,
                     "min": 0
