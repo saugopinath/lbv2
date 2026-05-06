@@ -1,89 +1,72 @@
 @php
-// Determine status color based on dynamic status
-$statusLower = strtolower($status ?? '');
-$dotColor = '#f97316'; // Default orange
-$pillBg = 'rgba(249, 115, 22, 0.05)';
-$pillBorder = 'rgba(249, 115, 22, 0.1)';
-$pillText = '#ea580c';
+    // Determine status color based on dynamic status
+    $statusLower = strtolower($status ?? '');
+    $dotColor = '#4f46e5'; // Default indigo
+    $pillBg = '#eef2ff';
+    $pillBorder = '#e0e7ff';
+    $pillText = '#4338ca';
 
-if (str_contains($statusLower, 'reject') || str_contains($statusLower, 'cancel')) {
-$dotColor = '#ef4444';
-$pillBg = 'rgba(239, 68, 68, 0.05)';
-$pillBorder = 'rgba(239, 68, 68, 0.1)';
-$pillText = '#dc2626';
-} elseif (str_contains($statusLower, 'approved') || str_contains($statusLower, 'success')) {
-$dotColor = '#10b981';
-$pillBg = 'rgba(16, 185, 129, 0.05)';
-$pillBorder = 'rgba(16, 185, 129, 0.1)';
-$pillText = '#059669';
-}
+    if (str_contains($statusLower, 'reject') || str_contains($statusLower, 'cancel')) {
+        $dotColor = '#ef4444';
+        $pillBg = '#fef2f2';
+        $pillBorder = '#fee2e2';
+        $pillText = '#b91c1c';
+    } elseif (str_contains($statusLower, 'approved') || str_contains($statusLower, 'success')) {
+        $dotColor = '#10b981';
+        $pillBg = '#f0fdf4';
+        $pillBorder = '#dcfce7';
+        $pillText = '#15803d';
+    } elseif (str_contains($statusLower, 'pend') || str_contains($statusLower, 'process')) {
+        $dotColor = '#f59e0b';
+        $pillBg = '#fffbeb';
+        $pillBorder = '#fef3c7';
+        $pillText = '#b45309';
+    }
 @endphp
 
-<div class="beneficiary-card group relative rounded-[2rem] p-6 shadow-[0_15px_40px_rgba(0,0,0,0.06)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(249,115,22,0.12)] border border-gray-100 overflow-hidden flex flex-col bg-white"
-    style="font-family: 'Plus Jakarta Sans', sans-serif; min-height: 520px;">
+<div class="beneficiary-card group relative rounded-[1.5rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(79,70,229,0.08)] border border-slate-100 overflow-hidden flex flex-col bg-white"
+    style="font-family: 'Plus Jakarta Sans', sans-serif; min-height: 480px;">
 
-    {{-- ── DECORATIVE LEAVES AT BOTTOM ── --}}
-    <div class="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-orange-50/50 to-transparent pointer-events-none z-0"></div>
-
-    <div class="absolute -bottom-4 -left-6 w-24 h-24 opacity-20 pointer-events-none rotate-12 transition-transform duration-700 group-hover:rotate-[20deg] z-0">
-        <svg viewBox="0 0 100 100" fill="#f97316">
-            <path d="M50 100C50 100 10 70 10 40C10 10 50 0 50 0C50 0 90 10 90 40C90 70 50 100 50 100Z" />
-        </svg>
-    </div>
-    <div class="absolute -bottom-8 left-12 w-32 h-32 opacity-15 pointer-events-none -rotate-12 transition-transform duration-1000 group-hover:-rotate-[15deg] z-0">
-        <svg viewBox="0 0 100 100" fill="#f97316">
-            <path d="M50 100C50 100 10 70 10 40C10 10 50 0 50 0C50 0 90 10 90 40C90 70 50 100 50 100Z" />
-        </svg>
-    </div>
-    <div class="absolute -bottom-6 right-0 w-28 h-28 opacity-20 pointer-events-none rotate-45 transition-transform duration-700 group-hover:rotate-[55deg] z-0">
-        <svg viewBox="0 0 100 100" fill="#f97316">
-            <path d="M50 100C50 100 10 70 10 40C10 10 50 0 50 0C50 0 90 10 90 40C90 70 50 100 50 100Z" />
-        </svg>
-    </div>
-    <div class="absolute -bottom-10 -right-8 w-40 h-40 opacity-10 pointer-events-none -rotate-12 transition-transform duration-1000 group-hover:-rotate-[20deg] z-0">
-        <svg viewBox="0 0 100 100" fill="#f97316">
-            <path d="M50 100C50 100 10 70 10 40C10 10 50 0 50 0C50 0 90 10 90 40C90 70 50 100 50 100Z" />
-        </svg>
-    </div>
+    {{-- ── DECORATIVE AMBIENT GLOW ── --}}
+    <div class="absolute -top-24 -right-24 w-64 h-64 rounded-full pointer-events-none opacity-[0.03]"
+        style="background: radial-gradient(circle, #4f46e5 0%, transparent 70%);"></div>
 
     {{-- ── HEADER ── --}}
-    <div class="relative flex justify-between items-start mb-6 z-10">
-        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-widest"
+    <div class="relative flex justify-between items-start mb-6">
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider"
             style="background: {{ $pillBg }}; border-color: {{ $pillBorder }}; color: {{ $pillText }};">
-            <span class="w-2 h-2 rounded-full animate-pulse" style="background: {{ $dotColor }}; box-shadow: 0 0 8px {{ $dotColor }};"></span>
+            <span class="w-2 h-2 rounded-full" style="background: {{ $dotColor }};"></span>
             {{ $status }}
         </div>
         <div class="text-right">
-            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Application ID</p>
-            <p class="text-xs font-mono font-bold tracking-wider text-orange-600">{{ $applicationId }}</p>
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Application ID</p>
+            <p class="text-xs font-mono font-bold tracking-wider text-indigo-600">{{ $applicationId }}</p>
         </div>
     </div>
 
-    {{-- ── PROFILE ── --}}
-    <div class="relative flex items-center gap-4 mb-6 z-10">
+    {{-- ── PROFILE SECTION ── --}}
+    <div class="relative flex items-center gap-4 mb-8">
         <div class="relative shrink-0">
-            <div class="absolute -inset-1 rounded-full bg-orange-500 opacity-20 blur-[4px]"></div>
+            <div class="absolute -inset-1 rounded-full bg-indigo-500 opacity-10 blur-[4px]"></div>
             @if ($ben_profile_pic && isset($ben_profile_pic['attched_document']))
-            @php
-            $document_mime_type = $ben_profile_pic['document_mime_type'] ?? 'image/jpeg';
-            $image_extension = ($document_mime_type == 'image/png') ? 'png' : 'jpg';
-            $row_image = "data:image/" . $image_extension . ";base64," . $ben_profile_pic['attched_document'];
-            @endphp
-            <img src="{{ $row_image }}" alt="Profile" class="relative w-16 h-16 rounded-full border-2 border-white object-cover shadow-sm">
+                @php
+                    $document_mime_type = $ben_profile_pic['document_mime_type'] ?? 'image/jpeg';
+                    $image_extension = ($document_mime_type == 'image/png') ? 'png' : 'jpg';
+                    $row_image = "data:image/" . $image_extension . ";base64," . $ben_profile_pic['attched_document']; 
+                @endphp
+                <img src="{{ $row_image }}" alt="Profile" class="relative w-14 h-14 rounded-full border border-slate-200 object-cover">
             @else
-            <div class="relative w-16 h-16 rounded-full flex items-center justify-center border-2 border-white shadow-sm"
-                style="background: linear-gradient(135deg, #f97316, #ea580c);">
-                <i class="fas fa-user text-white text-2xl"></i>
-            </div>
+                <div class="relative w-14 h-14 rounded-full flex items-center justify-center border border-slate-200 bg-slate-50">
+                    <i class="fas fa-user text-slate-400 text-xl"></i>
+                </div>
             @endif
         </div>
         <div class="min-w-0">
-            <h3 class="text-2xl font-bold text-slate-800 truncate leading-tight">
+            <h3 class="text-xl font-bold text-slate-800 truncate leading-tight group-hover:text-indigo-600 transition-colors">
                 {{ $name }}
             </h3>
             <div class="flex items-center gap-2 mt-1">
-                <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-tighter border border-orange-500/20"
-                    style="background: rgba(249, 115, 22, 0.05); color: #ea580c;">
+                <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-tighter bg-slate-100 text-slate-600 border border-slate-200">
                     {{ $relation }}
                 </span>
                 <span class="text-sm font-medium text-slate-500 truncate">{{ $relationName }}</span>
@@ -91,41 +74,41 @@ $pillText = '#059669';
         </div>
     </div>
 
-    {{-- ── INFO SECTION (Individual Containers) ── --}}
-    <div class="relative space-y-3 mb-8 z-10">
+    {{-- ── INFO SECTION ── --}}
+    <div class="relative flex-1 space-y-4 mb-8">
         @php
-        $infoItems = [
-        ['icon' => 'fa-shield-alt', 'label' => 'Applied Scheme', 'value' => $schemeName],
-        ['icon' => 'fa-map-marker-alt', 'label' => 'Location', 'value' => $location],
-        ['icon' => 'fa-phone-alt', 'label' => 'Contact', 'value' => $mobile],
-        ];
+            $infoItems = [
+                ['icon' => 'fa-shield-alt', 'label' => 'Applied Scheme', 'value' => $schemeName, 'color' => 'indigo'],
+                ['icon' => 'fa-map-marker-alt', 'label' => 'Location', 'value' => $location, 'color' => 'slate'],
+                ['icon' => 'fa-phone-alt', 'label' => 'Contact', 'value' => $mobile, 'color' => 'slate'],
+            ];
         @endphp
 
         @foreach($infoItems as $item)
-        <div class="flex items-center gap-4 p-3 rounded-2xl border border-orange-500/5 transition-all duration-300 hover:border-orange-500/20 bg-orange-50/20 backdrop-blur-sm">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-white shadow-sm border border-orange-100">
-                <i class="fas {{ $item['icon'] }} text-sm text-orange-500"></i>
+        <div class="flex items-center gap-4 group/item">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 bg-slate-50 border border-slate-100 group-hover/item:bg-white group-hover/item:border-indigo-100 group-hover/item:shadow-sm">
+                <i class="fas {{ $item['icon'] }} text-xs text-slate-400 group-hover/item:text-indigo-500"></i>
             </div>
             <div class="min-w-0">
-                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">{{ $item['label'] }}</p>
-                <p class="text-[13px] font-bold text-slate-700 truncate">{{ $item['value'] }}</p>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">{{ $item['label'] }}</p>
+                <p class="text-sm font-semibold text-slate-700 truncate">{{ $item['value'] }}</p>
             </div>
         </div>
         @endforeach
     </div>
 
     {{-- ── ACTIONS ── --}}
-    <div class="relative mt-auto pt-2 space-y-3 z-10">
+    <div class="relative space-y-3">
         <a href="{{ $beneficiaryDetailsUrl }}"
-            class="group/btn flex items-center justify-center gap-3 w-full py-4 rounded-xl text-sm font-black uppercase tracking-widest text-white transition-all duration-300 shadow-[0_8px_20px_rgba(249,115,22,0.2)] hover:shadow-[0_12px_28px_rgba(249,115,22,0.3)] hover:-translate-y-1 active:scale-95"
-            style="background: linear-gradient(135deg, #f97316, #ea580c);">
+            class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold text-white transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:scale-95"
+            style="background: #4f46e5;">
             View Full Profile
-            <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/btn:translate-x-1"></i>
+            <i class="fas fa-arrow-right text-[10px]"></i>
         </a>
 
         <a href="{{ $paymentUrl }}"
-            class="flex items-center justify-center gap-3 w-full py-4 rounded-xl text-sm font-black uppercase tracking-widest text-orange-600 border-2 border-orange-500/20 bg-white/80 backdrop-blur-sm transition-all duration-300 hover:border-emerald-500/40 hover:bg-orange-50/30">
-            <i class="fas fa-indian-rupee-sign text-xs"></i>
+            class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold text-slate-600 border border-slate-200 bg-white transition-all duration-300 hover:border-indigo-200 hover:bg-slate-50 hover:text-indigo-600">
+            <i class="fas fa-indian-rupee-sign text-[10px]"></i>
             Payment History
         </a>
     </div>
@@ -137,19 +120,12 @@ $pillText = '#059669';
 <style>
     .beneficiary-card {
         backface-visibility: hidden;
-        animation: bc-reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        animation: bc-reveal-smooth 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
-    @keyframes bc-reveal {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    @keyframes bc-reveal-smooth {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
 @endpush
