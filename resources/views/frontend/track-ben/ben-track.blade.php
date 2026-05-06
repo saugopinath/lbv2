@@ -1,874 +1,943 @@
 @extends('frontend.layouts.app-template')
 @push('styles')
-    <style>
-        .input {
-            @apply p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 transition-all duration-200 w-full;
+<style>
+    :root {
+        --primary: #4f46e5;
+        --primary-light: #818cf8;
+        --primary-dark: #3730a3;
+        --secondary: #64748b;
+        --accent: #f59e0b;
+        --bg-main: #f8fafc;
+        --glass-bg: rgba(255, 255, 255, 0.8);
+        --glass-border: rgba(255, 255, 255, 0.5);
+    }
+
+    body {
+        font-family: 'Inter', 'Poppins', sans-serif;
+        background-color: var(--bg-main);
+    }
+
+    .input {
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        transition: all 0.2s ease;
+        width: 100%;
+        font-size: 0.875rem;
+    }
+
+    .input:focus {
+        outline: none;
+        border-color: var(--primary-light);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+    .area-btn {
+        padding: 0.625rem 0.75rem;
+        border-radius: 0.75rem;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+        font-size: 0.875rem;
+        background: #fff;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        color: var(--secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .area-btn i {
+        color: var(--primary);
+        opacity: 0.7;
+        transition: all 0.3s ease;
+    }
+
+    .area-btn:hover {
+        border-color: var(--primary-light);
+        background: #f5f3ff;
+        color: var(--primary);
+    }
+
+    .area-btn:hover i {
+        opacity: 1;
+        color: var(--primary);
+    }
+
+    .area-btn.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    }
+
+    .area-btn.active i {
+        opacity: 1;
+        color: #fff !important;
+    }
+
+    .filter-sidebar {
+        transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), width 0.2s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease;
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        z-index: 40;
+    }
+
+    .main-content {
+        transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        position: relative;
+        background:
+            radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.05) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, rgba(129, 140, 248, 0.05) 0px, transparent 50%),
+            radial-gradient(at 100% 100%, rgba(79, 70, 229, 0.05) 0px, transparent 50%),
+            radial-gradient(at 0% 100%, rgba(129, 140, 248, 0.05) 0px, transparent 50%);
+    }
+
+    .loader {
+        border: 3px solid #f1f5f9;
+        border-top: 3px solid var(--primary);
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
         }
 
-        .area-btn {
-            @apply border rounded-xl py-2.5 px-3 text-center text-sm transition-all duration-200 hover:border-indigo-400 hover:bg-indigo-50 cursor-pointer;
+        100% {
+            transform: rotate(360deg);
         }
+    }
 
-        .area-btn.active {
-            @apply bg-indigo-600 border-indigo-600 text-white font-medium shadow-md;
-        }
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.3);
+        backdrop-filter: blur(4px);
+        z-index: 35;
+        transition: opacity 0.2s ease;
+    }
 
-        .beneficiary-card {
-            @apply bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100;
-        }
+    .sidebar-overlay.active {
+        display: block;
+    }
 
-        .status-active {
-            @apply px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200;
-        }
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        border: none;
+        cursor: pointer;
+    }
 
-        .status-pending {
-            @apply px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700 border border-yellow-200;
-        }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        filter: brightness(1.1);
+    }
 
-        .status-inactive {
-            @apply px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200;
-        }
+    .btn-primary:active {
+        transform: translateY(0);
+    }
 
+    .btn-secondary {
+        background: #fff;
+        color: var(--secondary);
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #1e293b;
+    }
+
+    #showSidebar {
+        background: white;
+        color: var(--primary);
+        border: 1px solid rgba(79, 70, 229, 0.2);
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #showSidebar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.15);
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+        background: #fff;
+        border-radius: 2rem;
+        border: 1px dashed #e2e8f0;
+    }
+
+    .filter-field-highlight {
+        border-color: var(--primary) !important;
+        background-color: #f5f3ff !important;
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1) !important;
+    }
+
+    .filter-label-highlight {
+        color: var(--primary) !important;
+        font-weight: 600 !important;
+    }
+
+    /* Glass Cards */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+        border-radius: 1.5rem;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    @media (max-width: 768px) {
         .filter-sidebar {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .main-content {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .loader {
-            border: 3px solid #e5e7eb;
-            border-top: 3px solid #4f46e5;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Custom scrollbar */
-        .filter-sidebar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .filter-sidebar::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-
-        .filter-sidebar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-
-        .filter-sidebar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* Mobile sidebar overlay */
-        .sidebar-overlay {
-            display: none;
             position: fixed;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 40;
-            backdrop-filter: blur(2px);
+            left: -320px;
+            width: 300px !important;
+            height: 100vh;
+            transform: translateX(0);
         }
 
-        .sidebar-overlay.active {
-            display: block;
+        .filter-sidebar.mobile-open {
+            transform: translateX(320px);
         }
-
-        /* Improved input focus states */
-        .input:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        /* Better button states */
-        .btn-primary {
-            @apply bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold transition-all duration-300 shadow-md hover:shadow-lg active:scale-95;
-        }
-
-        .btn-secondary {
-            @apply bg-white hover:bg-gray-50 text-gray-700 font-medium border border-gray-300 transition-all duration-300 active:scale-95;
-        }
-
-        /* Empty state */
-        .empty-state {
-            @apply flex flex-col items-center justify-center py-16 text-center;
-        }
-
-        /* Search highlight animation */
-        @keyframes highlight {
-
-            0%,
-            100% {
-                background-color: transparent;
-            }
-
-            50% {
-                background-color: rgba(79, 70, 229, 0.1);
-            }
-        }
-
-        .search-highlight {
-            animation: highlight 1s ease-in-out;
-        }
-
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-            .filter-sidebar.mobile-open {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 85% !important;
-                max-width: 320px;
-                height: 100vh;
-                z-index: 50;
-                opacity: 1 !important;
-            }
-        }
-
-        /* Loading skeleton */
-        .skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s ease-in-out infinite;
-        }
-
-        @keyframes loading {
-            0% {
-                background-position: 200% 0;
-            }
-
-            100% {
-                background-position: -200% 0;
-            }
-        }
-
-        /* Filter highlight styling */
-        .filter-field-highlight {
-            border-color: #4f46e5 !important;
-            background-color: #f5f3ff !important;
-            box-shadow: 0 0 0 1px #4f46e5 !important;
-            font-weight: 500 !important;
-        }
-
-        .filter-label-highlight {
-            color: #4f46e5 !important;
-            transform: scale(1.02);
-            transition: all 0.2s ease;
-        }
-    </style>
+    }
+</style>
 @endpush
 
 @section('content')
-    @include('frontend.components.top-header')
-    @include('frontend.components.header')
+@include('frontend.components.top-header')
+@include('frontend.components.header')
 
-    <!-- Mobile Sidebar Overlay -->
-    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+<!-- Mobile Sidebar Overlay -->
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeMobileSidebar()"></div>
 
-    <div class="flex min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-        <!-- ================= COLLAPSIBLE FILTER SIDEBAR ================= -->
-        <aside id="filterSidebar"
-            class="filter-sidebar bg-white border-r border-gray-200 shadow-lg transition-all duration-300"
-            style="width: 320px;">
+<div class="flex min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <!-- ================= COLLAPSIBLE FILTER SIDEBAR ================= -->
+    <aside id="filterSidebar"
+        class="filter-sidebar bg-white border-r border-gray-200 shadow-lg transition-all duration-300"
+        style="width: 320px;">
 
-            <div
-                class="flex items-center justify-between p-5 border-b bg-gradient-to-r from-indigo-50 via-indigo-25 to-white sticky top-0 z-10">
-                <h2 class="font-bold text-xl text-gray-800 flex items-center">
-                    <i class="fa-solid fa-filter text-indigo-600 mr-2"></i>
+        <div
+            class="flex items-center justify-between p-5 border-b bg-gradient-to-r from-indigo-50 via-indigo-25 to-white sticky top-0 z-10">
+            <h2 class="font-bold text-xl text-gray-800 flex items-center">
+                <i class="fa-solid fa-filter text-indigo-600 mr-2"></i>
+                Filters
+            </h2>
+            <button id="toggleSidebar" class="p-2 rounded-lg hover:bg-indigo-100 transition-colors duration-200"
+                title="Collapse sidebar">
+                <i class="fa-solid fa-angle-left text-indigo-600"></i>
+            </button>
+        </div>
+
+        <div class="p-5 space-y-5 overflow-y-auto h-[calc(100vh-80px)]">
+            <!-- Scheme -->
+            <div>
+                <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                    <i class="fa-solid fa-clipboard-list mr-2"></i>
+                    Scheme
+                </label>
+                <select id="scheme" class="mt-1 input">
+                    <option value="">All Schemes</option>
+                    @foreach($schemes as $scheme)
+                    <option value="{{ $scheme->id }}">{{ $scheme->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- District -->
+            <div>
+                <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                    <i class="fa-solid fa-location-dot mr-2"></i>
+                    District
+                </label>
+                <select id="district" class="mt-1 input">
+                    <option value="">All Districts</option>
+                    @foreach($districts as $dist)
+                    <option value="{{ $dist->id }}">{{ $dist->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Area Type -->
+            <div>
+                <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                    <i class="fa-solid fa-layer-group mr-2"></i>
+                    Area Type
+                </label>
+                <div class="grid grid-cols-3 gap-2 mt-2">
+                    <button type="button" onclick="setArea('')" class="area-btn active" id="areaAll">
+                        <i class="fa-solid fa-earth-asia"></i>
+                        All
+                    </button>
+                    <button type="button" onclick="setArea('2')" class="area-btn" id="areaRural">
+                        <i class="fa-solid fa-city"></i>
+                        Rural
+                    </button>
+                    <button type="button" onclick="setArea('1')" class="area-btn" id="areaUrban">
+                        <i class="fa-solid fa-city"></i>
+                        Urban
+                    </button>
+                </div>
+                <input type="hidden" id="urban_code">
+            </div>
+
+            <!-- Block / Subdivision -->
+            <div id="blk_sub_div" style="display: none;">
+                <label id="blk_sub_txt" class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                    <i class="fa-solid fa-map-location-dot mr-2"></i>
+                    Block / Subdivision
+                </label>
+                <select id="block" class="mt-1 input">
+                    <option value="">All</option>
+                </select>
+            </div>
+
+            <!-- Municipality -->
+            <div id="municipality_div" style="display: none;">
+                <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                    <i class="fa-solid fa-city mr-2"></i>
+                    Municipality
+                </label>
+                <select id="muncid" class="mt-1 input">
+                    <option value="">All</option>
+                </select>
+            </div>
+
+            <!-- GP / Ward -->
+            <div id="gp_ward_div" style="display: none;">
+                <label id="gp_ward_txt" class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                    <i class="fa-solid fa-location-dot mr-2"></i>
+                    GP / Ward
+                </label>
+                <select id="gp_ward" class="mt-1 input">
+                    <option value="">All</option>
+                </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-6 space-y-3">
+                <button type="button" onclick="applyFilters()"
+                    class="w-full btn-primary flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-filter"></i>
+                    Apply Filters
+                </button>
+                <button type="button" onclick="resetFilters()"
+                    class="w-full btn-secondary flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 hover:border-red-200">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    Reset Filters
+                </button>
+            </div>
+
+            <!-- Results Info -->
+            <div class="mt-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                <div class="flex items-center text-blue-700">
+                    <i class="fa-solid fa-circle-info w-5 h-5 mr-2 flex-shrink-0"></i>
+                    <span class="text-sm font-medium">
+                        Showing <span id="resultCount" class="font-bold">{{ $results }}</span> beneficiaries
+                    </span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="main-content flex-1 p-4 md:p-6 transition-all duration-300" style="margin-left: 0;">
+
+        <!-- HEADER WITH SEARCH -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Beneficiary Search</h1>
+                <p class="text-gray-600 text-sm md:text-base">Search and filter beneficiary records</p>
+            </div>
+
+            <div class="flex gap-3">
+                <!-- Sidebar toggle button (visible when sidebar is collapsed) -->
+                <button type="button" id="showSidebar"
+                    class="hidden btn-primary px-6 py-2.5 rounded-full flex items-center shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95 border-2 border-white">
+                    <i class="fa-solid fa-sliders mr-2"></i>
+                    <span class="font-bold tracking-wide uppercase text-xs">Show Filters</span>
+                </button>
+
+                <!-- Mobile filter toggle -->
+                <button type="button" id="mobileToggleSidebar"
+                    class="md:hidden btn-primary px-4 py-2 rounded-xl flex items-center">
+                    <i class="fa-solid fa-sliders w-5 h-5 mr-2"></i>
                     Filters
-                </h2>
-                <button id="toggleSidebar" class="p-2 rounded-lg hover:bg-indigo-100 transition-colors duration-200"
-                    title="Collapse sidebar">
-                    <i class="fa-solid fa-angle-left text-indigo-600"></i>
                 </button>
             </div>
+        </div>
 
-            <div class="p-5 space-y-5 overflow-y-auto h-[calc(100vh-80px)]">
-                <!-- Scheme -->
-                <div>
-                    <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                        <i class="fa-solid fa-clipboard-list w-4 h-4 mr-2 text-indigo-500"></i>
-                        Scheme
-                    </label>
-                    <select id="scheme" class="mt-1 input">
-                        <option value="">All Schemes</option>
-                        @foreach($schemes as $scheme)
-                            <option value="{{ $scheme->id }}">{{ $scheme->name }}</option>
-                        @endforeach
-                    </select>
+        <!-- SEARCH BAR -->
+        <div class="max-w-4xl mx-auto mb-8 md:mb-10">
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-magnifying-glass text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
                 </div>
+                <input id="searchText" type="text"
+                    placeholder="Search by Beneficiary ID, Name, Mobile or Address..."
+                    class="w-full pl-12 pr-4 md:pr-40 py-4 rounded-2xl border border-gray-200 bg-white/50 backdrop-blur-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 shadow-sm transition-all duration-300 text-base">
 
-                <!-- District -->
-                <div>
-                    <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                        <i class="fa-solid fa-location-dot w-4 h-4 mr-2 text-indigo-500"></i>
-                        District
-                    </label>
-                    <select id="district" class="mt-1 input">
-                        <option value="">All Districts</option>
-                        @foreach($districts as $dist)
-                            <option value="{{ $dist->id }}">{{ $dist->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Area Type -->
-                <div>
-                    <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                        <i class="fa-solid fa-layer-group w-4 h-4 mr-2 text-indigo-500"></i>
-                        Area Type
-                    </label>
-                    <div class="grid grid-cols-3 gap-2 mt-2">
-                        <button type="button" onclick="setArea('')" class="area-btn active" id="areaAll">
-                            <i class="fa-solid fa-earth-asia w-4 h-4 inline-block mr-1 text-indigo-500"></i>
-                            All
-                        </button>
-                        <button type="button" onclick="setArea('2')" class="area-btn" id="areaRural">
-                            <i class="fa-solid fa-city mr-2 text-indigo-500"></i>
-                            Rural
-                        </button>
-                        <button type="button" onclick="setArea('1')" class="area-btn" id="areaUrban">
-                            <i class="fa-solid fa-city mr-2 text-indigo-500"></i>
-                            Urban
-                        </button>
-                    </div>
-                    <input type="hidden" id="urban_code">
-                </div>
-
-                <!-- Block / Subdivision -->
-                <div id="blk_sub_div" style="display: none;">
-                    <label id="blk_sub_txt" class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                        <i class="fa-solid fa-map-location-dot mr-2 text-indigo-500"></i>
-                        Block / Subdivision
-                    </label>
-                    <select id="block" class="mt-1 input">
-                        <option value="">All</option>
-                    </select>
-                </div>
-
-                <!-- Municipality -->
-                <div id="municipality_div" style="display: none;">
-                    <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                        <i class="fa-solid fa-city mr-2 text-indigo-500"></i>
-                        Municipality
-                    </label>
-                    <select id="muncid" class="mt-1 input">
-                        <option value="">All</option>
-                    </select>
-                </div>
-
-                <!-- GP / Ward -->
-                <div id="gp_ward_div" style="display: none;">
-                    <label id="gp_ward_txt" class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                        <i class="fa-solid fa-location-dot w-4 h-4 mr-2 text-indigo-500"></i>
-                        GP / Ward
-                    </label>
-                    <select id="gp_ward" class="mt-1 input">
-                        <option value="">All</option>
-                    </select>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="pt-4 space-y-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                    <button type="button" onclick="resetFilters()"
-                        class="w-full btn-secondary bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl flex items-center justify-center">
-                        <i class="fa-solid fa-refresh mr-2"></i>
-                        Reset Filters
-                    </button>
-                    <button type="button" onclick="applyFilters()"
-                        class="w-full btn-primary bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl flex items-center justify-center">
-                        <i class="fa-solid fa-filter mr-2"></i>
-                        Apply Filters
-                    </button>
-                </div>
-
-                <!-- Results Info -->
-                <div class="mt-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
-                    <div class="flex items-center text-blue-700">
-                        <i class="fa-solid fa-circle-info w-5 h-5 mr-2 flex-shrink-0"></i>
-                        <span class="text-sm font-medium">
-                            Showing <span id="resultCount" class="font-bold">{{ $results }}</span> beneficiaries
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- ================= MAIN CONTENT ================= -->
-        <main class="main-content flex-1 p-4 md:p-6 transition-all duration-300" style="margin-left: 0;">
-
-            <!-- HEADER WITH SEARCH -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-4">
-                <div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Beneficiary Search</h1>
-                    <p class="text-gray-600 text-sm md:text-base">Search and filter beneficiary records</p>
-                </div>
-
-                <div class="flex gap-3">
-                    <!-- Sidebar toggle button (visible when sidebar is collapsed) -->
-                    <button type="button" id="showSidebar"
-                        class="hidden btn-primary px-4 py-2 rounded-xl flex items-center">
-                        <i class="fa-solid fa-filter w-5 h-5 mr-2"></i>
-                        Filters
-                    </button>
-
-                    <!-- Mobile filter toggle -->
-                    <button type="button" id="mobileToggleSidebar"
-                        class="md:hidden btn-primary px-4 py-2 rounded-xl flex items-center">
-                        <i class="fa-solid fa-sliders w-5 h-5 mr-2"></i>
-                        Filters
-                    </button>
-                </div>
-            </div>
-
-            <!-- SEARCH BAR -->
-            <div class="max-w-4xl mx-auto mb-8 md:mb-10">
-                <div class="relative">
-                    <i
-                        class="fa-solid fa-magnifying-glass w-5 h-5 absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input id="searchText" type="text"
-                        placeholder="Search by Beneficiary ID, Name, Mobile Number or Address"
-                        class="w-full pl-14 pr-4 md:pr-36 py-3.5 md:py-4 rounded-2xl border border-gray-300 focus:ring-3 focus:ring-indigo-300 focus:border-indigo-500 shadow-sm transition-all duration-300 text-sm md:text-base">
-
-                    <button type="button" onclick="searchBeneficiary()"
-                        class="hidden md:flex absolute right-2 top-2 btn-primary px-6 md:px-8 py-2.5 md:py-3 rounded-xl items-center justify-center">
-                        <i class="fa-solid fa-magnifying-glass w-5 h-5 mr-2"></i>
-                        Search
-                    </button>
-                </div>
-            </div>
-
-            <!-- Loading Spinner -->
-            <div id="loadingSpinner" class="hidden flex justify-center items-center py-12">
-                <div class="loader"></div>
-                <span class="ml-3 text-gray-600 font-medium">Loading beneficiaries...</span>
-            </div>
-
-            <!-- ================= BENEFICIARY CARDS GRID ================= -->
-            <div id="resultArea" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-7xl mx-auto">
-                <!-- Dynamic cards will be loaded here -->
-            </div>
-
-            <!-- View More Button -->
-            <div class="text-center mt-8 md:mt-10">
-                <button type="button" id="viewMoreBtn" onclick="loadMore()"
-                    class="hidden btn-primary px-8 py-3 rounded-xl font-semibold inline-flex items-center">
-                    <i class="fa-solid fa-angle-down w-5 h-5 mr-2"></i>
-                    Load More
+                <button type="button" onclick="searchBeneficiary()"
+                    class="hidden md:flex absolute right-2 top-2 bottom-2 btn-primary px-8 items-center justify-center text-sm">
+                    Search
                 </button>
             </div>
-        </main>
-    </div>
+        </div>
 
-    @include('frontend.layouts.footer')
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="hidden flex justify-center items-center py-12">
+            <div class="loader"></div>
+            <span class="ml-3 text-gray-600 font-medium">Loading beneficiaries...</span>
+        </div>
+
+        <!-- ================= BENEFICIARY CARDS GRID ================= -->
+        <div id="resultArea" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-7xl mx-auto">
+            <!-- Dynamic cards will be loaded here -->
+        </div>
+
+        <!-- View More Button -->
+        <div class="text-center mt-8 md:mt-10">
+            <button type="button" id="viewMoreBtn" onclick="loadMore()"
+                class="hidden btn-primary px-8 py-3 rounded-xl font-semibold inline-flex items-center">
+                <i class="fa-solid fa-angle-down w-5 h-5 mr-2"></i>
+                Load More
+            </button>
+        </div>
+    </main>
+</div>
+
+@include('frontend.layouts.footer')
 @endsection
 
 @push('scripts')
-    <script>
-        // Data injected from Controller
-        const blocks = @json($blocks ?? []);
-        const subDistricts = @json($subDistricts ?? []);
-        const ulbs = @json($ulbs ?? []);
-        const gps = @json($gps ?? []);
-        const ulb_wards = @json($ulb_wards ?? []);
+<script>
+    // Data injected from Controller
+    const blocks = @json($blocks ?? []);
+    const subDistricts = @json($subDistricts ?? []);
+    const ulbs = @json($ulbs ?? []);
+    const gps = @json($gps ?? []);
+    const ulb_wards = @json($ulb_wards ?? []);
 
-        // Global variables for state
-        let offset = 0;
-        let limit = 100;
-        let totalRecords = 0;
-        let searchTimer;
-        let sidebarCollapsed = false;
+    // Global variables for state
+    let offset = 0;
+    let limit = 100;
+    let totalRecords = 0;
+    let searchTimer;
+    let sidebarCollapsed = false;
 
-        // Helper Functions
-        const $ = (selector) => document.querySelector(selector);
-        const $$ = (selector) => document.querySelectorAll(selector);
+    // Helper Functions
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => document.querySelectorAll(selector);
 
-        // DOM Ready
-        document.addEventListener('DOMContentLoaded', function () {
-            // Initial Load
-            loadBeneficiaries(true);
+    // DOM Ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initial Load
+        loadBeneficiaries(true);
 
-            // Search with Debounce
-            const searchInput = $('#searchText');
-            if (searchInput) {
-                searchInput.addEventListener('keyup', function (e) {
-                    clearTimeout(searchTimer);
-                    // Search on Enter key
-                    if (e.keyCode === 13) {
-                        searchBeneficiary();
-                        return;
-                    }
-                    searchTimer = setTimeout(function () {
-                        resetAndLoad();
-                    }, 800);
-                });
-            }
-
-            // Initialize area selection
-            setArea('');
-
-            // Sidebar Toggle Events
-            const toggleSidebarBtn = $('#toggleSidebar');
-            const showSidebarBtn = $('#showSidebar');
-            const mobileToggleBtn = $('#mobileToggleSidebar');
-
-            if (toggleSidebarBtn) {
-                toggleSidebarBtn.addEventListener('click', toggleSidebar);
-            }
-            if (showSidebarBtn) {
-                showSidebarBtn.addEventListener('click', expandSidebar);
-            }
-            if (mobileToggleBtn) {
-                mobileToggleBtn.addEventListener('click', toggleMobileSidebar);
-            }
-
-            // Close mobile sidebar on window resize
-            window.addEventListener('resize', function () {
-                if (window.innerWidth >= 768) {
-                    closeMobileSidebar();
+        // Search with Debounce
+        const searchInput = $('#searchText');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function(e) {
+                clearTimeout(searchTimer);
+                // Search on Enter key
+                if (e.keyCode === 13) {
+                    searchBeneficiary();
+                    return;
                 }
+                searchTimer = setTimeout(function() {
+                    resetAndLoad();
+                }, 800);
             });
+        }
 
-            // ---------- District / Urban / Block / Muncid / GP handlers ----------
-            const districtSelect = $('#district');
-            if (districtSelect) {
-                districtSelect.addEventListener('change', function () {
-                    const urbanCode = $('#urban_code');
-                    const blockSelect = $('#block');
-                    const muncidSelect = $('#muncid');
-                    const gpWardSelect = $('#gp_ward');
+        // Initialize area selection
+        setArea('');
 
-                    if (urbanCode) urbanCode.value = '';
-                    if (blockSelect) blockSelect.innerHTML = '<option value="">All</option>';
-                    if (muncidSelect) muncidSelect.innerHTML = '<option value="">All</option>';
-                    if (gpWardSelect) gpWardSelect.innerHTML = '<option value="">All</option>';
+        // Sidebar Toggle Events
+        const toggleSidebarBtn = $('#toggleSidebar');
+        const showSidebarBtn = $('#showSidebar');
+        const mobileToggleBtn = $('#mobileToggleSidebar');
 
-                    updateSidebarHighlights();
+        if (toggleSidebarBtn) {
+            toggleSidebarBtn.addEventListener('click', toggleSidebar);
+        }
+        if (showSidebarBtn) {
+            showSidebarBtn.addEventListener('click', expandSidebar);
+        }
+        if (mobileToggleBtn) {
+            mobileToggleBtn.addEventListener('click', toggleMobileSidebar);
+        }
 
+        // Close mobile sidebar on window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                closeMobileSidebar();
+            }
+        });
+
+        // ---------- District / Urban / Block / Muncid / GP handlers ----------
+        const districtSelect = $('#district');
+        if (districtSelect) {
+            districtSelect.addEventListener('change', function() {
+                const urbanCode = $('#urban_code');
+                const blockSelect = $('#block');
+                const muncidSelect = $('#muncid');
+                const gpWardSelect = $('#gp_ward');
+
+                if (urbanCode) urbanCode.value = '';
+                if (blockSelect) blockSelect.innerHTML = '<option value="">All</option>';
+                if (muncidSelect) muncidSelect.innerHTML = '<option value="">All</option>';
+                if (gpWardSelect) gpWardSelect.innerHTML = '<option value="">All</option>';
+
+                updateSidebarHighlights();
+
+                hide('#blk_sub_div');
+                hide('#municipality_div');
+                hide('#gp_ward_div');
+            });
+        }
+
+        const urbanCodeInput = $('#urban_code');
+        if (urbanCodeInput) {
+            urbanCodeInput.addEventListener('change', function() {
+                const urban_code = this.value;
+                const select_district_code = districtSelect ? districtSelect.value : '';
+
+                const muncidSelect = $('#muncid');
+                const blockSelect = $('#block');
+                const gpWardSelect = $('#gp_ward');
+
+                if (muncidSelect) muncidSelect.innerHTML = '<option value="">All</option>';
+                if (blockSelect) blockSelect.innerHTML = '<option value="">All</option>';
+                if (gpWardSelect) gpWardSelect.innerHTML = '<option value="">All</option>';
+
+                if (urban_code === '') {
                     hide('#blk_sub_div');
                     hide('#municipality_div');
                     hide('#gp_ward_div');
-                });
-            }
+                    return;
+                }
 
-            const urbanCodeInput = $('#urban_code');
-            if (urbanCodeInput) {
-                urbanCodeInput.addEventListener('change', function () {
-                    const urban_code = this.value;
-                    const select_district_code = districtSelect ? districtSelect.value : '';
+                if (!select_district_code) {
+                    showNotification('Please select district first', 'warning');
+                    if (districtSelect) districtSelect.focus();
+                    this.value = '';
+                    setArea('');
+                    return;
+                }
 
-                    const muncidSelect = $('#muncid');
-                    const blockSelect = $('#block');
-                    const gpWardSelect = $('#gp_ward');
+                show('#blk_sub_div');
+                let htmlOption = '<option value="">All</option>';
 
-                    if (muncidSelect) muncidSelect.innerHTML = '<option value="">All</option>';
-                    if (blockSelect) blockSelect.innerHTML = '<option value="">All</option>';
-                    if (gpWardSelect) gpWardSelect.innerHTML = '<option value="">All</option>';
+                if (urban_code == '2') {
+                    // Rural
+                    setText('#blk_sub_txt', 'Block');
+                    setText('#gp_ward_txt', 'GP');
+                    hide('#municipality_div');
+                    show('#gp_ward_div');
 
-                    if (urban_code === '') {
-                        hide('#blk_sub_div');
-                        hide('#municipality_div');
-                        hide('#gp_ward_div');
-                        return;
+                    if (typeof blocks !== 'undefined') {
+                        blocks.forEach(function(value) {
+                            if (value.district_id == select_district_code) {
+                                htmlOption += '<option value="' + value.id + '">' + value.name + '</option>';
+                            }
+                        });
                     }
+                } else if (urban_code == '1') {
+                    // Urban
+                    setText('#blk_sub_txt', 'Subdivision');
+                    setText('#gp_ward_txt', 'Ward');
+                    show('#municipality_div');
+                    show('#gp_ward_div');
 
-                    if (!select_district_code) {
-                        showNotification('Please select district first', 'warning');
-                        if (districtSelect) districtSelect.focus();
-                        this.value = '';
-                        setArea('');
-                        return;
+                    if (typeof subDistricts !== 'undefined') {
+                        subDistricts.forEach(function(value) {
+                            if (value.district_id == select_district_code) {
+                                htmlOption += '<option value="' + value.id + '">' + value.name + '</option>';
+                            }
+                        });
                     }
-
-                    show('#blk_sub_div');
-                    let htmlOption = '<option value="">All</option>';
-
-                    if (urban_code == '2') {
-                        // Rural
-                        setText('#blk_sub_txt', 'Block');
-                        setText('#gp_ward_txt', 'GP');
-                        hide('#municipality_div');
-                        show('#gp_ward_div');
-
-                        if (typeof blocks !== 'undefined') {
-                            blocks.forEach(function (value) {
-                                if (value.district_id == select_district_code) {
-                                    htmlOption += '<option value="' + value.id + '">' + value.name + '</option>';
-                                }
-                            });
-                        }
-                    } else if (urban_code == '1') {
-                        // Urban
-                        setText('#blk_sub_txt', 'Subdivision');
-                        setText('#gp_ward_txt', 'Ward');
-                        show('#municipality_div');
-                        show('#gp_ward_div');
-
-                        if (typeof subDistricts !== 'undefined') {
-                            subDistricts.forEach(function (value) {
-                                if (value.district_id == select_district_code) {
-                                    htmlOption += '<option value="' + value.id + '">' + value.name + '</option>';
-                                }
-                            });
-                        }
-                    }
-                    if (blockSelect) blockSelect.innerHTML = htmlOption;
-                    updateSidebarHighlights();
-                });
-            }
-
-            const blockSelect = $('#block');
-            if (blockSelect) {
-                blockSelect.addEventListener('change', function () {
-                    const block = this.value;
-                    const district = districtSelect ? districtSelect.value : '';
-                    const urban_code = urbanCodeInput ? urbanCodeInput.value : '';
-
-                    const gpWardSelect = $('#gp_ward');
-                    const muncidSelect = $('#muncid');
-
-                    if (gpWardSelect) gpWardSelect.innerHTML = '<option value="">All</option>';
-                    if (muncidSelect) muncidSelect.innerHTML = '<option value="">All</option>';
-
-                    if (!district) {
-                        showNotification('Please select district first', 'warning');
-                        if (districtSelect) districtSelect.focus();
-                        return;
-                    }
-
-                    if (!urban_code) {
-                        showNotification('Please select area type first', 'warning');
-                        return;
-                    }
-
-                    if (!block) {
-                        return;
-                    }
-
-                    let htmlOption = '<option value="">All</option>';
-
-                    if (urban_code == '1') {
-                        // Urban - load municipalities
-                        if (typeof ulbs !== 'undefined') {
-                            ulbs.forEach(function (value) {
-                                if (value.subdivision_id == block) {
-                                    htmlOption += '<option value="' + value.id + '">' + value.name + '</option>';
-                                }
-                            });
-                        }
-                        if (muncidSelect) muncidSelect.innerHTML = htmlOption;
-                    } else if (urban_code == '2') {
-                        // Rural - load GPs
-                        hide('#municipality_div');
-                        if (typeof gps !== 'undefined') {
-                            gps.forEach(function (value) {
-                                if (value.block_id == block) {
-                                    htmlOption += '<option value="' + value.id + '">' + value.name + '</option>';
-                                }
-                            });
-                        }
-                        if (gpWardSelect) gpWardSelect.innerHTML = htmlOption;
-                    }
-                });
-            }
-
-            const muncidSelect = $('#muncid');
-            if (muncidSelect) {
-                muncidSelect.addEventListener('change', function () {
-                    const muncid = this.value;
-                    const district = districtSelect ? districtSelect.value : '';
-                    const urban_code = urbanCodeInput ? urbanCodeInput.value : '';
-
-                    const gpWardSelect = $('#gp_ward');
-                    if (gpWardSelect) gpWardSelect.innerHTML = '<option value="">All</option>';
-
-                    if (!district) {
-                        showNotification('Please select district first', 'warning');
-                        if (districtSelect) districtSelect.focus();
-                        return;
-                    }
-
-                    if (!urban_code) {
-                        showNotification('Please select area type first', 'warning');
-                        return;
-                    }
-
-                    if (!muncid) {
-                        return;
-                    }
-
-                    if (urban_code == '1') {
-                        // Load wards for municipality
-                        let htmlOption = '<option value="">All</option>';
-                        if (typeof ulb_wards !== 'undefined') {
-                            ulb_wards.forEach(function (value) {
-                                if (value.municipality_id == muncid) {
-                                    htmlOption += '<option value="' + value.id + '">' + value.name + '</option>';
-                                }
-                            });
-                        }
-                        if (gpWardSelect) gpWardSelect.innerHTML = htmlOption;
-                    }
-                    updateSidebarHighlights();
-                });
-            }
-
-            // Add change listeners to all sidebar selects for automatic highlighting
-            $$('.filter-sidebar select').forEach(select => {
-                select.addEventListener('change', updateSidebarHighlights);
+                }
+                if (blockSelect) blockSelect.innerHTML = htmlOption;
+                updateSidebarHighlights();
             });
+        }
 
-            // Initialization of highlights
-            updateSidebarHighlights();
-        });
+        const blockSelect = $('#block');
+        if (blockSelect) {
+            blockSelect.addEventListener('change', function() {
+                const block = this.value;
+                const district = districtSelect ? districtSelect.value : '';
+                const urban_code = urbanCodeInput ? urbanCodeInput.value : '';
 
-        // Function to update highlights on sidebar filters
-        function updateSidebarHighlights() {
-            const selects = ['#scheme', '#district', '#block', '#muncid', '#gp_ward',];
-            selects.forEach(id => {
-                const el = $(id);
-                if (!el) return;
+                const gpWardSelect = $('#gp_ward');
+                const muncidSelect = $('#muncid');
 
-                // Look for the label inside the parent div
-                const parent = el.closest('div');
-                const label = parent ? parent.querySelector('label') : null;
+                if (gpWardSelect) gpWardSelect.innerHTML = '<option value="">All</option>';
+                if (muncidSelect) muncidSelect.innerHTML = '<option value="">All</option>';
 
-                if (el.value !== '') {
-                    el.classList.add('filter-field-highlight');
-                    if (label) label.classList.add('filter-label-highlight');
-                } else {
-                    el.classList.remove('filter-field-highlight');
-                    if (label) label.classList.remove('filter-label-highlight');
+                if (!district) {
+                    showNotification('Please select district first', 'warning');
+                    if (districtSelect) districtSelect.focus();
+                    return;
+                }
+
+                if (!urban_code) {
+                    showNotification('Please select area type first', 'warning');
+                    return;
+                }
+
+                if (!block) {
+                    return;
+                }
+
+                let htmlOption = '<option value="">All</option>';
+
+                if (urban_code == '1') {
+                    // Urban - load municipalities
+                    if (typeof ulbs !== 'undefined') {
+                        ulbs.forEach(function(value) {
+                            if (value.subdivision_id == block) {
+                                htmlOption += '<option value="' + value.id + '">' + value.name + '</option>';
+                            }
+                        });
+                    }
+                    if (muncidSelect) muncidSelect.innerHTML = htmlOption;
+                } else if (urban_code == '2') {
+                    // Rural - load GPs
+                    hide('#municipality_div');
+                    if (typeof gps !== 'undefined') {
+                        gps.forEach(function(value) {
+                            if (value.block_id == block) {
+                                htmlOption += '<option value="' + value.id + '">' + value.name + '</option>';
+                            }
+                        });
+                    }
+                    if (gpWardSelect) gpWardSelect.innerHTML = htmlOption;
                 }
             });
         }
 
-        // Utility Functions
-        function show(selector) {
-            const element = $(selector);
-            if (element) element.style.display = 'block';
+        const muncidSelect = $('#muncid');
+        if (muncidSelect) {
+            muncidSelect.addEventListener('change', function() {
+                const muncid = this.value;
+                const district = districtSelect ? districtSelect.value : '';
+                const urban_code = urbanCodeInput ? urbanCodeInput.value : '';
+
+                const gpWardSelect = $('#gp_ward');
+                if (gpWardSelect) gpWardSelect.innerHTML = '<option value="">All</option>';
+
+                if (!district) {
+                    showNotification('Please select district first', 'warning');
+                    if (districtSelect) districtSelect.focus();
+                    return;
+                }
+
+                if (!urban_code) {
+                    showNotification('Please select area type first', 'warning');
+                    return;
+                }
+
+                if (!muncid) {
+                    return;
+                }
+
+                if (urban_code == '1') {
+                    // Load wards for municipality
+                    let htmlOption = '<option value="">All</option>';
+                    if (typeof ulb_wards !== 'undefined') {
+                        ulb_wards.forEach(function(value) {
+                            if (value.municipality_id == muncid) {
+                                htmlOption += '<option value="' + value.id + '">' + value.name + '</option>';
+                            }
+                        });
+                    }
+                    if (gpWardSelect) gpWardSelect.innerHTML = htmlOption;
+                }
+                updateSidebarHighlights();
+            });
         }
 
-        function hide(selector) {
-            const element = $(selector);
-            if (element) element.style.display = 'none';
-        }
+        // Add change listeners to all sidebar selects for automatic highlighting
+        $$('.filter-sidebar select').forEach(select => {
+            select.addEventListener('change', updateSidebarHighlights);
+        });
 
-        function setText(selector, text) {
-            const element = $(selector);
-            if (element) element.textContent = text;
-        }
+        // Initialization of highlights
+        updateSidebarHighlights();
+    });
 
-        function addClass(selector, className) {
-            const element = $(selector);
-            if (element) element.classList.add(className);
-        }
+    // Function to update highlights on sidebar filters
+    function updateSidebarHighlights() {
+        const selects = ['#scheme', '#district', '#block', '#muncid', '#gp_ward', ];
+        selects.forEach(id => {
+            const el = $(id);
+            if (!el) return;
 
-        function removeClass(selector, className) {
-            const element = $(selector);
-            if (element) element.classList.remove(className);
-        }
+            // Look for the label inside the parent div
+            const parent = el.closest('div');
+            const label = parent ? parent.querySelector('label') : null;
 
-        function hasClass(selector, className) {
-            const element = $(selector);
-            return element ? element.classList.contains(className) : false;
-        }
+            if (el.value !== '') {
+                el.classList.add('filter-field-highlight');
+                if (label) label.classList.add('filter-label-highlight');
+            } else {
+                el.classList.remove('filter-field-highlight');
+                if (label) label.classList.remove('filter-label-highlight');
+            }
+        });
+    }
 
-        // ================= DATA LOADING =================
+    // Utility Functions
+    function show(selector) {
+        const element = $(selector);
+        if (element) element.style.display = 'block';
+    }
 
-        function resetAndLoad() {
-            offset = 0;
-            const resultArea = $('#resultArea');
-            if (resultArea) resultArea.innerHTML = '';
-            loadBeneficiaries(true);
-        }
+    function hide(selector) {
+        const element = $(selector);
+        if (element) element.style.display = 'none';
+    }
 
-        function loadBeneficiaries(reset = false) {
-            const spinner = $('#loadingSpinner');
-            const resultArea = $('#resultArea');
+    function setText(selector, text) {
+        const element = $(selector);
+        if (element) element.textContent = text;
+    }
 
-            if (spinner) removeClass('#loadingSpinner', 'hidden');
+    function addClass(selector, className) {
+        const element = $(selector);
+        if (element) element.classList.add(className);
+    }
 
-            // Gather Data
-            const data = {
-                offset: offset,
-                search: $('#searchText')?.value || '',
-                scheme: $('#scheme')?.value || '',
-                district: $('#district')?.value || '',
-                urban_code: $('#urban_code')?.value || '',
-                block: $('#block')?.value || '',
-                muncid: $('#muncid')?.value || '',
-                gp_ward: $('#gp_ward')?.value || '',
-                status: $('#statusFilter')?.value || ''
-            };
+    function removeClass(selector, className) {
+        const element = $(selector);
+        if (element) element.classList.remove(className);
+    }
 
-            // Convert data to URL params
-            const params = new URLSearchParams(data).toString();
+    function hasClass(selector, className) {
+        const element = $(selector);
+        return element ? element.classList.contains(className) : false;
+    }
 
-            fetch("{{ route('beneficiaries.search') }}?" + params, {
+    // ================= DATA LOADING =================
+
+    function resetAndLoad() {
+        offset = 0;
+        const resultArea = $('#resultArea');
+        if (resultArea) resultArea.innerHTML = '';
+        loadBeneficiaries(true);
+    }
+
+    function loadBeneficiaries(reset = false) {
+        const spinner = $('#loadingSpinner');
+        const resultArea = $('#resultArea');
+
+        if (spinner) removeClass('#loadingSpinner', 'hidden');
+
+        // Gather Data
+        const data = {
+            offset: offset,
+            search: $('#searchText')?.value || '',
+            scheme: $('#scheme')?.value || '',
+            district: $('#district')?.value || '',
+            urban_code: $('#urban_code')?.value || '',
+            block: $('#block')?.value || '',
+            muncid: $('#muncid')?.value || '',
+            gp_ward: $('#gp_ward')?.value || '',
+            status: $('#statusFilter')?.value || ''
+        };
+
+        // Convert data to URL params
+        const params = new URLSearchParams(data).toString();
+
+        fetch("{{ route('beneficiaries.search') }}?" + params, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json'
                 }
             })
-                .then(response => response.json())
-                .then(res => {
-                    totalRecords = res.total;
-                    offset = res.loaded;
+            .then(response => response.json())
+            .then(res => {
+                totalRecords = res.total;
+                offset = res.loaded;
 
-                    if (reset) {
-                        if (resultArea) resultArea.innerHTML = res.html;
+                if (reset) {
+                    if (resultArea) resultArea.innerHTML = res.html;
+                } else {
+                    if (resultArea) resultArea.innerHTML += res.html;
+                }
+
+                setText('#resultCount', totalRecords);
+                if (spinner) addClass('#loadingSpinner', 'hidden');
+
+                // Handle View More Button
+                const viewMoreBtn = $('#viewMoreBtn');
+                if (viewMoreBtn) {
+                    if (offset < totalRecords) {
+                        removeClass('#viewMoreBtn', 'hidden');
                     } else {
-                        if (resultArea) resultArea.innerHTML += res.html;
+                        addClass('#viewMoreBtn', 'hidden');
                     }
+                }
 
-                    setText('#resultCount', totalRecords);
-                    if (spinner) addClass('#loadingSpinner', 'hidden');
+                if (totalRecords === 0 && resultArea) {
+                    resultArea.innerHTML = `
+                        <div class="col-span-full py-20 flex flex-col items-center justify-center text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                                <i class="fa-solid fa-magnifying-glass text-4xl text-gray-300"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-2">No results found</h3>
+                            <p class="text-gray-500 max-w-sm mb-8">We couldn't find any beneficiaries matching your current search or filter criteria.</p>
+                            <button onclick="resetFilters()" class="btn-primary">
+                                Clear All Filters
+                            </button>
+                        </div>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                if (spinner) addClass('#loadingSpinner', 'hidden');
+                showNotification('Error loading beneficiaries. Please try again.', 'error');
 
-                    // Handle View More Button
-                    const viewMoreBtn = $('#viewMoreBtn');
-                    if (viewMoreBtn) {
-                        if (offset < totalRecords) {
-                            removeClass('#viewMoreBtn', 'hidden');
-                        } else {
-                            addClass('#viewMoreBtn', 'hidden');
-                        }
-                    }
-
-                    if (totalRecords === 0 && resultArea) {
-                        resultArea.innerHTML = `<div class="col-span-full empty-state"><i class="fa-solid fa-face-frown w-50 h-50 text-gray-300 mb-4"></i><h3 class="text-xl font-semibold text-gray-700 mb-2">No beneficiaries found</h3><p class="text-gray-500 mb-4">Try adjusting your search or filters</p><button onclick="resetFilters()" class="btn-primary px-6 py-2 rounded-lg">Reset Filters</button></div>`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    if (spinner) addClass('#loadingSpinner', 'hidden');
-                    showNotification('Error loading beneficiaries. Please try again.', 'error');
-
-                    if (resultArea) {
-                        resultArea.innerHTML = `<div class="col-span-full empty-state"><i class="fa-solid fa-triangle-exclamation w-20 h-20 text-red-300 mb-4"></i><h3 class="text-xl font-semibold text-gray-700 mb-2">Something went wrong</h3><p class="text-gray-500 mb-4">Unable to load beneficiaries</p><button onclick="resetAndLoad()" class="btn-primary px-6 py-2 rounded-lg">Try Again</button></div>`;
-                    }
-                });
-        }
-
-        // ================= GLOBAL ACTIONS =================
-
-        function loadMore() {
-            loadBeneficiaries(false);
-        }
-
-        function searchBeneficiary() {
-            resetAndLoad();
-        }
-
-        function applyFilters() {
-            resetAndLoad();
-            // Close mobile sidebar after applying
-            closeMobileSidebar();
-        }
-
-        function resetFilters() {
-            const schemeSelect = $('#scheme');
-            const districtSelect = $('#district');
-            const urbanCodeInput = $('#urban_code');
-            const blockSelect = $('#block');
-            const muncidSelect = $('#muncid');
-            const gpWardSelect = $('#gp_ward');
-            const statusFilter = $('#statusFilter');
-            const searchText = $('#searchText');
-
-            if (schemeSelect) schemeSelect.value = '';
-            if (districtSelect) districtSelect.value = '';
-            if (urbanCodeInput) urbanCodeInput.value = '';
-            if (blockSelect) blockSelect.innerHTML = '<option value="">All</option>';
-            if (muncidSelect) muncidSelect.innerHTML = '<option value="">All</option>';
-            if (gpWardSelect) gpWardSelect.innerHTML = '<option value="">All</option>';
-            if (statusFilter) statusFilter.value = '';
-            if (searchText) searchText.value = '';
-
-            updateSidebarHighlights();
-
-            // Hide conditional divs
-            hide('#blk_sub_div');
-            hide('#municipality_div');
-            hide('#gp_ward_div');
-
-            setArea('');
-            resetAndLoad();
-        }
-
-        function setArea(type) {
-            const urbanCodeInput = $('#urban_code');
-            if (urbanCodeInput) {
-                urbanCodeInput.value = type;
-                urbanCodeInput.dispatchEvent(new Event('change'));
-            }
-
-            // Remove active class from all buttons
-            $$('.area-btn').forEach(btn => {
-                btn.classList.remove('active', 'filter-field-highlight');
+                if (resultArea) {
+                    resultArea.innerHTML = `<div class="col-span-full empty-state"><i class="fa-solid fa-triangle-exclamation w-20 h-20 text-red-300 mb-4"></i><h3 class="text-xl font-semibold text-gray-700 mb-2">Something went wrong</h3><p class="text-gray-500 mb-4">Unable to load beneficiaries</p><button onclick="resetAndLoad()" class="btn-primary px-6 py-2 rounded-lg">Try Again</button></div>`;
+                }
             });
+    }
 
-            // Add active class to selected button
-            if (type === '') { addClass('#areaAll', 'active'); addClass('#areaAll', 'filter-field-highlight'); }
-            if (type === '2') { addClass('#areaRural', 'active'); addClass('#areaRural', 'filter-field-highlight'); }
-            if (type === '1') { addClass('#areaUrban', 'active'); addClass('#areaUrban', 'filter-field-highlight'); }
+    // ================= GLOBAL ACTIONS =================
+
+    function loadMore() {
+        loadBeneficiaries(false);
+    }
+
+    function searchBeneficiary() {
+        resetAndLoad();
+    }
+
+    function applyFilters() {
+        resetAndLoad();
+        // Close mobile sidebar after applying
+        closeMobileSidebar();
+    }
+
+    function resetFilters() {
+        const schemeSelect = $('#scheme');
+        const districtSelect = $('#district');
+        const urbanCodeInput = $('#urban_code');
+        const blockSelect = $('#block');
+        const muncidSelect = $('#muncid');
+        const gpWardSelect = $('#gp_ward');
+        const statusFilter = $('#statusFilter');
+        const searchText = $('#searchText');
+
+        if (schemeSelect) schemeSelect.value = '';
+        if (districtSelect) districtSelect.value = '';
+        if (urbanCodeInput) urbanCodeInput.value = '';
+        if (blockSelect) blockSelect.innerHTML = '<option value="">All</option>';
+        if (muncidSelect) muncidSelect.innerHTML = '<option value="">All</option>';
+        if (gpWardSelect) gpWardSelect.innerHTML = '<option value="">All</option>';
+        if (statusFilter) statusFilter.value = '';
+        if (searchText) searchText.value = '';
+
+        updateSidebarHighlights();
+
+        // Hide conditional divs
+        hide('#blk_sub_div');
+        hide('#municipality_div');
+        hide('#gp_ward_div');
+
+        setArea('');
+        resetAndLoad();
+    }
+
+    function setArea(type) {
+        const urbanCodeInput = $('#urban_code');
+        if (urbanCodeInput) {
+            urbanCodeInput.value = type;
+            urbanCodeInput.dispatchEvent(new Event('change'));
         }
 
-        // ================= UI HELPERS =================
+        // Remove active class from all buttons
+        $$('.area-btn').forEach(btn => {
+            btn.classList.remove('active', 'filter-field-highlight');
+        });
 
-        function toggleSidebar() {
-            const sidebar = $('#filterSidebar');
-            const toggleBtn = $('#toggleSidebar');
-            const showSidebarBtn = $('#showSidebar');
-
-            if (!sidebar || !toggleBtn || !showSidebarBtn) return;
-
-            sidebarCollapsed = !sidebarCollapsed;
-
-            if (sidebarCollapsed) {
-                sidebar.style.width = '0';
-                sidebar.style.overflow = 'hidden';
-                sidebar.style.opacity = '0';
-
-                toggleBtn.innerHTML = '<i class="fa-solid fa-angle-left text-indigo-600"></i>';
-                toggleBtn.setAttribute('title', 'Expand sidebar');
-                showSidebarBtn.classList.remove('hidden');
-            } else {
-                sidebar.style.width = '320px';
-                sidebar.style.overflow = 'visible';
-                sidebar.style.opacity = '1';
-
-                toggleBtn.innerHTML = '<i class="fa-solid fa-angle-left text-indigo-600"></i>';
-                toggleBtn.setAttribute('title', 'Collapse sidebar');
-                showSidebarBtn.classList.add('hidden');
-            }
+        // Add active class to selected button
+        if (type === '') {
+            addClass('#areaAll', 'active');
         }
+        if (type === '2') {
+            addClass('#areaRural', 'active');
+        }
+        if (type === '1') {
+            addClass('#areaUrban', 'active');
+        }
+    }
 
-        function expandSidebar() {
-            const sidebar = $('#filterSidebar');
-            const toggleBtn = $('#toggleSidebar');
-            const showSidebarBtn = $('#showSidebar');
+    // ================= UI HELPERS =================
 
-            if (!sidebar || !toggleBtn || !showSidebarBtn) return;
+    function toggleSidebar() {
+        const sidebar = $('#filterSidebar');
+        const toggleBtn = $('#toggleSidebar');
+        const showSidebarBtn = $('#showSidebar');
 
+        if (!sidebar || !toggleBtn || !showSidebarBtn) return;
+
+        sidebarCollapsed = !sidebarCollapsed;
+
+        if (sidebarCollapsed) {
+            sidebar.style.width = '0';
+            sidebar.style.overflow = 'hidden';
+            sidebar.style.opacity = '0';
+
+            toggleBtn.innerHTML = '<i class="fa-solid fa-angle-left text-indigo-600"></i>';
+            toggleBtn.setAttribute('title', 'Expand sidebar');
+            showSidebarBtn.classList.remove('hidden');
+        } else {
             sidebar.style.width = '320px';
             sidebar.style.overflow = 'visible';
             sidebar.style.opacity = '1';
@@ -876,55 +945,72 @@
             toggleBtn.innerHTML = '<i class="fa-solid fa-angle-left text-indigo-600"></i>';
             toggleBtn.setAttribute('title', 'Collapse sidebar');
             showSidebarBtn.classList.add('hidden');
-            sidebarCollapsed = false;
+        }
+    }
+
+    function expandSidebar() {
+        const sidebar = $('#filterSidebar');
+        const toggleBtn = $('#toggleSidebar');
+        const showSidebarBtn = $('#showSidebar');
+
+        if (!sidebar || !toggleBtn || !showSidebarBtn) return;
+
+        sidebar.style.width = '320px';
+        sidebar.style.overflow = 'visible';
+        sidebar.style.opacity = '1';
+
+        toggleBtn.innerHTML = '<i class="fa-solid fa-angle-left text-indigo-600"></i>';
+        toggleBtn.setAttribute('title', 'Collapse sidebar');
+        showSidebarBtn.classList.add('hidden');
+        sidebarCollapsed = false;
+    }
+
+    function toggleMobileSidebar() {
+        const sidebar = $('#filterSidebar');
+        const overlay = $('#sidebarOverlay');
+
+        if (!sidebar || !overlay) return;
+
+        if (sidebar.classList.contains('mobile-open')) {
+            closeMobileSidebar();
+        } else {
+            sidebar.classList.add('mobile-open');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeMobileSidebar() {
+        const sidebar = $('#filterSidebar');
+        const overlay = $('#sidebarOverlay');
+
+        if (sidebar) sidebar.classList.remove('mobile-open');
+        if (overlay) overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function showNotification(message, type = 'info') {
+        // Remove existing notifications
+        const existingNotifications = $$('.custom-notification');
+        existingNotifications.forEach(notif => notif.remove());
+
+        let bgClass = 'bg-indigo-600';
+        let icon = '<i class="fa-solid fa-circle-info w-5 h-5"></i>';
+
+        if (type === 'warning') {
+            bgClass = 'bg-yellow-500';
+            icon = '<i class="fa-solid fa-triangle-exclamation w-5 h-5"></i>';
+        }
+        if (type === 'error') {
+            bgClass = 'bg-red-500';
+            icon = '<i class="fa-solid fa-circle-xmark w-5 h-5"></i>';
+        }
+        if (type === 'success') {
+            bgClass = 'bg-green-500';
+            icon = '<i class="fa-solid fa-circle-check w-5 h-5"></i>';
         }
 
-        function toggleMobileSidebar() {
-            const sidebar = $('#filterSidebar');
-            const overlay = $('#sidebarOverlay');
-
-            if (!sidebar || !overlay) return;
-
-            if (sidebar.classList.contains('mobile-open')) {
-                closeMobileSidebar();
-            } else {
-                sidebar.classList.add('mobile-open');
-                overlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeMobileSidebar() {
-            const sidebar = $('#filterSidebar');
-            const overlay = $('#sidebarOverlay');
-
-            if (sidebar) sidebar.classList.remove('mobile-open');
-            if (overlay) overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        function showNotification(message, type = 'info') {
-            // Remove existing notifications
-            const existingNotifications = $$('.custom-notification');
-            existingNotifications.forEach(notif => notif.remove());
-
-            let bgClass = 'bg-indigo-600';
-            let icon = '<i class="fa-solid fa-circle-info w-5 h-5"></i>';
-
-            if (type === 'warning') {
-                bgClass = 'bg-yellow-500';
-                icon = '<i class="fa-solid fa-triangle-exclamation w-5 h-5"></i>';
-            }
-            if (type === 'error') {
-                bgClass = 'bg-red-500';
-                icon = '<i class="fa-solid fa-circle-xmark w-5 h-5"></i>';
-            }
-            if (type === 'success') {
-                bgClass = 'bg-green-500';
-                icon = '<i class="fa-solid fa-circle-check w-5 h-5"></i>';
-            }
-
-            const notificationHTML = `
+        const notificationHTML = `
                                                                                                                                                                                                                                                                                                                             <div class="custom-notification fixed top-6 right-6 px-6 py-4 rounded-xl shadow-2xl z-[100] transform transition-all duration-300 ${bgClass} text-white flex items-center gap-3 max-w-md" style="opacity: 0; transform: translateX(100px);">
                                                                                                                                                                                                                                                                                                                                 ${icon}
                                                                                                                                                                                                                                                                                                                                 <span class="flex-1">${message}</span>
@@ -934,33 +1020,33 @@
                                                                                                                                                                                                                                                                                                                             </div>
                                                                                                                                                                                                                                                                                                                         `;
 
-            document.body.insertAdjacentHTML('beforeend', notificationHTML);
+        document.body.insertAdjacentHTML('beforeend', notificationHTML);
 
-            const notification = document.body.lastElementChild;
+        const notification = document.body.lastElementChild;
 
-            // Auto-slide in
-            setTimeout(() => {
-                notification.style.opacity = '1';
-                notification.style.transform = 'translateX(0)';
-            }, 10);
+        // Auto-slide in
+        setTimeout(() => {
+            notification.style.opacity = '1';
+            notification.style.transform = 'translateX(0)';
+        }, 10);
 
-            // Auto-dismiss
-            setTimeout(() => {
-                if (notification && notification.parentElement) {
-                    notification.style.opacity = '0';
-                    notification.style.transform = 'translateX(100px)';
-                    setTimeout(() => {
-                        if (notification && notification.parentElement) {
-                            notification.remove();
-                        }
-                    }, 300);
-                }
-            }, 4000);
-        }
+        // Auto-dismiss
+        setTimeout(() => {
+            if (notification && notification.parentElement) {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100px)';
+                setTimeout(() => {
+                    if (notification && notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 300);
+            }
+        }, 4000);
+    }
 
-        function viewDetails(beneficiaryId) {
-            showNotification(`Opening details for beneficiary ${beneficiaryId}`, 'info');
-            console.log('View details for:', beneficiaryId);
-        }
-    </script>
+    function viewDetails(beneficiaryId) {
+        showNotification(`Opening details for beneficiary ${beneficiaryId}`, 'info');
+        console.log('View details for:', beneficiaryId);
+    }
+</script>
 @endpush

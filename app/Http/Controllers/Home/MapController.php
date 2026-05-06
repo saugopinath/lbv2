@@ -14,7 +14,7 @@ class MapController extends Controller
 {
     public function index()
     {
-        $districtCount = Cache::remember('map.district.total_count', 600, fn () => District::count());
+        $districtCount = Cache::remember('map.district.total_count', 600, fn() => District::count());
         return view('frontend.pension.map', compact('districtCount'));
     }
 
@@ -25,9 +25,9 @@ class MapController extends Controller
     {
         $data = Cache::remember('map.district.beneficiary_counts', 600, function () {
             return BeneficiaryPersonalDetail::select(
-                    'created_by_dist_code',
-                    DB::raw('COUNT(*) as total')
-                )
+                'created_by_dist_code',
+                DB::raw('COUNT(*) as total')
+            )
                 ->whereIn('is_clean', [1, 2])
                 ->whereNotNull('created_by_dist_code')
                 ->groupBy('created_by_dist_code')
@@ -36,6 +36,4 @@ class MapController extends Controller
 
         return response()->json($data);
     }
-
-
 }

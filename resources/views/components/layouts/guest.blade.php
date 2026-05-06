@@ -26,9 +26,8 @@
 </head>
 
 <body class="min-h-screen bg-cover bg-center bg-no-repeat bg-white bg-login-cover">
-    <div class="min-h-screen flex items-center justify-center px-4">
+    <div class="min-h-screen flex flex-col items-center justify-center px-4 py-8">
         <div class="bg-white/80 rounded-2xl shadow-xl w-full max-w-6xl overflow-hidden flex flex-col lg:flex-row">
-
             <!-- Left Image Section -->
             <div class="lg:flex lg:w-1/2 flex-col justify-center items-center p-4 relative rounded-l-2xl">
                 <a href="{{ route('/') }}" class="absolute top-4 left-4 bg-[#003974] p-3 rounded-full">
@@ -83,6 +82,27 @@
                 {{ $slot }}
             </div>
         </div>
+
+        <!-- Footer -->
+        <footer class="w-full max-w-6xl mt-4 px-2">
+            <div class="border-t border-white/30 mb-3"></div>
+            <div class="flex flex-col items-center gap-2 text-center">
+                <!-- Copyright -->
+                <p class="text-xs text-white/80 drop-shadow">
+                    &copy; {{ date('Y') }} This site is designed by National Informatics Centre (NIC). Content, DATA, Process and Operation owned and maintained by Department of {{ config('jblbConf.deptName') }}, Government of West Bengal.
+                </p>
+                <!-- Links -->
+                <nav class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-white/80">
+                    <a href="#" class="hover:text-white hover:underline transition-colors duration-200 drop-shadow">Privacy Policy</a>
+                    <span class="text-white/40">|</span>
+                    <a href="#" class="hover:text-white hover:underline transition-colors duration-200 drop-shadow">Terms &amp; Conditions</a>
+                    <span class="text-white/40">|</span>
+                    <a href="#" class="hover:text-white hover:underline transition-colors duration-200 drop-shadow">Help &amp; Support</a>
+                    <span class="text-white/40">|</span>
+                    <a href="#" class="hover:text-white hover:underline transition-colors duration-200 drop-shadow">Disclaimer</a>
+                </nav>
+            </div>
+        </footer>
     </div>
     @livewireScripts
 </body>

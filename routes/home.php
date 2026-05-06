@@ -37,10 +37,10 @@ Route::post('/notifications/datatable', [NotificationController::class, 'datatab
 
 Route::prefix('dashboard')->group(function () {
     Route::get('home', [DashboardController::class, 'index'])->name('home');
-    Route::get('/scheme-wise-applications', [DashboardController::class, 'schemeWiseApplications'])->name('dashboard.schemeWiseApplications');
-    Route::get('/district-wise-beneficiaries', [DashboardController::class, 'districtWiseBeneficiaries'])->name('dashboard.districtWiseBeneficiaries');
-    Route::get('/age-distribution', [DashboardController::class, 'getAgeDistribution'])->name('dashboard.ageDistribution');
-    Route::get('/consolidated-fy-payments', [DashboardController::class, 'consolidatedFyPayments'])->name('dashboard.fy.consolidated');
+    Route::get('scheme-wise-applications', [DashboardController::class, 'schemeWiseApplications'])->name('dashboard.schemeWiseApplications');
+    Route::get('district-wise-beneficiaries', [DashboardController::class, 'districtWiseBeneficiaries'])->name('dashboard.districtWiseBeneficiaries');
+    Route::get('age-distribution', [DashboardController::class, 'getAgeDistribution'])->name('dashboard.ageDistribution');
+    Route::get('consolidated-fy-payments', [DashboardController::class, 'consolidatedFyPayments'])->name('dashboard.fy.consolidated');
 
     Route::post('/refresh-scheme-status', function () {
         DB::connection('pgsql_app_read')->statement('REFRESH MATERIALIZED VIEW CONCURRENTLY pension.mv_scheme_status_summary');
@@ -51,9 +51,9 @@ Route::prefix('dashboard')->group(function () {
 // Scheme-status chart
 Route::get('/chart/scheme-status', function () {
     return DB::connection('pgsql_app_read')->table('pension.mv_scheme_status_summary')
-        ->orderBy('scheme_id')
+        ->orderBy('scheme_name')
         ->get();
-})->name('dashboard.schemeStatus');
+})->name('dashboard.schemeStatusChart');
 
 
 

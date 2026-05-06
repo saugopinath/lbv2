@@ -10,11 +10,17 @@ use App\Http\Controllers\Controller;
 class DashboardController extends Controller
 {
 
+    public array $schemeIds = [];
+    public string $appPortal;
 
+    public function __construct()
+    {
+        $this->schemeIds = config('jblbConf.schemeIds', []);
+        $this->appPortal = config('jblbConf.app_portal');
+    }
     public function index(Request $request)
     {
         $financialYear = Helper::getCurrentFinancialYearIndia();
-
         // ✅ Total Approved (next_level_role_id = 0 means fully approved)
         $totalApproved = DB::connection('pgsql_app_read')
             ->table('pension.beneficiary_personals')
@@ -38,6 +44,9 @@ class DashboardController extends Controller
             ->table('payment.ben_transaction_details')
             ->selectRaw("COALESCE(SUM($monthPayColumn), 0) AS total")
             ->where('fin_year', $financialYear)
+            // ->when(in_array($this->schemeIds, [20]), function ($query) {
+            //     $query->whereIn('scheme_id', $this->schemeIds);
+            // })
             ->value('total');
 
         // ✅ Financial Year Consolidated (month-wise)
@@ -58,6 +67,9 @@ class DashboardController extends Controller
                 COALESCE(SUM(mar_payment_amount),0) AS mar
             ")
             ->where('fin_year', $financialYear)
+            // ->when(in_array($this->schemeIds, [20]), function ($query) {
+            //     $query->whereIn('scheme_id', $this->schemeIds);
+            // })
             ->first();
 
         // ✅ Calculate total FY amount
@@ -92,6 +104,7 @@ class DashboardController extends Controller
             ->table('pension.beneficiary_personals')
             ->selectRaw('scheme_id, COUNT(*) as total')
             ->where('next_level_role_id', '>=', 0)
+            ->whereIn('scheme_id', $this->schemeIds)
             ->groupBy('scheme_id')
             ->orderBy('scheme_id');
 
@@ -117,9 +130,10 @@ class DashboardController extends Controller
         // ✅ DB query — district_name is not a Meilisearch filterable/facetable attribute
         $rows = DB::connection('pgsql_app_read')
             ->table('pension.beneficiary_personals as b')
-            ->joinRaw('INNER JOIN public.districts AS d ON CAST(b.created_by_dist_code AS TEXT) = CAST(d.lgd_code AS TEXT)')
+            ->join('public.districts AS d', DB::raw('CAST(b.created_by_dist_code AS TEXT)'), '=', DB::raw('CAST(d.lgd_code AS TEXT)'))
             ->selectRaw('d.local_name, COUNT(*) as total')
             ->where('b.next_level_role_id', 0)
+            ->whereIn('b.scheme_id', $this->schemeIds)
             ->groupBy('d.local_name')
             ->orderByDesc('total')
             ->limit(50)
@@ -135,7 +149,7 @@ class DashboardController extends Controller
     {
         // ✅ DB query — Meilisearch cannot perform script-based age calculations
         $row = DB::connection('pgsql_app_read')
-            ->table('pension.beneficiaries')
+            ->table('pension.beneficiary_personals')
             ->selectRaw("
                 COUNT(*) FILTER (WHERE EXTRACT(YEAR FROM AGE(CURRENT_DATE, dob)) < 18)            AS age_0_18,
                 COUNT(*) FILTER (WHERE EXTRACT(YEAR FROM AGE(CURRENT_DATE, dob)) BETWEEN 18 AND 29) AS age_18_30,
@@ -145,6 +159,7 @@ class DashboardController extends Controller
             ")
             ->whereNotNull('dob')
             ->where('next_level_role_id', '>=', 0)
+            ->whereIn('scheme_id', $this->schemeIds)
             ->first();
 
         return response()->json([
@@ -177,6 +192,7 @@ class DashboardController extends Controller
                 COALESCE(SUM(mar_payment_amount),0) AS mar
             ")
             ->where('fin_year', $finYear)
+            ->whereIn('scheme_id', $this->schemeIds)
             ->first();
 
         return response()->json([

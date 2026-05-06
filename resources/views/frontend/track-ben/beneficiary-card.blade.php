@@ -203,6 +203,12 @@
             .beneficiary-card {
                 backface-visibility: hidden;
                 animation: bc-fade-up 0.5s ease both;
+                transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .beneficiary-card:hover {
+                border-color: rgba(37, 99, 235, 0.4);
+                box-shadow: 0 20px 50px rgba(37, 99, 235, 0.15), 0 0 0 4px rgba(37, 99, 235, 0.05);
             }
 
             @keyframes bc-fade-up {

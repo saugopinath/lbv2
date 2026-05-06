@@ -38,31 +38,23 @@ class BeneficiaryTrackController extends Controller
 {
     public function trackBeneficiary(Request $request)
     {
-
-
         // Initial Page Load
         $schemes = Scheme::where('is_active', 1)->get();
         $districts = District::all();
-
         // Count total accessible records via Scout
-        $results = BeneficiaryPersonalDetail::search('*')->get()->count();
-
+        $results = BeneficiaryPersonalDetail::search('')->get()->count();
+        // dd($results);
         // Fetch Location Data for Scripts
         $blocks = Block::select('id  as id', 'name as name', 'district_id')
             ->get();
-
         $subDistricts = Subdivision::select('id as id', 'name as name', 'district_id')
             ->get();
-
         $ulbs = Municipality::select('id as id', 'name as name', 'subdivision_id')
             ->get();
-
         $gps = Panchayat::select('id as id', 'name as name', 'block_id')
             ->get();
-
         $ulb_wards = Ward::select('id as id', 'name as name', 'municipality_id')
             ->get();
-
         return view('frontend.track-ben.ben-track', compact(
             'schemes',
             'districts',
@@ -81,21 +73,16 @@ class BeneficiaryTrackController extends Controller
 
             if ($request->wantsJson()) {
 
-                $limit = 100;
+                $limit = 20;
                 $offset = (int) $request->get('offset', 0);
                 $page = ($offset / $limit) + 1;
-
                 $search = $request->search;
-
                 // 🔥 Meilisearch query
                 $scout = BeneficiaryPersonalDetail::search($search ?: '');
-
-                // ✅ Filters (must match filterableAttributes exactly)
-
+                // ✅ Filters (must match filterableAttributes exactly
                 if ($request->scheme) {
                     $scout->where('scheme_id', (int) $request->scheme);
                 }
-
                 if ($request->district) {
                     $scout->where('district_id', (int) $request->district);
                 }
@@ -308,7 +295,6 @@ class BeneficiaryTrackController extends Controller
                     } else {
                         $acc_validation_txt_name_1 = NULL;
                     }
-
                 } elseif ($paymentDetails->acc_validated == 4) {
                     $acc_validation_txt_1 = 'Payment Transaction Failed.';
                     $acc_validation_txt_2 = 'Please Update Bank Details';
@@ -332,8 +318,6 @@ class BeneficiaryTrackController extends Controller
                 $acc_validation_icon = 'fa-solid fa-circle-xmark';
                 $acc_validation_color = 'red';
             }
-
-
         } else {
             if ($paymentDetails->ben_status == 1) {
                 $acc_validation_icon = 'fa-solid fa-circle-check';
@@ -380,7 +364,6 @@ class BeneficiaryTrackController extends Controller
                     $acc_validation_txt_2 = 'Please Update Bank Details';
                     $acc_validation_icon = 'fa-solid fa-circle-xmark';
                     $acc_validation_color = 'red';
-
                 }
                 $acc_validation_txt = $acc_validation_txt_1 . $acc_validation_txt_2;
             } else {
@@ -484,8 +467,7 @@ class BeneficiaryTrackController extends Controller
         }
 
 
-        $ben_profile_pic = array();
-        $ben_profile_pic = BeneficiaryEnclosure::where('application_id', (int) $b->application_id)->where('document_type', 103)->first()->toArray();
+        $ben_profile_pic = BeneficiaryEnclosure::where('application_id', (int) $b->application_id)->where('document_type', 103)->first()?->toArray() ?? [];
         // dd($ben_profile_pic);
 
         $returnData['status'] = $status;
@@ -557,7 +539,6 @@ class BeneficiaryTrackController extends Controller
             'activityLogData' => $activityLogData,
             'ben_profile_pic' => $ben_profile_pic,
         ]);
-
     }
 
     public function benActivityLog($application_id)
@@ -602,7 +583,6 @@ class BeneficiaryTrackController extends Controller
             if (in_array($benPayDetail->ben_status, [-94])) {
                 $response['comment'] = 'Contact with District (Approver) Office for Beneficiary Re-activation';
             }
-
         } else {
             if ($benPayDetail->ben_status == 1) {
                 if (in_array($benPersonlDetails->scheme_id, [2, 10, 11, 13]) && in_array($benPayDetail->acc_validated, [3, 4])) {
@@ -634,7 +614,6 @@ class BeneficiaryTrackController extends Controller
                         $response['comment'] = 'Contact with Block / Sub-Divisional Office for Bank Details Updation';
                     }
                 }
-
             } elseif ($benPayDetail->ben_status == 2) {
                 if ($benPersonlDetails->scheme_id == 13) {
                     $response['comment'] = 'Contact with Block / Sub-Divisional Office for Beneficiary Re-activation';
@@ -649,6 +628,5 @@ class BeneficiaryTrackController extends Controller
         }
 
         return $response;
-
     }
 }
