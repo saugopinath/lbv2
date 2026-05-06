@@ -433,7 +433,7 @@
         </div>
 
         <!-- ================= BENEFICIARY CARDS GRID ================= -->
-        <div id="resultArea" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-7xl mx-auto">
+        <div id="resultArea" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-auto mx-auto">
             <!-- Dynamic cards will be loaded here -->
         </div>
 
