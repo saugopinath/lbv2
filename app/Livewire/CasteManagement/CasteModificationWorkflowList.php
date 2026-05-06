@@ -90,7 +90,7 @@ class CasteModificationWorkflowList extends Component
             ->toArray();
 
         // Add special options
-        $this->stepOptions[-1] = 'Rejected List';
+        // $this->stepOptions[-1] = 'Rejected List';
         $this->stepOptions[-$this->schemeId] = 'Reverted List';
 
         if (count($this->stepOptions) === 1) {

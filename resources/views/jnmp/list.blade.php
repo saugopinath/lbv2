@@ -139,7 +139,7 @@
 
         <div class="flex justify-between items-center border-b pb-3 mb-4">
             <h2 class="text-xl font-semibold text-indigo-700 dark:text-indigo-300">
-                Marking Beneficiaries as Death case to Lakshmir Bhandar Portal
+                Marking Beneficiaries as Death case to ANNAPURNA BHANDAR Portal
             </h2>
 
             <button @click="open = !open" class="text-sm px-3 py-1 rounded-full bg-indigo-100 dark:bg-gray-700
@@ -187,7 +187,7 @@
             @csrf
             <div class="pt-4">
 
-                <x-button.loading-button type="submit" text="Mark as Death to Lakshmir Bhandar Portal" x-data
+                <x-button.loading-button type="submit" text="Mark as Death to ANNAPURNA BHANDAR Portal" x-data
                     x-on:click.prevent="
                     Livewire.dispatch('showLoader');
                     $el.form.submit();

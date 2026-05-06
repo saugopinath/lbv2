@@ -3,7 +3,7 @@
         <div class="p-3.5">
             <a href="#" class="main-logo w-full">
                 <x-logos.lb-logo width="200px" height="50px"/>
-                <p class="text-center">Lakshmir Bhandar</p>
+                <p class="text-center">ANNAPURNA BHANDAR</p>
 
             </a>
         </div>

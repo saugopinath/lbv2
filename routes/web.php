@@ -31,6 +31,7 @@ use App\Http\Controllers\UserPermissionController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\ValidationManagerController;
 use App\Http\Controllers\workflowmanagementController;
+use App\Livewire\CasteManagement\UpdateRevertCaste;
 use App\Livewire\CsvSplitter;
 use App\Livewire\DynamicWorkflow\DynamicProcessPage;
 use App\Livewire\DynamicWorkflow\ProcessWorkflow;
@@ -246,10 +247,12 @@ Route::controller(UpdateMarkBeneficiaryDetailsController::class)->group(function
 // Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
 //     // ->middleware('permission.redirect:canBeneficiaryDetails')
 //     ->name('view-beneficiary-details');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::controller(CasteManagementController::class)->group(function () {
         Route::get('caste-management', 'index')->name('caste-management');
         Route::get('update-caste-management-details', 'updateDetails')->name('update-caste-management-details');
         Route::get('caste-management-request-list', 'requestdedlistdetails')->name('caste-management-request-list');
+        Route::get('caste-revert-update', UpdateRevertCaste::class)->name('caste-revert-update');
     });
 });
