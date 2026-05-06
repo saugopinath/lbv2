@@ -21,69 +21,16 @@ use Livewire\Component;
 class UpdateRevertCaste extends Component
 {
     public ?int $modificationId = null;
-
-    public bool $schemeData = false;
-
-    public bool $showTable = false;
-
-    public ?int $schemeId = null;
-
-    public ?string $schemeName = null;
-
-    public ?string $moduleCode = null;
-
-    public ?string $moduleName = null;
-
-    public ?int $selectedModuleId = null;   // This will store the scheme_module_id
-
-    public ?string $selectedModuleCode = null;
-
-    public ?string $selectedModuleName = null;
-
-    public ?int $selectedStepId = null;
-
-    public ?int $confirmedStepId = null;
-
-    public ?string $selectedStepName = null;
-
-    public ?string $stage = null;
-
     public $mainModuleId = null;
-
-    public array $stepOptions = []; // Changed from moduleOptions to stepOptions
-
-    public ?int $userRoleId = null;
-
-    public $filter_condition = [];
-
-    public $requestModuleCode = null;
-
     public $RoleId = null;
-
-    public $currentRoleId = null;
-
     public $moduleSchemeId;
-
     public $oldData = [];
-
     public $newData = [];
-
-    public $items = [];
-
     public $beneficiary = null;
-
-    public $showFields = false;
-
     public $casteOptions = [];
-
     public $doctype = [];
 
-    protected $listeners = [
-        'beneficiary-search' => 'handleSearch',
-        'reset-beneficiary-search' => 'resetSearch',
-    ];
-
-    public function mount($moduleCode = null, $moduleName = null, $mainModuleId = null)
+    public function mount()
     {
         $appIdEnc = request()->query('application_id');
         $schemeEnc = request()->query('Scheme');
@@ -99,27 +46,7 @@ class UpdateRevertCaste extends Component
             }
         }
 
-        if ($moduleCode) {
-            $this->moduleCode = $moduleCode;
-        }
-        if ($moduleName) {
-            $this->moduleName = $moduleName;
-        }
-        if ($mainModuleId) {
-            $this->mainModuleId = $mainModuleId;
-        }
         $selectLgd = session('lgd_session');
-        $this->requestModuleCode = $moduleCode;
-        $this->currentRoleId = Crypt::decryptString($selectLgd['role_id']);
-        if (! empty($selectLgd['district_id'])) {
-            $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($selectLgd['district_id']);
-        }
-        if (! empty($selectLgd['block_id'])) {
-            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($selectLgd['block_id']);
-        }
-        if (! empty($selectLgd['subdivision_id'])) {
-            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($selectLgd['subdivision_id']);
-        }
         if (! empty($selectLgd['role_id'])) {
             $this->RoleId = Crypt::decryptString($selectLgd['role_id']);
         }
@@ -138,99 +65,7 @@ class UpdateRevertCaste extends Component
         return in_array((int) $this->newData['caste'], array_filter([$scID, $stID]));
     }
 
-    public function handleSearch($data)
-    {       
-        $this->beneficiary = null;
-        $this->showFields = false;
-        $this->reset(['oldData', 'newData']);
 
-        if (empty($data['results'])) {
-            $this->items = [];
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => 'No matching approved beneficiary found.',
-            ]);
-
-            return;
-        }
-        $applicationIds = collect($data['results'])->pluck('application_id')->toArray();
-        $this->moduleSchemeId = $data['results'][0]['scheme_id'];
-
-        $Mainmodule = DynamicWorkflowModule::where('module_code', $this->requestModuleCode)->first();
-        if (! $Mainmodule) {
-            abort(404, 'Module not found');
-        }
-        $module = DynamicWorkflowSchemeModule::where('module_id', $Mainmodule->id)->where('scheme_id', $this->moduleSchemeId)->first();
-        if (! $module) {
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => 'Steps are not configured for this scheme!',
-            ]);
-
-            return;
-        }
-        $firstStep = WorkflowsteproleMapping::where([
-            'module_id' => $module->id,
-            'scheme_id' => $this->moduleSchemeId,
-            'role_id' => $this->RoleId,
-        ])
-            ->orderBy('rank', 'asc')
-            ->orderBy('id', 'asc')
-            ->first();
-
-        if (! $firstStep) {
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => 'You are not authorized to initiate this workflow or steps are not configured.',
-            ]);
-
-            return;
-        }
-
-        $SubmittedRequest = CasteModificationInfo::where('application_id', $applicationIds)
-            ->where('scheme_id', $this->moduleSchemeId)
-            ->where('module_id', $module->id)
-            ->whereNotIn('current_rank', [-1, 0])
-            ->get();
-
-        if ($SubmittedRequest->count() > 0) {
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => 'Request already Pending!',
-            ]);
-
-            return;
-        }
-
-        $this->items = BeneficiaryPersonalDetail::query()
-            ->select(['application_id', 'beneficiary_id', 'scheme_id', 'beneficiary_name', 'caste', 'caste_cer_no', 'other_details'])
-            ->with([
-                'contact:beneficiary_id,application_id,scheme_id,district_id,rural_urban,blockurban,gpward',
-                'bank:beneficiary_id,application_id,scheme_id,bankaccountnumber,ifscode',
-            ])
-            ->whereIn('application_id', $applicationIds)
-            ->get()
-            ->map(fn ($item) => [
-                'application_id' => $item->application_id,
-                'beneficiary_id' => $item->beneficiary_id,
-                'applicant_name' => $item->beneficiary_name,
-                'caste_name' => FormOptionHelper::label('Caste', $item->caste),
-                'caste_no' => $item->caste_cer_no,
-                'mobile_no' => $item->other_details['mobile_no'] ?? '-',
-                'address' => optional($item->contact)->getFullAddress() ?? 'N/A',
-                'bank_account' => optional($item->bank)->bankaccountnumber ?? '-',
-                'ifsc' => optional($item->bank)->ifscode ?? '-',
-                'scheme_id' => $item->scheme_id,
-            ])->toArray();
-    }
-
-    public function resetSearch()
-    {
-        $this->items = [];
-        $this->beneficiary = null;
-        $this->showFields = false;
-        $this->reset(['oldData', 'newData']);
-    }
 
     public function selectBeneficiary($appId)
     {
@@ -240,9 +75,8 @@ class UpdateRevertCaste extends Component
 
             return;
         }
-        $this->items = [];  // table hide করো
+        
         $this->moduleSchemeId = $this->beneficiary->scheme_id;
-        $this->showFields = true;
 
         $pendingRequest = CasteModificationInfo::where('application_id', $appId)
             ->where('scheme_id', $this->moduleSchemeId)
