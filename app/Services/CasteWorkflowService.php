@@ -182,11 +182,11 @@ class CasteWorkflowService
             $request = CasteModificationInfo::findOrFail($requestId);
             $currentStep = $this->getStepForRank($request->module_id, $request->current_rank);
 
-            $prevStep = $this->getStepForRank(
-                $request->module_id,
-                $currentStep->same_label_role_id,
-                'Revert target rank configuration missing.'
-            );
+            // $prevStep = $this->getStepForRank(
+            //     $request->module_id,
+            //     $currentStep->same_label_role_id,
+            //     'Revert target rank configuration missing.'
+            // );
 
             $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $request->application_id)->value('beneficiary_id');
             $parentId = AcceptRejectInfo::where('application_id', $request->application_id)->latest('id')->value('id');
@@ -198,7 +198,7 @@ class CasteWorkflowService
                 'user_id' => Auth::id(),
                 'ip_address' => request()->ip(),
                 'browser' => request()->userAgent(),
-                'op_type' => $prevStep->rank,
+                'op_type' => Codemaster::getIdByCode($request->scheme_id),
                 'model_name' => optional($request->module)->module_name ?? 'null',
                 'revert_reason_remarks' => $remark ?: 'Reverted to previous step',
                 'parent_id' => $parentId,
@@ -207,13 +207,12 @@ class CasteWorkflowService
             ]);
 
             $request->update([
-                'current_rank' => $prevStep->rank,
-                'current_step_id' => $prevStep->id,
+                'current_rank' => -($request->scheme_id),
             ]);
 
             DB::commit();
 
-            return ['status' => 'reverted', 'message' => 'Request reverted to rank '.$prevStep->rank];
+            return ['status' => 'reverted', 'message' => 'Application Reverted Successfully'];
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -258,7 +257,7 @@ class CasteWorkflowService
             throw $e;
         }
     }
-    
+
     protected function applyApprovedChanges(CasteModificationInfo $request): void
     {
         DB::transaction(function () use ($request) {

@@ -10,7 +10,7 @@
     <meta name="author" content="Webonzer" />
 
     <!-- Site Title -->
-    <title>Lakshmir Bhandar | Government of West Bengal</title>
+    <title>ANNAPURNA BHANDAR | Government of West Bengal</title>
 
     <!-- Favicon Icon -->
     <link rel="shortcut icon" href="{{ asset('images/biswofab.ico') }}">

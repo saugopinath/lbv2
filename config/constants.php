@@ -154,8 +154,8 @@ return [
         'purohithousing' => array("scheme_code" => '13', "name" => 'One time Housing Scheme', 'slug' => 'housing', 'maintable' => 'PensionPurohitHousingICAD', 'doctable' => 'BenDocsPurohitHousingICAD', 'docarctable' => 'BenDocsArcPurohitHousingICAD'),
         'purohitboth' => array("scheme_code" => '14', "name" => 'Both', 'slug' => 'both', 'maintable' => 'PensionPurohitHousingICAD')
     ],
-    'site_title' => 'Lakshmir Bhandar',
-    'site_titleShort' => 'Lakshmir Bhandar',
+    'site_title' => 'ANNAPURNA BHANDAR',
+    'site_titleShort' => 'ANNAPURNA BHANDAR',
     'lb_source' => [
         // 'nfsa' => 'NFSA (Khadyasathi)',
         'ss_nfsa' => 'Swasthya Sathi',

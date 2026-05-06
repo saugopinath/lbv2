@@ -300,7 +300,7 @@
                                     style="background-color: {{ $baseColor }}">
                                     <i class="fas fa-female"></i>
                                 </div>
-                                <h3 class="font-bold text-lg" style="color: {{ $baseColor }}">Lakshmir Bhandar</h3>
+                                <h3 class="font-bold text-lg" style="color: {{ $baseColor }}">ANNAPURNA BHANDAR</h3>
                             </div>
                             <p class="text-sm mb-3" style="color: {{ $baseColor }}">Monthly financial assistance of
                                 ₹500-₹1000 to women heads of families</p>

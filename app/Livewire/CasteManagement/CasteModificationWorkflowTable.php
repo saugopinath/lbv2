@@ -130,7 +130,7 @@ class CasteModificationWorkflowTable extends DataTableComponent
                 ->html(),
             Column::make('Actions')
                 ->label(fn ($row) => view('coulmn_button.view', [
-                    'link' => route('view-beneficiary-details', [
+                    'link' => route('caste-revert-update', [
                         'application_id' => Crypt::encryptString($row->application_id),
                         'Scheme' => Crypt::encryptString($row->scheme_id),
                     ]),

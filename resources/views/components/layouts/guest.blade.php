@@ -13,7 +13,7 @@
     @if(config('app.jblb_logo') == 1)
     <title>Jai Bangla Portal | Government of West Bengal</title>
     @else
-    <title>Lakshmir Bhandar | Government of West Bengal</title>
+    <title>ANNAPURNA BHANDAR | Government of West Bengal</title>
     @endif
 
 
@@ -73,13 +73,13 @@
                     @else
                     <img src="{{ asset('images/biswo-1.png') }}" alt="Centered Logo" class="w-24 h-auto sm:block">
                     @endif
-                    <!-- <h2 class="text-2xl lg:text-3xl text-center text-[#003974] font-bold">Lakshmir Bhandar Portal</h2> -->
+                    <!-- <h2 class="text-2xl lg:text-3xl text-center text-[#003974] font-bold">ANNAPURNA BHANDAR Portal</h2> -->
                 </div>
                 <div class="text-center mb-2">
                     @if(config('app.jblb_logo')==1)
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Jai Bangla Portal</h1>
                     @else
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Lakshmir Bhandar Portal</h1>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">ANNAPURNA BHANDAR Portal</h1>
                     @endif
                 </div>
                 {{ $slot }}
