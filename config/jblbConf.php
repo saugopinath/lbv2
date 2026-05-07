@@ -14,6 +14,9 @@ if ($portal == 'lb') {
     $schemeIds = [20];
     $footerText = 'Design and develpod By NIC.';
     $deptName = 'Women and Child Development & Social Welfare Department';
+    $indexName = 'Annapurna Bhandar | Government of West Bengal';
+    $initiallogo = 'biswo-1.png';
+    $dept_logo = 'biswo_logo.png';
 } elseif ($portal == 'jb') {
     $title = 'Jai Bangla Portal | Government of West Bengal';
     $headLine = 'Jai Bangla';
@@ -28,6 +31,7 @@ if ($portal == 'lb') {
     $footerText = 'Design and develpod By NIC.';
     $deptName = 'Finance Department';
     $dept_logo = 'biswo_logo.png';
+    $initiallogo = 'jb_logo.png';
     $indexName = 'Department of Finance | Government of West Bengal';
 } else if ($portal == 'ub') {
     $title = 'Unnayan Bangla | Government of West Bengal';
