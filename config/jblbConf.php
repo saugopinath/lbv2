@@ -42,7 +42,7 @@ if ($portal == 'lb') {
     $das_logo = 'ub_logo.png';
     $logo_das_width = 'w-12';
     $das_logo_class = 'p-2';
-    $bg_image = 'jb-bg.jpg';
+    $bg_image = 'jb_bg.png';
     $schemeIds = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 17, 19, 20];
     $footerText = 'Design and develpod By NIC.';
     $deptName = 'Finance Department';

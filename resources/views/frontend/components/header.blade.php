@@ -10,7 +10,10 @@
                     alt="Biswa Bangla" />
                 <img class="w-16 md:w-24 lg:w-24 h-auto" src="{{ asset('images/home/'.config('jblbConf.logo')) }}"
                     alt="{{ config('constants.jb') }}" />
-
+                <div
+                    class="text-xl md:text-xl font-semibold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent text-center md:text-left">
+                    {{config('jblbConf.headLine')}} | {{config('jblbConf.deptName')}} <br>Government of West Bengal
+                </div>
             </div>
 
             <!-- Icon Navigation -->
@@ -82,12 +85,7 @@
         </div>
 
         <!-- Navigation -->
-        <nav class="flex flex-col md:flex-row md:items-center md:justify-between border-t pt-2 gap-2">
-            <!-- Title -->
-            <div
-                class="text-xs md:text-sm font-semibold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent text-center md:text-left">{{ config('jblbConf.indexName') }}
-            </div>
-
+        <nav class="flex flex-col md:flex-row md:items-end md:justify-end border-t pt-2 gap-2">
             <!-- Menu -->
             <div class="flex flex-wrap justify-center md:justify-end gap-3 md:gap-6 text-xs md:text-sm font-medium">
                 <a href="#about" class="hover:text-indigo-600">About</a>

@@ -14,7 +14,7 @@
 
 
     <!-- Favicon Icon -->
-    <link rel="shortcut icon" href="{{asset('images/biswofab.ico')}}">
+    <link rel="shortcut icon" href="{{ asset('images/' . config('jblbConf.headerlogo')) }}">
     <!-- Style Css -->
     @livewireStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -30,7 +30,7 @@
         <div class="bg-white/80 rounded-2xl shadow-xl w-full max-w-6xl overflow-hidden flex flex-col lg:flex-row">
             <!-- Left Image Section -->
             <div class="lg:flex lg:w-1/2 flex-col justify-center items-center p-4 relative rounded-l-2xl">
-                <a href="{{ route('/') }}" class="absolute top-4 left-4 bg-[#003974] p-3 rounded-full">
+                <a href="{{ route('/') }}" class="absolute top-4 left-4 bg-green-800 p-3 rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="w-5 h-5 fill-white text-white">
                         <path
                             d="M341.8 72.6C329.5 61.2 310.5 61.2 298.3 72.6L74.3 280.6C64.7 289.6 61.5 303.5 66.3 315.7C71.1 327.9 82.8 336 96 336L112 336L112 512C112 547.3 140.7 576 176 576L464 576C499.3 576 528 547.3 528 512L528 336L544 336C557.2 336 569 327.9 573.8 315.7C578.6 303.5 575.4 289.5 565.8 280.6L341.8 72.6zM304 384L336 384C362.5 384 384 405.5 384 432L384 528L256 528L256 432C256 405.5 277.5 384 304 384z" />
@@ -77,30 +77,33 @@
                     @else
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Lakshmir Bhandar Portal</h1>
                     @endif -->
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">{{ config('jblbConf.headLine') }}</h1>
+                    <h1 class="text-2xl sm:text-3xl font-bold gradient-text">{{ config('jblbConf.headLine') }}</h1>
                 </div>
                 {{ $slot }}
             </div>
         </div>
 
         <!-- Footer -->
-        <footer class="w-full max-w-6xl mt-4 px-2">
-            <div class="border-t border-white/30 mb-3"></div>
-            <div class="flex flex-col items-center gap-2 text-center">
-                <!-- Copyright -->
-                <p class="text-xs text-white/80 drop-shadow">
-                    &copy; {{ date('Y') }} This site is designed by National Informatics Centre (NIC). Content, DATA, Process and Operation owned and maintained by Department of {{ config('jblbConf.deptName') }}, Government of West Bengal.
-                </p>
-                <!-- Links -->
-                <nav class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-white/80">
-                    <a href="#" class="hover:text-white hover:underline transition-colors duration-200 drop-shadow">Privacy Policy</a>
-                    <span class="text-white/40">|</span>
-                    <a href="#" class="hover:text-white hover:underline transition-colors duration-200 drop-shadow">Terms &amp; Conditions</a>
-                    <span class="text-white/40">|</span>
-                    <a href="#" class="hover:text-white hover:underline transition-colors duration-200 drop-shadow">Help &amp; Support</a>
-                    <span class="text-white/40">|</span>
-                    <a href="#" class="hover:text-white hover:underline transition-colors duration-200 drop-shadow">Disclaimer</a>
-                </nav>
+        <footer class="w-full max-w-6xl mt-4 mb-2">
+            <div class="bg-black/20 backdrop-blur-md border border-white/10 py-4 px-6 rounded-2xl shadow-xl">
+                <div class="flex flex-col items-center gap-3 text-center">
+                    <!-- Copyright -->
+                    <p class="text-[11px] md:text-xs font-medium text-white leading-relaxed drop-shadow-sm">
+                        &copy; {{ date('Y') }} This site is designed by National Informatics Centre (NIC). <br class="md:hidden">
+                        Content, DATA, Process and Operation owned and maintained by {{ config('jblbConf.deptName') }}, Government of West Bengal.
+                    </p>
+
+                    <!-- Links -->
+                    <nav class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] md:text-xs">
+                        <a href="#" class="text-indigo-100 hover:text-white transition-colors duration-200">Privacy Policy</a>
+                        <span class="text-white/30">|</span>
+                        <a href="#" class="text-indigo-100 hover:text-white transition-colors duration-200">Terms &amp; Conditions</a>
+                        <span class="text-white/30">|</span>
+                        <a href="#" class="text-indigo-100 hover:text-white transition-colors duration-200">Help &amp; Support</a>
+                        <span class="text-white/30">|</span>
+                        <a href="#" class="text-indigo-100 hover:text-white transition-colors duration-200">Disclaimer</a>
+                    </nav>
+                </div>
             </div>
         </footer>
     </div>
