@@ -23,7 +23,7 @@ class CasteManagement extends Component
             $this->schemeData = true;
             $this->schemeName = $schemeData->name;
         }
-        $this->moduleCode = 'caste_mng_01';
+        $this->moduleCode = config('constants.module_codes.caste_management');
         $this->header = "Update Caste Management Details";
     }
     #[On('selectedScheme')]

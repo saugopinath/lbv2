@@ -259,4 +259,8 @@ return [
         '2025' => '2025',
     ],
     'EncryptionKey'=>'wltHCqXLI0rTIZtjY2tw9FuglpZFIcHzBhBZAG9ADKw=',
+    'module_codes' => [
+        'caste_management' => 'caste_mng_01',
+        'update_mark_beneficiary' => 'UP_MB_D_01',
+    ],
 ];
