@@ -58,7 +58,7 @@ class CasteWorkflowModal extends Component
         $this->stepLabel = $step->label->label_name ?? 'Approve';
         $this->actions = [
             'approve' => $this->stepLabel,
-            'reject' => 'Reject',
+            // 'reject' => 'Reject',
             'revert' => 'Revert',
         ];
         $this->remark = null;
@@ -81,7 +81,7 @@ class CasteWorkflowModal extends Component
         // dd($action);
         $this->selectedAction = $action;
         $this->validate([
-            'selectedAction' => 'required|in:approve,reject,revert',
+            'selectedAction' => 'required|in:approve,revert',
             'remark' => 'required',
         ]);
 
@@ -102,9 +102,9 @@ class CasteWorkflowModal extends Component
                 case 'approve':
                     $result = $service->approve($this->selectedRequest->id, $this->remark);
                     break;
-                case 'reject':
-                    $result = $service->reject($this->selectedRequest->id, $this->remark);
-                    break;
+                // case 'reject':
+                //     $result = $service->reject($this->selectedRequest->id, $this->remark);
+                //     break;
                 case 'revert':
                     $result = $service->revert($this->selectedRequest->id, $this->remark);
                     break;
