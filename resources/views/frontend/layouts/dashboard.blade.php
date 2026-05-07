@@ -212,11 +212,11 @@
 
                             <div>
                                 <h1 class="text-2xl sm:text-3xl font-bold gradient-text leading-tight">
-                                    Jai Bangla Portal
-                                    <span class="block sm:inline">@yield('header_title')</span>
+                                    {{ config('jblbConf.title') }}
+                                    <!-- <span class="block sm:inline">@yield('header_title')</span> -->
                                 </h1>
                                 <p class="text-gray-600 text-sm sm:text-base mt-1">
-                                    @yield('header_description')
+                                    {{ config('jblbConf.indexName') }}
                                 </p>
                             </div>
                         </div>

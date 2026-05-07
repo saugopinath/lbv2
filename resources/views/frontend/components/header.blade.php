@@ -6,15 +6,11 @@
 
             <!-- Logo -->
             <div class="flex items-center justify-center md:justify-start gap-3">
-                @if(config('app.app_portal') == 'jb')
-                <img class="w-10 md:w-16 lg:w-16 h-auto" src="{{ asset('images/home/biswo_logo.png') }}" alt="Biswa Bangla" />
-                <img class="w-40 md:w-40 lg:w-40 h-auto" src="{{ asset('images/home/jb_logo.png') }}"
+                <img class="w-10 md:w-12 lg:w-12 h-auto" src="{{ asset('images/home/'.config('jblbConf.headerlogo')) }}"
+                    alt="Biswa Bangla" />
+                <img class="w-16 md:w-24 lg:w-24 h-auto" src="{{ asset('images/home/'.config('jblbConf.logo')) }}"
                     alt="{{ config('constants.jb') }}" />
-                @else
-                <img class="w-10 md:w-16 lg:w-16 h-auto" src="{{ asset('images/home/biswo_logo.png') }}" alt="Biswa Bangla" />
-                <img class="w-50 md:w-50 lg:w-50 h-auto" src="{{ asset('images/home/lb_header_logo.png') }}"
-                    alt="{{ config('constants.lb') }}" />
-                @endif
+
             </div>
 
             <!-- Icon Navigation -->
@@ -87,16 +83,9 @@
 
         <!-- Navigation -->
         <nav class="flex flex-col md:flex-row md:items-center md:justify-between border-t pt-2 gap-2">
-
             <!-- Title -->
             <div
-                class="text-xs md:text-sm font-semibold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent text-center md:text-left">
-                @if(config('app.app_portal') == 'jb')
-                {{ config('constants.jb') }} | One Umbrella Scheme | Department of Finance | Government of West Bengal
-                @else
-                {{ config('constants.lb') }} | Department of Women & Child Development and Social Welfare | Government
-                of West Bengal
-                @endif
+                class="text-xs md:text-sm font-semibold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent text-center md:text-left">{{ config('jblbConf.indexName') }}
             </div>
 
             <!-- Menu -->
