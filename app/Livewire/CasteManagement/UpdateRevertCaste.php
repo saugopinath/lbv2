@@ -163,9 +163,13 @@ class UpdateRevertCaste extends Component
                 'op_type' => $optype,
             ]);
             
-            if ($this->modificationId) {
-                $UpdateCaste = CasteModificationInfo::find($this->modificationId);
-                $UpdateCaste->update([
+            $existingActiveRequest = CasteModificationInfo::where('application_id', $this->beneficiary->application_id)
+                ->where('scheme_id', $this->moduleSchemeId)
+                ->where('is_active', true)
+                ->first();
+
+            if ($existingActiveRequest) {
+                $existingActiveRequest->update([
                     'old_data' => $this->oldData,
                     'new_data' => $this->newData,
                     'caste_request_type' => $this->newData['caste'],
@@ -175,6 +179,8 @@ class UpdateRevertCaste extends Component
                     'current_step_id' => $firstStep->workflow_step_id,
                     'current_rank' => $firstStep->next_label_role_id,
                 ]);
+                $UpdateCaste = $existingActiveRequest;
+                $successMessage = 'Modification request updated successfully!';
             } else {
                 $UpdateCaste = CasteModificationInfo::create([
                     'application_id' => $this->beneficiary->application_id,
@@ -190,11 +196,12 @@ class UpdateRevertCaste extends Component
                     'current_rank' => $firstStep->next_label_role_id,
                     'created_by' => Auth::id(),
                 ]);
+                $successMessage = 'Modification request submitted successfully!';
             }
             
             if ($logdetails && $UpdateCaste) {
                 DB::commit();
-                $this->dispatch('toastr', ['type' => 'success', 'message' => 'Modification request submitted successfully!']);
+                $this->dispatch('toastr', ['type' => 'success', 'message' => $successMessage]);
 
                 return redirect()->route('caste-management');
             } else {

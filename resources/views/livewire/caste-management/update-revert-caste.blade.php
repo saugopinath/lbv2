@@ -1,4 +1,16 @@
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-fadeIn">
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border border-gray-200 rounded-xl p-4">
+        <div class="flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800">Process Reverted Application</h1>
+            <a href="{{ route('caste-management-request-list') }}" class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-fadeIn">
                 <div class="p-5 space-y-6">
                     {{-- Added Tab-wise Application View from original blade --}}
                     <div class="mb-4">
@@ -84,3 +96,4 @@
                     </div>
                 </div>
             </div>
+</div>

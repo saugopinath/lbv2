@@ -142,7 +142,7 @@ class CasteWorkflowService
                     $UpdateRequest = $request->update([
                         'current_rank' => $currentStep->next_label_role_id,
                         'current_step_id' => $currentStep->workflow_step_id,
-                        'is_active' => false, // Request completed
+                        'is_active' => false, 
                         'updated_by' => Auth::id(),
                         'updated_at' => now(),
                     ]);
@@ -219,48 +219,48 @@ class CasteWorkflowService
         }
     }
 
-    public function reject($requestId, $remark = '')
+    // public function reject($requestId, $remark = '')
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $request = CasteModificationInfo::findOrFail($requestId);
+    //         $currentStep = workflowstepRolemapping::where('module_id', $request->module_id)
+    //             ->where('rank', $request->current_rank)
+    //             ->first();
+    //         $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $request->application_id)->value('beneficiary_id');
+    //         $parentId = AcceptRejectInfo::where('application_id', $request->application_id)->latest('id')->value('id');
+    //         AcceptRejectInfo::create([
+    //             'application_id' => $request->application_id,
+    //             'beneficiary_id' => $beneficiary_id,
+    //             'scheme_id' => $request->scheme_id,
+    //             'user_id' => Auth::id(),
+    //             'ip_address' => request()->ip(),
+    //             'browser' => request()->userAgent(),
+    //             'op_type' => Codemaster::getIdByCode(-1),
+    //             'model_name' => optional($request->module)->module_name ?? 'null',
+    //             'revert_reason_remarks' => $remark ?: 'Rejected',
+    //             'parent_id' => $parentId,
+    //             'old_value' => $request->old_data,
+    //             'new_value' => $request->new_data,
+    //         ]);
+
+    //         $request->update([
+    //             'current_rank' => -100,
+    //             'current_step_id' => $currentStep->workflow_step_id,
+    //         ]);
+
+    //         DB::commit();
+
+    //         return ['status' => 'rejected', 'message' => 'Request rejected and closed.'];
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         throw $e;
+    //     }
+    // }
+
+    protected function applyApprovedChanges(CasteModificationInfo $request): bool
     {
-        DB::beginTransaction();
-        try {
-            $request = CasteModificationInfo::findOrFail($requestId);
-            $currentStep = workflowstepRolemapping::where('module_id', $request->module_id)
-                ->where('rank', $request->current_rank)
-                ->first();
-            $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $request->application_id)->value('beneficiary_id');
-            $parentId = AcceptRejectInfo::where('application_id', $request->application_id)->latest('id')->value('id');
-            AcceptRejectInfo::create([
-                'application_id' => $request->application_id,
-                'beneficiary_id' => $beneficiary_id,
-                'scheme_id' => $request->scheme_id,
-                'user_id' => Auth::id(),
-                'ip_address' => request()->ip(),
-                'browser' => request()->userAgent(),
-                'op_type' => Codemaster::getIdByCode(-1),
-                'model_name' => optional($request->module)->module_name ?? 'null',
-                'revert_reason_remarks' => $remark ?: 'Rejected',
-                'parent_id' => $parentId,
-                'old_value' => $request->old_data,
-                'new_value' => $request->new_data,
-            ]);
-
-            $request->update([
-                'current_rank' => -100,
-                'current_step_id' => $currentStep->workflow_step_id,
-            ]);
-
-            DB::commit();
-
-            return ['status' => 'rejected', 'message' => 'Request rejected and closed.'];
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
-    }
-
-    protected function applyApprovedChanges(CasteModificationInfo $request): void
-    {
-        DB::transaction(function () use ($request) {
+        return DB::transaction(function () use ($request) {
             $application_id = $request->application_id;
             $scheme_id = $request->scheme_id;
             $beneficiary = BeneficiaryPersonalDetail::where('application_id', $application_id)->firstOrFail();
@@ -305,7 +305,7 @@ class CasteWorkflowService
                     }
                 }
 
-                if ($beneficiary->save() && ($temp->delete() || $existingDoc->delete())) {
+                if ($beneficiary->save()) {
                     return true;
                 } else {
                     throw new \Exception('Failed to update beneficiary personal details.');
