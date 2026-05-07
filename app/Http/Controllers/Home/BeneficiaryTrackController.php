@@ -408,19 +408,14 @@ class BeneficiaryTrackController extends Controller
 
     public function getBeneficiaryDetails($b)
     {
-
         $returnData = [];
-
-        // 🔥 No more DB queries if you include names in index
         $districtcode = $b->contact->district_id ?? NULL;
         $districtName = District::where('id', $districtcode)->first()->name ?? 'Unknown';
         $schemeName = Scheme::where('id', $b->scheme_id)->first()->name ?? 'Unknown';
-
         // $status = $b->next_level_role_id == 0 ? 'Approved' : 'Approval Pending';
         // $statusClass = $b->next_level_role_id == 0
         //     ? 'status-active'
         //     : 'status-pending';
-
         $status = NULL;
         $statusClass = NULL;
         // $nextlevelRoleVer = WorkflowsteproleMapping::where('scheme_id', $b->scheme_id)->where('module_id', Null)->where('rank', 3)->value('next_level_role_id');

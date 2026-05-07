@@ -101,9 +101,9 @@ class PaymentStatusTable extends DataTableComponent
 
         // Fetch the created_at of the beneficiary
         if ($this->scheme_id == 20) {
-            $benPersonal = BenTransactionDetailsLB::select('created_at')->where('ben_id', $this->ben_id)->where('fin_year', $this->fin_year)->first();
+            $benPersonal = BenTransactionDetailsLB::select('created_at')->where('ben_id', $this->ben_id)->first();
         } else {
-            $benPersonal = BenTransactionDetailsJB::select('created_at')->where('ben_id', $this->ben_id)->where('fin_year', $this->fin_year)->first();
+            $benPersonal = BenTransactionDetailsJB::select('created_at')->where('ben_id', $this->ben_id)->first();
         }
         $start_month_idx = 1;
 
@@ -122,6 +122,7 @@ class PaymentStatusTable extends DataTableComponent
         }
 
         $current_time = time();
+
         $current_year = (int) date('Y', $current_time);
         $current_month = (int) date('m', $current_time);
         $current_fin_year = ($current_month >= 4) ? $current_year . '-' . ($current_year + 1) : ($current_year - 1) . '-' . $current_year;
@@ -133,6 +134,48 @@ class PaymentStatusTable extends DataTableComponent
             $end_month_idx = 0; // Don't show any months for future financial years
         }
 
+        // foreach ($months as $idx => $m) {
+        //     if ($idx < $start_month_idx || $idx > $end_month_idx) {
+        //         continue;
+        //     }
+
+        //     $prefix = $m[0];
+        //     $monthName = $m[1];
+
+        //     $q = $model::query()
+        //         ->selectRaw("{$idx} as month_idx, '{$monthName}' as month_name, {$prefix}_lot_status as lot_status, '{$prefix}' as prefix")
+        //         ->where('ben_id', $this->ben_id)
+        //         ->limit(1);
+
+        //     if ($this->scheme_id != 20) {
+        //         $q->where('scheme_id', $this->scheme_id);
+        //     }
+
+        //     if (!empty($this->fin_year)) {
+        //         $q->where('fin_year', $this->fin_year);
+        //     }
+
+        //     if ($query === null) {
+        //         $query = $q;
+        //     } else {
+        //         $query->unionAll($q);
+        //     }
+        // }
+
+        $data = $model::query()
+            ->where('ben_id', $this->ben_id)
+            ->when($this->scheme_id != 20, function ($q) {
+                $q->where('scheme_id', $this->scheme_id);
+            })
+            ->when(!empty($this->fin_year), function ($q) {
+                $q->where('fin_year', $this->fin_year);
+            })
+            ->first();
+
+        $query = null;
+        $dummy = new DummyPaymentModel();
+        $dummy->dynamicConnection = app($model)->getConnectionName();
+
         foreach ($months as $idx => $m) {
             if ($idx < $start_month_idx || $idx > $end_month_idx) {
                 continue;
@@ -140,20 +183,14 @@ class PaymentStatusTable extends DataTableComponent
 
             $prefix = $m[0];
             $monthName = $m[1];
+            $column = "{$prefix}_lot_status";
+            $val = $data ? ($data->$column ?? '') : '';
 
-            // Build the select dynamically for the current month prefix
-            $q = $model::query()
-                ->selectRaw("{$idx} as month_idx, '{$monthName}' as month_name, {$prefix}_lot_status as lot_status, '{$prefix}' as prefix")
-                ->where('ben_id', $this->ben_id)
+            // Create a virtual row of constants for each month
+            $q = $dummy->newQuery()
+                ->selectRaw("{$idx} as month_idx, '{$monthName}' as month_name, '{$val}' as lot_status, '{$prefix}' as prefix")
+                ->fromRaw("(SELECT 1 as dummy) as d")
                 ->limit(1);
-
-            if ($this->scheme_id != 20) {
-                $q->where('scheme_id', $this->scheme_id);
-            }
-
-            if (!empty($this->fin_year)) {
-                $q->where('fin_year', $this->fin_year);
-            }
 
             if ($query === null) {
                 $query = $q;
@@ -162,18 +199,13 @@ class PaymentStatusTable extends DataTableComponent
             }
         }
 
-        $dummy = new DummyPaymentModel();
-        $dummy->dynamicConnection = app($model)->getConnectionName();
-
         if ($query === null) {
-            $query = $model::query()
+            
+            $query = $dummy->newQuery()
                 ->selectRaw("0 as month_idx, '' as month_name, '' as lot_status, '' as prefix")
+                ->fromRaw("(SELECT 1 as dummy) as d")
                 ->whereRaw('1=0');
         }
-
-        // We wrap the subquery inside a clean DummyPaymentModel. 
-        // This ensures Rappasoft doesn't inject SoftDeletes ("deleted_at" is null) 
-        // and safely maps the physical prefix exclusively as "payments." instead of a rigid Postgres Schema.
 
         /** @var \Illuminate\Database\Eloquent\Builder $builder */
         $builder = $dummy->newQuery()->fromSub($query, 'payments')->orderBy('month_idx', 'asc');
