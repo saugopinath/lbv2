@@ -7,13 +7,15 @@
             <!-- Logo -->
             <div class="flex items-center justify-center md:justify-start gap-3">
                 @if(config('app.app_portal') == 'jb')
-                <img class="w-10 md:w-16 lg:w-16 h-auto" src="{{ asset('images/home/biswo_logo.png') }}" alt="Biswa Bangla" />
-                <img class="w-40 md:w-40 lg:w-40 h-auto" src="{{ asset('images/home/jb_logo.png') }}"
-                    alt="{{ config('constants.jb') }}" />
+                    <img class="w-10 md:w-16 lg:w-16 h-auto" src="{{ asset('images/home/biswo_logo.png') }}"
+                        alt="Biswa Bangla" />
+                    <img class="w-40 md:w-40 lg:w-40 h-auto" src="{{ asset('images/home/jb_logo.png') }}"
+                        alt="{{ config('constants.jb') }}" />
                 @else
-                <img class="w-10 md:w-16 lg:w-16 h-auto" src="{{ asset('images/home/biswo_logo.png') }}" alt="Biswa Bangla" />
-                <img class="w-50 md:w-50 lg:w-50 h-auto" src="{{ asset('images/home/lb_header_logo.png') }}"
-                    alt="{{ config('constants.lb') }}" />
+                    <img class="w-10 md:w-16 lg:w-16 h-auto" src="{{ asset('images/home/biswo_logo.png') }}"
+                        alt="Biswa Bangla" />
+                    <img class="w-50 md:w-50 lg:w-50 h-auto" src="{{ asset('images/home/lb_header_logo.png') }}"
+                        alt="{{ config('constants.lb') }}" />
                 @endif
             </div>
 
@@ -52,7 +54,7 @@
                     </a>
 
                     <!-- Dashboard -->
-                    <a href="{{ route('dashboard') }}"
+                    <a href="{{ route('dashboard.home') }}"
                         class="flex flex-col items-center text-gray-700 hover:text-indigo-600 transition">
                         <div
                             class="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-gray-100 rounded-full shadow-sm mb-1">
@@ -92,10 +94,10 @@
             <div
                 class="text-xs md:text-sm font-semibold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent text-center md:text-left">
                 @if(config('app.app_portal') == 'jb')
-                {{ config('constants.jb') }} | One Umbrella Scheme | Department of Finance | Government of West Bengal
+                    {{ config('constants.jb') }} | One Umbrella Scheme | Department of Finance | Government of West Bengal
                 @else
-                {{ config('constants.lb') }} | Department of Women & Child Development and Social Welfare | Government
-                of West Bengal
+                    {{ config('constants.lb') }} | Department of Women & Child Development and Social Welfare | Government
+                    of West Bengal
                 @endif
             </div>
 

@@ -36,7 +36,7 @@ Route::get('notifications', [NotificationController::class, 'index'])->name('not
 Route::post('/notifications/datatable', [NotificationController::class, 'datatable'])->name('notifications.datatable');
 
 Route::prefix('dashboard')->group(function () {
-    Route::get('home', [DashboardController::class, 'index'])->name('home');
+    Route::get('home', [DashboardController::class, 'index'])->name('dashboard.home');
     Route::get('scheme-wise-applications', [DashboardController::class, 'schemeWiseApplications'])->name('dashboard.schemeWiseApplications');
     Route::get('district-wise-beneficiaries', [DashboardController::class, 'districtWiseBeneficiaries'])->name('dashboard.districtWiseBeneficiaries');
     Route::get('age-distribution', [DashboardController::class, 'getAgeDistribution'])->name('dashboard.ageDistribution');

@@ -181,7 +181,7 @@ return [
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', 'localhost'),
             'port' => env('DB_PORT', '5432'),
-            'database' => 'lb_payments_db',
+            'database' => env('LB_PAY_DB', 'laravel'),
             'username' => env('DB_USERNAME', 'postgres'),
             'password' => env('DB_PASSWORD', '12345'),
             'charset' => env('DB_CHARSET', 'utf8'),
