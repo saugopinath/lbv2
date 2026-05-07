@@ -27,7 +27,8 @@ class SchemeDropdownNew extends Component
             $select_lgd = session('lgd_session');
 
             if (!empty($select_lgd['scheme_id'])) {
-                $scheme_id = Crypt::decryptString($select_lgd['scheme_id']);
+                // $scheme_id = Crypt::decryptString($select_lgd['scheme_id']);
+                $scheme_id = Crypt::decryptString($select_lgd['scheme_id'][0]);
             }
         }
         $query = Scheme::query()
