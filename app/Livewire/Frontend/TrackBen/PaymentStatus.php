@@ -11,12 +11,11 @@ class PaymentStatus extends Component
     public $ben_status;
     public $bank_code;
     public $ifsc;
-    
-    public $fin_year = '2025-2026'; // default
-    
+
+    public $fin_year = '2026-2027'; // default
+
     public function render()
     {
-        // Compute available financial years
         $currentYear = date('Y');
         $currentMonth = date('m');
         if ($currentMonth > 3) {
@@ -24,7 +23,7 @@ class PaymentStatus extends Component
         } else {
             $start = $currentYear - 1;
         }
-        
+
         $years = [];
         for ($i = 0; $i < 3; $i++) {
             $y = $start - $i;

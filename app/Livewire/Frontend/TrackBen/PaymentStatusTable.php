@@ -39,16 +39,43 @@ class PaymentStatusTable extends DataTableComponent
             ->setSearchStatus(false)
             ->setSortingDisabled()
             ->setColumnSelectDisabled()
-            ->setFiltersStatus(false)
-            ->setTableAttributes([
-                'class' => 'w-full border-collapse bg-white',
-            ])
-            ->setThAttributes(function (Column $column) {
-                return ['class' => 'font-bold text-gray-700 bg-gray-50 border-b border-gray-200 text-[13px] py-4 px-6 text-left uppercase tracking-wider'];
-            })
-            ->setTdAttributes(function (Column $column, $row, $columnIndex, $rowIndex) {
-                return ['class' => 'px-6 py-4 border-b border-gray-100 text-gray-700 align-middle'];
-            });
+            ->setFiltersStatus(false);
+        // ->setTableAttributes([
+        //     'class' => 'w-full border-collapse bg-white',
+        // ])
+        // ->setThAttributes(function (Column $column) {
+        //     return ['class' => 'font-bold text-gray-700 bg-gray-50 border-b border-gray-200 text-[13px] py-4 px-6 text-left uppercase tracking-wider'];
+        // })
+        // ->setTdAttributes(function (Column $column, $row, $columnIndex, $rowIndex) {
+        //     return ['class' => 'px-6 py-4 border-b border-gray-100 text-gray-700 align-middle'];
+        // });
+
+        $this->setTableWrapperAttributes([
+            'class' => 'overflow-x-auto overflow-y-auto max-h-[500px] border border-gray-200 rounded-lg shadow-sm',
+        ]);
+
+        $this->setTableAttributes([
+            'class' => 'min-w-full text-sm text-gray-700 text-center overflow-x-auto',
+        ]);
+
+        $this->setTheadAttributes([
+            'class' => 'bg-violet-800 text-xs uppercase py-3 px-4 text-white',
+        ]);
+        $this->setThAttributes(function ($column) {
+            return [
+                'class' => 'px-4 py-3 text-white bg-violet-800 text-xs',
+            ];
+        });
+
+        $this->setTdAttributes(function ($row) {
+            return [
+                'class' => 'px-4 py-3 text-gray-700 text-center',
+            ];
+        });
+
+        $this->setTbodyAttributes([
+            'class' => 'px-4 py-3 divide-y divide-gray-200 bg-white overflow-y-auto',
+        ]);
     }
 
     public function builder(): Builder
@@ -74,9 +101,9 @@ class PaymentStatusTable extends DataTableComponent
 
         // Fetch the created_at of the beneficiary
         if ($this->scheme_id == 20) {
-            $benPersonal = BenTransactionDetailsLB::select('created_at')->where('ben_id', $this->ben_id)->first();
+            $benPersonal = BenTransactionDetailsLB::select('created_at')->where('ben_id', $this->ben_id)->where('fin_year', $this->fin_year)->first();
         } else {
-            $benPersonal = BenTransactionDetailsJB::select('created_at')->where('ben_id', $this->ben_id)->first();
+            $benPersonal = BenTransactionDetailsJB::select('created_at')->where('ben_id', $this->ben_id)->where('fin_year', $this->fin_year)->first();
         }
         $start_month_idx = 1;
 
@@ -117,7 +144,8 @@ class PaymentStatusTable extends DataTableComponent
             // Build the select dynamically for the current month prefix
             $q = $model::query()
                 ->selectRaw("{$idx} as month_idx, '{$monthName}' as month_name, {$prefix}_lot_status as lot_status, '{$prefix}' as prefix")
-                ->where('ben_id', $this->ben_id);
+                ->where('ben_id', $this->ben_id)
+                ->limit(1);
 
             if ($this->scheme_id != 20) {
                 $q->where('scheme_id', $this->scheme_id);
@@ -138,8 +166,9 @@ class PaymentStatusTable extends DataTableComponent
         $dummy->dynamicConnection = app($model)->getConnectionName();
 
         if ($query === null) {
-            // fallback generic query if needed
-            return $dummy->newQuery()->where('month_idx', 0);
+            $query = $model::query()
+                ->selectRaw("0 as month_idx, '' as month_name, '' as lot_status, '' as prefix")
+                ->whereRaw('1=0');
         }
 
         // We wrap the subquery inside a clean DummyPaymentModel. 
@@ -234,7 +263,7 @@ class PaymentStatusTable extends DataTableComponent
         }
 
         try {
-            if ($schemeId = 20) {
+            if ($schemeId == 20) {
                 $model = BenTransactionDetailsLB::class;
                 $lotObj = $model::where('ben_id', $pension_id)
                     ->where('scheme_id', $schemeId)
@@ -246,7 +275,6 @@ class PaymentStatusTable extends DataTableComponent
                     ->where('scheme_id', $schemeId)
                     ->whereIn('failed_type', [3, 4, 5])
                     ->first();
-
             }
 
             if (!$lotObj) {

@@ -30,6 +30,7 @@ use App\Models\Municipality;
 use App\Models\Panchayat;
 use App\Models\Subdivision;
 use App\Models\WorkflowStep;
+use App\Models\WorkflowsteproleMapping;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
@@ -422,6 +423,8 @@ class BeneficiaryTrackController extends Controller
 
         $status = NULL;
         $statusClass = NULL;
+        // $nextlevelRoleVer = WorkflowsteproleMapping::where('scheme_id', $b->scheme_id)->where('module_id', Null)->where('rank', 3)->value('next_level_role_id');
+        // dd($nextlevelRoleVer);
         if ($b->is_final == 0 && $b->next_level_role_id == NULL) {
             $status = 'Application Partial Entry';
             $statusClass = 'status-pending';
@@ -432,12 +435,12 @@ class BeneficiaryTrackController extends Controller
             $statusClass = 'status-active';
             $statusColor = 'orange';
             $beneficiaryId = NULL;
-        } elseif ($b->is_final == 1 && $b->next_level_role_id == WorkflowStep::where('scheme_id', $b->scheme_id)->where('rank', 2)->first()->next_level_roleid) {
+        } elseif ($b->is_final == 1 && $b->next_level_role_id == WorkflowsteproleMapping::where('scheme_id', $b->scheme_id)->where('module_id', Null)->where('rank', 2)->value('next_label_role_id')) {
             $status = 'Verified';
             $statusClass = 'status-active';
             $statusColor = 'blue';
             $beneficiaryId = NULL;
-        } elseif ($b->is_final == 1 && $b->next_level_role_id == WorkflowStep::where('scheme_id', $b->scheme_id)->where('rank', 3)->first()->next_level_roleid) {
+        } elseif ($b->is_final == 1 && $b->next_level_role_id == WorkflowsteproleMapping::where('scheme_id', $b->scheme_id)->where('module_id', Null)->where('rank', 3)->value('next_label_role_id')) {
             $status = 'Approved';
             $statusClass = 'status-active';
             $statusColor = 'green';
