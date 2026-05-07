@@ -29,7 +29,7 @@ $accentColor = $selectedColor['accent'];
             class="card-inner relative w-full h-80 transform transition-transform duration-700 [transform-style:preserve-3d] hover:[transform:rotateY(180deg)]">
 
             <div class="card-front absolute w-full h-full rounded-2xl shadow-sm border {{ $borderColor }} flex flex-col items-center justify-center text-center {{ $textColor }} {{ $bgColor }} backdrop-blur-md [backface-visibility:hidden]">
-                <img src="{{ asset('images/home/biswo_logo.png') }}"
+                <img src="{{ asset('images/home/'.config('jblbConf.dept_logo')) }}"
                     class="w-20 h-20 mb-6 object-contain rounded-full bg-white p-1 shadow-md" />
                 <h3 class="font-bold text-xl">{{ $name ?? 'Department Name' }}</h3>
             </div>
