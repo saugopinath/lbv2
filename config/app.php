@@ -14,7 +14,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
-    'jblb_logo' => env('JBLB_LOGO', 0),
+    
 
     /*
     |--------------------------------------------------------------------------
@@ -123,5 +123,8 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
- 'password_expire_day' => env('PASSWORD_EXPIRE_DAY', 90),
+    'password_expire_day' => env('PASSWORD_EXPIRE_DAY', 90),
+
+    'app_portal' => env('APP_PORTAL', 'jb'),
+    'jblb_logo' => env('JBLB_LOGO', 0),
 ];

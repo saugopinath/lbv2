@@ -3,6 +3,10 @@ import "./bootstrap";
 import toastr from "toastr";
 import Sortable from 'sortablejs';
 import "toastr/build/toastr.min.css";
+import Highcharts from 'highcharts';
+
+window.Highcharts = Highcharts;
+
 
 // Optional default settings
 toastr.options = {

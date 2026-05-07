@@ -5,10 +5,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Jai Bangla @yield('title')</title>
+    <title>@if(config('app.app_portal') == 'jb') {{ config('constants.jb') }} @else {{ config('constants.lb') }} @endif
+        @yield('title')</title>
     <link rel="shortcut icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
@@ -78,6 +81,8 @@
         }
     </style>
 
+    <!-- Page-specific meta tags -->
+    @stack('meta')
     <!-- Styles -->
     @stack('styles')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -122,6 +127,16 @@
             }, 800);
         });
     </script>
+
+    @if(session()->has('toastr'))
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                window.dispatchEvent(new CustomEvent('toastr', {
+                    detail: [@json(session('toastr'))]
+                }));
+            });
+        </script>
+    @endif
 
     @stack('scripts')
 </body>

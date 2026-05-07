@@ -151,7 +151,7 @@ return new class extends Migration {
 
         $conn->statement("
             CREATE TABLE IF NOT EXISTS {$this->schema}.beneficiary_documents(
-            id SERIAL,
+            id bigserial,
             scheme_id integer NULL,
             beneficiary_id BIGINT NULL,
             application_id BIGINT NOT NULL,
