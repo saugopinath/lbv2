@@ -20,12 +20,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         .bg-login-cover {
-            background-image: url("{{ asset('images/' . config('jblbConf.bg_image')) }}");
+            background-image: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url("{{ asset('images/' . config('jblbConf.bg_image')) }}");
         }
     </style>
 </head>
 
-<body class="min-h-screen bg-cover bg-center bg-no-repeat bg-white bg-login-cover">
+<body class="min-h-screen bg-cover bg-center bg-no-repeat bg-white bg-login-cover" >
     <div class="min-h-screen flex flex-col items-center justify-center px-4 py-8">
         <div class="bg-white/80 rounded-2xl shadow-xl w-full max-w-6xl overflow-hidden flex flex-col lg:flex-row">
             <!-- Left Image Section -->
@@ -85,21 +85,21 @@
 
         <!-- Footer -->
         <footer class="w-full max-w-6xl mt-4 px-2">
-            <div class="border-t border-white/30 mb-3"></div>
+            <div class="border-t border-gray-300 mb-3"></div>
             <div class="flex flex-col items-center gap-2 text-center">
                 <!-- Copyright -->
-                <p class="text-xs text-white/80 drop-shadow">
+                <p class="text-xs text-gray-700 font-semibold">
                     &copy; {{ date('Y') }} This site is designed by National Informatics Centre (NIC). Content, DATA, Process and Operation owned and maintained by Department of {{ config('jblbConf.deptName') }}, Government of West Bengal.
                 </p>
                 <!-- Links -->
-                <nav class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-white/80">
-                    <a href="#" class="hover:text-white hover:underline transition-colors duration-200 drop-shadow">Privacy Policy</a>
-                    <span class="text-white/40">|</span>
-                    <a href="#" class="hover:text-white hover:underline transition-colors duration-200 drop-shadow">Terms &amp; Conditions</a>
-                    <span class="text-white/40">|</span>
-                    <a href="#" class="hover:text-white hover:underline transition-colors duration-200 drop-shadow">Help &amp; Support</a>
-                    <span class="text-white/40">|</span>
-                    <a href="#" class="hover:text-white hover:underline transition-colors duration-200 drop-shadow">Disclaimer</a>
+                <nav class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-gray-600 font-semibold">
+                    <a href="#" class="hover:text-blue-800 hover:underline transition-colors duration-200">Privacy Policy</a>
+                    <span class="text-gray-400">|</span>
+                    <a href="#" class="hover:text-blue-800 hover:underline transition-colors duration-200">Terms &amp; Conditions</a>
+                    <span class="text-gray-400">|</span>
+                    <a href="#" class="hover:text-blue-800 hover:underline transition-colors duration-200">Help &amp; Support</a>
+                    <span class="text-gray-400">|</span>
+                    <a href="#" class="hover:text-blue-800 hover:underline transition-colors duration-200">Disclaimer</a>
                 </nav>
             </div>
         </footer>
