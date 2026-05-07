@@ -264,4 +264,8 @@ return [
     'jb' => 'Jai Bangla',
     'lb' => 'Lakshmir Bhandar',
 
+    'module_codes' => [
+        'caste_management' => 'caste_mng_01',
+        'update_mark_beneficiary' => 'UP_MB_D_01',
+    ],
 ];

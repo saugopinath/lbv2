@@ -15,7 +15,7 @@ class UpdateMarkBeneficiaryDetailsController extends Controller
 
     public function listdetails()
     {
-        $moduleCode = 'UP_MB_D_01';
+        $moduleCode = config('constants.module_codes.update_mark_beneficiary');
         $module = DynamicWorkflowModule::where('module_code', $moduleCode)->first();
         if (!$module) {
             abort(404, 'Module not found');
@@ -27,7 +27,7 @@ class UpdateMarkBeneficiaryDetailsController extends Controller
     }
     public function updateRequest()
     {
-        $moduleCode = 'UP_MB_D_01';
+        $moduleCode = config('constants.module_codes.update_mark_beneficiary');
         $module = DynamicWorkflowModule::where('module_code', $moduleCode)->first();
         if (!$module) {
             // dd('module not found');

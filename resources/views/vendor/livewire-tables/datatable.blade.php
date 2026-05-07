@@ -1,11 +1,11 @@
-@php($tableName = $this->getTableName)
-@php($tableId = $this->getTableId)
-@php($primaryKey = $this->getPrimaryKey)
-@php($isTailwind = $this->isTailwind)
-@php($isBootstrap = $this->isBootstrap)
-@php($isBootstrap4 = $this->isBootstrap4)
-@php($isBootstrap5 = $this->isBootstrap5)
-@php($localisationPath = $this->getLocalisationPath)
+@php($tableName = $this->getTableName())
+@php($tableId = $this->getTableId())
+@php($primaryKey = $this->getPrimaryKey())
+@php($isTailwind = $this->isTailwind())
+@php($isBootstrap = $this->isBootstrap())
+@php($isBootstrap4 = $this->isBootstrap4())
+@php($isBootstrap5 = $this->isBootstrap5())
+@php($localisationPath = $this->getLocalisationPath())
 
 <div>
     <div x-data="{ currentlyReorderingStatus: false }">
@@ -82,9 +82,9 @@
                             <x-livewire-tables::table.th.collapsed-columns />
                         @endif
 
-                        @tableloop($this->selectedVisibleColumns as $index => $column)
+                        @foreach($this->selectedVisibleColumns as $index => $column)
                             <x-livewire-tables::table.th wire:key="{{ $tableName.'-table-head-'.$index }}" :$column :$index />
-                        @endtableloop
+                        @endforeach
                     </x-slot>
 
                     @if($this->secondaryHeaderIsEnabled() && $this->hasColumnsWithSecondaryHeader())
@@ -98,12 +98,12 @@
                         <x-livewire-tables::table.tr.bulk-actions  :displayMinimisedOnReorder="true" />
                     @endif
                     @if(count($currentRows = $this->getRows) > 0)
-                        @php($getCurrentlyReorderingStatus = $this->getCurrentlyReorderingStatus)
+                        @php($getCurrentlyReorderingStatus = $this->getCurrentlyReorderingStatus())
                         @php($showBulkActionsSections = $this->showBulkActionsSections)
                         @php($showCollapsingColumnSections = $this->showCollapsingColumnSections)
                         @php($selectedVisibleColumns = $this->selectedVisibleColumns)
 
-                        @tableloop ($currentRows as $rowIndex => $row)
+                        @foreach ($currentRows as $rowIndex => $row)
                             <x-livewire-tables::table.tr wire:key="{{ $tableName }}-row-wrap-{{ $row->{$primaryKey} }}" :$row :$rowIndex>
                                 @if($getCurrentlyReorderingStatus)
                                     <x-livewire-tables::table.td.reorder x-cloak x-show="currentlyReorderingStatus" wire:key="{{ $tableName }}-row-reorder-{{ $row->{$primaryKey} }}" :rowID="$tableName.'-'.$row->{$this->getPrimaryKey()}" :$rowIndex />
@@ -115,7 +115,7 @@
                                     <x-livewire-tables::table.td.collapsed-columns wire:key="{{ $tableName }}-row-collapsed-{{ $row->{$primaryKey} }}" :$rowIndex />
                                 @endif
 
-                                @tableloop($selectedVisibleColumns as $colIndex => $column)
+                                @foreach($selectedVisibleColumns as $colIndex => $column)
                                     <x-livewire-tables::table.td wire:key="{{ $tableName . '-' . $row->{$primaryKey} . '-datatable-td-' . $column->getSlug() }}"  :$column :$colIndex>
                                         @if($column->isHtml())
                                             {!! $column->setIndexes($rowIndex, $colIndex)->renderContents($row) !!}
@@ -123,13 +123,13 @@
                                             {{ $column->setIndexes($rowIndex, $colIndex)->renderContents($row) }}
                                         @endif
                                     </x-livewire-tables::table.td>
-                                @endtableloop
+                                @endforeach
                             </x-livewire-tables::table.tr>
 
                             @if ($showCollapsingColumnSections)
                                 <x-livewire-tables::table.collapsed-columns :$row :$rowIndex />
                             @endif
-                        @endtableloop
+                        @endforeach
                     @else
                         <x-livewire-tables::table.empty />
                     @endif

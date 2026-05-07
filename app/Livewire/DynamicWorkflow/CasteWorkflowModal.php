@@ -55,7 +55,7 @@ class CasteWorkflowModal extends Component
             $this->selectedRequest->setRelation('step', $step);
         }
         $this->button_status = ($step && $step->is_final_step == 1) ? 1 : 0;
-        $this->stepLabel = $step->label->label_name ?? 'Approve';
+        $this->stepLabel = $step?->label?->label_name ?? 'Approve';
         $this->actions = [
             'approve' => $this->stepLabel,
             // 'reject' => 'Reject',

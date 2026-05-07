@@ -39,8 +39,12 @@ class ProcessWorkflowModal extends Component
             ->where('scheme_id', $this->selectedRequest->scheme_id)
             ->first();
         $this->SchemeName = Scheme::where('id', $scheme_id)->first()->name;
-        $this->selectedRequest->step = $step;
-        $this->button_status = ($step && $step->is_final_step == 1) ? 1 : 0;
+        if ($step) {
+            $this->selectedRequest->setRelation('step', $step);
+            $this->button_status = ($step->is_final_step == 1) ? 1 : 0;
+        } else {
+            $this->button_status = 0;
+        }
         $this->remark = null;
         $this->isOpen = true;
     }

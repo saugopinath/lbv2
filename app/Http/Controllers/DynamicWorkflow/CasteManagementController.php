@@ -14,7 +14,7 @@ class CasteManagementController extends Controller
         if (WorkFlowPermissionHelper::canModifyCaste()) {
             // if (Auth::user()->can('modify caste')) {
             $header = 'Caste Modification Information';
-            $moduleCode = 'caste_mng_01';
+            $moduleCode = config('constants.module_codes.caste_management');
             $mainModule = DynamicWorkflowModule::where('module_code', $moduleCode)->first();
             if (! $mainModule) {
                 $header = 'Oops! You do not configure this module.';
@@ -38,7 +38,7 @@ class CasteManagementController extends Controller
         if (WorkFlowPermissionHelper::canCasteModification()) {
             // if (Auth::user()->can('modify caste')) {
             $header = 'Caste Modification Information';
-            $moduleCode = 'caste_mng_01';
+            $moduleCode = config('constants.module_codes.caste_management');
             $mainModule = DynamicWorkflowModule::where('module_code', $moduleCode)->first();
             if (! $mainModule) {
                 $header = 'Oops! You do not configure this module.';
