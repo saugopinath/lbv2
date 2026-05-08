@@ -276,7 +276,7 @@ class SchemewiseStoreDataJsonHelper
             $wireModelMode = 'wire:model.live';
         }
         $isConfirmField = false;
-
+$isEdit = false;
         if (!empty($field['validation_rule'])) {
             $rules = explode('|', $field['validation_rule']);
             $isRequired = in_array('required', $rules, true);
@@ -305,6 +305,7 @@ class SchemewiseStoreDataJsonHelper
         $requiredAttr = $isRequired ? 'required' : '';
         $isReadonly = !empty($field['is_readonly']) && (int) $field['is_readonly'] === 1;
         $readonlyAttr = $isReadonly ? 'readonly' : '';
+        $disabledAttr = in_array($name, ['ds_registration_no', 'application_type', 'ds_date']) ? ':disabled="$isEdit"' : '';
         $ignore = !empty($field['field_class']);
         $wireIgnore = $ignore ? 'wire:ignore' : '';
         $hasDependency =
@@ -393,6 +394,7 @@ class SchemewiseStoreDataJsonHelper
                 data-wire="application_type"
                 required
                 wire:model.live="formData.application_type"
+                {$disabledAttr}
             >
                 <option value="">-- Select Application Type --</option>
 
@@ -423,6 +425,7 @@ class SchemewiseStoreDataJsonHelper
         {$wireIgnore}
         {$readonlyAttr}
         {$requiredAttr}
+        {$disabledAttr}
         wire:model.live="formData.{$name}"
     >
         <option value="">-- Select {$label} --</option>
@@ -441,6 +444,7 @@ class SchemewiseStoreDataJsonHelper
                     {$wireIgnore}
                      {$readonlyAttr}
                       {$requiredAttr}
+                      {$disabledAttr}
                     wire:model.live="formData.{$name}"
                 />
                 BLADE;
@@ -451,6 +455,7 @@ class SchemewiseStoreDataJsonHelper
                         name="{$name}"
                         value="{$value}"
                         label="{$label}"
+                        {$disabledAttr}
                         wire:model.live="formData.{$name}"
                     />
                 BLADE;
@@ -471,6 +476,7 @@ class SchemewiseStoreDataJsonHelper
                     {$requiredAttr}
                     {$minAttr}
                     {$maxAttr}
+                    {$disabledAttr}
                     {$wireModelMode}="formData.{$name}"
                     {$dynamicAttr}
                 />
