@@ -17,7 +17,9 @@ if ($portal == 'lb') {
     $indexName = 'Annapurna Bhandar | Government of West Bengal';
     $initiallogo = 'biswo-1.png';
     $dept_logo = 'biswo_logo.png';
-} elseif ($portal == 'jb') {
+    $indexName = 'Women and Child Development & Social Welfare Department | Government of West Bengal';
+    $footerDescription = 'A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic development and welfare.';
+} else if ($portal == 'jb') {
     $title = 'Jai Bangla Portal | Government of West Bengal';
     $headLine = 'Jai Bangla';
     $logo = 'jb_logo.png';
@@ -33,6 +35,7 @@ if ($portal == 'lb') {
     $dept_logo = 'biswo_logo.png';
     $initiallogo = 'jb_logo.png';
     $indexName = 'Department of Finance | Government of West Bengal';
+    $footerDescription = 'A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic development and welfare.';
 } else if ($portal == 'ub') {
     $title = 'Unnayan Bangla | Government of West Bengal';
     $headLine = 'Unnayan Bangla';
@@ -43,12 +46,13 @@ if ($portal == 'lb') {
     $das_logo = 'ub_logo.png';
     $logo_das_width = 'w-12';
     $das_logo_class = 'p-2';
-    $bg_image = 'jb-bg.jpg';
+    $bg_image = 'jb_bg.png';
     $schemeIds = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 17, 19, 20];
     $footerText = 'Design and develpod By NIC.';
     $deptName = 'Finance Department';
     $indexName = 'Finance Department | Government of West Bengal';
     $dept_logo = 'biswo_logo.png';
+    $footerDescription = 'A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic development and welfare.';
 } else {
     $title = 'Government of West Bengal';
     $headLine = 'Government of West Bengal';
@@ -65,6 +69,7 @@ if ($portal == 'lb') {
     $deptName = 'WCD';
     $dept_logo = 'biswo_logo.png';
     $indexName = 'Department of Finance | Government of West Bengal';
+    $footerDescription = 'A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic development and welfare.';
 }
 return [
     'app_portal' => $portal,
@@ -85,4 +90,5 @@ return [
     'deptName' => $deptName,
     'initiallogo' => $initiallogo,
     'dept_logo' => $dept_logo,
+    'footerDescription' => $footerDescription,
 ];
