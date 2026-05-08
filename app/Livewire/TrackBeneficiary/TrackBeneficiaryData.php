@@ -37,6 +37,7 @@ class TrackBeneficiaryData extends Component
     public $ulbs = [];
     public $gps = [];
     public $ulb_wards = [];
+    public $filter_condition = [];
 
     // User restrictions
     public ?int $userDistrictId = null;

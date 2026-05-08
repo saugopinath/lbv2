@@ -49,7 +49,7 @@ use App\Livewire\UserPermission\AssignPermissionsPage;
 use App\Livewire\Users\Create as UsersCreate;
 use Illuminate\Support\Facades\Route;
 
-require __DIR__.'/home.php';
+require __DIR__ . '/home.php';
 
 // Guest Routes
 Route::get('/session-expired', function () {
