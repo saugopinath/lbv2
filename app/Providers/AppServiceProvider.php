@@ -30,6 +30,7 @@ use App\Models\BenRejectDetails;
 use App\Observers\BenRejectDetailsObserver;
 use App\Models\BeneficiaryPersonal;
 use App\Observers\BeneficiaryPersonalObserver;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -47,11 +48,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(CmoAuthenticationInterface::class, CmoAuthenticationService::class);
 
-         $this->app->bind(
+        $this->app->bind(
             JNMPAuthenticationInterface::class,
             JNMPAuthenticationService::class
         );
-
     }
 
     /**
@@ -79,6 +79,9 @@ class AppServiceProvider extends ServiceProvider
                 'updated_at',
                 'beneficiary_id',
                 'application_id',
+                'created_by_dist_code',
+                'created_by_local_body_code',
+                'next_level_role_id'
             ]);
 
             // ✅ Filterable attributes (must exist in searchable array)
@@ -91,6 +94,8 @@ class AppServiceProvider extends ServiceProvider
                 'next_level_role_id',
                 'application_id',
                 'beneficiary_id',
+                'created_by_dist_code',
+                'created_by_local_body_code',
             ]);
         }
     }

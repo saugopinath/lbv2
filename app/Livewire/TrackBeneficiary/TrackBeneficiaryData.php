@@ -2,155 +2,115 @@
 
 namespace App\Livewire\TrackBeneficiary;
 
-use App\Models\BeneficiaryPersonalDetail;
-use App\Models\Block;
-use App\Models\District;
-use App\Models\Municipality;
-use App\Models\Panchayat;
-use App\Models\Scheme;
-use App\Models\Subdivision;
-use App\Models\Ward;
-use App\Models\UserRoleSchemeOfficeMapping;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Crypt;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Url;
+
+use App\Models\BeneficiaryPersonalDetail;
+
+use Illuminate\Support\Facades\Crypt;
 
 class TrackBeneficiaryData extends Component
 {
-    // use WithPagination;
+    use WithPagination;
 
-    // Filters
+    public $search = '';
     public $scheme = '';
     public $district = '';
-    public $areaType = ''; // 1 for Urban, 2 for Rural
+    public $urban_code = '';
     public $block = '';
-    public $municipality = '';
     public $gp_ward = '';
-    public $search = '';
 
-    // Data for dropdowns
     public $schemes = [];
-    public $districts = [];
-    public $blocks = [];
-    public $subDistricts = [];
-    public $ulbs = [];
-    public $gps = [];
-    public $ulb_wards = [];
     public $filter_condition = [];
 
-    // User restrictions
-    public ?int $userDistrictId = null;
-    public $isAdmin = false;
+    public function updating()
+    {
+        $this->resetPage();
+    }
+
+    public function searchBeneficiary()
+    {
+        $this->resetPage();
+    }
 
     public function mount()
     {
-        $userId = Auth::id();
         $select_lgd = session('lgd_session');
-        // dd($select_lgd);
+
         if (!empty($select_lgd['district_id'])) {
-            $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
-        }
-        if (!empty($select_lgd['block_id'])) {
-            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
-        }
-        if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
-        }
-        if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
+
+            $this->filter_condition['created_by_dist_code']
+                = Crypt::decryptString(
+                    $select_lgd['district_id']
+                );
         }
 
-        $this->loadLocationData();
-    }
+        if (!empty($select_lgd['scheme_id'])) {
 
-    // public function updatedDistrict()
-    // {
-    //     $this->resetFilters(['block', 'municipality', 'gp_ward', 'areaType']);
-    //     $this->loadLocationData();
-    // }
+            $schemeRaw = is_array($select_lgd['scheme_id'])
+                ? $select_lgd['scheme_id']
+                : [$select_lgd['scheme_id']];
 
-    // public function updatedAreaType()
-    // {
-    //     $this->resetFilters(['block', 'municipality', 'gp_ward']);
-    // }
-
-    // public function updatedBlock()
-    // {
-    //     $this->resetFilters(['municipality', 'gp_ward']);
-    // }
-
-    // public function updatedMunicipality()
-    // {
-    //     $this->resetFilters(['gp_ward']);
-    // }
-
-    // protected function resetFilters($fields)
-    // {
-    //     foreach ($fields as $field) {
-    //         $this->$field = '';
-    //     }
-    //     $this->resetPage();
-    // }
-
-    public function loadLocationData()
-    {
-        $scout = BeneficiaryPersonalDetail::search($this->search);
-
-
-        // if ($this->district) {
-        //     $scout->where('district_id', (int) $this->district);
-        // }
-        // if ($this->scheme) {
-        //     $scout->where('scheme_id', (int) $this->scheme);
-        // }
-        // if ($this->areaType) {
-        //     $scout->where('rural_urban', (int) $this->areaType);
-        // }
-        // if ($this->block) {
-        //     $scout->where('blockurban', (int) $this->block);
-        // }
-        // if ($this->municipality) {
-        //     $scout->where('blockurban', (int) $this->municipality);
-        // }
-        // if ($this->gp_ward) {
-        //     $scout->where('gpward', (int) $this->gp_ward);
-        // }
-        $beneficiaries = $scout->paginate(20);
+            $this->schemes = array_map(
+                fn($id) => Crypt::decryptString($id),
+                $schemeRaw
+            );
+        }
     }
 
     public function render()
     {
-        // $scout = BeneficiaryPersonalDetail::search($this->search);
 
-        // if ($this->district) {
-        //     $scout->where('district_id', (int) $this->district);
-        // }
+        $query = BeneficiaryPersonalDetail::search(
+            trim($this->search)
+        );
+        if (!empty($this->schemes)) {
 
-        // if ($this->scheme) {
-        //     $scout->where('scheme_id', (int) $this->scheme);
-        // }
+            $query->whereIn(
+                'scheme_id',
+                $this->schemes
+            );
+        }
+        foreach ($this->filter_condition as $key => $value) {
 
-        // if ($this->areaType) {
-        //     $scout->where('rural_urban', (int) $this->areaType);
-        // }
+            $query->where($key, $value);
+        }
+        if ($this->scheme) {
 
-        // if ($this->block) {
-        //     $scout->where('blockurban', (int) $this->block);
-        // }
+            $query->where(
+                'scheme_id',
+                (int) $this->scheme
+            );
+        }
+        if ($this->urban_code) {
+            $query->where(
+                'rural_urban',
+                (int) $this->urban_code
+            );
+        }
+        if ($this->block) {
+            $query->where(
+                'blockurban',
+                (int) $this->block
+            );
+        }
+        if ($this->gp_ward) {
 
-        // if ($this->municipality) {
-        //     $scout->where('blockurban', (int) $this->municipality);
-        // }
+            $query->where(
+                'gpward',
+                (int) $this->gp_ward
+            );
+        }
 
-        // if ($this->gp_ward) {
-        //     $scout->where('gpward', (int) $this->gp_ward);
-        // }
+        $beneficiaries = $query
+            ->paginate(20);
 
-        // $beneficiaries = $scout->paginate(20);
-
-        return view('livewire.track-beneficiary.track-beneficiary-data', [
-            // 'beneficiaries' => $beneficiaries
-        ]);
+        return view(
+            'livewire.track-beneficiary.track-beneficiary-data',
+            [
+                'beneficiaries' => $beneficiaries
+            ]
+        );
     }
 }
