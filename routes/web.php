@@ -51,6 +51,7 @@ use App\Livewire\DynamicWorkflow\ProcessWorkflow;
 use App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary;
 use App\Livewire\DynamicWorkflow\WorkflowWizard;
 use App\Http\Controllers\DynamicWorkflow\UpdateMarkBeneficiaryDetailsController;
+use App\Http\Controllers\TrackBeneficiaryDetailsController;
 use App\Livewire\DynamicWorkflow\DynamicProcessPage;
 
 require __DIR__ . '/home.php';
@@ -82,10 +83,8 @@ Route::controller(AuthenticationController::class)->group(function () {
 
 // Authenticated Routes
 Route::middleware(['auth', 'verified'])->group(function () {
-
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
     Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])
         ->name('lb-application-list');
 
@@ -171,6 +170,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
     // Route::get('/custom_application/{id}', ApplicationView::class)->name('custom_application.view');
     Route::get('/getelsticsearchIndex', [ElasticSearchController::class, 'index'])->name('getelsticsearchIndex');
+
+    // Track Beneficiary Details
+    Route::get('track-beneficiary-details', [TrackBeneficiaryDetailsController::class, 'TrackBeneficiaryDetails'])
+        ->name('track-beneficiary-details');
 });
 
 Route::controller(CreateAssignOtherFormFieldController::class)->group(function () {
@@ -289,10 +292,10 @@ Route::get('caste-management-request-list', [CasteManagementController::class, '
 //     // ->middleware('permission.redirect:canBeneficiaryDetails')
 //     ->name('view-beneficiary-details');
 
-    // Route::controller(CasteManagementController::class)->group(function () {
-    //     Route::get('caste-management', 'index')->name('caste-management');
-    //     Route::get('caste-management-request-list', 'requestdedlistdetails')->name('caste-management-request-list');
-    // });
+// Route::controller(CasteManagementController::class)->group(function () {
+//     Route::get('caste-management', 'index')->name('caste-management');
+//     Route::get('caste-management-request-list', 'requestdedlistdetails')->name('caste-management-request-list');
+// });
 Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])
     ->middleware('permission:update bank details')
     ->name('bankUpdate');
@@ -308,3 +311,6 @@ Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile
 Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
     // ->middleware('permission:update bank')
     ->name('update-bank');
+
+
+
