@@ -36,9 +36,8 @@ use App\Livewire\DynamicWorkflow\DynamicProcessPage;
 use App\Livewire\DynamicWorkflow\ProcessWorkflow;
 use App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary;
 use App\Livewire\DynamicWorkflow\WorkflowWizard;
-use App\Http\Controllers\DynamicWorkflow\UpdateMarkBeneficiaryDetailsController;
 use App\Http\Controllers\TrackBeneficiaryDetailsController;
-use App\Livewire\DynamicWorkflow\DynamicProcessPage;
+
 
 require __DIR__ . '/home.php';
 
