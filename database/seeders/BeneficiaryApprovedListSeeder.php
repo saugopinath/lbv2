@@ -34,9 +34,10 @@ class BeneficiaryApprovedListSeeder extends Seeder
         try {
 
 
-            for ($i = 0; $i < 100; $i++) {
+            for ($i = 0; $i < 600; $i++) {
                 // 🔹 Random Scheme
-                $schemeId = 20;
+                $schemeId = $schemes[array_rand($schemes)];
+
                 // Office & User তথ্য
                 $office = OfficeMaster::where('district_id', 318)
                     ->where('block_id', 2979)
