@@ -2,30 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AcceptRejectInfo;
-use App\Models\BeneficiaryCommonList;
-use App\Models\CasteModificationInfo;
-use App\Models\Codemaster;
-use Illuminate\Http\Request;
 use App\Helpers\CheckAuthHelper;
 use App\Helpers\FormOptionHelper;
 use App\Helpers\WorkFlowPermissionHelper;
-use App\Models\BeneficiaryEnclosure;
+use App\Models\AcceptRejectInfo;
 use App\Models\BeneficiaryPersonalDetail;
 use App\Models\BeneficiaryTemEnclosure;
+use App\Models\CasteModificationInfo;
+use App\Models\Codemaster;
 use App\Models\Scheme;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-
 
 class CasteModificationController extends Controller
 {
     protected $casteCodeMaster;
+
     protected $doctype;
+
     protected $isAuthorized = false;
+
     protected $accessType;
 
     public function __construct(Request $request)
@@ -38,12 +36,12 @@ class CasteModificationController extends Controller
         $operatorRoutes = [
             'Caste-modification-info',
             'Caste-modification-editview',
-            'Caste-modification-update'
+            'Caste-modification-update',
         ];
 
         $verifierRoutes = [
             'Caste-modification-list',
-            'Caste-modification-view-details'
+            'Caste-modification-view-details',
         ];
 
         if (in_array($currentRoute, $operatorRoutes)) {
@@ -71,18 +69,18 @@ class CasteModificationController extends Controller
     public function index()
     {
         if (WorkFlowPermissionHelper::canModifyCaste()) {
-            // if (Auth::user()->can('modify caste')) {
             $header = 'Caste Modification Information';
+
             return view('CasteModificationView.caste_modification_index', compact('header'));
         }
         $header = 'Oops! You do not have permission to modify caste.';
+
         return view('CommonRestictedpage.index', compact('header'));
     }
 
     public function editview(Request $request)
     {
         if (WorkFlowPermissionHelper::canEditCaste()) {
-            // if (Auth::user()->can('edit caste')) {
             $header = 'Caste Modification Details';
             $application_id = Crypt::decryptString($request->application_id);
             $beneficiary_id = Crypt::decryptString($request->beneficiary_id);
@@ -93,7 +91,7 @@ class CasteModificationController extends Controller
             $BenDetails = BeneficiaryPersonalDetail::where('application_id', $application_id)->where('scheme_id', $scheme_id)->firstOrFail();
             $allCastes = FormOptionHelper::get('Caste');
             $currentCasteId = $BenDetails->caste;
-            $castes = collect($allCastes)->filter(fn($name, $id) => $id != $currentCasteId);
+            $castes = collect($allCastes)->filter(fn ($name, $id) => $id != $currentCasteId);
             $checkapplication = CasteModificationInfo::where('application_id', $application_id)->first();
             $isReverted = false;
             $oldData = [];
@@ -103,6 +101,7 @@ class CasteModificationController extends Controller
                     $oldData = $checkapplication->new_data;
                 }
             }
+
             return view('CasteModificationView.beneficiary_cast_edit', compact(
                 'application_id',
                 'beneficiary_id',
@@ -118,15 +117,15 @@ class CasteModificationController extends Controller
         }
 
         $header = 'Oops! You do not have permission to edit caste.';
+
         return view('CommonRestictedpage.index', compact('header'));
     }
 
     public function updateCaste(Request $request)
     {
-        // dd('dsfdsfs');
         if (WorkFlowPermissionHelper::canUpdateCaste()) {
-            // if (Auth::user()->can('update caste')) {
-            if (!Auth::check()) {
+
+            if (! Auth::check()) {
                 return redirect()->route('login')->with('error', 'Please login first!');
             }
             $userId = Auth::id();
@@ -158,15 +157,7 @@ class CasteModificationController extends Controller
                 }
             }
             $request->validate($rules, $messages);
-            // $request->validate([
-            //     'application_id' => 'required|string',
-            //     'caste' => 'required|integer|exists:codemasters,id',
-            //     'cast_no' => ['nullable', 'string', 'required_if:caste,17,18'],
-            // ], [
-            //     'application_id.required' => 'Invalid application.',
-            //     'caste.required' => 'Please select a caste.',
-            //     'cast_no.required_if' => 'Caste certificate number is required.',
-            // ]);
+
             $beneficiary = BeneficiaryPersonalDetail::where('application_id', $application_id)->where('scheme_id', $scheme_id)->firstOrFail();
             $oldData = [
                 'caste' => $beneficiary->caste,
@@ -186,7 +177,7 @@ class CasteModificationController extends Controller
             DB::beginTransaction();
             try {
                 if ($existingModification) {
-                    $acceptReject = new AcceptRejectInfo();
+                    $acceptReject = new AcceptRejectInfo;
                     $acceptReject->application_id = $application_id;
                     $acceptReject->beneficiary_id = $existingModification->beneficiary_id;
                     $acceptReject->ip_address = request()->ip();
@@ -208,10 +199,12 @@ class CasteModificationController extends Controller
                     $updatedModification = $existingModification->save();
                     if ($acceptSaved && $updatedModification) {
                         DB::commit();
+
                         return redirect()->route('caste-modification-list', ['retain_filters' => 1])
                             ->with('success', 'Caste re-apply request sent successfully!');
                     }
                     DB::rollBack();
+
                     return back()->with('error', 'Something went wrong.');
                 } else {
                     $logdetails = new AcceptRejectInfo;
@@ -235,22 +228,22 @@ class CasteModificationController extends Controller
                     $modified_caste->next_level_requested_id = Codemaster::getIdByCode(2201);
                     $modified_caste->request_id = $logdetails->id;
                     $modified_caste->created_by = $userId;
-                    // $modified_caste->updated_by = $userId;
-                    // $modified_caste->created_by_dist_code = $beneficiary->created_by_dist_code;
-                    // $modified_caste->created_by_local_body_code = $beneficiary->created_by_local_body_code;
                     $modified_caste->save();
 
                     DB::commit();
+
                     return redirect()->route('Caste-modification-info')
                         ->with('success', 'Caste updated request processed successfully!');
                 }
             } catch (\Exception $e) {
                 dd($e);
                 DB::rollBack();
-                return back()->with('error', 'Something went wrong: ' . $e->getMessage());
+
+                return back()->with('error', 'Something went wrong: '.$e->getMessage());
             }
         }
         $header = 'Oops! You do not have permission to update caste.';
+
         return view('CommonRestictedpage.index', compact('header'));
     }
 
@@ -258,27 +251,23 @@ class CasteModificationController extends Controller
     public function list()
     {
         if (WorkFlowPermissionHelper::canCasteModification()) {
-            // if (Auth::user()->can('view caste modification list')) {
             $header = 'Caste Modification Information List';
+
             return view('CasteModificationView.caste_modification_list', compact('header'));
         }
         $header = 'Oops! You do not have permission to view caste modification list.';
+
         return view('CommonRestictedpage.index', compact('header'));
     }
 
     public function viewAppDetails(Request $request)
     {
         if (WorkFlowPermissionHelper::canBeneficiaryDetails()) {
-            // if (Auth::user()->can('view beneficiary details')) {
-            // dd($request->Scheme);
             $applicant_id = trim($request->application_id);
-            $scheme_raw   = trim($request->Scheme);
+            $scheme_raw = trim($request->Scheme);
             $application_id = Crypt::decryptString($applicant_id);
-            $scheme_id      = Crypt::decryptString($scheme_raw);
+            $scheme_id = Crypt::decryptString($scheme_raw);
             $schemeName = Scheme::where('id', $scheme_id)->firstOrFail()->name;
-
-            // dd($scheme_id);
-            // dd($application_id);
 
             $application = CasteModificationInfo::where('application_id', $application_id)->where('is_active', true)->firstOrFail();
             $oldData = $application->old_data;
@@ -307,6 +296,7 @@ class CasteModificationController extends Controller
         }
 
         $header = 'Oops! You do not have permission to view beneficiary details.';
+
         return view('CommonRestictedpage.index', compact('header'));
     }
 }

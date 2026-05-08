@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Helpers\CheckAuthHelper;
 use App\Helpers\WorkFlowPermissionHelper;
 use App\Models\SchemeFinalSubmitCheck;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Http\Request;
 
 class BeneficiaryListController extends Controller
 {
     protected $isAuthorized = false;
-    protected $schemes = [], $reportTypes = [];
+
+    protected $schemes = [];
+
+    protected $reportTypes = [];
+
     public function __construct()
     {
         $this->schemes = SchemeFinalSubmitCheck::where('is_final_submitted', true)
@@ -49,34 +50,30 @@ class BeneficiaryListController extends Controller
                 '6' => 'Submitted List',
             ];
         }
-        // if (CheckAuthHelper::isCommonWorkFlow4thStep()) {
-        //     $this->isAuthorized = true;
-        // } else {
-        //     redirect()->route('dashboard')
-        //         ->with('error', 'Oops! You are not authorized to perform this action.')
-        //         ->send();
-        // }
+        if (CheckAuthHelper::isCommonWorkFlow4thStep()) {
+            $this->isAuthorized = true;
+        } else {
+            redirect()->route('dashboard')
+                ->with('error', 'Oops! You are not authorized to perform this action.')
+                ->send();
+        }
     }
 
-    /** Beneficiary List View */
     public function index()
     {
-        // if (Auth::user()->can('view beneficiaries')) {
-        // if (WorkFlowPermissionHelper::canViewBeneficiaries()) {
-        $schemes = $this->schemes;
-        $reporttypes = $this->reportTypes;
-        return view('beneficiaries.index', compact('schemes', 'reporttypes'));
-        // }
+        if (WorkFlowPermissionHelper::canViewBeneficiaries()) {
+            $schemes = $this->schemes;
+            $reporttypes = $this->reportTypes;
 
-        // $header = 'Oops! You do not have permission to view beneficiaries.';
-        // return view('CommonRestictedpage.index', compact('header'));
+            return view('beneficiaries.index', compact('schemes', 'reporttypes'));
+        }
+        $header = 'Oops! You do not have permission to view beneficiaries.';
+
+        return view('CommonRestictedpage.index', compact('header'));
     }
-
-    /** Report View */
-
+    
     public function show(Request $request)
     {
-        // Backend validation
         $validated = $request->validate([
             'report_type' => 'required|in:1,2,3,4,5,6',
             'scheme' => 'required',
@@ -85,15 +82,15 @@ class BeneficiaryListController extends Controller
             'report_type.in' => 'Invalid report type selected.',
         ]);
 
-        // Permission check
-        // if (WorkFlowPermissionHelper::canViewReport()) {
-        // if (Auth::user()->can('view reports')) {
-        $reportType = $validated['report_type'];
-        $scheme = $validated['scheme'];
-        return view('beneficiaries.report', compact('reportType','scheme'));
-        // }
+        if (WorkFlowPermissionHelper::canViewReport()) {
+            $reportType = $validated['report_type'];
+            $scheme = $validated['scheme'];
 
-        // $header = 'Oops! You do not have permission to view reports.';
-        // return view('CommonRestictedpage.index', compact('header'));
+            return view('beneficiaries.report', compact('reportType', 'scheme'));
+        }
+
+        $header = 'Oops! You do not have permission to view reports.';
+
+        return view('CommonRestictedpage.index', compact('header'));
     }
 }

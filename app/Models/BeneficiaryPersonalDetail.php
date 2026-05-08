@@ -3,14 +3,17 @@
 namespace App\Models;
 
 use Laravel\Scout\Searchable;
-use Illuminate\Database\Eloquent\Model;
 
 class BeneficiaryPersonalDetail extends BaseAuditableModel
 {
     use Searchable;
+
     protected $guarded = [];
+
     protected $table = 'pension.beneficiary_personals';
+
     protected $primaryKey = 'application_id';
+
     public $incrementing = false;
 
     protected $casts = [
@@ -53,6 +56,7 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     {
         return $this->hasOne(BeneficiaryAadhaar::class, 'application_id');
     }
+
     public function banks()
     {
         return $this->hasOne(BeneficiaryBankDetail::class, 'application_id', 'application_id');

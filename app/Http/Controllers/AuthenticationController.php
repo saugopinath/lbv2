@@ -75,7 +75,7 @@ class AuthenticationController  extends Controller
                 $otp = '123456';
             else
                 $otp = rand(111111, 999999);
-            $message = 'Your OTP for Lakshmir Bhandar scheme login is ' . $otp . ' . Lakshmir Bhandar, Govt of WB.';
+            $message = 'Your OTP for ANNAPURNA BHANDAR scheme login is ' . $otp . ' . ANNAPURNA BHANDAR, Govt of WB.';
             $snd_sms = $this->sendsmsService->sendSms($userData['mobile_no'], $message);
             $smsTrack = $this->sendsmsService->SmstrackInsert($userObj->id, $userData['mobile_no'], $otp, $message);
             $lastOtpStore = $this->authenticationService->userLastOtpStore($userObj->id, $otp);
@@ -110,7 +110,7 @@ class AuthenticationController  extends Controller
                 $otp = '123456';
             else
                 $otp = rand(111111, 999999);
-            $message = 'Your OTP for Lakshmir Bhandar scheme login is ' . $otp . ' . Lakshmir Bhandar, Govt of WB.';
+            $message = 'Your OTP for ANNAPURNA BHANDAR scheme login is ' . $otp . ' . ANNAPURNA BHANDAR, Govt of WB.';
             $snd_sms = $this->sendsmsService->sendSms($userData['mobile_no'], $message);
             $smsTrack = $this->sendsmsService->SmstrackInsert($user_obj->id, $userData['mobile_no'], $otp, $message);
             $lastOtpStore = $this->authenticationService->userLastOtpStore($user_obj->id, $otp);
@@ -177,7 +177,7 @@ class AuthenticationController  extends Controller
                 $otp = '123456';
             else
                 $otp = rand(111111, 999999);
-            $message = 'Your OTP for Lakshmir Bhandar scheme login is ' . $otp . ' . Lakshmir Bhandar, Govt of WB.';
+            $message = 'Your OTP for ANNAPURNA BHANDAR scheme login is ' . $otp . ' . ANNAPURNA BHANDAR, Govt of WB.';
             $snd_sms = $this->sendsmsService->sendSms($user_obj->mobile_no, $message);
             $smsTrack = $this->sendsmsService->SmstrackInsert($user_obj->id, $user_obj->mobile_no, $otp, $message);
             $lastOtpStore = $this->authenticationService->userLastOtpStore($user_obj->id, $otp);

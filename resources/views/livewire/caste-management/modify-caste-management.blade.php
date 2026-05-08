@@ -109,7 +109,9 @@
                                         <select wire:model.live="newData.caste" class="block w-full px-3 py-2 text-sm border border-indigo-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
                                             <option value="">Select New Caste</option>
                                             @foreach($casteOptions as $id => $name)
-                                            <option value="{{ $id }}">{{ $name }}</option>
+                                                @if($id != $oldData['caste'])
+                                                <option value="{{ $id }}">{{ $name }}</option>
+                                                @endif
                                             @endforeach
                                         </select>
                                         @error('newData.caste') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror

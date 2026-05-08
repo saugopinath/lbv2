@@ -114,6 +114,10 @@ class CheckAuthHelper
     {
         return self::isSuperAdmin() || self::isCommmonVerifier() || self::isCommonApprover() || self::isCommonHOD();
     }
+     public static function isCommonJNMP(): bool
+    {
+        return self::isSuperAdmin() ||  self::isCommonApprover() || self::isCommonHOD();
+    }
     public static function isCommonFindUser(): bool
     {
         return self::isCommmonVerifier() || self::isCommonApprover() || self::isCommonHOD();
