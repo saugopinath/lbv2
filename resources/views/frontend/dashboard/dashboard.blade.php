@@ -170,7 +170,8 @@
                         <h3 class="text-lg font-bold text-gray-800">Scheme-wise Applications</h3>
                         <p class="text-sm text-gray-500 mt-1">Cumulative performance</p>
                     </div>
-                    <select id="schemeFilter" class="py-2 px-3 pe-9 block border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500">
+                    <select id="schemeFilter"
+                        class="py-2 px-3 pe-9 block border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="all">All Time</option>
                         <option value="30">Last 30 Days</option>
                         <option value="90">Last 90 Days</option>
@@ -186,7 +187,8 @@
                         <h3 class="text-lg font-bold text-gray-800">District-Wise Distribution</h3>
                         <p class="text-sm text-gray-500 mt-1">By Approved beneficiaries</p>
                     </div>
-                    <button class="py-2 px-3 inline-flex items-center gap-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 hover:bg-gray-50">
+                    <button
+                        class="py-2 px-3 inline-flex items-center gap-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 hover:bg-gray-50">
                         <i class="fas fa-map-marker-alt"></i> View Map
                     </button>
                 </div>
@@ -267,7 +269,8 @@
                 </div>
                 <div class="flex items-center gap-3">
                     <span id="lastRefreshed" class="text-xs text-gray-500 hidden sm:inline">Last refreshed: --</span>
-                    <button id="refreshSchemeStatus" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button id="refreshSchemeStatus"
+                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
                         <i class="fas fa-sync-alt"></i> Refresh
                     </button>
                 </div>
@@ -285,7 +288,9 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100" id="schemeStatusTbody">
-                        <tr><td colspan="6" class="px-4 py-6 text-center text-gray-400">Loading data...</td></tr>
+                        <tr>
+                            <td colspan="6" class="px-4 py-6 text-center text-gray-400">Loading data...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -317,7 +322,8 @@
                         <h3 class="text-lg font-bold text-gray-800">District-Wise Distribution</h3>
                         <p class="text-sm text-gray-500 mt-1">By Approved beneficiaries</p>
                     </div>
-                    <button class="py-2 px-3 inline-flex items-center gap-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 hover:bg-gray-50">
+                    <button
+                        class="py-2 px-3 inline-flex items-center gap-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 hover:bg-gray-50">
                         <i class="fas fa-map-marker-alt"></i> View Map
                     </button>
                 </div>
@@ -372,6 +378,7 @@
                 <div id="casteChart" style="height: 350px;"></div>
             </div>
         </div>
+
     @endif
 
 
@@ -522,33 +529,33 @@
                             }
 
                             tbody += `
-                                                                                                <tr class="hover:bg-gray-50">
-                                                                                                    <td class="px-4 py-3 font-medium text-gray-800">${row.scheme_name}</td>
-                                                                                                    <td class="px-4 py-3 text-right">${entry}</td>
-                                                                                                    <td class="px-4 py-3 text-right">${verified}</td>
-                                                                                                    <td class="px-4 py-3 text-right font-semibold text-green-600">${approved}</td>
-                                                                                                    <td class="px-4 py-3 text-right">${recommended}</td>
-                                                                                                    <td class="px-4 py-3 text-right text-red-500">${rejected}</td>
-                                                                                                </tr>
-                                                                                            `;
+                                                                                                                        <tr class="hover:bg-gray-50">
+                                                                                                                            <td class="px-4 py-3 font-medium text-gray-800">${row.scheme_name}</td>
+                                                                                                                            <td class="px-4 py-3 text-right">${entry}</td>
+                                                                                                                            <td class="px-4 py-3 text-right">${verified}</td>
+                                                                                                                            <td class="px-4 py-3 text-right font-semibold text-green-600">${approved}</td>
+                                                                                                                            <td class="px-4 py-3 text-right">${recommended}</td>
+                                                                                                                            <td class="px-4 py-3 text-right text-red-500">${rejected}</td>
+                                                                                                                        </tr>
+                                                                                                                    `;
                         });
 
                         if (!hasData) {
                             tbody = `
-                                                                                                <tr>
-                                                                                                    <td colspan="6" class="px-4 py-6 text-center text-gray-400">No data available</td>
-                                                                                                </tr>
-                                                                                            `;
+                                                                                                                        <tr>
+                                                                                                                            <td colspan="6" class="px-4 py-6 text-center text-gray-400">No data available</td>
+                                                                                                                        </tr>
+                                                                                                                    `;
                         }
 
                         document.getElementById('schemeStatusTbody').innerHTML = tbody;
                     })
                     .catch(function () {
                         document.getElementById('schemeStatusTbody').innerHTML = `
-                                                                                            <tr>
-                                                                                                <td colspan="6" class="px-4 py-6 text-center text-red-500">Failed to load scheme status data</td>
-                                                                                            </tr>
-                                                                                        `;
+                                                                                                                    <tr>
+                                                                                                                        <td colspan="6" class="px-4 py-6 text-center text-red-500">Failed to load scheme status data</td>
+                                                                                                                    </tr>
+                                                                                                                `;
                     });
             }
 
@@ -882,106 +889,106 @@
                     method: 'GET',
                     headers: { 'Accept': 'application/json' }
                 })
-                .then(res => res.json())
-                .then(function (data) {
-                    const chartData = data.map(item => ({
-                        name: item.name,
-                        y: parseInt(item.y)
-                    }));
-                    
-                    Highcharts.chart('maritalStatusChart', {
-                        chart: { type: 'pie', backgroundColor: 'transparent' },
-                        title: { text: null },
-                        plotOptions: {
-                            pie: {
-                                innerSize: '70%',
-                                dataLabels: { enabled: true, format: '<b>{point.name}</b>: {point.percentage:.1f}%' }
-                            }
-                        },
-                        tooltip: { pointFormat: '<b>{point.y}</b> beneficiaries' },
-                        series: [{
-                            name: 'Beneficiaries',
-                            data: chartData,
-                            colors: ['#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#64748b']
-                        }],
-                        credits: { enabled: false }
-                    });
-                }).catch(err => console.error('Failed to load marital status data'));
+                    .then(res => res.json())
+                    .then(function (data) {
+                        const chartData = data.map(item => ({
+                            name: item.name,
+                            y: parseInt(item.y)
+                        }));
+
+                        Highcharts.chart('maritalStatusChart', {
+                            chart: { type: 'pie', backgroundColor: 'transparent' },
+                            title: { text: null },
+                            plotOptions: {
+                                pie: {
+                                    innerSize: '70%',
+                                    dataLabels: { enabled: true, format: '<b>{point.name}</b>: {point.percentage:.1f}%' }
+                                }
+                            },
+                            tooltip: { pointFormat: '<b>{point.y}</b> beneficiaries' },
+                            series: [{
+                                name: 'Beneficiaries',
+                                data: chartData,
+                                colors: ['#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#64748b']
+                            }],
+                            credits: { enabled: false }
+                        });
+                    }).catch(err => console.error('Failed to load marital status data'));
             }
-            
+
             // Load Caste Distribution
             function loadCasteDistribution() {
                 fetch("{{ route('dashboard.casteDistribution') }}", {
                     method: 'GET',
                     headers: { 'Accept': 'application/json' }
                 })
-                .then(res => res.json())
-                .then(function (data) {
-                    const chartData = data.map(item => ({
-                        name: item.name,
-                        y: parseInt(item.y)
-                    }));
-                    
-                    Highcharts.chart('casteChart', {
-                        chart: { type: 'pie', backgroundColor: 'transparent' },
-                        title: { text: null },
-                        plotOptions: {
-                            pie: {
-                                innerSize: '0%', // Solid pie
-                                dataLabels: { enabled: true, format: '<b>{point.name}</b>: {point.percentage:.1f}%' }
-                            }
-                        },
-                        tooltip: { pointFormat: '<b>{point.y}</b> beneficiaries' },
-                        series: [{
-                            name: 'Beneficiaries',
-                            data: chartData,
-                            colors: ['#f43f5e', '#8b5cf6', '#0ea5e9', '#10b981', '#f59e0b', '#64748b']
-                        }],
-                        credits: { enabled: false }
-                    });
-                }).catch(err => console.error('Failed to load caste data'));
+                    .then(res => res.json())
+                    .then(function (data) {
+                        const chartData = data.map(item => ({
+                            name: item.name,
+                            y: parseInt(item.y)
+                        }));
+
+                        Highcharts.chart('casteChart', {
+                            chart: { type: 'pie', backgroundColor: 'transparent' },
+                            title: { text: null },
+                            plotOptions: {
+                                pie: {
+                                    innerSize: '0%', // Solid pie
+                                    dataLabels: { enabled: true, format: '<b>{point.name}</b>: {point.percentage:.1f}%' }
+                                }
+                            },
+                            tooltip: { pointFormat: '<b>{point.y}</b> beneficiaries' },
+                            series: [{
+                                name: 'Beneficiaries',
+                                data: chartData,
+                                colors: ['#f43f5e', '#8b5cf6', '#0ea5e9', '#10b981', '#f59e0b', '#64748b']
+                            }],
+                            credits: { enabled: false }
+                        });
+                    }).catch(err => console.error('Failed to load caste data'));
             }
-            
+
             // Load Daily Applications
             function loadDailyApplications() {
                 fetch("{{ route('dashboard.dailyApplications') }}", {
                     method: 'GET',
                     headers: { 'Accept': 'application/json' }
                 })
-                .then(res => res.json())
-                .then(function (response) {
-                    Highcharts.chart('dailyChart', {
-                        chart: { type: 'areaspline', backgroundColor: 'transparent' },
-                        title: { text: null },
-                        xAxis: {
-                            categories: response.categories,
-                            labels: { rotation: -45, style: { fontSize: '11px' } }
-                        },
-                        yAxis: { title: { text: 'Applications' } },
-                        legend: { enabled: false },
-                        plotOptions: {
-                            areaspline: {
-                                fillColor: {
-                                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                                    stops: [
-                                        [0, 'rgba(16, 185, 129, 0.35)'],
-                                        [1, 'rgba(16, 185, 129, 0.05)']
-                                    ]
-                                },
-                                lineWidth: 3,
-                                marker: { enabled: true, radius: 4 }
-                            }
-                        },
-                        series: [{
-                            name: 'Applications',
-                            data: response.data,
-                            color: '#10b981'
-                        }],
-                        credits: { enabled: false }
-                    });
-                }).catch(err => console.error('Failed to load daily applications data'));
+                    .then(res => res.json())
+                    .then(function (response) {
+                        Highcharts.chart('dailyChart', {
+                            chart: { type: 'areaspline', backgroundColor: 'transparent' },
+                            title: { text: null },
+                            xAxis: {
+                                categories: response.categories,
+                                labels: { rotation: -45, style: { fontSize: '11px' } }
+                            },
+                            yAxis: { title: { text: 'Applications' } },
+                            legend: { enabled: false },
+                            plotOptions: {
+                                areaspline: {
+                                    fillColor: {
+                                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                                        stops: [
+                                            [0, 'rgba(16, 185, 129, 0.35)'],
+                                            [1, 'rgba(16, 185, 129, 0.05)']
+                                        ]
+                                    },
+                                    lineWidth: 3,
+                                    marker: { enabled: true, radius: 4 }
+                                }
+                            },
+                            series: [{
+                                name: 'Applications',
+                                data: response.data,
+                                color: '#10b981'
+                            }],
+                            credits: { enabled: false }
+                        });
+                    }).catch(err => console.error('Failed to load daily applications data'));
             }
-            
+
             loadMaritalStatusDistribution();
             loadCasteDistribution();
             loadDailyApplications();

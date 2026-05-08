@@ -44,18 +44,10 @@ Route::prefix('dashboard')->group(function () {
     Route::get('marital-status-distribution', [DashboardController::class, 'maritalStatusDistribution'])->name('dashboard.maritalStatusDistribution');
     Route::get('caste-distribution', [DashboardController::class, 'casteDistribution'])->name('dashboard.casteDistribution');
     Route::get('daily-applications', [DashboardController::class, 'dailyApplications'])->name('dashboard.dailyApplications');
+    Route::get('scheme-status-chart', [DashboardController::class, 'schemeStatusChart'])->name('dashboard.schemeStatusChart');
 
     Route::post('/refresh-scheme-status', [DashboardController::class, 'refreshMV'])->name('dashboard.refreshSchemeStatus');
 });
-
-// Scheme-status chart
-Route::get('/chart/scheme-status', function () {
-    return DB::connection('pgsql_app_read')->table('pension.mv_scheme_status_summary')
-        ->orderBy('scheme_name')
-        ->get();
-})->name('dashboard.schemeStatusChart');
-
-
 
 
 Route::get('ben-details/{id}', [BeneficiarySearchController::class, 'ben_details'])->name('ben-details');

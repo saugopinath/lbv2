@@ -330,6 +330,19 @@ class DashboardController extends Controller
         return response()->json(compact('categories', 'data'));
     }
 
+    public function schemeStatusChart()
+    {
+        $table = ($this->appPortal == 'jb')
+            ? 'pension.mv_scheme_status_summary_v1'
+            : 'pension.mv_scheme_status_summary_v2';
+
+        $data = DB::connection('pgsql_app_read')->table($table)
+            ->orderBy('scheme_name')
+            ->get();
+
+        return response()->json($data);
+    }
+
     public function refreshMV(Request $request)
     {
         if (config('app.app_portal') == 'jb') {
