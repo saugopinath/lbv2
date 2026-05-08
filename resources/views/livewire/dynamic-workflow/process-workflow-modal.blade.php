@@ -1,157 +1,87 @@
-<div>
-    @if($isOpen)
-    <div class="fixed inset-0 z-50 overflow-y-auto">
-        <!-- Backdrop with blur effect -->
-        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"></div>
-
-        <!-- Modal container -->
-        <div class="flex min-h-full items-center justify-center p-4">
-            <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col transform transition-all duration-300 scale-100 opacity-100">
-
-                <!-- Modal Header - Simplified with better contrast -->
-                <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-5 flex justify-between items-center shrink-0">
-                    <div class="flex items-center gap-4">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
-                            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <h2 class="text-lg font-bold text-white tracking-tight">Request Processing</h2>
-                            <p class="text-indigo-200 text-xs">Ref ID: {{ $selectedRequest->ref_id }}</p>
-                        </div>
-                    </div>
-                    <button
-                        wire:click="closeModal"
-                        class="rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white transition-all duration-200">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Modal Content -->
-                <div class="flex-1 overflow-y-auto p-6 space-y-6">
-                    <!-- Info Cards Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Module Name Card -->
-                        <div class="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
-                            <div class="flex items-center gap-2 mb-2">
-                                <svg class="h-4 w-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1.5 4 4 4h8c2.5 0 4-2 4-4V7c0-2-1.5-4-4-4H8c-2.5 0-4 2-4 4z"></path>
-                                </svg>
-                                <span class="text-xs font-semibold text-indigo-600 uppercase tracking-wide">Module Name</span>
-                            </div>
-                            <p class="text-sm font-medium text-gray-900">{{ $selectedRequest->module->module_name }}</p>
-                        </div>
-
-                        <!-- Current Step Card -->
-                        <div class="rounded-xl border border-amber-200 bg-amber-50/50 p-4">
-                            <div class="flex items-center gap-2 mb-2">
-                                <svg class="h-4 w-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                </svg>
-                                <span class="text-xs font-semibold text-amber-700 uppercase tracking-wide">Current Step</span>
-                            </div>
-                            <span class="inline-flex rounded-full bg-amber-200 px-3 py-1 text-xs font-semibold text-amber-800">
-                                {{ $selectedRequest->step->label->label_name ?? 'Processing' }}
-                            </span>
-                        </div>
-
-                        <!-- Submission Date Card -->
-                        <div class="rounded-xl border border-indigo-200 bg-indigo-50/50 p-4 md:col-span-2">
-                            <div class="flex items-center gap-2 mb-2">
-                                <svg class="h-4 w-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                <span class="text-xs font-semibold text-indigo-600 uppercase tracking-wide">Submission Date</span>
-                            </div>
-                            <p class="text-sm font-medium text-gray-900">{{ $selectedRequest->created_at->format('M d, Y h:i A') }}</p>
-                        </div>
-                    </div>
-
-                    <!-- Data Changes Section -->
-                    <div>
-                        <h4 class="text-base font-bold text-gray-900 border-l-4 border-indigo-600 pl-3 mb-6">Proposed Data Changes</h4>
-
-                        <div class="space-y-8">
-                            @foreach($groupedChanges as $groupName => $changes)
-                            <div class="relative">
-                                <div class="flex items-center gap-3 mb-4">
-                                    <span class="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] whitespace-nowrap">{{ $groupName }}</span>
-                                    <div class="h-px w-full bg-gradient-to-r from-indigo-100 to-transparent"></div>
-                                </div>
-
-                                <div class="grid grid-cols-1 gap-4">
-                                    @foreach($changes as $change)
-                                    <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm hover:border-indigo-200 hover:shadow-md transition-all duration-300">
-                                        <div class="flex items-center justify-between mb-3">
-                                            <span class="inline-flex rounded-lg bg-indigo-50 px-2.5 py-1 text-[10px] font-bold text-indigo-700 uppercase tracking-wider">
-                                                {{ $change['label'] }}
-                                            </span>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-6">
-                                            <div class="space-y-1">
-                                                <span class="block text-[10px] font-medium text-gray-400 uppercase">Current Data</span>
-                                                <p class="text-sm text-gray-400 font-medium">
-                                                    {{ $change['old'] }}
-                                                </p>
-                                            </div>
-                                            <div class="space-y-1 border-l border-gray-100 pl-6">
-                                                <span class="block text-[10px] font-bold text-emerald-600 uppercase">Requested Data</span>
-                                                <p class="text-sm font-bold text-emerald-700">
-                                                    {{ $change['new'] ?? 'N/A' }}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <!-- Remark Section -->
-                    <div class="pt-4 border-t border-gray-200">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            Process Remark
-                        </label>
-                        <textarea
-                            wire:model="remark"
-                            rows="2"
-                            class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:bg-white transition-all duration-200 outline-none resize-none"
-                            placeholder="Add your remarks for approval or rejection..."></textarea>
-                        @error('remark')
-                        <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
-                        @enderror
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="space-y-4">
+            <div class="flex items-center justify-between border-b pb-3 mb-4">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-tasks text-indigo-600"></i>Pending Applications
+                </h3>
+            </div>
+            @if(count($requests) > 0)
+            @foreach($requests as $req)
+            <div wire:click="viewDetails({{ $req->id }})" class="bg-white rounded-xl shadow-lg border-l-4 {{ $req->status == 'pending' ? 'border-amber-400' : 'border-emerald-400' }} p-5 cursor-pointer hover:shadow-2xl transition-all {{ $selectedRequest && $selectedRequest->id == $req->id ? 'ring-2 ring-indigo-500' : '' }}">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest">{{ $req->module->module_name }}</span>
+                    <div class="flex flex-col items-end">
                     </div>
                 </div>
+                <h5 class="font-bold text-gray-900 mb-1">Ref ID: {{ $req->ref_id }}</h5>
+            </div>
+            @endforeach
+            @else
+            <div class="p-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 text-center text-gray-400">
+                <i class="fas fa-check-circle text-4xl mb-3 text-emerald-300"></i>
+                <p>No pending workflow actions found for your role.</p>
+            </div>
+            @endif
+        </div>
 
-                <!-- Modal Footer -->
-                <div class="border-t border-gray-200 bg-gray-50 px-6 py-4 shrink-0">
-                    <div class="flex gap-3">
-                        <button
-                            wire:click="processAction('approve')"
-                            class="flex-1 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all duration-200 active:scale-95">
-                            <svg class="inline h-4 w-4 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
+        <!-- ⚙️ (RIGHT) ACTION PANEL -->
+        <div class="space-y-6">
+            @if($selectedRequest)
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100 animate__animated animate__fadeInRight">
+                <div class="bg-dark px-8 py-5 flex items-center justify-between text-white border-b border-gray-700">
+                    <div class="flex flex-col">
+                        <h5 class="font-black uppercase tracking-widest text-xs">Requested Changes</h5>
+                    </div>
+                    <button wire:click="$set('selectedRequest', null)" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+                </div>
+
+                <div class="p-8 space-y-8">
+                    <h4 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Proposed Data Changes</h4>
+
+                    <div class="space-y-4">
+                        @foreach($selectedRequest->new_data as $field => $newValue)
+                        <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                            <label class="block text-xs font-black text-indigo-600 uppercase mb-2">{{ str_replace('_', ' ', $field) }}</label>
+                            <div class="flex items-center gap-4">
+                                <div class="flex-1">
+                                    <span class="text-xs text-gray-400 block mb-1 font-bold">Old Value</span>
+                                    <div class="px-3 py-2 bg-red-50 text-red-600 rounded text-sm font-medium border border-red-100">{{ $selectedRequest->old_data[$field] ?? 'N/A' }}</div>
+                                </div>
+                                <div class="px-2 text-indigo-400"><i class="fas fa-long-arrow-alt-right fa-lg"></i></div>
+                                <div class="flex-1">
+                                    <span class="text-xs text-gray-400 block mb-1 font-bold">New Value (To Update)</span>
+                                    <div class="px-3 py-2 bg-emerald-50 text-emerald-700 rounded text-sm font-bold border border-emerald-100">{{ $newValue }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+
+                    <div class="space-y-3 pt-6 border-top border-gray-100">
+                        <label class="block text-sm font-bold text-gray-700 uppercase">Action Remark</label>
+                        <textarea wire:model="remark" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl focus:bg-white focus:border-indigo-500 outline-none transition-all h-24" placeholder="Enter your decision remark..."></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-6">
+                        <button wire:click="processAction('approve')" class="col-span-1 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-xl transition-all active:scale-95 uppercase tracking-tighter shadow-emerald-100-md">
+                            <i class="fas fa-check-circle mr-2"></i>
                             {{ $button_status == 1 ? 'Approve' : 'Process' }}
                         </button>
-                        <button
-                            wire:click="processAction('reject')"
-                            class="flex-1 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 active:scale-95">
-                            <svg class="inline h-4 w-4 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            Reject
+
+                        <button wire:click="processAction('reject')" class="col-span-1 py-4 bg-red-100 text-red-600 font-bold rounded-xl hover:bg-red-200 transition-all transition-all active:scale-95 uppercase">
+                            Cancel
                         </button>
                     </div>
                 </div>
-
             </div>
+            @else
+            <div class="h-96 bg-gray-100 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center text-gray-400 text-center">
+                <i class="fas fa-mouse-pointer text-5xl mb-4"></i>
+                <h4 class="font-bold text-gray-500">Selection Required</h4>
+                <p class="max-w-xs text-sm">Select a pending request from the left list to review data and take action.</p>
+            </div>
+            @endif
         </div>
     </div>
-    @endif
 </div>

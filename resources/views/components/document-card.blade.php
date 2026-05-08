@@ -10,7 +10,7 @@
 
 <div x-data="{ modalOpen: false, modalSrc: '', modalDocName: '', successMessage: '', docId:'' }"
     x-on:enclosure-saved.window="
-    successMessage = $event.detail.message; 
+    successMessage = $event.detail.message;
     docId = $event.detail.docId; "
     class="relative">
 

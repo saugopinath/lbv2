@@ -1,49 +1,108 @@
 @extends('frontend.layouts.app-template')
 @push('styles')
 <style>
+    :root {
+        --primary: #4f46e5;
+        --primary-light: #818cf8;
+        --primary-dark: #3730a3;
+        --secondary: #64748b;
+        --accent: #f59e0b;
+        --bg-main: #f8fafc;
+        --glass-bg: rgba(255, 255, 255, 0.8);
+        --glass-border: rgba(255, 255, 255, 0.5);
+    }
+
+    body {
+        font-family: 'Inter', 'Poppins', sans-serif;
+        background-color: var(--bg-main);
+    }
+
     .input {
-        @apply p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 transition-all duration-200 w-full;
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        transition: all 0.2s ease;
+        width: 100%;
+        font-size: 0.875rem;
+    }
+
+    .input:focus {
+        outline: none;
+        border-color: var(--primary-light);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
     }
 
     .area-btn {
-        @apply border rounded-xl py-2.5 px-3 text-center text-sm transition-all duration-200 hover:border-indigo-400 hover:bg-indigo-50 cursor-pointer;
+        padding: 0.625rem 0.75rem;
+        border-radius: 0.75rem;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+        font-size: 0.875rem;
+        background: #fff;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        color: var(--secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .area-btn i {
+        color: var(--primary);
+        opacity: 0.7;
+        transition: all 0.3s ease;
+    }
+
+    .area-btn:hover {
+        border-color: var(--primary-light);
+        background: #f5f3ff;
+        color: var(--primary);
+    }
+
+    .area-btn:hover i {
+        opacity: 1;
+        color: var(--primary);
     }
 
     .area-btn.active {
-        @apply bg-indigo-600 border-indigo-600 text-white font-medium shadow-md;
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
     }
 
-    .beneficiary-card {
-        @apply bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100;
-    }
-
-    .status-active {
-        @apply px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200;
-    }
-
-    .status-pending {
-        @apply px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700 border border-yellow-200;
-    }
-
-    .status-inactive {
-        @apply px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200;
+    .area-btn.active i {
+        opacity: 1;
+        color: #fff !important;
     }
 
     .filter-sidebar {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), width 0.2s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease;
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        z-index: 40;
     }
 
     .main-content {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        position: relative;
+        background:
+            radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.05) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, rgba(129, 140, 248, 0.05) 0px, transparent 50%),
+            radial-gradient(at 100% 100%, rgba(79, 70, 229, 0.05) 0px, transparent 50%),
+            radial-gradient(at 0% 100%, rgba(129, 140, 248, 0.05) 0px, transparent 50%);
     }
 
     .loader {
-        border: 3px solid #e5e7eb;
-        border-top: 3px solid #4f46e5;
+        border: 3px solid #f1f5f9;
+        border-top: 3px solid var(--primary);
         border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: spin 0.8s linear infinite;
+        width: 48px;
+        height: 48px;
+        animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
     }
 
     @keyframes spin {
@@ -56,106 +115,132 @@
         }
     }
 
-    /* Custom scrollbar */
-    .filter-sidebar::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .filter-sidebar::-webkit-scrollbar-track {
-        background: #f1f5f9;
-    }
-
-    .filter-sidebar::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 3px;
-    }
-
-    .filter-sidebar::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-    }
-
-    /* Mobile sidebar overlay */
     .sidebar-overlay {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 40;
-        backdrop-filter: blur(2px);
+        inset: 0;
+        background: rgba(15, 23, 42, 0.3);
+        backdrop-filter: blur(4px);
+        z-index: 35;
+        transition: opacity 0.2s ease;
     }
 
     .sidebar-overlay.active {
         display: block;
     }
 
-    /* Improved input focus states */
-    .input:focus {
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        border: none;
+        cursor: pointer;
     }
 
-    /* Better button states */
-    .btn-primary {
-        @apply bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold transition-all duration-300 shadow-md hover:shadow-lg active:scale-95;
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        filter: brightness(1.1);
+    }
+
+    .btn-primary:active {
+        transform: translateY(0);
     }
 
     .btn-secondary {
-        @apply bg-white hover:bg-gray-50 text-gray-700 font-medium border border-gray-300 transition-all duration-300 active:scale-95;
+        background: #fff;
+        color: var(--secondary);
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+        cursor: pointer;
     }
 
-    /* Empty state */
+    .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #1e293b;
+    }
+
+    #showSidebar {
+        background: white;
+        color: var(--primary);
+        border: 1px solid rgba(79, 70, 229, 0.2);
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #showSidebar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.15);
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
     .empty-state {
-        @apply flex flex-col items-center justify-center py-16 text-center;
+        padding: 4rem 2rem;
+        text-align: center;
+        background: #fff;
+        border-radius: 2rem;
+        border: 1px dashed #e2e8f0;
     }
 
-    /* Search highlight animation */
-    @keyframes highlight {
-
-        0%,
-        100% {
-            background-color: transparent;
-        }
-
-        50% {
-            background-color: rgba(79, 70, 229, 0.1);
-        }
+    .filter-field-highlight {
+        border-color: var(--primary) !important;
+        background-color: #f5f3ff !important;
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1) !important;
     }
 
-    .search-highlight {
-        animation: highlight 1s ease-in-out;
+    .filter-label-highlight {
+        color: var(--primary) !important;
+        font-weight: 600 !important;
     }
 
-    /* Mobile optimizations */
+    /* Glass Cards */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+        border-radius: 1.5rem;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
     @media (max-width: 768px) {
-        .filter-sidebar.mobile-open {
+        .filter-sidebar {
             position: fixed;
             top: 0;
-            left: 0;
-            width: 85% !important;
-            max-width: 320px;
+            left: -320px;
+            width: 300px !important;
             height: 100vh;
-            z-index: 50;
-            opacity: 1 !important;
-        }
-    }
-
-    /* Loading skeleton */
-    .skeleton {
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: loading 1.5s ease-in-out infinite;
-    }
-
-    @keyframes loading {
-        0% {
-            background-position: 200% 0;
+            transform: translateX(0);
         }
 
-        100% {
-            background-position: -200% 0;
+        .filter-sidebar.mobile-open {
+            transform: translateX(320px);
         }
     }
 </style>
@@ -177,17 +262,12 @@
         <div
             class="flex items-center justify-between p-5 border-b bg-gradient-to-r from-indigo-50 via-indigo-25 to-white sticky top-0 z-10">
             <h2 class="font-bold text-xl text-gray-800 flex items-center">
-                <svg class="w-5 h-5 mr-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                </svg>
+                <i class="fa-solid fa-filter text-indigo-600 mr-2"></i>
                 Filters
             </h2>
             <button id="toggleSidebar" class="p-2 rounded-lg hover:bg-indigo-100 transition-colors duration-200"
                 title="Collapse sidebar">
-                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
+                <i class="fa-solid fa-angle-left text-indigo-600"></i>
             </button>
         </div>
 
@@ -195,10 +275,7 @@
             <!-- Scheme -->
             <div>
                 <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                    <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
+                    <i class="fa-solid fa-clipboard-list mr-2"></i>
                     Scheme
                 </label>
                 <select id="scheme" class="mt-1 input">
@@ -212,12 +289,7 @@
             <!-- District -->
             <div>
                 <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                    <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+                    <i class="fa-solid fa-location-dot mr-2"></i>
                     District
                 </label>
                 <select id="district" class="mt-1 input">
@@ -231,32 +303,20 @@
             <!-- Area Type -->
             <div>
                 <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                    <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
+                    <i class="fa-solid fa-layer-group mr-2"></i>
                     Area Type
                 </label>
                 <div class="grid grid-cols-3 gap-2 mt-2">
                     <button type="button" onclick="setArea('')" class="area-btn active" id="areaAll">
-                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <i class="fa-solid fa-earth-asia"></i>
                         All
                     </button>
                     <button type="button" onclick="setArea('2')" class="area-btn" id="areaRural">
-                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                        </svg>
+                        <i class="fa-solid fa-city"></i>
                         Rural
                     </button>
                     <button type="button" onclick="setArea('1')" class="area-btn" id="areaUrban">
-                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
+                        <i class="fa-solid fa-city"></i>
                         Urban
                     </button>
                 </div>
@@ -266,10 +326,7 @@
             <!-- Block / Subdivision -->
             <div id="blk_sub_div" style="display: none;">
                 <label id="blk_sub_txt" class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                    <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                    </svg>
+                    <i class="fa-solid fa-map-location-dot mr-2"></i>
                     Block / Subdivision
                 </label>
                 <select id="block" class="mt-1 input">
@@ -280,10 +337,7 @@
             <!-- Municipality -->
             <div id="municipality_div" style="display: none;">
                 <label class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                    <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
+                    <i class="fa-solid fa-city mr-2"></i>
                     Municipality
                 </label>
                 <select id="muncid" class="mt-1 input">
@@ -294,10 +348,7 @@
             <!-- GP / Ward -->
             <div id="gp_ward_div" style="display: none;">
                 <label id="gp_ward_txt" class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                    <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    </svg>
+                    <i class="fa-solid fa-location-dot mr-2"></i>
                     GP / Ward
                 </label>
                 <select id="gp_ward" class="mt-1 input">
@@ -306,22 +357,15 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="pt-4 space-y-3">
+            <div class="pt-6 space-y-3">
                 <button type="button" onclick="applyFilters()"
-                    class="w-full btn-primary py-3 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
+                    class="w-full btn-primary flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-filter"></i>
                     Apply Filters
                 </button>
-
                 <button type="button" onclick="resetFilters()"
-                    class="w-full btn-secondary py-3 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
+                    class="w-full btn-secondary flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 hover:border-red-200">
+                    <i class="fa-solid fa-rotate-left"></i>
                     Reset Filters
                 </button>
             </div>
@@ -329,10 +373,7 @@
             <!-- Results Info -->
             <div class="mt-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
                 <div class="flex items-center text-blue-700">
-                    <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <i class="fa-solid fa-circle-info w-5 h-5 mr-2 flex-shrink-0"></i>
                     <span class="text-sm font-medium">
                         Showing <span id="resultCount" class="font-bold">{{ $results }}</span> beneficiaries
                     </span>
@@ -354,21 +395,15 @@
             <div class="flex gap-3">
                 <!-- Sidebar toggle button (visible when sidebar is collapsed) -->
                 <button type="button" id="showSidebar"
-                    class="hidden btn-primary px-4 py-2 rounded-xl flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
-                    Filters
+                    class="hidden btn-primary px-6 py-2.5 rounded-full flex items-center shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95 border-2 border-white">
+                    <i class="fa-solid fa-sliders mr-2"></i>
+                    <span class="font-bold tracking-wide uppercase text-xs">Show Filters</span>
                 </button>
 
                 <!-- Mobile filter toggle -->
                 <button type="button" id="mobileToggleSidebar"
                     class="md:hidden btn-primary px-4 py-2 rounded-xl flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                    </svg>
+                    <i class="fa-solid fa-sliders w-5 h-5 mr-2"></i>
                     Filters
                 </button>
             </div>
@@ -376,22 +411,16 @@
 
         <!-- SEARCH BAR -->
         <div class="max-w-4xl mx-auto mb-8 md:mb-10">
-            <div class="relative">
-                <svg class="w-5 h-5 absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none"
-                    stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-magnifying-glass text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                </div>
                 <input id="searchText" type="text"
-                    placeholder="Search by Beneficiary ID, Name, Mobile Number or Address"
-                    class="w-full pl-14 pr-4 md:pr-36 py-3.5 md:py-4 rounded-2xl border border-gray-300 focus:ring-3 focus:ring-indigo-300 focus:border-indigo-500 shadow-sm transition-all duration-300 text-sm md:text-base">
+                    placeholder="Search by Beneficiary ID, Name, Mobile or Address..."
+                    class="w-full pl-12 pr-4 md:pr-40 py-4 rounded-2xl border border-gray-200 bg-white/50 backdrop-blur-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 shadow-sm transition-all duration-300 text-base">
 
                 <button type="button" onclick="searchBeneficiary()"
-                    class="hidden md:flex absolute right-2 top-2 btn-primary px-6 md:px-8 py-2.5 md:py-3 rounded-xl items-center justify-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    class="hidden md:flex absolute right-2 top-2 bottom-2 btn-primary px-8 items-center justify-center text-sm">
                     Search
                 </button>
             </div>
@@ -404,7 +433,7 @@
         </div>
 
         <!-- ================= BENEFICIARY CARDS GRID ================= -->
-        <div id="resultArea" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-7xl mx-auto">
+        <div id="resultArea" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-auto mx-auto">
             <!-- Dynamic cards will be loaded here -->
         </div>
 
@@ -412,9 +441,7 @@
         <div class="text-center mt-8 md:mt-10">
             <button type="button" id="viewMoreBtn" onclick="loadMore()"
                 class="hidden btn-primary px-8 py-3 rounded-xl font-semibold inline-flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
+                <i class="fa-solid fa-angle-down w-5 h-5 mr-2"></i>
                 Load More
             </button>
         </div>
@@ -504,6 +531,8 @@
                 if (muncidSelect) muncidSelect.innerHTML = '<option value="">All</option>';
                 if (gpWardSelect) gpWardSelect.innerHTML = '<option value="">All</option>';
 
+                updateSidebarHighlights();
+
                 hide('#blk_sub_div');
                 hide('#municipality_div');
                 hide('#gp_ward_div');
@@ -572,6 +601,7 @@
                     }
                 }
                 if (blockSelect) blockSelect.innerHTML = htmlOption;
+                updateSidebarHighlights();
             });
         }
 
@@ -667,9 +697,39 @@
                     }
                     if (gpWardSelect) gpWardSelect.innerHTML = htmlOption;
                 }
+                updateSidebarHighlights();
             });
         }
+
+        // Add change listeners to all sidebar selects for automatic highlighting
+        $$('.filter-sidebar select').forEach(select => {
+            select.addEventListener('change', updateSidebarHighlights);
+        });
+
+        // Initialization of highlights
+        updateSidebarHighlights();
     });
+
+    // Function to update highlights on sidebar filters
+    function updateSidebarHighlights() {
+        const selects = ['#scheme', '#district', '#block', '#muncid', '#gp_ward', ];
+        selects.forEach(id => {
+            const el = $(id);
+            if (!el) return;
+
+            // Look for the label inside the parent div
+            const parent = el.closest('div');
+            const label = parent ? parent.querySelector('label') : null;
+
+            if (el.value !== '') {
+                el.classList.add('filter-field-highlight');
+                if (label) label.classList.add('filter-label-highlight');
+            } else {
+                el.classList.remove('filter-field-highlight');
+                if (label) label.classList.remove('filter-label-highlight');
+            }
+        });
+    }
 
     // Utility Functions
     function show(selector) {
@@ -765,17 +825,16 @@
 
                 if (totalRecords === 0 && resultArea) {
                     resultArea.innerHTML = `
-                                                            <div class="col-span-full empty-state">
-                                                                <svg class="w-20 h-20 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                                </svg>
-                                                                <h3 class="text-xl font-semibold text-gray-700 mb-2">No beneficiaries found</h3>
-                                                                <p class="text-gray-500 mb-4">Try adjusting your search or filters</p>
-                                                                <button onclick="resetFilters()" class="btn-primary px-6 py-2 rounded-lg">
-                                                                    Reset Filters
-                                                                </button>
-                                                            </div>
-                                                        `;
+                        <div class="col-span-full py-20 flex flex-col items-center justify-center text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                                <i class="fa-solid fa-magnifying-glass text-4xl text-gray-300"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-2">No results found</h3>
+                            <p class="text-gray-500 max-w-sm mb-8">We couldn't find any beneficiaries matching your current search or filter criteria.</p>
+                            <button onclick="resetFilters()" class="btn-primary">
+                                Clear All Filters
+                            </button>
+                        </div>`;
                 }
             })
             .catch(error => {
@@ -784,18 +843,7 @@
                 showNotification('Error loading beneficiaries. Please try again.', 'error');
 
                 if (resultArea) {
-                    resultArea.innerHTML = `
-                                                            <div class="col-span-full empty-state">
-                                                                <svg class="w-20 h-20 text-red-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                                </svg>
-                                                                <h3 class="text-xl font-semibold text-gray-700 mb-2">Something went wrong</h3>
-                                                                <p class="text-gray-500 mb-4">Unable to load beneficiaries</p>
-                                                                <button onclick="resetAndLoad()" class="btn-primary px-6 py-2 rounded-lg">
-                                                                    Try Again
-                                                                </button>
-                                                            </div>
-                                                        `;
+                    resultArea.innerHTML = `<div class="col-span-full empty-state"><i class="fa-solid fa-triangle-exclamation w-20 h-20 text-red-300 mb-4"></i><h3 class="text-xl font-semibold text-gray-700 mb-2">Something went wrong</h3><p class="text-gray-500 mb-4">Unable to load beneficiaries</p><button onclick="resetAndLoad()" class="btn-primary px-6 py-2 rounded-lg">Try Again</button></div>`;
                 }
             });
     }
@@ -835,6 +883,8 @@
         if (statusFilter) statusFilter.value = '';
         if (searchText) searchText.value = '';
 
+        updateSidebarHighlights();
+
         // Hide conditional divs
         hide('#blk_sub_div');
         hide('#municipality_div');
@@ -852,12 +902,20 @@
         }
 
         // Remove active class from all buttons
-        $$('.area-btn').forEach(btn => btn.classList.remove('active'));
+        $$('.area-btn').forEach(btn => {
+            btn.classList.remove('active', 'filter-field-highlight');
+        });
 
         // Add active class to selected button
-        if (type === '') addClass('#areaAll', 'active');
-        if (type === '2') addClass('#areaRural', 'active');
-        if (type === '1') addClass('#areaUrban', 'active');
+        if (type === '') {
+            addClass('#areaAll', 'active');
+        }
+        if (type === '2') {
+            addClass('#areaRural', 'active');
+        }
+        if (type === '1') {
+            addClass('#areaUrban', 'active');
+        }
     }
 
     // ================= UI HELPERS =================
@@ -876,7 +934,7 @@
             sidebar.style.overflow = 'hidden';
             sidebar.style.opacity = '0';
 
-            toggleBtn.innerHTML = '<svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>';
+            toggleBtn.innerHTML = '<i class="fa-solid fa-angle-left text-indigo-600"></i>';
             toggleBtn.setAttribute('title', 'Expand sidebar');
             showSidebarBtn.classList.remove('hidden');
         } else {
@@ -884,7 +942,7 @@
             sidebar.style.overflow = 'visible';
             sidebar.style.opacity = '1';
 
-            toggleBtn.innerHTML = '<svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>';
+            toggleBtn.innerHTML = '<i class="fa-solid fa-angle-left text-indigo-600"></i>';
             toggleBtn.setAttribute('title', 'Collapse sidebar');
             showSidebarBtn.classList.add('hidden');
         }
@@ -901,7 +959,7 @@
         sidebar.style.overflow = 'visible';
         sidebar.style.opacity = '1';
 
-        toggleBtn.innerHTML = '<svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>';
+        toggleBtn.innerHTML = '<i class="fa-solid fa-angle-left text-indigo-600"></i>';
         toggleBtn.setAttribute('title', 'Collapse sidebar');
         showSidebarBtn.classList.add('hidden');
         sidebarCollapsed = false;
@@ -937,32 +995,30 @@
         existingNotifications.forEach(notif => notif.remove());
 
         let bgClass = 'bg-indigo-600';
-        let icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+        let icon = '<i class="fa-solid fa-circle-info w-5 h-5"></i>';
 
         if (type === 'warning') {
             bgClass = 'bg-yellow-500';
-            icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
+            icon = '<i class="fa-solid fa-triangle-exclamation w-5 h-5"></i>';
         }
         if (type === 'error') {
             bgClass = 'bg-red-500';
-            icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+            icon = '<i class="fa-solid fa-circle-xmark w-5 h-5"></i>';
         }
         if (type === 'success') {
             bgClass = 'bg-green-500';
-            icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+            icon = '<i class="fa-solid fa-circle-check w-5 h-5"></i>';
         }
 
         const notificationHTML = `
-                                                <div class="custom-notification fixed top-6 right-6 px-6 py-4 rounded-xl shadow-2xl z-[100] transform transition-all duration-300 ${bgClass} text-white flex items-center gap-3 max-w-md" style="opacity: 0; transform: translateX(100px);">
-                                                    ${icon}
-                                                    <span class="flex-1">${message}</span>
-                                                    <button class="ml-2 text-white hover:text-gray-200 transition-colors" onclick="this.parentElement.remove()">
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            `;
+                                                                                                                                                                                                                                                                                                                            <div class="custom-notification fixed top-6 right-6 px-6 py-4 rounded-xl shadow-2xl z-[100] transform transition-all duration-300 ${bgClass} text-white flex items-center gap-3 max-w-md" style="opacity: 0; transform: translateX(100px);">
+                                                                                                                                                                                                                                                                                                                                ${icon}
+                                                                                                                                                                                                                                                                                                                                <span class="flex-1">${message}</span>
+                                                                                                                                                                                                                                                                                                                                <button class="ml-2 text-white hover:text-gray-200 transition-colors" onclick="this.parentElement.remove()">
+                                                                                                                                                                                                                                                                                                                                    <i class="fa-solid fa-xmark w-5 h-5"></i>
+                                                                                                                                                                                                                                                                                                                                </button>
+                                                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                                                        `;
 
         document.body.insertAdjacentHTML('beforeend', notificationHTML);
 
@@ -991,11 +1047,6 @@
     function viewDetails(beneficiaryId) {
         showNotification(`Opening details for beneficiary ${beneficiaryId}`, 'info');
         console.log('View details for:', beneficiaryId);
-    }
-
-    function viewPayments(beneficiaryId) {
-        showNotification(`Opening payment history for beneficiary ${beneficiaryId}`, 'info');
-        console.log('View payments for:', beneficiaryId);
     }
 </script>
 @endpush

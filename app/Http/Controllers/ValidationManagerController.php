@@ -10,11 +10,9 @@ use Illuminate\Support\Facades\Crypt;
 class ValidationManagerController extends Controller
 {
     public function index(Request $request)
-    {
-        // dd($request->all());
+    {       
         [$schemeId, $tabCode] =
-            explode('|', Crypt::decryptString($request->ref));
-            // dd($schemeId, $tabCode);
+            explode('|', Crypt::decryptString($request->ref));           
         $header='Manage Defult Field Validations';
         $schemeName = Scheme::where('id', $schemeId)->value('name');
         $tabName=MasterTab::where('tab_code',$tabCode)->value('tab_name');

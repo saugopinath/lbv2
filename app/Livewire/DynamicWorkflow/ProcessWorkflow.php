@@ -24,7 +24,7 @@ class ProcessWorkflow extends Component
     public function mount()
     {
         // $this->module_code=request()->module_code;
-        $this->module_code = 'UP_MB_D_01';
+        $this->module_code = config('constants.module_codes.update_mark_beneficiary');
         $module = DynamicWorkflowModule::where('module_code', $this->module_code)->first();
         if ($module) {
             $this->module_id = $module->id;
@@ -80,17 +80,22 @@ class ProcessWorkflow extends Component
     {
         $this->selectedRequest = DynamicWorkflowRequest::with(['module', 'step.label', 'step.role'])
             ->find($requestId);
-        // dd($this->selectedRequest);
+
+        if (!$this->selectedRequest) {
+            return;
+        }
+
         $step = workflowstepRolemapping::where('rank', $this->selectedRequest->current_rank)
             ->where('module_id', $this->selectedRequest->module_id)
             ->where('scheme_id', $this->selectedRequest->scheme_id)
             ->first();
-        $this->selectedRequest->step = $step;
-        $this->button_status = 0;
-        if ($this->selectedRequest->step->is_final_step == 1) {
-            $this->button_status = 1;
+        
+        if ($step) {
+            $this->selectedRequest->setRelation('step', $step);
+            $this->button_status = ($step->is_final_step == 1) ? 1 : 0;
+        } else {
+            $this->button_status = 0;
         }
-        // dd($this->button_status);
     }
     public function processAction($action)
     {

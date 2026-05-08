@@ -5,10 +5,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Jai Bangla @yield('title')</title>
+    <title>
+        {{ config('jblbConf.title') }}
+        @yield('title')
+    </title>
     <link rel="shortcut icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
@@ -78,6 +83,8 @@
         }
     </style>
 
+    <!-- Page-specific meta tags -->
+    @stack('meta')
     <!-- Styles -->
     @stack('styles')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -93,7 +100,7 @@
         <div class="absolute w-40 h-40 bg-amber-500/20 rounded-full animate-ripple"></div>
 
         <!-- Logo with Floating + Glow -->
-        <img src="{{ asset('images/home/biswo_logo.png') }}" class="w-24 h-24 relative animate-floating-glow"
+        <img src="{{ asset('images/home/'.config('jblbConf.initiallogo')) }}" class="w-24 h-24 relative animate-floating-glow"
             alt="Loading">
 
         <p class="text-gray-300 mt-6 text-sm tracking-widest animate-pulse">
@@ -101,27 +108,33 @@
         </p>
     </div>
 
-
-
     @yield('content')
-
-
     <!-- Scripts-->
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            setTimeout(function () {
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(function() {
                 const loader = document.getElementById("pageLoader");
 
                 if (!loader) return;
 
                 loader.classList.add("hideLoader");
 
-                setTimeout(function () {
+                setTimeout(function() {
                     loader.remove();
                 }, 700);
             }, 800);
         });
     </script>
+
+    @if(session()->has('toastr'))
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            window.dispatchEvent(new CustomEvent('toastr', {
+                detail: [@json(session('toastr'))]
+            }));
+        });
+    </script>
+    @endif
 
     @stack('scripts')
 </body>

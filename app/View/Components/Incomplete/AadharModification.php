@@ -6,14 +6,14 @@ use Illuminate\View\Component;
 
 class AadharModification extends Component
 {
-    public $aadhaarIssues;
+    public $aadhaarIssues,$schemeId;
     public $formData = [];
 
-    public function __construct($aadhaarIssues = [])
+    public function __construct($aadhaarIssues = [], $schemeId = null)
     {
         $this->aadhaarIssues = $aadhaarIssues;
+        $this->schemeId = $schemeId;  
 
-         
     }
 
     public function render()
@@ -21,7 +21,7 @@ class AadharModification extends Component
         $user = auth()->user();
 
         $stage = $this->stage ?? null;
-       
+
 
         if (!$stage) {
             if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
@@ -33,7 +33,7 @@ class AadharModification extends Component
 
         }
         //  dd($stage);
-     return view('components.incomplete.aadhar-modification', compact('stage'));
+        return view('components.incomplete.aadhar-modification', compact('stage'));
 
     }
 }

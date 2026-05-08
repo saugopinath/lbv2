@@ -2,16 +2,16 @@
 
 namespace App\Livewire\DynamicWorkflow;
 
+use App\Models\Codemaster;
 use App\Models\DynamicWorkflowLabel;
 use App\Models\DynamicWorkflowModule;
 use App\Models\DynamicWorkflowSchemeModule;
-use App\Models\Codemaster;
 use App\Models\Permission;
-use App\Models\workflowstepRolemapping;
 use App\Models\Role;
 use App\Models\Scheme;
 use App\Models\User;
 use App\Models\UserRoleSchemeOfficeMapping;
+use App\Models\workflowstepRolemapping;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -19,20 +19,29 @@ use Livewire\Component;
 class WorkflowWizard extends Component
 {
     public $currentTab = 1;
+
     public $totalTabs = 3;
 
     public $selectedScheme;
+
     public $selectedModule;
+
     public $isNewModule = false;
+
     public $newModuleName;
+
     public $newModuleCode;
+
     public $moduleList = [];
 
     public $stepCount = 1;
+
     public $stepNames = [];
 
     public $finalSteps = [];
+
     public $roles = [];
+
     public $permissionsList = [];
 
     public function mount()
@@ -170,7 +179,7 @@ class WorkflowWizard extends Component
                 'permissions' => $existingLabel ? (array) ($existingLabel->permissions ?? []) : [],
                 'role_ids' => $mappings
                     ->pluck('role_id')
-                    ->map(fn($roleId) => (string) $roleId)
+                    ->map(fn ($roleId) => (string) $roleId)
                     ->values()
                     ->all(),
                 'is_final' => ($index == $this->stepCount - 1),
@@ -220,12 +229,12 @@ class WorkflowWizard extends Component
                     ]
                 );
             }
-            $schemeModule->steps()->delete();
-            DynamicWorkflowLabel::where('module_id', $schemeModule->id)->delete();
+            workflowstepRolemapping::where('module_id', $schemeModule->id)->where('scheme_id', $this->selectedScheme)->delete();
+            DynamicWorkflowLabel::where('module_id', $schemeModule->id)->where('scheme_id', $this->selectedScheme)->delete();
             foreach ($this->finalSteps as $index => $stepData) {
                 $rank = ($index + 1) * 10;
                 $successRank = ($index < count($this->finalSteps) - 1) ? ($index + 2) * 10 : 0;
-                $revertRank = ($index > 0) ? $index * 10 : - ($this->selectedScheme);
+                $revertRank = ($index > 0) ? $index * 10 : -($this->selectedScheme);
                 // Find the parent ID for dynamic_op_type
                 $parent = Codemaster::where('short_name', 'dynamic_op_type')->first();
                 $opTypeId = null;
@@ -235,13 +244,13 @@ class WorkflowWizard extends Component
                     $codemaster = Codemaster::where('parent_id', $parent->id)
                         ->where('short_name', $labelSlug)
                         ->first();
-                    if (!$codemaster) {
+                    if (! $codemaster) {
                         $maxCode = Codemaster::where('parent_short_code', 'dynamic_op_type')->max('code');
-                        if (!$maxCode) {
+                        if (! $maxCode) {
                             $maxCode = ($parent->code * 10);
                         }
                         $codemaster = Codemaster::create([
-                            'name' => strtoupper($module->module_code) . " - " . strtoupper($stepData['label']),
+                            'name' => strtoupper($module->module_code).' - '.strtoupper($stepData['label']),
                             'short_name' => $labelSlug,
                             'parent_id' => $parent->id,
                             'parent_short_code' => $parent->short_name,
@@ -264,8 +273,8 @@ class WorkflowWizard extends Component
                         'scheme_id' => $this->selectedScheme,
                         'module_id' => $schemeModule->id,
                         'workflow_step_id' => $label->id,
-                        'rank' => $rank,
                         'role_id' => $roleId,
+                        'rank' => $rank,
                         'next_label_role_id' => $successRank,
                         'same_label_role_id' => $revertRank,
                         'is_final_step' => ($index == count($this->finalSteps) - 1),
@@ -273,23 +282,23 @@ class WorkflowWizard extends Component
                     ]);
 
                     foreach ($stepData['permissions'] as $permissionValue) {
-                        if (!empty($permissionValue)) {
+                        if (! empty($permissionValue)) {
                             // If it's a numeric ID, find by ID, otherwise it might be a new name
                             if (is_numeric($permissionValue)) {
                                 $permission = Permission::find($permissionValue);
                             } else {
                                 $permission = Permission::firstOrCreate([
                                     'name' => $permissionValue,
-                                    'guard_name' => 'web'
+                                    'guard_name' => 'web',
                                 ]);
                             }
 
                             if ($permission) {
-                                if (!in_array((string)$permission->id, $savedPermissionIds)) {
-                                    $savedPermissionIds[] = (string)$permission->id;
+                                if (! in_array((string) $permission->id, $savedPermissionIds)) {
+                                    $savedPermissionIds[] = (string) $permission->id;
                                 }
                                 $role = Role::find($roleId);
-                                if ($role && !$role->hasPermissionTo($permission->name)) {
+                                if ($role && ! $role->hasPermissionTo($permission->name)) {
                                     $role->givePermissionTo($permission);
                                 }
                                 // Assign permission to users mapped to this role and scheme
@@ -300,8 +309,13 @@ class WorkflowWizard extends Component
 
                                 foreach ($userIds as $userId) {
                                     $user = User::find($userId);
-                                    if ($user && !$user->hasPermissionTo($permission->name)) {
-                                        $user->givePermissionTo($permission);
+                                    if ($user) {
+
+                                        $user->givePermissionWithScheme(
+                                            $permission->id,
+                                            $this->selectedScheme
+                                        );
+
                                     }
                                 }
                             }
@@ -315,7 +329,7 @@ class WorkflowWizard extends Component
             DB::commit();
             $this->dispatch('toastr', [
                 'type' => 'success',
-                'message' => 'Workflow Master & Steps Configured Perfectly!'
+                'message' => 'Workflow Master & Steps Configured Perfectly!',
             ]);
             $this->reset(['selectedScheme', 'selectedModule', 'isNewModule', 'newModuleName', 'newModuleCode', 'stepCount', 'stepNames', 'finalSteps']);
             $this->currentTab = 1;
@@ -324,7 +338,7 @@ class WorkflowWizard extends Component
             DB::rollBack();
             $this->dispatch('toastr', [
                 'type' => 'error',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         }
     }
@@ -335,6 +349,7 @@ class WorkflowWizard extends Component
             $this->currentTab--;
         }
     }
+
     public function render()
     {
         return view('livewire.dynamic-workflow.workflow-wizard', [

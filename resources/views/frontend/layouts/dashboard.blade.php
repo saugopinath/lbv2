@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jai Bangla Portal | Dashboard @yield('title')</title>
+    <title>{{ config('jblbConf.title') }} Portal | Dashboard @yield('title')</title>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -181,6 +181,7 @@
     </style>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('head_scripts')
 </head>
 
 <body>
@@ -211,11 +212,11 @@
 
                             <div>
                                 <h1 class="text-2xl sm:text-3xl font-bold gradient-text leading-tight">
-                                    Jai Bangla Portal
-                                    <span class="block sm:inline">@yield('header_title')</span>
+                                    {{ config('jblbConf.title') }}
+                                    <!-- <span class="block sm:inline">@yield('header_title')</span> -->
                                 </h1>
                                 <p class="text-gray-600 text-sm sm:text-base mt-1">
-                                    @yield('header_description')
+                                    {{ config('jblbConf.indexName') }}
                                 </p>
                             </div>
                         </div>
@@ -243,10 +244,12 @@
 
     <!-- Sidebar Active Link Handler -->
     <script>
-        $(document).ready(function () {
-            $('.sidebar-link').on('click', function () {
-                $('.sidebar-link').removeClass('active');
-                $(this).addClass('active');
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.sidebar-link').forEach(function(link) {
+                link.addEventListener('click', function() {
+                    document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+                    this.classList.add('active');
+                });
             });
         });
     </script>

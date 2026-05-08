@@ -9,7 +9,8 @@ use App\Services\AuthenticationService;
 
 use App\Interfaces\SendSmsInterface;
 use App\Services\SendSmsService;
-
+use App\Interfaces\JNMPAuthenticationInterface;
+use App\Services\JNMPAuthenticationService;
 use App\Interfaces\UserInterface;
 use App\Services\UserService;
 
@@ -46,6 +47,11 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(CmoAuthenticationInterface::class, CmoAuthenticationService::class);
 
+         $this->app->bind(
+            JNMPAuthenticationInterface::class,
+            JNMPAuthenticationService::class
+        );
+
     }
 
     /**
@@ -71,6 +77,8 @@ class AppServiceProvider extends ServiceProvider
                 'district_id',
                 'created_at',
                 'updated_at',
+                'beneficiary_id',
+                'application_id',
             ]);
 
             // ✅ Filterable attributes (must exist in searchable array)
@@ -80,7 +88,9 @@ class AppServiceProvider extends ServiceProvider
                 'rural_urban',
                 'blockurban',
                 'gpward',
-                'next_level_role_id'
+                'next_level_role_id',
+                'application_id',
+                'beneficiary_id',
             ]);
         }
     }

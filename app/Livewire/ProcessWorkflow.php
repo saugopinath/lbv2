@@ -23,7 +23,7 @@ class ProcessWorkflow extends Component
             $this->schemeData = true;
             $this->schemeName = $schemeData->name;
         }
-        $this->moduleCode = 'UP_MB_D_01';
+        $this->moduleCode = config('constants.module_codes.update_mark_beneficiary');
         $this->header = "Update Mark Beneficiary Details";
     }
     #[On('selectedScheme')]

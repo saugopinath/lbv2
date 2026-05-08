@@ -41,6 +41,7 @@ class RequestUpdateBeneficiary extends Component
 
     protected $listeners = [
         'beneficiary-search' => 'handleSearch',
+        'reset-beneficiary-search' => 'resetSearch',
     ];
 
     protected array $baseFieldOptions = [
@@ -50,10 +51,13 @@ class RequestUpdateBeneficiary extends Component
         'bank_details' => 'Bank Update',
     ];
 
-    public function mount($moduleCode = null)
+    public function mount($moduleCode = null, $moduleName = null, $moduleId = null)
     {
+        // dd($moduleCode, $moduleName, $moduleId);
         $selectLgd = session('lgd_session');
-        $this->requestModuleCode = 'UP_MB_D_01';
+        $this->requestModuleCode = $moduleCode;
+        // $this->moduleName = $moduleName;
+        // $this->moduleId = $moduleId;
         $this->currentRoleId = Crypt::decryptString($selectLgd['role_id']);
         if (!empty($selectLgd['district_id'])) {
             $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($selectLgd['district_id']);
@@ -91,12 +95,14 @@ class RequestUpdateBeneficiary extends Component
         $applicationIds = collect($data['results'])->pluck('application_id')->toArray();
         $this->moduleSchemeId = $data['results'][0]['scheme_id'];
         // dd($this->moduleSchemeId);
+        // dd($this->requestModuleCode);
         $Mainmodule = DynamicWorkflowModule::where('module_code', $this->requestModuleCode)->first();
+        // dd($Mainmodule);
         if (!$Mainmodule) {
             abort(404, 'Module not found');
         }
         $module = DynamicWorkflowSchemeModule::where('module_id', $Mainmodule->id)->where('scheme_id', $this->moduleSchemeId)->first();
-
+        // dd($module);
         if (!$module) {
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -123,6 +129,7 @@ class RequestUpdateBeneficiary extends Component
         }
         $SubmittedRequest = DynamicWorkflowRequest::where('ref_id', $applicationIds)
             ->where('scheme_id', $this->moduleSchemeId)
+            ->where('module_id', $this->moduleId)
             ->whereNotIn('current_rank', [-100, 0])
             ->get();
         // dd($SubmittedRequest);
@@ -152,6 +159,14 @@ class RequestUpdateBeneficiary extends Component
                 'scheme_id'      => $item->scheme_id,
             ])->toArray();
     }
+    public function resetSearch()
+    {
+        $this->items = [];
+        $this->beneficiary = null;
+        $this->showFields = false;
+        $this->selectedFields = [];
+    }
+
     public function selectBeneficiary($appId)
     {
         // dd($appId);
@@ -178,7 +193,7 @@ class RequestUpdateBeneficiary extends Component
             abort(404, 'Module not found');
         }
         $module = DynamicWorkflowSchemeModule::where('module_id', $Mainmodule->id)->where('scheme_id', $this->beneficiary->scheme_id)->first();
-
+        // dd($module);
         if (!$module) {
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -189,6 +204,7 @@ class RequestUpdateBeneficiary extends Component
         $this->moduleId = $module->id;
         $this->moduleCode = $module->module_code;
         // $this->moduleSchemeId = $module->scheme_id;
+      
         if (!$this->beneficiary) {
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -196,6 +212,7 @@ class RequestUpdateBeneficiary extends Component
             ]);
             return;
         }
+       
         if (empty($this->selectedFields)) {
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -203,7 +220,9 @@ class RequestUpdateBeneficiary extends Component
             ]);
             return;
         }
+          
         $this->validate($this->rules(), [], $this->validationAttributes());
+        
         $payload = $this->prepareWorkflowPayload();
         if (count($payload['actual_changed_blocks']) !== count($this->selectedFields)) {
             $this->dispatch('toastr', [
@@ -212,6 +231,7 @@ class RequestUpdateBeneficiary extends Component
             ]);
             return;
         }
+        
         $checkData = [
             'mobile_no' => $this->newData['mobile_no'] ?? null,
             'bankaccountnumber' => $this->newData['bank_account_number'] ?? null,
@@ -221,6 +241,7 @@ class RequestUpdateBeneficiary extends Component
             (int)$this->beneficiary->application_id,
             $checkData
         );
+      
         if ($duplicateResult !== true) {
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -228,15 +249,18 @@ class RequestUpdateBeneficiary extends Component
             ]);
             return;
         }
+         
         $hasPendingRequest = DynamicWorkflowRequest::where('module_id', $this->moduleId)
             ->where('ref_id', $this->beneficiary->application_id)
             ->where('scheme_id', $this->beneficiary->scheme_id)
             ->whereNotIn('current_rank', [-100, 0]) // -100 = rejected, 0 = completed
             ->exists();
+            //    dd($hasPendingRequest);
         if ($hasPendingRequest) {
             $this->dispatch('toast', 'error', 'A pending request already exists.');
             return;
         }
+        
         DB::beginTransaction();
         try {
             $service = new DynamicWorkflowService();
@@ -255,10 +279,9 @@ class RequestUpdateBeneficiary extends Component
                 'type' => 'success',
                 'message' => $message
             ]);
-            return redirect()->route('dynamic-workflow-request');
+            return redirect()->route('request-update-beneficiary');
         } catch (\Exception $e) {
             DB::rollBack();
-            // $e->getMessage() দিয়ে Exception-এর ভেতরের মেসেজটি দেখানো হচ্ছে
             $this->dispatch('toastr', [
                 'type' => 'error',
                 'message' => $e->getMessage()

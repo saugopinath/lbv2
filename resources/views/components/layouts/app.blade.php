@@ -10,18 +10,16 @@
     <meta name="author" content="Webonzer" />
 
     <!-- Site Title -->
-    <title>Lakshmir Bhandar | Government of West Bengal</title>
+    <title>{{ config('jblbConf.title') }}</title>
 
     <!-- Favicon Icon -->
-    <link rel="shortcut icon" href="{{ asset('images/biswofab.ico') }}">
+    <link rel="shortcut icon" href="{{ asset('images/' . config('jblbConf.headerlogo')) }}">
 
     <!-- Styles -->
     @livewireStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
     <!-- Alpine.js local -->
     <!-- <script src="{{ asset('js/alpine.min.js') }}" defer></script> -->
-
     <!-- Chart.js for Dashboard -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
