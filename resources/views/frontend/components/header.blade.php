@@ -12,7 +12,7 @@
                     alt="{{ config('constants.jb') }}" />
                 <div
                     class="text-xl md:text-xl font-semibold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent text-center md:text-left">
-                    {{config('jblbConf.headLine')}} | {{config('jblbConf.deptName')}} <br>Government of West Bengal
+                    {{config('jblbConf.headLine')}} <br> {{config('jblbConf.deptName')}}, Government of West Bengal
                 </div>
             </div>
 

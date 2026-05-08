@@ -16,6 +16,7 @@ if ($portal == 'lb') {
     $deptName = 'Women and Child Development & Social Welfare Department';
     $dept_logo = 'biswo_logo.png';
     $indexName = 'Women and Child Development & Social Welfare Department | Government of West Bengal';
+    $footerDescription = 'A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic development and welfare.';
 } else if ($portal == 'jb') {
     $title = 'Jai Bangla Portal | Government of West Bengal';
     $headLine = 'Jai Bangla';
@@ -32,6 +33,7 @@ if ($portal == 'lb') {
     $deptName = 'Finance Department';
     $dept_logo = 'biswo_logo.png';
     $indexName = 'Department of Finance | Government of West Bengal';
+    $footerDescription = 'A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic development and welfare.';
 } else if ($portal == 'ub') {
     $title = 'Unnayan Bangla | Government of West Bengal';
     $headLine = 'Unnayan Bangla';
@@ -48,6 +50,7 @@ if ($portal == 'lb') {
     $deptName = 'Finance Department';
     $indexName = 'Finance Department | Government of West Bengal';
     $dept_logo = 'biswo_logo.png';
+    $footerDescription = 'A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic development and welfare.';
 } else {
     $title = 'Government of West Bengal';
     $headLine = 'Government of West Bengal';
@@ -64,6 +67,7 @@ if ($portal == 'lb') {
     $deptName = 'WCD';
     $dept_logo = 'biswo_logo.png';
     $indexName = 'Department of Finance | Government of West Bengal';
+    $footerDescription = 'A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic development and welfare.';
 }
 return [
     'app_portal' => $portal,
@@ -84,4 +88,5 @@ return [
     'deptName' => $deptName,
     'initiallogo' => $initiallogo,
     'dept_logo' => $dept_logo,
+    'footerDescription' => $footerDescription,
 ];
