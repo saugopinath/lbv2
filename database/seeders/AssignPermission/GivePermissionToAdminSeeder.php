@@ -8,6 +8,8 @@ use Spatie\Permission\Models\Permission;
 use App\Models\User;
 use App\Models\UserRoleSchemeOfficeMapping;
 
+use Spatie\Permission\PermissionRegistrar;
+
 class GivePermissionToAdminSeeder extends Seeder
 {
     public function run(): void
@@ -29,7 +31,9 @@ class GivePermissionToAdminSeeder extends Seeder
             'role-rank-management',
             'define-workflow',
             'role-permission-management',
-            'scheme-capacity-setting'
+            'scheme-capacity-setting',
+            'import-janma-mrityu-data',
+            'dynamic-workflow-management'
         ];
         // 1) find role
         try {
@@ -48,37 +52,38 @@ class GivePermissionToAdminSeeder extends Seeder
             );
         }
 
-        // 3) Get user_ids from mapping table for that role
-        $adminUserIds = UserRoleSchemeOfficeMapping::where('role_id', $role->id)
-            ->pluck('user_id')
-            ->unique()
-            ->values();
+        // 3) Get mappings for that role
+        $mappings = UserRoleSchemeOfficeMapping::where('role_id', $role->id)->get();
 
-        if ($adminUserIds->isEmpty()) {
+        if ($mappings->isEmpty()) {
             $this->command->info('No users found in UserRoleSchemeOfficeMapping for role "Super Admin".');
             return;
         }
 
-        // 4) Loop users and assign permissions, printing a message for each assign (or skip)
-        foreach ($adminUserIds as $userId) {
-            $user = User::find($userId);
-            if (! $user) {
-                $this->command->warn("User id={$userId} not found (skipping).");
+        // 4) Loop mappings and assign permissions
+        foreach ($mappings as $mapping) {
+            $user = User::find($mapping->user_id);
+            if (!$user) {
+                $this->command->warn("User id={$mapping->user_id} not found (skipping).");
                 continue;
             }
+
+            // Set the permissions team ID for this scheme
+            app(PermissionRegistrar::class)->setPermissionsTeamId($mapping->scheme_id);
 
             foreach ($permissionModels as $permission) {
                 // check if user already has this permission
                 if ($user->hasPermissionTo($permission->name)) {
-                    $this->command->info("User id={$user->id} already has permission '{$permission->name}' (id={$permission->id}).");
+                    $this->command->info("User id={$user->id} already has permission '{$permission->name}' for scheme {$mapping->scheme_id} (id={$permission->id}).");
                     continue;
                 }
-
                 // assign and print message
                 $user->givePermissionTo($permission->name);
-                $this->command->info("Assigned permission '{$permission->name}' (id={$permission->id}) to user id={$user->id}.");
+                $this->command->info("Assigned permission '{$permission->name}' (id={$permission->id}) to user id={$user->id} for scheme {$mapping->scheme_id}.");
             }
         }
+        // Reset the permissions team ID
+        app(PermissionRegistrar::class)->setPermissionsTeamId(null);
 
         $this->command->info('GivePermissionToAdminSeeder finished.');
     }

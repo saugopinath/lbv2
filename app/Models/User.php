@@ -5,17 +5,17 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Auth;
 use OwenIt\Auditing\Contracts\Auditable;
-use App\Models\Permission;
-use App\Models\UserRoleSchemeOfficeMapping;
+use Spatie\Permission\Traits\HasRoles;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements Auditable
+class User extends Authenticatable implements Auditable, JWTSubject
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
     use \OwenIt\Auditing\Auditable;
 
     public $audit_old_permissions;
@@ -37,8 +37,9 @@ class User extends Authenticatable implements Auditable
         'password_expires_at',
         'updated_at',
         'mobile_no',
-        'is_active'
+        'is_active',
     ];
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -59,9 +60,10 @@ class User extends Authenticatable implements Auditable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
         ];
     }
+
     public function RoleSchemeOfficeMappings(): HasMany
     {
 
@@ -91,16 +93,36 @@ class User extends Authenticatable implements Auditable
             'model_has_permissions',
             'model_id',
             'permission_id'
-        );
+        )->withPivot('scheme_id');
+    }
+
+    public function givePermissionWithScheme($permissionId, $schemeId)
+    {
+        // Check already exists
+        $exists = $this->mappedPermissions()
+            ->wherePivot('permission_id', $permissionId)
+            ->wherePivot('scheme_id', $schemeId)
+            ->exists();
+
+        if (! $exists) {
+
+            $this->mappedPermissions()->attach(
+                $permissionId,
+                [
+                    'scheme_id' => $schemeId,
+                ]
+            );
+
+        }
     }
 
     public function transformAudit(array $data): array
     {
-        $userId = \Illuminate\Support\Facades\Auth::id();
+        $userId = Auth::id();
         $userRole = UserRoleSchemeOfficeMapping::where('user_id', $userId)
             ->value('role_id');
 
-        $data['tags'] = class_basename($this) . '_' . ($data['event'] ?? 'unknown');
+        $data['tags'] = class_basename($this).'_'.($data['event'] ?? 'unknown');
         $data['session_id'] = session()->getId();
 
         $data['other_details'] = json_encode([
@@ -126,5 +148,15 @@ class User extends Authenticatable implements Auditable
         }
 
         return $data;
+    }
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
     }
 }

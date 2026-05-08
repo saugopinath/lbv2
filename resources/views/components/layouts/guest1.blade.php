@@ -10,7 +10,7 @@
     <meta name="author" content="Webonzer" />
 
     <!-- Site Tiltle -->
-    <title>Lakshmir Bhandar | Government of West Bengal</title>
+    <title>ANNAPURNA BHANDAR | Government of West Bengal</title>
 
     <!-- Favicon Icon -->
     <link rel="shortcut icon" href="{{asset('images/biswofab.ico')}}">
@@ -64,7 +64,7 @@
                     <script>
                         var year = new Date(); document.write(year.getFullYear());
                     </script>
-                    Lakshmir Bhandar
+                    ANNAPURNA BHANDAR
                 </p>
             </footer>
         </div>

@@ -9,24 +9,23 @@ use Illuminate\Http\Request;
 
 class UsersController extends Controller
 {
-    // protected $isAuthorized = false;
-    // public function __construct()
-    // {
-    //     if (CheckAuthHelper::isCommonPrivilegedUser()) {
-    //         $this->isAuthorized = true;
-    //     } else {
-    //          redirect()->route('dashboard')
-    //             ->with('error', 'Oops! You are not authorized to perform this action.')
-    //             ->send();
-    //     }
-    // }
+    protected $isAuthorized = false;
+    public function __construct()
+    {
+        if (CheckAuthHelper::isCommonPrivilegedUser()) {
+            $this->isAuthorized = true;
+        } else {
+             redirect()->route('dashboard')
+                ->with('error', 'Oops! You are not authorized to perform this action.')
+                ->send();
+        }
+    }
     public function index()
     {
-        // if (WorkFlowPermissionHelper::canViewUser()) {
-        // if (Auth::user()->can('view users')) {
+        if (WorkFlowPermissionHelper::canViewUser()) {      
             return view('users.index');
-        // }
-    //     $header = 'Oops! You do not have permission to view users.';
-    //     return view('CommonRestictedpage.index', compact('header'));
+        }
+        $header = 'Oops! You do not have permission to view users.';
+        return view('CommonRestictedpage.index', compact('header'));
      }
 }

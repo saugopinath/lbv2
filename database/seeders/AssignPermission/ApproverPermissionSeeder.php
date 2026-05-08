@@ -8,6 +8,8 @@ use Spatie\Permission\Models\Permission;
 use App\Models\User;
 use App\Models\UserRoleSchemeOfficeMapping;
 
+use Spatie\Permission\PermissionRegistrar;
+
 class ApproverPermissionSeeder extends Seeder
 {
     /**
@@ -51,6 +53,19 @@ class ApproverPermissionSeeder extends Seeder
             'Normal Entry Revert Allow',
             'Normal Entry Approver Allow',
             'Normal Entry Reject Allow',
+            're-activate-death-incident',
+            'manage-menus',
+            'manage-permissions',
+            'manage-roles',
+            'manage-users',
+            'manage-departments',
+            'manage-schemes',
+            'manage-menus',
+            'manage-permissions',
+            'manage-roles',
+            'manage-users',
+            'manage-departments',
+            'manage-schemes',
         ];
         try {
             $role = Role::findByName('Approver');
@@ -65,30 +80,39 @@ class ApproverPermissionSeeder extends Seeder
                 ['guard_name' => 'web']
             );
         }
-        $adminUserIds = UserRoleSchemeOfficeMapping::where('role_id', $role->id)
-            ->pluck('user_id')
-            ->unique()
-            ->values();
-        if ($adminUserIds->isEmpty()) {
+        // Get mappings for that role
+        $mappings = UserRoleSchemeOfficeMapping::where('role_id', $role->id)->get();
+
+        if ($mappings->isEmpty()) {
             $this->command->info('No users found in UserRoleSchemeOfficeMapping for role "Approver".');
             return;
         }
-        foreach ($adminUserIds as $userId) {
-            $user = User::find($userId);
-            if (! $user) {
-                $this->command->warn("User id={$userId} not found (skipping).");
+
+        // 4) Loop mappings and assign permissions
+        foreach ($mappings as $mapping) {
+            $user = User::find($mapping->user_id);
+            if (!$user) {
+                $this->command->warn("User id={$mapping->user_id} not found (skipping).");
                 continue;
             }
-            foreach ($permissionModels as $permission) {
 
+            // Set the permissions team ID for this scheme
+            app(PermissionRegistrar::class)->setPermissionsTeamId($mapping->scheme_id);
+
+            foreach ($permissionModels as $permission) {
+                // check if user already has this permission
                 if ($user->hasPermissionTo($permission->name)) {
-                    $this->command->info("User id={$user->id} already has permission '{$permission->name}' (id={$permission->id}).");
+                    $this->command->info("User id={$user->id} already has permission '{$permission->name}' for scheme {$mapping->scheme_id} (id={$permission->id}).");
                     continue;
                 }
+                // assign and print message
                 $user->givePermissionTo($permission->name);
-                $this->command->info("Assigned permission '{$permission->name}' (id={$permission->id}) to user id={$user->id}.");
+                $this->command->info("Assigned permission '{$permission->name}' (id={$permission->id}) to user id={$user->id} for scheme {$mapping->scheme_id}.");
             }
         }
+        // Reset the permissions team ID
+        app(PermissionRegistrar::class)->setPermissionsTeamId(null);
+
         $this->command->info('Give Permission To Approver  finished.');
     }
 }

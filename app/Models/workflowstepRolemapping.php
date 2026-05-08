@@ -23,7 +23,8 @@ class WorkflowsteproleMapping extends Model implements Auditable
             $query->where('role_id', $roleId);
         }
         return $query->where('scheme_id', $schemeId)
-            ->first(['same_label_role_id', 'next_label_role_id']);
+            ->with('workflowstep')
+            ->first(['same_label_role_id', 'next_label_role_id', 'is_first_step', 'is_final_step', 'workflow_step_id']);
     }
 
     public static function getMinMaxWorkflowStep(int $schemeId): array
@@ -77,5 +78,10 @@ class WorkflowsteproleMapping extends Model implements Auditable
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    public function workflowstep()
+    {
+        return $this->belongsTo(WorkflowStep::class, 'workflow_step_id', 'id');
     }
 }

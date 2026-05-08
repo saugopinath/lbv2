@@ -155,8 +155,8 @@ return [
         'purohithousing' => array("scheme_code" => '13', "name" => 'One time Housing Scheme', 'slug' => 'housing', 'maintable' => 'PensionPurohitHousingICAD', 'doctable' => 'BenDocsPurohitHousingICAD', 'docarctable' => 'BenDocsArcPurohitHousingICAD'),
         'purohitboth' => array("scheme_code" => '14', "name" => 'Both', 'slug' => 'both', 'maintable' => 'PensionPurohitHousingICAD')
     ],
-    'site_title' => 'Lakshmir Bhandar',
-    'site_titleShort' => 'Lakshmir Bhandar',
+    'site_title' => 'ANNAPURNA BHANDAR',
+    'site_titleShort' => 'ANNAPURNA BHANDAR',
     'lb_source' => [
         // 'nfsa' => 'NFSA (Khadyasathi)',
         'ss_nfsa' => 'Swasthya Sathi',
@@ -259,7 +259,11 @@ return [
         '2024' => '2024',
         '2025' => '2025',
     ],
-    'EncryptionKey' => 'wltHCqXLI0rTIZtjY2tw9FuglpZFIcHzBhBZAG9ADKw=',
+    'EncryptionKey'=>'wltHCqXLI0rTIZtjY2tw9FuglpZFIcHzBhBZAG9ADKw=',
+    'module_codes' => [
+        'caste_management' => 'caste_mng_01',
+        'update_mark_beneficiary' => 'UP_MB_D_01',
+    ],    
     'contact_phone' => '1800-102-8255',
     'jb' => 'Jai Bangla',
     'lb' => 'Lakshmir Bhandar',

@@ -2,25 +2,35 @@
 
 namespace App\Livewire;
 
-use App\Models\Codemaster;
-use App\Models\District;
-use App\Models\OfficeMaster;
-use App\Models\Role;
-use App\Models\RoleOfficeTypeMapping;
+use App\Attributes\Loggable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
-use App\Attributes\Loggable;
 
 class UserPermissionDetailsTable extends DataTableComponent
 {
     public ?int $perPage = 5;
-    public $role, $selectedMappingLevel, $selectedState, $selectedDistrict, $office;
 
-    protected $listeners = ['refreshUserTable' => '$refresh',  'userFilter' => 'userFilter'];
+    public $role;
+
+    public $selectedMappingLevel;
+
+    public $selectedState;
+
+    public $selectedDistrict;
+
+    public $office;
+
+    public $schemeId = null;
+
+    protected $listeners = ['refreshUserTable' => '$refresh', 'userFilter' => 'userFilter'];
+
+    public function mount($schemeId = null)
+    {
+        $this->schemeId = $schemeId;
+    }
 
     public function userFilter($filters)
     {
@@ -76,11 +86,18 @@ class UserPermissionDetailsTable extends DataTableComponent
             'assign_bulk_permissions' => 'Assign Permission',
         ];
     }
+
     public function builder(): Builder
     {
+        $schemeId = (int) $this->schemeId;
+
         $query = User::query()
-            ->whereHas('RoleSchemeOfficeMappings.office', function ($q) {
+            ->whereHas('RoleSchemeOfficeMappings', function ($q) use ($schemeId) {
                 $q->where('is_active', 1);
+
+                if ($schemeId) {
+                    $q->where('scheme_id', $schemeId);
+                }
 
                 if (!empty($this->role)) {
                     $q->where('role_id', $this->role);
@@ -96,7 +113,18 @@ class UserPermissionDetailsTable extends DataTableComponent
                     $q->where('office_type_id', $this->selectedMappingLevel);
                 }
             })
-            ->with(['mappedRoles', 'mappedPermissions']);
+            ->with([
+                'mappedRoles' => function ($q) use ($schemeId) {
+                    if ($schemeId) {
+                        $q->wherePivot('scheme_id', $schemeId);
+                    }
+                },
+                'mappedPermissions' => function ($q) use ($schemeId) {
+                    if ($schemeId) {
+                        $q->wherePivot('scheme_id', $schemeId);
+                    }
+                }
+            ]);
 
         return $query;
     }
@@ -104,16 +132,16 @@ class UserPermissionDetailsTable extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make("ID", "id")->hideIf(true),
+            Column::make('ID', 'id')->hideIf(true),
 
-            Column::make("User Name", "name")->searchable(),
+            Column::make('User Name', 'name')->searchable(),
 
-            Column::make("Mobile No", "mobile_no")->searchable(),
+            Column::make('Mobile No', 'mobile_no')->searchable(),
 
-            Column::make("Role")
+            Column::make('Role')
                 ->label(fn($row) => $row->mappedRoles->map(fn($role) => "<span class='px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs'>{$role->name}</span>")->implode(' '))
                 ->html(),
-            Column::make("Assigned Permissions")
+            Column::make('Assigned Permissions')
                 ->label(function ($row) {
                     $colors = [
                         'bg-blue-100 text-blue-800 border border-blue-200',
@@ -127,6 +155,7 @@ class UserPermissionDetailsTable extends DataTableComponent
 
                     $tags = $permissions->map(function ($permission, $index) use ($colors) {
                         $color = $colors[$index % count($colors)];
+
                         return "<span class='px-2 py-1 rounded text-xs font-medium {$color}'>{$permission->name}</span>";
                     });
 
@@ -146,27 +175,28 @@ class UserPermissionDetailsTable extends DataTableComponent
                     <button type='button'
                         class='text-blue-600 text-xs mt-1 focus:outline-none'
                         @click='open = !open'
-                        x-text='open ? \"Show less\" : \"Show more\"'></button>" : "") . "</div>";
+                        x-text='open ? \"Show less\" : \"Show more\"'></button>" : '') . '</div>';
                 })
                 ->html(),
 
-            Column::make("Actions")
+            Column::make('Actions')
                 ->label(
-                    fn($row) =>
-                    view('coulmn_button.actions', [
-                        'wireClick' => " \$dispatch('UpdatePermission', { userId: {$row->id} })",
-                        'tooltip'   => 'Update Permissions',
+                    fn($row) => view('coulmn_button.actions', [
+                        'wireClick' => " \$dispatch('UpdatePermission', { userId: {$row->id}, schemeId: " . (int) $this->schemeId . " })",
+                        'tooltip' => 'Update Permissions',
                     ])->render()
                 )
                 ->html(),
         ];
     }
+
     #[Loggable(level: 'M', nickname: 'Open Assign Bulk Permission Modal')]
     public function assign_bulk_permissions()
     {
         // dd($this->getSelected());
-        $this->dispatch('open-bulk-assign-permission-modal',  users: $this->getSelected());
+        $this->dispatch('open-bulk-assign-permission-modal', users: $this->getSelected(), schemeId: (int) $this->schemeId);
     }
+
     #[On('assign-success')]
     public function assignsuccessfully()
     {
