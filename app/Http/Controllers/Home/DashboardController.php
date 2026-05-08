@@ -33,12 +33,11 @@ class DashboardController extends Controller
         // Count beneficiaries whose current workflow position matches the final
         // approval role of their respective scheme (i.e. fully approved).
         if (!empty($approveRoles)) {
-            $totalApproved = BeneficiaryPersonalDetail::whereIn('scheme_id', $this->schemeIds)
+            $totalApproved = DB::connection('pgsql_app_read')
+                ->table('pension.beneficiary_personals')
+                ->whereIn('scheme_id', $this->schemeIds)
                 ->where(function ($query) use ($approveRoles) {
                     foreach ($approveRoles as $schemeId => $roleId) {
-                        if ($roleId === null) {
-                            continue; // skip schemes with no final step configured
-                        }
                         $query->orWhere(function ($q) use ($schemeId, $roleId) {
                             $q->where('scheme_id', $schemeId)
                                 ->where('next_level_role_id', $roleId);
@@ -51,7 +50,9 @@ class DashboardController extends Controller
         }
 
         // All submitted applications (next_level_role_id > 0 means past entry stage)
-        $totalApplied = BeneficiaryPersonalDetail::whereIn('scheme_id', $this->schemeIds)
+        $totalApplied = DB::connection('pgsql_app_read')
+            ->table('pension.beneficiary_personals')
+            ->whereIn('scheme_id', $this->schemeIds)
             ->where('next_level_role_id', '>=', 0)
             ->count();
 
@@ -123,14 +124,15 @@ class DashboardController extends Controller
         $days = $request->get('days');
         $approveRoles = $this->approveRoleId();
 
+        if (empty($approveRoles)) {
+            return response()->json(['categories' => [], 'data' => []]);
+        }
+
         $query = DB::connection('pgsql_app_read')
             ->table('pension.beneficiary_personals')
             ->selectRaw('scheme_id, COUNT(*) as total')
             ->where(function ($query) use ($approveRoles) {
                 foreach ($approveRoles as $schemeId => $roleId) {
-                    if ($roleId === null) {
-                        continue;
-                    }
                     $query->orWhere(function ($q) use ($schemeId, $roleId) {
                         $q->where('scheme_id', $schemeId)
                             ->where('next_level_role_id', $roleId);
@@ -161,15 +163,16 @@ class DashboardController extends Controller
     {
         $approveRoles = $this->approveRoleId();
 
+        if (empty($approveRoles)) {
+            return response()->json(['categories' => [], 'data' => []]);
+        }
+
         $rows = DB::connection('pgsql_app_read')
             ->table('pension.beneficiary_personals as b')
             ->join('public.districts AS d', DB::raw('CAST(b.created_by_dist_code AS TEXT)'), '=', DB::raw('CAST(d.lgd_code AS TEXT)'))
             ->selectRaw('d.name, COUNT(*) as total')
             ->where(function ($query) use ($approveRoles) {
                 foreach ($approveRoles as $schemeId => $roleId) {
-                    if ($roleId === null) {
-                        continue;
-                    }
                     $query->orWhere(function ($q) use ($schemeId, $roleId) {
                         $q->where('scheme_id', $schemeId)
                             ->where('next_level_role_id', $roleId);
@@ -217,7 +220,7 @@ class DashboardController extends Controller
         $finYear = $request->get('fin_year');
 
         // Validate fin_year to prevent injection
-        if (!$finYear || !preg_match('/^\d{4}-\d{2}$/', $finYear)) {
+        if (!$finYear || !preg_match('/^\d{4}-\d{4}$/', $finYear)) {
             return response()->json(['status' => 'error', 'message' => 'Invalid financial year'], 422);
         }
 
@@ -262,24 +265,45 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function genderDistribution()
+    public function maritalStatusDistribution()
     {
         $rows = DB::connection('pgsql_app_read')
             ->table('pension.beneficiary_personals')
-            ->selectRaw("COALESCE(gender, 'Unknown') as name, COUNT(*) as y")
+            ->selectRaw("COALESCE(CAST(mar_statu AS VARCHAR), 'Unknown') as name, COUNT(*) as y")
             ->where('next_level_role_id', '>', 0)
             ->whereIn('scheme_id', $this->schemeIds)
-            ->groupBy('gender')
+            ->groupBy('mar_statu')
             ->get();
 
-        return response()->json($rows);
+        // Optional mapping if mar_statu is stored as numeric/code
+        $map = [
+            '1' => 'Unmarried',
+            '2' => 'Married',
+            '3' => 'Widow',
+            '4' => 'Divorced',
+            '5' => 'Separated',
+            'Unmarried' => 'Unmarried',
+            'Married' => 'Married',
+            'Widow' => 'Widow',
+            'Divorced' => 'Divorced',
+            'Separated' => 'Separated',
+        ];
+
+        $data = $rows->map(function ($row) use ($map) {
+            return [
+                'name' => $map[$row->name] ?? $row->name,
+                'y' => $row->y
+            ];
+        });
+
+        return response()->json($data);
     }
 
     public function casteDistribution()
     {
         $rows = DB::connection('pgsql_app_read')
             ->table('pension.beneficiary_personals')
-            ->selectRaw("COALESCE(caste, 'Others') as name, COUNT(*) as y")
+            ->selectRaw("COALESCE(CAST(caste AS VARCHAR), 'Others') as name, COUNT(*) as y")
             ->where('next_level_role_id', '>', 0)
             ->whereIn('scheme_id', $this->schemeIds)
             ->groupBy('caste')
@@ -306,6 +330,16 @@ class DashboardController extends Controller
         return response()->json(compact('categories', 'data'));
     }
 
+    public function refreshMV(Request $request)
+    {
+        if (config('app.app_portal') == 'jb') {
+            DB::connection('pgsql_app_read')->statement('REFRESH MATERIALIZED VIEW CONCURRENTLY pension.mv_scheme_status_summary_v1');
+        } else {
+            DB::connection('pgsql_app_read')->statement('REFRESH MATERIALIZED VIEW CONCURRENTLY pension.mv_scheme_status_summary_v2');
+        }
+        return response()->json(['status' => 'success']);
+    }
+
     /**
      * Returns a map of [ scheme_id => final_approval_role_id ].
      * Schemes without a configured final step are included as null.
@@ -319,7 +353,9 @@ class DashboardController extends Controller
                 ->where('is_final_step', true)
                 ->first();
 
-            $roles[$id] = $role?->next_level_role_id;
+            if ($role?->next_level_role_id !== null) {
+                $roles[$id] = $role->next_level_role_id;
+            }
         }
 
         return $roles;

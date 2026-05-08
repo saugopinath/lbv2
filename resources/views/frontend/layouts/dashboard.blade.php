@@ -239,7 +239,7 @@
     <!-- ══ HEADER ═══════════════════════════════════════════ -->
     <header class="dash-header">
         <div class="dash-header-left">
-            <img src="{{ asset('images/home/biswo_logo.png') }}"
+            <img src="{{ asset('images/' . config('jblbConf.das_logo')) }}"
                  class="dash-header-logo"
                  alt="{{ config('jblbConf.headLine') }} Logo">
 
