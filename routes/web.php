@@ -51,6 +51,7 @@ use App\Livewire\DynamicWorkflow\ProcessWorkflow;
 use App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary;
 use App\Livewire\DynamicWorkflow\WorkflowWizard;
 use App\Http\Controllers\DynamicWorkflow\UpdateMarkBeneficiaryDetailsController;
+use App\Http\Controllers\testController;
 use App\Livewire\DynamicWorkflow\DynamicProcessPage;
 
 require __DIR__ . '/home.php';
@@ -261,7 +262,7 @@ Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])
 
 //Reject Approved Beneficiary
 Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
-    Route::get('/reject-approved-beneficiary',  'index')
+    Route::get('/reject-approved-beneficiary', 'index')
         ->middleware('permission.redirect:canRejectApprovedBeneficiary')
         ->name('reject-approved-beneficiary');
     Route::get('/reject-approved-beneficiary/BeneficiaryDetails', 'editview')
@@ -289,10 +290,10 @@ Route::get('caste-management-request-list', [CasteManagementController::class, '
 //     // ->middleware('permission.redirect:canBeneficiaryDetails')
 //     ->name('view-beneficiary-details');
 
-    // Route::controller(CasteManagementController::class)->group(function () {
-    //     Route::get('caste-management', 'index')->name('caste-management');
-    //     Route::get('caste-management-request-list', 'requestdedlistdetails')->name('caste-management-request-list');
-    // });
+// Route::controller(CasteManagementController::class)->group(function () {
+//     Route::get('caste-management', 'index')->name('caste-management');
+//     Route::get('caste-management-request-list', 'requestdedlistdetails')->name('caste-management-request-list');
+// });
 Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])
     ->middleware('permission:update bank details')
     ->name('bankUpdate');
@@ -308,3 +309,6 @@ Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile
 Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
     // ->middleware('permission:update bank')
     ->name('update-bank');
+
+
+Route::get('/test', [testController::class, 'index'])->name('test');

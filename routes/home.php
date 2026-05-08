@@ -41,6 +41,9 @@ Route::prefix('dashboard')->group(function () {
     Route::get('district-wise-beneficiaries', [DashboardController::class, 'districtWiseBeneficiaries'])->name('dashboard.districtWiseBeneficiaries');
     Route::get('age-distribution', [DashboardController::class, 'getAgeDistribution'])->name('dashboard.ageDistribution');
     Route::get('consolidated-fy-payments', [DashboardController::class, 'consolidatedFyPayments'])->name('dashboard.fy.consolidated');
+    Route::get('gender-distribution', [DashboardController::class, 'genderDistribution'])->name('dashboard.genderDistribution');
+    Route::get('caste-distribution', [DashboardController::class, 'casteDistribution'])->name('dashboard.casteDistribution');
+    Route::get('daily-applications', [DashboardController::class, 'dailyApplications'])->name('dashboard.dailyApplications');
 
     Route::post('/refresh-scheme-status', function () {
         DB::connection('pgsql_app_read')->statement('REFRESH MATERIALIZED VIEW CONCURRENTLY pension.mv_scheme_status_summary');

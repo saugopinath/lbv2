@@ -4,6 +4,8 @@ import toastr from "toastr";
 import Sortable from 'sortablejs';
 import "toastr/build/toastr.min.css";
 import Highcharts from 'highcharts';
+import 'highcharts/highcharts-more';
+import 'highcharts/modules/exporting';
 
 window.Highcharts = Highcharts;
 

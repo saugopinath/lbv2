@@ -27,7 +27,7 @@ if ($portal == 'lb') {
     $logo_das_width = 'w-20';
     $das_logo_class = 'p-2';
     $bg_image = 'jb-bg.jpg';
-    $schemeIds = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 17, 19, 20];
+    $schemeIds = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 17, 19];
     $footerText = 'Design and develpod By NIC.';
     $deptName = 'Finance Department';
     $dept_logo = 'biswo_logo.png';
