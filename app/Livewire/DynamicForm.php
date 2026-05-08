@@ -664,9 +664,12 @@ class DynamicForm extends Component
         try {
             $existingRecord = $modelClass::where('application_id', $this->applicationId)->first();
             if ($existingRecord) {
-                $dbData['application_type'] = $existingRecord['application_type'];
+                if($existingRecord['application_type']){
+                      $dbData['application_type'] = $existingRecord['application_type'];
                 $dbData['ds_date'] = $existingRecord['ds_date'];
                 $dbData['ds_registration_no'] = $existingRecord['ds_registration_no'];
+                }
+              
                 $updated = $existingRecord->update($dbData);
                 if ($updated) {
                     $this->navMessage = 'Application updated successfully! ID: ' . $this->applicationId;
@@ -765,7 +768,7 @@ class DynamicForm extends Component
                 }
             }
         } catch (Throwable $e) {
-            // dd($e);
+            dd($e);
             DB::rollBack();
             $this->dispatch('toastr', [
                 'type' => 'error',

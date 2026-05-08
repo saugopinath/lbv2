@@ -174,14 +174,12 @@
                             {{-- @endcan --}}
                         @endif
                     </ul>
-
-                    </ul>
                 </div>
             </div>
 
         @endif
 
-         @if (\App\Helpers\WorkFlowPermissionHelper::canDynamicWorkflowManagement())
+        @if (\App\Helpers\WorkFlowPermissionHelper::canDynamicWorkflowManagement())
             <div>
                 <a href="{{ route('dynamic-workflow-config') }}"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -208,33 +206,26 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                     </svg>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M17 20h5v-2a2 2 0 00-2-2h-3m-2-2H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v7m-7 4v5m-7-5h12" />
-                </svg>
-                <span x-show="sidebar" class="mr-2 truncate">Update Bank Details</span>
-            </a>
-        </div>
+                    <span x-show="sidebar" class="mr-2 truncate">Update Bank Details</span>
+                </a>
+            </div>
         @endif
-        {{-- Incomplete Menu --}}
         @if (\App\Helpers\WorkFlowPermissionHelper::canIncomplete())
-        <div>
-            <button @click="activeMenu === 'Incomplete' ? activeMenu = null : activeMenu = 'Incomplete'"
-                class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 text-slate-200 hover:text-white rounded">
-                <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor">
-                    <path opacity="0.3"
-                        d="M10.8939 22H13.1061C16.5526 22 18.2759 22 19.451 20.9882C20.626 19.9764 20.8697 18.2827 21.3572 14.8952L21.6359 12.9579C22.0154 10.3208 22.2051 9.00229 21.6646 7.87495C21.1242 6.7476 19.9738 6.06234 17.6731 4.69182L16.2882 3.86687C14.199 2.62229 13.1543 2 12 2C10.8457 2 9.80104 2.62229 7.71175 3.86687L6.32691 4.69181C4.02619 6.06234 2.87583 6.7476 2.33537 7.87495C1.79491 9.00229 1.98463 10.3208 2.36407 12.9579L2.64284 14.8952C3.13025 18.2827 3.37396 19.9764 4.54903 20.9882C5.72409 22 7.44737 22 10.8939 22Z"
-                        fill="currentColor" />
-                </svg>
-                <span x-show="sidebar" class="mr-2 truncate">Incomplete</span>
-                <svg class="mr-2 w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="m1 1 4 4 4-4" />
-                </svg>
-            </button>
+            <div>
+                <button @click="activeMenu === 'Incomplete' ? activeMenu = null : activeMenu = 'Incomplete'"
+                    class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 text-slate-200 hover:text-white rounded">
+                    <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path opacity="0.3"
+                            d="M10.8939 22H13.1061C16.5526 22 18.2759 22 19.451 20.9882C20.626 19.9764 20.8697 18.2827 21.3572 14.8952L21.6359 12.9579C22.0154 10.3208 22.2051 9.00229 21.6646 7.87495C21.1242 6.7476 19.9738 6.06234 17.6731 4.69182L16.2882 3.86687C14.199 2.62229 13.1543 2 12 2C10.8457 2 9.80104 2.62229 7.71175 3.86687L6.32691 4.69181C4.02619 6.06234 2.87583 6.7476 2.33537 7.87495C1.79491 9.00229 1.98463 10.3208 2.36407 12.9579L2.64284 14.8952C3.13025 18.2827 3.37396 19.9764 4.54903 20.9882C5.72409 22 7.44737 22 10.8939 22Z"
+                            fill="currentColor" />
+                    </svg>
+                    <span x-show="sidebar" class="mr-2 truncate">Incomplete</span>
+                    <svg class="mr-2 w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="m1 1 4 4 4-4" />
+                    </svg>
+                </button>
 
                 <!-- Sub-menu -->
                 <div id="list_menu" x-show="activeMenu === 'Incomplete'" x-collapse x-transition class="pl-4">
@@ -242,8 +233,7 @@
                         @if (\App\Helpers\WorkFlowPermissionHelper::canVerifierIncomplet())
                             <li>
                                 <a href="{{ route('incomplete.types', 'verifier') }}"
-                                    class="flex item-center px-2 py-1 text-left rounder hover:bg-slate-700 hover:text-white
-                                                                                                                                                                                                                                                                                ">
+                                    class="flex item-center px-2 py-1 text-left rounder hover:bg-slate-700 hover:text-white">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg"
                                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path opacity="0.3"
@@ -253,14 +243,12 @@
                                     <span x-show="sidebar" class="truncate">Verifier Incomplete</span>
                                 </a>
                             </li>
-
-                    @endif
+                        @endif
 
                         @if (\App\Helpers\WorkFlowPermissionHelper::canApproverIncomplet())
                             <li>
                                 <a href="{{ route('incomplete.types', 'approver') }}"
-                                    class="flex item-center px-2 py-1 text-left rounder hover:bg-slate-700 hover:text-white
-                                                                                                                                                                                                                                                                                ">
+                                    class="flex item-center px-2 py-1 text-left rounder hover:bg-slate-700 hover:text-white">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg"
                                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path opacity="0.3"
@@ -274,8 +262,6 @@
                     </ul>
                 </div>
             </div>
-        </div>
-
         @endif
 
         @if (\App\Helpers\WorkFlowPermissionHelper::canSchemeOnboard())
@@ -463,9 +449,6 @@
                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M17 20h5v-2a2 2 0 00-2-2h-3m-2-2H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v7m-7 4v5m-7-5h12" />
                 </svg>
                 <span x-show="sidebar" class="mr-2 truncate">Beneficiary List</span>
             </a>
