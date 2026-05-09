@@ -24,6 +24,7 @@ use Livewire\Component;
 use Throwable;
 use App\Attributes\Loggable;
 use App\Models\CmoSmData;
+use App\Models\DsPhase;
 
 #[Loggable(level: 'Normal', nickname: 'Dynamic Form Entry')]
 
@@ -471,9 +472,7 @@ class DynamicForm extends Component
         }
     }
 
-    public function onDocumentTabFailed()
-    {
-    }
+    public function onDocumentTabFailed() {}
 
     private function markTabCompleted(string $tabCode): void
     {
@@ -642,7 +641,12 @@ class DynamicForm extends Component
             'created_by' => Auth::id(),
             'updated_by' => Auth::id(),
         ];
-
+        if (!$this->isEdit) {
+            if (!empty($this->formData['ds_registration_no'])) {
+                $currentPhase = DsPhase::where('is_current', true)->value('phase_code');
+                $extraFields['ds_phase'] = $currentPhase;
+            }
+        }
         foreach ($extraFields as $column => $value) {
             if (in_array($column, $columns)) {
                 $dbData[$column] = $value;
@@ -655,14 +659,18 @@ class DynamicForm extends Component
         if (!$this->checkDuplicateEntries()) {
             return false;
         }
-
+        // dd($this->formData);
         DB::beginTransaction();
         try {
             $existingRecord = $modelClass::where('application_id', $this->applicationId)->first();
             if ($existingRecord) {
-
+                if($existingRecord['application_type']){
+                      $dbData['application_type'] = $existingRecord['application_type'];
+                $dbData['ds_date'] = $existingRecord['ds_date'];
+                $dbData['ds_registration_no'] = $existingRecord['ds_registration_no'];
+                }
+              
                 $updated = $existingRecord->update($dbData);
-
                 if ($updated) {
                     $this->navMessage = 'Application updated successfully! ID: ' . $this->applicationId;
                     $this->navMessageType = 'success';
@@ -760,7 +768,7 @@ class DynamicForm extends Component
                 }
             }
         } catch (Throwable $e) {
-            // dd($e);
+            dd($e);
             DB::rollBack();
             $this->dispatch('toastr', [
                 'type' => 'error',

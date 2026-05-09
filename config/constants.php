@@ -205,7 +205,7 @@ return [
         '4' => 'She has not attained the age of 18 years',
         '5' => 'She is a not a citizen of India and/or has not been a resident of West Bengal for the last 10
         years',
-        '6' => 'She earns any monthly remuneration from any regular/ contractual Government job or gets 
+        '6' => 'She earns any monthly remuneration from any regular/ contractual Government job or gets
         any Pension under any Government scheme',
         '7' => 'Others (Please specify)'
     ],

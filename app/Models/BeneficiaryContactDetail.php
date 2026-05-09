@@ -24,10 +24,14 @@ class BeneficiaryContactDetail extends BaseAuditableModel
         return $this->belongsTo(Municipality::class, 'blockurban', 'id');
     }
 
-     public function district()
-    {
-        return $this->belongsTo(District::class, 'district_id', 'id');
-    }
+    // public function block()
+    // {
+    //     return $this->belongsTo(Block::class, 'blockurban');
+    // }
+        // public function district()
+        // {
+        //     return $this->belongsTo(District::class, 'district_id', 'id');
+        // }
 
     public function block()
     {
@@ -36,11 +40,75 @@ class BeneficiaryContactDetail extends BaseAuditableModel
 
     public function panchayat()
     {
+        return $this->belongsTo(Panchayat::class, 'gpward');
         return $this->belongsTo(Panchayat::class, 'gpward', 'id');
     }
 
     public function ward()
     {
+        return $this->belongsTo(Ward::class, 'gpward');
+    }
+    public function district()
+    {
+        return $this->belongsTo(District::class, 'district_id');
+    }
+
+    public function getFullAddress(): string
+    {
+        $district = optional($this->district)->name;
+        $parts = [];
+
+        if ($district) {
+            $parts[] = "District - " . strtoupper($district);
+        }
+        // Rural
+        if ($this->rural_urban == 2) {
+            $block = optional($this->block)->name;
+            $panchayat = optional($this->panchayat)->name;
+            if ($block) {
+                $parts[] = "Block - " . strtoupper($block);
+            }
+            if ($panchayat) {
+                $parts[] = "GP - " . strtoupper($panchayat);
+            }
+        }
+        // Urban
+        else {
+            $muni = $this->municipality;
+            $municipality = optional($muni)->name;
+            $subdivision = $muni ? optional($muni->Subdivision)->name : null;
+            $ward = optional($this->ward)->name;
+
+            if ($subdivision) {
+                $parts[] = "Subdivision - " . strtoupper($subdivision);
+            }
+            if ($municipality) {
+                $parts[] = "Municipality - " . strtoupper($municipality);
+            }
+            if ($ward) {
+                $parts[] = "Ward - " . strtoupper($ward);
+            }
+        }
+
+        // Use <br> for line breaks in HTML
+        return !empty($parts) ? implode('<br>', $parts) : 'N/A';
+    }
+
+    public function blockmuni(): array
+    {
+        $blockname = '';
+        $gpname = '';
+        if ($this->rural_urban == 2) {
+            $blockname = optional($this->block)->name;
+            $gpname = optional($this->panchayat)->name;
+        } else {
+            $blockname = optional($this->municipality)->name;
+            $gpname = optional($this->ward)->name;
+        }
+        return [
+            'block' => $blockname ? strtoupper($blockname) : '',
+            'gp' => $gpname ? strtoupper($gpname) : ''
+        ];
         return $this->belongsTo(Ward::class, 'gpward', 'id');
     }
 
@@ -103,49 +171,9 @@ class BeneficiaryContactDetail extends BaseAuditableModel
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
-    }   
+    }
     public function subdivision()
     {
         return $this->belongsTo(Subdivision::class, 'sub_division_id', 'id');
-    }
-    public function getFullAddress(): string
-    {
-        $district = optional($this->district)->name;
-        $subdivision = optional($this->subdivision)->name;
-        $block = optional($this->block)->name;
-        $panchayat = optional($this->panchayat)->name;
-        $municipality = optional($this->municipality)->name;
-        $ward = optional($this->ward)->name;
-
-        $parts = [];
-
-        if ($district) {
-            $parts[] = "District - " . strtoupper($district);
-        }
-
-        // Rural
-        if ($this->rural_urban == 2) {
-            if ($block) {
-                $parts[] = "Block - " . strtoupper($block);
-            }
-            if ($panchayat) {
-                $parts[] = "GP - " . strtoupper($panchayat);
-            }
-        }
-        // Urban
-        else {
-            if ($subdivision) {
-                $parts[] = "Subdivision - " . strtoupper($subdivision);
-            }
-            if ($municipality) {
-                $parts[] = "Municipality - " . strtoupper($municipality);
-            }
-            if ($ward) {
-                $parts[] = "Ward - " . strtoupper($ward);
-            }
-        }
-
-        // Use <br> for line breaks in HTML
-        return !empty($parts) ? implode('<br>', $parts) : 'N/A';
     }
 }

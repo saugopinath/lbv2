@@ -156,7 +156,7 @@ class BeneficiaryTable extends DataTableComponent
 
         if (in_array($this->reportType, ['1', '5', '4'])) {
             $columns[] = Column::make('Applicant Mobile No.', 'mobile_no')
-                ->label(fn ($row) => $row->mobile_no ?? 'N/A');
+                ->label(fn ($row) => $row->other_details['mobile_no'] ?? 'N/A');
         }
 
         if ($this->reportType == '3') {

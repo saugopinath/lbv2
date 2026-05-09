@@ -28,3 +28,4 @@ yarn-error.log
 
 # Allow files inside data
 !/storage/app/data/**
+/storage/app/livewire-tmp/*

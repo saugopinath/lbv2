@@ -1,11 +1,11 @@
 <?php
+
 $portal = config('app.app_portal', 'lb');
 if ($portal == 'lb') {
-    $title = 'Lakshmir Bhandar | Government of West Bengal';
-    $headLine = 'Lakshmir Bhandar';
+    $title = 'Annapurna Bhandar | Government of West Bengal';
+    $headLine = 'Annapurna Bhandar';
     $logo = 'biswo-1.png';
-    $headerlogo = 'header_logo.png';
-    $initiallogo = 'biswo_bangla.png';
+    $headerlogo = 'Emblem_of_India.png';
     $logo_class = 'w-48 sm:w-64 mb-4';
     $das_logo = 'biswo-1.png';
     $logo_das_width = 'w-8';
@@ -14,6 +14,8 @@ if ($portal == 'lb') {
     $schemeIds = [20];
     $footerText = 'Design and develpod By NIC.';
     $deptName = 'Women and Child Development & Social Welfare Department';
+    $indexName = 'Annapurna Bhandar | Government of West Bengal';
+    $initiallogo = 'biswo-1.png';
     $dept_logo = 'biswo_logo.png';
     $indexName = 'Women and Child Development & Social Welfare Department | Government of West Bengal';
     $footerDescription = 'A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic development and welfare.';
@@ -21,8 +23,7 @@ if ($portal == 'lb') {
     $title = 'Jai Bangla Portal | Government of West Bengal';
     $headLine = 'Jai Bangla';
     $logo = 'jb_logo.png';
-    $headerlogo = 'header_logo.png';
-    $initiallogo = 'jb_logo.png';
+    $headerlogo = 'Emblem_of_India.png';
     $logo_class = 'w-56 sm:w-64 mb-4';
     $das_logo = 'biswo_bangla.png';
     $logo_das_width = 'w-20';
@@ -32,6 +33,7 @@ if ($portal == 'lb') {
     $footerText = 'Design and develpod By NIC.';
     $deptName = 'Finance Department';
     $dept_logo = 'biswo_logo.png';
+    $initiallogo = 'jb_logo.png';
     $indexName = 'Department of Finance | Government of West Bengal';
     $footerDescription = 'A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic development and welfare.';
 } else if ($portal == 'ub') {
