@@ -3,70 +3,95 @@
 <footer class="footer-decoration bg-gray-800 text-gray-300 py-10 relative overflow-hidden">
 
     <!-- Decorative floating icons -->
-    <i class="floating-icon icon-1 fa-thin fa-flower text-green-400"></i>
-    <i class="floating-icon icon-2 fas fa-heart text-pink-400"></i>
-    <i class="floating-icon icon-3 fas fa-star text-yellow-400"></i>
-    <i class="floating-icon icon-4 fa-thin fa-flower text-emerald-400"></i>
+    <i class="floating-icon icon-1 fas fa-solid fa-fan text-green-400/20"></i>
+    <i class="floating-icon icon-2 fas fa-heart text-pink-400/20"></i>
+    <i class="floating-icon icon-3 fas fa-star text-yellow-400/20"></i>
+    <i class="floating-icon icon-4 fas fa-leaf text-emerald-400/20"></i>
+
+    <!-- Government Skyline Illustration (Halka Visible) -->
+    <div class="absolute bottom-0 left-0 w-full h-48 opacity-[0.12] pointer-events-none select-none overflow-hidden">
+        <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Wavy Background Hills -->
+            <path d="M0 200 C 300 120 600 220 900 150 C 1050 115 1150 180 1200 190 V 200 H 0 Z" fill="url(#hill-gradient-1)" />
+            <path d="M0 200 C 200 150 500 100 800 180 C 1000 230 1100 150 1200 170 V 200 H 0 Z" fill="url(#hill-gradient-2)" />
+
+            <!-- Skyline Buildings (Line Art) -->
+            <g stroke="currentColor" stroke-width="0.8" class="text-amber-400/40">
+                <!-- Victoria Memorial style dome -->
+                <path d="M450 160 L450 140 Q450 120 470 120 L480 120 Q500 120 500 140 L500 160" />
+                <path d="M470 120 Q475 100 480 120" />
+
+                <!-- Howrah Bridge style structure -->
+                <path d="M100 170 L130 130 L370 130 L400 170" />
+                <path d="M130 130 Q250 80 370 130" />
+                <path d="M160 130 L160 155 M190 130 L190 150 M220 130 L220 145 M250 130 L250 145 M280 130 L280 145 M310 130 L310 150 M340 130 L340 155" />
+
+                <!-- Tall Building/Tower -->
+                <path d="M600 160 L600 80 L630 80 L630 160" />
+                <path d="M615 80 L615 60" />
+
+                <!-- Clock Tower style -->
+                <path d="M750 160 L750 100 L780 100 L780 160" />
+                <circle cx="765" cy="115" r="5" />
+                <path d="M750 100 L765 80 L780 100" />
+
+                <!-- More abstract buildings -->
+                <path d="M850 160 L850 120 L880 120 L880 160" />
+                <path d="M920 160 L920 110 L940 90 L960 110 L960 160" />
+                <path d="M1050 160 L1050 130 Q1075 110 1100 130 L1100 160" />
+            </g>
+
+            <defs>
+                <linearGradient id="hill-gradient-1" x1="600" y1="120" x2="600" y2="200" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#10B981" stop-opacity="0.2" />
+                    <stop offset="1" stop-color="#10B981" stop-opacity="0" />
+                </linearGradient>
+                <linearGradient id="hill-gradient-2" x1="600" y1="100" x2="600" y2="200" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#F59E0B" stop-opacity="0.1" />
+                    <stop offset="1" stop-color="#F59E0B" stop-opacity="0" />
+                </linearGradient>
+            </defs>
+        </svg>
+    </div>
 
     <div class="max-w-7xl mx-auto px-4 relative z-10">
         <!-- Government Seals and Logos -->
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 pb-6 border-b border-gray-700">
-            <div class="flex items-center space-x-6 mb-4 md:mb-0">
-                <img src="{{asset('images/home/biswo.jpeg')}}" alt="West Bengal Government"
-                    class="h-14 w-20 object-contain">
-                <img src="{{asset('images/home/biswo_logo.png')}}" alt="West Bengal Government"
-                    class="h-14 w-20 object-contain">
-            </div>
-
+        <div class="flex flex-col md:flex-row justify-end items-end mb-2 pb-2 border-b border-gray-700">
             <!-- Important Links Bar -->
-            <div class="flex flex-wrap justify-center gap-4 text-sm">
-                <a href="#" class="hover:text-amber-400 transition-colors duration-300">Accessibility</a>
-                <a href="#" class="hover:text-amber-400 transition-colors duration-300">Privacy Policy</a>
-                <a href="#" class="hover:text-amber-400 transition-colors duration-300">Terms &amp; Conditions</a>
-                <a href="#" class="hover:text-amber-400 transition-colors duration-300">Sitemap</a>
-                <a href="#" class="hover:text-amber-400 transition-colors duration-300">Help</a>
+            <div class="flex flex-wrap justify-center gap-2 text-sm">
+                <a href="#" class="text-indigo-100 hover:text-white transition-colors duration-200">Legal Disclaimer</a>
+                <span class="text-white/30">|</span>
+                <a href="#" class="text-indigo-100 hover:text-white transition-colors duration-200">Privacy Policy</a>
+                <span class="text-white/30">|</span>
+                <a href="#" class="text-indigo-100 hover:text-white transition-colors duration-200">Terms &amp; Conditions</a>
+                <span class="text-white/30">|</span>
+                <a href="#" class="text-indigo-100 hover:text-white transition-colors duration-200">Copyright Policy</a>
+                <span class="text-white/30">|</span>
+                <a href="#" class="text-indigo-100 hover:text-white transition-colors duration-200">Hyperlink Policy</a>
             </div>
         </div>
         <!-- Main Footer Content -->
-        <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div class="grid md:grid-cols-3 gap-8 mb-8">
             <!-- Scheme Information -->
-            @if(config('jblbConf.is_lb'))
             <div>
                 <h4 class="font-bold text-lg mb-4 text-amber-400 border-b border-amber-400 pb-2">
-                    Lakshmir Bhandar
+                    {{ config('jblbConf.headLine') }}
                 </h4>
                 <p class="text-sm text-gray-300 mb-4">
-                    A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic
-                    development and welfare.
+                    {{ config('jblbConf.footerDescription') }}
                 </p>
                 <div class="flex items-center text-sm text-gray-400">
                     <i class="fas fa-shield-alt mr-2 text-amber-400"></i>
                     <span>Official Government Portal</span>
                 </div>
             </div>
-            @else
-            <div>
-                <h4 class="font-bold text-lg mb-4 text-amber-400 border-b border-amber-400 pb-2">
-                    Jai Bangla | One Umbrella Scheme
-                </h4>
-                <p class="text-sm text-gray-300 mb-4">
-                    A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic
-                    development and welfare.
-                </p>
-                <div class="flex items-center text-sm text-gray-400">
-                    <i class="fas fa-shield-alt mr-2 text-amber-400"></i>
-                    <span>Official Government Portal</span>
-                </div>
-            </div>
-            @endif
-
             <!-- Important Links -->
             <div>
                 <h4 class="font-bold text-lg mb-4 text-amber-400 border-b border-amber-400 pb-2">
                     Important Links
                 </h4>
                 <ul class="space-y-2 text-sm">
-                    <li>
+                    <!-- <li>
                         <a href="#"
                             class="hover:text-amber-400 transition-all duration-300 flex items-center hover:translate-x-1">
                             <i class="fas fa-external-link-alt mr-2 text-xs text-gray-400"></i>
@@ -79,7 +104,7 @@
                             <i class="fas fa-external-link-alt mr-2 text-xs text-gray-400"></i>
                             Finance Department
                         </a>
-                    </li>
+                    </li> -->
                     <li>
                         <a href="#"
                             class="hover:text-amber-400 transition-all duration-300 flex items-center hover:translate-x-1">
@@ -87,13 +112,13 @@
                             DBT Bharat
                         </a>
                     </li>
-                    <li>
+                    <!-- <li>
                         <a href="#"
                             class="hover:text-amber-400 transition-all duration-300 flex items-center hover:translate-x-1">
                             <i class="fas fa-external-link-alt mr-2 text-xs text-gray-400"></i>
                             e-District West Bengal
                         </a>
-                    </li>
+                    </li> -->
                 </ul>
             </div>
 
@@ -118,19 +143,11 @@
                             <div class="text-gray-300">support@lakshmirBhandar.wb.gov.in</div>
                         </div>
                     </div>
-                    <div class="flex items-start hover:text-white transition-colors duration-300">
-                        <i class="fas fa-clock mt-1 mr-3 text-amber-400 text-xs"></i>
-                        <div>
-                            <div class="font-semibold">Working Hours</div>
-                            <div class="text-gray-300">10:00 AM - 6:00 PM</div>
-                            <div class="text-xs text-gray-400">(Monday to Friday)</div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
             <!-- Grievance Redressal -->
-            <div>
+            <!-- <div>
                 <h4 class="font-bold text-lg mb-4 text-amber-400 border-b border-amber-400 pb-2">
                     Grievance Redressal
                 </h4>
@@ -149,59 +166,59 @@
                         Grievances will be resolved within 15 working days
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
 
         <!-- Additional Government Links -->
-        <div class="bg-gray-700 rounded-lg p-4 mb-6">
-            <h5 class="font-semibold text-center mb-5 text-amber-300 text-lg">
+        <!-- <div class="bg-gray-700 rounded-lg p-4 mb-6"> -->
+        <!-- <h5 class="font-semibold text-center mb-5 text-amber-300 text-lg">
                 Related Government Portals
-            </h5>
+            </h5> -->
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-xs">
+        <!-- <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-xs"> -->
 
-                <!-- WB State Portal -->
-                <a href="https://wb.gov.in/" target="_blank"
+        <!-- WB State Portal -->
+        <!-- <a href="https://wb.gov.in/" target="_blank"
                     class="group flex flex-col items-center p-4 bg-gray-800 rounded-lg hover:bg-gray-900 transition-all duration-300">
                     <img src="{{asset('images/home/biswo_logo.png')}}"
                         class="w-12 h-12 mb-3 opacity-80 group-hover:opacity-100 transition-all object-contain">
                     <span class="text-gray-200 group-hover:text-amber-400 leading-tight">
                         WB State Portal
                     </span>
-                </a>
+                </a> -->
 
-                <!-- Finance Department -->
-                <a href="https://finance.wb.gov.in/" target="_blank"
+        <!-- Finance Department -->
+        <!-- <a href="https://finance.wb.gov.in/" target="_blank"
                     class="group flex flex-col items-center p-4 bg-gray-800 rounded-lg hover:bg-gray-900 transition-all duration-300">
                     <img src="{{asset('images/home/finance.jpeg')}}"
                         class="w-12 h-12 mb-3 opacity-80 group-hover:opacity-100 transition-all object-contain">
                     <span class="text-gray-200 group-hover:text-amber-400 leading-tight">
                         Finance Department
                     </span>
-                </a>
+                </a> -->
 
-                <!-- Women & Child Development -->
-                <a href="https://wcdsw.wb.gov.in/" target="_blank"
+        <!-- Women & Child Development -->
+        <!-- <a href="https://wcdsw.wb.gov.in/" target="_blank"
                     class="group flex flex-col items-center p-4 bg-gray-800 rounded-lg hover:bg-gray-900 transition-all duration-300">
                     <img src="{{asset('images/home/biswo_logo.png')}}"
                         class="w-12 h-12 mb-3 opacity-80 group-hover:opacity-100 transition-all object-contain">
                     <span class="text-gray-200 group-hover:text-amber-400 leading-tight text-center">
                         Women &amp; Child Development &amp; Social Welfare
                     </span>
-                </a>
+                </a> -->
 
-                <!-- BSK -->
-                <a href="https://bsk.wb.gov.in/" target="_blank"
+        <!-- BSK -->
+        <!-- <a href="https://bsk.wb.gov.in/" target="_blank"
                     class="group flex flex-col items-center p-4 bg-gray-800 rounded-lg hover:bg-gray-900 transition-all duration-300">
                     <img src="{{asset('images/home/bsk.jpeg')}}"
                         class="w-12 h-12 mb-3 opacity-80 group-hover:opacity-100 transition-all object-contain">
                     <span class="text-gray-200 group-hover:text-amber-400 leading-tight">
                         Bangla Sahayata Kendra
                     </span>
-                </a>
+                </a> -->
 
-                <!-- DUARE SARKAR + APAS (two logos) -->
-                <a href="https://ds.wb.gov.in/" target="_blank"
+        <!-- DUARE SARKAR + APAS (two logos) -->
+        <!-- <a href="https://ds.wb.gov.in/" target="_blank"
                     class="group flex flex-col items-center p-4 bg-gray-800 rounded-lg hover:bg-gray-900 transition-all duration-300 col-span-2 md:col-span-1">
 
                     <div class="flex items-center justify-center space-x-2 mb-3">
@@ -214,30 +231,30 @@
                     <span class="text-gray-200 group-hover:text-amber-400 leading-tight text-center">
                         Duare Sarkar<br> Aamar Para Amar Samadhan
                     </span>
-                </a>
+                </a> -->
 
-                <!-- Tribal Dept -->
-                <a href="https://adibasikalyan.gov.in/" target="_blank"
+        <!-- Tribal Dept -->
+        <!-- <a href="https://adibasikalyan.gov.in/" target="_blank"
                     class="group flex flex-col items-center p-4 bg-gray-800 rounded-lg hover:bg-gray-900 transition-all duration-300">
                     <img src="{{asset('images/home/biswo.jpeg')}}"
                         class="w-12 h-12 mb-3 opacity-80 group-hover:opacity-100 transition-all object-contain">
                     <span class="text-gray-200 group-hover:text-amber-400 leading-tight text-center">
                         Tribal Development Department
                     </span>
-                </a>
+                </a> -->
 
-                <!-- Backward Classes Welfare -->
-                <a href="https://www.anagrasarkalyan.gov.in/" target="_blank"
+        <!-- Backward Classes Welfare -->
+        <!-- <a href="https://www.anagrasarkalyan.gov.in/" target="_blank"
                     class="group flex flex-col items-center p-4 bg-gray-800 rounded-lg hover:bg-gray-900 transition-all duration-300">
                     <img src="{{asset('images/home/biswo_logo.png')}}"
                         class="w-12 h-12 mb-3 opacity-80 group-hover:opacity-100 transition-all object-contain">
                     <span class="text-gray-200 group-hover:text-amber-400 leading-tight text-center">
                         Backward Classes Welfare Department
                     </span>
-                </a>
+                </a> -->
 
-            </div>
-        </div>
+        <!-- </div> -->
+        <!-- </div> -->
 
 
 
@@ -249,14 +266,14 @@
                     Centre</a>
             </div>
             <div class="text-xs text-gray-500">
-                Content owned and maintained by Finance Department, Government of West Bengal.<br>
-                Designed, Developed and Hosted by
-                <a href="#" class="text-amber-400 hover:text-amber-300 transition-colors">National Informatics
-                    Centre</a>,
-                West Bengal State Centre.
+                This site is designed by National Informatics Centre(NIC). Content, DATA, Process and Operation owned and maintained by {{
+                    config('jblbConf.deptName')}}, Government of West Bengal. <br>
+                <nav class="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-sm md:text-xs">
+                    <p>Best Viewed in Google Chrome</p>
+                </nav>
             </div>
             <div class="text-xs text-gray-500 mt-2">
-                Last Updated: 01 January, 2025
+                Last Updated: 08 May, 2026
             </div>
 
             <!-- Visitor Counter (Optional) -->

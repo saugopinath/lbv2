@@ -36,17 +36,9 @@ use App\Livewire\DynamicWorkflow\DynamicProcessPage;
 use App\Livewire\DynamicWorkflow\ProcessWorkflow;
 use App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary;
 use App\Livewire\DynamicWorkflow\WorkflowWizard;
-use App\Livewire\IncompletTypePage;
-use App\Livewire\MasterTabManager;
-use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
-use App\Livewire\ProcessApplication\DraftApplicationView;
-use App\Livewire\RoleOfficeTypeMappings\Create;
-use App\Livewire\RolerankManagement;
-use App\Livewire\SchemeDropdown;
-use App\Livewire\SchemeTabFieldManager;
-use App\Livewire\UserPermission\AssignPermissionsPage;
-use App\Livewire\Users\Create as UsersCreate;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TrackBeneficiaryDetailsController;
+
+require __DIR__ . '/home.php';
 
 require __DIR__.'/home.php';
 
@@ -73,11 +65,10 @@ Route::controller(AuthenticationController::class)->group(function () {
 
 // Authenticated Routes
 Route::middleware(['auth', 'verified'])->group(function () {
-
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])->name('lb-application-list');
+    Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])
+        ->name('lb-application-list');
 
     Route::get('/lb-application-list/{scheme_id?}', SchemeDropdown::class)->name('lb-application-list');
 
@@ -124,6 +115,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
     Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
     Route::get('/getelsticsearchIndex', [ElasticSearchController::class, 'index'])->name('getelsticsearchIndex');
+
+    // Track Beneficiary Details
+    Route::get('track-beneficiary-details', [TrackBeneficiaryDetailsController::class, 'TrackBeneficiaryDetails'])
+        ->name('track-beneficiary-details');
 });
 
 Route::controller(CreateAssignOtherFormFieldController::class)->group(function () {
@@ -244,11 +239,25 @@ Route::controller(UpdateMarkBeneficiaryDetailsController::class)->group(function
 //     // ->middleware('permission.redirect:canBeneficiaryDetails')
 //     ->name('view-beneficiary-details');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::controller(CasteManagementController::class)->group(function () {
-        Route::get('caste-management', 'index')->name('caste-management');
-        Route::get('update-caste-management-details', 'updateDetails')->name('update-caste-management-details');
-        Route::get('caste-management-request-list', 'requestdedlistdetails')->name('caste-management-request-list');
-        Route::get('caste-revert-update', UpdateRevertCaste::class)->name('caste-revert-update');
-    });
-});
+// Route::controller(CasteManagementController::class)->group(function () {
+//     Route::get('caste-management', 'index')->name('caste-management');
+//     Route::get('caste-management-request-list', 'requestdedlistdetails')->name('caste-management-request-list');
+// });
+Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])
+    ->middleware('permission:update bank details')
+    ->name('bankUpdate');
+
+Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])
+    // ->middleware('permission:search bank update')
+    ->name('bank-update.search-beneficiary');
+
+Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])
+    // ->middleware('permission:update mobile')
+    ->name('update-mobile');
+
+Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])
+    // ->middleware('permission:update bank')
+    ->name('update-bank');
+
+
+
