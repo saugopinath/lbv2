@@ -128,121 +128,121 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Track Beneficiary Details
     Route::get('track-beneficiary-details', [TrackBeneficiaryDetailsController::class, 'TrackBeneficiaryDetails'])
         ->name('track-beneficiary-details');
-});
 
-Route::controller(CreateAssignOtherFormFieldController::class)->group(function () {
-    Route::get('/create-dynamicformfield', 'createdynamicformfield')->name('create-dynamicformfield');
-});
 
-Route::get('/dynamic-form-page', [DynamicFormController::class, 'show'])->name('dynamic-form-page');
+    Route::controller(CreateAssignOtherFormFieldController::class)->group(function () {
+        Route::get('/create-dynamicformfield', 'createdynamicformfield')->name('create-dynamicformfield');
+    });
 
-Route::get('/master-tab', MasterTabManager::class)->middleware('permission.redirect:canMasterTab')->name('master-tab');
-Route::get('/tab-field-manager', SchemeTabFieldManager::class)->name('tab-field-manager');
+    Route::get('/dynamic-form-page', [DynamicFormController::class, 'show'])->name('dynamic-form-page');
 
-Route::get('/edit-validation', [ValidationManagerController::class, 'index'])->name('edit-validation');
-Route::get('/master-tab-creation', [MasterTabCreationController::class, 'index'])->name('master-tab-creation');
+    Route::get('/master-tab', MasterTabManager::class)->middleware('permission.redirect:canMasterTab')->name('master-tab');
+    Route::get('/tab-field-manager', SchemeTabFieldManager::class)->name('tab-field-manager');
 
-Route::get('/schemes-final-submitted', [SchemeController::class, 'finalSubmitted'])->middleware('permission.redirect:canEntry')->name('schemes.final-submitted');
+    Route::get('/edit-validation', [ValidationManagerController::class, 'index'])->name('edit-validation');
+    Route::get('/master-tab-creation', [MasterTabCreationController::class, 'index'])->name('master-tab-creation');
 
-Route::get('/duplicate-checks', [SchemeController::class, 'finalSubmitted'])->name('duplicate-checks');
-Route::get('/age-management', [SchemeController::class, 'finalSubmitted'])->name('age-management');
+    Route::get('/schemes-final-submitted', [SchemeController::class, 'finalSubmitted'])->middleware('permission.redirect:canEntry')->name('schemes.final-submitted');
 
-Route::controller(workflowmanagementController::class)->group(function () {
-    Route::any('/create-steps', 'createSteps')->name('create-steps');
-    Route::any('/assign-workflow', 'assignWorkflow')->name('assign-workflow');
-});
+    Route::get('/duplicate-checks', [SchemeController::class, 'finalSubmitted'])->name('duplicate-checks');
+    Route::get('/age-management', [SchemeController::class, 'finalSubmitted'])->name('age-management');
 
-Route::get('/role-rank-management', RolerankManagement::class)->middleware('permission.redirect:canRoleRankManagement')->name('role-rank-management');
+    Route::controller(workflowmanagementController::class)->group(function () {
+        Route::any('/create-steps', 'createSteps')->name('create-steps');
+        Route::any('/assign-workflow', 'assignWorkflow')->name('assign-workflow');
+    });
 
-Route::get('/define-workflow', [SchemeController::class, 'finalSubmitted'])->middleware('permission.redirect:canDefineWorkflow')->name('define-workflow');
+    Route::get('/role-rank-management', RolerankManagement::class)->middleware('permission.redirect:canRoleRankManagement')->name('role-rank-management');
 
-Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])->name('beneficiaries_selection.index');
+    Route::get('/define-workflow', [SchemeController::class, 'finalSubmitted'])->middleware('permission.redirect:canDefineWorkflow')->name('define-workflow');
 
-Route::get('/report', [BeneficiaryListController::class, 'show'])->name('report.show');
+    Route::get('/beneficiaries_selection', [BeneficiaryListController::class, 'index'])->name('beneficiaries_selection.index');
 
-Route::any('draftedit', [SchemeController::class, 'draftedit'])->name('draftedit');
+    Route::get('/report', [BeneficiaryListController::class, 'show'])->name('report.show');
 
-Route::any('/custom_application', [SchemeController::class, 'applicationView'])->name('custom_application.view');
+    Route::any('draftedit', [SchemeController::class, 'draftedit'])->name('draftedit');
 
-// Caste Update
-Route::get('/Caste-modification-info', [CasteModificationController::class, 'index'])->middleware('permission.redirect:canModifyCaste')->name('Caste-modification-info');
+    Route::any('/custom_application', [SchemeController::class, 'applicationView'])->name('custom_application.view');
 
-Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])->middleware('permission.redirect:canEditCaste')->name('caste-modification.edit');
+    // Caste Update
+    Route::get('/Caste-modification-info', [CasteModificationController::class, 'index'])->middleware('permission.redirect:canModifyCaste')->name('Caste-modification-info');
 
-Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])->middleware('permission.redirect:canUpdateCaste')->name('beneficiary.updateCaste');
+    Route::get('/caste-modification/edit', [CasteModificationController::class, 'editview'])->middleware('permission.redirect:canEditCaste')->name('caste-modification.edit');
 
-Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])->middleware('permission.redirect:canCasteModification')->name('caste-modification-list');
+    Route::post('/beneficiary/update-caste', [CasteModificationController::class, 'updateCaste'])->middleware('permission.redirect:canUpdateCaste')->name('beneficiary.updateCaste');
 
-Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])->middleware('permission.redirect:canBeneficiaryDetails')->name('view-beneficiary-details');
+    Route::get('/caste-modification-list', [CasteModificationController::class, 'list'])->middleware('permission.redirect:canCasteModification')->name('caste-modification-list');
 
-Route::get('/scheme-capacity', [SchemeCapacityController::class, 'index'])->name('scheme-capacity');
+    Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])->middleware('permission.redirect:canBeneficiaryDetails')->name('view-beneficiary-details');
 
-Route::get('/csv-splitter', CsvSplitter::class)->name('csv-splitter');
+    Route::get('/scheme-capacity', [SchemeCapacityController::class, 'index'])->name('scheme-capacity');
 
-Route::get('/form', [Formcontroller::class, 'index'])->middleware('permission.redirect:canEntry')->name('form');
-Route::get('application-lists', [Formcontroller::class, 'applicationLists'])->name('application-lists');
-Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])->name('define-workflow1');
+    Route::get('/csv-splitter', CsvSplitter::class)->name('csv-splitter');
 
-Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])->middleware('permission.redirect:canUpdateBankDetailsPermission')->name('bankUpdate');
+    Route::get('/form', [Formcontroller::class, 'index'])->middleware('permission.redirect:canEntry')->name('form');
+    Route::get('application-lists', [Formcontroller::class, 'applicationLists'])->name('application-lists');
+    Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])->name('define-workflow1');
 
-Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])->middleware('permission.redirect:canSearchBankUpdate')->name('bank-update.search-beneficiary');
+    Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])->middleware('permission.redirect:canUpdateBankDetailsPermission')->name('bankUpdate');
 
-Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])->middleware('permission:update mobile')->name('update-mobile');
+    Route::get('/bank-update/search-beneficiary/{type}', [UpdateBankDetailsController::class, 'updateBeneficiaryBank'])->middleware('permission.redirect:canSearchBankUpdate')->name('bank-update.search-beneficiary');
 
-Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])->middleware('permission:update bank')->name('update-bank');
+    Route::post('/update-mobile', [UpdateBankDetailsController::class, 'updateMobile'])->middleware('permission:update mobile')->name('update-mobile');
 
-Route::controller(JnpmController::class)->group(function () {
+    Route::post('/update-bank', [UpdateBankDetailsController::class, 'updateBank'])->middleware('permission:update bank')->name('update-bank');
 
-    Route::any('/jnmp/pull', 'pullJnmpData')->middleware('permission.redirect:canImportJanmaMrityuData')->name('jnmp.pull');
+    Route::controller(JnpmController::class)->group(function () {
 
-    Route::post('/jnmp/details-callback', 'detailsCallback')->name('jnmp.details-callback');
+        Route::any('/jnmp/pull', 'pullJnmpData')->middleware('permission.redirect:canImportJanmaMrityuData')->name('jnmp.pull');
 
-    Route::get('/jnmp-stats', 'getJnmpStats');
-    Route::post('/jnmp/mark-as-death', 'markAsDeathProcess')->name('jnmp.mark-as-death');
+        Route::post('/jnmp/details-callback', 'detailsCallback')->name('jnmp.details-callback');
 
-    Route::get('jnmp-data', 'index')->middleware('permission.redirect:canReActivateDeathIncident')->name('jnmp-data');
+        Route::get('/jnmp-stats', 'getJnmpStats');
+        Route::post('/jnmp/mark-as-death', 'markAsDeathProcess')->name('jnmp.mark-as-death');
 
-    // JNMP List at HOD
-    Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')->name('jnmp-marked-data');
-});
-// Reject Approved Beneficiary
-Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
-    Route::get('/reject-approved-beneficiary', 'index')->middleware('permission.redirect:canRejectApprovedBeneficiary')->name('reject-approved-beneficiary');
-    Route::get('/reject-approved-beneficiary/BeneficiaryDetails', 'editview')->middleware('permission.redirect:canViewDetailsToReject')->name('reject-approved-beneficiary.BeneficiaryDetails');
-    Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->middleware('permission.redirect:canRejectBeneficiary')->name('beneficiary.deActivebeneficiary');
-});
+        Route::get('jnmp-data', 'index')->middleware('permission.redirect:canReActivateDeathIncident')->name('jnmp-data');
 
-// / Global Dynamic Workflow Routes
-Route::get('dynamic-workflow-config', WorkflowWizard::class)->middleware('permission.redirect:canDynamicWorkflowManagement')->name('dynamic-workflow-config');
-// Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
+        // JNMP List at HOD
+        Route::any('jnmp-marked-data', 'jnmpMarkedDataAtHOD')->middleware('permission.redirect:canJanmyaMrityuBeneficiaryList')->name('jnmp-marked-data');
+    });
+    // Reject Approved Beneficiary
+    Route::controller(RejectApprovedBeneficiaryController::class)->group(function () {
+        Route::get('/reject-approved-beneficiary', 'index')->middleware('permission.redirect:canRejectApprovedBeneficiary')->name('reject-approved-beneficiary');
+        Route::get('/reject-approved-beneficiary/BeneficiaryDetails', 'editview')->middleware('permission.redirect:canViewDetailsToReject')->name('reject-approved-beneficiary.BeneficiaryDetails');
+        Route::post('/deActivebeneficiary', 'deActiveBeneficiary')->middleware('permission.redirect:canRejectBeneficiary')->name('beneficiary.deActivebeneficiary');
+    });
+
+    // / Global Dynamic Workflow Routes
+    Route::get('dynamic-workflow-config', WorkflowWizard::class)->middleware('permission.redirect:canDynamicWorkflowManagement')->name('dynamic-workflow-config');
+    // Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
 // Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
 
-Route::controller(BackFromJBController::class)->group(function () {
-    Route::any('/backfromjb', 'backfromjb')->middleware('permission.redirect:canBackFromJb')->name('backfromjb');
-    Route::any('/backfromjbactions', 'backfromjbactions')->name('backfromjbactions');
-});
+    Route::controller(BackFromJBController::class)->group(function () {
+        Route::any('/backfromjb', 'backfromjb')->middleware('permission.redirect:canBackFromJb')->name('backfromjb');
+        Route::any('/backfromjbactions', 'backfromjbactions')->name('backfromjbactions');
+    });
 
-Route::controller(CmoController::class)->group(function () {
-    Route::any('/pullnewcmo', 'pullnewcmo')->middleware('permission.redirect:canCMODataFetch')->name('pullnewcmo');
-    Route::any('/populatelbportal', 'populatelbportal')->name('populatelbportal');
-    Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')->middleware('permission.redirect:canCMOGrievanceMark')->name('cmo-grievance-workflow');
-    Route::any('/cmo-grievance-find', 'cmogrievancefind')->name('cmo-grievance-find');
-    Route::post('/cmo-grievance-action', 'cmodetailsaction')->name('cmo-grievance-action');
-    Route::post('/cmo-grievance-search', 'cmogrievancesearch')->name('cmo-grievance-search');
-    Route::post('/map-applicant', 'mapapplicant')->name('map-applicant');
-    Route::post('/cmo-add-actions', 'addactions')->name('cmo-add-actions');
-});
-// Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
+    Route::controller(CmoController::class)->group(function () {
+        Route::any('/pullnewcmo', 'pullnewcmo')->middleware('permission.redirect:canCMODataFetch')->name('pullnewcmo');
+        Route::any('/populatelbportal', 'populatelbportal')->name('populatelbportal');
+        Route::any('/cmo-grievance-workflow', 'cmogrievanceworkflow')->middleware('permission.redirect:canCMOGrievanceMark')->name('cmo-grievance-workflow');
+        Route::any('/cmo-grievance-find', 'cmogrievancefind')->name('cmo-grievance-find');
+        Route::post('/cmo-grievance-action', 'cmodetailsaction')->name('cmo-grievance-action');
+        Route::post('/cmo-grievance-search', 'cmogrievancesearch')->name('cmo-grievance-search');
+        Route::post('/map-applicant', 'mapapplicant')->name('map-applicant');
+        Route::post('/cmo-add-actions', 'addactions')->name('cmo-add-actions');
+    });
+    // Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
 // Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
 // Route::get('dynamic-process-workflow', DynamicProcessPage::class)->name('dynamic-process-workflow');
 
-Route::controller(UpdateMarkBeneficiaryDetailsController::class)->group(function () {
-    Route::get('request-update-beneficiary', 'updateRequest')->name('request-update-beneficiary');
-    Route::get('update-mark-beneficiary-details', 'index')->name('update-mark-beneficiary-details');
-    Route::get('update-beneficiary-list', 'listdetails')->name('update-beneficiary-list');
-});
+    Route::controller(UpdateMarkBeneficiaryDetailsController::class)->group(function () {
+        Route::get('request-update-beneficiary', 'updateRequest')->name('request-update-beneficiary');
+        Route::get('update-mark-beneficiary-details', 'index')->name('update-mark-beneficiary-details');
+        Route::get('update-beneficiary-list', 'listdetails')->name('update-beneficiary-list');
+    });
 
-// Route::get('caste-management', [CasteManagementController::class, 'index'])->name('caste-management');
+    // Route::get('caste-management', [CasteManagementController::class, 'index'])->name('caste-management');
 // Route::get('caste-management-request-list', [CasteManagementController::class, 'requestdedlistdetails'])->name('caste-management-request-list');
 // Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
 //     // ->middleware('permission.redirect:canBeneficiaryDetails')
