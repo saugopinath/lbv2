@@ -516,124 +516,162 @@ $isEdit = false;
             }
         }
 
+        $levelName = $field->level_name;
+        $hasPlaceholder = str_contains($levelName, '[[input]]');
+        $parts = $hasPlaceholder ? explode('[[input]]', $levelName) : [$levelName, ''];
+        $before = $parts[0];
+        $after = $parts[1] ?? '';
+
+        $inputHtml = '';
         switch ($type) {
-
-            /* ===== NUMBER ===== */
             case 'number':
-                return <<<BLADE
-                <div class="{$paddingClass}">
-                    <x-form.input
-                        type="number"
-                        name="{$name}"
-                        label="{$label}"
-                        placeholder="{$placeholder}"
-                        wire:model.live="formData.{$name}"
-                    />
-                </div>
+                $inputHtml = <<<BLADE
+                <x-form.input
+                    type="number"
+                    name="{$name}"
+                    label=""
+                    placeholder="{$placeholder}"
+                    wire:model.live="formData.{$name}"
+                    class="inline-block w-auto"
+                />
                 BLADE;
+                break;
 
-                /* ===== TEXTAREA ===== */
             case 'textarea':
-                return <<<BLADE
-                <div class="{$paddingClass}">
-                    <x-form.textarea
-                        name="{$name}"
-                        label="{$label}"
-                        placeholder="{$placeholder}"
-                        wire:model.live="formData.{$name}"
-                    />
-                </div>
+                $inputHtml = <<<BLADE
+                <x-form.textarea
+                    name="{$name}"
+                    label=""
+                    placeholder="{$placeholder}"
+                    wire:model.live="formData.{$name}"
+                />
                 BLADE;
+                break;
 
-                /* ===== SELECT ===== */
             case 'select':
-
                 $optionsHtml = '';
                 foreach ($options as $key => $text) {
-                    if (is_int($key)) {
-                        $key = $text;
-                    }
-                    $key = e($key);
-                    $text = e($text);
-
+                    if (is_int($key)) { $key = $text; }
+                    $key = e($key); $text = e($text);
                     $optionsHtml .= "<option value=\"{$key}\">{$text}</option>\n";
                 }
-
-                return <<<BLADE
-                <div class="{$paddingClass}">
-                    <x-form.select
-                        name="{$name}"
-                        label="{$label}"
-                        wire:model.live="formData.{$name}"
-                    >
-                        <option value="">-- Select {$label} --</option>
-                        {$optionsHtml}
-                    </x-form.select>
-                </div>
+                $inputHtml = <<<BLADE
+                <x-form.select
+                    name="{$name}"
+                    label=""
+                    wire:model.live="formData.{$name}"
+                    class="inline-block w-auto mx-1"
+                >
+                    <option value="">-- Select --</option>
+                    {$optionsHtml}
+                </x-form.select>
                 BLADE;
+                break;
 
-                /* ===== RADIO ===== */
             case 'radio':
-
                 $radioHtml = '';
                 foreach ($options as $key => $text) {
-                    if (is_int($key)) {
-                        $key = $text;
-                    }
-
-                    $key = e($key);
-                    $text = e($text);
-
+                    if (is_int($key)) { $key = $text; }
+                    $key = e($key); $text = e($text);
                     $radioHtml .= <<<HTML
                     <label class="flex items-center gap-2">
-                        <input
-                            type="radio"
-                            name="{$name}"
-                            value="{$key}"
-                            wire:model.live="formData.{$name}"
-                        />
+                        <input type="radio" name="{$name}" value="{$key}" wire:model.live="formData.{$name}" />
                         {$text}
                     </label>
                     HTML;
                 }
-
-                return <<<BLADE
-                <div class="{$paddingClass}">
-                    <label class="block font-medium text-gray-700 mb-1">{$label}</label>
-                    <div class="flex flex-wrap gap-4">
-                        {$radioHtml}
-                    </div>
+                $inputHtml = <<<HTML
+                <div class="flex flex-wrap gap-4 inline-flex">
+                    {$radioHtml}
                 </div>
-                BLADE;
+                HTML;
+                break;
 
-                /* ===== CHECKBOX ===== */
             case 'checkbox':
-                return <<<BLADE
-                <div class="{$paddingClass}">
-                    <x-form.checkbox
-                        name="{$name}"
-                        label="{$label}"
-                        value="{$value}"
-                        wire:model.live="formData.{$name}"
-                    />
-                </div>
+                $inputHtml = <<<BLADE
+                <x-form.checkbox
+                    name="{$name}"
+                    label="{$label}"
+                    value="{$value}"
+                    wire:model.live="formData.{$name}"
+                />
                 BLADE;
+                break;
 
-                /* ===== DEFAULT TEXT ===== */
+            case 'label':
+            case 'heading':
+                return <<<HTML
+                <div class="{$paddingClass} mt-4 mb-2">
+                    <span class="text-lg font-semibold text-gray-800">{!! $label !!}</span>
+                </div>
+                HTML;
+
             default:
-                return <<<BLADE
-            <div class="{$paddingClass}">
+                $inputHtml = <<<BLADE
                 <x-form.input
                     type="text"
                     name="{$name}"
-                    label="{$label}"
+                    label=""
                     placeholder="{$placeholder}"
                     wire:model.live="formData.{$name}"
                     {$dynamicAttr}
+                    class="inline-block w-auto"
                 />
+                BLADE;
+                break;
+        }
+
+        if ($hasPlaceholder) {
+            $rawInputHtml = '';
+            switch ($type) {
+                case 'number':
+                    $rawInputHtml = "<input type=\"number\" name=\"{$name}\" wire:model.live=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-cyan-500 focus:border-cyan-500 inline-block w-auto mx-1\" placeholder=\"{$placeholder}\" />";
+                    break;
+                case 'select':
+                    $optionsHtml = '';
+                    foreach ($options as $key => $text) {
+                        if (is_int($key)) { $key = $text; }
+                        $key = e($key); $text = e($text);
+                        $optionsHtml .= "<option value=\"{$key}\">{$text}</option>\n";
+                    }
+                    $rawInputHtml = "<select name=\"{$name}\" wire:model.live=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-cyan-500 focus:border-cyan-500 inline-block w-auto mx-1\"><option value=\"\">-- Select --</option>{$optionsHtml}</select>";
+                    break;
+                case 'radio':
+                    $radioHtml = '';
+                    foreach ($options as $key => $text) {
+                        if (is_int($key)) { $key = $text; }
+                        $key = e($key); $text = e($text);
+                        $radioHtml .= "<label class=\"inline-flex items-center gap-1 mx-1\"><input type=\"radio\" name=\"{$name}\" value=\"{$key}\" wire:model.live=\"formData.{$name}\" /> {$text}</label>";
+                    }
+                    $rawInputHtml = $radioHtml;
+                    break;
+                case 'checkbox':
+                    $rawInputHtml = "<input type=\"checkbox\" name=\"{$name}\" value=\"{$value}\" wire:model.live=\"formData.{$name}\" class=\"mx-1\" />";
+                    break;
+                default:
+                    $rawInputHtml = "<input type=\"text\" name=\"{$name}\" wire:model.live=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-cyan-500 focus:border-cyan-500 inline-block w-auto mx-1\" placeholder=\"{$placeholder}\" {$dynamicAttr} />";
+                    break;
+            }
+
+            return <<<BLADE
+            <div class="{$paddingClass} flex flex-wrap items-center gap-1 text-gray-700">
+                <span>{$before}</span>
+                {$rawInputHtml}
+                <span>{$after}</span>
+                <x-form.error name="formData.{$name}" />
             </div>
             BLADE;
         }
+
+        return <<<BLADE
+        <div class="{$paddingClass}">
+            @if(!in_array('{$type}', ['label', 'heading', 'checkbox']))
+                <label class="block font-medium text-gray-700 mb-1">{$label}</label>
+            @endif
+            {$inputHtml}
+            <x-form.error name="formData.{$name}" />
+        </div>
+        BLADE;
     }
 
     private static function generateDynamicInputLogic(string $name, ?string $validation, ?string $regex): string
