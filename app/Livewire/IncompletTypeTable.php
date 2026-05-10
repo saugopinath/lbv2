@@ -3,13 +3,7 @@
 namespace App\Livewire;
 
 use App\Helpers\CheckAuthHelper;
-use App\Models\Ward;
-use App\Models\Block;
-use App\Models\District;
-use App\Models\Panchayat;
-use App\Models\Subdivision;
-use App\Models\Municipality;
-use App\Models\Codemaster;
+use App\Services\TableExportService;
 use App\Helpers\EncryptionArray;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\ApplicantIncompletDeatil;
@@ -77,7 +71,9 @@ class IncompletTypeTable extends DataTableComponent
 
         $this->setHideBulkActionsWhenEmptyEnabled();
 
-
+        $this->setConfigurableAreas([
+            'toolbar-left-start' => 'livewire.export_excel_buttons',
+        ]);
 
         $this->setTableWrapperAttributes([
             'class' => 'overflow-x-auto overflow-y-auto max-h-[500px] border rounded-lg shadow-sm',
@@ -238,5 +234,13 @@ class IncompletTypeTable extends DataTableComponent
         }
         $this->dispatch('hideLoader');
         return $query;
+    }
+
+    public function exportExcel(TableExportService $exportService)
+    {
+        return $exportService->export(
+            $this,
+            'applications_all.xlsx'
+        );
     }
 }
