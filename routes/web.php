@@ -248,7 +248,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 //     // ->middleware('permission.redirect:canBeneficiaryDetails')
 //     ->name('view-beneficiary-details');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+
     Route::controller(CasteManagementController::class)->group(function () {
         Route::get('caste-management', 'index')->name('caste-management');
         Route::get('update-caste-management-details', 'updateDetails')->name('update-caste-management-details');
