@@ -6,11 +6,12 @@ use Illuminate\View\Component;
 
 class MobileIssues extends Component
 {
-    public $mobileIssues;
+    public $mobileIssues, $stage;
 
-    public function __construct($mobileIssues)
+    public function __construct($mobileIssues, $stage = null)
     {
         $this->mobileIssues = $mobileIssues;
+        $this->stage = $stage;
     }
 
     public function render()
@@ -29,6 +30,7 @@ class MobileIssues extends Component
             }
 
         }
+    
         return view('components.incomplete.mobile-issues',compact('stage'));
     }
 }
