@@ -53,7 +53,12 @@
     @endif
     @if($activeTab)
         <div class="p-4">
-            @includeIf("schemes.scheme_{$schemeId}.{$activeTab}", ['schemeId' => $schemeId, 'form_preview' => $form_preview, 'applicationId' => $applicationId])
+            @includeIf("schemes.scheme_{$schemeId}.{$activeTab}", [
+                'schemeId' => $schemeId,
+                'form_preview' => $form_preview,
+                'applicationId' => $applicationId,
+                'isEdit' => $isEdit
+            ])
         </div>
         @if($ram == null)
             {{-- ACTION BUTTONS --}}

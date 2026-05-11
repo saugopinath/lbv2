@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use App\Models\MasterTab;
 use App\Models\SchemeAttachedDocMappings;
 use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Validation\Rule;
 
 class CreateOtherfromAttribute extends Component
 {
@@ -227,7 +228,14 @@ class CreateOtherfromAttribute extends Component
             'scheme_id' => 'required',
             'tabId' => 'required',
             'level_name' => 'required|string|max:100',
-            'field_id' => 'required|string|max:100',
+            'field_id' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('scheme_tab_basefields', 'field_id')
+                    ->where('scheme_id', $this->scheme_id)
+                    ->where('tab_code', $this->tabId),
+            ],
             'field_name' => 'required|string|max:150',
             'field_type' => 'required|string',
             'validation_rule' => 'required|array|min:1',
@@ -368,7 +376,7 @@ class CreateOtherfromAttribute extends Component
             }
             session()->flash('success', 'Field created successfully');
         } catch (\Exception $e) {
-            dd($e);
+            session()->flash('error', 'Error creating field: ' . $e->getMessage());
         }
     }
     public function updatedFieldName($value)
