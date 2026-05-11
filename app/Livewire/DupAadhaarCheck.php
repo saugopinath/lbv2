@@ -97,7 +97,7 @@ class DupAadhaarCheck extends Component
                                 'ds_entry' => WorkFlowPermissionHelper::canDuareSarkarEntryAllow()
                             ];
                         }
-                    } elseif ($config->is_cross && !empty($config->scheme_lists)) {
+                    } if ($config->is_cross && !empty($config->scheme_lists)) {
                         $schemeLists = is_array($config->scheme_lists) ? $config->scheme_lists : json_decode($config->scheme_lists, true);
                         $otherSchemes = implode(',', $schemeLists);
                         $checkWith = $config->check_with;

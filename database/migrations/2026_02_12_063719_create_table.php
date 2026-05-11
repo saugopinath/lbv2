@@ -72,6 +72,10 @@ return new class extends Migration {
                 jnmp_marked smallint,
                 jnmp_remarks varchar(255),
                 reactive_reason varchar(255),
+                approval_date date,
+                rejection_date date,
+                verification_date date,
+                recomendation_date date,
                 created_at timestamp without time zone,
                 updated_at timestamp without time zone
             ) PARTITION BY LIST (scheme_id)
