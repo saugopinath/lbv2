@@ -114,12 +114,12 @@ class DupAadhaarCheck extends Component
                         }
                     }
                 }
-                $this->dispatch('aadhaarChecked', [
+            }
+            $this->dispatch('aadhaarChecked', [
                     'encoded' => $encoded_aadhar,
                     'hash' => $aadhaar_hash
                 ]);
-                $this->dispatch('hideLoader');
-            }
+            $this->dispatch('hideLoader');
         } else {
             $this->dispatch('aadhaarChecked', [
                 'encoded' => $encoded_aadhar,
