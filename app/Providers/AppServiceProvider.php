@@ -20,6 +20,9 @@ use App\Services\ElasticsearchService;
 use App\Interfaces\CmoAuthenticationInterface;
 use App\Services\CmoAuthenticationService;
 
+use App\Interfaces\DuplicatecheckInterface;
+use App\Services\DuplicatecheckService;
+
 use App\Models\User;
 use App\Observers\UserObserver;
 use App\Models\AcceptRejectInfo;
@@ -47,11 +50,12 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(CmoAuthenticationInterface::class, CmoAuthenticationService::class);
 
-         $this->app->bind(
+        $this->app->bind(
             JNMPAuthenticationInterface::class,
             JNMPAuthenticationService::class
         );
 
+        $this->app->bind(DuplicatecheckInterface::class, DuplicatecheckService::class);
     }
 
     /**

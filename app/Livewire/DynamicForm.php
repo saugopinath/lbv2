@@ -975,7 +975,10 @@ class DynamicForm extends Component
         );
         if (is_array($result)) {
             $this->addError($result['field'], $result['message']);
-
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => $result['message'],
+            ]);
             return false;
         }
 

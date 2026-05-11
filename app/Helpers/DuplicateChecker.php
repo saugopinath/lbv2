@@ -3,16 +3,10 @@
 namespace App\Helpers;
 
 use Illuminate\Support\Facades\DB;
-
+use App\Interfaces\DuplicatecheckInterface;
+use App\Models\Scheme;
 class DuplicateChecker
 {
-    /**
-     * @param int $schemeId
-     * @param int|null $applicationId
-     * @param array $formData
-     * @param array $aadhaarPayload
-     * @return array|bool
-     */
     public static function check($schemeId, $applicationId, array $formData, array $aadhaarPayload = [])
     {
         $configs = DB::table('public.dupcheckschemeconfig_settings')
@@ -65,21 +59,28 @@ class DuplicateChecker
                 }
             }
             if ($config->is_cross && !empty($config->scheme_lists)) {
-                $otherSchemes = json_decode($config->scheme_lists, true);
-                $existsCross = DB::table($table)
-                    ->whereIn('scheme_id', $otherSchemes)
-                    ->where(function ($query) use ($type, $column, $inputValue) {
-                        if ($type === 'Mobile') {
-                            $query->whereRaw("other_details->>'mobile_no' = ?", [$inputValue]);
-                        } else {
-                            $query->whereRaw("TRIM(CAST($column AS TEXT)) = ?", [$inputValue]);
-                        }
-                    })
-                    ->exists();
+                $otherSchemes = implode(',', json_decode($config->scheme_lists, true));
+                $checkWith = $config->check_with;
+                $schemeId = $config->scheme_id;
+                $data = app(DuplicatecheckInterface::class)->duplicatecheck($checkWith, $schemeId, $inputValue, $otherSchemes);
+                $existsCross = false;
+                $type = '';
+                if($data->isdup){
+                     $type = $data->checkWith;
+                    $scheme_name = Scheme::find($data->scheme)->name;
+                    if($data->checkWith == 'Aadhar'){
+                        $formFieldName = 'aadhar_no';
+                    }elseif($data->checkWith == 'Mobile'){
+                        $formFieldName = 'mobile_no';
+                    }elseif($data->checkWith == 'Bank'){
+                        $formFieldName = 'bankaccountnumber';
+                    }
+                    $existsCross = true;
+                }
                 if ($existsCross) {
                     return [
                         'field' => "formData.{$formFieldName}",
-                        'message' => "This $type is already registered in another scheme."
+                        'message' => "This $type is already registered in $scheme_name scheme."
                     ];
                 }
             }
