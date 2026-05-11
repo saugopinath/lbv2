@@ -82,12 +82,6 @@ class SchemeSeeder extends Seeder
                 'dept_short_name' => 'I&CA',
             ],
             [
-                'id' => '17',
-                'name' => 'State Welfare Scheme for Purohits',
-                'short_name' => 'purohit_monthly',
-                'dept_short_name' => 'I&CA',
-            ],
-            [
                 'id' => '1',
                 'name' => 'Jai Johar (for ST)',
                 'short_name' => 'johar',
@@ -104,13 +98,7 @@ class SchemeSeeder extends Seeder
                 'name' => 'Taposili Bandhu(for SC)',
                 'short_name' => 'bandhu',
                 'dept_short_name' => 'BCWD',
-            ],
-            [
-                'id' => '3',
-                'name' => 'Taposili Bandhu(for SC)',
-                'short_name' => 'bandhu',
-                'dept_short_name' => 'BCWD',
-            ],
+            ],           
 
         ];
         //   foreach ($schemes as $scheme_item) {
