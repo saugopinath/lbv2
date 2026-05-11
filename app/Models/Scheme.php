@@ -33,4 +33,9 @@ class Scheme extends Model
     {
         return $this->hasMany(SchemeFinalSubmitCheck::class);
     }
+
+    public function duplicateCheckSettings()
+    {
+        return $this->hasMany(DupcheckschemeconfigSetting::class, 'scheme_id');
+    }
 }

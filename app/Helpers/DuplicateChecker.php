@@ -1,50 +1,42 @@
 <?php
-
 namespace App\Helpers;
-
-use Illuminate\Support\Facades\DB;
 use App\Interfaces\DuplicatecheckInterface;
+use App\Models\BeneficiaryAadhaar;
+use App\Models\BeneficiaryBankDetail;
+use App\Models\BeneficiaryPersonalDetail;
 use App\Models\Scheme;
 class DuplicateChecker
 {
     public static function check($schemeId, $applicationId, array $formData, array $aadhaarPayload = [])
     {
-        $configs = DB::table('public.dupcheckschemeconfig_settings')
-            ->where('scheme_id', $schemeId)
-            ->orderByRaw("CASE 
-                WHEN check_with = 'Aadhar' THEN 1 
-                WHEN check_with = 'Mobile' THEN 2 
-                WHEN check_with = 'Bank' THEN 3 
-                ELSE 4 END ASC")
-            ->get();
-        foreach ($configs as $config) {
+        $configs = Scheme::with('duplicateCheckSettings')->findOrFail($schemeId);
+        foreach ($configs->duplicateCheckSettings as $config) {
             $type = $config->check_with;
             $inputValue = null;
-            $table = '';
             $column = '';
             $formFieldName = '';
+            $modelClass = null;
             if ($type === 'Aadhar') {
-                $table = 'pension.beneficiary_aadhars';
+                $modelClass = BeneficiaryAadhaar::class;
                 $column = 'encoded_aadhar';
                 $inputValue = $aadhaarPayload['encoded'] ?? null;
                 $formFieldName = 'aadhar_no';
             } elseif ($type === 'Mobile') {
-                $table = 'pension.beneficiary_personals';
+                $modelClass = BeneficiaryPersonalDetail::class;
                 $inputValue = trim($formData['mobile_no'] ?? '');
                 $formFieldName = 'mobile_no';
             } elseif ($type === 'Bank') {
-                $table = 'pension.beneficiary_banks';
+                $modelClass = BeneficiaryBankDetail::class;
                 $column = 'bankaccountnumber';
                 $inputValue = trim($formData['bankaccountnumber'] ?? '');
                 $formFieldName = 'bankaccountnumber';
             }
-            if (empty($inputValue)) continue;
+            if (empty($inputValue) || !$modelClass) continue;
             if ($config->is_same) {
-                $existsSame = DB::table($table)
-                    ->where('scheme_id', $schemeId)
+                $existsSame = $modelClass::where('scheme_id', $schemeId)
                     ->where(function ($query) use ($type, $column, $inputValue) {
                         if ($type === 'Mobile') {
-                            $query->whereRaw("other_details->>'mobile_no' = ?", [$inputValue]);
+                            $query->where('other_details->mobile_no', $inputValue);
                         } else {
                             $query->whereRaw("TRIM(CAST($column AS TEXT)) = ?", [$inputValue]);
                         }
@@ -59,25 +51,20 @@ class DuplicateChecker
                 }
             }
             if ($config->is_cross && !empty($config->scheme_lists)) {
-                $otherSchemes = implode(',', json_decode($config->scheme_lists, true));
+                $schemeLists = is_array($config->scheme_lists) ? $config->scheme_lists : json_decode($config->scheme_lists, true);
+                $otherSchemes = implode(',', $schemeLists);
                 $checkWith = $config->check_with;
-                $schemeId = $config->scheme_id;
                 $data = app(DuplicatecheckInterface::class)->duplicatecheck($checkWith, $schemeId, $inputValue, $otherSchemes);
-                $existsCross = false;
-                $type = '';
-                if($data->isdup){
-                     $type = $data->checkWith;
-                    $scheme_name = Scheme::find($data->scheme)->name;
-                    if($data->checkWith == 'Aadhar'){
+                if ($data && isset($data->isdup) && $data->isdup) {
+                    $type = $data->checkWith;
+                    $scheme_name = Scheme::find($data->scheme)->name ?? 'another';
+                    if ($data->checkWith == 'Aadhar') {
                         $formFieldName = 'aadhar_no';
-                    }elseif($data->checkWith == 'Mobile'){
+                    } elseif ($data->checkWith == 'Mobile') {
                         $formFieldName = 'mobile_no';
-                    }elseif($data->checkWith == 'Bank'){
+                    } elseif ($data->checkWith == 'Bank') {
                         $formFieldName = 'bankaccountnumber';
                     }
-                    $existsCross = true;
-                }
-                if ($existsCross) {
                     return [
                         'field' => "formData.{$formFieldName}",
                         'message' => "This $type is already registered in $scheme_name scheme."
