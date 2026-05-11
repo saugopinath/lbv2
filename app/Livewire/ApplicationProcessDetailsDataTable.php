@@ -324,6 +324,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     $record->update([
                         'next_level_role_id' => $this->nextLabelRoleId,
                         'is_clean' => 10,
+                        'rejection_date' => Carbon::now()->toDateString(),
                     ]);
 
                     $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
@@ -379,7 +380,8 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 foreach ($records as $record) {
 
                     $record->update([
-                        'next_level_role_id' => $this->nextLabelRoleId
+                        'next_level_role_id' => $this->nextLabelRoleId,
+                        'verification_date' => Carbon::now()->toDateString(),
                     ]);
 
                     $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
@@ -440,6 +442,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     $record->update([
                         'next_level_role_id' => $this->nextLabelRoleId,
                         'is_clean' => 1,
+                        'approval_date' => Carbon::now()->toDateString(),
                     ]);
 
                     $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
