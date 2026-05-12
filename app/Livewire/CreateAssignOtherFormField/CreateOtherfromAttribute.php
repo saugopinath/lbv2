@@ -111,6 +111,11 @@ class CreateOtherfromAttribute extends Component
             $this->master_sec = 'yes';
         }
         $this->isdependent = 'no';
+        if ($value === 'email') {
+            if (!in_array('email', (array)$this->validation_rule)) {
+                $this->validation_rule[] = 'email';
+            }
+        }
     }
     protected function loadSections()
     {

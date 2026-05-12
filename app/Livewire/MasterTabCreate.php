@@ -375,7 +375,7 @@ class MasterTabCreate extends Component
             'level_name' => [
                 'required',
                 'min:3',
-                'max:50',
+                'max:500',
                 Rule::unique('scheme_tab_basefields', 'level_name')
                     ->where(fn($q) => $q->where('tab_code', $this->tab_code)),
             ],

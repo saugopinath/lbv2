@@ -358,6 +358,44 @@ $isEdit = false;
             $wireKey = 'wire:key="field-norm-' . $name . '"';
         }
 
+        $hasPlaceholder = str_contains($label, '[[input]]');
+        $parts = $hasPlaceholder ? explode('[[input]]', $label) : [$label, ''];
+        $before = $parts[0];
+        $after = $parts[1] ?? '';
+
+        if ($hasPlaceholder) {
+            $inputHtml = '';
+            switch ($type) {
+                case 'select':
+                    $optionsHtml = '';
+                    foreach (($field['options'] ?? []) as $key => $optionlabel) {
+                        $key = e($key);
+                        $optionlabel = e($optionlabel);
+                        $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
+                    }
+                    $inputHtml = "<select name=\"{$name}\" {$wireModelMode}=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-indigo-500 focus:border-indigo-500 inline-block w-auto mx-1\"><option value=\"\">-- Select --</option>{$optionsHtml}</select>";
+                    break;
+                case 'checkbox':
+                    $inputHtml = "<input type=\"checkbox\" name=\"{$name}\" value=\"{$value}\" {$wireModelMode}=\"formData.{$name}\" class=\"mx-1\" />";
+                    break;
+                case 'number':
+                    $inputHtml = "<input type=\"number\" name=\"{$name}\" {$wireModelMode}=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-indigo-500 focus:border-indigo-500 inline-block w-auto mx-1\" placeholder=\"{$placeholder}\" />";
+                    break;
+                default:
+                    $inputHtml = "<input type=\"text\" name=\"{$name}\" {$wireModelMode}=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-indigo-500 focus:border-indigo-500 inline-block w-auto mx-1\" placeholder=\"{$placeholder}\" {$dynamicAttr} />";
+                    break;
+            }
+
+            return <<<BLADE
+            <div {$xData} {$xShow} {$xCloak} {$wireKey} class="flex flex-wrap items-center gap-1 text-gray-700">
+                <span>{$before}</span>
+                {$inputHtml}
+                <span>{$after}</span>
+                <x-form.error name="formData.{$name}" />
+            </div>
+            BLADE;
+        }
+
         switch ($type) {
             // case 'select':
             //     $optionsHtml = '';
@@ -625,7 +663,7 @@ $isEdit = false;
             $rawInputHtml = '';
             switch ($type) {
                 case 'number':
-                    $rawInputHtml = "<input type=\"number\" name=\"{$name}\" wire:model.live=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-cyan-500 focus:border-cyan-500 inline-block w-auto mx-1\" placeholder=\"{$placeholder}\" />";
+                    $rawInputHtml = "<input type=\"number\" name=\"{$name}\" wire:model.live=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-indigo-500 focus:border-indigo-500 inline-block w-auto mx-1\" placeholder=\"{$placeholder}\" />";
                     break;
                 case 'select':
                     $optionsHtml = '';
@@ -634,7 +672,7 @@ $isEdit = false;
                         $key = e($key); $text = e($text);
                         $optionsHtml .= "<option value=\"{$key}\">{$text}</option>\n";
                     }
-                    $rawInputHtml = "<select name=\"{$name}\" wire:model.live=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-cyan-500 focus:border-cyan-500 inline-block w-auto mx-1\"><option value=\"\">-- Select --</option>{$optionsHtml}</select>";
+                    $rawInputHtml = "<select name=\"{$name}\" wire:model.live=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-indigo-500 focus:border-indigo-500 inline-block w-auto mx-1\"><option value=\"\">-- Select --</option>{$optionsHtml}</select>";
                     break;
                 case 'radio':
                     $radioHtml = '';
@@ -649,7 +687,7 @@ $isEdit = false;
                     $rawInputHtml = "<input type=\"checkbox\" name=\"{$name}\" value=\"{$value}\" wire:model.live=\"formData.{$name}\" class=\"mx-1\" />";
                     break;
                 default:
-                    $rawInputHtml = "<input type=\"text\" name=\"{$name}\" wire:model.live=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-cyan-500 focus:border-cyan-500 inline-block w-auto mx-1\" placeholder=\"{$placeholder}\" {$dynamicAttr} />";
+                    $rawInputHtml = "<input type=\"text\" name=\"{$name}\" wire:model.live=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-indigo-500 focus:border-indigo-500 inline-block w-auto mx-1\" placeholder=\"{$placeholder}\" {$dynamicAttr} />";
                     break;
             }
 

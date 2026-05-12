@@ -28,15 +28,17 @@
                 <input type="checkbox" disabled class="mx-1" />
                 @break
             @default
-                <input type="text" disabled class="border border-gray-300 rounded-lg p-1 inline-block w-auto mx-1" placeholder="Input" />
+                <input type="text" disabled class="border border-gray-300 rounded-lg p-1 inline-block w-auto mx-1 focus:ring-indigo-500" placeholder="Input" />
         @endswitch
 
         <span>{!! $parts[1] !!}</span>
     @else
         @switch($field->field_type)
             @case('text')
+            @case('email')
             <div>
                 <x-form.input
+                    type="{{ $field->field_type }}"
                     name="{{ $field->field_name ?? $field->level_name }}"
                     label="{!! $field->level_name !!}"
                     placeholder="Enter {{ $field->level_name }}"
