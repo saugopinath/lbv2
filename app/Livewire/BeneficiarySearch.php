@@ -155,8 +155,8 @@ class BeneficiarySearch extends Component
             $query->where($this->lgdData);
         }
         if ($this->isApproved) {
-            $getMinMaxWorkflowStep = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->selectedScheme);          
-            $nextLabelRoleId = $workflowService->getLabelRoles($this->selectedScheme, $getMinMaxWorkflowStep['max'])->next_label_role_id;   
+            $getMinMaxWorkflowStep = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->selectedScheme);
+            $nextLabelRoleId = $workflowService->getLabelRoles($this->selectedScheme, $getMinMaxWorkflowStep['max'])->next_label_role_id;
             $query->where('is_final', 1);
             $query->where('next_level_role_id', $nextLabelRoleId);
         }
@@ -168,7 +168,7 @@ class BeneficiarySearch extends Component
                 $query->where($key, $searchValue);
                 break;
             case 'beneficiary_name':
-                $query->where($key, $searchValue);
+                $query->where($key, 'ILIKE', '%' . trim($searchValue) . '%');
                 break;
             case 'mobile_number':
                 $query->where('other_details->mobile_no', $searchValue);

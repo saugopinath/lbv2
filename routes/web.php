@@ -49,7 +49,7 @@ use App\Livewire\UserPermission\AssignPermissionsPage;
 use App\Livewire\Users\Create as UsersCreate;
 use Illuminate\Support\Facades\Route;
 
-require __DIR__.'/home.php';
+require __DIR__ . '/home.php';
 
 // Guest Routes
 Route::get('/session-expired', function () {
@@ -124,10 +124,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/selectionDesign', [DesignController::class, 'selectionDesign'])->name('selectionDesign');
     Route::get('/viewpage', [DesignController::class, 'viewPage'])->name('viewpage');
     Route::get('/getelsticsearchIndex', [ElasticSearchController::class, 'index'])->name('getelsticsearchIndex');
-
-    // Track Beneficiary Details
-    Route::get('track-beneficiary-details', [TrackBeneficiaryDetailsController::class, 'TrackBeneficiaryDetails'])
-        ->name('track-beneficiary-details');
 
     Route::controller(CreateAssignOtherFormFieldController::class)->group(function () {
         Route::get('/create-dynamicformfield', 'createdynamicformfield')->name('create-dynamicformfield');
@@ -252,5 +248,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('update-caste-management-details', 'updateDetails')->name('update-caste-management-details');
         Route::get('caste-management-request-list', 'requestdedlistdetails')->name('caste-management-request-list');
         Route::get('caste-revert-update', UpdateRevertCaste::class)->name('caste-revert-update');
+    });
+    // Track Beneficiary Details
+    Route::controller(TrackBeneficiaryDetailsController::class)->group(function () {
+        Route::get('track-beneficiary-details', 'TrackBeneficiaryDetails')->name('track-beneficiary-details');
+        Route::get('beneficiary-payment-history-log/{id}', 'BeneficiaryPaymentHistory')->name('beneficiary-payment-history-log');
+        Route::get('beneficiary-details/{id}', 'BeneficiaryDetailslogs')->name('beneficiary-details');
     });
 });
