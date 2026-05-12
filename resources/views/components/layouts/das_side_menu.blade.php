@@ -230,7 +230,7 @@
                 <!-- Sub-menu -->
                 <div id="list_menu" x-show="activeMenu === 'Incomplete'" x-collapse x-transition class="pl-4">
                     <ul>
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canVerifierIncomplet())
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canVerifierIncomplete())
                             <li>
                                 <a href="{{ route('incomplete.types', 'verifier') }}"
                                     class="flex item-center px-2 py-1 text-left rounder hover:bg-slate-700 hover:text-white">
@@ -245,7 +245,7 @@
                             </li>
                         @endif
 
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canApproverIncomplet())
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canApproverIncomplete())
                             <li>
                                 <a href="{{ route('incomplete.types', 'approver') }}"
                                     class="flex item-center px-2 py-1 text-left rounder hover:bg-slate-700 hover:text-white">

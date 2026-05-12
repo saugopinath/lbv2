@@ -37,6 +37,6 @@
 
     {{-- Table --}}
     <div class="bg-white shadow-xl rounded-2xl p-4 mt-4">
-        <livewire:incomplet-type-table :stage="$stage" :schemeId="$schemeId" :wire:key="'table-'.$stage" />
+        <livewire:incomplete-type-table :stage="$stage" :schemeId="$schemeId" :wire:key="'table-'.$stage" />
     </div>
 </div>

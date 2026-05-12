@@ -7,7 +7,7 @@ use App\Helpers\ChechDupHelper;
 use App\Helpers\CheckAuthHelper;
 use App\Helpers\WorkFlowPermissionHelper;
 use App\Models\AcceptRejectInfo;
-use App\Models\ApplicantIncompletDeatil;
+use App\Models\ApplicantIncompleteDetail;
 use App\Models\BeneficiaryTemEnclosure;
 use App\Models\Codemaster;
 use Illuminate\Http\Request;
@@ -34,11 +34,11 @@ class IncompleteTypeController extends Controller
 
     public function index($stage)
     {
-        if ($stage === 'verifier' && WorkFlowPermissionHelper::canVerifierIncomplet()) {
+        if ($stage === 'verifier' && WorkFlowPermissionHelper::canVerifierIncomplete()) {
             return view('incomplete_types.index', ['stage' => 'verifier']);
         }
 
-        if ($stage === 'approver' && WorkFlowPermissionHelper::canApproverIncomplet()) {
+        if ($stage === 'approver' && WorkFlowPermissionHelper::canApproverIncomplete()) {
             return view('incomplete_types.index', ['stage' => 'approver']);
         }
 
@@ -49,7 +49,7 @@ class IncompleteTypeController extends Controller
 
     public function fullUpdate(Request $request, $id, $schemeId)
     {
-        if (WorkFlowPermissionHelper::canUpdateIncomplet()) {
+        if (WorkFlowPermissionHelper::canUpdateIncomplete()) {
             $realId = Crypt::decrypt($id);
             $schemeId = Crypt::decrypt($schemeId);
 
@@ -62,7 +62,7 @@ class IncompleteTypeController extends Controller
                 $confirmAccData = $request->confirmbankaccountnumber;
                 $ifscodeData = $request->ifscode;
 
-                $allIssues = ApplicantIncompletDeatil::where('application_id', $realId)->where('scheme_id', $schemeId)->get();
+                $allIssues = ApplicantIncompleteDetail::where('application_id', $realId)->where('scheme_id', $schemeId)->get();
                 $applicantInfo = $allIssues->first()?->personaldetails;
 
                 if ($allIssues->isEmpty()) {
@@ -78,7 +78,7 @@ class IncompleteTypeController extends Controller
                 $messages = [];
 
                 foreach ($allIssues as $item) {
-                    $typeCode = $item->incomplet_type ?? null;
+                    $typeCode = $item->incomplete_type ?? null;
 
                     if (! $typeCode) {
                         continue;
@@ -167,7 +167,7 @@ class IncompleteTypeController extends Controller
 
                 foreach ($allIssues as $item) {
 
-                    $typeCode = $item->incomplet_type ?? null;
+                    $typeCode = $item->incomplete_type ?? null;
 
                     if (in_array($typeCode, ['141', '149', '1414'])) {
 
@@ -197,12 +197,12 @@ class IncompleteTypeController extends Controller
                         'op_type' => Codemaster::where('code', 2103)->value('id'),
                     ]);
 
-                    $bankIssues = $allIssues->filter(fn ($i) => in_array($i->incomplet_type, ['145', '146', '1411', '1412', '1413']));
-                    $dupbankacc = $bankIssues->contains(fn ($i) => $i->incomplet_type == '1411');
+                    $bankIssues = $allIssues->filter(fn ($i) => in_array($i->incomplete_type, ['145', '146', '1411', '1412', '1413']));
+                    $dupbankacc = $bankIssues->contains(fn ($i) => $i->incomplete_type == '1411');
 
                     // ✅ Step 6: Update loop
                     foreach ($allIssues as $item) {
-                        $typeCode = $item->incomplet_type ?? null;
+                        $typeCode = $item->incomplete_type ?? null;
                         if (! $typeCode) {
                             continue;
                         }
@@ -229,7 +229,7 @@ class IncompleteTypeController extends Controller
                                 'confirmbankaccountnumber' => $confirmAccData,
                             ];
 
-                            $relatedIssues = $allIssues->whereIn('incomplet_type', ['145', '146', '1411', '1412', '1413']);
+                            $relatedIssues = $allIssues->whereIn('incomplete_type', ['145', '146', '1411', '1412', '1413']);
 
                             if ($relatedIssues->count() > 1) {
                                 if ($typeCode == '1411') {
@@ -281,7 +281,7 @@ class IncompleteTypeController extends Controller
 
     public function revertVerify(Request $request, $id, $schemeId)
     {
-        if (WorkFlowPermissionHelper::canRevertIncomplet()) {
+        if (WorkFlowPermissionHelper::canRevertIncomplete()) {
             $realId = Crypt::decrypt($id);
             $schemeId = Crypt::decrypt($schemeId);
 
@@ -295,7 +295,7 @@ class IncompleteTypeController extends Controller
                 $ifscodeData = $request->ifscode;
 
                 // Get all issues
-                $allIssues = ApplicantIncompletDeatil::where('application_id', $realId)->where('scheme_id', $schemeId)->get();
+                $allIssues = ApplicantIncompleteDetail::where('application_id', $realId)->where('scheme_id', $schemeId)->get();
                 $applicantInfo = $allIssues->first()?->personaldetails;
 
                 if ($allIssues->isEmpty()) {
@@ -311,7 +311,7 @@ class IncompleteTypeController extends Controller
                 $messages = [];
 
                 foreach ($allIssues as $item) {
-                    $typeCode = $item->incomplet_type ?? null;
+                    $typeCode = $item->incomplete_type ?? null;
                     if (! $typeCode) {
                         continue;
                     }
@@ -424,11 +424,11 @@ class IncompleteTypeController extends Controller
                     'parent_id' => $previousId,
                 ]);
 
-                $bankIssues = $allIssues->filter(fn ($i) => in_array($i->incomplet_type, ['145', '146', '1411', '1412', '1413']));
-                $dupbankacc = $bankIssues->contains(fn ($i) => $i->incomplet_type == '1411');
+                $bankIssues = $allIssues->filter(fn ($i) => in_array($i->incomplete_type, ['145', '146', '1411', '1412', '1413']));
+                $dupbankacc = $bankIssues->contains(fn ($i) => $i->incomplete_type == '1411');
 
                 foreach ($allIssues as $item) {
-                    $typeCode = $item->incomplet_type ?? null;
+                    $typeCode = $item->incomplete_type ?? null;
                     if (! $typeCode) {
                         continue;
                     }
@@ -453,7 +453,7 @@ class IncompleteTypeController extends Controller
                             'confirmbankaccountnumber' => $confirmAccData,
                         ];
 
-                        $relatedIssues = $allIssues->whereIn('incomplet_type', ['145', '146', '1411', '1412', '1413']);
+                        $relatedIssues = $allIssues->whereIn('incomplete_type', ['145', '146', '1411', '1412', '1413']);
 
                         if ($relatedIssues->count() === 1) {
                             $isActive = 1;
@@ -511,27 +511,27 @@ class IncompleteTypeController extends Controller
         $rawMobileData = $request->dup_mobile;
         $mobileData = is_array($rawMobileData) ? ($rawMobileData[$realId] ?? null) : $rawMobileData;
         $confirmAccData = $request->confirmbankaccountnumber;
-        $allIssues = ApplicantIncompletDeatil::where('application_id', $realId)->where('scheme_id', $schemeId)->get();
+        $allIssues = ApplicantIncompleteDetail::where('application_id', $realId)->where('scheme_id', $schemeId)->get();
 
         if ($allIssues->isEmpty()) {
             return true; // No issues found, no need for duplicate check
         }
 
         foreach ($allIssues as $item) {
-            $typeCode = $item->incomplet_type ?? null;
+            $typeCode = $item->incomplete_type ?? null;
 
             if (in_array($typeCode, ['141', '149', '1414']) && $aadharData) {
-                $result = ChechDupHelper::checkDuplicate('aadhaar', $aadharData, $item->incomplet_type, $schemeId);
+                $result = ChechDupHelper::checkDuplicate('aadhaar', $aadharData, $item->incomplete_type, $schemeId);
                 if ($result !== true) {
                     return $result; // Return error message
                 }
             } elseif (in_array($typeCode, ['142', '1410']) && $mobileData) {
-                $result = ChechDupHelper::checkDuplicate('mobile', $mobileData, $item->incomplet_type, $schemeId);
+                $result = ChechDupHelper::checkDuplicate('mobile', $mobileData, $item->incomplete_type, $schemeId);
                 if ($result !== true) {
                     return $result; // Return error message
                 }
             } elseif (in_array($typeCode, ['145', '146', '1411', '1412', '1413']) && $confirmAccData) {
-                $result = ChechDupHelper::checkDuplicate('bank', $confirmAccData, $item->incomplet_type, $schemeId);
+                $result = ChechDupHelper::checkDuplicate('bank', $confirmAccData, $item->incomplete_type, $schemeId);
                 if ($result !== true) {
                     return $result; // Return error message
                 }
@@ -543,6 +543,6 @@ class IncompleteTypeController extends Controller
 
     public function incompleteDetails()
     {
-        return view('incomplet.incompleteDetails');
+        return view('incomplete.incompleteDetails');
     }
 }

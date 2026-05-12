@@ -37,7 +37,7 @@ use App\Livewire\DynamicWorkflow\DynamicProcessPage;
 use App\Livewire\DynamicWorkflow\ProcessWorkflow;
 use App\Livewire\DynamicWorkflow\RequestUpdateBeneficiary;
 use App\Livewire\DynamicWorkflow\WorkflowWizard;
-use App\Livewire\IncompletTypePage;
+use App\Livewire\IncompleteTypePage;
 use App\Livewire\MasterTabManager;
 use App\Livewire\OfficeMasters\Create as OfficeMasterCreate;
 use App\Livewire\ProcessApplication\DraftApplicationView;
@@ -113,11 +113,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Incomplete Types
     Route::get('/incomplete-types/{stage?}', [IncompleteTypeController::class, 'index'])->name('incomplete.types');
 
-    Route::get('/incomplet-type/{id}/{stage}/{schemeId}', IncompletTypePage::class)->name('incomplet-type.view');
+    Route::get('/incomplete-type/{id}/{stage}/{schemeId}', IncompleteTypePage::class)->name('incomplete-type.view');
 
-    Route::post('/incomplete/update/{id}/{schemeId}', [IncompleteTypeController::class, 'fullUpdate'])->middleware('permission.redirect:canUpdateIncomplet')->name('incomplete-full-deatils-update');
+    Route::post('/incomplete/update/{id}/{schemeId}', [IncompleteTypeController::class, 'fullUpdate'])->middleware('permission.redirect:canUpdateIncomplete')->name('incomplete-full-details-update');
 
-    Route::post('/incomplete/revert/{id}/{schemeId}', [IncompleteTypeController::class, 'revertVerify'])->middleware('permission.redirect:canRevertIncomplet')->name('incomplete-revert-update');
+    Route::post('/incomplete/revert/{id}/{schemeId}', [IncompleteTypeController::class, 'revertVerify'])->middleware('permission.redirect:canRevertIncomplete')->name('incomplete-revert-update');
 
     // Design Pages (Dev Only – Remove in Prod)
     Route::get('/tableDesign', [DesignController::class, 'tableDesign'])->name('tableDesign');

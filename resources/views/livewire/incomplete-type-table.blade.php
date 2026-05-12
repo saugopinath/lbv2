@@ -98,19 +98,19 @@
                             @if ($stage === 'approver')
                                 {{-- Approve Button --}}
                                 <x-button.primary
-                                    href="{{ route('incomplet-type.view', ['id' => encrypt($row->application_id), 'stage' => encrypt($stage)]) }}">
+                                    href="{{ route('incomplete-type.view', ['id' => encrypt($row->application_id), 'stage' => encrypt($stage)]) }}">
                                     View
                                 </x-button.primary>
                             @elseif ($stage === 'revert')
                                 {{-- Revert Button --}}
                                 <x-button.primary
-                                    href="{{ route('incomplet-type.view', ['id' => encrypt($row->application_id), 'stage' => encrypt($stage)]) }}">
+                                    href="{{ route('incomplete-type.view', ['id' => encrypt($row->application_id), 'stage' => encrypt($stage)]) }}">
                                     View
                                 </x-button.primary>
                             @else
                                 {{-- Verifier Update Button --}}
                                 <x-button.primary
-                                    href="{{ route('incomplet-type.view', ['id' => encrypt($row->application_id), 'stage' => encrypt($stage)]) }}">
+                                    href="{{ route('incomplete-type.view', ['id' => encrypt($row->application_id), 'stage' => encrypt($stage)]) }}">
                                     Update
                                 </x-button.primary>
                             @endif

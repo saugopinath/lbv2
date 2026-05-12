@@ -34,11 +34,11 @@
     @endif
 
     <form method="POST" action="@if ($stage === 'verifier')
-        {{ route('incomplete-full-deatils-update', ['id' => encrypt($id),'schemeId' => encrypt($schemeId)]) }}
+        {{ route('incomplete-full-details-update', ['id' => encrypt($id),'schemeId' => encrypt($schemeId)]) }}
     @elseif ($stage === 'revert')
         {{ route('incomplete-revert-update', ['id' => encrypt($id),'schemeId' => encrypt($schemeId)]) }}
     @else
-        {{ route('incomplete-full-deatils-update', ['id' => encrypt($id),'schemeId' => encrypt($schemeId)]) }}
+        {{ route('incomplete-full-details-update', ['id' => encrypt($id),'schemeId' => encrypt($schemeId)]) }}
     @endif">
         @csrf
 
@@ -55,20 +55,20 @@
         @if (!empty($sortedBankIssues))
             @foreach ($sortedBankIssues as $item)
                 <div class="p-4 mb-4 border rounded-lg bg-gray-50 shadow-sm">
-                    <h2 class="font-semibold text-lg text-blue-700 mb-2">{{ $item->incompletType->name }}</h2>
+                    <h2 class="font-semibold text-lg text-blue-700 mb-2">{{ $item->incompleteType->name }}</h2>
 
-                    @if ($item->incomplet_type == '1411')
+                    @if ($item->incomplete_type == '1411')
                         <livewire:incomplete.dup-bank :item="$item" :schemeId="$schemeId" :dupAction="$item->dupAction" :wire:key="'dup-'.$item->id" />
-                    @elseif ($item->incomplet_type == '145')
+                    @elseif ($item->incomplete_type == '145')
                         <livewire:incomplete.bank-name-fail :item="$item" :schemeId="$schemeId" :dupAction="$item->dupAction"
                             :wire:key="'name-'.$item->id" />
-                    @elseif ($item->incomplet_type == '146')
+                    @elseif ($item->incomplete_type == '146')
                         <livewire:incomplete.bank-account-fail :item="$item" :schemeId="$schemeId" :dupAction="$item->dupAction"
                             :wire:key="'account-'.$item->id" />
-                    @elseif ($item->incomplet_type == '1412')
+                    @elseif ($item->incomplete_type == '1412')
                         <livewire:incomplete.mismatch-low :item="$item" :schemeId="$schemeId" :dupAction="$item->dupAction"
                             :wire:key="'mismatch-low-'.$item->id" />
-                    @elseif ($item->incomplet_type == '1413')
+                    @elseif ($item->incomplete_type == '1413')
                         <livewire:incomplete.mismatch-high :item="$item" :schemeId="$schemeId" :dupAction="$item->dupAction"
                             :wire:key="'mismatch-high-'.$item->id" />
                     @endif

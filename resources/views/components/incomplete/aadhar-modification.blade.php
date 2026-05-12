@@ -5,7 +5,7 @@
 
     <ul class="list-disc list-inside text-sm text-gray-700 mb-2">
         @foreach ($aadhaarIssues as $issueItem)
-            <li>{{ $issueItem->incompletType->name }}</li>
+            <li>{{ $issueItem->incompleteType->name }}</li>
         @endforeach
     </ul>
 
