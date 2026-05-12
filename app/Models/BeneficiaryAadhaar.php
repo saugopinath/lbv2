@@ -9,7 +9,7 @@ class BeneficiaryAadhaar extends BaseAuditableModel
     use Searchable;
     protected $guarded = [];
     protected $primaryKey = 'application_id';
-    protected $table = 'pension.beneficiary_aadhars';
+    protected $table = 'pension.beneficiary_aadhaars';
     public $incrementing = false;
     public function personal()
     {

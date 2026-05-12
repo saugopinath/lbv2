@@ -50,12 +50,7 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     //     $data['new_values']['method'] = \Illuminate\Support\Facades\Request::method();
     //     $data['new_values']['referrer'] = \Illuminate\Support\Facades\Request::header('referer');
     //     return $data;
-    // }
-
-    public function aadhaar()
-    {
-        return $this->hasOne(BeneficiaryAadhaar::class, 'application_id');
-    }
+    // }    
 
     public function banks()
     {
