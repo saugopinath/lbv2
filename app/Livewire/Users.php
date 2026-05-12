@@ -144,14 +144,25 @@ class Users extends DataTableComponent
         $user = User::find($id);
 
         if ($user) {
-            UserRoleSchemeOfficeMapping::where('user_id', $id)->delete();
-            UserPersonal::where('user_id', $id)->delete();
-            $user->delete();
-        }
+            DB::beginTransaction();
+            try {
+                UserRoleSchemeOfficeMapping::where('user_id', $id)->get()->each->delete();
+                UserPersonal::where('user_id', $id)->get()->each->delete();
+                $user->delete();
 
-        $this->dispatch('toastr', [
-            'type' => 'success',
-            'message' => 'User deleted successfully!',
-        ]);
+                DB::commit();
+
+                $this->dispatch('toastr', [
+                    'type' => 'success',
+                    'message' => 'User deleted successfully!',
+                ]);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                $this->dispatch('toastr', [
+                    'type' => 'error',
+                    'message' => 'Failed to delete user: ' . $e->getMessage()
+                ]);
+            }
+        }
     }
 }
