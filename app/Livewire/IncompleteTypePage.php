@@ -49,7 +49,7 @@ class IncompleteTypePage extends Component
                 $decoded = is_string($item->new_value) ? json_decode($item->new_value, true) : $item->new_value;
 
                 if (isset($decoded['aadhaar_no'])) {
-                    $this->formData['aadhar_modification'][$item->application_id] = $decoded['aadhaar_no'];
+                    $this->formData['aadhaar_modification'][$item->application_id] = $decoded['aadhaar_no'];
                 }
 
                 if (isset($decoded['mobile_no'])) {
@@ -60,9 +60,9 @@ class IncompleteTypePage extends Component
 
         // Preserve form values when redirected back after validation errors
         // (e.g., when `back()->withInput()` is used in the controller)
-        $oldAadhaar = request()->old('aadhar_modification');
+        $oldAadhaar = request()->old('aadhaar_modification');
         if (!is_null($oldAadhaar)) {
-            $this->formData['aadhar_modification'][$this->id] = $oldAadhaar;
+            $this->formData['aadhaar_modification'][$this->id] = $oldAadhaar;
         }
 
         $oldMobile = request()->old('dup_mobile');
@@ -142,7 +142,7 @@ class IncompleteTypePage extends Component
                 // Aadhaar related
                 if (in_array($typeId, ['141', '149', '1414'])) {
                     $jsonValue = [
-                        'aadhaar_no' => $this->formData['aadhar_modification'][$item->application_id] ?? null,
+                        'aadhaar_no' => $this->formData['aadhaar_modification'][$item->application_id] ?? null,
                         'application_id' => $this->id,
                     ];
                 }
@@ -225,16 +225,16 @@ class IncompleteTypePage extends Component
 
 
         switch ($typeId) {
-            case 141: // NO AADHAR NUMBER
-            case 149: // DUPLICATE AADHAR NUMBER
+            case 141: // NO AADHAAR NUMBER
+            case 149: // DUPLICATE AADHAAR NUMBER
             case 1414: // PDS Mismatch
                 $beneficiary->aadhaar()->updateOrCreate(
                     ['application_id' => $this->id],
                     [
                         'beneficiary_id' => $beneficiary->beneficiary_id,
-                        'encoded_aadhar' => Crypt::encryptString($newAadhaar),
-                        'aadhar_hash' => md5($newAadhaar),
-                        'aadhar_vault' => md5($newAadhaar),
+                        'encoded_aadhaar' => Crypt::encryptString($newAadhaar),
+                        'aadhaar_hash' => md5($newAadhaar),
+                        'aadhaar_vault' => md5($newAadhaar),
                         'scheme_id' => $this->schemeId,
                         'updated_at' => now(),
                     ]
@@ -451,7 +451,7 @@ class IncompleteTypePage extends Component
         foreach ($this->page as $item) {
             $typeName = $item->incompleteType->name;
 
-            if (in_array($typeName, ['PDS MISMATCH', 'NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER'])) {
+            if (in_array($typeName, ['PDS MISMATCH', 'NO AADHAAR NUMBER', 'DUPLICATE AADHAAR NUMBER'])) {
                 $aadhaarIssues[] = $item;
             } elseif (in_array($typeName, ['NO MOBILE NUMBER', 'DUPLICATE MOBILE NUMBER'])) {
                 $mobileIssues[] = $item;

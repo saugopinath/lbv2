@@ -24,14 +24,14 @@ class SearchBeneficiary extends Component
     public $searchOptions = [
         1 => 'Application ID',
         2 => 'Beneficiary ID',
-        3 => 'Aadhar Number',
+        3 => 'Aadhaar Number',
         4 => 'Mobile No',
     ];
 
     protected $searchTypeMap = [
         1 => 'application_id',
         2 => 'beneficiary_id',
-        3 => 'encoded_aadhar',
+        3 => 'encoded_aadhaar',
         4 => 'mobile_no',
     ];
 
@@ -83,7 +83,7 @@ class SearchBeneficiary extends Component
                             break;
                         case 3:
                             if (!preg_match('/^\d{12}$/', $value)) {
-                                $fail('Aadhar must be 12 digits.');
+                                $fail('Aadhaar must be 12 digits.');
                             }
                             break;
                         case 4:
@@ -119,7 +119,7 @@ class SearchBeneficiary extends Component
             return;
         }
         
-        $this->searchBy = ($column === 'encoded_aadhar')
+        $this->searchBy = ($column === 'encoded_aadhaar')
             ? md5(trim($this->searchValue))
             : trim($this->searchValue);
        
@@ -132,10 +132,10 @@ class SearchBeneficiary extends Component
       
         $query->where('next_level_role_id', $this->filterRoleId);
         
-        if ($column === 'encoded_aadhar') {
+        if ($column === 'encoded_aadhaar') {
 
             $query->whereHas('aadhaar', function ($q) {
-                $q->where('encoded_aadhar', $this->searchBy);
+                $q->where('encoded_aadhaar', $this->searchBy);
             });
 
         } elseif ($column === 'mobile_no') {

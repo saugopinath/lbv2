@@ -16,9 +16,9 @@ class CheckDupHelper
         }
 
         if ($type === 'aadhaar') {
-            $aadhar = md5($value);
+            $aadhaar = md5($value);
 
-            $existsInCommonList = BeneficiaryAadhaar::where('encoded_aadhar', $aadhar)
+            $existsInCommonList = BeneficiaryAadhaar::where('encoded_aadhaar', $aadhaar)
                 ->whereRelation('personal', 'scheme_id', $schemeId)
                 ->whereRelation('personal', 'is_final', 1)
                 ->whereRelation('personal', 'next_level_role_id', '!=', -100)

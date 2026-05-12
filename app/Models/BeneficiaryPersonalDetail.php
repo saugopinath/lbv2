@@ -32,7 +32,7 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     {
         return $this->hasOne(BeneficiaryBankDetail::class, 'application_id', 'application_id');
     }
-    public function aadhar()
+    public function aadhaar()
     {
         return $this->hasOne(BeneficiaryAadhaar::class, 'application_id', 'application_id');
     }

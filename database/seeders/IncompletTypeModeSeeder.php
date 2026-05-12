@@ -17,7 +17,7 @@ class IncompletTypeModeSeeder extends Seeder
         $incompletTypeModelMapping = array(
 
             array(
-                "table_column" => "NO AADHAR NUMBER",
+                "table_column" => "NO AADHAAR NUMBER",
                 "incomplet_type_code" => "141",
                 "model" => "BeneficiaryAadhaar",
             ),
@@ -37,7 +37,7 @@ class IncompletTypeModeSeeder extends Seeder
                 "model" => "FailedPaymentDetails",
             ),
             array(
-                "table_column" => "DUPLICATE AADHAR NUMBER",
+                "table_column" => "DUPLICATE AADHAAR NUMBER",
                 "incomplet_type_code" => "149",
                 "model" => "BeneficiaryAadhaar",
             ),

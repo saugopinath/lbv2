@@ -43,7 +43,7 @@
         @csrf
 
         @if (!empty($aadhaarIssues))
-            <x-incomplete.aadhar-modification :aadhaar-issues="$aadhaarIssues" :schemeId="$schemeId" />
+            <x-incomplete.aadhaar-modification :aadhaar-issues="$aadhaarIssues" :schemeId="$schemeId" />
         @endif
 
         {{-- Mobile Issues --}}

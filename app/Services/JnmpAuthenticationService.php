@@ -106,7 +106,7 @@ class JnmpAuthenticationService implements JnmpAuthenticationInterface
                     'from_date'                     => date('Y-m-d', strtotime(str_replace('/', '-', $from_date))),
                     'to_date'                       => date('Y-m-d', strtotime(str_replace('/', '-', $to_date))),
 
-                    'aadhar_hash'                   => (!empty($item->deceased_idprooftypname) &&
+                    'aadhaar_hash'                   => (!empty($item->deceased_idprooftypname) &&
                         trim($item->deceased_idprooftypname) == 'Aadhaar')
                         ? md5($item->deceased_idproofnumber)
                         : null,

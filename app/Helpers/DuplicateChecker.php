@@ -16,11 +16,11 @@ class DuplicateChecker
             $column = '';
             $formFieldName = '';
             $modelClass = null;
-            if ($type === 'Aadhar') {
+            if ($type === 'Aadhaar') {
                 $modelClass = BeneficiaryAadhaar::class;
-                $column = 'encoded_aadhar';
+                $column = 'encoded_aadhaar';
                 $inputValue = $aadhaarPayload['encoded'] ?? null;
-                $formFieldName = 'aadhar_no';
+                $formFieldName = 'aadhaar_no';
             } elseif ($type === 'Mobile') {
                 $modelClass = BeneficiaryPersonalDetail::class;
                 $inputValue = trim($formData['mobile_no'] ?? '');
@@ -58,8 +58,8 @@ class DuplicateChecker
                 if ($data && isset($data->isdup) && $data->isdup) {
                     $type = $data->checkWith;
                     $scheme_name = Scheme::find($data->scheme)->name ?? 'another';
-                    if ($data->checkWith == 'Aadhar') {
-                        $formFieldName = 'aadhar_no';
+                    if ($data->checkWith == 'Aadhaar') {
+                        $formFieldName = 'aadhaar_no';
                     } elseif ($data->checkWith == 'Mobile') {
                         $formFieldName = 'mobile_no';
                     } elseif ($data->checkWith == 'Bank') {

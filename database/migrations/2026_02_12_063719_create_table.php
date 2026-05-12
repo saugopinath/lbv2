@@ -133,19 +133,19 @@ return new class extends Migration {
 
         /*
         |--------------------------------------------------------------------------
-        | 5. beneficiary_aadhar (Partitioned)
+        | 5. beneficiary_aadhaar (Partitioned)
         |--------------------------------------------------------------------------
         */
         $conn->statement("
-            CREATE TABLE IF NOT EXISTS {$this->schema}.beneficiary_aadhars
+            CREATE TABLE IF NOT EXISTS {$this->schema}.beneficiary_aadhaars
             (
                 scheme_id integer NOT NULL,
                 application_id bigint NOT NULL,
                 beneficiary_id bigint NOT NULL,
                 encode_key text,
-                encoded_aadhar text,
-                aadhar_vault text,
-                aadhar_hash varchar(255),
+                encoded_aadhaar text,
+                aadhaar_vault text,
+                aadhaar_hash varchar(255),
                 is_clean smallint DEFAULT 1,
                 created_at timestamp without time zone,
                 updated_at timestamp without time zone
@@ -190,7 +190,7 @@ return new class extends Migration {
         $tables = [
             "beneficiary_self_declarations",
             'beneficiary_documents',
-            'beneficiary_aadhars',
+            'beneficiary_aadhaars',
             'beneficiary_banks',
             'beneficiary_contacts',
             'beneficiary_personals',

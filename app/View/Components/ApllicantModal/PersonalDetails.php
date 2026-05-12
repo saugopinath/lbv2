@@ -37,7 +37,7 @@ class PersonalDetails extends Component
             $applicantDet = DraftBeneficiaryPersonal::with(['aadhaar', 'relationships'])->where('application_id', $id)->first();
         }
         // dd($applicantDet);
-        $this->decryptedAadhaar = Crypt::decryptString($applicantDet->aadhaar->encoded_aadhar);
+        $this->decryptedAadhaar = Crypt::decryptString($applicantDet->aadhaar->encoded_aadhaar);
         $this->ds_registration_no = $applicantDet->ds_registration_no;
         $this->duaresarkarDate = Carbon::parse($applicantDet->ds_date)->format('d-m-Y');
         $this->beneficiary_name = $applicantDet->full_name;

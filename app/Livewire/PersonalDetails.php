@@ -176,9 +176,9 @@ class PersonalDetails extends Component
 
                 $BeneficiaryAadhaar = new BeneficiaryAadhaar;
                 $BeneficiaryAadhaar->application_id = $uniqueApp->application_id;
-                $BeneficiaryAadhaar->aadhar_hash = $this->hash;
+                $BeneficiaryAadhaar->aadhaar_hash = $this->hash;
                 $BeneficiaryAadhaar->created_by = Auth::id();
-                $BeneficiaryAadhaar->encoded_aadhar = $this->encoded;
+                $BeneficiaryAadhaar->encoded_aadhaar = $this->encoded;
                 $BeneficiaryAadhaar->save();
 
                 $draftbenPar = new DraftBeneficiaryPersonal;

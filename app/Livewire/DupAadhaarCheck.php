@@ -57,7 +57,7 @@ class DupAadhaarCheck extends Component
             $this->dispatch('hideLoader');
             return ['status' => 'error', 'message' => $this->error];
         }
-        $encoded_aadhar = Crypt::encryptString($this->aadhaar);
+        $encoded_aadhaar = Crypt::encryptString($this->aadhaar);
         $aadhaar_hash = md5($this->aadhaar);
 
         /*$exists = BeneficiaryAadhaar::where('aadhar_hash', $aadhaar_hash)
@@ -83,9 +83,9 @@ class DupAadhaarCheck extends Component
         if ($configs) {
             foreach ($configs->duplicateCheckSettings as $config) {
                 $type = $config->check_with;
-                if ($type === 'Aadhar') {
+                if ($type === 'Aadhaar') {
                     if ($config->is_same) {
-                        $existsSame = BeneficiaryAadhaar::where('aadhar_hash', $aadhaar_hash)
+                        $existsSame = BeneficiaryAadhaar::where('aadhaar_hash', $aadhaar_hash)
                             ->where('scheme_id', $this->schemeId)
                             ->exists();
                         if ($existsSame) {
@@ -116,13 +116,13 @@ class DupAadhaarCheck extends Component
                 }
             }
             $this->dispatch('aadhaarChecked', [
-                    'encoded' => $encoded_aadhar,
+                    'encoded' => $encoded_aadhaar,
                     'hash' => $aadhaar_hash
                 ]);
             $this->dispatch('hideLoader');
         } else {
             $this->dispatch('aadhaarChecked', [
-                'encoded' => $encoded_aadhar,
+                'encoded' => $encoded_aadhaar,
                 'hash' => $aadhaar_hash
             ]);
             $this->dispatch('hideLoader');
@@ -135,7 +135,7 @@ class DupAadhaarCheck extends Component
         // Session::put('dup_aadhaar', md5(trim($this->aadhaar)));
         $this->showDsTable = true;
         $this->dispatch('aadhaarCheckedds', [
-            'aadhar_hash' => md5(trim($this->aadhaar))
+            'aadhaar_hash' => md5(trim($this->aadhaar))
         ]);
         return [
             'status' => true

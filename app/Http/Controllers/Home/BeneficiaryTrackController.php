@@ -200,7 +200,7 @@ class BeneficiaryTrackController extends Controller
                 $ben_status = 'Inactive';
                 $ben_status_color = 'red';
                 if ($paymentDetails->ben_status == 0) {
-                    $ben_status_reason = 'Duplicate Aadhar Beneficiary';
+                    $ben_status_reason = 'Duplicate Aadhaar Beneficiary';
                 } elseif ($paymentDetails->ben_status == 9) {
                     $ben_status_reason = 'DOB or name or ss_card is null';
                 } elseif ($paymentDetails->ben_status == 77) {

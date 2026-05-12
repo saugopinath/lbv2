@@ -692,10 +692,10 @@ class DynamicForm extends Component
                                 'application_id' => $this->applicationId,
                                 'beneficiary_id' => $this->beneficiaryId,
                                 'scheme_id' => $this->schemeId,
-                                'aadhar_hash' => $this->aadhaarPayload['hash'],
-                                'encoded_aadhar' => $this->aadhaarPayload['encoded'],
+                                'aadhaar_hash' => $this->aadhaarPayload['hash'],
+                                'encoded_aadhaar' => $this->aadhaarPayload['encoded'],
                                 'encode_key' => null,
-                                'aadhar_vault' => $this->aadhaarPayload['hash'],
+                                'aadhaar_vault' => $this->aadhaarPayload['hash'],
                             ]
                         );
                         if ($this->grievanceId) {

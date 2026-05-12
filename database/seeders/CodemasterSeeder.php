@@ -440,7 +440,7 @@ class CodemasterSeeder extends Seeder
             ),
             array(
                 "name" => "Aadhaar Document Not Uploaded or Not Clearly Visible",
-                "short_name" => "VisibleAadharDocument",
+                "short_name" => "VisibleAadhaarDocument",
                 "parent_short_code" => "rejection_cause",
                  "code" => "124",
             ),
@@ -493,8 +493,8 @@ class CodemasterSeeder extends Seeder
                  "code" => "133",
             ),
             array(
-                "name" => "NO AADHAR NUMBER",
-                "short_name" => "no_aadhar_number",
+                "name" => "NO AADHAAR NUMBER",
+                "short_name" => "no_aadhaar_number",
                 "parent_short_code" => "incomplete_details",
                  "code" => "141",
             ),
@@ -505,8 +505,8 @@ class CodemasterSeeder extends Seeder
                  "code" => "142",
             ),
             array(
-                "name" => "NO AADHAR DOCUMENT",
-                "short_name" => "no_aadhar_document",
+                "name" => "NO AADHAAR DOCUMENT",
+                "short_name" => "no_aadhaar_document",
                 "parent_short_code" => "incomplete_details",
                  "code" => "143",
             ),
@@ -541,8 +541,8 @@ class CodemasterSeeder extends Seeder
                  "code" => "148",
             ),
             array(
-                "name" => "DUPLICATE AADHAR NUMBER",
-                "short_name" => "duplicate_aadhar_number",
+                "name" => "DUPLICATE AADHAAR NUMBER",
+                "short_name" => "duplicate_aadhaar_number",
                 "parent_short_code" => "incomplete_details",
                  "code" => "149",
             ),
@@ -644,8 +644,8 @@ class CodemasterSeeder extends Seeder
                  "code" => "164",
             ),
             array(
-                "name" => "Copy of Aadhar Card",
-                "short_name" => "aadhar_card_enc",
+                "name" => "Copy of Aadhaar Card",
+                "short_name" => "aadhaar_card_enc",
                 "parent_short_code" => "ENCDETAILS",
                  "code" => "165",
             ),

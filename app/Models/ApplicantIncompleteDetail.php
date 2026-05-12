@@ -38,10 +38,7 @@ class ApplicantIncompleteDetail extends Model implements Auditable
     {
         return $this->belongsTo(BeneficiaryBankDetail::class, 'application_id');
     }
-    // public function aadhar()
-    // {
-    //     return $this->belongsTo(BeneficiaryAadhaar::class, 'application_id');
-    // }
+
     public function incompleteType()
     {
         return $this->belongsTo(Codemaster::class, 'incomplete_type', 'code');

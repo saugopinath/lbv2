@@ -19,7 +19,7 @@ class DupCheckSchemeConfigSettings extends Component
     {
         $this->schemeId = $schemeId;
         $this->dupcheckOptions = [
-            'Aadhar' => 'Aadhar',
+            'Aadhaar' => 'Aadhaar',
             'Bank'   => 'Bank',
             'Mobile' => 'Mobile',
             'CS' => 'Caste Certificate Number',

@@ -12,7 +12,7 @@ class LbMapping extends Model implements Auditable
     protected $fillable = [
         'lb_id',
         'jnm_id',
-        'aadhar_hash',
+        'aadhaar_hash',
         'payment_suspend'
     ];
 

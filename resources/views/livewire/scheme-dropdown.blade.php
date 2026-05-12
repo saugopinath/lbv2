@@ -56,6 +56,6 @@
 @if ($option == 1 || $option == 4)
     @push('scripts')
         <script src="{{ asset('js/master-data/master-data-v2.js') }}"></script>
-        <script src="{{ asset('js/adhar-verhoeff.js') }}"></script>
+        <script src="{{ asset('js/aadhaar-verhoeff.js') }}"></script>
     @endpush
 @endif

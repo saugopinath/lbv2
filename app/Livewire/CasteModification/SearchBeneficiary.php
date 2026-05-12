@@ -37,13 +37,13 @@ class SearchBeneficiary extends Component
     public $searchOptions = [
         1 => 'Application ID',
         2 => 'Beneficiary ID',
-        3 => 'Aadhar Number',
+        3 => 'Aadhaar Number',
         4 => 'Mobile No',
     ];
     protected $searchTypeMap = [
         1 => 'application_id',
         2 => 'beneficiary_id',
-        3 => 'aadhar_vault',
+        3 => 'aadhaar_vault',
         4 => 'mobile_no',
     ];
 
@@ -124,9 +124,9 @@ class SearchBeneficiary extends Component
                             $fail('This field must be numeric.');
                         }
                         break;
-                    case 3: // Aadhar Number
+                    case 3: // Aadhaar Number
                         if (!preg_match('/^\d{12}$/', $value)) {
-                            $fail('Aadhar number must be exactly 12 digits.');
+                            $fail('Aadhaar number must be exactly 12 digits.');
                         }
                         break;
                     case 4: // Mobile No
@@ -159,9 +159,9 @@ class SearchBeneficiary extends Component
         if (in_array($column, ['application_id', 'beneficiary_id'])) {
             $modelClass   = BeneficiaryPersonalDetail::class;
             $searchColumn = $column;
-        } elseif ($column === 'aadhar_vault') {
+        } elseif ($column === 'aadhaar_vault') {
             $modelClass   = BeneficiaryAadhaar::class;
-            $searchColumn = 'aadhar_vault';
+            $searchColumn = 'aadhaar_vault';
             $searchValue  = md5($this->searchValue);
         } else {
             $fieldManager = SchemeTabFormField::with('tabMaster')

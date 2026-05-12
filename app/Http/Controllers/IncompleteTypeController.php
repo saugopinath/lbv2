@@ -54,7 +54,7 @@ class IncompleteTypeController extends Controller
             $schemeId = Crypt::decrypt($schemeId);
 
             try {
-                $aadharData = $request->aadhar_modification;
+                $aadharData = $request->aadhaar_modification;
                 $rawMobileData = $request->dup_mobile;
                 $mobileData = is_array($rawMobileData) ? ($rawMobileData[$realId] ?? null) : $rawMobileData;
                 $bankActionData = (int) $request->bank_action;
@@ -286,7 +286,7 @@ class IncompleteTypeController extends Controller
             $schemeId = Crypt::decrypt($schemeId);
 
             try {
-                $aadharData = $request->aadhar_modification;
+                $aadharData = $request->aadhaar_modification;
                 $rawMobileData = $request->dup_mobile;
                 $mobileData = is_array($rawMobileData) ? ($rawMobileData[$realId] ?? null) : $rawMobileData;
                 $bankActionData = (int) $request->bank_action;
@@ -507,7 +507,7 @@ class IncompleteTypeController extends Controller
     {
         $realId = Crypt::decrypt($id);
 
-        $aadharData = $request->aadhar_modification;
+        $aadharData = $request->aadhaar_modification;
         $rawMobileData = $request->dup_mobile;
         $mobileData = is_array($rawMobileData) ? ($rawMobileData[$realId] ?? null) : $rawMobileData;
         $confirmAccData = $request->confirmbankaccountnumber;
