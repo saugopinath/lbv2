@@ -85,6 +85,11 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
         }
     }
 
+    public function incompleteDetails()
+    {
+        return $this->hasMany(ApplicantIncompletDeatil::class, 'application_id', 'application_id');
+    }
+
     public function toSearchableArray()
     {
         $this->loadMissing('contact');
