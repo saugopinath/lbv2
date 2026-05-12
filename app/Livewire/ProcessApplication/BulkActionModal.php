@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Carbon\Carbon;
 
 class BulkActionModal extends Component
 {
@@ -148,6 +149,7 @@ class BulkActionModal extends Component
                 try {
                     $dbData = [
                         'next_level_role_id' => $this->nextLabelRoleId,
+                        'verification_date' => Carbon::now()->toDateString(),
                     ];
                     $existingRecord = BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->first();
                     $existingRecord->update($dbData);
@@ -189,6 +191,7 @@ class BulkActionModal extends Component
                     $dbData = [
                         'next_level_role_id' => $this->nextLabelRoleId,
                         'is_clean' => 1,
+                        'approval_date' => Carbon::now()->toDateString(),
                     ];
                     $existingRecord = BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->first();
                     $existingRecord->update($dbData);
@@ -272,6 +275,7 @@ class BulkActionModal extends Component
                     $dbData = [
                         'next_level_role_id' => $this->nextLabelRoleId,
                         'is_clean' => 10,
+                        'rejection_date' => Carbon::now()->toDateString(),
                     ];
                     $existingRecord = BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->first();
                     $existingRecord->update($dbData);
