@@ -13,14 +13,14 @@
         </p>
     </div>
 
-    @if ($dsregno != null)
+    @if ($ds_registration_no != null)
     <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
         <p class="text-xs text-gray-500">Duare Sarkar Registration No.:</p>
-        <p class="font-semibold text-gray-800">{{ $dsregno }}</p>
+        <p class="font-semibold text-gray-800">{{ $ds_registration_no }}</p>
     </div>
     <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
         <p class="text-xs text-gray-500">Duare Sarkar Date.:</p>
-        <p class="font-semibold text-gray-800">{{ $dsdate }}</p>
+        <p class="font-semibold text-gray-800">{{ $ds_date }}</p>
     </div>
     @endif
     
@@ -44,26 +44,26 @@
     </div>
     <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
         <p class="text-xs text-gray-500">Father Name</p>
-        <p class="font-semibold text-gray-800">{{ $ffname }}</p>
+        <p class="font-semibold text-gray-800">{{ $ben_father_name }}</p>
     </div>
     <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
         <p class="text-xs text-gray-500">Mother Name</p>
-        <p class="font-semibold text-gray-800">{{ $mfname }}</p>
+        <p class="font-semibold text-gray-800">{{ $ben_mother_name }}</p>
     </div>
-    @if ($sfname != null)
+    @if ($ben_spouse_name != null)
     <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
         <p class="text-xs text-gray-500">Spouse Name</p>
-        <p class="font-semibold text-gray-800">{{ $sfname }}</p>
+        <p class="font-semibold text-gray-800">{{ $ben_spouse_name }}</p>
     </div>
     @endif
     <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
         <p class="text-xs text-gray-500">Caste</p>
         <p class="font-semibold text-gray-800">{{ $caste }}</p>
     </div>
-    @if ($cascerno != null)
+    @if ($caste_cer_no != null)
     <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
         <p class="text-xs text-gray-500">SC/ST Certificate No.</p>
-        <p class="font-semibold text-gray-800">{{ $cascerno }}</p>
+        <p class="font-semibold text-gray-800">{{ $caste_cer_no }}</p>
     </div>
     @endif
 </div>

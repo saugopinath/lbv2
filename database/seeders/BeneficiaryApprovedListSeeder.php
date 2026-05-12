@@ -106,7 +106,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
                     'beneficiary_name' => "Test User $i",
                     'age' => rand(18, 65),
                     'dob' => '2000-01-01',
-                    'mar_statu' => 1,
+                    'marital_status' => 1,
                     'caste' => 2,
                     'other_details' => [
                         'mobile_no' => (string) rand(6000000000, 9999999999),

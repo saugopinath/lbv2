@@ -351,7 +351,7 @@ class DynamicForm extends Component
 
     public function updatedFormData($value, $key)
     {
-        if (str_contains($key, 'mar_statu') || str_contains($key, 'marital_status') || str_contains($key, 'is_handicapped')) {
+        if (str_contains($key, 'marital_status') || str_contains($key, 'is_handicapped')) {
             $this->updateAgeLimits();
         }
     }
@@ -887,7 +887,7 @@ class DynamicForm extends Component
 
             // Case 2: Widow
             if (isset($specialCases['2'])) {
-                $marStatus = $this->formData['mar_statu'] ?? $this->formData['marital_status'] ?? null;
+                $marStatus = $this->formData['marital_status'] ?? null;
                 // Check if Widow (Codemaster 34 or Name 'Widow' or common ID 3)
                 if ($marStatus == 34 || strtolower($marStatus) == 'widow' || $marStatus == 3) {
                     $applicableLimits[] = $specialCases['2'];

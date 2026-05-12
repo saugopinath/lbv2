@@ -276,11 +276,11 @@ class DynamicForm extends Component
         $this->appTypeOptions = $options;
     }
 
-    public function updatedFormDataAppType($value)
+    public function updatedFormDataApplicationType($value)
     {
         if (!array_key_exists($value, $this->appTypeOptions)) {
-            $this->addError('formData.app_type', 'Unauthorized application type.');
-            $this->formData['app_type'] = null;
+            $this->addError('formData.application_type', 'Unauthorized application type.');
+            $this->formData['application_type'] = null;
         }
     }
 

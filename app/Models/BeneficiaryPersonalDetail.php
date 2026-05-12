@@ -107,7 +107,7 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
             'dob' => $this->dob,
             'ben_father_name' => $this->ben_father_name,
             'ben_mother_name' => $this->ben_mother_name,
-            'mar_statu' => $this->mar_statu,
+            'marital_status' => $this->marital_status,
             'ben_spouse_name' => $this->ben_spouse_name,
             'caste' => $this->caste,
             'caste_cer_no' => $this->caste_cer_no,

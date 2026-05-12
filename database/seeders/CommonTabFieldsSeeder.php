@@ -185,9 +185,9 @@ class CommonTabFieldsSeeder extends Seeder
                 ],
 
                 [
-                    'field_id' => 'mar_statu',
+                    'field_id' => 'marital_status',
                     'level_name' => 'Marital Status',
-                    'field_name' => 'mar_statu',
+                    'field_name' => 'marital_status',
                     'field_type' => 'select',
                     'options' => [
                         "1" => "Un Married",
@@ -205,7 +205,7 @@ class CommonTabFieldsSeeder extends Seeder
                     'is_multiple' => false,
                     'is_active' => true,
                     'field_position' => 11,
-                    'db_colunm' => 'mar_statu'
+                    'db_colunm' => 'marital_status'
 
                 ],
                 [
@@ -215,9 +215,9 @@ class CommonTabFieldsSeeder extends Seeder
                     'field_type' => 'text',
                     'is_common' => true,
                     'tab_code' => 101,
-                    'validation_rule' => 'required_if:formData.mar_statu,2,3,5',
+                    'validation_rule' => 'required_if:formData.marital_status,2,3,5',
                     'regex' => '^[A-Za-z .]+$',
-                    "dependent_on" => "mar_statu",
+                    "dependent_on" => "marital_status",
                     "dependent_on_values" => ["2", "3", "5"],
                     'section_level_id' => null,
                     'is_multiple' => false,

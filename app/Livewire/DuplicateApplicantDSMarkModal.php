@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class DuplicateApplicantDSMarkModal extends Component
 {
     public $applicantId, $open;
-    public $cdate, $pdate, $reg_no, $ds_date, $cdsphase;
+    public $cdate, $pdate, $ds_registration_no, $ds_date, $cdsphase;
     #[On('opendsMarkModal')]
     public function openModal($id = null)
     {
@@ -27,7 +27,7 @@ class DuplicateApplicantDSMarkModal extends Component
     public function rules()
     {
         $rules = [
-            'reg_no'   => 'required',
+            'ds_registration_no'   => 'required',
             'ds_date'   => "required|date",
         ];
         return $rules;
@@ -35,7 +35,7 @@ class DuplicateApplicantDSMarkModal extends Component
     public function messages()
     {
         return [
-            'reg_no.*'     => 'Registration number is required.',
+            'ds_registration_no.*'     => 'Registration number is required.',
             'ds_date.*'    => 'DS date is required.',
         ];
     }
@@ -49,7 +49,7 @@ class DuplicateApplicantDSMarkModal extends Component
         $olddsdate = $targatedModel->ds_date;
         $olddsphase = $targatedModel->ds_phase;
         $targatedModel->ds_date = $validated['ds_date'];
-        $targatedModel->ds_registration_no = $validated['reg_no'];
+        $targatedModel->ds_registration_no = $validated['ds_registration_no'];
         $targatedModel->ds_phase = $this->cdsphase;
         $targatedModel->application_type = 2;
         $targatedModel->save();
@@ -57,7 +57,7 @@ class DuplicateApplicantDSMarkModal extends Component
         $DsMapRecord->application_id = $this->applicantId;
         $DsMapRecord->new_ds_phase = $this->cdsphase;
         $DsMapRecord->new_ds_date = $validated['ds_date'];
-        $DsMapRecord->new_ds_registration_no = $validated['reg_no'];
+        $DsMapRecord->new_ds_registration_no = $validated['ds_registration_no'];
         $DsMapRecord->old_ds_phase = $olddsphase;
         $DsMapRecord->old_ds_date = $olddsdate;
         $DsMapRecord->old_ds_registration_no = $olddsres;
@@ -71,7 +71,7 @@ class DuplicateApplicantDSMarkModal extends Component
     }
     public function resetForm()
     {
-        $this->reset(['reg_no', 'ds_date']);
+        $this->reset(['ds_registration_no', 'ds_date']);
     }
     public function render()
     {

@@ -309,8 +309,8 @@
                     "tab_field_id": 11,
                     "scheme_id": 20,
                     "level_name": "Marital Status",
-                    "field_name": "mar_statu",
-                    "field_id": "mar_statu",
+                    "field_name": "marital_status",
+                    "field_id": "marital_status",
                     "field_type": "select",
                     "options": {
                         "1": "Un Married",
@@ -320,7 +320,7 @@
                         "5": "Widower"
                     },
                     "is_common": true,
-                    "db_column": "mar_statu",
+                    "db_column": "marital_status",
                     "is_mandatory": 0,
                     "tab_code": 101,
                     "validation_rule": "required",

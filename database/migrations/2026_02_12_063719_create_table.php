@@ -56,7 +56,7 @@ return new class extends Migration {
                 dob date,
                 ben_father_name varchar(250),
                 ben_mother_name varchar(250),
-                mar_statu integer,
+                marital_status integer,
                 ben_spouse_name varchar(250),
                 caste smallint,
                 caste_cer_no varchar(250),
