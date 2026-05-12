@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('workflowstep_rolemappings', function (Blueprint $table) {
-            $table->dropColumn(['module_id', 'is_first_step', 'action_type']);
+            $table->dropColumn(['module_id', 'is_first_step', 'is_final_step', 'action_type']);
         });
     }
 };
