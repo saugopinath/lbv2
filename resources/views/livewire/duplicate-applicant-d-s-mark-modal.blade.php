@@ -33,7 +33,7 @@
                             required wire:model="ds_registration_no" />
                     </div>
                     <div>
-                        <x-form.input type="date" name="ds_date" id="ds_date" label="Duare Sakar Date" required wire:model="ds_date" :max="$cdate" :min="$pdate" />
+                        <x-form.input type="date" name="duaresarkarDate" id="duaresarkarDate" label="Duare Sakar Date" required wire:model="duaresarkarDate" :max="$currentDate" :min="$previouesDate" />
                     </div>
                 </div>
             </div>

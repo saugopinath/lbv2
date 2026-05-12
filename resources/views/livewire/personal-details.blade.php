@@ -14,7 +14,7 @@
                 </x-form.select>
             </div>
             <div>
-                <x-form.input type="date" name="application_date" id="application_date" label="Application Date:" required wire:model="application_date" :max="$cdate" :min="$pdate" />
+                <x-form.input type="date" name="application_date" id="application_date" label="Application Date:" required wire:model="application_date" :max="$currentDate" :min="$previouesDate" />
             </div>
         </div>
         @endif
@@ -28,7 +28,7 @@
                         required wire:model="ds_registration_no" />
                 </div>
                 <div>
-                    <x-form.input type="date" name="ds_date" id="ds_date" label="Duare Sakar Date" required wire:model="ds_date" :max="$cdate" :min="$pdate" />
+                    <x-form.input type="date" name="duaresarkarDate" id="duaresarkarDate" label="Duare Sakar Date" required wire:model="duaresarkarDate" :max="$currentDate" :min="$previouesDate" />
                 </div>
             </div>
         </template>
@@ -76,7 +76,7 @@
                 <x-form.input
                     id="age"
                     name="age"
-                    label="Age (as on {{ $currentDate }})"
+                    label="Age (as on {{ $currentDateDMY }})"
                     wire:model="age" disabled />
                 <x-loading-spinner wire:target="dob" />
             </div>

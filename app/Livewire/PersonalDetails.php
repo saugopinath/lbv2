@@ -20,8 +20,8 @@ use App\Models\CmoSmData;
 class PersonalDetails extends Component
 {
     public $app_types, $genders, $castes, $marital_statuses = [];
-    public $mode, $currentDate, $minDOB, $maxDOB, $cdate, $pdate;
-    public $application_type, $application_date, $ds_registration_no, $ds_date, $application_id;
+    public $mode, $currentDate, $minDOB, $maxDOB, $previouesDate, $currentDateDMY;
+    public $application_type, $application_date, $ds_registration_no, $duaresarkarDate, $application_id;
     public $beneficiary_name, $mobile, $email, $dob, $age, $marital_status;
     public $ben_father_name, $ben_mother_name, $ben_spouse_name;
     public $caste, $caste_cer_no, $encoded, $hash, $grievance_id, $hideAppTypeSection;
@@ -49,7 +49,7 @@ class PersonalDetails extends Component
         ];
         if ($this->application_type == Codemaster::getIdByCode(42)) {
             $rules['ds_registration_no'] = 'required|string';
-            $rules['ds_date'] = 'required|date';
+            $rules['duaresarkarDate'] = 'required|date';
         }
         if ($this->caste != Codemaster::getIdByCode(173)) {
             $rules['caste_cer_no'] = 'required|string';
@@ -79,7 +79,7 @@ class PersonalDetails extends Component
             'caste.*'      => 'Please select caste.',
             'marital_status.*'  => 'Please select marital status.',
             'ds_registration_no.*'     => 'Registration number is required.',
-            'ds_date.*'    => 'DS date is required.',
+            'duaresarkarDate.*'    => 'DS date is required.',
             'caste_cer_no.*' => 'Caste certificate number is required.',
             'ben_spouse_name.*'     => 'Spouse name is required and must contain only letters and spaces.',
             'email.*'      => 'Please enter a valid email address.',
@@ -116,11 +116,11 @@ class PersonalDetails extends Component
             $this->app_types = [];
         }
 
-        $this->currentDate = Carbon::now()->format('d/m/Y');
+        $this->currentDateDMY = Carbon::now()->format('d/m/Y');
         $this->minDOB = now()->subYears(60)->format('Y-m-d');
         $this->maxDOB = now()->subYears(25)->format('Y-m-d');
-        $this->cdate = Carbon::now()->format('Y-m-d');
-        $this->pdate = Carbon::now()->subYears(2)->format('Y-m-d');
+        $this->currentDate = Carbon::now()->format('Y-m-d');
+        $this->previouesDate = Carbon::now()->subYears(2)->format('Y-m-d');
         $this->mode = $mode;
         // $this->app_types = Codemaster::where('code', 4)->first()->children()->get();
         $this->marital_statuses = Codemaster::where('code', 3)->first()->children()->where('code', '!=', 35)->get();
@@ -131,7 +131,7 @@ class PersonalDetails extends Component
             $this->application_type = $app_det->entry_type;
             $this->application_date = $app_det->created_at->format('d-m-Y');
             if ($this->application_type == Codemaster::getIdByCode(42)) {
-                $this->ds_date = Carbon::parse($app_det->ds_date)->format('d-m-Y');
+                $this->duaresarkarDate = Carbon::parse($app_det->ds_date)->format('d-m-Y');
                 $this->ds_registration_no = $app_det->ds_registration_no;
             }
             $this->beneficiary_name = $app_det->full_name;
@@ -204,7 +204,7 @@ class PersonalDetails extends Component
                     $draftbenPar->email = $validated['email'];
                 }
                 if ($validated['application_type'] == Codemaster::getIdByCode(42)) {
-                    $draftbenPar->ds_date = $validated['ds_date'];
+                    $draftbenPar->ds_date = $validated['duaresarkarDate'];
                     $draftbenPar->ds_registration_no = $validated['ds_registration_no'];
                 }
                 if ($validated['caste'] != Codemaster::getIdByCode(173)) {
@@ -255,7 +255,7 @@ class PersonalDetails extends Component
                     $draftbenPar->email = $validated['email'];
                 }
                 if ($validated['application_type'] == Codemaster::getIdByCode(42)) {
-                    $draftbenPar->ds_date = $validated['ds_date'];
+                    $draftbenPar->ds_date = $validated['duaresarkarDate'];
                     $draftbenPar->ds_registration_no = $validated['ds_registration_no'];
                 }
                 if ($validated['caste'] != Codemaster::getIdByCode(173)) {

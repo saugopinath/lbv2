@@ -13,22 +13,22 @@ use Illuminate\Support\Facades\DB;
 class DuplicateApplicantDSMarkModal extends Component
 {
     public $applicantId, $open;
-    public $cdate, $pdate, $ds_registration_no, $ds_date, $cdsphase;
+    public $currentDate, $previouesDate, $ds_registration_no, $duaresarkarDate, $currentdsPhase;
     #[On('opendsMarkModal')]
     public function openModal($id = null)
     {
         $this->applicantId = $id;
         $this->dispatch('show-modal');
-        $this->cdate = Carbon::now()->format('Y-m-d');
-        $this->pdate = DsPhase::where('is_current', true)->value('base_dob');
-        $this->cdsphase = DsPhase::where('is_current', true)->value('phase_code');
+        $this->currentDate = Carbon::now()->format('Y-m-d');
+        $this->previouesDate = DsPhase::where('is_current', true)->value('base_dob');
+        $this->currentdsPhase = DsPhase::where('is_current', true)->value('phase_code');
     }
     public function mount() {}
     public function rules()
     {
         $rules = [
             'ds_registration_no'   => 'required',
-            'ds_date'   => "required|date",
+            'duaresarkarDate'   => "required|date",
         ];
         return $rules;
     }
@@ -36,7 +36,7 @@ class DuplicateApplicantDSMarkModal extends Component
     {
         return [
             'ds_registration_no.*'     => 'Registration number is required.',
-            'ds_date.*'    => 'DS date is required.',
+            'duaresarkarDate.*'    => 'DS date is required.',
         ];
     }
     public function saveDsMark()
@@ -48,15 +48,15 @@ class DuplicateApplicantDSMarkModal extends Component
         $olddsres = $targatedModel->ds_registration_no;
         $olddsdate = $targatedModel->ds_date;
         $olddsphase = $targatedModel->ds_phase;
-        $targatedModel->ds_date = $validated['ds_date'];
+        $targatedModel->ds_date = $validated['duaresarkarDate'];
         $targatedModel->ds_registration_no = $validated['ds_registration_no'];
-        $targatedModel->ds_phase = $this->cdsphase;
+        $targatedModel->ds_phase = $this->currentdsPhase;
         $targatedModel->application_type = 2;
         $targatedModel->save();
         $DsMapRecord = new DsMapRecord;
         $DsMapRecord->application_id = $this->applicantId;
-        $DsMapRecord->new_ds_phase = $this->cdsphase;
-        $DsMapRecord->new_ds_date = $validated['ds_date'];
+        $DsMapRecord->new_ds_phase = $this->currentdsPhase;
+        $DsMapRecord->new_ds_date = $validated['duaresarkarDate'];
         $DsMapRecord->new_ds_registration_no = $validated['ds_registration_no'];
         $DsMapRecord->old_ds_phase = $olddsphase;
         $DsMapRecord->old_ds_date = $olddsdate;
@@ -71,7 +71,7 @@ class DuplicateApplicantDSMarkModal extends Component
     }
     public function resetForm()
     {
-        $this->reset(['ds_registration_no', 'ds_date']);
+        $this->reset(['ds_registration_no', 'duaresarkarDate']);
     }
     public function render()
     {

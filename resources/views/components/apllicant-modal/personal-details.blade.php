@@ -20,7 +20,7 @@
     </div>
     <div class="bg-white p-3 rounded-lg shadow hover:shadow-md transition">
         <p class="text-xs text-gray-500">Duare Sarkar Date.:</p>
-        <p class="font-semibold text-gray-800">{{ $ds_date }}</p>
+        <p class="font-semibold text-gray-800">{{ $duaresarkarDate }}</p>
     </div>
     @endif
     
