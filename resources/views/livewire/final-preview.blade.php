@@ -55,7 +55,7 @@
         <div class="p-4">
             @includeIf("schemes.scheme_{$schemeId}.{$activeTab}", ['schemeId' => $schemeId, 'form_preview' => $form_preview, 'applicationId' => $applicationId])
         </div>
-        @if($ram == null)
+        @if($saveNext == null)
             {{-- ACTION BUTTONS --}}
             <div class="flex justify-between mt-6">
 

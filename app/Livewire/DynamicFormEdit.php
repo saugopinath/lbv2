@@ -33,7 +33,7 @@ class DynamicForm extends Component
     public bool $isLast = false;
     public $prevTab = null;
     public $nextTab = null;
-    public $ram, $form_preview;
+    public $saveNext, $form_preview;
     public array $completedTabs = [];
     public bool $allTabsCompleted = false;
     public $applicationId;
@@ -59,7 +59,7 @@ class DynamicForm extends Component
     ];
     /* ================= MOUNT ================= */
 
-    public function mount($schemeId, $schemeName = null, $ram = null, $applicationId = 150000019, $beneficiaryId = 700000019, $form_preview = null)
+    public function mount($schemeId, $schemeName = null, $saveNext = null, $applicationId = 150000019, $beneficiaryId = 700000019, $form_preview = null)
     {
 
         if (!WorkFlowPermissionHelper::canCreateEntry()) {
@@ -75,7 +75,7 @@ class DynamicForm extends Component
         $this->schemeId = $schemeId;
         $this->schemeName = $schemeName;
         $this->heading = 'Government Of West Bengal ' . $this->schemeName . ' Scheme';
-        $this->ram = $ram;
+        $this->saveNext = $saveNext;
         $this->form_preview = $form_preview;
         $this->applicationId = $applicationId;
         $this->beneficiaryId = $beneficiaryId;

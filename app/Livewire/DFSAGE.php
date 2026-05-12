@@ -48,7 +48,7 @@ class DynamicForm extends Component
 
     public $nextTab = null;
 
-    public $ram, $grievanceId;
+    public $saveNext, $grievanceId;
 
     public $form_preview;
 
@@ -99,7 +99,7 @@ class DynamicForm extends Component
         'aadhaarCheckedReset' => 'onAadhaarCheckedReset',
     ];
 
-    public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null)
+    public function mount($schemeId = null, $schemeName = null, $saveNext = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null)
     {
 
         if (!WorkFlowPermissionHelper::canEntry($schemeId)) {
@@ -115,7 +115,7 @@ class DynamicForm extends Component
         $this->schemeId = $schemeId;
         $this->schemeName = $schemeName;
         $this->heading = 'Government Of West Bengal ' . $this->schemeName . ' Scheme';
-        $this->ram = $ram;
+        $this->saveNext = $saveNext;
         $this->form_preview = $form_preview;
         $this->applicationId = $applicationId;
         $this->beneficiaryId = $beneficiaryId;

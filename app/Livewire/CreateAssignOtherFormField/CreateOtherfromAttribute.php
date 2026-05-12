@@ -177,10 +177,10 @@ class CreateOtherfromAttribute extends Component
     {
         if ($value === 'yes') {
 
-            $ram = SchemeTabBasefield::find($this->depenent_on);
+            $isExists = SchemeTabBasefield::find($this->depenent_on);
 
-            if ($ram && is_array($ram->options)) {
-                $this->depvaluesopt = collect($ram->options)
+            if ($isExists && is_array($isExists->options)) {
+                $this->depvaluesopt = collect($isExists->options)
                     ->toArray();
             }
         } else {
@@ -198,11 +198,11 @@ class CreateOtherfromAttribute extends Component
         // ALL = "1"
         if (in_array('0', $selectedValues)) {
 
-            $ram = SchemeTabBasefield::find($this->depenent_on);
+            $isExists = SchemeTabBasefield::find($this->depenent_on);
 
-            if ($ram && is_array($ram->options)) {
+            if ($isExists && is_array($isExists->options)) {
 
-                $this->depvalues = collect($ram->options)
+                $this->depvalues = collect($isExists->options)
                     ->keys()
                     ->map(fn($k) => (string) $k)
                     ->reject(fn($k) => $k === '0') // ALL remove
