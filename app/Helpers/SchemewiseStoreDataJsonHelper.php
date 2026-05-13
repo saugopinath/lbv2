@@ -266,17 +266,13 @@ class SchemewiseStoreDataJsonHelper
         $dynamicAttr = self::generateDynamicInputLogic($name, $validation, $regex);
         if ($name === 'ifscode' || $name === 'ifsc_code') {
             $wireModelMode = 'wire:model.live';
-        } 
-        // বাকি যেসব ফিল্ডে digits বা size আছে সেগুলোতে .blur হবে
-        elseif (str_contains($validation, 'digits') || str_contains($validation, 'size')) {
+        } elseif (str_contains($validation, 'digits') || str_contains($validation, 'size')) {
             $wireModelMode = 'wire:model.blur';
-        } 
-        // অন্য সব সাধারণ ফিল্ডে .live থাকবে
-        else {
+        } else {
             $wireModelMode = 'wire:model.live';
         }
         $isConfirmField = false;
-$isEdit = false;
+        $isEdit = false;
         if (!empty($field['validation_rule'])) {
             $rules = explode('|', $field['validation_rule']);
             $isRequired = in_array('required', $rules, true);
@@ -589,8 +585,11 @@ $isEdit = false;
             case 'select':
                 $optionsHtml = '';
                 foreach ($options as $key => $text) {
-                    if (is_int($key)) { $key = $text; }
-                    $key = e($key); $text = e($text);
+                    if (is_int($key)) {
+                        $key = $text;
+                    }
+                    $key = e($key);
+                    $text = e($text);
                     $optionsHtml .= "<option value=\"{$key}\">{$text}</option>\n";
                 }
                 $inputHtml = <<<BLADE
@@ -609,8 +608,11 @@ $isEdit = false;
             case 'radio':
                 $radioHtml = '';
                 foreach ($options as $key => $text) {
-                    if (is_int($key)) { $key = $text; }
-                    $key = e($key); $text = e($text);
+                    if (is_int($key)) {
+                        $key = $text;
+                    }
+                    $key = e($key);
+                    $text = e($text);
                     $radioHtml .= <<<HTML
                     <label class="flex items-center gap-2">
                         <input type="radio" name="{$name}" value="{$key}" wire:model.live="formData.{$name}" />
@@ -668,8 +670,11 @@ $isEdit = false;
                 case 'select':
                     $optionsHtml = '';
                     foreach ($options as $key => $text) {
-                        if (is_int($key)) { $key = $text; }
-                        $key = e($key); $text = e($text);
+                        if (is_int($key)) {
+                            $key = $text;
+                        }
+                        $key = e($key);
+                        $text = e($text);
                         $optionsHtml .= "<option value=\"{$key}\">{$text}</option>\n";
                     }
                     $rawInputHtml = "<select name=\"{$name}\" wire:model.live=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-indigo-500 focus:border-indigo-500 inline-block w-auto mx-1\"><option value=\"\">-- Select --</option>{$optionsHtml}</select>";
@@ -677,8 +682,11 @@ $isEdit = false;
                 case 'radio':
                     $radioHtml = '';
                     foreach ($options as $key => $text) {
-                        if (is_int($key)) { $key = $text; }
-                        $key = e($key); $text = e($text);
+                        if (is_int($key)) {
+                            $key = $text;
+                        }
+                        $key = e($key);
+                        $text = e($text);
                         $radioHtml .= "<label class=\"inline-flex items-center gap-1 mx-1\"><input type=\"radio\" name=\"{$name}\" value=\"{$key}\" wire:model.live=\"formData.{$name}\" /> {$text}</label>";
                     }
                     $rawInputHtml = $radioHtml;
@@ -707,7 +715,6 @@ $isEdit = false;
                 <label class="block font-medium text-gray-700 mb-1">{$label}</label>
             @endif
             {$inputHtml}
-            <x-form.error name="formData.{$name}" />
         </div>
         BLADE;
     }

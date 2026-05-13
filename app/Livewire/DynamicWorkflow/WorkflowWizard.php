@@ -179,7 +179,7 @@ class WorkflowWizard extends Component
                 'permissions' => $existingLabel ? (array) ($existingLabel->permissions ?? []) : [],
                 'role_ids' => $mappings
                     ->pluck('role_id')
-                    ->map(fn ($roleId) => (string) $roleId)
+                    ->map(fn($roleId) => (string) $roleId)
                     ->values()
                     ->all(),
                 'is_final' => ($index == $this->stepCount - 1),
@@ -234,7 +234,7 @@ class WorkflowWizard extends Component
             foreach ($this->finalSteps as $index => $stepData) {
                 $rank = ($index + 1) * 10;
                 $successRank = ($index < count($this->finalSteps) - 1) ? ($index + 2) * 10 : 0;
-                $revertRank = ($index > 0) ? $index * 10 : -($this->selectedScheme);
+                $revertRank = ($index > 0) ? $index * 10 : - ($this->selectedScheme);
                 // Find the parent ID for dynamic_op_type
                 $parent = Codemaster::where('short_name', 'dynamic_op_type')->first();
                 $opTypeId = null;
@@ -250,8 +250,8 @@ class WorkflowWizard extends Component
                             $maxCode = ($parent->code * 10);
                         }
                         $codemaster = Codemaster::create([
-                            'name' => strtoupper($module->module_code).' - '.strtoupper($stepData['label']),
-                            'short_name' => $labelSlug,
+                            'name' => strtoupper($stepData['label']),
+                            'short_name' => strtolower($module->module_code) . '_' . $labelSlug,
                             'parent_id' => $parent->id,
                             'parent_short_code' => $parent->short_name,
                             'code' => $maxCode + 1,
@@ -315,7 +315,6 @@ class WorkflowWizard extends Component
                                             $permission->id,
                                             $this->selectedScheme
                                         );
-
                                     }
                                 }
                             }

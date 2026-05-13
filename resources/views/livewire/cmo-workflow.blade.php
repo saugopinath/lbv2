@@ -1,6 +1,8 @@
 <div>
     @if (!$schemeData)
-    <livewire:scheme-dropdown-new :isFinal="true" />
+    <div class="max-w-3xl mx-auto bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+        <livewire:scheme-dropdown-new :isFinal="true" />
+    </div>
     @endif
     @if ($schemeData)
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-2 space-y-4">
