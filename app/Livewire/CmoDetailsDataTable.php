@@ -204,10 +204,10 @@ class CmoDetailsDataTable extends DataTableComponent
                 'mobile_number' => $query->where('other_details->mobile_no', $value),
 
                 'aadhaar_number' => $query->whereHas(
-                    'aadhar',
+                    'aadhaar',
                     fn($q) =>
-                    $q->where('aadhar_vault', md5($value))
-                )->with('aadhar'),
+                    $q->where('aadhaar_vault', md5($value))
+                )->with('aadhaar'),
 
                 'bank_account_number' => $query->whereHas(
                     'bank',

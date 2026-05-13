@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class SchemeTabMapping extends Model
+class SchemeTabMapping extends BaseAuditableModel
 {
     protected $guarded = [];
     public function masterTab()

@@ -77,7 +77,7 @@ class FinalSubmitModal extends Component
         if (!empty($select_lgd['subdivision_id'])) {
             $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
-        $labelRoles = $workflowService->getLabelRoles($this->schemeId);
+        $levelRoles = $workflowService->getLevelRoles($this->schemeId);
         
         DB::beginTransaction();
         try {
@@ -86,7 +86,7 @@ class FinalSubmitModal extends Component
                 ->where($this->filter_data)
                 ->first();
             if ($BeneficiaryDetails) {
-                $BeneficiaryDetails->next_level_role_id = $labelRoles->next_label_role_id;
+                $BeneficiaryDetails->next_level_role_id = $levelRoles->next_level_role_id;
                 $BeneficiaryDetails->is_final = 1;
                 $BeneficiaryDetails->updated_at = now();
                 $BeneficiaryDetails->save();

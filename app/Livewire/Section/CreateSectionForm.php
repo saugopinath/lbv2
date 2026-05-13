@@ -7,6 +7,7 @@ use App\Models\MasterTab;
 use App\Models\Scheme;
 use App\Models\SectionLevelMaster;
 use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class CreateSectionForm extends Component
@@ -58,25 +59,37 @@ class CreateSectionForm extends Component
     {
         $this->validate();
 
-        SectionLevelMaster::create([
-            'scheme_id' => $this->scheme_id,
-            'section_level_name' => $this->section_level_name,
-            'section_level_short_name' => $this->section_short_name,
-            'section_level_code' => 0,
-            'tab_code' => $this->tab_code,
-        ]);
+        DB::beginTransaction();
+        try {
+            SectionLevelMaster::create([
+                'scheme_id' => $this->scheme_id,
+                'section_level_name' => $this->section_level_name,
+                'section_level_short_name' => $this->section_short_name,
+                'section_level_code' => 0,
+                'tab_code' => $this->tab_code,
+            ]);
 
-        $this->reset([
-            'scheme_id',
-            'section_short_name',
-            'tab_code',
-        ]);
-        $this->dispatch('hideLoader');
-        $this->dispatch('toastr', [
-            'type' => 'success',
-            'message' => 'Section created successfully!'
-        ]);
-        $this->dispatch('close-modal');
+            DB::commit();
+
+            $this->reset([
+                'scheme_id',
+                'section_short_name',
+                'tab_code',
+            ]);
+            $this->dispatch('hideLoader');
+            $this->dispatch('toastr', [
+                'type' => 'success',
+                'message' => 'Section created successfully!'
+            ]);
+            $this->dispatch('close-modal');
+        } catch (\Exception $e) {
+            DB::rollBack();           
+            $this->dispatch('hideLoader');
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Something went wrong while creating the section.'
+            ]);
+        }
     }
     public function cancel()
     {

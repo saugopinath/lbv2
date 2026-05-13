@@ -19,26 +19,26 @@ return new class extends Migration
             // Workflow / role
             $table->bigInteger('next_level_role_id')->nullable();
             // Dates
-            $table->date('app_date')->nullable();
+            $table->date('application_date')->nullable();
             $table->date('ds_date')->nullable();
             $table->date('dob')->nullable();
 
             // Personal info
             $table->integer('age')->nullable();
-            $table->string('full_name', 150)->nullable();
-            $table->string('mfname', 150)->nullable();   // mother/father?
-            $table->string('ffname', 150)->nullable();
-            $table->string('sfname', 150)->nullable();
+            $table->string('beneficiary_name', 150)->nullable();
+            $table->string('ben_mother_name', 150)->nullable();
+            $table->string('ben_father_name', 150)->nullable();
+            $table->string('ben_spouse_name', 150)->nullable();
 
             // Contact
-            $table->string('email_id', 150)->nullable();
+            $table->string('email', 150)->nullable();
             // Application meta
-            $table->string('app_type', 50)->nullable();
-            $table->string('reg_no', 100)->nullable();
+            $table->string('application_type', 50)->nullable();
+            $table->string('ds_registration_no', 100)->nullable();
             // Social details
-            $table->integer('mar_statu')->nullable();
+            $table->integer('marital_status')->nullable();
             $table->integer('caste')->nullable();
-            $table->string('cas_cer_no', 100)->nullable();
+            $table->string('caste_cer_no', 100)->nullable();
             $table->smallInteger('is_final')->default(0);
             $table->integer('created_by_dist_code')->nullable();
             $table->integer('created_by_local_body_code')->nullable();

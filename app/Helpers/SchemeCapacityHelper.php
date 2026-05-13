@@ -13,7 +13,7 @@ use App\Services\WorkflowService;
 class SchemeCapacityHelper
 {
     protected static $filters = [];
-    protected static $nextLabelRoleIds = [];
+    protected static $nextLevelRoleIds = [];
     private static function initFilters($bencreatAdd = null)
     {
         if (!empty($bencreatAdd)) {
@@ -35,11 +35,11 @@ class SchemeCapacityHelper
     {
         $map = WorkflowsteproleMapping::getMinMaxWorkflowStep($schemeId)['max'];
         $workflowService = app(WorkflowService::class);
-        $labelRoles = $workflowService->getLabelRoles($schemeId, $map);
+        $levelRoles = $workflowService->getLevelRoles($schemeId, $map);
         if ($actionType == 1) {
-            self::$nextLabelRoleIds = [$labelRoles->same_label_role_id, $labelRoles->next_label_role_id];
+            self::$nextLevelRoleIds = [$levelRoles->same_level_role_id, $levelRoles->next_level_role_id];
         } elseif ($actionType == 2) {
-            self::$nextLabelRoleIds = [$labelRoles->next_label_role_id];
+            self::$nextLevelRoleIds = [$levelRoles->next_level_role_id];
         }
         self::initFilters($bencreatAdd);
         $res = self::checkScheme($schemeId, $actionType, $selectedTypes);
@@ -144,8 +144,8 @@ class SchemeCapacityHelper
             return ['is_processed' => true];
         $query = BeneficiaryPersonalDetail::where('scheme_id', $schemeId)
             ->whereIn('is_clean', [1, 2]);
-        $query->when(!empty(self::$nextLabelRoleIds), function ($q) {
-            return $q->whereIn('next_level_role_id', self::$nextLabelRoleIds);
+        $query->when(!empty(self::$nextLevelRoleIds), function ($q) {
+            return $q->whereIn('next_level_role_id', self::$nextLevelRoleIds);
         });      
         if ($dbType === 0) {
             $query->whereIn('application_type', [1, 2]);

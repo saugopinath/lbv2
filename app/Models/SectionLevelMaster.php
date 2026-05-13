@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class SectionLevelMaster extends Model
+class SectionLevelMaster extends BaseAuditableModel
 {
     protected $guarded = [];
 }

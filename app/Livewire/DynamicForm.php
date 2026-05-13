@@ -48,7 +48,7 @@ class DynamicForm extends Component
 
     public $nextTab = null;
 
-    public $ram, $grievanceId;
+    public $saveNext, $grievanceId;
 
     public $form_preview;
 
@@ -99,7 +99,7 @@ class DynamicForm extends Component
         'aadhaarCheckedReset' => 'onAadhaarCheckedReset',
     ];
 
-    public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null)
+    public function mount($schemeId = null, $schemeName = null, $saveNext = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null)
     {
 
         if (!WorkFlowPermissionHelper::canEntry($schemeId)) {
@@ -115,7 +115,7 @@ class DynamicForm extends Component
         $this->schemeId = $schemeId;
         $this->schemeName = $schemeName;
         $this->heading = 'Government Of West Bengal ' . $this->schemeName . ' Scheme';
-        $this->ram = $ram;
+        $this->saveNext = $saveNext;
         $this->form_preview = $form_preview;
         $this->applicationId = $applicationId;
         $this->beneficiaryId = $beneficiaryId;
@@ -692,10 +692,10 @@ class DynamicForm extends Component
                                 'application_id' => $this->applicationId,
                                 'beneficiary_id' => $this->beneficiaryId,
                                 'scheme_id' => $this->schemeId,
-                                'aadhar_hash' => $this->aadhaarPayload['hash'],
-                                'encoded_aadhar' => $this->aadhaarPayload['encoded'],
+                                'aadhaar_hash' => $this->aadhaarPayload['hash'],
+                                'encoded_aadhaar' => $this->aadhaarPayload['encoded'],
                                 'encode_key' => null,
-                                'aadhar_vault' => $this->aadhaarPayload['hash'],
+                                'aadhaar_vault' => $this->aadhaarPayload['hash'],
                             ]
                         );
                         if ($this->grievanceId) {
@@ -975,7 +975,10 @@ class DynamicForm extends Component
         );
         if (is_array($result)) {
             $this->addError($result['field'], $result['message']);
-
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => $result['message'],
+            ]);
             return false;
         }
 

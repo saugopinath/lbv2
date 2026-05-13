@@ -32,7 +32,7 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     {
         return $this->hasOne(BeneficiaryBankDetail::class, 'application_id', 'application_id');
     }
-    public function aadhar()
+    public function aadhaar()
     {
         return $this->hasOne(BeneficiaryAadhaar::class, 'application_id', 'application_id');
     }
@@ -50,12 +50,7 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     //     $data['new_values']['method'] = \Illuminate\Support\Facades\Request::method();
     //     $data['new_values']['referrer'] = \Illuminate\Support\Facades\Request::header('referer');
     //     return $data;
-    // }
-
-    public function aadhaar()
-    {
-        return $this->hasOne(BeneficiaryAadhaar::class, 'application_id');
-    }
+    // }    
 
     public function banks()
     {
@@ -107,7 +102,7 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
             'dob' => $this->dob,
             'ben_father_name' => $this->ben_father_name,
             'ben_mother_name' => $this->ben_mother_name,
-            'mar_statu' => $this->mar_statu,
+            'marital_status' => $this->marital_status,
             'ben_spouse_name' => $this->ben_spouse_name,
             'caste' => $this->caste,
             'caste_cer_no' => $this->caste_cer_no,

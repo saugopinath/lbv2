@@ -173,11 +173,11 @@ class UpdateRevertCaste extends Component
                     'old_data' => $this->oldData,
                     'new_data' => $this->newData,
                     'caste_request_type' => $this->newData['caste'],
-                    'next_level_requested_id' => $firstStep->next_label_role_id,
+                    'next_level_requested_id' => $firstStep->next_level_role_id,
                     'request_id' => $logdetails->id,
                     'module_id' => $sm->id,
                     'current_step_id' => $firstStep->workflow_step_id,
-                    'current_rank' => $firstStep->next_label_role_id,
+                    'current_rank' => $firstStep->next_level_role_id,
                 ]);
                 $UpdateCaste = $existingActiveRequest;
                 $successMessage = 'Modification request updated successfully!';
@@ -189,11 +189,11 @@ class UpdateRevertCaste extends Component
                     'old_data' => $this->oldData,
                     'new_data' => $this->newData,
                     'caste_request_type' => $this->newData['caste'],
-                    'next_level_requested_id' => $firstStep->next_label_role_id,
+                    'next_level_requested_id' => $firstStep->next_level_role_id,
                     'request_id' => $logdetails->id,
                     'module_id' => $sm->id,
                     'current_step_id' => $firstStep->workflow_step_id,
-                    'current_rank' => $firstStep->next_label_role_id,
+                    'current_rank' => $firstStep->next_level_role_id,
                     'created_by' => Auth::id(),
                 ]);
                 $successMessage = 'Modification request submitted successfully!';

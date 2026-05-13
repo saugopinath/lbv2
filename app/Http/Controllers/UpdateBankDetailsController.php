@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BeneficiaryPersonalDetail;
 use App\Models\Codemaster;
 use Illuminate\Http\Request;
-use App\Helpers\ChechDupHelper;
+use App\Helpers\CheckDupHelper;
 use App\Helpers\CheckAuthHelper;
 use App\Models\AcceptRejectInfo;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +20,7 @@ class UpdateBankDetailsController extends Controller
     {
         if (CheckAuthHelper::isCommonApprover()) {
             $header = 'Update Bank Details For Approved Beneficiary';
-            return view('UpdateBankDetailsView.bank_deatils_index', compact('header'));
+            return view('UpdateBankDetailsView.bank_details_index', compact('header'));
         } else {
             $header = 'Opps! you are not able to perform any action';
             return view('CommonRestictedpage.index', compact('header'));
@@ -41,9 +41,9 @@ class UpdateBankDetailsController extends Controller
         $mobileNumber = $query?->contact?->mobile_no ?? '';
 
         if ($type === 'bank') {
-            return view('UpdateBankDetailsView.bank_deatils_update', compact('application_id', 'scheme_id'));
+            return view('UpdateBankDetailsView.bank_details_update', compact('application_id', 'scheme_id'));
         } elseif ($type === 'mobile') {
-            return view('UpdateBankDetailsView.mobile_deatils_update', compact('application_id', 'mobileNumber', 'scheme_id'));
+            return view('UpdateBankDetailsView.mobile_details_update', compact('application_id', 'mobileNumber', 'scheme_id'));
         }
     }
     public function updateMobile(Request $request)
@@ -221,14 +221,14 @@ class UpdateBankDetailsController extends Controller
         $confirmAccData = $request->confirmbankaccountnumber;
 
         if (!empty($confirmAccData)) {
-            $bankCheck = ChechDupHelper::checkBankMobileDuplicate('bank', $confirmAccData, $scheme_id);
+            $bankCheck = CheckDupHelper::checkBankMobileDuplicate('bank', $confirmAccData, $scheme_id);
             if ($bankCheck !== true) {
                 return $bankCheck;
             }
         }
 
         if (!empty($mobileData)) {
-            $mobileCheck = ChechDupHelper::checkBankMobileDuplicate('mobile', $mobileData, $scheme_id);
+            $mobileCheck = CheckDupHelper::checkBankMobileDuplicate('mobile', $mobileData, $scheme_id);
             if ($mobileCheck !== true) {
                 return $mobileCheck;
             }

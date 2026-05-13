@@ -8,7 +8,7 @@ use Livewire\Component;
 class AddUserForm extends Component
 {
     public $fullname;
-    public $fullnameaadhar;
+    public $fullnameaadhaar;
     public $displayname;
     public $email;
     public $mobile;
@@ -17,7 +17,7 @@ class AddUserForm extends Component
 
     protected $rules = [
         'fullname' => 'required|string|max:255',
-        'fullnameaadhar' => 'required|string|max:255',
+        'fullnameaadhaar' => 'required|string|max:255',
         'displayname' => 'required|string|max:255',
         'email' => 'required|email|unique:users,email',
         'mobile' => 'required|string|max:10',
@@ -35,7 +35,7 @@ class AddUserForm extends Component
 
         dd([
             'fullname' => $this->fullname,
-            'fullnameaadhar' => $this->fullnameaadhar,
+            'fullnameaadhaar' => $this->fullnameaadhaar,
             'displayname' => $this->displayname,
             'email' => $this->email,
             'mobile' => $this->mobile,
@@ -51,7 +51,7 @@ class AddUserForm extends Component
         ]);
         */
 
-        $this->reset(['fullname', 'fullnameaadhar', 'displayname', 'email', 'mobile']);
+        $this->reset(['fullname', 'fullnameaadhaar', 'displayname', 'email', 'mobile']);
     }
 
     public function render()

@@ -1,8 +1,8 @@
 (function () {
 
     function toggleSpouseName(forceHide = false) {
-        const maritalSelect = document.querySelector('select[name="mar_statu"]');
-        const spouseInput   = document.querySelector('input[name="sfname"]');
+        const maritalSelect = document.querySelector('select[name="marital_status"]');
+        const spouseInput   = document.querySelector('input[name="ben_spouse_name"]');
 
         if (!maritalSelect || !spouseInput) return;
 
@@ -33,7 +33,7 @@
 
     // ✅ Change listener
     document.addEventListener('change', function (e) {
-        if (e.target.name === 'mar_statu') {
+        if (e.target.name === 'marital_status') {
             toggleSpouseName();
         }
     });

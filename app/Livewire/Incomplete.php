@@ -5,7 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
-class Incomplet extends Component
+class Incomplete extends Component
 {
     public bool $schemeData = false;
     public $schemeId, $schemeName = null;
@@ -27,6 +27,6 @@ class Incomplet extends Component
     }
     public function render()
     {
-        return view('livewire.incomplet');
+        return view('livewire.incomplete');
     }
 }

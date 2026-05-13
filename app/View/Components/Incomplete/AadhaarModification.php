@@ -4,7 +4,7 @@ namespace App\View\Components\Incomplete;
 
 use Illuminate\View\Component;
 
-class AadharModification extends Component
+class AadhaarModification extends Component
 {
     public $aadhaarIssues, $schemeId, $stage;
 
@@ -30,8 +30,9 @@ class AadharModification extends Component
                 $stage = 'approver';
             }
 
-        }        
-        return view('components.incomplete.aadhar-modification', compact('stage'));
+        }
+        //  dd($stage);
+        return view('components.incomplete.aadhaar-modification', compact('stage'));
 
     }
 }

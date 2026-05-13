@@ -1,3 +1,3 @@
 <x-layouts.app>
-    <livewire:incomplet :stage="$stage"/>
+    <livewire:incomplete :stage="$stage"/>
 </x-layouts.app>

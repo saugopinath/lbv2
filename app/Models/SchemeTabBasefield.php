@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 
-class SchemeTabBasefield extends Model
-{
+class SchemeTabBasefield extends BaseAuditableModel
+{ 
     protected $guarded = [];
 
     protected $casts = [

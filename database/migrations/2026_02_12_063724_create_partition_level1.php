@@ -81,21 +81,21 @@ return new class extends Migration {
 
             /*
             |--------------------------------------------------------------------------
-            | 4️⃣ beneficiary_aadhar
+            | 4️⃣ beneficiary_aadhaar
             |--------------------------------------------------------------------------
             */
 
             $conn->statement("
-                CREATE TABLE IF NOT EXISTS {$this->schema}.beneficiary_aadhars_{$schemeId}
-                PARTITION OF {$this->schema}.beneficiary_aadhars
+                CREATE TABLE IF NOT EXISTS {$this->schema}.beneficiary_aadhaars_{$schemeId}
+                PARTITION OF {$this->schema}.beneficiary_aadhaars
                 FOR VALUES IN ({$schemeId})
                 PARTITION BY LIST (is_clean)
             ");
 
             foreach ($this->isCleans as $isClean) {
                 $conn->statement("
-                    CREATE TABLE IF NOT EXISTS {$this->schema}.beneficiary_aadhars_{$schemeId}_{$isClean}
-                    PARTITION OF {$this->schema}.beneficiary_aadhars_{$schemeId}
+                    CREATE TABLE IF NOT EXISTS {$this->schema}.beneficiary_aadhaars_{$schemeId}_{$isClean}
+                    PARTITION OF {$this->schema}.beneficiary_aadhaars_{$schemeId}
                     FOR VALUES IN ({$isClean})
                 ");
             }
@@ -146,7 +146,7 @@ return new class extends Migration {
                 $conn->statement("DROP TABLE IF EXISTS {$this->schema}.beneficiary_personals_{$schemeId}_{$isClean} CASCADE");
                 $conn->statement("DROP TABLE IF EXISTS {$this->schema}.beneficiary_contacts_{$schemeId}_{$isClean} CASCADE");
                 $conn->statement("DROP TABLE IF EXISTS {$this->schema}.beneficiary_banks_{$schemeId}_{$isClean} CASCADE");
-                $conn->statement("DROP TABLE IF EXISTS {$this->schema}.beneficiary_aadhars_{$schemeId}_{$isClean} CASCADE");
+                $conn->statement("DROP TABLE IF EXISTS {$this->schema}.beneficiary_aadhaars_{$schemeId}_{$isClean} CASCADE");
                 $conn->statement("DROP TABLE IF EXISTS {$this->schema}.beneficiary_documents_{$schemeId}_{$isClean} CASCADE");
                 $conn->statement("DROP TABLE IF EXISTS {$this->schema}.beneficiary_self_declarations_{$schemeId}_{$isClean} CASCADE");
             }
@@ -154,7 +154,7 @@ return new class extends Migration {
             $conn->statement("DROP TABLE IF EXISTS {$this->schema}.beneficiary_personals_{$schemeId} CASCADE");
             $conn->statement("DROP TABLE IF EXISTS {$this->schema}.beneficiary_contacts_{$schemeId} CASCADE");
             $conn->statement("DROP TABLE IF EXISTS {$this->schema}.beneficiary_banks_{$schemeId} CASCADE");
-            $conn->statement("DROP TABLE IF EXISTS {$this->schema}.beneficiary_aadhars_{$schemeId} CASCADE");
+            $conn->statement("DROP TABLE IF EXISTS {$this->schema}.beneficiary_aadhaars_{$schemeId} CASCADE");
             $conn->statement("DROP TABLE IF EXISTS {$this->schema}.beneficiary_documents_{$schemeId} CASCADE");
             $conn->statement("DROP TABLE IF EXISTS {$this->schema}.beneficiary_self_declarations_{$schemeId} CASCADE");
         }

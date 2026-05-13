@@ -16,7 +16,7 @@ class ReactivateModal extends Component
 {
     public $applicantId;
     public $beneficiary_id, $jnmp_name, $dod, $name, $gender, $mobile, $father_name;
-    public $dob, $aadhar_no;
+    public $dob, $aadhaar_no;
     public $reactive_reason;
     public $revert_reason_cause_id, $revert_reason_remarks;
 
@@ -51,7 +51,7 @@ class ReactivateModal extends Component
         $this->name = trim($b->beneficiary_name);
         $this->mobile = $b->mobile_no;
         $this->dob = $b->dob ? date('d-m-Y', strtotime($b->dob)) : '—';
-        $this->aadhar_no = $b->aadhar_no ?? null;
+        $this->aadhaar_no = $b->aadhaar_no ?? null;
 
         $this->father_name = $b->ben_father_name ?? 'N/A';
 

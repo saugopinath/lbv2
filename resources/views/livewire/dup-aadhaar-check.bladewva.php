@@ -43,10 +43,10 @@
     <!-- Aadhaar Input -->
     <div>
         <x-form.input
-            id="check_aadhar"
-            name="aadhar_number"
-            label="Aadhar Number"
-            placeholder="Enter Aadhar Number"
+            id="check_aadhaar"
+            name="aadhaar_number"
+            label="Aadhaar Number"
+            placeholder="Enter Aadhaar Number"
             required
             x-model="aadhaar" x-on:input="aadhaar = $el.value.replace(/[^0-9]/g, '').slice(0,12);
         $el.value = aadhaar;" />

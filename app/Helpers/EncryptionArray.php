@@ -92,7 +92,7 @@ class EncryptionArray
         return $query;
     }
 
-    public static function applyIncompletLocationFilter(
+    public static function applyIncompleteLocationFilter(
         Builder $query,
         ?int $district_id,
         ?int $rural_urban,
@@ -103,7 +103,7 @@ class EncryptionArray
     ): Builder {
 
         if ($filterCode) {
-            $query->where('incomplet_type', $filterCode);
+            $query->where('incomplete_type', $filterCode);
         }
 
         $query->whereHas('contact', function ($q) use ($district_id, $rural_urban, $blockurban, $gpward, $sub_div) {

@@ -6,7 +6,7 @@ use App\Helpers\CheckAuthHelper;
 use Livewire\Component;
 use App\Models\Ifsccodemaster;
 use App\Models\BeneficiaryPersonal;
-use App\Models\ApplicantIncompletDeatil;
+use App\Models\ApplicantIncompleteDetail;
 
 class MismatchLow extends Component
 {
@@ -69,7 +69,7 @@ class MismatchLow extends Component
             $this->confirmbankaccountnumber = old('confirmbankaccountnumber', $old_value['confirmbankaccountnumber'] ?? '');
         }
 
-        $app_det = ApplicantIncompletDeatil::with('banks')
+        $app_det = ApplicantIncompleteDetail::with('banks')
             ->where('application_id', $item->application_id)
             ->first();
 

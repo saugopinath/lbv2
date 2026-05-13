@@ -18,7 +18,7 @@ class DuplicateChecker
         $configs = DB::table('public.dupcheckschemeconfig_settings')
             ->where('scheme_id', $schemeId)
             ->orderByRaw("CASE 
-                WHEN check_with = 'Aadhar' THEN 1 
+                WHEN check_with = 'Aadhaar' THEN 1 
                 WHEN check_with = 'Mobile' THEN 2 
                 WHEN check_with = 'Bank' THEN 3 
                 ELSE 4 END ASC")
@@ -30,11 +30,11 @@ class DuplicateChecker
             $table = '';
             $column = '';
             $formFieldName = '';
-            if ($type === 'Aadhar') {
-                $table = 'pension.beneficiary_aadhars';
-                $column = 'encoded_aadhar';
+            if ($type === 'Aadhaar') {
+                $table = 'pension.beneficiary_aadhaars';
+                $column = 'encoded_aadhaar';
                 $inputValue = $aadhaarPayload['encoded'] ?? null;
-                $formFieldName = 'aadhar_no';
+                $formFieldName = 'aadhaar_no';
             } elseif ($type === 'Mobile') {
                 $table = 'pension.beneficiary_personals';
                 $inputValue = trim($formData['mobile_no'] ?? '');

@@ -6,7 +6,6 @@ use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use App\Models\AgeManagements;
-use App\Attributes\Loggable;
 
 class AgeManagement extends Component
 {
@@ -31,22 +30,28 @@ class AgeManagement extends Component
             $this->minage = $record->min_age;
             $this->maxage = $record->max_age;
             $this->isspecial = $record->is_special ? 'yes' : 'no';
-
-            // JSON ডাটা রিড করা
             if ($record->special_case) {
-                // যদি মডেলে Cast করা না থাকে তবে json_decode ব্যবহার করুন
                 $data = is_array($record->special_case)
                     ? $record->special_case
                     : json_decode($record->special_case, true);
 
                 foreach ($data as $id => $values) {
                     $this->selectedSpecialCases[] = [
-                        'case_id' => (string)$id, // Key টি এখানে আইডি হিসেবে আসবে
+                        'case_id' => (string)$id,
                         'min'     => $values['min'],
                         'max'     => $values['max'],
                     ];
                 }
             }
+        }
+    }
+
+    public function updatedIsspecial($value)
+    {
+        if ($value === 'yes' && empty($this->selectedSpecialCases)) {
+            $this->addSpecialCase();
+        } elseif ($value === 'no') {
+            $this->selectedSpecialCases = [];
         }
     }
 
@@ -80,8 +85,10 @@ class AgeManagement extends Component
     {
         unset($this->selectedSpecialCases[$index]);
         $this->selectedSpecialCases = array_values($this->selectedSpecialCases);
+        if (empty($this->selectedSpecialCases)) {
+            $this->isspecial = 'no';
+        }
     }
-    #[Loggable(level: 'C', nickname: 'Age Management')]
     public function save()
     {
         $rules = [
@@ -91,8 +98,8 @@ class AgeManagement extends Component
 
         if ($this->isspecial === 'yes') {
             $rules['selectedSpecialCases.*.case_id'] = 'required|distinct';
-            $rules['selectedSpecialCases.*.min'] = 'required|integer';
-            $rules['selectedSpecialCases.*.max'] = 'required|integer';
+            $rules['selectedSpecialCases.*.min'] = 'nullable|integer';
+            $rules['selectedSpecialCases.*.max'] = 'nullable|integer';
         }
         $customMessages = [
             'minage.*' => 'General Min Age is Required',

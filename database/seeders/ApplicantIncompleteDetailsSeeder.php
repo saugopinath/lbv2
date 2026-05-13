@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\ApplicantIncompletDeatil;
+use App\Models\ApplicantIncompleteDetail;
 use App\Models\BeneficiaryPersonalDetail;
 
-class ApplicantIncompletDetailsSeeder extends Seeder
+class ApplicantIncompleteDetailsSeeder extends Seeder
 {
     public function run(): void
     {
@@ -57,19 +57,19 @@ class ApplicantIncompletDetailsSeeder extends Seeder
                     break;
                 }
 
-                $exists = ApplicantIncompletDeatil::where('application_id', $applicationId)
-                    ->where('incomplet_type', $type)
+                $exists = ApplicantIncompleteDetail::where('application_id', $applicationId)
+                    ->where('incomplete_type', $type)
                     ->exists();
 
                 if ($exists) {
                     continue;
                 }
 
-                ApplicantIncompletDeatil::updateOrCreate(
+                ApplicantIncompleteDetail::updateOrCreate(
                     [
                         'scheme_id' => $schemeId,
                         'application_id' => $applicationId,
-                        'incomplet_type' => $type,
+                        'incomplete_type' => $type,
                     ],
                     [
                         'beneficiary_id' => null,

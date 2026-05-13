@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->integer('lb_id')->nullable();
             $table->integer('jnm_id')->nullable();
-            $table->string('aadhar_hash')->nullable()->unique();
+            $table->string('aadhaar_hash')->nullable()->unique();
             $table->smallInteger('payment_suspend')->nullable();
 
-            // $table->foreign('aadhar_hash', 'aadhar_hash_fk')->references('aadhar_hash')->on('pension.beneficiary_aadhars')->onDelete('cascade');
+            // $table->foreign('aadhaar_hash', 'aadhaar_hash_fk')->references('aadhaar_hash')->on('pension.beneficiary_aadhaars')->onDelete('cascade');
             $table->timestamps();
         });
     }

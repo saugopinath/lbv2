@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class SchemeAttachedDocMappings extends Model
+class SchemeAttachedDocMappings extends BaseAuditableModel
 {
     protected $table = 'scheme_attached_doc_mappings';
 

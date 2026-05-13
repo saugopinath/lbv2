@@ -132,7 +132,7 @@ public function builder(): Builder
     $query = BeneficiaryPersonalDetail::with(['contact', 'aadhaar']);
     if (!empty($this->value)) {
         $query->whereHas('aadhaar', function ($q) {
-            $q->where('aadhar_hash', $this->value);
+            $q->where('aadhaar_hash', $this->value);
         });
     }
 
@@ -143,7 +143,7 @@ public function builder(): Builder
     // {
     //     $query = BeneficiaryPersonalDetail::with('contact');
     //     $filters = [
-    //         'dup_aadhaar' => 'encoded_aadhar',
+    //         'dup_aadhaar' => 'encoded_aadhaar',
     //         'dup_bank'    => 'bank_account_number',
     //         'dup_mobile'  => 'mobile_no',
     //         'dup_name'    => 'full_name',

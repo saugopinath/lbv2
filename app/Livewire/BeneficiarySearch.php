@@ -156,9 +156,9 @@ class BeneficiarySearch extends Component
         }
         if ($this->isApproved) {
             $getMinMaxWorkflowStep = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->selectedScheme);          
-            $nextLabelRoleId = $workflowService->getLabelRoles($this->selectedScheme, $getMinMaxWorkflowStep['max'])->next_label_role_id;   
+            $nextLevelRoleId = $workflowService->getLevelRoles($this->selectedScheme, $getMinMaxWorkflowStep['max'])->next_level_role_id;   
             $query->where('is_final', 1);
-            $query->where('next_level_role_id', $nextLabelRoleId);
+            $query->where('next_level_role_id', $nextLevelRoleId);
         }
         switch ($key) {
             case 'application_id':
@@ -174,8 +174,8 @@ class BeneficiarySearch extends Component
                 $query->where('other_details->mobile_no', $searchValue);
                 break;
             case 'aadhaar_number':
-                $query->whereHas('aadhar', function ($q) use ($searchValue) {
-                    $q->where('aadhar_vault', md5($searchValue));
+                $query->whereHas('aadhaar', function ($q) use ($searchValue) {
+                    $q->where('aadhaar_vault', md5($searchValue));
                 });
                 break;
             case 'bank_account_number':

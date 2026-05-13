@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class UniqueAppBenId extends Model
+class UniqueAppBenId extends BaseAuditableModel
 {
     protected $table = 'pension.unique_app_ben_ids';
     protected $primaryKey = 'application_id';

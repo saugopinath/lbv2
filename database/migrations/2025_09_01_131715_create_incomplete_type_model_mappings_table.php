@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('incomplet_type_model_mappings', function (Blueprint $table) {
+        Schema::create('incomplete_type_model_mappings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('incomplet_type_code')->unique();
+            $table->unsignedBigInteger('incomplete_type_code')->unique();
             $table->string('table_column');
             $table->string('model_name');
             $table->timestamps();
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('incomplet_type_model_mappings');
+        Schema::dropIfExists('incomplete_type_model_mappings');
     }
 };

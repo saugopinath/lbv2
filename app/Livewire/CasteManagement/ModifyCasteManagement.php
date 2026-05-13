@@ -304,11 +304,11 @@ class ModifyCasteManagement extends Component
                 'old_data' => $this->oldData,
                 'new_data' => $this->newData,
                 'caste_request_type' => $this->newData['caste'],
-                'next_level_requested_id' => $firstStep->next_label_role_id,
+                'next_level_requested_id' => $firstStep->next_level_role_id,
                 'request_id' => $logdetails->id,
                 'module_id' => $sm->id,
                 'current_step_id' => $firstStep->workflow_step_id,
-                'current_rank' => $firstStep->next_label_role_id,
+                'current_rank' => $firstStep->next_level_role_id,
                 'created_by' => Auth::id(),
             ]);
             if ($logdetails && $UpdateCaste) {

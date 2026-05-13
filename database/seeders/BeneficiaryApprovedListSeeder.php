@@ -83,7 +83,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
                 |--------------------------------------------------------------------------
                 */
 
-                $aadharNumber = rand(100000000000, 999999999999);
+                $aadhaarNumber = rand(100000000000, 999999999999);
 
                 // dd($uniqueAppBenId);
                 // dd($beneficiary_id_obj->beneficiary_id);
@@ -93,8 +93,8 @@ class BeneficiaryApprovedListSeeder extends Seeder
                     'beneficiary_id' => $beneficiaryId,
                 ], [
                     'encode_key' => null,
-                    'encoded_aadhar' => Crypt::encryptString($aadharNumber),
-                    'aadhar_hash' => md5($aadharNumber),
+                    'encoded_aadhaar' => Crypt::encryptString($aadhaarNumber),
+                    'aadhaar_hash' => md5($aadhaarNumber),
                 ]);
                 // dd($beneficiary_aadhar);
                 $beneficiary = BeneficiaryPersonalDetail::updateOrCreate([
@@ -106,7 +106,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
                     'beneficiary_name' => "Test User $i",
                     'age' => rand(18, 65),
                     'dob' => '2000-01-01',
-                    'mar_statu' => 1,
+                    'marital_status' => 1,
                     'caste' => 2,
                     'other_details' => [
                         'mobile_no' => (string) rand(6000000000, 9999999999),

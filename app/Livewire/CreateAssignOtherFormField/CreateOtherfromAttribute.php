@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 use App\Models\MasterTab;
 use App\Models\SchemeAttachedDocMappings;
 use Illuminate\Contracts\Encryption\DecryptException;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class CreateOtherfromAttribute extends Component
 {
@@ -119,8 +119,7 @@ class CreateOtherfromAttribute extends Component
     }
     protected function loadSections()
     {
-        $this->sections = SectionLevelMaster::where('is_active', true)->where('section_level_code', 0)->get();
-        // dd($this->sections);
+        $this->sections = SectionLevelMaster::where('is_active', true)->where('section_level_code', 0)->get();       
     }
     protected function resetSection()
     {
@@ -171,7 +170,7 @@ class CreateOtherfromAttribute extends Component
         $this->depenent_on = $value;
         $this->reset(['isdependentvalue', 'depvalues']);
         if ($value) {
-            $this->depvalueradio = true;   // radio show
+            $this->depvalueradio = true;   
         } else {
             $this->depvalueradio = false;
             $this->isdependentvalue = 'no';
@@ -183,14 +182,13 @@ class CreateOtherfromAttribute extends Component
     {
         if ($value === 'yes') {
 
-            $ram = SchemeTabBasefield::find($this->depenent_on);
+            $isExists = SchemeTabBasefield::find($this->depenent_on);
 
-            if ($ram && is_array($ram->options)) {
-                $this->depvaluesopt = collect($ram->options)
+            if ($isExists && is_array($isExists->options)) {
+                $this->depvaluesopt = collect($isExists->options)
                     ->toArray();
             }
-        } else {
-            // radio = no
+        } else {           
             $this->depvaluesopt = [];
             $this->depvalues = [];
         }
@@ -200,18 +198,17 @@ class CreateOtherfromAttribute extends Component
         $selectedValues = collect($this->depvalues)
             ->map(fn($v) => is_array($v) ? (string) $v['value'] : (string) $v)
             ->toArray();
-
-        // ALL = "1"
+        
         if (in_array('0', $selectedValues)) {
 
-            $ram = SchemeTabBasefield::find($this->depenent_on);
+            $isExists = SchemeTabBasefield::find($this->depenent_on);
 
-            if ($ram && is_array($ram->options)) {
+            if ($isExists && is_array($isExists->options)) {
 
-                $this->depvalues = collect($ram->options)
+                $this->depvalues = collect($isExists->options)
                     ->keys()
                     ->map(fn($k) => (string) $k)
-                    ->reject(fn($k) => $k === '0') // ALL remove
+                    ->reject(fn($k) => $k === '0') 
                     ->values()
                     ->toArray();
             }
@@ -270,8 +267,9 @@ class CreateOtherfromAttribute extends Component
     }
     public function save()
     {
+        $this->validate();
+        DB::beginTransaction();
         try {
-            $this->validate();
             if ($this->field_type === 'file') {
 
                 SchemeAttachedDocMappings::updateOrCreate([
@@ -294,13 +292,11 @@ class CreateOtherfromAttribute extends Component
                 $currentRules = is_array($this->validation_rule)
                     ? implode('|', collect($this->validation_rule)->flatten()->toArray())
                     : $this->validation_rule;
-
-                // Confirm field এর জন্য logic
+               
                 if (($this->isconfirm ?? 'no') === 'yes') {
                     $currentRules .= ($currentRules ? '|' : '') . 'same:formData.' . SchemeTabBasefield::find($this->confirm_of)->field_name;
                 }
-
-                /* ================= DEPENDENT VALUES NORMALIZE ================= */
+               
                 $depValues = null;
                 if (($this->isdependentvalue ?? 'no') === 'yes' && !empty($this->depvalues)) {
                     if (is_string($this->depvalues)) {
@@ -310,12 +306,10 @@ class CreateOtherfromAttribute extends Component
                         $depValues = array_values($this->depvalues);
                     }
                 }
-
-                /* ================= REQUIRED_IF LOGIC ================= */
+               
                 if (($this->isdependent ?? 'no') === 'yes' && str_contains($currentRules, 'required') && !empty($depValues)) {
                     $valuesString = ',' . implode(',', $depValues);
-
-                    // required কে বদলে required_if করা হচ্ছে
+                 
                     $currentRules = str_replace(
                         'required',
                         'required_if:formData.' . SchemeTabBasefield::find($this->depenent_on)->field_name . $valuesString,
@@ -379,9 +373,11 @@ class CreateOtherfromAttribute extends Component
                     'tabId'
                 ]);
             }
+            DB::commit();
             session()->flash('success', 'Field created successfully');
         } catch (\Exception $e) {
-            session()->flash('error', 'Error creating field: ' . $e->getMessage());
+            DB::rollBack();
+            session()->flash('error', 'Something went wrong while creating the field.');
         }
     }
     public function updatedFieldName($value)

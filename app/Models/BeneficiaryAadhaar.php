@@ -9,7 +9,7 @@ class BeneficiaryAadhaar extends BaseAuditableModel
     use Searchable;
     protected $guarded = [];
     protected $primaryKey = 'application_id';
-    protected $table = 'pension.beneficiary_aadhars';
+    protected $table = 'pension.beneficiary_aadhaars';
     public $incrementing = false;
     public function personal()
     {
@@ -25,9 +25,9 @@ class BeneficiaryAadhaar extends BaseAuditableModel
             'application_id' => $this->application_id,
             'beneficiary_id' => $this->beneficiary_id,
             'encode_key' => $this->encode_key,
-            'encoded_aadhar' => $this->encoded_aadhar,
-            'aadhar_vault' => $this->aadhar_vault,
-            'aadhar_hash' => $this->aadhar_hash,
+            'encoded_aadhaar' => $this->encoded_aadhaar,
+            'aadhaar_vault' => $this->aadhaar_vault,
+            'aadhaar_hash' => $this->aadhaar_hash,
             'is_clean' => $this->is_clean,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
