@@ -102,6 +102,7 @@ class SchemeTabFieldManager extends Component
     public $usedDocTypeIds = [];
 
     public bool $isCurrentAddress = false;
+    public array $isSyncableSelected = [];
 
     public function mount(Request $request)
     {
@@ -373,8 +374,16 @@ class SchemeTabFieldManager extends Component
                 ->where('tab_code', $tabCode)
                 ->first();
             $this->isCurrentAddress = (bool) ($mapping->is_current_address ?? false);
+
+            $this->isSyncableSelected = SchemeTabFormField::where('scheme_id', $this->schemeId)
+                ->where('tab_code', $tabCode)
+                ->where('is_syncable', 1)
+                ->pluck('tab_field_id')
+                ->map(fn($id) => (string)$id)
+                ->toArray();
         } else {
             $this->isCurrentAddress = false;
+            $this->isSyncableSelected = [];
         }
 
         $fields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
@@ -515,6 +524,7 @@ class SchemeTabFieldManager extends Component
                         'is_mandatory' => $base->is_mendetory,
                         'is_active' => true,
                         'is_readonly' => $base->is_readonly,
+                        'is_syncable' => in_array((string)$baseFieldId, $this->isSyncableSelected) ? 1 : 0,
                     ]
                 );
             }
