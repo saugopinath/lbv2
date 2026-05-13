@@ -29,11 +29,17 @@ class TrackBeneficiaryDetailsController extends Controller
 {
     public function TrackBeneficiaryDetails()
     {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
         $header = 'Track Beneficiary Details';
         return view('TrackBeneficiaryDetails.track_beneficiary_details_view', compact('header'));
     }
     public function BeneficiaryDetailslogs(Request $request)  // dd($id);
-    { 
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
         $id = $request->id;
         $applicationId = Crypt::decryptString($id);
         // dd($applicationId);
@@ -160,6 +166,9 @@ class TrackBeneficiaryDetailsController extends Controller
 
     public function BeneficiaryPaymentHistory(Request $request)
     {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
         $id = $request->id;
         $ben_status = NULL;
         $ben_status_color = NULL;
