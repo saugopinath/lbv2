@@ -183,8 +183,8 @@ class WorkflowWizard extends Component
                     ->values()
                     ->all(),
                 'is_final' => ($index == $this->stepCount - 1),
-                'success_rank' => $firstMapping?->next_label_role_id ?? (($index < $this->stepCount - 1) ? ($index + 2) * 10 : null),
-                'revert_rank' => $firstMapping?->same_label_role_id ?? (($index > 0) ? $index * 10 : null),
+                'success_rank' => $firstMapping?->next_level_role_id ?? (($index < $this->stepCount - 1) ? ($index + 2) * 10 : null),
+                'revert_rank' => $firstMapping?->same_level_role_id ?? (($index > 0) ? $index * 10 : null),
             ];
         }
     }
@@ -275,8 +275,8 @@ class WorkflowWizard extends Component
                         'workflow_step_id' => $label->id,
                         'role_id' => $roleId,
                         'rank' => $rank,
-                        'next_label_role_id' => $successRank,
-                        'same_label_role_id' => $revertRank,
+                        'next_level_role_id' => $successRank,
+                        'same_level_role_id' => $revertRank,
                         'is_final_step' => ($index == count($this->finalSteps) - 1),
                         'action_type' => null,
                     ]);

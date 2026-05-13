@@ -104,12 +104,12 @@ class SearchBeneficiary extends Component
         // 🔹 Workflow setup
         $this->getMinMaxWorkflowStep = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->selectScheme);
 
-        $this->nextLabelRoleId = $workflowService->getLabelRoles(
+        $this->nextLevelRoleId = $workflowService->getLevelRoles(
             $this->selectScheme,
             $this->getMinMaxWorkflowStep['max']
         );
 
-        $this->filterRoleId = $this->nextLabelRoleId->next_label_role_id;
+        $this->filterRoleId = $this->nextLevelRoleId->next_level_role_id;
 
         // 🔹 Search column
         $column = $this->searchTypeMap[$this->searchType] ?? null;

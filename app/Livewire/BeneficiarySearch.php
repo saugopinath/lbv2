@@ -156,9 +156,9 @@ class BeneficiarySearch extends Component
         }
         if ($this->isApproved) {
             $getMinMaxWorkflowStep = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->selectedScheme);          
-            $nextLabelRoleId = $workflowService->getLabelRoles($this->selectedScheme, $getMinMaxWorkflowStep['max'])->next_label_role_id;   
+            $nextLevelRoleId = $workflowService->getLevelRoles($this->selectedScheme, $getMinMaxWorkflowStep['max'])->next_level_role_id;   
             $query->where('is_final', 1);
-            $query->where('next_level_role_id', $nextLabelRoleId);
+            $query->where('next_level_role_id', $nextLevelRoleId);
         }
         switch ($key) {
             case 'application_id':

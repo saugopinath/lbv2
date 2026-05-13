@@ -430,12 +430,12 @@ class BeneficiaryTrackController extends Controller
             $statusClass = 'status-active';
             $statusColor = 'orange';
             $beneficiaryId = NULL;
-        } elseif ($b->is_final == 1 && $b->next_level_role_id == WorkflowsteproleMapping::where('scheme_id', $b->scheme_id)->where('module_id', Null)->where('rank', 2)->value('next_label_role_id')) {
+        } elseif ($b->is_final == 1 && $b->next_level_role_id == WorkflowsteproleMapping::where('scheme_id', $b->scheme_id)->where('module_id', Null)->where('rank', 2)->value('next_level_role_id')) {
             $status = 'Verified';
             $statusClass = 'status-active';
             $statusColor = 'blue';
             $beneficiaryId = NULL;
-        } elseif ($b->is_final == 1 && $b->next_level_role_id == WorkflowsteproleMapping::where('scheme_id', $b->scheme_id)->where('module_id', Null)->where('rank', 3)->value('next_label_role_id')) {
+        } elseif ($b->is_final == 1 && $b->next_level_role_id == WorkflowsteproleMapping::where('scheme_id', $b->scheme_id)->where('module_id', Null)->where('rank', 3)->value('next_level_role_id')) {
             $status = 'Approved';
             $statusClass = 'status-active';
             $statusColor = 'green';

@@ -34,16 +34,16 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
     public array $filter_condition = [];
-    public $sameLabelRoleId, $nextLabelRoleId;
+    public $sameLevelRoleId, $nextLevelRoleId;
     public $isFinal;
     public function mount($schemeId = null, WorkflowService $workflowService): void
     {
         $this->schemeId = $schemeId;
         $this->isFinal = 1;
-        $labelRoles = $workflowService->getLabelRoles($schemeId);
-        if ($labelRoles) {
-            $this->sameLabelRoleId = $labelRoles->same_label_role_id;
-            $this->nextLabelRoleId = $labelRoles->next_label_role_id;
+        $levelRoles = $workflowService->getLevelRoles($schemeId);
+        if ($levelRoles) {
+            $this->sameLevelRoleId = $levelRoles->same_level_role_id;
+            $this->nextLevelRoleId = $levelRoles->next_level_role_id;
         }
 
         $select_lgd = session('lgd_session');
@@ -116,7 +116,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             'exportSelected' => 'Export',
         ];
         $workflowService = app(WorkflowService::class);
-        $data = $workflowService->getLabelRoles($this->schemeId);
+        $data = $workflowService->getLevelRoles($this->schemeId);
         if (
             (WorkFlowPermissionHelper::canBulkActionAllow(1, 'verification', true, $this->schemeId) ||
                 WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true, $this->schemeId)) && ((!$data->is_final_step && !$data->is_first_step) || ($data->is_final_step && $data->is_first_step))
@@ -193,7 +193,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     {
         $query = BeneficiaryPersonalDetail::query()->select('application_id', 'beneficiary_id', 'scheme_id', 'beneficiary_name', 'ben_father_name', 'dob', 'application_type')
             ->whereIn('is_clean', [1, 2])
-            ->where('next_level_role_id', $this->sameLabelRoleId)
+            ->where('next_level_role_id', $this->sameLevelRoleId)
             ->where('scheme_id', $this->schemeId)
             ->where('is_final', $this->isFinal);
         if (!empty($this->filter_condition)) {
@@ -240,9 +240,9 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public function confirmBulkRevert($validated, WorkflowService $workflowService)
     {
         if ($this->revertrejectAction === 'revert') {
-            $this->nextLabelRoleId = $workflowService->getLabelRoles($this->schemeId, 1)->same_label_role_id;
+            $this->nextLevelRoleId = $workflowService->getLevelRoles($this->schemeId, 1)->same_level_role_id;
         } elseif ($this->revertrejectAction === 'reject') {
-            $this->nextLabelRoleId = -100;
+            $this->nextLevelRoleId = -100;
         }
         $ids = $this->getSelected();
         $select_lgd = session('lgd_session');
@@ -268,7 +268,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 foreach ($records as $record) {
 
                     $record->update([
-                        'next_level_role_id' => $this->nextLabelRoleId
+                        'next_level_role_id' => $this->nextLevelRoleId
                     ]);
 
                     $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
@@ -322,7 +322,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 foreach ($records as $record) {
 
                     $record->update([
-                        'next_level_role_id' => $this->nextLabelRoleId,
+                        'next_level_role_id' => $this->nextLevelRoleId,
                         'is_clean' => 10,
                         'rejection_date' => Carbon::now()->toDateString(),
                     ]);
@@ -363,7 +363,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
             $ids = $this->getSelected();
             if (empty($ids))
                 return;
-            $check = SchemeCapacityHelper::checkBulk($this->schemeId, $this->nextLabelRoleId, $ids);
+            $check = SchemeCapacityHelper::checkBulk($this->schemeId, $this->nextLevelRoleId, $ids);
             if (!$check['is_processed']) {
                 $this->dispatch('toastr', [
                     'type' => 'error',
@@ -380,7 +380,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 foreach ($records as $record) {
 
                     $record->update([
-                        'next_level_role_id' => $this->nextLabelRoleId,
+                        'next_level_role_id' => $this->nextLevelRoleId,
                         'verification_date' => Carbon::now()->toDateString(),
                     ]);
 
@@ -417,7 +417,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
             $check = SchemeCapacityHelper::checkBulk(
                 $this->schemeId,
-                $this->nextLabelRoleId,
+                $this->nextLevelRoleId,
                 $ids
             );
 
@@ -440,7 +440,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 foreach ($records as $record) {
 
                     $record->update([
-                        'next_level_role_id' => $this->nextLabelRoleId,
+                        'next_level_role_id' => $this->nextLevelRoleId,
                         'is_clean' => 1,
                         'approval_date' => Carbon::now()->toDateString(),
                     ]);

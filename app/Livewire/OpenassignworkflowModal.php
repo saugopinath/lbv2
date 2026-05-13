@@ -47,14 +47,14 @@ class OpenassignworkflowModal extends Component
 
         DB::beginTransaction();
         try {
-            $sameLabelRoleId = 0;
-            $nextLabelRoleId = 0;
+            $sameLevelRoleId = 0;
+            $nextLevelRoleId = 0;
             if ($this->workflowStep->parent_id === null) {
-                $sameLabelRoleId = - ($this->workflowStep->scheme_id);
-                $nextLabelRoleId = 0;
+                $sameLevelRoleId = - ($this->workflowStep->scheme_id);
+                $nextLevelRoleId = 0;
             } else {
-                $nextLabelRoleId = $this->workflowStep->parent_id;
-                $sameLabelRoleId = $this->workflowStep->parent->parent_id ?? 0;
+                $nextLevelRoleId = $this->workflowStep->parent_id;
+                $sameLevelRoleId = $this->workflowStep->parent->parent_id ?? 0;
             }
 
             WorkflowsteproleMapping::where('workflow_step_id', $this->workflowStep->id)->get()->each->delete();
@@ -67,8 +67,8 @@ class OpenassignworkflowModal extends Component
                     'role_id'            => $roleId,
                     'rank'               => $roleRank,
                     'scheme_id'          => $this->workflowStep->scheme_id,
-                    'same_label_role_id' => $sameLabelRoleId,
-                    'next_label_role_id' => $nextLabelRoleId,
+                    'same_level_role_id' => $sameLevelRoleId,
+                    'next_level_role_id' => $nextLevelRoleId,
                     'is_first_step'      => $this->workflowStep->is_first,
                     'is_final_step'      => $this->workflowStep->is_last,
                 ]);

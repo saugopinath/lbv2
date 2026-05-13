@@ -40,9 +40,8 @@ class BulkActionModal extends Component
 
     public $entryType;
 
-    public $sameLabelRoleId;
-
-    public $nextLabelRoleId;
+    public $sameLevelRoleId;
+    public $nextLevelRoleId;
 
     public $schemeId;
 
@@ -70,10 +69,10 @@ class BulkActionModal extends Component
         $this->entryType = $this->selectedRows['selectedIds']['entry_type'];
         $this->schemeId = $this->selectedRows['selectedIds']['schemeId'];
       
-        $labelRoles = $workflowService->getLabelRoles($this->schemeId);
-        if ($labelRoles) {
-            $this->sameLabelRoleId = $labelRoles->same_label_role_id;
-            $this->nextLabelRoleId = $labelRoles->next_label_role_id;
+        $levelRoles = $workflowService->getLevelRoles($this->schemeId);
+        if ($levelRoles) {
+            $this->sameLevelRoleId = $levelRoles->same_level_role_id;
+            $this->nextLevelRoleId = $levelRoles->next_level_role_id;
         }
 
         if ($this->entryType == 1) {          
@@ -85,19 +84,19 @@ class BulkActionModal extends Component
         }
 
         if ($entryType) {
-            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'verification', true, $this->schemeId) && ((!$labelRoles->is_final_step && !$labelRoles->is_first_step) || ($labelRoles->is_final_step && $labelRoles->is_first_step))) {
-                $this->availableActions['V'] = $labelRoles->workflowstep->label;
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'verification', true, $this->schemeId) && ((!$levelRoles->is_final_step && !$levelRoles->is_first_step) || ($levelRoles->is_final_step && $levelRoles->is_first_step))) {
+                $this->availableActions['V'] = $levelRoles->workflowstep->label;
             }
 
-            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'approver', true, $this->schemeId) && $labelRoles->is_final_step) {
-                $this->availableActions['A'] = $labelRoles->workflowstep->label;
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'approver', true, $this->schemeId) && $levelRoles->is_final_step) {
+                $this->availableActions['A'] = $levelRoles->workflowstep->label;
             }
 
-            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'reject', true, $this->schemeId) && (!$labelRoles->is_first_step || ($labelRoles->is_final_step && $labelRoles->is_first_step))) {
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'reject', true, $this->schemeId) && (!$levelRoles->is_first_step || ($levelRoles->is_final_step && $levelRoles->is_first_step))) {
                 $this->availableActions['R'] = 'Reject';
             }
 
-            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'revert', true, $this->schemeId) && (!$labelRoles->is_first_step || ($labelRoles->is_final_step && $labelRoles->is_first_step))) {
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'revert', true, $this->schemeId) && (!$levelRoles->is_first_step || ($levelRoles->is_final_step && $levelRoles->is_first_step))) {
                 $this->availableActions['T'] = 'Revert';
             }
         }
@@ -108,9 +107,9 @@ class BulkActionModal extends Component
     {
         if (in_array($value, ['R', 'T'])) {
             if ($value == 'T') {
-                $this->nextLabelRoleId = $workflowService->getLabelRoles($this->schemeId, 1)->same_label_role_id;
+                $this->nextLevelRoleId = $workflowService->getLevelRoles($this->schemeId, 1)->same_level_role_id;
             } elseif ($value == 'R') {
-                $this->nextLabelRoleId = -100;
+                $this->nextLevelRoleId = -100;
             }
             $this->reasons = Codemaster::where('parent_id', 12)
                 ->orderBy('id', 'asc')
@@ -142,13 +141,13 @@ class BulkActionModal extends Component
        
         if ($this->bulkActionType === 'V') {
             foreach ($ids as $id) {
-                if (!$this->checkCapacity($id, $this->nextLabelRoleId)) {
+                if (!$this->checkCapacity($id, $this->nextLevelRoleId)) {
                     return;
                 }
                 DB::beginTransaction();
                 try {
                     $dbData = [
-                        'next_level_role_id' => $this->nextLabelRoleId,
+                        'next_level_role_id' => $this->nextLevelRoleId,
                         'verification_date' => Carbon::now()->toDateString(),
                     ];
                     $existingRecord = BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->first();
@@ -182,14 +181,14 @@ class BulkActionModal extends Component
             }
         } elseif ($this->bulkActionType === 'A') {
             foreach ($ids as $id) {
-                if (!$this->checkCapacity($id, $this->nextLabelRoleId)) {
+                if (!$this->checkCapacity($id, $this->nextLevelRoleId)) {
                     return;
                 }
                 DB::beginTransaction();
                 try {
 
                     $dbData = [
-                        'next_level_role_id' => $this->nextLabelRoleId,
+                        'next_level_role_id' => $this->nextLevelRoleId,
                         'is_clean' => 1,
                         'approval_date' => Carbon::now()->toDateString(),
                     ];
@@ -234,7 +233,7 @@ class BulkActionModal extends Component
                 DB::beginTransaction();
                 try {
                     $dbData = [
-                        'next_level_role_id' => $this->nextLabelRoleId,
+                        'next_level_role_id' => $this->nextLevelRoleId,
                     ];
                     $existingRecord = BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->first();
                     $existingRecord->update($dbData);
@@ -256,7 +255,7 @@ class BulkActionModal extends Component
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     // BeneficiaryPersonalDetail::where('application_id', $id)->update([
-                    //     'next_level_role_id' => $this->nextLabelRoleId,
+                    //     'next_level_role_id' => $this->nextLevelRoleId,
                     // ]);
                     DB::commit();
                     $this->dispatch('toastr', [
@@ -273,7 +272,7 @@ class BulkActionModal extends Component
                 DB::beginTransaction();
                 try {                    
                     $dbData = [
-                        'next_level_role_id' => $this->nextLabelRoleId,
+                        'next_level_role_id' => $this->nextLevelRoleId,
                         'is_clean' => 10,
                         'rejection_date' => Carbon::now()->toDateString(),
                     ];

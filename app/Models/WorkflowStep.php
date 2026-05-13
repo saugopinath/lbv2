@@ -26,7 +26,7 @@ class WorkflowStep extends Model implements Auditable
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'workflowstep_rolemappings', 'workflow_step_id', 'role_id')
-            ->withPivot(['rank', 'same_label_role_id', 'next_label_role_id'])
+            ->withPivot(['rank', 'same_level_role_id', 'next_level_role_id'])
             ->withTimestamps();
     }
     public function transformAudit(array $data): array

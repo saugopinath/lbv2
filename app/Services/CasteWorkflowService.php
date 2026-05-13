@@ -79,7 +79,7 @@ class CasteWorkflowService
     //             'module_id' => $moduleId,
     //             'ref_id' => $refId,
     //             'scheme_id' => $schemeId,
-    //             'current_rank' => $firstStep->next_label_role_id,
+    //             'current_rank' => $firstStep->next_level_role_id,
     //             'current_step_id' => $firstStep->workflow_step_id,
     //             'old_data' => $oldData,
     //             'new_data' => $newData,
@@ -140,7 +140,7 @@ class CasteWorkflowService
 
                 if ($applied) {
                     $UpdateRequest = $request->update([
-                        'current_rank' => $currentStep->next_label_role_id,
+                        'current_rank' => $currentStep->next_level_role_id,
                         'current_step_id' => $currentStep->workflow_step_id,
                         'is_active' => false, 
                         'updated_by' => Auth::id(),
@@ -152,7 +152,7 @@ class CasteWorkflowService
                 }
             } else {
                 $UpdateRequest = $request->update([
-                    'current_rank' => $currentStep->next_label_role_id,
+                    'current_rank' => $currentStep->next_level_role_id,
                     'current_step_id' => $currentStep->workflow_step_id,
                     'updated_by' => Auth::id(),
                 ]);
@@ -184,7 +184,7 @@ class CasteWorkflowService
 
             // $prevStep = $this->getStepForRank(
             //     $request->module_id,
-            //     $currentStep->same_label_role_id,
+            //     $currentStep->same_level_role_id,
             //     'Revert target rank configuration missing.'
             // );
 
