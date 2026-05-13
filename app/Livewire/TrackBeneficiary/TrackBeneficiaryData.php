@@ -176,11 +176,13 @@ class TrackBeneficiaryData extends Component
 
                 return $b;
             });
-        // dd($beneficiaries);
+        $isSingle = $beneficiaries->count() === 1;
+
         return view(
             'livewire.track-beneficiary.track-beneficiary-data',
             [
                 'beneficiaries' => $beneficiaries,
+                'isSingle' => $isSingle,
             ]
         );
     }

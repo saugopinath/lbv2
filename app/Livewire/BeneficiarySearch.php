@@ -22,6 +22,7 @@ class BeneficiarySearch extends Component
     public $isShownScheme = true;
     public $selectedScheme = null;
     public $lgdData = [];
+    public $isReset = false;
     public $fields = [
         'application_id' => [
             'label' => 'Application ID',
@@ -71,13 +72,15 @@ class BeneficiarySearch extends Component
         $isFinal = false,
         $isAssigned = false,
         $isShownScheme = true,
-        $excludeFields = []
+        $excludeFields = [],
+        $isReset = false
     ) {
         $this->isApproved = $isApproved;
         $this->selectedOption = $selectedOption;
         $this->inputValue = $inputValue ?? '';
         $this->displayType = $displayType;
         $this->isShownScheme = $isShownScheme;
+        $this->isReset = $isReset;
         $scheme_id = null;
         $select_lgd = session('lgd_session');
         if ($select_lgd) {
@@ -108,6 +111,14 @@ class BeneficiarySearch extends Component
         if (!empty($excludeFields)) {
             $this->fields = array_diff_key($this->fields, array_flip($excludeFields));
         }
+    }
+
+    public function resetSearch()
+    {
+        $this->selectedOption = null;
+        $this->inputValue = '';
+        $this->selectedScheme = null;
+        $this->dispatch('reset-beneficiary-search');
     }
 
     public function updatedSelectedScheme()

@@ -14,19 +14,19 @@
             <div class="p-4">
                 @livewire('beneficiary-search', [
                 'isShownScheme' => true,
-                'excludeFields' => ['bank_account_number']
+                'excludeFields' => ['bank_account_number'],
+                'isReset' => true
                 ])
             </div>
         </div>
     </div>
-    <div class="{{ $beneficiaries->count() === 1 ? 'flex justify-center' : 'grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4' }} gap-6">
+    <div class="{{ $isSingle ? 'flex justify-center' : 'grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4' }} gap-6">
         @forelse($beneficiaries as $b)
-        @if($beneficiaries->count() === 1)
+        @if($isSingle)
         <div class="w-full max-w-sm md:max-w-md lg:max-w-lg">
             @endif
-            @include(
-            'frontend.track-ben.beneficiary-card',
-            [
+
+            @include('frontend.track-ben.beneficiary-card', [
             'status' => $b->status,
             'statusColor' => $b->statusColor,
             'applicationId' => $b->application_id,
@@ -40,9 +40,9 @@
             'paymentUrl' => $b->paymentUrl,
             'beneficiaryDetailsUrl' => $b->BenDetailsUrl,
             'ben_profile_pic' => $b->ben_profile_pic,
-            ]
-            )
-            @if($beneficiaries->count() === 1)
+            ])
+
+            @if($isSingle)
         </div>
         @endif
 
