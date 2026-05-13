@@ -111,11 +111,6 @@ class CreateOtherfromAttribute extends Component
             $this->master_sec = 'yes';
         }
         $this->isdependent = 'no';
-        if ($value === 'email') {
-            if (!in_array('email', (array)$this->validation_rule)) {
-                $this->validation_rule[] = 'email';
-            }
-        }
     }
     protected function loadSections()
     {
@@ -230,14 +225,7 @@ class CreateOtherfromAttribute extends Component
             'scheme_id' => 'required',
             'tabId' => 'required',
             'level_name' => 'required|string|max:100',
-            'field_id' => [
-                'required',
-                'string',
-                'max:100',
-                Rule::unique('scheme_tab_basefields', 'field_id')
-                    ->where('scheme_id', $this->scheme_id)
-                    ->where('tab_code', $this->tabId),
-            ],
+            'field_id' => 'required|string|max:100',
             'field_name' => 'required|string|max:150',
             'field_type' => 'required|string',
             'validation_rule' => 'required|array|min:1',
