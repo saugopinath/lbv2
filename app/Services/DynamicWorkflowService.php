@@ -8,6 +8,7 @@ use App\Models\BeneficiaryPersonalDetail;
 use App\Models\Codemaster;
 use App\Models\DynamicWorkflowLabel;
 use App\Models\DynamicWorkflowRequest;
+use App\Models\SchemeTabFormField;
 use App\Models\workflowstepRolemapping;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -152,7 +153,6 @@ class DynamicWorkflowService
             $request = DynamicWorkflowRequest::findOrFail($requestId);
             $currentStep = $this->getStepForRank($request->module_id, $request->current_rank);
 
-            // পেছনের র্যাঙ্ক-এ পাঠানো (same_label_role_id ব্যবহার করে)
             $prevStep = $this->getStepForRank(
                 $request->module_id,
                 $currentStep->same_label_role_id,
@@ -260,6 +260,7 @@ class DynamicWorkflowService
             $beneficiary->update($personalData);
         }
         if (array_key_exists('mobile_no', $newData)) {
+
             $otherDetails = $beneficiary->other_details ?? [];
             if (is_string($otherDetails)) {
                 $otherDetails = json_decode($otherDetails, true) ?? [];
@@ -267,6 +268,41 @@ class DynamicWorkflowService
             $otherDetails['mobile_no'] = $newData['mobile_no'];
             $beneficiary->update(['other_details' => $otherDetails]);
         }
+        // if (array_key_exists('mobile_no', $newData)) {
+
+        //     $fieldManager = SchemeTabFormField::with('tabMaster')
+        //         ->where('field_name', 'mobile_no')
+        //         ->where('scheme_id', $beneficiary->scheme_id)
+        //         ->first();
+        //     if ($fieldManager && $fieldManager->tabMaster) {
+        //         $modelClass = "App\\Models\\" . $fieldManager->tabMaster->tab_model_name;
+        //         $dbColumn = $fieldManager->db_column;
+        //         $record = $modelClass::where(
+        //             'application_id',
+        //             $beneficiary->application_id
+        //         )->first();
+        //         if ($record) {
+        //             if ($dbColumn === 'other_details') {
+        //                 $otherDetails = $record->other_details ?? [];
+        //                 if (is_string($otherDetails)) {
+        //                     $otherDetails = json_decode($otherDetails, true) ?? [];
+        //                 }
+        //                 $otherDetails['mobile_no'] = $newData['mobile_no'];
+        //                 $record->update([
+        //                     'other_details' => $otherDetails
+        //                 ]);
+        //             } else {
+        //                 $record->update([
+        //                     $dbColumn => $newData['mobile_no']
+        //                 ]);
+        //             }
+        //         } else {
+        //             throw new \Exception("Record not found");
+        //         }
+        //     } else {
+        //         throw new \Exception("Field Manager not found");
+        //     }
+        // }
         $bankColumns = ['bank_ifsc', 'bank_name', 'bank_branch_name', 'bank_account_number'];
         $hasBankUpdate = collect($bankColumns)->contains(fn($column) => array_key_exists($column, $newData));
         if ($hasBankUpdate) {
@@ -289,7 +325,6 @@ class DynamicWorkflowService
         if ($rank === null) {
             throw new \Exception($errorMessage ?? 'Workflow rank configuration missing.');
         }
-
         $step = workflowstepRolemapping::where('module_id', $moduleId)
             ->where('rank', $rank)
             ->orderBy('id', 'asc')

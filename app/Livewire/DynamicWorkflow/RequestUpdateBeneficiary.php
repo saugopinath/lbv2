@@ -231,7 +231,6 @@ class RequestUpdateBeneficiary extends Component
             ]);
             return;
         }
-        
         $checkData = [
             'mobile_no' => $this->newData['mobile_no'] ?? null,
             'bankaccountnumber' => $this->newData['bank_account_number'] ?? null,
@@ -241,7 +240,6 @@ class RequestUpdateBeneficiary extends Component
             (int)$this->beneficiary->application_id,
             $checkData
         );
-      
         if ($duplicateResult !== true) {
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -249,7 +247,6 @@ class RequestUpdateBeneficiary extends Component
             ]);
             return;
         }
-         
         $hasPendingRequest = DynamicWorkflowRequest::where('module_id', $this->moduleId)
             ->where('ref_id', $this->beneficiary->application_id)
             ->where('scheme_id', $this->beneficiary->scheme_id)
