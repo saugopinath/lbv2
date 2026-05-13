@@ -289,6 +289,7 @@ class PaymentStatusTable extends DataTableComponent
 
     public function showError($value)
     {
+        // dd($value);
         $params = explode('_', $value);
         $lot_no = $params[0] ?? null;
         $pension_id = $params[1] ?? null;
@@ -305,13 +306,12 @@ class PaymentStatusTable extends DataTableComponent
 
         try {
             if ($schemeId == 20) {
-                $model = BenTransactionDetailsLB::class;
+                $model = BenFailedPaymentDetailsLB::class;
                 $lotObj = $model::where('ben_id', $pension_id)
-                    ->where('scheme_id', $schemeId)
-                    ->whereIn('failed_type', [3, 4, 5])
+                    ->whereIn('failed_type', [2])
                     ->first();
             } else {
-                $model = BenTransactionDetailsJB::class;
+                $model = BenFailedPaymentDetailsJB::class;
                 $lotObj = $model::where('ben_id', $pension_id)
                     ->where('scheme_id', $schemeId)
                     ->whereIn('failed_type', [3, 4, 5])
@@ -344,7 +344,7 @@ class PaymentStatusTable extends DataTableComponent
                 ]);
             } elseif ($lotObj->pmt_mode == 2 && $schemeId != 20) {
                 $results = BenFailedPaymentDetailsJB::where('ben_id', $pension_id)
-                    ->where('scheme_id', $schemeId)
+                    // ->where('scheme_id', $schemeId)
                     ->where('lot_no', $lot_no)
                     ->orderBy('created_at', 'desc')
                     ->first();
@@ -358,17 +358,85 @@ class PaymentStatusTable extends DataTableComponent
                     ->where('lot_no', $lot_no)
                     ->orderBy('created_at', 'desc')
                     ->first();
-
+                $error_code = $results->status_code;
+                // dd($results->status_code);
+                $description = $this->getErrorCodeDescription($error_code, 1);
                 $this->dispatch('toastr', [
                     'type' => 'error',
-                    'message' => $results->description ?? 'No description found'
+                    'message' => $description ?? 'No description found'
                 ]);
             }
         } catch (\Exception $e) {
+            // dd($e->getMessage());
             $this->dispatch('toastr', [
                 'type' => 'error',
                 'message' => 'Error! Please try again.'
             ]);
         }
+    }
+
+    public function getErrorCodeDescription($error_code, $type = 1)
+    {
+        $errorMessages = [];
+
+        if ($type == 1) {
+
+            $errorMessages = [
+                '01' => 'Account Closed',
+                '02' => 'No Such Account',
+                '03' => 'Account Description Does not Tally',
+                '04' => 'Miscellaneous - Others',
+                '11' => 'Invalid IFSC/MICR Code',
+                '51' => 'KYC Documents Pending',
+                '52' => 'Documents Pending for Account Holder turning Major',
+                '53' => 'Account inoperative',
+                '54' => 'Account Dormant',
+                '55' => 'A/c in Zero Balance/No Transactions have Happened, first Transaction in Cash or Self Cheque',
+                '56' => 'Small Account, First Transaction to be from Base Branch',
+                '57' => 'Amount Exceeds limit set on Account by Bank for Credit per Transaction',
+                '58' => 'Account reached maximum Credit limit set on account by Bank',
+                '59' => 'Network Failure (CBS)',
+                '60' => 'Account Holder Expired',
+                '62' => 'Account Under Litigation',
+                '65' => 'Account Holder Name Invalid',
+                '68' => 'A/c Blocked or Frozen',
+                '69' => 'Customer Insolvent / Insane',
+                '70' => 'Customer to refer to the branch',
+                '71' => 'Invalid Account Type (NRE/PPF/CC/Loan/FD)',
+                '-1' => 'Any thing other than NPCI',
+            ];
+        }
+
+        if ($type == 2) {
+
+            $errorMessages = [
+                '01' => 'Account Closed or Transferred',
+                '02' => 'No Such Account',
+                '03' => 'Account Description Does not Tally',
+                '04' => 'Miscellaneous - Others',
+                '51' => 'Miscellaneous - KYC Documents Pending',
+                '52' => 'Miscellaneous - Documents Pending for Account Holder turning Major',
+                '53' => 'Miscellaneous - A/c Inactive (No Transactions for last 3 Months)',
+                '54' => 'Miscellaneous - Dormant A/c (No Transactions for last 6 Months)',
+                '55' => 'Miscellaneous - A/c in Zero Balance/No Transactions have Happened',
+                '56' => 'Miscellaneous - Simple Account',
+                '57' => 'Miscellaneous - Amount Exceeds limit set on Account by Bank for Credit per Transaction',
+                '58' => 'Miscellaneous - Account reached maximum Credit limit set on account by Bank',
+                '59' => 'Miscellaneous - Network Failure (CBS)',
+                '60' => 'Account Holder Expired',
+                '61' => 'Mandate Cancelled',
+                '62' => 'Account Under Litigation',
+                '63' => 'Invalid Aadhaar Number',
+                '64' => 'Aadhaar Number not Mapped to Account Number',
+                '65' => 'Account Holder Name Invalid',
+                '66' => 'UMRN Does not exist',
+                '68' => 'A/c Blocked or Frozen',
+                '71' => 'Invalid Account Type (NRE/PPF/CC/Loan/FD)',
+                '99' => 'Mark Pending',
+                '-1' => 'Any thing other than NPCI',
+            ];
+        }
+
+        return $errorMessages[$error_code] ?? 'Unknown Error Code';
     }
 }

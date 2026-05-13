@@ -52,7 +52,7 @@
                         <!-- IDs container: modern with icons and copy-friendly design -->
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-3 pt-1 ml-6">
                             <div
-                                class="group flex items-center gap-2.5 bg-gray-50/80 px-4 py-4 rounded-xl border border-gray-100 hover:border-indigo-200 transition-all">
+                                class="group flex items-center gap-2.5 bg-gray-50/80 px-4 py-2 rounded-xl border border-gray-100 hover:border-indigo-200 transition-all">
                                 <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
                                     <i class="fa-regular fa-id-card text-indigo-600 text-sm"></i>
                                 </div>
