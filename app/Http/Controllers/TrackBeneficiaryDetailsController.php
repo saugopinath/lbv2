@@ -32,9 +32,8 @@ class TrackBeneficiaryDetailsController extends Controller
         $header = 'Track Beneficiary Details';
         return view('TrackBeneficiaryDetails.track_beneficiary_details_view', compact('header'));
     }
-    public function BeneficiaryDetailslogs($id)
-    {
-        // dd($id);
+    public function BeneficiaryDetailslogs($id)  // dd($id);
+    { 
         $applicationId = Crypt::decryptString($id);
         // dd($applicationId);
         $benPersonal = BeneficiaryPersonalDetail::where('application_id', $applicationId)->first();
@@ -183,7 +182,6 @@ class TrackBeneficiaryDetailsController extends Controller
             $transactionDetails = BenTransactionDetailsJB::where('ben_id', $benPersonal->beneficiary_id)->get();
         }
         // dd($paymentDetails);
-
         if (empty($paymentDetails)) {
             return redirect()->back()->with([
                 'toastr' => [

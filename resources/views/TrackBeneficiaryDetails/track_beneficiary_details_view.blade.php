@@ -7,5 +7,4 @@
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-2 space-y-4">
         @livewire('track-beneficiary.track-beneficiary-data')
     </div>
-
 </x-layouts.app>

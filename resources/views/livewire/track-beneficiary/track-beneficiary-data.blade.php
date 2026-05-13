@@ -19,27 +19,32 @@
             </div>
         </div>
     </div>
-    <!-- Gri -->
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div class="{{ $beneficiaries->count() === 1 ? 'flex justify-center' : 'grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4' }} gap-6">
         @forelse($beneficiaries as $b)
-        @include(
-        'frontend.track-ben.beneficiary-card',
-        [
-        'status' => $b->status,
-        'statusColor' => $b->statusColor,
-        'applicationId' => $b->application_id,
-        'beneficiaryId' => $b->beneficiary_id,
-        'name' => $b->beneficiary_name,
-        'relation' => $b->relation,
-        'relationName' => $b->relationName,
-        'schemeName' => $b->scheme->name ?? 'N/A',
-        'location' => $b->location,
-        'mobile' => $b->maskedMobile,
-        'paymentUrl' => $b->paymentUrl,
-        'beneficiaryDetailsUrl' => $b->BenDetailsUrl,
-        'ben_profile_pic' => $b->ben_profile_pic,
-        ]
-        )
+        @if($beneficiaries->count() === 1)
+        <div class="w-full max-w-sm md:max-w-md lg:max-w-lg">
+            @endif
+            @include(
+            'frontend.track-ben.beneficiary-card',
+            [
+            'status' => $b->status,
+            'statusColor' => $b->statusColor,
+            'applicationId' => $b->application_id,
+            'beneficiaryId' => $b->beneficiary_id,
+            'name' => $b->beneficiary_name,
+            'relation' => $b->relation,
+            'relationName' => $b->relationName,
+            'schemeName' => $b->scheme->name ?? 'N/A',
+            'location' => $b->location,
+            'mobile' => $b->maskedMobile,
+            'paymentUrl' => $b->paymentUrl,
+            'beneficiaryDetailsUrl' => $b->BenDetailsUrl,
+            'ben_profile_pic' => $b->ben_profile_pic,
+            ]
+            )
+            @if($beneficiaries->count() === 1)
+        </div>
+        @endif
 
         @empty
         <div class="col-span-full text-center py-10">

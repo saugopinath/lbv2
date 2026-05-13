@@ -63,9 +63,7 @@ class TrackBeneficiaryData extends Component
     {
         $select_lgd = session('lgd_session');
         // dd($select_lgd);
-
         if (!empty($select_lgd['district_id'])) {
-
             $this->filter_condition['created_by_dist_code']
                 = Crypt::decryptString(
                     $select_lgd['district_id']

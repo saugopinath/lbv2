@@ -176,7 +176,7 @@
                     </div>
                 </div>
                 <!-- Timeline Container -->
-                <div class="relative mt-4 ml-4 md:ml-12 pl-8 md:pl-12 pb-8 border-l-2 border-dashed border-indigo-200 dark:border-gray-700">
+                <div class="relative mt-4 ml-4 mr-4 md:ml-12 pl-8 md:pl-12 pb-8 border-l-2 border-dashed border-indigo-200 dark:border-gray-700">
                     <div class="space-y-10">
                         @foreach($activityLogData as $index => $log)
                         <div class="relative group" data-log-id="{{ $index }}">
