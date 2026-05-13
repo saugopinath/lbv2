@@ -16,7 +16,7 @@
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-2">
                 @foreach ($groupFields as $field)
                 <div>
-                    @if ($field['field_type'] === 'text'|| $field['field_type'] === 'date' )
+                    @if ($field['field_type'] === 'text'|| $field['field_type'] === 'date' || $field['field_type'] === 'email' )
                     <x-form.input name="{{ $field['field_label'] }}" id="{{ $field['field_id'] }}" wire:model="formData.{{ $field['field_label'] }}"
                         label="{{ $field['level_name'] }}" placeholder="Enter {{ $field['level_name'] }}" required
                         type="{{ $field['field_type'] }}" />
@@ -106,7 +106,7 @@
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                 @foreach ($groupFields as $field)
                 <div>
-                    @if ($field['field_type'] === 'text'|| $field['field_type'] === 'date' )
+                    @if ($field['field_type'] === 'text'|| $field['field_type'] === 'date' || $field['field_type'] === 'email' )
                     <x-form.input name="{{ $field['field_label'] }}" id="{{ $field['field_id'] }}" wire:model="formData.{{ $field['field_label'] }}"
                         label="{{ $field['level_name'] }}" placeholder="Enter {{ $field['level_name'] }}"
                         type="{{ $field['field_type'] }}" />

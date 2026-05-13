@@ -6,7 +6,7 @@ use App\Helpers\CheckAuthHelper;
 use Livewire\Component;
 use App\Models\Ifsccodemaster;
 use App\Models\BeneficiaryPersonal;
-use App\Models\ApplicantIncompletDeatil;
+use App\Models\ApplicantIncompleteDetail;
 
 class BankAccountFail extends Component
 {
@@ -37,7 +37,7 @@ class BankAccountFail extends Component
     //     $this->item = $item;
     //     $old = $item->old_value ?? [];
 
-    //      $app_det = ApplicantIncompletDeatil::with('banks')->where('application_id', $item->application_id)->first();
+    //      $app_det = ApplicantIncompleteDetail::with('banks')->where('application_id', $item->application_id)->first();
     //     if ($app_det->banks) {
     //         $this->ifscode = $app_det->banks->ifsc;
     //         $this->updatedIfscode($this->ifscode);
@@ -91,7 +91,7 @@ class BankAccountFail extends Component
             $this->confirmbankaccountnumber = old('confirmbankaccountnumber', $old_value['confirmbankaccountnumber'] ?? '');
         }
 
-        $app_det = ApplicantIncompletDeatil::with('banks')
+        $app_det = ApplicantIncompleteDetail::with('banks')
             ->where('application_id', $item->application_id)
             ->first();
 

@@ -14,12 +14,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
 use App\Models\BeneficiaryTemEnclosure;
-use App\Models\ApplicantIncompletDeatil;
+use App\Models\ApplicantIncompleteDetail;
 use Request;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Illuminate\Support\Facades\Route;
 
-class IncompletTypePage extends Component
+class IncompleteTypePage extends Component
 {
     public $page, $applicantInfo, $formData = [], $revertReasons = [], $user_id, $revert_reason_cause_id, $revert_reason_remarks, $aadhaarIssues = [], $mobileIssues = [], $sortedBankIssues = [], $ifscode, $bank_account_number, $bank_action, $confirmbankaccountnumber;
     public $id, $stage, $schemeId;
@@ -36,9 +36,9 @@ class IncompletTypePage extends Component
 
         $this->revertReasons = Codemaster::where('parent_id', Codemaster::getIdByCode(12))->get();
 
-        $this->page = ApplicantIncompletDeatil::where('application_id', $this->id)
+        $this->page = ApplicantIncompleteDetail::where('application_id', $this->id)
             ->with([
-                'incompletType',
+                'incompleteType',
             ])->get();
 
         $this->applicantInfo = $this->page->first()?->beneficiaryCommonList;
@@ -49,7 +49,7 @@ class IncompletTypePage extends Component
                 $decoded = is_string($item->new_value) ? json_decode($item->new_value, true) : $item->new_value;
 
                 if (isset($decoded['aadhaar_no'])) {
-                    $this->formData['aadhar_modification'][$item->application_id] = $decoded['aadhaar_no'];
+                    $this->formData['aadhaar_modification'][$item->application_id] = $decoded['aadhaar_no'];
                 }
 
                 if (isset($decoded['mobile_no'])) {
@@ -60,9 +60,9 @@ class IncompletTypePage extends Component
 
         // Preserve form values when redirected back after validation errors
         // (e.g., when `back()->withInput()` is used in the controller)
-        $oldAadhaar = request()->old('aadhar_modification');
+        $oldAadhaar = request()->old('aadhaar_modification');
         if (!is_null($oldAadhaar)) {
-            $this->formData['aadhar_modification'][$this->id] = $oldAadhaar;
+            $this->formData['aadhaar_modification'][$this->id] = $oldAadhaar;
         }
 
         $oldMobile = request()->old('dup_mobile');
@@ -133,7 +133,7 @@ class IncompletTypePage extends Component
             ]);
 
             foreach ($this->page as $item) {
-                $typeId = $item->incomplet_type;
+                $typeId = $item->incomplete_type;
                 if (!$typeId)
                     continue;
 
@@ -142,7 +142,7 @@ class IncompletTypePage extends Component
                 // Aadhaar related
                 if (in_array($typeId, ['141', '149', '1414'])) {
                     $jsonValue = [
-                        'aadhaar_no' => $this->formData['aadhar_modification'][$item->application_id] ?? null,
+                        'aadhaar_no' => $this->formData['aadhaar_modification'][$item->application_id] ?? null,
                         'application_id' => $this->id,
                     ];
                 }
@@ -209,7 +209,7 @@ class IncompletTypePage extends Component
             return;
         }
 
-        $typeId = $item->incomplet_type;
+        $typeId = $item->incomplete_type;
 
         if (in_array($typeId, ['141', '149', '1414'])) {
             $newAadhaar = $item->new_value['aadhaar_no'] ?? null;
@@ -225,16 +225,16 @@ class IncompletTypePage extends Component
 
 
         switch ($typeId) {
-            case 141: // NO AADHAR NUMBER
-            case 149: // DUPLICATE AADHAR NUMBER
+            case 141: // NO AADHAAR NUMBER
+            case 149: // DUPLICATE AADHAAR NUMBER
             case 1414: // PDS Mismatch
                 $beneficiary->aadhaar()->updateOrCreate(
                     ['application_id' => $this->id],
                     [
                         'beneficiary_id' => $beneficiary->beneficiary_id,
-                        'encoded_aadhar' => Crypt::encryptString($newAadhaar),
-                        'aadhar_hash' => md5($newAadhaar),
-                        'aadhar_vault' => md5($newAadhaar),
+                        'encoded_aadhaar' => Crypt::encryptString($newAadhaar),
+                        'aadhaar_hash' => md5($newAadhaar),
+                        'aadhaar_vault' => md5($newAadhaar),
                         'scheme_id' => $this->schemeId,
                         'updated_at' => now(),
                     ]
@@ -449,9 +449,9 @@ class IncompletTypePage extends Component
         ];
 
         foreach ($this->page as $item) {
-            $typeName = $item->incompletType->name;
+            $typeName = $item->incompleteType->name;
 
-            if (in_array($typeName, ['PDS MISMATCH', 'NO AADHAR NUMBER', 'DUPLICATE AADHAR NUMBER'])) {
+            if (in_array($typeName, ['PDS MISMATCH', 'NO AADHAAR NUMBER', 'DUPLICATE AADHAAR NUMBER'])) {
                 $aadhaarIssues[] = $item;
             } elseif (in_array($typeName, ['NO MOBILE NUMBER', 'DUPLICATE MOBILE NUMBER'])) {
                 $mobileIssues[] = $item;
@@ -460,13 +460,13 @@ class IncompletTypePage extends Component
             }
         }
 
-        // Priority অনুযায়ী sort করা
+        // Priority অনুযায়ী sort করা
         $sorted = collect($bankIssues)->sortBy(
-            fn($item) => array_search($item->incompletType->name, $bankPriority)
+            fn($item) => array_search($item->incompleteType->name, $bankPriority)
         )->values();
 
         // ✅ Check করো — duplicate আছে কিনা
-        $hasDuplicate = $sorted->contains(fn($item) => $item->incompletType->name === 'DUPLICATE BANK ACCOUNT NUMBER');
+        $hasDuplicate = $sorted->contains(fn($item) => $item->incompleteType->name === 'DUPLICATE BANK ACCOUNT NUMBER');
 
         // ✅ যদি duplicate থাকে তাহলে dupAction = 1, না থাকলে null
         // $item->dupAction = $hasDuplicate ? 1 : null;
@@ -482,7 +482,7 @@ class IncompletTypePage extends Component
 
     public function render()
     {
-        return view('livewire.incomplet-type-page', [
+        return view('livewire.incomplete-type-page', [
             'applicantInfo' => $this->applicantInfo,
             'aadhaarIssues' => $this->aadhaarIssues,
             'mobileIssues' => $this->mobileIssues,

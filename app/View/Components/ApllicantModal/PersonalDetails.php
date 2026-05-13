@@ -16,8 +16,8 @@ class PersonalDetails extends Component
     /**
      * Create a new component instance.
      */
-    public $id, $applicantDet, $decryptedAadhaar, $dsregno, $dsdate, $mobile, $email,
-        $fname, $dob, $age, $ffname, $mfname, $sfname, $caste, $cascerno, $currentDate, $mode,$name;
+    public $id, $applicantDet, $decryptedAadhaar, $ds_registration_no, $duaresarkarDate, $mobile, $email,
+        $fname, $dob, $age, $ben_father_name, $ben_mother_name, $ben_spouse_name, $caste, $caste_cer_no, $currentDate, $mode,$beneficiary_name;
 
     public function __construct($id, $reportType = null, $mode = null)
     {
@@ -37,10 +37,10 @@ class PersonalDetails extends Component
             $applicantDet = DraftBeneficiaryPersonal::with(['aadhaar', 'relationships'])->where('application_id', $id)->first();
         }
         // dd($applicantDet);
-        $this->decryptedAadhaar = Crypt::decryptString($applicantDet->aadhaar->encoded_aadhar);
-        $this->dsregno = $applicantDet->ds_registration_no;
-        $this->dsdate = Carbon::parse($applicantDet->ds_date)->format('d-m-Y');
-        $this->name = $applicantDet->full_name;
+        $this->decryptedAadhaar = Crypt::decryptString($applicantDet->aadhaar->encoded_aadhaar);
+        $this->ds_registration_no = $applicantDet->ds_registration_no;
+        $this->duaresarkarDate = Carbon::parse($applicantDet->ds_date)->format('d-m-Y');
+        $this->beneficiary_name = $applicantDet->full_name;
         $this->mobile = $applicantDet->mobile_no;
         $this->email = $applicantDet->email;
         $this->fname = $applicantDet->full_name;
@@ -48,17 +48,17 @@ class PersonalDetails extends Component
         $this->age = Carbon::parse($applicantDet->dob)->age;
         // $this->ffname = $applicantDet->relationships->firstWhere('relation_type_id', Codemaster::getIdByCode(131))->full_name;
         // $this->mfname = $applicantDet->relationships->firstWhere('relation_type_id', Codemaster::getIdByCode(132))->full_name;
-        $this->ffname = optional(
+        $this->ben_father_name = optional(
             $applicantDet->relationships->firstWhere('relation_type_id', Codemaster::getIdByCode(131))
         )->full_name ?? '';
 
-        $this->mfname = optional(
+        $this->ben_mother_name = optional(
             $applicantDet->relationships->firstWhere('relation_type_id', Codemaster::getIdByCode(132))
         )->full_name ?? '';
 
         if ($applicantDet->marital_status == Codemaster::getIdByCode(32) || $applicantDet->marital_status == Codemaster::getIdByCode(34)) {
-            // $this->sfname = $applicantDet->relationships->firstWhere('relation_type_id', Codemaster::getIdByCode(133))->full_name;
-            $this->sfname = optional(
+            // $this->ben_spouse_name = $applicantDet->relationships->firstWhere('relation_type_id', Codemaster::getIdByCode(133))->full_name;
+            $this->ben_spouse_name = optional(
                 $applicantDet->relationships->firstWhere(
                     'relation_type_id',
                     Codemaster::getIdByCode(133)
@@ -66,7 +66,7 @@ class PersonalDetails extends Component
             )->full_name;
         }
         $this->caste = Codemaster::find($applicantDet->caste)->name;
-        $this->cascerno = $applicantDet->caste_certificate_no;
+        $this->caste_cer_no = $applicantDet->caste_certificate_no;
     }
 
     /**

@@ -28,7 +28,7 @@ class FinalPreview extends Component
     public bool $isLast = false;
     public $prevTab = null;
     public $nextTab = null;
-    public $ram, $form_preview;
+    public $saveNext, $form_preview;
     public $applicationId;
     public $beneficiaryId;
     public array $appTypeOptions = [];
@@ -37,6 +37,7 @@ class FinalPreview extends Component
     public $navMessageType = 'success';
     public $showFinalModal = false;
     public $maxDate, $minDate, $minDOB, $maxDOB;
+    public bool $isEdit = false;
 
     protected $listeners = [
         'document-validation-passed' => 'goToNextTab',
@@ -45,8 +46,9 @@ class FinalPreview extends Component
 
     /* ================= MOUNT ================= */
 
-    public function mount($schemeId, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null)
+    public function mount($schemeId, $saveNext = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $isEdit = false)  
     {
+        $this->isEdit = $isEdit;
         $this->loadAppTypeOptions();
         $this->loadScheme($schemeId);
 
@@ -55,7 +57,7 @@ class FinalPreview extends Component
             $this->updateTabNavigation();
         }
         $this->schemeId = $schemeId;
-        $this->ram = $ram;
+        $this->saveNext = $saveNext;
         $this->form_preview = $form_preview;
         $this->applicationId = $applicationId;
         $this->beneficiaryId = $beneficiaryId;

@@ -17,14 +17,14 @@ return new class extends Migration {
             $table->integer('scheme_id');
             $table->Integer('created_by');
             $table->string('encode_key')->nullable();
-            $table->text('encoded_aadhar');
+            $table->text('encoded_aadhaar');
             $table->text('aadhaar_vault');
-            $table->string('aadhar_hash')->nullable()->unique();
+            $table->string('aadhaar_hash')->nullable()->unique();
             $table->foreign('created_by', 'user_id_fk')->references('id')->on('users');
             $table->foreign('application_id', 'application_id_fk')->references('application_id')->on('lb_scheme.unique_app_ben_ids');
-            $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.unique_app_ben_ids')->onDelet('cascade');
+            $table->foreign('beneficiary_id', 'beneficiary_id_fk')->references('beneficiary_id')->on('lb_scheme.unique_app_ben_ids')->onDelete('cascade');
             $table->timestamps();
-            $table->index('aadhar_hash');
+            $table->index('aadhaar_hash');
         });
     }
 

@@ -10,6 +10,12 @@
         </div>
     @endif
 
+    @if (session()->has('error'))
+        <div class="mb-4 text-red-600 font-semibold">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <form wire:submit.prevent="save" class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
         <x-form.select label="Select Scheme" wire:model.live="scheme_id" name="scheme_id" :disabled="$lock">

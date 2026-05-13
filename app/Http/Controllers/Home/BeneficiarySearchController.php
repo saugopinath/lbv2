@@ -85,7 +85,7 @@ class BeneficiarySearchController extends Controller
             $must = [];
 
             // SEARCH TYPE HANDLING
-            if (in_array($searchType, ['aadhar_no', 'mobile_no', 'ben_id', 'bank_account'])) {
+            if (in_array($searchType, ['aadhaar_no', 'mobile_no', 'ben_id', 'bank_account'])) {
 
                 // Case: Exact match searches — requires searchValue NOT empty
                 if ($searchValue !== '') {
@@ -103,7 +103,7 @@ class BeneficiarySearchController extends Controller
                                 'ben_fname^3',
                                 'ben_lname^3',
                                 'ben_mname',
-                                'aadhar_no^5',
+                                'aadhaar_no^5',
                                 'mobile_no'
                             ]
 

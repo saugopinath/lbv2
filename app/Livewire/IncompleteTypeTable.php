@@ -3,22 +3,16 @@
 namespace App\Livewire;
 
 use App\Helpers\CheckAuthHelper;
-use App\Models\Ward;
-use App\Models\Block;
-use App\Models\District;
-use App\Models\Panchayat;
-use App\Models\Subdivision;
-use App\Models\Municipality;
-use App\Models\Codemaster;
+use App\Services\TableExportService;
 use App\Helpers\EncryptionArray;
 use Illuminate\Support\Facades\Crypt;
-use App\Models\ApplicantIncompletDeatil;
+use App\Models\ApplicantIncompleteDetail;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
 
-class IncompletTypeTable extends DataTableComponent
+class IncompleteTypeTable extends DataTableComponent
 {
     public ?int $perPage = 5;
     public string $search = '';
@@ -77,7 +71,9 @@ class IncompletTypeTable extends DataTableComponent
 
         $this->setHideBulkActionsWhenEmptyEnabled();
 
-
+        $this->setConfigurableAreas([
+            'toolbar-left-start' => 'livewire.export_excel_buttons',
+        ]);
 
         $this->setTableWrapperAttributes([
             'class' => 'overflow-x-auto overflow-y-auto max-h-[500px] border rounded-lg shadow-sm',
@@ -168,7 +164,7 @@ class IncompletTypeTable extends DataTableComponent
                     default => 'Update',
                 };
 
-                $link = route('incomplet-type.view', [
+                $link = route('incomplete-type.view', [
                     'id' => Crypt::encryptString($row->application_id),
                     'stage' => Crypt::encryptString($this->stage),
                     'schemeId' => Crypt::encryptString($this->schemeId),
@@ -187,7 +183,7 @@ class IncompletTypeTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $query = ApplicantIncompletDeatil::applicationWise($this->schemeId);
+        $query = ApplicantIncompleteDetail::applicationWise($this->schemeId);
 
         $stage = $this->stage ?? null;
 
@@ -226,7 +222,7 @@ class IncompletTypeTable extends DataTableComponent
         }
 
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gpward || $this->filterCode) {
-            $query = EncryptionArray::applyIncompletLocationFilter(
+            $query = EncryptionArray::applyIncompleteLocationFilter(
                 $query,
                 $this->district_id ? (int) $this->district_id : null,
                 $this->rural_urban ? (int) $this->rural_urban : null,
@@ -238,5 +234,13 @@ class IncompletTypeTable extends DataTableComponent
         }
         $this->dispatch('hideLoader');
         return $query;
+    }
+
+    public function exportExcel(TableExportService $exportService)
+    {
+        return $exportService->export(
+            $this,
+            'applications_all.xlsx'
+        );
     }
 }

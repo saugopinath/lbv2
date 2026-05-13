@@ -33,7 +33,7 @@ class DynamicForm extends Component
     public bool $isLast = false;
     public $prevTab = null;
     public $nextTab = null;
-    public $ram, $form_preview;
+    public $saveNext, $form_preview;
     public array $completedTabs = [];
     public bool $allTabsCompleted = false;
     public $applicationId;
@@ -59,7 +59,7 @@ class DynamicForm extends Component
     ];
     /* ================= MOUNT ================= */
 
-    public function mount($schemeId, $schemeName = null, $ram = null, $applicationId = 150000019, $beneficiaryId = 700000019, $form_preview = null)
+    public function mount($schemeId, $schemeName = null, $saveNext = null, $applicationId = 150000019, $beneficiaryId = 700000019, $form_preview = null)
     {
 
         if (!WorkFlowPermissionHelper::canCreateEntry()) {
@@ -75,7 +75,7 @@ class DynamicForm extends Component
         $this->schemeId = $schemeId;
         $this->schemeName = $schemeName;
         $this->heading = 'Government Of West Bengal ' . $this->schemeName . ' Scheme';
-        $this->ram = $ram;
+        $this->saveNext = $saveNext;
         $this->form_preview = $form_preview;
         $this->applicationId = $applicationId;
         $this->beneficiaryId = $beneficiaryId;
@@ -276,11 +276,11 @@ class DynamicForm extends Component
         $this->appTypeOptions = $options;
     }
 
-    public function updatedFormDataAppType($value)
+    public function updatedFormDataApplicationType($value)
     {
         if (!array_key_exists($value, $this->appTypeOptions)) {
-            $this->addError('formData.app_type', 'Unauthorized application type.');
-            $this->formData['app_type'] = null;
+            $this->addError('formData.application_type', 'Unauthorized application type.');
+            $this->formData['application_type'] = null;
         }
     }
 
@@ -585,10 +585,10 @@ class DynamicForm extends Component
                     [
                         'beneficiary_id' => $this->beneficiaryId,
                         'scheme_id' => $this->schemeId,
-                        'aadhar_hash' => $this->aadhaarPayload['hash'],
-                        'encoded_aadhar' => $this->aadhaarPayload['encoded'],
+                        'aadhaar_hash' => $this->aadhaarPayload['hash'],
+                        'encoded_aadhaar' => $this->aadhaarPayload['encoded'],
                         'encode_key' => null,
-                        'aadhar_vault' => $this->aadhaarPayload['hash'],
+                        'aadhaar_vault' => $this->aadhaarPayload['hash'],
                     ]
                 );
             }

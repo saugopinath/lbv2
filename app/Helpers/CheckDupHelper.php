@@ -3,11 +3,11 @@
 namespace App\Helpers;
 
 use App\Models\BeneficiaryAadhaar;
-use App\Models\ApplicantIncompletDeatil;
+use App\Models\ApplicantIncompleteDetail;
 use App\Models\BeneficiaryBankDetail;
 use App\Models\BeneficiaryPersonalDetail;
 
-class ChechDupHelper
+class CheckDupHelper
 {
     public static function checkDuplicate(string $type, string $value, string $incompleteType, string $schemeId)
     {
@@ -16,15 +16,15 @@ class ChechDupHelper
         }
 
         if ($type === 'aadhaar') {
-            $aadhar = md5($value);
+            $aadhaar = md5($value);
 
-            $existsInCommonList = BeneficiaryAadhaar::where('encoded_aadhar', $aadhar)
+            $existsInCommonList = BeneficiaryAadhaar::where('encoded_aadhaar', $aadhaar)
                 ->whereRelation('personal', 'scheme_id', $schemeId)
                 ->whereRelation('personal', 'is_final', 1)
                 ->whereRelation('personal', 'next_level_role_id', '!=', -100)
                 ->exists();
 
-            $existsInIncomplete = ApplicantIncompletDeatil::whereJsonContains('new_value->aadhaar_no', $value)
+            $existsInIncomplete = ApplicantIncompleteDetail::whereJsonContains('new_value->aadhaar_no', $value)
                 ->whereHas('incompleteType', function ($q) use ($incompleteType) {
                     $q->where('table_column', 'LIKE', "%{$incompleteType}%");
                 })
@@ -46,7 +46,7 @@ class ChechDupHelper
                 ->exists();
 
             // dd($existsInCommonList);
-            $existsInIncomplete = ApplicantIncompletDeatil::whereJsonContains('new_value->mobile_no', $value)
+            $existsInIncomplete = ApplicantIncompleteDetail::whereJsonContains('new_value->mobile_no', $value)
                 ->whereHas('incompleteType', function ($q) use ($incompleteType) {
                     $q->where('table_column', 'LIKE', "%{$incompleteType}%");
                 })
@@ -67,7 +67,7 @@ class ChechDupHelper
                 ->whereRelation('personal', 'next_level_role_id', '!=', -100)
                 ->exists();
 
-            $existsInIncomplete = ApplicantIncompletDeatil::whereJsonContains('new_value->account_number', $value)
+            $existsInIncomplete = ApplicantIncompleteDetail::whereJsonContains('new_value->account_number', $value)
                 ->whereHas('incompleteType', function ($q) use ($incompleteType) {
                     $q->where('table_column', 'LIKE', "%{$incompleteType}%");
                 })

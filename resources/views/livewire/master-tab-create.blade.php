@@ -315,12 +315,15 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                            <x-form.input
-                                name="level_name"
-                                label="Level Name"
-                                placeholder="Enter Level Name"
-                                wire:model="level_name"
-                                required />
+                                <x-form.input
+                                    name="level_name"
+                                    label="Level Name"
+                                    placeholder="Enter Level Name"
+                                    wire:model="level_name"
+                                    required />
+                                <p class="mt-1 text-xs text-indigo-600 font-medium italic">
+                                    Tip: Use <strong>[[input]]</strong> for inline input. Example: "I [[input]] hereby declare..."
+                                </p>
 
                             <x-form.input
                                 name="field_name"

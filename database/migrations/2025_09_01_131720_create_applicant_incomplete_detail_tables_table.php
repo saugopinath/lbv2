@@ -10,12 +10,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('applicant_incomplet_deatils', function (Blueprint $table) {
+        Schema::create('applicant_incomplete_details', function (Blueprint $table) {
             $table->id();
             $table->integer('scheme_id');
             $table->unsignedBigInteger('application_id');
             $table->unsignedBigInteger('beneficiary_id')->nullable();
-            $table->unsignedBigInteger('incomplet_type');
+            $table->unsignedBigInteger('incomplete_type');
             $table->smallInteger('next_level_request_id')->nullable();
             $table->json('new_value')->nullable();
             $table->json('old_value')->nullable();
@@ -26,9 +26,9 @@ return new class extends Migration {
                 ->references('id')
                 ->on('accept_reject_infos')
                 ->onDelete('cascade');
-            $table->foreign('incomplet_type')
-                ->references('incomplet_type_code')
-                ->on('incomplet_type_model_mappings')
+            $table->foreign('incomplete_type')
+                ->references('incomplete_type_code')
+                ->on('incomplete_type_model_mappings')
                 ->onDelete('cascade');
             $table->timestamps();
             $table->index('application_id');
@@ -41,6 +41,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('applicant_incomplet_deatils');
+        Schema::dropIfExists('applicant_incomplete_details');
     }
 };

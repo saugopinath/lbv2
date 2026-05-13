@@ -42,7 +42,7 @@ return new class extends Migration
             $table->date('from_date')->nullable();
             $table->date('to_date')->nullable();
             $table->integer('jnm_id')->nullable();
-            $table->string('aadhar_hash')->nullable();
+            $table->string('aadhaar_hash')->nullable();
             $table->integer('lb_application_id')->nullable();
             $table->smallInteger('migrated_to_jb')->nullable();
             $table->timestampTz('marking_application_at')->nullable();

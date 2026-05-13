@@ -27,13 +27,13 @@
                 <div class="grid gap-6 md:grid-cols-2 mb-2 pl-4 pr-4">
                     <div>
                         <x-form.input
-                            name="reg_no"
+                            name="ds_registration_no"
                             label="Duare Sakar Registration Number"
                             placeholder="Enter Duare Sakar Registration Number"
-                            required wire:model="reg_no" />
+                            required wire:model="ds_registration_no" />
                     </div>
                     <div>
-                        <x-form.input type="date" name="ds_date" id="ds_date" label="Duare Sakar Date" required wire:model="ds_date" :max="$cdate" :min="$pdate" />
+                        <x-form.input type="date" name="duaresarkarDate" id="duaresarkarDate" label="Duare Sakar Date" required wire:model="duaresarkarDate" :max="$currentDate" :min="$previouesDate" />
                     </div>
                 </div>
             </div>

@@ -69,7 +69,7 @@ class DynamicWorkflowService
                 'module_id'       => $moduleId,
                 'ref_id'          => $refId,
                 'scheme_id'       => $schemeId,
-                'current_rank'    => $firstStep->next_label_role_id,
+                'current_rank'    => $firstStep->next_level_role_id,
                 'current_step_id' => $firstStep->workflow_step_id,
                 'old_data'        => $oldData,
                 'new_data'        => $newData,
@@ -121,13 +121,13 @@ class DynamicWorkflowService
                 $this->applyApprovedChanges($request);
                 $request = DynamicWorkflowRequest::find($request->id);
                 $UpdateRequest = $request->update([
-                    'current_rank' => $currentStep->next_label_role_id,
+                    'current_rank' => $currentStep->next_level_role_id,
                     'current_step_id' => $currentStep->workflow_step_id
                 ]);
                 $msg = ['message' => 'Finally Approved & Beneficiary Data Updated'];
             } else {
                 $UpdateRequest = $request->update([
-                    'current_rank' => $currentStep->next_label_role_id,
+                    'current_rank' => $currentStep->next_level_role_id,
                     'current_step_id' => $currentStep->workflow_step_id
                 ]);
                 $msg = ['message' => 'Processed & Forwarded to the Next Step'];
@@ -153,9 +153,10 @@ class DynamicWorkflowService
             $request = DynamicWorkflowRequest::findOrFail($requestId);
             $currentStep = $this->getStepForRank($request->module_id, $request->current_rank);
 
+            // পেছনের র্যাঙ্ক-এ পাঠানো (same_level_role_id ব্যবহার করে)
             $prevStep = $this->getStepForRank(
                 $request->module_id,
-                $currentStep->same_label_role_id,
+                $currentStep->same_level_role_id,
                 'Revert target rank configuration missing.'
             );
 

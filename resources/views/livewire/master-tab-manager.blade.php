@@ -159,7 +159,7 @@
                     <div class="space-y-6">
                         <livewire:final-preview
                             :scheme-id="$selectedSchemeId"
-                            :ram="1"
+                            :saveNext="1"
                             :form_preview="1"
                             :wire:key="'final-preview-'.$selectedSchemeId" />
                     </div>

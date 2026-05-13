@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 
-class ApplicantIncompletDeatil extends Model implements Auditable
+class ApplicantIncompleteDetail extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
-    protected $table = 'applicant_incomplet_deatils';
+    protected $table = 'applicant_incomplete_details';
     protected $fillable = [
         'application_id',
         'beneficiary_id',
-        'incomplet_type',
+        'incomplete_type',
         'next_level_request_id',
         'new_value',
         'old_value',
@@ -38,21 +38,18 @@ class ApplicantIncompletDeatil extends Model implements Auditable
     {
         return $this->belongsTo(BeneficiaryBankDetail::class, 'application_id');
     }
-    // public function aadhar()
-    // {
-    //     return $this->belongsTo(BeneficiaryAadhaar::class, 'application_id');
-    // }
-    public function incompletType()
+
+    public function incompleteType()
     {
-        return $this->belongsTo(Codemaster::class, 'incomplet_type', 'code');
+        return $this->belongsTo(Codemaster::class, 'incomplete_type', 'code');
     }
     public function enclosers()
     {
         return $this->hasMany(BeneficiaryEnclosure::class, 'application_id', 'application_id');
     }
-    public function incompleteType()
+    public function incompleteTypeMapping()
     {
-        return $this->belongsTo(IncompletTypeModelMapping::class, 'incomplet_type', 'incomplet_type_code');
+        return $this->belongsTo(IncompleteTypeModelMapping::class, 'incomplete_type', 'incomplete_type_code');
     }
 
     public function contact()
@@ -100,11 +97,11 @@ class ApplicantIncompletDeatil extends Model implements Auditable
     }
     public function getIncompleteTypesNamesAttribute()
     {
-        return ApplicantIncompletDeatil::where('application_id', $this->application_id)
+        return ApplicantIncompleteDetail::where('application_id', $this->application_id)
             ->whereIn('is_active', [0, 1])
-            ->with('incompletType')
+            ->with('incompleteType')
             ->get()
-            ->pluck('incompletType.name')
+            ->pluck('incompleteType.name')
             ->filter()
             ->values()
             ->map(function ($name, $index) {

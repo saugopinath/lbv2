@@ -30,20 +30,20 @@ class SearchBeneficiary extends Component
     public $revert_code = null;
     public $schemeOptions = [];
     public $getMinMaxWorkflowStep;
-    public $nextLabelRoleId;
+    public $nextLevelRoleId;
     public $filterRoleId;
     public $CasteOptions = [];
 
     public $searchOptions = [
         1 => 'Application ID',
         2 => 'Beneficiary ID',
-        3 => 'Aadhar Number',
+        3 => 'Aadhaar Number',
         4 => 'Mobile No',
     ];
     protected $searchTypeMap = [
         1 => 'application_id',
         2 => 'beneficiary_id',
-        3 => 'aadhar_vault',
+        3 => 'aadhaar_vault',
         4 => 'mobile_no',
     ];
 
@@ -91,7 +91,7 @@ class SearchBeneficiary extends Component
                 'results',
                 'items',
                 'getMinMaxWorkflowStep',
-                'nextLabelRoleId',
+                'nextLevelRoleId',
                 'filterRoleId',
             ]);
             $this->resetValidation();
@@ -103,7 +103,7 @@ class SearchBeneficiary extends Component
             'results',
             'items',
             'getMinMaxWorkflowStep',
-            'nextLabelRoleId',
+            'nextLevelRoleId',
             'filterRoleId',
         ]);
         $this->resetValidation();
@@ -124,9 +124,9 @@ class SearchBeneficiary extends Component
                             $fail('This field must be numeric.');
                         }
                         break;
-                    case 3: // Aadhar Number
+                    case 3: // Aadhaar Number
                         if (!preg_match('/^\d{12}$/', $value)) {
-                            $fail('Aadhar number must be exactly 12 digits.');
+                            $fail('Aadhaar number must be exactly 12 digits.');
                         }
                         break;
                     case 4: // Mobile No
@@ -159,9 +159,9 @@ class SearchBeneficiary extends Component
         if (in_array($column, ['application_id', 'beneficiary_id'])) {
             $modelClass   = BeneficiaryPersonalDetail::class;
             $searchColumn = $column;
-        } elseif ($column === 'aadhar_vault') {
+        } elseif ($column === 'aadhaar_vault') {
             $modelClass   = BeneficiaryAadhaar::class;
-            $searchColumn = 'aadhar_vault';
+            $searchColumn = 'aadhaar_vault';
             $searchValue  = md5($this->searchValue);
         } else {
             $fieldManager = SchemeTabFormField::with('tabMaster')
@@ -240,8 +240,8 @@ class SearchBeneficiary extends Component
                 return;
             } else {
                 $this->getMinMaxWorkflowStep = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->selectScheme);
-                $this->nextLabelRoleId = $workflowService->getLabelRoles($this->selectScheme, $this->getMinMaxWorkflowStep['max']);
-                $this->filterRoleId = $this->nextLabelRoleId->next_label_role_id;
+                $this->nextLevelRoleId = $workflowService->getLevelRoles($this->selectScheme, $this->getMinMaxWorkflowStep['max']);
+                $this->filterRoleId = $this->nextLevelRoleId->next_level_role_id;
                 // dd($this->filterRoleId);
                 // dd($this->getMinMaxWorkflowStep);
                 // $query = BeneficiaryPersonalDetail::select('application_id', 'beneficiary_id', 'scheme_id', 'beneficiary_name', 'caste', 'caste_cer_no', 'other_details', 'next_level_role_id')->where('application_id', $applicationId)->where('scheme_id', $this->selectScheme)->where('is_clean', 1)->where('is_final', 1);

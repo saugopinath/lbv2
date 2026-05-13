@@ -17,7 +17,7 @@ class JnmpData extends Model implements Auditable
 
     public function aadhaar()
     {
-        return $this->belongsTo(BeneficiaryAadhaar::class, 'aadhar_hash', 'aadhar_hash');
+        return $this->belongsTo(BeneficiaryAadhaar::class, 'aadhaar_hash', 'aadhaar_hash');
     }
 
     public function beneficiary()

@@ -14,7 +14,7 @@ class WorkflowsteproleMapping extends Model implements Auditable
     protected $casts = [
         'is_final_step' => 'boolean',
     ];
-    public static function getLabelRoleIdsByRole($schemeId, $roleId, $rank = null)
+    public static function getLevelRoleIdsByRole($schemeId, $roleId, $rank = null)
     {
         $query = self::query();
         if ($rank !== null) {
@@ -24,7 +24,7 @@ class WorkflowsteproleMapping extends Model implements Auditable
         }
         return $query->where('scheme_id', $schemeId)
             ->with('workflowstep')
-            ->first(['same_label_role_id', 'next_label_role_id', 'is_first_step', 'is_final_step', 'workflow_step_id']);
+            ->first(['same_level_role_id', 'next_level_role_id', 'is_first_step', 'is_final_step', 'workflow_step_id']);
     }
 
     public static function getMinMaxWorkflowStep(int $schemeId): array

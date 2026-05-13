@@ -196,22 +196,22 @@ class WorkFlowPermissionHelper
         return self::hasPermission('view beneficiary details', $schemeId);
     }
 
-    public static function canVerifierIncomplet($schemeId = null): bool
+    public static function canVerifierIncomplete($schemeId = null): bool
     {
         return self::hasPermission('view verifier incomplete', $schemeId);
     }
 
-    public static function canApproverIncomplet($schemeId = null): bool
+    public static function canApproverIncomplete($schemeId = null): bool
     {
         return self::hasPermission('view approver incomplete', $schemeId);
     }
 
-    public static function canUpdateIncomplet($schemeId = null): bool
+    public static function canUpdateIncomplete($schemeId = null): bool
     {
         return self::hasPermission('update incomplete', $schemeId);
     }
 
-    public static function canRevertIncomplet($schemeId = null): bool
+    public static function canRevertIncomplete($schemeId = null): bool
     {
         return self::hasPermission('revert incomplete', $schemeId);
     }

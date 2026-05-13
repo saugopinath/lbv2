@@ -7,7 +7,6 @@ use App\Models\Scheme;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Exception;
-use App\Attributes\Loggable;
 
 class DupCheckSchemeConfigSettings extends Component
 {
@@ -20,7 +19,7 @@ class DupCheckSchemeConfigSettings extends Component
     {
         $this->schemeId = $schemeId;
         $this->dupcheckOptions = [
-            'Aadhar' => 'Aadhar',
+            'Aadhaar' => 'Aadhaar',
             'Bank'   => 'Bank',
             'Mobile' => 'Mobile',
             'CS' => 'Caste Certificate Number',
@@ -50,9 +49,21 @@ class DupCheckSchemeConfigSettings extends Component
         }
     }
 
-    #[Loggable(level: 'C', nickname: 'Dup Check Scheme Config Settings')]
     public function save()
     {
+        $rules = [];
+        $messages = [];
+        foreach ($this->config as $key => $data) {
+            if ($data['selected'] && $data['iscross'] === 'yes') {
+                $rules["config.$key.schemes"] = 'required|array|min:1';
+                $messages["config.$key.schemes.required"] = "At least one scheme must be selected for {$this->dupcheckOptions[$key]}.";
+                $messages["config.$key.schemes.min"] = "At least one scheme must be selected for {$this->dupcheckOptions[$key]}.";
+            }
+        }
+        if (!empty($rules)) {
+            $this->validate($rules, $messages);
+        }
+
         DB::beginTransaction();
         try {
             DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)->delete();

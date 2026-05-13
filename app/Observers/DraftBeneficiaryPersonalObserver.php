@@ -92,7 +92,7 @@ class DraftBeneficiaryPersonalObserver
                 $benrej->bank_details         = DraftBeneficiaryBank::where('application_id', $draftBeneficiaryPersonal->application_id)->get()->toArray();
                 $benrej->declaration_details  = DraftBeneficiaryDeclaration::where('application_id', $draftBeneficiaryPersonal->application_id)->get()->toArray();
                 $benrej->relationship_details = DraftBeneficiaryRelationship::where('application_id', $draftBeneficiaryPersonal->application_id)->get()->toArray();
-                $benrej->aadhar_details       = BeneficiaryAadhaar::where('application_id', $draftBeneficiaryPersonal->application_id)->get()->toArray();
+                $benrej->aadhaar_details       = BeneficiaryAadhaar::where('application_id', $draftBeneficiaryPersonal->application_id)->get()->toArray();
                 $benrej->save();
 
                 $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($draftBeneficiaryPersonal->application_id);

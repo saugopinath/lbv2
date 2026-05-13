@@ -5,7 +5,7 @@
 
     <ul class="list-disc list-inside text-sm text-gray-700 mb-2">
         @foreach ($aadhaarIssues as $issueItem)
-            <li>{{ $issueItem->incompletType->name }}</li>
+            <li>{{ $issueItem->incompleteType->name }}</li>
         @endforeach
     </ul>
 
@@ -19,9 +19,9 @@
         {{-- @dump($stage); --}}
         @if (!empty($stage) && in_array($stage, ['verifier', 'revert']))
             <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
-                <x-form.input id="aadhar_modification_{{ $aadhaarIssues[0]->application_id }}" name="aadhar_modification"
+                <x-form.input id="aadhaar_modification_{{ $aadhaarIssues[0]->application_id }}" name="aadhaar_modification"
                     label="Aadhaar Number" required placeholder="Enter New Aadhaar Number"
-                    wire:model.defer="formData.aadhar_modification.{{ $aadhaarIssues[0]->application_id }}"
+                    wire:model.defer="formData.aadhaar_modification.{{ $aadhaarIssues[0]->application_id }}"
                     x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,12)" />
             </div>
         @elseif (!empty($stage) && $stage === 'approver')

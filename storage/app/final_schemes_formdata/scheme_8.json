@@ -11,7 +11,7 @@
                 {
                     "id": 1,
                     "tab_field_id": 1,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "Application Type",
                     "field_name": "application_type",
                     "field_id": "application_type",
@@ -42,7 +42,7 @@
                 {
                     "id": 2,
                     "tab_field_id": 5,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "Applicant Name",
                     "field_name": "beneficiary_name",
                     "field_id": "beneficiary_name",
@@ -184,9 +184,9 @@
                     "updated_at": "2026-05-12T12:23:38.000000Z"
                 },
                 {
-                    "id": 7,
+                    "id": 87,
                     "tab_field_id": 6,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "Age",
                     "field_name": "age",
                     "field_id": "age",
@@ -242,7 +242,7 @@
                 {
                     "id": 9,
                     "tab_field_id": 9,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "Father's Name",
                     "field_name": "ben_father_name",
                     "field_id": "ben_father_name",
@@ -296,9 +296,9 @@
                     "updated_at": "2026-05-12T12:23:38.000000Z"
                 },
                 {
-                    "id": 11,
+                    "id": 90,
                     "tab_field_id": 10,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "Mother's Name",
                     "field_name": "ben_mother_name",
                     "field_id": "ben_mother_name",
@@ -315,7 +315,7 @@
                     "dependent_on_values": null,
                     "field_class": null,
                     "is_multiple": false,
-                    "field_position": 11,
+                    "field_position": 9,
                     "is_active": true,
                     "section_level_id": null,
                     "section_level_type": null,
@@ -324,9 +324,9 @@
                     "updated_at": "2026-05-12T12:23:38.000000Z"
                 },
                 {
-                    "id": 12,
+                    "id": 91,
                     "tab_field_id": 11,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "Marital Status",
                     "field_name": "mar_statu",
                     "field_id": "mar_statu",
@@ -349,7 +349,7 @@
                     "dependent_on_values": null,
                     "field_class": null,
                     "is_multiple": false,
-                    "field_position": 12,
+                    "field_position": 10,
                     "is_active": true,
                     "section_level_id": null,
                     "section_level_type": null,
@@ -360,7 +360,7 @@
                 {
                     "id": 13,
                     "tab_field_id": 13,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "Caste",
                     "field_name": "caste",
                     "field_id": "caste",
@@ -423,9 +423,9 @@
                     "updated_at": "2026-05-12T12:23:38.000000Z"
                 },
                 {
-                    "id": 15,
+                    "id": 94,
                     "tab_field_id": 14,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "Caste Certificate Number",
                     "field_name": "caste_cer_no",
                     "field_id": "caste_cer_no",
@@ -446,7 +446,7 @@
                     ],
                     "field_class": null,
                     "is_multiple": false,
-                    "field_position": 15,
+                    "field_position": 13,
                     "is_active": true,
                     "section_level_id": null,
                     "section_level_type": null,
@@ -578,7 +578,7 @@
                 {
                     "id": 20,
                     "tab_field_id": 20,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "State",
                     "field_name": "state",
                     "field_id": "state",
@@ -597,6 +597,118 @@
                     "dependent_on_values": null,
                     "field_class": null,
                     "is_multiple": false,
+                    "field_position": 1,
+                    "is_active": true,
+                    "section_level_id": null,
+                    "section_level_type": null,
+                    "is_readonly": 0,
+                    "created_at": "2026-05-11T10:25:30.000000Z",
+                    "updated_at": "2026-05-11T11:34:25.000000Z"
+                },
+                {
+                    "id": 100,
+                    "tab_field_id": 16,
+                    "scheme_id": 8,
+                    "level_name": "District",
+                    "field_name": "district_id",
+                    "field_id": "district_id",
+                    "field_type": "select",
+                    "options": null,
+                    "is_common": true,
+                    "db_column": "district_id",
+                    "is_mandatory": 1,
+                    "tab_code": 102,
+                    "validation_rule": "required",
+                    "regex": null,
+                    "confirm_of": null,
+                    "dependent_on": null,
+                    "dependent_on_values": null,
+                    "field_class": "district_id",
+                    "is_multiple": false,
+                    "field_position": 2,
+                    "is_active": true,
+                    "section_level_id": null,
+                    "section_level_type": null,
+                    "is_readonly": 0,
+                    "created_at": "2026-05-11T10:25:30.000000Z",
+                    "updated_at": "2026-05-11T11:34:25.000000Z"
+                },
+                {
+                    "id": 117,
+                    "tab_field_id": 47,
+                    "scheme_id": 8,
+                    "level_name": "Assembly Constituency",
+                    "field_name": "assemblie",
+                    "field_id": "assemblie",
+                    "field_type": "select",
+                    "options": null,
+                    "is_common": true,
+                    "db_column": "assemblie",
+                    "is_mandatory": null,
+                    "tab_code": 102,
+                    "validation_rule": "required",
+                    "regex": null,
+                    "confirm_of": null,
+                    "dependent_on": null,
+                    "dependent_on_values": null,
+                    "field_class": "assemblie",
+                    "is_multiple": false,
+                    "field_position": 3,
+                    "is_active": true,
+                    "section_level_id": null,
+                    "section_level_type": null,
+                    "is_readonly": 0,
+                    "created_at": "2026-05-11T11:27:03.000000Z",
+                    "updated_at": "2026-05-11T11:34:25.000000Z"
+                },
+                {
+                    "id": 101,
+                    "tab_field_id": 17,
+                    "scheme_id": 8,
+                    "level_name": "Rural\/Urbar",
+                    "field_name": "rural_urban",
+                    "field_id": "rural_urban",
+                    "field_type": "select",
+                    "options": null,
+                    "is_common": true,
+                    "db_column": "rural_urban",
+                    "is_mandatory": 1,
+                    "tab_code": 102,
+                    "validation_rule": "required",
+                    "regex": null,
+                    "confirm_of": null,
+                    "dependent_on": null,
+                    "dependent_on_values": null,
+                    "field_class": "rural_urban",
+                    "is_multiple": false,
+                    "field_position": 4,
+                    "is_active": true,
+                    "section_level_id": null,
+                    "section_level_type": null,
+                    "is_readonly": 0,
+                    "created_at": "2026-05-11T10:25:30.000000Z",
+                    "updated_at": "2026-05-11T11:34:25.000000Z"
+                },
+                {
+                    "id": 102,
+                    "tab_field_id": 18,
+                    "scheme_id": 8,
+                    "level_name": "Block\/Municipality",
+                    "field_name": "blockurban",
+                    "field_id": "blockurban",
+                    "field_type": "select",
+                    "options": null,
+                    "is_common": true,
+                    "db_column": "blockurban",
+                    "is_mandatory": 1,
+                    "tab_code": 102,
+                    "validation_rule": "required",
+                    "regex": null,
+                    "confirm_of": null,
+                    "dependent_on": null,
+                    "dependent_on_values": null,
+                    "field_class": "blockurban",
+                    "is_multiple": false,
                     "field_position": 5,
                     "is_active": true,
                     "section_level_id": null,
@@ -608,7 +720,7 @@
                 {
                     "id": 21,
                     "tab_field_id": 22,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "Village \/ Town \/ City",
                     "field_name": "villtowncity",
                     "field_id": "villtowncity",
@@ -636,7 +748,7 @@
                 {
                     "id": 22,
                     "tab_field_id": 23,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "House \/ Premise No",
                     "field_name": "housepremiseno",
                     "field_id": "housepremiseno",
@@ -664,7 +776,7 @@
                 {
                     "id": 23,
                     "tab_field_id": 24,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "Post Office",
                     "field_name": "postoffice",
                     "field_id": "postoffice",
@@ -692,7 +804,7 @@
                 {
                     "id": 24,
                     "tab_field_id": 25,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "Pin Code",
                     "field_name": "pincode",
                     "field_id": "pincode",
@@ -755,9 +867,9 @@
             "tab_short_name": "bank_details",
             "fields": [
                 {
-                    "id": 26,
+                    "id": 112,
                     "tab_field_id": 26,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "IFSC Code",
                     "field_name": "ifscode",
                     "field_id": "ifscode",
@@ -783,9 +895,9 @@
                     "updated_at": "2026-05-12T12:23:55.000000Z"
                 },
                 {
-                    "id": 27,
+                    "id": 113,
                     "tab_field_id": 27,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "Bank Name",
                     "field_name": "bankname",
                     "field_id": "bankname",
@@ -811,9 +923,9 @@
                     "updated_at": "2026-05-12T12:23:55.000000Z"
                 },
                 {
-                    "id": 28,
+                    "id": 114,
                     "tab_field_id": 28,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "Bank Branch Name",
                     "field_name": "bank_branch_name",
                     "field_id": "bank_branch_name",
@@ -839,9 +951,9 @@
                     "updated_at": "2026-05-12T12:23:55.000000Z"
                 },
                 {
-                    "id": 29,
+                    "id": 115,
                     "tab_field_id": 29,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "Bank Account Number",
                     "field_name": "bankaccountnumber",
                     "field_id": "bankaccountnumber",
@@ -867,9 +979,9 @@
                     "updated_at": "2026-05-12T12:23:55.000000Z"
                 },
                 {
-                    "id": 30,
+                    "id": 116,
                     "tab_field_id": 30,
-                    "scheme_id": 20,
+                    "scheme_id": 8,
                     "level_name": "Confirm Bank Account Number",
                     "field_name": "confirmbankaccountnumber",
                     "field_id": "confirmbankaccountnumber",
@@ -965,19 +1077,19 @@
                     "doc_type_id": 103,
                     "is_required": true,
                     "max_file_size": "500KB",
-                    "extension_type": "jpg,jpeg,png",
+                    "extension_type": "jpg,jpeg,png,pdf",
                     "tab_code": 104,
                     "field_position": 3,
                     "is_active": true,
                     "doc_type": {
-                        "id": 103,
-                        "name": "PASSPORT SIZE PROFILE PHOTO",
-                        "short_name": "profile_photo_enc",
+                        "id": 109,
+                        "name": "COPY OF RESIDENTIAL CERTIFICATE(SELF DECLARATION)",
+                        "short_name": "residential_certificate_enc",
                         "parent_id": 16,
                         "created_at": "2026-05-11T11:30:28.000000Z",
                         "updated_at": "2026-05-11T11:30:28.000000Z",
                         "is_active": 1,
-                        "code": 161,
+                        "code": 167,
                         "rank": null,
                         "parent_short_code": "ENCDETAILS"
                     },
@@ -994,8 +1106,8 @@
             "tab_short_name": "self_declaration",
             "fields": [
                 {
-                    "id": 1,
-                    "scheme_id": 20,
+                    "id": 24,
+                    "scheme_id": 8,
                     "tab_code": 105,
                     "section_level_id": null,
                     "field_type": "checkbox",
@@ -1004,7 +1116,7 @@
                     "field_id": "is_resident",
                     "options": [],
                     "db_column": "other_details",
-                    "validation_rule": "required",
+                    "validation_rule": "nullable",
                     "regex": null,
                     "is_multiple": false,
                     "is_mandatory": 0,
@@ -1015,17 +1127,17 @@
                     "updated_at": "2026-05-12T12:25:38.000000Z"
                 },
                 {
-                    "id": 2,
-                    "scheme_id": 20,
+                    "id": 25,
+                    "scheme_id": 8,
                     "tab_code": 105,
-                    "section_level_id": null,
+                    "section_level_id": 1,
                     "field_type": "checkbox",
                     "level_name": "dont get any govt. bnefit",
                     "field_name": "is_govt",
                     "field_id": "is_govt",
                     "options": [],
                     "db_column": "other_details",
-                    "validation_rule": "required",
+                    "validation_rule": "nullable",
                     "regex": null,
                     "is_multiple": false,
                     "is_mandatory": 0,
@@ -1036,7 +1148,72 @@
                     "updated_at": "2026-05-12T12:26:52.000000Z"
                 }
             ],
-            "layout": null
+            "layout": [
+                {
+                    "row": 1,
+                    "columns": 1
+                },
+                {
+                    "row": 2,
+                    "columns": 1
+                },
+                {
+                    "row": 3,
+                    "columns": 1
+                },
+                {
+                    "row": 4,
+                    "columns": 1
+                },
+                {
+                    "row": 5,
+                    "columns": 1
+                },
+                {
+                    "row": 6,
+                    "columns": 3
+                },
+                {
+                    "row": 7,
+                    "columns": 1
+                },
+                {
+                    "row": 8,
+                    "columns": 1
+                },
+                {
+                    "row": 9,
+                    "columns": 1
+                },
+                {
+                    "row": 10,
+                    "columns": 1
+                },
+                {
+                    "row": 11,
+                    "columns": 1
+                },
+                {
+                    "row": 12,
+                    "columns": 1
+                },
+                {
+                    "row": 13,
+                    "columns": 1
+                },
+                {
+                    "row": 14,
+                    "columns": 1
+                },
+                {
+                    "row": 15,
+                    "columns": 1
+                },
+                {
+                    "row": 16,
+                    "columns": 1
+                }
+            ]
         }
     ]
 }

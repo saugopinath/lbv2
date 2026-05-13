@@ -312,7 +312,7 @@
                             <div class="ml-5">
                                 <h2 class="text-xl font-bold text-gray-900">Identification Numbers</h2>
                                 <p class="text-gray-600 mt-1">
-                                    {{$row->aadhar_no ? 'Aadhaar: ' . $row->aadhar_no : 'No Aadhaar'}}</p>
+                                    {{$row->aadhaar_no ? 'Aadhaar: ' . $row->aadhaar_no : 'No Aadhaar'}}</p>
                             </div>
                         </div>
                         <div class="flex items-center">
@@ -320,7 +320,7 @@
                                 <span
                                     class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border border-purple-200">
                                     <i class="fa-solid fa-shield-check mr-2"></i>
-                                    {{$row->aadhar_no ? 'Verified' : 'Pending'}}
+                                    {{$row->aadhaar_no ? 'Verified' : 'Pending'}}
                                 </span>
                             </div>
                             <div
@@ -339,7 +339,7 @@
                                 $idFields = [
                                     ['icon' => 'fa-credit-card', 'label' => 'Digital Ration Card No.', 'value' => $row->ration_card_no, 'color' => 'orange'],
                                     ['icon' => 'fa-id-card-alt', 'label' => 'AHL TIN', 'value' => $row->ahl_tin, 'color' => 'blue'],
-                                    ['icon' => 'fa-address-card', 'label' => 'Aadhaar No.', 'value' => $row->aadhar_no, 'color' => 'green'],
+                                    ['icon' => 'fa-address-card', 'label' => 'Aadhaar No.', 'value' => $row->aadhaar_no, 'color' => 'green'],
                                     ['icon' => 'fa-vote-yea', 'label' => 'EPIC/Voter ID No.', 'value' => $row->epic_voter_id, 'color' => 'red'],
                                     ['icon' => 'fa-file-invoice', 'label' => 'PAN', 'value' => $row->pan_no, 'color' => 'purple'],
                                     ['icon' => 'fa-list-ol', 'label' => 'BPL Seq No.', 'value' => $row->bpl_seq_no, 'color' => 'teal'],

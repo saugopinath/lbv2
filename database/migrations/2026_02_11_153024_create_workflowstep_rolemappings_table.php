@@ -21,8 +21,8 @@ return new class extends Migration
             $table->foreignId('role_id')
                 ->constrained('roles')
                 ->cascadeOnDelete();
-            $table->bigInteger('same_label_role_id')->nullable();
-            $table->bigInteger('next_label_role_id')->nullable();
+            $table->bigInteger('same_level_role_id')->nullable();
+            $table->bigInteger('next_level_role_id')->nullable();
             $table->timestamps();
         });
     }

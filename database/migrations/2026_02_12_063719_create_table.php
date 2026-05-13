@@ -56,7 +56,7 @@ return new class extends Migration {
                 dob date,
                 ben_father_name varchar(250),
                 ben_mother_name varchar(250),
-                mar_statu integer,
+                marital_status integer,
                 ben_spouse_name varchar(250),
                 caste smallint,
                 caste_cer_no varchar(250),
@@ -72,6 +72,10 @@ return new class extends Migration {
                 jnmp_marked smallint,
                 jnmp_remarks varchar(255),
                 reactive_reason varchar(255),
+                approval_date date,
+                rejection_date date,
+                verification_date date,
+                recomendation_date date,
                 created_at timestamp without time zone,
                 updated_at timestamp without time zone
             ) PARTITION BY LIST (scheme_id)
@@ -129,19 +133,19 @@ return new class extends Migration {
 
         /*
         |--------------------------------------------------------------------------
-        | 5. beneficiary_aadhar (Partitioned)
+        | 5. beneficiary_aadhaar (Partitioned)
         |--------------------------------------------------------------------------
         */
         $conn->statement("
-            CREATE TABLE IF NOT EXISTS {$this->schema}.beneficiary_aadhars
+            CREATE TABLE IF NOT EXISTS {$this->schema}.beneficiary_aadhaars
             (
                 scheme_id integer NOT NULL,
                 application_id bigint NOT NULL,
                 beneficiary_id bigint NOT NULL,
                 encode_key text,
-                encoded_aadhar text,
-                aadhar_vault text,
-                aadhar_hash varchar(255),
+                encoded_aadhaar text,
+                aadhaar_vault text,
+                aadhaar_hash varchar(255),
                 is_clean smallint DEFAULT 1,
                 created_at timestamp without time zone,
                 updated_at timestamp without time zone
@@ -186,7 +190,7 @@ return new class extends Migration {
         $tables = [
             "beneficiary_self_declarations",
             'beneficiary_documents',
-            'beneficiary_aadhars',
+            'beneficiary_aadhaars',
             'beneficiary_banks',
             'beneficiary_contacts',
             'beneficiary_personals',

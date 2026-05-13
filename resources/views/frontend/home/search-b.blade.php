@@ -189,7 +189,7 @@
                                 class="w-full pl-10 pr-8 py-3 bg-white rounded-l-lg border border-gray-300 border-r-0 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-200 appearance-none cursor-pointer text-gray-700 font-medium group-hover:border-gray-400">
                                 <option value="">Search By</option>
                                 <option value="ben_id">Beneficiary ID</option>
-                                <option value="aadhar_no">Aadhaar Number</option>
+                                <option value="aadhaar_no">Aadhaar Number</option>
                                 <option value="bank_account">Bank Account</option>
                                 <option value="mobile_no">Mobile Number</option>
                                 <option value="name">Full Name</option>
@@ -254,7 +254,7 @@
                         class="text-xs px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded border border-purple-100 transition-colors">
                         Beneficiary ID
                     </button>
-                    <button onclick="quickFill('aadhar_no', 'Aadhaar')"
+                    <button onclick="quickFill('aadhaar_no', 'Aadhaar')"
                         class="text-xs px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded border border-blue-100 transition-colors">
                         Aadhaar
                     </button>
@@ -341,7 +341,7 @@
             // icon mapping and placeholders
             const iconMap = {
                 'ben_id': 'fa-user',
-                'aadhar_no': 'fa-id-card',
+                'aadhaar_no': 'fa-id-card',
                 'bank_account': 'fa-credit-card',
                 'mobile_no': 'fa-mobile-alt',
                 'name': 'fa-user-tag'
@@ -349,7 +349,7 @@
 
             const placeholderMap = {
                 'ben_id': 'Enter Beneficiary ID...',
-                'aadhar_no': 'Enter 12-digit Aadhaar...',
+                'aadhaar_no': 'Enter 12-digit Aadhaar...',
                 'bank_account': 'Enter account number...',
                 'mobile_no': 'Enter 10-digit mobile...',
                 'name': 'Enter full name...'
@@ -839,7 +839,7 @@
                 data.forEach(result => {
                     const b = result._source || {};
                     const safeId = (result._id || '').replace(/'/g, "\\'");
-                    const safeAadhaar = (b.aadhar_no || '').replace(/'/g, "\\'");
+                    const safeAadhaar = (b.aadhaar_no || '').replace(/'/g, "\\'");
                     const safeMobile = (b.mobile_no || '').replace(/'/g, "\\'");
                     const safeAccount = (b.bank_code || '').replace(/'/g, "\\'");
                     const safeIFSC = (b.bank_ifsc || '').replace(/'/g, "\\'");
@@ -860,9 +860,9 @@
                                                                                             <div class="flex items-center gap-2 mt-1">
                                                                                                 <span class="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full flex items-center gap-1">
                                                                                                     <i class="fas fa-id-card text-xs"></i>
-                                                                                                    ${window.maskAadhaar(b.aadhar_no)}
+                                                                                                    ${window.maskAadhaar(b.aadhaar_no)}
                                                                                                 </span>
-                                                                                                ${b.aadhar_no ? `<button class="copy-aadhaar text-gray-400 hover:text-blue-600 transition-colors p-1" title="Copy Aadhaar"><i class="fas fa-copy text-xs"></i></button>` : ''}
+                                                                                                ${b.aadhaar_no ? `<button class="copy-aadhaar text-gray-400 hover:text-blue-600 transition-colors p-1" title="Copy Aadhaar"><i class="fas fa-copy text-xs"></i></button>` : ''}
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
@@ -1026,7 +1026,7 @@
                     $card.find('.details-btn').on('click', function () { window.viewDetails(safeId); });
                     $card.find('.view-full-details').on('click', function () { window.showSensitiveData(safeId); });
 
-                    if (b.aadhar_no) $card.find('.copy-aadhaar').on('click', function () { window.copyToClipboard(safeAadhaar); });
+                    if (b.aadhaar_no) $card.find('.copy-aadhaar').on('click', function () { window.copyToClipboard(safeAadhaar); });
                     if (b.mobile_no) $card.find('.copy-mobile').on('click', function () { window.copyToClipboard(safeMobile); });
                     if (b.bank_ifsc) $card.find('.copy-ifsc').on('click', function () { window.copyToClipboard(safeIFSC); });
                     if (b.bank_code) $card.find('.copy-account').on('click', function () { window.copyToClipboard(safeAccount); });

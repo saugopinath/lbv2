@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->bigInteger('user_id');
             $table->foreign('user_id', 'user_id_fk')->references('id')->on('users');
             $table->string('name');
-            $table->string('full_name_as_in_aadhar')->nullable();
+            $table->string('full_name_as_in_aadhaar')->nullable();
             $table->string('picture')->nullable();
             $table->date('date_hired')->nullable();
             $table->smallInteger('department_id')->nullable();

@@ -200,7 +200,7 @@ class BeneficiaryTrackController extends Controller
                 $ben_status = 'Inactive';
                 $ben_status_color = 'red';
                 if ($paymentDetails->ben_status == 0) {
-                    $ben_status_reason = 'Duplicate Aadhar Beneficiary';
+                    $ben_status_reason = 'Duplicate Aadhaar Beneficiary';
                 } elseif ($paymentDetails->ben_status == 9) {
                     $ben_status_reason = 'DOB or name or ss_card is null';
                 } elseif ($paymentDetails->ben_status == 77) {
@@ -430,12 +430,12 @@ class BeneficiaryTrackController extends Controller
             $statusClass = 'status-active';
             $statusColor = 'orange';
             $beneficiaryId = NULL;
-        } elseif ($b->is_final == 1 && $b->next_level_role_id == WorkflowsteproleMapping::where('scheme_id', $b->scheme_id)->where('module_id', Null)->where('rank', 2)->value('next_label_role_id')) {
+        } elseif ($b->is_final == 1 && $b->next_level_role_id == WorkflowsteproleMapping::where('scheme_id', $b->scheme_id)->where('module_id', Null)->where('rank', 2)->value('next_level_role_id')) {
             $status = 'Verified';
             $statusClass = 'status-active';
             $statusColor = 'blue';
             $beneficiaryId = NULL;
-        } elseif ($b->is_final == 1 && $b->next_level_role_id == WorkflowsteproleMapping::where('scheme_id', $b->scheme_id)->where('module_id', Null)->where('rank', 3)->value('next_label_role_id')) {
+        } elseif ($b->is_final == 1 && $b->next_level_role_id == WorkflowsteproleMapping::where('scheme_id', $b->scheme_id)->where('module_id', Null)->where('rank', 3)->value('next_level_role_id')) {
             $status = 'Approved';
             $statusClass = 'status-active';
             $statusColor = 'green';

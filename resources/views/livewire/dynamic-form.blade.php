@@ -70,7 +70,7 @@
                     'form_preview' => $form_preview,
                 ])
             </div>
-            @if ($ram == null)
+            @if ($saveNext == null)
                 {{-- ACTION BUTTONS --}}
                 <div class="flex justify-between mt-6">
 

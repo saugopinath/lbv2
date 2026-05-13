@@ -24,6 +24,7 @@ use Livewire\Component;
 use Throwable;
 use App\Attributes\Loggable;
 use App\Models\CmoSmData;
+use App\Models\DsPhase;
 
 #[Loggable(level: 'Normal', nickname: 'Dynamic Form Entry')]
 
@@ -47,7 +48,7 @@ class DynamicForm extends Component
 
     public $nextTab = null;
 
-    public $ram, $grievanceId;
+    public $saveNext, $grievanceId;
 
     public $form_preview;
 
@@ -98,7 +99,7 @@ class DynamicForm extends Component
         'aadhaarCheckedReset' => 'onAadhaarCheckedReset',
     ];
 
-    public function mount($schemeId = null, $schemeName = null, $ram = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null)
+    public function mount($schemeId = null, $schemeName = null, $saveNext = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null)
     {
 
         if (!WorkFlowPermissionHelper::canEntry($schemeId)) {
@@ -114,7 +115,7 @@ class DynamicForm extends Component
         $this->schemeId = $schemeId;
         $this->schemeName = $schemeName;
         $this->heading = 'Government Of West Bengal ' . $this->schemeName . ' Scheme';
-        $this->ram = $ram;
+        $this->saveNext = $saveNext;
         $this->form_preview = $form_preview;
         $this->applicationId = $applicationId;
         $this->beneficiaryId = $beneficiaryId;
@@ -471,9 +472,7 @@ class DynamicForm extends Component
         }
     }
 
-    public function onDocumentTabFailed()
-    {
-    }
+    public function onDocumentTabFailed() {}
 
     private function markTabCompleted(string $tabCode): void
     {
@@ -642,7 +641,12 @@ class DynamicForm extends Component
             'created_by' => Auth::id(),
             'updated_by' => Auth::id(),
         ];
-
+        if (!$this->isEdit) {
+            if (!empty($this->formData['ds_registration_no'])) {
+                $currentPhase = DsPhase::where('is_current', true)->value('phase_code');
+                $extraFields['ds_phase'] = $currentPhase;
+            }
+        }
         foreach ($extraFields as $column => $value) {
             if (in_array($column, $columns)) {
                 $dbData[$column] = $value;
@@ -655,14 +659,18 @@ class DynamicForm extends Component
         if (!$this->checkDuplicateEntries()) {
             return false;
         }
-
+        // dd($this->formData);
         DB::beginTransaction();
         try {
             $existingRecord = $modelClass::where('application_id', $this->applicationId)->first();
             if ($existingRecord) {
-
+                if($existingRecord['application_type']){
+                      $dbData['application_type'] = $existingRecord['application_type'];
+                $dbData['ds_date'] = $existingRecord['ds_date'];
+                $dbData['ds_registration_no'] = $existingRecord['ds_registration_no'];
+                }
+              
                 $updated = $existingRecord->update($dbData);
-
                 if ($updated) {
                     $this->navMessage = 'Application updated successfully! ID: ' . $this->applicationId;
                     $this->navMessageType = 'success';
@@ -684,10 +692,10 @@ class DynamicForm extends Component
                                 'application_id' => $this->applicationId,
                                 'beneficiary_id' => $this->beneficiaryId,
                                 'scheme_id' => $this->schemeId,
-                                'aadhar_hash' => $this->aadhaarPayload['hash'],
-                                'encoded_aadhar' => $this->aadhaarPayload['encoded'],
+                                'aadhaar_hash' => $this->aadhaarPayload['hash'],
+                                'encoded_aadhaar' => $this->aadhaarPayload['encoded'],
                                 'encode_key' => null,
-                                'aadhar_vault' => $this->aadhaarPayload['hash'],
+                                'aadhaar_vault' => $this->aadhaarPayload['hash'],
                             ]
                         );
                         if ($this->grievanceId) {
@@ -760,7 +768,7 @@ class DynamicForm extends Component
                 }
             }
         } catch (Throwable $e) {
-            // dd($e);
+            dd($e);
             DB::rollBack();
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -967,7 +975,10 @@ class DynamicForm extends Component
         );
         if (is_array($result)) {
             $this->addError($result['field'], $result['message']);
-
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => $result['message'],
+            ]);
             return false;
         }
 

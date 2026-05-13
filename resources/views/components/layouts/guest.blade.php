@@ -20,12 +20,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         .bg-login-cover {
-            background-image: url("{{ asset('images/' . config('jblbConf.bg_image')) }}");
+            background-image: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url("{{ asset('images/' . config('jblbConf.bg_image')) }}");
         }
     </style>
 </head>
 
-<body class="min-h-screen bg-cover bg-center bg-no-repeat bg-white bg-login-cover">
+<body class="min-h-screen bg-cover bg-center bg-no-repeat bg-white bg-login-cover" >
     <div class="min-h-screen flex flex-col items-center justify-center px-4 py-8">
         <div class="bg-white/80 rounded-2xl shadow-xl w-full max-w-6xl overflow-hidden flex flex-col lg:flex-row">
             <!-- Left Image Section -->
