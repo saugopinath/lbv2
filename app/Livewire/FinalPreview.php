@@ -356,6 +356,9 @@ class FinalPreview extends Component
                 // }
 
                 $rules["formData.{$field['field_name']}"] = $fieldRules;
+                if ((string)$this->activeTab === '102') {
+                    $rules["formData.cur_{$field['field_name']}"] = $fieldRules;
+                }
             }
         }
         // dd($rules);
@@ -375,6 +378,9 @@ class FinalPreview extends Component
             foreach ($tab['fields'] ?? [] as $field) {
                 if (!empty($field['field_name']) && !empty($field['level_name'])) {
                     $attributes["formData.{$field['field_name']}"] = $field['level_name'];
+                    if ((string)$this->activeTab === '102') {
+                        $attributes["formData.cur_{$field['field_name']}"] = 'Current ' . $field['level_name'];
+                    }
                 }
             }
         }
