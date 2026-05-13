@@ -104,6 +104,22 @@ class SchemeTabFieldManager extends Component
     public bool $isCurrentAddress = false;
     public array $isSyncableSelected = [];
 
+    public function updatedIsCurrentAddress($value)
+    {
+        if (!$value) {
+            $this->isSyncableSelected = [];
+        }
+    }
+
+    public function updatedModalSelected()
+    {
+        // Remove any sync selection if the corresponding field is deselected
+        $this->isSyncableSelected = array_intersect(
+            $this->isSyncableSelected, 
+            array_map('strval', (array)$this->modalSelected)
+        );
+    }
+
     public function mount(Request $request)
     {
         $scheme_id = $request->query('scheme_id');
@@ -471,6 +487,11 @@ class SchemeTabFieldManager extends Component
             $tabCode = $this->activeTabCode;
 
             if ($tabCode == 102) {
+                if ($this->isCurrentAddress && empty($this->isSyncableSelected)) {
+                    $this->addError('isSyncableSelected', 'Please select at least one field to sync for current address.');
+                    return;
+                }
+
                 SchemeTabMapping::where('scheme_id', $schemeId)
                     ->where('tab_code', $tabCode)
                     ->update(['is_current_address' => $this->isCurrentAddress]);
