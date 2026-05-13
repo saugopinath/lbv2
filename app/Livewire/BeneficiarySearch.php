@@ -119,6 +119,7 @@ class BeneficiarySearch extends Component
         $this->inputValue = '';
         $this->selectedScheme = null;
         $this->dispatch('reset-beneficiary-search');
+        $this->dispatch('hideLoader');
     }
 
     public function updatedSelectedScheme()
@@ -157,7 +158,12 @@ class BeneficiarySearch extends Component
             $messages['inputValue.digits']   = "The $fieldLabel must be :digits digits.";
             $messages['inputValue.regex']    = "The $fieldLabel should only contain characters (A-Z, a-z).";
         }
-        $this->validate($rules, $messages);
+        try {
+            $this->validate($rules, $messages);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('hideLoader');
+            throw $e;
+        }
         $modelClass = BeneficiaryPersonalDetail::class;
         $searchValue = $this->inputValue;
         $query = $modelClass::query()->whereIn('is_clean', [1, 2]);
@@ -206,7 +212,9 @@ class BeneficiarySearch extends Component
             $payload['count']   = $results->count();
         }
         // dd($payload);
+        $this->dispatch('showLoader');
         $this->dispatch('beneficiary-search', data: $payload);
+        $this->dispatch('hideLoader');
     }
     public function render()
     {

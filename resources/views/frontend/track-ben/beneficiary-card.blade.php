@@ -98,7 +98,7 @@ $pillText = '#b45309';
 
     {{-- ── ACTIONS ── --}}
     <div class="relative space-y-3">
-        <form action="{{ $beneficiaryDetailsUrl }}" method="POST">
+        <form action="{{ $beneficiaryDetailsUrl }}" method="POST" onsubmit="window.dispatchEvent(new CustomEvent('showLoader'))">
             @csrf
             <input type="hidden" name="id" value="{{ $encryptedId }}">
             <button type="submit"
@@ -109,7 +109,7 @@ $pillText = '#b45309';
             </button>
         </form>
 
-        <form action="{{ $paymentUrl }}" method="POST">
+        <form action="{{ $paymentUrl }}" method="POST" onsubmit="window.dispatchEvent(new CustomEvent('showLoader'))">
             @csrf
             <input type="hidden" name="id" value="{{ $encryptedId }}">
             <button type="submit"
