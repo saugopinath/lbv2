@@ -116,14 +116,10 @@ class TrackBeneficiaryData extends Component
             ->with(['enclosers', 'scheme', 'contact.district'])
             ->paginate(20)
             ->through(function ($b) {
-                $b->paymentUrl = route(
-                    'beneficiary-payment-history-log',
-                    ['id' => Crypt::encryptString($b->application_id)]
-                );
-                $b->BenDetailsUrl = route(
-                    'beneficiary-details',
-                    ['id' => Crypt::encryptString($b->application_id)]
-                );
+                $encryptedId = Crypt::encryptString($b->application_id);
+                $b->encryptedId = $encryptedId;
+                $b->paymentUrl = route('beneficiary-payment-history-log');
+                $b->BenDetailsUrl = route('beneficiary-details');
 
                 // Status Logic
                 $status = NULL;

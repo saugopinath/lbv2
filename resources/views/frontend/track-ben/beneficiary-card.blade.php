@@ -98,18 +98,26 @@ $pillText = '#b45309';
 
     {{-- ── ACTIONS ── --}}
     <div class="relative space-y-3">
-        <a href="{{ $beneficiaryDetailsUrl }}"
-            class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold text-white transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:scale-95"
-            style="background: #4f46e5;">
-            View Full Profile
-            <i class="fas fa-arrow-right text-[10px]"></i>
-        </a>
+        <form action="{{ $beneficiaryDetailsUrl }}" method="POST">
+            @csrf
+            <input type="hidden" name="id" value="{{ $encryptedId }}">
+            <button type="submit"
+                class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold text-white transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:scale-95"
+                style="background: #4f46e5;">
+                View Full Profile
+                <i class="fas fa-arrow-right text-[10px]"></i>
+            </button>
+        </form>
 
-        <a href="{{ $paymentUrl }}"
-            class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold text-slate-600 border border-slate-200 bg-white transition-all duration-300 hover:border-indigo-200 hover:bg-slate-50 hover:text-indigo-600">
-            <i class="fas fa-indian-rupee-sign text-[10px]"></i>
-            Payment History
-        </a>
+        <form action="{{ $paymentUrl }}" method="POST">
+            @csrf
+            <input type="hidden" name="id" value="{{ $encryptedId }}">
+            <button type="submit"
+                class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold text-slate-600 border border-slate-200 bg-white transition-all duration-300 hover:border-indigo-200 hover:bg-slate-50 hover:text-indigo-600">
+                <i class="fas fa-indian-rupee-sign text-[10px]"></i>
+                Payment History
+            </button>
+        </form>
     </div>
 
 </div>

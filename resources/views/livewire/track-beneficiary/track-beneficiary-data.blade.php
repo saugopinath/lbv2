@@ -40,6 +40,7 @@
             'paymentUrl' => $b->paymentUrl,
             'beneficiaryDetailsUrl' => $b->BenDetailsUrl,
             'ben_profile_pic' => $b->ben_profile_pic,
+            'encryptedId' => $b->encryptedId,
             ])
 
             @if($isSingle)
