@@ -29,4 +29,4 @@ yarn-error.log
 # Allow files inside data
 !/storage/app/data/**
 /storage/app/livewire-tmp/*
-/storage/app/final_schemes_formdata/*
+/storage/app/final_schemes_formdata/
