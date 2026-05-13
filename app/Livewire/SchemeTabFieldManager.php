@@ -101,6 +101,8 @@ class SchemeTabFieldManager extends Component
 
     public $usedDocTypeIds = [];
 
+    public bool $isCurrentAddress = false;
+
     public function mount(Request $request)
     {
         $scheme_id = $request->query('scheme_id');
@@ -365,6 +367,16 @@ class SchemeTabFieldManager extends Component
         if ($tabCode == 105) {
             return;
         }
+
+        if ($tabCode == 102) {
+            $mapping = SchemeTabMapping::where('scheme_id', $this->schemeId)
+                ->where('tab_code', $tabCode)
+                ->first();
+            $this->isCurrentAddress = (bool) ($mapping->is_current_address ?? false);
+        } else {
+            $this->isCurrentAddress = false;
+        }
+
         $fields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
             ->whereIn('tab_code', [$tabCode, 0])
             ->where('is_active', true)
@@ -448,6 +460,13 @@ class SchemeTabFieldManager extends Component
         try {
             $schemeId = $this->schemeId;
             $tabCode = $this->activeTabCode;
+
+            if ($tabCode == 102) {
+                SchemeTabMapping::where('scheme_id', $schemeId)
+                    ->where('tab_code', $tabCode)
+                    ->update(['is_current_address' => $this->isCurrentAddress]);
+            }
+
             $existingFormFields = SchemeTabFormField::where('scheme_id', $schemeId)
                 ->where('tab_code', $tabCode)
                 ->where('is_active', true)

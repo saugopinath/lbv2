@@ -1,4 +1,3 @@
-
 window.initMasterData = function () {
 
     if (!window.masterDataV2 || !window.masterDataV2.districts) return;
@@ -6,135 +5,123 @@ window.initMasterData = function () {
 
     const md = window.masterDataV2;
 
-    const districtSelect = document.querySelector('select[name="district_id"]');
-    const assemblie  = document.querySelector('select[name="assemblie"]');
-    const urban      = document.querySelector('select[name="rural_urban"]');
-    const localbody  = document.querySelector('select[name="blockurban"]');
-    const gpward     = document.querySelector('select[name="gpward"]');
+    const addressSets = [
+        { prefix: '', district: 'district_id', assembly: 'assemblie', urban: 'rural_urban', localbody: 'blockurban', gp: 'gpward' },
+        { prefix: 'cur_', district: 'cur_district_id', assembly: 'cur_assemblie', urban: 'cur_rural_urban', localbody: 'cur_blockurban', gp: 'cur_gpward' }
+    ];
 
-    if (!districtSelect) return;
+    addressSets.forEach(set => {
+        const districtSelect = document.querySelector(`select[name="${set.district}"]`);
+        const assemblie = document.querySelector(`select[name="${set.assembly}"]`);
+        const urban = document.querySelector(`select[name="${set.urban}"]`);
+        const localbody = document.querySelector(`select[name="${set.localbody}"]`);
+        const gpward = document.querySelector(`select[name="${set.gp}"]`);
 
-    const root = districtSelect.closest('[wire\\:id]');
-    if (!root) return;
+        if (!districtSelect) return;
 
-    const component = Livewire.find(root.getAttribute('wire:id'));
-    if (!component) return;
+        const root = districtSelect.closest('[wire\\:id]');
+        if (!root) return;
 
-    /* ================= DISTRICT ================= */
-    if (!districtSelect.dataset.loaded) {
-        fillSelect(districtSelect, md.districts);
-        districtSelect.dataset.loaded = "1";
-    }
-    restoreSelected(districtSelect, component);
+        const component = Livewire.find(root.getAttribute('wire:id'));
+        if (!component) return;
 
-    /* ================= ASSEMBLIE ================= */
-    if (assemblie && districtSelect.value) {
-        if (!assemblie.dataset.loaded && md.assemblies) {
-            fillSelect(
-                assemblie,
-                md.assemblies.filter(
-                    a => a.district_code == districtSelect.value
-                )
-            );
-            assemblie.dataset.loaded = "1";
+        /* ================= DISTRICT ================= */
+        if (!districtSelect.dataset.loaded) {
+            fillSelect(districtSelect, md.districts);
+            districtSelect.dataset.loaded = "1";
         }
-        restoreSelected(assemblie, component);
-    }
+        restoreSelected(districtSelect, component);
 
-    /* ================= RURAL / URBAN ================= */
-    if (urban && !urban.dataset.loaded) {
-        fillSelect(urban, [
-            { id: 1, text: "Urban" },
-            { id: 2, text: "Rural" }
-        ]);
-        urban.dataset.loaded = "1";
-    }
-    restoreSelected(urban, component);
-
-    /* ================= BLOCK ================= */
-    if (urban?.value && districtSelect.value) {
-        if (!localbody.dataset.loaded) {
-            if (urban.value == 2 && md.blocks) {
+        /* ================= ASSEMBLIE ================= */
+        if (assemblie && districtSelect.value) {
+            if (!assemblie.dataset.loaded && md.assemblies) {
                 fillSelect(
-                    localbody,
-                    md.blocks.filter(
-                        b => b.district_code == districtSelect.value
-                    )
+                    assemblie,
+                    md.assemblies.filter(a => a.district_code == districtSelect.value)
                 );
+                assemblie.dataset.loaded = "1";
             }
-            if (urban.value == 1 && md.ulbs) {
-                fillSelect(
-                    localbody,
-                    md.ulbs.filter(
-                        u => u.district_code == districtSelect.value
-                    )
-                );
-            }
-            localbody.dataset.loaded = "1";
+            restoreSelected(assemblie, component);
         }
-        restoreSelected(localbody, component);
-    }
 
-    /* ================= GP / WARD ================= */
-    if (localbody?.value) {
-        if (!gpward.dataset.loaded) {
-            if (urban.value == 2 && md.gps) {
-                fillSelect(
-                    gpward,
-                    md.gps.filter(
-                        g =>
-                            g.district_code == districtSelect.value &&
-                            g.block_code == localbody.value
-                    )
-                );
-            }
-            if (urban.value == 1 && md.ulb_wards) {
-                fillSelect(
-                    gpward,
-                    md.ulb_wards.filter(
-                        w => w.urban_body_code == localbody.value
-                    )
-                );
-            }
-            gpward.dataset.loaded = "1";
+        /* ================= RURAL / URBAN ================= */
+        if (urban && !urban.dataset.loaded) {
+            fillSelect(urban, [
+                { id: 1, text: "Urban" },
+                { id: 2, text: "Rural" }
+            ]);
+            urban.dataset.loaded = "1";
         }
-        restoreSelected(gpward, component);
-    }
+        restoreSelected(urban, component);
 
-    /* ================= EVENTS ================= */
-    districtSelect.onchange = () => {
-        clearSelect(assemblie);
-        clearSelect(localbody);
-        clearSelect(gpward);
-        component.set('formData.district_id', districtSelect.value);
-    };
+        /* ================= BLOCK ================= */
+        if (urban?.value && districtSelect.value) {
+            if (!localbody.dataset.loaded) {
+                if (urban.value == 2 && md.blocks) {
+                    fillSelect(localbody, md.blocks.filter(b => b.district_code == districtSelect.value));
+                }
+                if (urban.value == 1 && md.ulbs) {
+                    fillSelect(localbody, md.ulbs.filter(u => u.district_code == districtSelect.value));
+                }
+                localbody.dataset.loaded = "1";
+            }
+            restoreSelected(localbody, component);
+        }
 
-    if (assemblie) {
-        assemblie.onchange = () => {
-            component.set('formData.assemblie', assemblie.value);
-        };
-    }
+        /* ================= GP / WARD ================= */
+        if (localbody?.value) {
+            if (!gpward.dataset.loaded) {
+                if (urban.value == 2 && md.gps) {
+                    fillSelect(gpward, md.gps.filter(g => g.district_code == districtSelect.value && g.block_code == localbody.value));
+                }
+                if (urban.value == 1 && md.ulb_wards) {
+                    fillSelect(gpward, md.ulb_wards.filter(w => w.urban_body_code == localbody.value));
+                }
+                gpward.dataset.loaded = "1";
+            }
+            restoreSelected(gpward, component);
+        }
 
-    if (urban) {
-        urban.onchange = () => {
+        /* ================= EVENTS ================= */
+        districtSelect.onchange = () => {
+            if (districtSelect.disabled) return;
+            clearSelect(assemblie);
             clearSelect(localbody);
             clearSelect(gpward);
-            component.set('formData.rural_urban', urban.value);
+            component.set('formData.' + set.district, districtSelect.value);
         };
-    }
 
-    if (localbody) {
-        localbody.onchange = () => {
-            clearSelect(gpward);
-            component.set('formData.blockurban', localbody.value);
-        };
-    }
+        if (assemblie) {
+            assemblie.onchange = () => {
+                if (assemblie.disabled) return;
+                component.set('formData.' + set.assembly, assemblie.value);
+            };
+        }
 
-    if (gpward) {
-        gpward.onchange = () => {
-            component.set('formData.gpward', gpward.value);
-        };
-    }
+        if (urban) {
+            urban.onchange = () => {
+                if (urban.disabled) return;
+                clearSelect(localbody);
+                clearSelect(gpward);
+                component.set('formData.' + set.urban, urban.value);
+            };
+        }
+
+        if (localbody) {
+            localbody.onchange = () => {
+                if (localbody.disabled) return;
+                clearSelect(gpward);
+                component.set('formData.' + set.localbody, localbody.value);
+            };
+        }
+
+        if (gpward) {
+            gpward.onchange = () => {
+                if (gpward.disabled) return;
+                component.set('formData.' + set.gp, gpward.value);
+            };
+        }
+    });
 };
 
 /* ================= HELPERS ================= */

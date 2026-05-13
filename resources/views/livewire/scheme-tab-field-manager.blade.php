@@ -481,6 +481,15 @@
                         :tab_code="$activeTabCode" />
                     @else
                     {{-- OTHER TABS --}}
+                    @if($activeTabCode == 102)
+                    <div class="mb-4 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" wire:model="isCurrentAddress" class="w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
+                            <span class="text-sm font-bold text-indigo-900">Include "Current Address" (Same as Permanent Address)</span>
+                        </label>
+                    </div>
+                    @endif
+
                     <div class="grid grid-cols-2 gap-3">
                         @foreach($modalFields as $field)
                         <label class="flex gap-3 items-center p-3 rounded border

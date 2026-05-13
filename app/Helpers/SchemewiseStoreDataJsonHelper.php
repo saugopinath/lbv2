@@ -64,6 +64,7 @@ class SchemewiseStoreDataJsonHelper
                 'tab_name' => $tab->masterTab->tab_name ?? '',
                 'tab_icon' => $tab->masterTab->tab_icon ?? '',
                 'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
+                'is_current_address' => $tab->is_current_address,
                 'fields' => $fields,
                 'layout' => $layout,
             ];
@@ -219,18 +220,26 @@ class SchemewiseStoreDataJsonHelper
                 File::put("{$dir}/105.blade.php", $blade);
                 continue;
             }
-            $layout = DB::table('scheme_tab_layouts')
-                ->where('scheme_id', $schemeId)
-                ->where('tab_code', $tabCode)
-                ->value('layout_json');
-
-            $layout = $layout ? json_decode($layout, true) : [];
-            $fields = $tab['fields'] ?? [];
-            $cursor = 0;
-            $total = count($fields);
+            $isCurrentAddress = ($tabCode == 102) && ($tab['is_current_address'] ?? false);
             $blade = '';
+            $fields = $tab['fields'] ?? [];
+            $total = count($fields);
+            $cursor = 0;
 
             if (!empty($layout)) {
+                $blade .= "<div x-data=\"{ sameAsPermanent: false, formData: @entangle('formData').live, sync() { if(this.sameAsPermanent) { ";
+                foreach ($fields as $field) {
+                    $name = $field['field_name'];
+                    $blade .= "this.formData.cur_{$name} = this.formData.{$name}; ";
+                }
+                $blade .= "this.\$nextTick(() => { document.querySelectorAll('[name^=\\'cur_\\']').forEach(el => el.dispatchEvent(new Event('change'))); }); ";
+                $blade .= " } } }\" x-init=\"\$watch('sameAsPermanent', v => sync()); ";
+                foreach ($fields as $field) {
+                    $name = $field['field_name'];
+                    $blade .= "\$watch('formData.{$name}', v => { if(sameAsPermanent) sync(); }); ";
+                }
+                $blade .= "\">\n";
+
                 foreach ($layout as $row) {
                     if ($cursor >= $total)
                         break;
@@ -243,11 +252,95 @@ class SchemewiseStoreDataJsonHelper
                     }
                     $blade .= "</div>\n";
                 }
-            }
-            while ($cursor < $total) {
-                $field = $fields[$cursor++];
-                $blade .= "<div class=\"grid md:grid-cols-1 gap-4 mt-4\">\n";
-                $blade .= self::renderField($field);
+
+                if ($cursor < $total) {
+                    while ($cursor < $total) {
+                        $field = $fields[$cursor++];
+                        $blade .= "<div class=\"grid md:grid-cols-1 gap-4 mt-4\">\n";
+                        $blade .= self::renderField($field);
+                        $blade .= "</div>\n";
+                    }
+                }
+
+                if ($isCurrentAddress) {
+                    $blade .= <<<HTML
+                    <div class="mt-8 mb-4 p-4 bg-gray-50 border-y border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">Current Address</h3>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" x-model="sameAsPermanent" class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm font-medium text-gray-700">Same as Permanent Address</span>
+                        </label>
+                    </div>
+                    HTML;
+
+                    $cursor = 0;
+                    foreach ($layout as $row) {
+                        if ($cursor >= $total)
+                            break;
+                        $cols = max(1, min(3, (int) $row['columns']));
+                        $rowFields = array_slice($fields, $cursor, $cols);
+                        $cursor += count($rowFields);
+                        $blade .= "<div class=\"grid md:grid-cols-{$cols} gap-4 mt-4\">\n";
+                        foreach ($rowFields as $field) {
+                            $curField = $field;
+                            $curField['field_name'] = 'cur_' . $field['field_name'];
+                            $curField['is_readonly'] = 'sameAsPermanent'; 
+                            $blade .= self::renderField($curField);
+                        }
+                        $blade .= "</div>\n";
+                    }
+                    if ($cursor < $total) {
+                        while ($cursor < $total) {
+                            $field = $fields[$cursor++];
+                            $blade .= "<div class=\"grid md:grid-cols-1 gap-4 mt-4\">\n";
+                            $curField = $field;
+                            $curField['field_name'] = 'cur_' . $field['field_name'];
+                            $blade .= self::renderField($curField);
+                            $blade .= "</div>\n";
+                        }
+                    }
+                }
+                $blade .= "</div>\n";
+            } else {
+                // No layout saved, default grid
+                $blade .= "<div x-data=\"{ sameAsPermanent: false, formData: @entangle('formData').live, sync() { if(this.sameAsPermanent) { ";
+                foreach ($fields as $field) {
+                    $name = $field['field_name'];
+                    $blade .= "this.formData.cur_{$name} = this.formData.{$name}; ";
+                }
+                $blade .= "this.\$nextTick(() => { document.querySelectorAll('[name^=\\'cur_\\']').forEach(el => el.dispatchEvent(new Event('change'))); }); ";
+                $blade .= " } } }\" x-init=\"\$watch('sameAsPermanent', v => sync()); ";
+                foreach ($fields as $field) {
+                    $name = $field['field_name'];
+                    $blade .= "\$watch('formData.{$name}', v => { if(sameAsPermanent) sync(); }); ";
+                }
+                $blade .= "\">\n";
+
+                $blade .= "<div class=\"grid md:grid-cols-2 gap-4 mt-4\">\n";
+                foreach ($fields as $field) {
+                    $blade .= self::renderField($field);
+                }
+                $blade .= "</div>\n";
+
+                if ($isCurrentAddress) {
+                    $blade .= <<<HTML
+                    <div class="mt-8 mb-4 p-4 bg-gray-50 border-y border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">Current Address</h3>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" x-model="sameAsPermanent" class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm font-medium text-gray-700">Same as Permanent Address</span>
+                        </label>
+                    </div>
+                    HTML;
+                    $blade .= "<div class=\"grid md:grid-cols-2 gap-4 mt-4\">\n";
+                    foreach ($fields as $field) {
+                        $curField = $field;
+                        $curField['field_name'] = 'cur_' . $field['field_name'];
+                        $curField['is_readonly'] = 'sameAsPermanent';
+                        $blade .= self::renderField($curField);
+                    }
+                    $blade .= "</div>\n";
+                }
                 $blade .= "</div>\n";
             }
             File::put("{$dir}/{$tabCode}.blade.php", $blade);
@@ -303,8 +396,14 @@ $isEdit = false;
         }
 
         $requiredAttr = $isRequired ? 'required' : '';
-        $isReadonly = !empty($field['is_readonly']) && (int) $field['is_readonly'] === 1;
-        $readonlyAttr = $isReadonly ? 'readonly' : '';
+        $isReadonly = !empty($field['is_readonly']);
+        $readonlyVal = $field['is_readonly'] ?? 0;
+
+        if (is_string($readonlyVal) && $readonlyVal === 'sameAsPermanent') {
+            $readonlyAttr = '::readonly="sameAsPermanent" ::disabled="sameAsPermanent"';
+        } else {
+            $readonlyAttr = ((int)$readonlyVal === 1) ? 'readonly' : '';
+        }
         $disabledAttr = in_array($name, ['ds_registration_no', 'application_type', 'ds_date']) ? ':disabled="$isEdit"' : '';
         $ignore = !empty($field['field_class']);
         $wireIgnore = $ignore ? 'wire:ignore' : '';
