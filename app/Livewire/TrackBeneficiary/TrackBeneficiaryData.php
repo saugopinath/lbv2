@@ -129,12 +129,12 @@ class TrackBeneficiaryData extends Component
             $verifiedRole = optional(
                 $workflowMappings[$b->scheme_id]
                     ->firstWhere('rank', 2)
-            )->next_label_role_id;
+            )->next_level_role_id;
 
             $approvedRole = optional(
                 $workflowMappings[$b->scheme_id]
                     ->firstWhere('rank', 3)
-            )->next_label_role_id;
+            )->next_level_role_id;
 
             match (true) {
                 $b->is_final == 0 && is_null($b->next_level_role_id) => [
