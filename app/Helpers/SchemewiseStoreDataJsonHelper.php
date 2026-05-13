@@ -59,6 +59,31 @@ class SchemewiseStoreDataJsonHelper
                 ->first();
 
             $layout = $schemeTabLayout?->layout_json;
+
+            if ($tab->tab_code == 102 && ($tab->is_current_address ?? false)) {
+                $curFields = [];
+                $existingNames = array_column($fields, 'field_name');
+                foreach ($fields as $field) {
+                    if (!empty($field['is_syncable']) && !str_starts_with($field['field_name'], 'cur_')) {
+                        $name = $field['field_name'];
+                        if (in_array('cur_' . $name, $existingNames)) continue;
+
+                        $curField = $field;
+                        $curField['field_name'] = 'cur_' . $name;
+                        
+                        $curField['db_column'] = 'other_details';
+                        
+                        $curField['level_name'] = 'Current ' . $field['level_name'];
+                        if (!empty($curField['dependent_on'])) {
+                            $curField['dependent_on'] = 'cur_' . $curField['dependent_on'];
+                        }
+                        $curField['is_syncable'] = false;
+                        $curFields[] = $curField;
+                    }
+                }
+                $fields = array_merge($fields, $curFields);
+            }
+
             $tabData[] = [
                 'tab_code' => $tab->tab_code,
                 'tab_name' => $tab->masterTab->tab_name ?? '',
@@ -223,8 +248,9 @@ class SchemewiseStoreDataJsonHelper
             $isCurrentAddress = ($tabCode == 102) && ($tab['is_current_address'] ?? false);
             $blade = '';
             $fields = $tab['fields'] ?? [];
+            $renderFields = array_values(array_filter($fields, fn($f) => !str_starts_with($f['field_name'], 'cur_')));
             $syncableFields = array_values(array_filter($fields, fn($f) => !empty($f['is_syncable'])));
-            $total = count($fields);
+            $total = count($renderFields);
             $cursor = 0;
 
             if (!empty($layout)) {
@@ -233,7 +259,7 @@ class SchemewiseStoreDataJsonHelper
                     $name = $field['field_name'];
                     $blade .= "this.formData.cur_{$name} = this.formData.{$name}; ";
                 }
-                $blade .= "this.\$nextTick(() => { document.querySelectorAll('[name^=\\'cur_\\']').forEach(el => el.dispatchEvent(new Event('change'))); }); ";
+                $blade .= "this.\$nextTick(() => { setTimeout(() => { document.querySelectorAll('[name^=\\'cur_\\']').forEach(el => delete el.dataset.loaded); if(typeof window.initMasterData === 'function') window.initMasterData(); }, 100); }); ";
                 $blade .= " } } }\" x-init=\"\$watch('sameAsPermanent', v => sync()); ";
                 foreach ($syncableFields as $field) {
                     $name = $field['field_name'];
@@ -245,7 +271,7 @@ class SchemewiseStoreDataJsonHelper
                     if ($cursor >= $total)
                         break;
                     $cols = max(1, min(3, (int) $row['columns']));
-                    $rowFields = array_slice($fields, $cursor, $cols);
+                    $rowFields = array_slice($renderFields, $cursor, $cols);
                     $cursor += count($rowFields);
                     $blade .= "<div class=\"grid md:grid-cols-{$cols} gap-4 mt-4\">\n";
                     foreach ($rowFields as $field) {
@@ -256,7 +282,7 @@ class SchemewiseStoreDataJsonHelper
 
                 if ($cursor < $total) {
                     while ($cursor < $total) {
-                        $field = $fields[$cursor++];
+                        $field = $renderFields[$cursor++];
                         $blade .= "<div class=\"grid md:grid-cols-1 gap-4 mt-4\">\n";
                         $blade .= self::renderField($field);
                         $blade .= "</div>\n";
@@ -287,10 +313,18 @@ class SchemewiseStoreDataJsonHelper
                         $cursor += count($rowFields);
                         $blade .= "<div class=\"grid md:grid-cols-{$cols} gap-4 mt-4\">\n";
                         foreach ($rowFields as $field) {
-                            $curField = $field;
-                            $curField['field_name'] = 'cur_' . $field['field_name'];
-                            $curField['is_readonly'] = 'sameAsPermanent';
-                            $blade .= self::renderField($curField);
+                            $curName = 'cur_' . $field['field_name'];
+                            $curField = collect($fields)->firstWhere('field_name', $curName);
+                            if ($curField) {
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            } else {
+                                $curField = $field;
+                                $curField['field_name'] = $curName;
+                                $curField['db_column'] = 'other_details';
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            }
                         }
                         $blade .= "</div>\n";
                     }
@@ -298,10 +332,18 @@ class SchemewiseStoreDataJsonHelper
                         while ($cursor < $totalSync) {
                             $field = $syncableFields[$cursor++];
                             $blade .= "<div class=\"grid md:grid-cols-1 gap-4 mt-4\">\n";
-                            $curField = $field;
-                            $curField['field_name'] = 'cur_' . $field['field_name'];
-                            $curField['is_readonly'] = 'sameAsPermanent';
-                            $blade .= self::renderField($curField);
+                            $curName = 'cur_' . $field['field_name'];
+                            $curField = collect($fields)->firstWhere('field_name', $curName);
+                            if ($curField) {
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            } else {
+                                $curField = $field;
+                                $curField['field_name'] = $curName;
+                                $curField['db_column'] = 'other_details';
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            }
                             $blade .= "</div>\n";
                         }
                     }
@@ -314,7 +356,7 @@ class SchemewiseStoreDataJsonHelper
                     $name = $field['field_name'];
                     $blade .= "this.formData.cur_{$name} = this.formData.{$name}; ";
                 }
-                $blade .= "this.\$nextTick(() => { document.querySelectorAll('[name^=\\'cur_\\']').forEach(el => el.dispatchEvent(new Event('change'))); }); ";
+                $blade .= "this.\$nextTick(() => { setTimeout(() => { document.querySelectorAll('[name^=\\'cur_\\']').forEach(el => delete el.dataset.loaded); if(typeof window.initMasterData === 'function') window.initMasterData(); }, 100); }); ";
                 $blade .= " } } }\" x-init=\"\$watch('sameAsPermanent', v => sync()); ";
                 foreach ($syncableFields as $field) {
                     $name = $field['field_name'];
@@ -323,7 +365,7 @@ class SchemewiseStoreDataJsonHelper
                 $blade .= "\">\n";
 
                 $blade .= "<div class=\"grid md:grid-cols-2 gap-4 mt-4\">\n";
-                foreach ($fields as $field) {
+                foreach ($renderFields as $field) {
                     $blade .= self::renderField($field);
                 }
                 $blade .= "</div>\n";
@@ -339,12 +381,20 @@ class SchemewiseStoreDataJsonHelper
                     </div>
                     HTML;
                     $blade .= "<div class=\"grid md:grid-cols-2 gap-4 mt-4\">\n";
-                    foreach ($syncableFields as $field) {
-                        $curField = $field;
-                        $curField['field_name'] = 'cur_' . $field['field_name'];
-                        $curField['is_readonly'] = 'sameAsPermanent';
-                        $blade .= self::renderField($curField);
-                    }
+                        foreach ($syncableFields as $field) {
+                            $curName = 'cur_' . $field['field_name'];
+                            $curField = collect($fields)->firstWhere('field_name', $curName);
+                            if ($curField) {
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            } else {
+                                $curField = $field;
+                                $curField['field_name'] = $curName;
+                                $curField['db_column'] = 'other_details';
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            }
+                        }
                     $blade .= "</div>\n";
                 }
                 $blade .= "</div>\n";

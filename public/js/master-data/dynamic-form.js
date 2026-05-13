@@ -84,7 +84,7 @@ window.initMasterData = function () {
 
         /* ================= EVENTS ================= */
         districtSelect.onchange = () => {
-            if (districtSelect.disabled) return;
+            // if (districtSelect.disabled) return;
             clearSelect(assemblie);
             clearSelect(localbody);
             clearSelect(gpward);
@@ -93,14 +93,14 @@ window.initMasterData = function () {
 
         if (assemblie) {
             assemblie.onchange = () => {
-                if (assemblie.disabled) return;
+                // if (assemblie.disabled) return;
                 component.set('formData.' + set.assembly, assemblie.value);
             };
         }
 
         if (urban) {
             urban.onchange = () => {
-                if (urban.disabled) return;
+                // if (urban.disabled) return;
                 clearSelect(localbody);
                 clearSelect(gpward);
                 component.set('formData.' + set.urban, urban.value);
@@ -109,7 +109,7 @@ window.initMasterData = function () {
 
         if (localbody) {
             localbody.onchange = () => {
-                if (localbody.disabled) return;
+                // if (localbody.disabled) return;
                 clearSelect(gpward);
                 component.set('formData.' + set.localbody, localbody.value);
             };
@@ -117,7 +117,7 @@ window.initMasterData = function () {
 
         if (gpward) {
             gpward.onchange = () => {
-                if (gpward.disabled) return;
+                // if (gpward.disabled) return;
                 component.set('formData.' + set.gp, gpward.value);
             };
         }

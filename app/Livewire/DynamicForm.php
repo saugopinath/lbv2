@@ -424,7 +424,15 @@ class DynamicForm extends Component
                     $this->formData[$dottedKey] = null;
                 }
             }
-            $this->validate($rules);
+            try {
+                $this->validate($rules);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                $this->dispatch('toastr', [
+                    'type' => 'error',
+                    'message' => 'Validation failed: ' . implode(', ', array_flatten($e->errors())),
+                ]);
+                throw $e;
+            }
         }
 
 
@@ -446,6 +454,10 @@ class DynamicForm extends Component
         $saved = $this->saveCurrentTabData();
 
         if ($saved !== true) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Save failed. Please check the form.',
+            ]);
             return;
         }
         $this->markTabCompleted($this->activeTab);
@@ -593,7 +605,7 @@ class DynamicForm extends Component
     }
 
     private function saveCurrentTabData(): bool
-    {
+    {      
         if (!$this->applicationId) {
             return false;
         }
@@ -924,9 +936,6 @@ class DynamicForm extends Component
 
                 $rules["formData.{$fieldName}"] = array_values(array_filter($fieldRules));
                 
-                if ((string)$this->activeTab === '102') {
-                    $rules["formData.cur_{$fieldName}"] = array_values(array_filter($fieldRules));
-                }
             }
         }
 
