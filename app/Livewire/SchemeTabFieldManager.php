@@ -101,6 +101,25 @@ class SchemeTabFieldManager extends Component
 
     public $usedDocTypeIds = [];
 
+    public bool $isCurrentAddress = false;
+    public array $isSyncableSelected = [];
+
+    public function updatedIsCurrentAddress($value)
+    {
+        if (!$value) {
+            $this->isSyncableSelected = [];
+        }
+    }
+
+    public function updatedModalSelected()
+    {
+        // Remove any sync selection if the corresponding field is deselected
+        $this->isSyncableSelected = array_intersect(
+            $this->isSyncableSelected, 
+            array_map('strval', (array)$this->modalSelected)
+        );
+    }
+
     public function mount(Request $request)
     {
         $scheme_id = $request->query('scheme_id');
@@ -365,6 +384,24 @@ class SchemeTabFieldManager extends Component
         if ($tabCode == 105) {
             return;
         }
+
+        if ($tabCode == 102) {
+            $mapping = SchemeTabMapping::where('scheme_id', $this->schemeId)
+                ->where('tab_code', $tabCode)
+                ->first();
+            $this->isCurrentAddress = (bool) ($mapping->is_current_address ?? false);
+
+            $this->isSyncableSelected = SchemeTabFormField::where('scheme_id', $this->schemeId)
+                ->where('tab_code', $tabCode)
+                ->where('is_syncable', 1)
+                ->pluck('tab_field_id')
+                ->map(fn($id) => (string)$id)
+                ->toArray();
+        } else {
+            $this->isCurrentAddress = false;
+            $this->isSyncableSelected = [];
+        }
+
         $fields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
             ->whereIn('tab_code', [$tabCode, 0])
             ->where('is_active', true)
@@ -448,6 +485,18 @@ class SchemeTabFieldManager extends Component
         try {
             $schemeId = $this->schemeId;
             $tabCode = $this->activeTabCode;
+
+            if ($tabCode == 102) {
+                if ($this->isCurrentAddress && empty($this->isSyncableSelected)) {
+                    $this->addError('isSyncableSelected', 'Please select at least one field to sync for current address.');
+                    return;
+                }
+
+                SchemeTabMapping::where('scheme_id', $schemeId)
+                    ->where('tab_code', $tabCode)
+                    ->update(['is_current_address' => $this->isCurrentAddress]);
+            }
+
             $existingFormFields = SchemeTabFormField::where('scheme_id', $schemeId)
                 ->where('tab_code', $tabCode)
                 ->where('is_active', true)
@@ -496,6 +545,7 @@ class SchemeTabFieldManager extends Component
                         'is_mandatory' => $base->is_mendetory,
                         'is_active' => true,
                         'is_readonly' => $base->is_readonly,
+                        'is_syncable' => in_array((string)$baseFieldId, $this->isSyncableSelected) ? 1 : 0,
                     ]
                 );
             }

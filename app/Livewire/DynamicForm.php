@@ -432,15 +432,37 @@ class DynamicForm extends Component
             return;
         }
         $rules = $this->getValidationRulesForActiveTab();
-        
-        try {
-            if (!empty($rules)) {
-                $this->validate($rules);
+
+
+        //  try {
+        //     if (!empty($rules)) {
+        //         $this->validate($rules);
+        //     }
+        // } catch (ValidationException $e) {
+        //     $this->dispatch('hideLoader');
+        //     throw $e;
+        // }
+
+        if (!empty($rules)) {
+            // Ensure all keys exist in formData to trigger required rules even if field wasn't touched
+            foreach ($rules as $key => $r) {
+                $dottedKey = str_replace('formData.', '', $key);
+                if (!array_key_exists($dottedKey, $this->formData)) {
+                    $this->formData[$dottedKey] = null;
+                }
             }
-        } catch (ValidationException $e) {
-            $this->dispatch('hideLoader');
-            throw $e;
+            try {
+                $this->validate($rules);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                   $this->dispatch('hideLoader');
+                $this->dispatch('toastr', [
+                    'type' => 'error',
+                    'message' => 'Validation failed: ' . implode(', ', array_flatten($e->errors())),
+                ]);
+                throw $e;
+            }
         }
+
 
         if ($this->isFirst) {
 
@@ -464,6 +486,10 @@ class DynamicForm extends Component
 
         if ($saved !== true) {
             $this->dispatch('hideLoader');
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Save failed. Please check the form.',
+            ]);
             return;
         }
         $this->markTabCompleted($this->activeTab);
@@ -624,7 +650,7 @@ class DynamicForm extends Component
     }
 
     private function saveCurrentTabData(): bool
-    {
+    {      
         if (!$this->applicationId) {
             return false;
         }
@@ -954,6 +980,7 @@ class DynamicForm extends Component
                 }
 
                 $rules["formData.{$fieldName}"] = array_values(array_filter($fieldRules));
+                
             }
         }
 
@@ -971,6 +998,10 @@ class DynamicForm extends Component
             foreach ($tab['fields'] ?? [] as $field) {
                 if (!empty($field['field_name']) && !empty($field['level_name'])) {
                     $attributes["formData.{$field['field_name']}"] = $field['level_name'];
+                    
+                    if ((string)$this->activeTab === '102') {
+                        $attributes["formData.cur_{$field['field_name']}"] = 'Current ' . $field['level_name'];
+                    }
                 }
             }
         }

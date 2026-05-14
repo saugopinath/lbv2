@@ -23,22 +23,82 @@ class SchemeSeeder extends Seeder
             ],
             [
                 'id' => '10',
-                'name' => 'Old Age Pension',
-                'short_name' => 'OAP',
+                'name' => 'WCD Old Age Pension',
+                'short_name' => 'oap_wcd',
                 'dept_short_name' => 'WCD',
             ],
             [
                 'id' => '11',
-                'name' => 'Widow Pension',
-                'short_name' => 'WP',
+                'name' => 'WCD Widow Pension',
+                'short_name' => 'wp_wcd',
                 'dept_short_name' => 'WCD',
             ],
             [
                 'id' => '2',
-                'name' => 'Manabik',
+                'name' => 'WCD Manabik',
                 'short_name' => 'manabik',
-                'dept_short_name' => 'WCD',
+                'dept_short_name' => 'WCD&SWD',
             ],
+            [
+                'id' => '9',
+                'name' => 'LPP Pensioner',
+                'short_name' => 'lokprasar_pensioner',
+                'dept_short_name' => 'null',
+            ],
+            [
+                'id' => '8',
+                'name' => 'LPP Retainer',
+                'short_name' => 'lokprasar_retainer',
+                'dept_short_name' => 'null',
+            ],
+            [
+                'id' => '19',
+                'name' => 'Legacy Old Age Pension for ST',
+                'short_name' => 'oap_st',
+                'dept_short_name' => 'TWD',
+            ],
+            [
+                'id' => '5',
+                'name' => 'Old age Pension for FisherMan',
+                'short_name' => 'fisherman_oap',
+                'dept_short_name' => 'Fisheries',
+            ],
+            [
+                'id' => '7',
+                'name' => 'Textile Pension',
+                'short_name' => 'weavers',
+                'dept_short_name' => 'MSME&T',
+            ],
+            [
+                'id' => '13',
+                'name' => 'Old age Pension for Farmer',
+                'short_name' => 'farmer',
+                'dept_short_name' => 'null',
+            ],
+            [
+                'id' => '17',
+                'name' => 'State Welfare Scheme for Purohits',
+                'short_name' => 'purohit_monthly',
+                'dept_short_name' => 'I&CA',
+            ],
+            [
+                'id' => '1',
+                'name' => 'Jai Johar (for ST)',
+                'short_name' => 'johar',
+                'dept_short_name' => 'TWD',
+            ],
+            [
+                'id' => '6',
+                'name' => 'MSME Pension',
+                'short_name' => 'msme',
+                'dept_short_name' => 'MSME&T',
+            ],
+            [
+                'id' => '3',
+                'name' => 'Taposili Bandhu(for SC)',
+                'short_name' => 'bandhu',
+                'dept_short_name' => 'BCWD',
+            ],           
 
         ];
         //   foreach ($schemes as $scheme_item) {
