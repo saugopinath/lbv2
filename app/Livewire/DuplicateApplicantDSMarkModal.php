@@ -92,7 +92,7 @@ class DuplicateApplicantDSMarkModal extends Component
             ]);
         }
         $this->dispatch('hide-modal');
-        // $this->dispatch('refreshDatatable');
+        $this->dispatch('refreshDatatable');
     }
     public function resetForm()
     {
