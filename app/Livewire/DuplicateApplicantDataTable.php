@@ -129,13 +129,26 @@ class DuplicateApplicantDataTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $query = BeneficiaryPersonalDetail::with(['contact', 'aadhaar']);
+        // $query = BeneficiaryPersonalDetail::with(['contact', 'aadhaar']);
+        // if (!empty($this->value)) {
+        //     $query->whereHas('aadhaar', function ($q) {
+        //         $q->where('aadhaar_hash', $this->value);
+        //     });
+        // }
+        $query = BeneficiaryPersonalDetail::query()
+            ->select([
+                'application_id',
+                'beneficiary_name',
+                'ben_father_name',
+                'other_details',
+                'ds_registration_no',
+                'ds_phase'
+            ]);
         if (!empty($this->value)) {
             $query->whereHas('aadhaar', function ($q) {
                 $q->where('aadhaar_hash', $this->value);
             });
         }
-
         return $query;
     }
 
