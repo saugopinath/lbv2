@@ -10,8 +10,8 @@ class CasteManagementController extends Controller
 {
     public function index()
     {
-        // dd('sxvsfv');
-        if (WorkFlowPermissionHelper::canModifyCaste()) {
+        $schemeId = WorkFlowPermissionHelper::getSchemeId();
+        if (WorkFlowPermissionHelper::canModifyCaste($schemeId)) {
             // if (Auth::user()->can('modify caste')) {
             $header = 'Caste Modification Information';
             $moduleCode = config('constants.module_codes.caste_management');
@@ -34,8 +34,8 @@ class CasteManagementController extends Controller
 
     public function requestdedlistdetails()
     {
-        // dd('sxvsfv');
-        if (WorkFlowPermissionHelper::canCasteModification()) {
+        $schemeId = WorkFlowPermissionHelper::getSchemeId();
+        if (WorkFlowPermissionHelper::canCasteModification($schemeId)) {
             // if (Auth::user()->can('modify caste')) {
             $header = 'Caste Modification Information';
             $moduleCode = config('constants.module_codes.caste_management');

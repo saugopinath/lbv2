@@ -3,11 +3,10 @@
 namespace Database\Seeders\AssignPermission;
 
 use App\Models\Role;
-use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
 use App\Models\User;
 use App\Models\UserRoleSchemeOfficeMapping;
-
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 
 class OperatorPermissionSeeder extends Seeder
@@ -21,7 +20,6 @@ class OperatorPermissionSeeder extends Seeder
             'view reports',
             'Duare Sarkar Entry',
             'Normal Entry',
-            'modify caste',
             'submit-lb-form',
             'view caste modification list',
             'edit caste',
@@ -34,6 +32,7 @@ class OperatorPermissionSeeder extends Seeder
             $role = Role::findByName('Operator');
         } catch (\Exception $e) {
             $this->command->error('Role "operator" not found. Seeder aborted.');
+
             return;
         }
 
@@ -50,14 +49,16 @@ class OperatorPermissionSeeder extends Seeder
 
         if ($mappings->isEmpty()) {
             $this->command->info('No users found in UserRoleSchemeOfficeMapping for role "Operator".');
+
             return;
         }
 
         // 4) Loop mappings and assign permissions
         foreach ($mappings as $mapping) {
             $user = User::find($mapping->user_id);
-            if (!$user) {
+            if (! $user) {
                 $this->command->warn("User id={$mapping->user_id} not found (skipping).");
+
                 continue;
             }
 
@@ -68,6 +69,7 @@ class OperatorPermissionSeeder extends Seeder
                 // check if user already has this permission
                 if ($user->hasPermissionTo($permission->name)) {
                     $this->command->info("User id={$user->id} already has permission '{$permission->name}' for scheme {$mapping->scheme_id} (id={$permission->id}).");
+
                     continue;
                 }
                 // assign and print message
@@ -81,3 +83,4 @@ class OperatorPermissionSeeder extends Seeder
         $this->command->info('GivePermissionToOperatorSeeder finished.');
     }
 }
+    
