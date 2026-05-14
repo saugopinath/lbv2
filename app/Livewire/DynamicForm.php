@@ -457,7 +457,7 @@ class DynamicForm extends Component
                    $this->dispatch('hideLoader');
                 $this->dispatch('toastr', [
                     'type' => 'error',
-                    'message' => 'Validation failed: ' . implode(', ', array_flatten($e->errors())),
+                    'message' => 'Validation failed: ' . implode(', ', \Illuminate\Support\Arr::flatten($e->errors())),
                 ]);
                 throw $e;
             }
