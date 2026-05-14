@@ -215,8 +215,6 @@
             ],
         ],
     ];
-
-    // Helper to check if any child is active
     $getActiveGroup = function ($item) {
         if (!isset($item['children'])) {
             return null;

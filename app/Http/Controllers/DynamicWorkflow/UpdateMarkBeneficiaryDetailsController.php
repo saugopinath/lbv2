@@ -11,6 +11,7 @@ class UpdateMarkBeneficiaryDetailsController extends Controller
     public function index()
     {
         $schemeId = WorkFlowPermissionHelper::getSchemeId();
+        // dd($schemeId);
         if (WorkFlowPermissionHelper::canUpdateMarkBeneficiaryDetails($schemeId)) {
             return view('dynamic-workflow.process-workflow-table');
         } else {
@@ -23,6 +24,7 @@ class UpdateMarkBeneficiaryDetailsController extends Controller
     public function listdetails()
     {
         $schemeId = WorkFlowPermissionHelper::getSchemeId();
+        // dd($schemeId);
         if (WorkFlowPermissionHelper::canUpdateBeneficiaryList($schemeId)) {
             $moduleCode = config('constants.module_codes.update_mark_beneficiary');
             $module = DynamicWorkflowModule::where('module_code', $moduleCode)->first();
@@ -43,6 +45,7 @@ class UpdateMarkBeneficiaryDetailsController extends Controller
     public function updateRequest()
     {
         $schemeId = WorkFlowPermissionHelper::getSchemeId();
+        dd($schemeId);
         if (WorkFlowPermissionHelper::canRequestUpdateBeneficiary($schemeId)) {
             $moduleCode = config('constants.module_codes.update_mark_beneficiary');
             $module = DynamicWorkflowModule::where('module_code', $moduleCode)->first();
