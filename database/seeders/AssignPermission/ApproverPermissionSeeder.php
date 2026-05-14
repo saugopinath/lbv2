@@ -3,11 +3,10 @@
 namespace Database\Seeders\AssignPermission;
 
 use App\Models\Role;
-use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
 use App\Models\User;
 use App\Models\UserRoleSchemeOfficeMapping;
-
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 
 class ApproverPermissionSeeder extends Seeder
@@ -66,11 +65,13 @@ class ApproverPermissionSeeder extends Seeder
             'manage-users',
             'manage-departments',
             'manage-schemes',
+            'modify caste',
         ];
         try {
             $role = Role::findByName('Approver');
         } catch (\Exception $e) {
             $this->command->error('Role "Approver" not found. Seeder aborted.');
+
             return;
         }
         $permissionModels = [];
@@ -85,14 +86,16 @@ class ApproverPermissionSeeder extends Seeder
 
         if ($mappings->isEmpty()) {
             $this->command->info('No users found in UserRoleSchemeOfficeMapping for role "Approver".');
+
             return;
         }
 
         // 4) Loop mappings and assign permissions
         foreach ($mappings as $mapping) {
             $user = User::find($mapping->user_id);
-            if (!$user) {
+            if (! $user) {
                 $this->command->warn("User id={$mapping->user_id} not found (skipping).");
+
                 continue;
             }
 
@@ -103,6 +106,7 @@ class ApproverPermissionSeeder extends Seeder
                 // check if user already has this permission
                 if ($user->hasPermissionTo($permission->name)) {
                     $this->command->info("User id={$user->id} already has permission '{$permission->name}' for scheme {$mapping->scheme_id} (id={$permission->id}).");
+
                     continue;
                 }
                 // assign and print message

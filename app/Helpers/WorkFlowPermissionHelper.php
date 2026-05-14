@@ -565,4 +565,25 @@ class WorkFlowPermissionHelper
     {
         return self::hasPermission('back-from-jb-approver-button', $schemeId);
     }
+
+    public static function canUpdateMarkBeneficiaryDetails($schemeId = null): bool
+    {
+        return self::hasPermission('update-mark-beneficiary-details', $schemeId);
+    }
+
+    public static function canUpdateBeneficiaryList($schemeId = null): bool
+    {
+        return self::hasPermission('update-beneficiary-list', $schemeId);
+    }
+
+    public static function canRequestUpdateBeneficiary($schemeId = null): bool
+    {
+        return self::hasPermission('request-update-beneficiary', $schemeId);
+    }
+
+    public static function canUpdateMarkBeneficiary($schemeId = null): bool
+    {
+        return self::hasPermission('update-mark-beneficiary-details', $schemeId)
+            || self::hasPermission('update-beneficiary-list', $schemeId) || self::hasPermission('request-update-beneficiary', $schemeId);
+    }
 }
