@@ -33,10 +33,19 @@ class WorkFlowPermissionHelper
             return false;
         }
 
-        if ($schemeId) {
-            app(PermissionRegistrar::class)->setPermissionsTeamId((int) $schemeId);
+        $registrar = app(PermissionRegistrar::class);
+        $originalTeamId = $registrar->getPermissionsTeamId();
 
-            return $user->can($permissionKey);
+        if ($schemeId) {
+            $registrar->setPermissionsTeamId((int) $schemeId);
+            $user->unsetRelation('roles')->unsetRelation('permissions');
+
+            $hasPerm = $user->can($permissionKey);
+
+            $registrar->setPermissionsTeamId($originalTeamId);
+            $user->unsetRelation('roles')->unsetRelation('permissions');
+
+            return $hasPerm;
         }
 
         $userSchemes = self::getUserSchemes();
@@ -45,14 +54,20 @@ class WorkFlowPermissionHelper
             return false;
         }
 
+        $hasPerm = false;
         foreach ($userSchemes as $scheme) {
-            app(PermissionRegistrar::class)->setPermissionsTeamId((int) $scheme);
+            $registrar->setPermissionsTeamId((int) $scheme);
+            $user->unsetRelation('roles')->unsetRelation('permissions');
             if ($user->can($permissionKey)) {
-                return true;
+                $hasPerm = true;
+                break;
             }
         }
 
-        return false;
+        $registrar->setPermissionsTeamId($originalTeamId);
+        $user->unsetRelation('roles')->unsetRelation('permissions');
+
+        return $hasPerm;
     }
 
     public static function getUserId(): ?int
@@ -82,6 +97,11 @@ class WorkFlowPermissionHelper
     public static function canEntry($schemeId = null): bool
     {
         return self::hasPermission('submit-lb-form', $schemeId);
+    }
+
+    public static function canDynamicWorkflowManagement($schemeId = null): bool
+    {
+        return self::hasPermission('dynamic-workflow-management', $schemeId);
     }
 
     public static function canViewUser($schemeId = null): bool
@@ -191,22 +211,22 @@ class WorkFlowPermissionHelper
         return self::hasPermission('view beneficiary details', $schemeId);
     }
 
-    public static function canVerifierIncomplet($schemeId = null): bool
+    public static function canVerifierIncomplete($schemeId = null): bool
     {
         return self::hasPermission('view verifier incomplete', $schemeId);
     }
 
-    public static function canApproverIncomplet($schemeId = null): bool
+    public static function canApproverIncomplete($schemeId = null): bool
     {
         return self::hasPermission('view approver incomplete', $schemeId);
     }
 
-    public static function canUpdateIncomplet($schemeId = null): bool
+    public static function canUpdateIncomplete($schemeId = null): bool
     {
         return self::hasPermission('update incomplete', $schemeId);
     }
 
-    public static function canRevertIncomplet($schemeId = null): bool
+    public static function canRevertIncomplete($schemeId = null): bool
     {
         return self::hasPermission('revert incomplete', $schemeId);
     }
@@ -229,11 +249,6 @@ class WorkFlowPermissionHelper
     public static function canUpdateBankDetails($schemeId = null): bool
     {
         return self::hasPermission('update bank details', $schemeId);
-    }
-
-    public static function canSearchBankUpdate($schemeId = null): bool
-    {
-        return self::hasPermission('search bank update', $schemeId);
     }
 
     public static function canUpdateMobile($schemeId = null): bool
@@ -304,6 +319,16 @@ class WorkFlowPermissionHelper
     public static function canRejectAllow($schemeId = null): bool
     {
         return self::hasPermission('Reject Allow', $schemeId);
+    }
+
+    public static function canUpdateBankDetailsPermission($schemeId = null): bool
+    {
+        return self::hasPermission('update bank details', $schemeId);
+    }
+
+    public static function canSearchBankUpdate($schemeId = null): bool
+    {
+        return self::hasPermission('search bank update', $schemeId);
     }
 
     public static function canRevertAllow($schemeId = null): bool
@@ -377,7 +402,8 @@ class WorkFlowPermissionHelper
     //     return $user->can($permission);
     // }
 
-    public static function canBulkActionAllow(int $entryType, string $action, bool $isBulk = false, $schemeId = null): bool {
+    public static function canBulkActionAllow(int $entryType, string $action, bool $isBulk = false, $schemeId = null): bool
+    {
 
         switch ($entryType) {
             case 1:
@@ -414,7 +440,7 @@ class WorkFlowPermissionHelper
                 return false;
         }
 
-        $permission = $isBulk ? "Bulk Actions {$prefix} {$suffix}" : "{$prefix} {$suffix}";       
+        $permission = $isBulk ? "Bulk Actions {$prefix} {$suffix}" : "{$prefix} {$suffix}";
 
         return self::hasPermission($permission, $schemeId);
     }
