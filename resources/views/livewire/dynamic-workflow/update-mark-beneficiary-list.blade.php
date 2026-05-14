@@ -11,11 +11,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {{-- Step 1: Scheme --}}
                 <div class="space-y-2">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">1. Select Scheme</label>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Select Scheme</label>
                     <livewire:scheme-dropdown-new />
                 </div>
                 <div class="space-y-2">
-                    <label for="step_id" class="block text-xs font-bold text-gray-500 uppercase tracking-wider">2. Select Application Type</label>
+                    <label for="step_id" class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Select Application Type</label>
                     <div class="relative">
                         <x-form.select name="selectedStepId" label="Application Type" wire:model.live="selectedStepId" class="border rounded px-3 py-2 w-full"
                             required>
