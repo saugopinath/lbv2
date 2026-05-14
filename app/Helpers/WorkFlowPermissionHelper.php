@@ -33,10 +33,19 @@ class WorkFlowPermissionHelper
             return false;
         }
 
-        if ($schemeId) {
-            app(PermissionRegistrar::class)->setPermissionsTeamId((int) $schemeId);
+        $registrar = app(PermissionRegistrar::class);
+        $originalTeamId = $registrar->getPermissionsTeamId();
 
-            return $user->can($permissionKey);
+        if ($schemeId) {
+            $registrar->setPermissionsTeamId((int) $schemeId);
+            $user->unsetRelation('roles')->unsetRelation('permissions');
+
+            $hasPerm = $user->can($permissionKey);
+
+            $registrar->setPermissionsTeamId($originalTeamId);
+            $user->unsetRelation('roles')->unsetRelation('permissions');
+
+            return $hasPerm;
         }
 
         $userSchemes = self::getUserSchemes();
@@ -45,14 +54,20 @@ class WorkFlowPermissionHelper
             return false;
         }
 
+        $hasPerm = false;
         foreach ($userSchemes as $scheme) {
-            app(PermissionRegistrar::class)->setPermissionsTeamId((int) $scheme);
+            $registrar->setPermissionsTeamId((int) $scheme);
+            $user->unsetRelation('roles')->unsetRelation('permissions');
             if ($user->can($permissionKey)) {
-                return true;
+                $hasPerm = true;
+                break;
             }
         }
 
-        return false;
+        $registrar->setPermissionsTeamId($originalTeamId);
+        $user->unsetRelation('roles')->unsetRelation('permissions');
+
+        return $hasPerm;
     }
 
     public static function getUserId(): ?int
@@ -234,7 +249,7 @@ class WorkFlowPermissionHelper
     public static function canUpdateBankDetails($schemeId = null): bool
     {
         return self::hasPermission('update bank details', $schemeId);
-    }    
+    }
 
     public static function canUpdateMobile($schemeId = null): bool
     {
@@ -304,8 +319,8 @@ class WorkFlowPermissionHelper
     public static function canRejectAllow($schemeId = null): bool
     {
         return self::hasPermission('Reject Allow', $schemeId);
-    }   
-    
+    }
+
     public static function canUpdateBankDetailsPermission($schemeId = null): bool
     {
         return self::hasPermission('update bank details', $schemeId);
@@ -387,7 +402,8 @@ class WorkFlowPermissionHelper
     //     return $user->can($permission);
     // }
 
-    public static function canBulkActionAllow(int $entryType, string $action, bool $isBulk = false, $schemeId = null): bool {
+    public static function canBulkActionAllow(int $entryType, string $action, bool $isBulk = false, $schemeId = null): bool
+    {
 
         switch ($entryType) {
             case 1:
@@ -424,7 +440,7 @@ class WorkFlowPermissionHelper
                 return false;
         }
 
-        $permission = $isBulk ? "Bulk Actions {$prefix} {$suffix}" : "{$prefix} {$suffix}";       
+        $permission = $isBulk ? "Bulk Actions {$prefix} {$suffix}" : "{$prefix} {$suffix}";
 
         return self::hasPermission($permission, $schemeId);
     }
