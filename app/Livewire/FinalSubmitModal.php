@@ -78,7 +78,7 @@ class FinalSubmitModal extends Component
             $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
         $levelRoles = $workflowService->getLevelRoles($this->schemeId);
-        
+
         DB::beginTransaction();
         try {
 
@@ -111,7 +111,7 @@ class FinalSubmitModal extends Component
             DB::commit();
             // $this->show = false;
             session()->flash('success', "Application ID: " . $this->applicationId . " Submitted successfully");
-            return redirect()->route('schemes.final-submitted');
+            return redirect()->route('form');
             $this->show = false;
         } catch (Exception $e) {
             DB::rollBack();

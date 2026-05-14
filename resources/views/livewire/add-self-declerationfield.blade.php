@@ -41,8 +41,14 @@
             wire:model.live="field_id"
             required readonly/>
 
-        <x-form.textarea name="level_name" label="Level Name"
-            wire:model="level_name" required></x-form.textarea>
+        <div class="md:col-span-2">
+            <x-form.textarea name="level_name" label="Level Name"
+                wire:model="level_name" required></x-form.textarea>
+            <p class="mt-1 text-sm text-gray-500 italic">
+                Tip: Use <code class="font-bold">[[input]]</code> inside the text to place the input box inline. 
+                Example: <code class="bg-gray-100 px-1 rounded">I [[input]] consent to the use of Aadhaar.</code>
+            </p>
+        </div>
         {{-- Is under section --}}
         <div class="grid grid-cols-2 gap-4 md:col-span-2">
             <div>

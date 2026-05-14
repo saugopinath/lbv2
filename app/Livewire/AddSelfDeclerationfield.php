@@ -10,6 +10,7 @@ use App\Models\SectionLevelMaster;
 use App\Models\SelfDeclerationBasefield;
 use App\Models\ValidationRule;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class AddSelfDeclerationField extends Component
 {
@@ -146,6 +147,9 @@ class AddSelfDeclerationField extends Component
             'field_name',
             'field_id',
         ]);
+        if ($this->field_type === 'email') {
+            $this->validation_rule[] = 'email';
+        }
     }
     public function updatedFieldName($value)
     {
@@ -172,12 +176,23 @@ class AddSelfDeclerationField extends Component
             'scheme_id' => 'required',
             'tab_code' => 'required',
             'field_type' => 'required',
-            'field_name' => 'required',
-            'field_id' => 'required',
-            'level_name' => 'required',
+            'field_name' => [
+                'required',
+                Rule::unique('self_decleration_basefields', 'field_name')
+                    ->where(fn($q) => $q->where('scheme_id', $this->scheme_id)->where('tab_code', $this->tab_code))
+            ],
+            'field_id' => [
+                'required',
+                Rule::unique('self_decleration_basefields', 'field_id')
+                    ->where(fn($q) => $q->where('scheme_id', $this->scheme_id)->where('tab_code', $this->tab_code))
+            ],
+            'level_name' => [
+                'required',
+                Rule::unique('self_decleration_basefields', 'level_name')
+                    ->where(fn($q) => $q->where('scheme_id', $this->scheme_id)->where('tab_code', $this->tab_code))
+            ],
             'validation_rule' => 'required',
             'is_multiple' => 'required_if:field_type,select',
-            // 'options' => 'required_if:field_type,select',
             'section_level_type' => 'required_if:is_under_section,yes',
             'section_id' => 'required_if:is_under_section,yes',
             'is_under_section' => 'required',

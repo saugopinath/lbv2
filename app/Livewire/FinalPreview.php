@@ -37,6 +37,7 @@ class FinalPreview extends Component
     public $navMessageType = 'success';
     public $showFinalModal = false;
     public $maxDate, $minDate, $minDOB, $maxDOB;
+    public bool $isEdit = false;
 
     protected $listeners = [
         'document-validation-passed' => 'goToNextTab',
@@ -45,8 +46,9 @@ class FinalPreview extends Component
 
     /* ================= MOUNT ================= */
 
-    public function mount($schemeId, $saveNext = null, $applicationId = null, $beneficiaryId = null, $form_preview = null)
+    public function mount($schemeId, $saveNext = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $isEdit = false)  
     {
+        $this->isEdit = $isEdit;
         $this->loadAppTypeOptions();
         $this->loadScheme($schemeId);
 

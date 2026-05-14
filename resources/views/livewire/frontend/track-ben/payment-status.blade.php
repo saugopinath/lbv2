@@ -6,13 +6,17 @@
         <select wire:model.live="fin_year" id="fin_year"
             class="border border-gray-300 rounded-lg px-4 py-2 text-[14px] bg-white text-gray-800 shadow-sm w-full sm:w-56 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all cursor-pointer">
             @foreach(config('constants.fin_year') as $year => $value)
-                <option value="{{ $year }}">{{ $value }}</option>
+            <option value="{{ $year }}">{{ $value }}</option>
             @endforeach
         </select>
     </div>
 
     <div class="w-full border border-gray-100 rounded-sm">
-        <livewire:frontend.track-ben.payment-status-table :ben_id="$ben_id" :scheme_id="$scheme_id"
-            :fin_year="$fin_year" :key="$fin_year" />
+        <livewire:frontend.track-ben.payment-status-table
+            :ben_id="$ben_id"
+            :scheme_id="$scheme_id"
+            :ben_status="$ben_status"
+            :fin_year="$fin_year"
+            :key="$fin_year" />
     </div>
 </div>

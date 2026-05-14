@@ -13,6 +13,20 @@ class PaymentStatus extends Component
     public $ifsc;
 
     public $fin_year = '2026-2027'; // default
+    public function mount(
+        $ben_id,
+        $scheme_id,
+        $ben_status,
+        ?string $bank_code,
+        ?string $ifsc
+    ) {
+        $this->ben_id = $ben_id;
+        $this->scheme_id = $scheme_id;
+        $this->ben_status = $ben_status;
+        $this->bank_code = $bank_code;
+        $this->ifsc = $ifsc;
+        // dd($this->ben_id, $this->scheme_id, $this->ben_status, $this->bank_code, $this->ifsc);
+    }
 
     public function render()
     {

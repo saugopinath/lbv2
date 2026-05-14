@@ -465,7 +465,9 @@ class BeneficiaryTrackController extends Controller
         }
 
 
-        $ben_profile_pic = BeneficiaryEnclosure::where('application_id', (int) $b->application_id)->where('document_type', 103)->first()?->toArray() ?? [];
+        $ben_profile_pic = $b->enclosers()
+            ->where('document_type', 103)
+            ->first()?->toArray() ?? [];
         // dd($ben_profile_pic);
 
         $returnData['status'] = $status;
@@ -505,8 +507,6 @@ class BeneficiaryTrackController extends Controller
         $applicationId = $id;
 
         $benPersonal = BeneficiaryPersonalDetail::where('application_id', $id)->first();
-
-
         if (empty($benPersonal)) {
             return redirect()->back()->with([
                 'toastr' => [
@@ -550,8 +550,8 @@ class BeneficiaryTrackController extends Controller
             $activityLogData[$key]['operation'] = Codemaster::where('id', $value->op_type)->first()->name;
             $activityLogData[$key]['action_date'] = $value->created_at->format('d-m-Y H:i:s');
             $activityLogData[$key]['action_by'] = $value->user->name ?? 'System';
-            $activityLogData[$key]['new_data'] = $value->new_data;
-            $activityLogData[$key]['old_data'] = $value->old_data;
+            $activityLogData[$key]['new_data'] = $value->new_value;
+            $activityLogData[$key]['old_data'] = $value->old_value;
         }
 
         return $activityLogData;

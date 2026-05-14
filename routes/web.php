@@ -255,4 +255,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('caste-management-request-list', 'requestdedlistdetails')->name('caste-management-request-list');
         Route::get('caste-revert-update', UpdateRevertCaste::class)->name('caste-revert-update');
     });
+    // Track Beneficiary Details
+    Route::controller(TrackBeneficiaryDetailsController::class)->group(function () {
+        Route::get('track-beneficiary-details', 'TrackBeneficiaryDetails')->name('track-beneficiary-details');
+        Route::post('beneficiary-payment-history-log', 'BeneficiaryPaymentHistory')->name('beneficiary-payment-history-log');
+        Route::post('beneficiary-details', 'BeneficiaryDetailslogs')->name('beneficiary-details');
+    });
 });

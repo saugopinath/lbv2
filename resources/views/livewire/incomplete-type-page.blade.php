@@ -11,7 +11,7 @@
             Update Incomplete
         @endif
     </h1>
-
+  
     <!-- Accordion Section -->
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-4 mb-6">
         <livewire:application-details.tab-wise-application-view :id="$id" :schemeId="$schemeId"
@@ -48,7 +48,7 @@
 
         {{-- Mobile Issues --}}
         @if (!empty($mobileIssues))
-            <x-incomplete.mobile-issues :mobile-issues="$mobileIssues" />
+            <x-incomplete.mobile-issues :mobile-issues="$mobileIssues" :stage="$stage" />
         @endif
 
         {{-- Bank Issues --}}

@@ -6,14 +6,13 @@ use Illuminate\View\Component;
 
 class AadhaarModification extends Component
 {
-    public $aadhaarIssues,$schemeId;
-    public $formData = [];
+    public $aadhaarIssues, $schemeId, $stage;
 
-    public function __construct($aadhaarIssues = [], $schemeId = null)
+    public function __construct($aadhaarIssues = [], $schemeId = null, $stage = null)
     {
         $this->aadhaarIssues = $aadhaarIssues;
-        $this->schemeId = $schemeId;  
-
+        $this->schemeId = $schemeId;
+        $this->stage = $stage;
     }
 
     public function render()

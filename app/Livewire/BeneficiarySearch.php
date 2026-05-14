@@ -22,6 +22,7 @@ class BeneficiarySearch extends Component
     public $isShownScheme = true;
     public $selectedScheme = null;
     public $lgdData = [];
+    public $isReset = false;
     public $fields = [
         'application_id' => [
             'label' => 'Application ID',
@@ -71,13 +72,15 @@ class BeneficiarySearch extends Component
         $isFinal = false,
         $isAssigned = false,
         $isShownScheme = true,
-        $excludeFields = []
+        $excludeFields = [],
+        $isReset = false
     ) {
         $this->isApproved = $isApproved;
         $this->selectedOption = $selectedOption;
         $this->inputValue = $inputValue ?? '';
         $this->displayType = $displayType;
         $this->isShownScheme = $isShownScheme;
+        $this->isReset = $isReset;
         $scheme_id = null;
         $select_lgd = session('lgd_session');
         if ($select_lgd) {
@@ -108,6 +111,15 @@ class BeneficiarySearch extends Component
         if (!empty($excludeFields)) {
             $this->fields = array_diff_key($this->fields, array_flip($excludeFields));
         }
+    }
+
+    public function resetSearch()
+    {
+        $this->selectedOption = null;
+        $this->inputValue = '';
+        $this->selectedScheme = null;
+        $this->dispatch('reset-beneficiary-search');
+        $this->dispatch('hideLoader');
     }
 
     public function updatedSelectedScheme()
@@ -146,7 +158,12 @@ class BeneficiarySearch extends Component
             $messages['inputValue.digits']   = "The $fieldLabel must be :digits digits.";
             $messages['inputValue.regex']    = "The $fieldLabel should only contain characters (A-Z, a-z).";
         }
-        $this->validate($rules, $messages);
+        try {
+            $this->validate($rules, $messages);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('hideLoader');
+            throw $e;
+        }
         $modelClass = BeneficiaryPersonalDetail::class;
         $searchValue = $this->inputValue;
         $query = $modelClass::query()->whereIn('is_clean', [1, 2]);
@@ -168,7 +185,7 @@ class BeneficiarySearch extends Component
                 $query->where($key, $searchValue);
                 break;
             case 'beneficiary_name':
-                $query->where($key, $searchValue);
+                $query->where($key, 'ILIKE', '%' . trim($searchValue) . '%');
                 break;
             case 'mobile_number':
                 $query->where('other_details->mobile_no', $searchValue);
@@ -195,7 +212,9 @@ class BeneficiarySearch extends Component
             $payload['count']   = $results->count();
         }
         // dd($payload);
+        $this->dispatch('showLoader');
         $this->dispatch('beneficiary-search', data: $payload);
+        $this->dispatch('hideLoader');
     }
     public function render()
     {

@@ -645,7 +645,8 @@
                         <div>
                             @switch($field->field_type)
                             @case('text')
-                            <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" placeholder="Enter {{ $field->level_name }}" disabled />
+                            @case('email')
+                            <x-form.input type="{{ $field->field_type }}" name="{{ $field->field_name }}" label="{!! $field->level_name !!}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('number')
                             <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
@@ -676,7 +677,8 @@
                             <div>
                                 @switch($field->field_type)
                                 @case('text')
-                                <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" placeholder="Enter {{ $field->level_name }}" disabled />
+                                @case('email')
+                                <x-form.input type="{{ $field->field_type }}" name="{{ $field->field_name }}" label="{!! $field->level_name !!}" placeholder="Enter {{ $field->level_name }}" disabled />
                                 @break
                                 @case('number')
                                 <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
@@ -711,7 +713,8 @@
                             <div>
                                 @switch($field->field_type)
                                 @case('text')
-                                <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" disabled />
+                                @case('email')
+                                <x-form.input type="{{ $field->field_type }}" name="{{ $field->field_name }}" label="{!! $field->level_name !!}" disabled />
                                 @break
                                 @case('number')
                                 <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
@@ -836,7 +839,8 @@
                         <div>
                             @switch($field->field_type)
                             @case('text')
-                            <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" placeholder="Enter {{ $field->level_name }}" disabled />
+                            @case('email')
+                            <x-form.input type="{{ $field->field_type }}" name="{{ $field->field_name }}" label="{!! $field->level_name !!}" placeholder="Enter {{ $field->level_name }}" disabled />
                             @break
                             @case('number')
                             <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
@@ -867,7 +871,8 @@
                             <div>
                                 @switch($field->field_type)
                                 @case('text')
-                                <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" placeholder="Enter {{ $field->level_name }}" disabled />
+                                @case('email')
+                                <x-form.input type="{{ $field->field_type }}" name="{{ $field->field_name }}" label="{!! $field->level_name !!}" placeholder="Enter {{ $field->level_name }}" disabled />
                                 @break
                                 @case('number')
                                 <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />
@@ -902,7 +907,8 @@
                             <div>
                                 @switch($field->field_type)
                                 @case('text')
-                                <x-form.input name="{{ $field->field_name }}" label="{!! $field->level_name !!}" placeholder="Enter {{ $field->level_name }}" disabled />
+                                @case('email')
+                                <x-form.input type="{{ $field->field_type }}" name="{{ $field->field_name }}" label="{!! $field->level_name !!}" placeholder="Enter {{ $field->level_name }}" disabled />
                                 @break
                                 @case('number')
                                 <x-form.input type="number" name="{{ $field->field_name }}" label="{{ $field->level_name }}" placeholder="Enter {{ $field->level_name }}" disabled />

@@ -27,7 +27,9 @@ class PaymentStatusTable extends DataTableComponent
 {
     public $ben_id;
     public $scheme_id;
-
+    public $ben_status;
+    public $bank_code;
+    public $ifsc;
     public $fin_year;
 
     public function configure(): void
@@ -80,8 +82,9 @@ class PaymentStatusTable extends DataTableComponent
 
     public function builder(): Builder
     {
+        // dd($this->ben_id, $this->scheme_id, $this->fin_year);
         $model = $this->scheme_id == 20 ? BenTransactionDetailsLB::class : BenTransactionDetailsJB::class;
-
+        // dd($model);
         $months = [
             1 => ['apr', 'April'],
             2 => ['may', 'May'],
@@ -98,7 +101,6 @@ class PaymentStatusTable extends DataTableComponent
         ];
 
         $query = null;
-
         // Fetch the created_at of the beneficiary
         if ($this->scheme_id == 20) {
             $benPersonal = BenTransactionDetailsLB::select('created_at')->where('ben_id', $this->ben_id)->first();
@@ -106,12 +108,13 @@ class PaymentStatusTable extends DataTableComponent
             $benPersonal = BenTransactionDetailsJB::select('created_at')->where('ben_id', $this->ben_id)->first();
         }
         $start_month_idx = 1;
+        $end_month_idx = 12;
 
+        /*
         if ($benPersonal && $benPersonal->created_at) {
             $created_time = strtotime($benPersonal->created_at);
             $created_year = (int) date('Y', $created_time);
             $created_month = (int) date('m', $created_time);
-
             $created_fin_year = ($created_month >= 4) ? $created_year . '-' . ($created_year + 1) : ($created_year - 1) . '-' . $created_year;
 
             if ($this->fin_year === $created_fin_year) {
@@ -127,12 +130,12 @@ class PaymentStatusTable extends DataTableComponent
         $current_month = (int) date('m', $current_time);
         $current_fin_year = ($current_month >= 4) ? $current_year . '-' . ($current_year + 1) : ($current_year - 1) . '-' . $current_year;
 
-        $end_month_idx = 12;
         if ($this->fin_year === $current_fin_year) {
             $end_month_idx = ($current_month >= 4) ? $current_month - 3 : $current_month + 9;
         } elseif ($this->fin_year !== null && $this->fin_year > $current_fin_year) {
             $end_month_idx = 0; // Don't show any months for future financial years
         }
+        */
 
         // foreach ($months as $idx => $m) {
         //     if ($idx < $start_month_idx || $idx > $end_month_idx) {
@@ -161,7 +164,7 @@ class PaymentStatusTable extends DataTableComponent
         //         $query->unionAll($q);
         //     }
         // }
-
+        // dd($model);
         $data = $model::query()
             ->where('ben_id', $this->ben_id)
             ->when($this->scheme_id != 20, function ($q) {
@@ -172,19 +175,31 @@ class PaymentStatusTable extends DataTableComponent
             })
             ->first();
 
-        $query = null;
         $dummy = new DummyPaymentModel();
         $dummy->dynamicConnection = app($model)->getConnectionName();
+
+        if (!$data) {
+            // Return an empty result with the same columns and types
+            return $dummy->newQuery()
+                ->selectRaw("0 as month_idx, '' as month_name, '' as lot_status, '' as prefix")
+                ->fromRaw("(SELECT 1 as dummy) as d")
+                ->whereRaw('1=0');
+        }
+
+        $query = null;
 
         foreach ($months as $idx => $m) {
             if ($idx < $start_month_idx || $idx > $end_month_idx) {
                 continue;
             }
-
             $prefix = $m[0];
             $monthName = $m[1];
             $column = "{$prefix}_lot_status";
             $val = $data ? ($data->$column ?? '') : '';
+
+            if ($val === 'R') {
+                continue;
+            }
 
             // Create a virtual row of constants for each month
             $q = $dummy->newQuery()
@@ -198,18 +213,14 @@ class PaymentStatusTable extends DataTableComponent
                 $query->unionAll($q);
             }
         }
-
-        if ($query === null) {
-            
+        if ($query === null && $data === null) {
             $query = $dummy->newQuery()
                 ->selectRaw("0 as month_idx, '' as month_name, '' as lot_status, '' as prefix")
                 ->fromRaw("(SELECT 1 as dummy) as d")
                 ->whereRaw('1=0');
         }
-
         /** @var \Illuminate\Database\Eloquent\Builder $builder */
         $builder = $dummy->newQuery()->fromSub($query, 'payments')->orderBy('month_idx', 'asc');
-
         return $builder;
     }
 
@@ -226,7 +237,6 @@ class PaymentStatusTable extends DataTableComponent
                     $statusColor = 'gray';
                     $statusLabel = 'Payment yet to be generated';
                     $statusIcon = 'fa-solid fa-clock-rotate-left';
-
                     if ($value === 'S') {
                         $statusColor = 'emerald';
                         $statusLabel = 'Payment Success';
@@ -243,12 +253,11 @@ class PaymentStatusTable extends DataTableComponent
                         $statusColor = 'rose';
                         $statusLabel = 'Payment Failed';
                         $statusIcon = 'fa-solid fa-circle-exclamation';
-                    } else {
+                    } elseif ($value !== '' && $value !== null) {
                         $statusColor = 'blue';
                         $statusLabel = 'Payment Under Process';
                         $statusIcon = 'fa-solid fa-spinner fa-spin';
                     }
-
                     $html = "<span class=\"inline-flex items-center gap-1.5 bg-{$statusColor}-50 text-{$statusColor}-700 text-[13px] font-semibold px-3 py-1.5 rounded-full border border-{$statusColor}-200 shadow-sm\"><i class=\"{$statusIcon} text-{$statusColor}-500\"></i> {$statusLabel}</span>";
 
                     if ($this->scheme_id == 20) {
@@ -280,6 +289,7 @@ class PaymentStatusTable extends DataTableComponent
 
     public function showError($value)
     {
+        // dd($value);
         $params = explode('_', $value);
         $lot_no = $params[0] ?? null;
         $pension_id = $params[1] ?? null;
@@ -296,13 +306,12 @@ class PaymentStatusTable extends DataTableComponent
 
         try {
             if ($schemeId == 20) {
-                $model = BenTransactionDetailsLB::class;
+                $model = BenFailedPaymentDetailsLB::class;
                 $lotObj = $model::where('ben_id', $pension_id)
-                    ->where('scheme_id', $schemeId)
-                    ->whereIn('failed_type', [3, 4, 5])
+                    ->whereIn('failed_type', [2])
                     ->first();
             } else {
-                $model = BenTransactionDetailsJB::class;
+                $model = BenFailedPaymentDetailsJB::class;
                 $lotObj = $model::where('ben_id', $pension_id)
                     ->where('scheme_id', $schemeId)
                     ->whereIn('failed_type', [3, 4, 5])
@@ -335,7 +344,7 @@ class PaymentStatusTable extends DataTableComponent
                 ]);
             } elseif ($lotObj->pmt_mode == 2 && $schemeId != 20) {
                 $results = BenFailedPaymentDetailsJB::where('ben_id', $pension_id)
-                    ->where('scheme_id', $schemeId)
+                    // ->where('scheme_id', $schemeId)
                     ->where('lot_no', $lot_no)
                     ->orderBy('created_at', 'desc')
                     ->first();
@@ -349,17 +358,85 @@ class PaymentStatusTable extends DataTableComponent
                     ->where('lot_no', $lot_no)
                     ->orderBy('created_at', 'desc')
                     ->first();
-
+                $error_code = $results->status_code;
+                // dd($results->status_code);
+                $description = $this->getErrorCodeDescription($error_code, 1);
                 $this->dispatch('toastr', [
                     'type' => 'error',
-                    'message' => $results->description ?? 'No description found'
+                    'message' => $description ?? 'No description found'
                 ]);
             }
         } catch (\Exception $e) {
+            // dd($e->getMessage());
             $this->dispatch('toastr', [
                 'type' => 'error',
                 'message' => 'Error! Please try again.'
             ]);
         }
+    }
+
+    public function getErrorCodeDescription($error_code, $type = 1)
+    {
+        $errorMessages = [];
+
+        if ($type == 1) {
+
+            $errorMessages = [
+                '01' => 'Account Closed',
+                '02' => 'No Such Account',
+                '03' => 'Account Description Does not Tally',
+                '04' => 'Miscellaneous - Others',
+                '11' => 'Invalid IFSC/MICR Code',
+                '51' => 'KYC Documents Pending',
+                '52' => 'Documents Pending for Account Holder turning Major',
+                '53' => 'Account inoperative',
+                '54' => 'Account Dormant',
+                '55' => 'A/c in Zero Balance/No Transactions have Happened, first Transaction in Cash or Self Cheque',
+                '56' => 'Small Account, First Transaction to be from Base Branch',
+                '57' => 'Amount Exceeds limit set on Account by Bank for Credit per Transaction',
+                '58' => 'Account reached maximum Credit limit set on account by Bank',
+                '59' => 'Network Failure (CBS)',
+                '60' => 'Account Holder Expired',
+                '62' => 'Account Under Litigation',
+                '65' => 'Account Holder Name Invalid',
+                '68' => 'A/c Blocked or Frozen',
+                '69' => 'Customer Insolvent / Insane',
+                '70' => 'Customer to refer to the branch',
+                '71' => 'Invalid Account Type (NRE/PPF/CC/Loan/FD)',
+                '-1' => 'Any thing other than NPCI',
+            ];
+        }
+
+        if ($type == 2) {
+
+            $errorMessages = [
+                '01' => 'Account Closed or Transferred',
+                '02' => 'No Such Account',
+                '03' => 'Account Description Does not Tally',
+                '04' => 'Miscellaneous - Others',
+                '51' => 'Miscellaneous - KYC Documents Pending',
+                '52' => 'Miscellaneous - Documents Pending for Account Holder turning Major',
+                '53' => 'Miscellaneous - A/c Inactive (No Transactions for last 3 Months)',
+                '54' => 'Miscellaneous - Dormant A/c (No Transactions for last 6 Months)',
+                '55' => 'Miscellaneous - A/c in Zero Balance/No Transactions have Happened',
+                '56' => 'Miscellaneous - Simple Account',
+                '57' => 'Miscellaneous - Amount Exceeds limit set on Account by Bank for Credit per Transaction',
+                '58' => 'Miscellaneous - Account reached maximum Credit limit set on account by Bank',
+                '59' => 'Miscellaneous - Network Failure (CBS)',
+                '60' => 'Account Holder Expired',
+                '61' => 'Mandate Cancelled',
+                '62' => 'Account Under Litigation',
+                '63' => 'Invalid Aadhaar Number',
+                '64' => 'Aadhaar Number not Mapped to Account Number',
+                '65' => 'Account Holder Name Invalid',
+                '66' => 'UMRN Does not exist',
+                '68' => 'A/c Blocked or Frozen',
+                '71' => 'Invalid Account Type (NRE/PPF/CC/Loan/FD)',
+                '99' => 'Mark Pending',
+                '-1' => 'Any thing other than NPCI',
+            ];
+        }
+
+        return $errorMessages[$error_code] ?? 'Unknown Error Code';
     }
 }

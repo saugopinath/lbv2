@@ -205,7 +205,7 @@ return [
         '4' => 'She has not attained the age of 18 years',
         '5' => 'She is a not a citizen of India and/or has not been a resident of West Bengal for the last 10
         years',
-        '6' => 'She earns any monthly remuneration from any regular/ contractual Government job or gets 
+        '6' => 'She earns any monthly remuneration from any regular/ contractual Government job or gets
         any Pension under any Government scheme',
         '7' => 'Others (Please specify)'
     ],
@@ -259,13 +259,13 @@ return [
         '2024' => '2024',
         '2025' => '2025',
     ],
-    'EncryptionKey'=>'wltHCqXLI0rTIZtjY2tw9FuglpZFIcHzBhBZAG9ADKw=',
-    'module_codes' => [
-        'caste_management' => 'caste_mng_01',
-        'update_mark_beneficiary' => 'UP_MB_D_01',
-    ],    
+    'EncryptionKey' => 'wltHCqXLI0rTIZtjY2tw9FuglpZFIcHzBhBZAG9ADKw=',
     'contact_phone' => '1800-102-8255',
     'jb' => 'Jai Bangla',
     'lb' => 'Lakshmir Bhandar',
 
+    'module_codes' => [
+        'caste_management' => 'caste_mng_01',
+        'update_mark_beneficiary' => 'UP_MB_D_01',
+    ],
 ];
