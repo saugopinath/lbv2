@@ -12,7 +12,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-
+use App\Models\AcceptRejectInfo;
+use Illuminate\Support\Facades\Auth;
 class BackFromJBController extends Controller
 {
     protected $minDOB;
@@ -47,14 +48,21 @@ class BackFromJBController extends Controller
     public function backfromjbactions(Request $request)
     {
         $app_id = Crypt::decryptString($request->id);
-        $record = BackFromJb::with([
-            'beneficiary',
-        ])->find($app_id);
+        $record = BackFromJb::query()
+            ->select([
+                'application_id',
+                'jb_poposed_dob',
+                'new_dob',
+                'jb_poposed_dob',
+            ])
+            ->with([
+                'beneficiary:application_id,beneficiary_id,scheme_id,dob,email,beneficiary_name,other_details,ben_father_name,ben_mother_name'
+            ])->find($app_id);
+            // dd($record);
         if (!$record) {
             return redirect()->back()->with('error', 'Record not found.');
         }
         $this->setDOBLimits($record->beneficiary->scheme_id);
-
         if ($request->isMethod('post')) {
             $messages = [
                 'new_dob.*' => "Date of birth must be between {$this->minDOB} and {$this->maxDOB}.",
@@ -88,14 +96,25 @@ class BackFromJBController extends Controller
                     $record->beneficiary->save();
                 }
                 $record->save();
+                $AcceptRejectInfo = new AcceptRejectInfo;
+            $AcceptRejectInfo->application_id = $record->beneficiary->application_id;
+            $AcceptRejectInfo->beneficiary_id = $record->beneficiary->beneficiary_id;
+            $AcceptRejectInfo->ip_address = request()->ip();
+            $AcceptRejectInfo->scheme_id = $record->beneficiary->scheme_id;
+            $AcceptRejectInfo->user_id = Auth::id();
+            $AcceptRejectInfo->browser = request()->header('User-Agent');
+            $AcceptRejectInfo->model_name = null;
+            $AcceptRejectInfo->op_type = 123;
+            $AcceptRejectInfo->revert_reason_cause_id = null;
+            $AcceptRejectInfo->revert_reason_remarks = null;
+            $AcceptRejectInfo->parent_id = null;
+            $AcceptRejectInfo->save();
                 DB::commit();
                 session()->flash('success', $msg);
-
                 return redirect()->route('backfromjb');
             } catch (\Exception $e) {
                 DB::rollBack();
                 session()->flash('error', 'Something went wrong! Please try again.');
-
                 return redirect()->back();
             }
         }
