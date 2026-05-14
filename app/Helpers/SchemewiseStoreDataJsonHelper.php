@@ -59,11 +59,37 @@ class SchemewiseStoreDataJsonHelper
                 ->first();
 
             $layout = $schemeTabLayout?->layout_json;
+
+            if ($tab->tab_code == 102 && ($tab->is_current_address ?? false)) {
+                $curFields = [];
+                $existingNames = array_column($fields, 'field_name');
+                foreach ($fields as $field) {
+                    if (!empty($field['is_syncable']) && !str_starts_with($field['field_name'], 'cur_')) {
+                        $name = $field['field_name'];
+                        if (in_array('cur_' . $name, $existingNames)) continue;
+
+                        $curField = $field;
+                        $curField['field_name'] = 'cur_' . $name;
+                        
+                        $curField['db_column'] = 'other_details';
+                        
+                        $curField['level_name'] = 'Current ' . $field['level_name'];
+                        if (!empty($curField['dependent_on'])) {
+                            $curField['dependent_on'] = 'cur_' . $curField['dependent_on'];
+                        }
+                        $curField['is_syncable'] = false;
+                        $curFields[] = $curField;
+                    }
+                }
+                $fields = array_merge($fields, $curFields);
+            }
+
             $tabData[] = [
                 'tab_code' => $tab->tab_code,
                 'tab_name' => $tab->masterTab->tab_name ?? '',
                 'tab_icon' => $tab->masterTab->tab_icon ?? '',
                 'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
+                'is_current_address' => $tab->is_current_address,
                 'fields' => $fields,
                 'layout' => $layout,
             ];
@@ -219,23 +245,33 @@ class SchemewiseStoreDataJsonHelper
                 File::put("{$dir}/105.blade.php", $blade);
                 continue;
             }
-            $layout = DB::table('scheme_tab_layouts')
-                ->where('scheme_id', $schemeId)
-                ->where('tab_code', $tabCode)
-                ->value('layout_json');
-
-            $layout = $layout ? json_decode($layout, true) : [];
-            $fields = $tab['fields'] ?? [];
-            $cursor = 0;
-            $total = count($fields);
+            $isCurrentAddress = ($tabCode == 102) && ($tab['is_current_address'] ?? false);
             $blade = '';
+            $fields = $tab['fields'] ?? [];
+            $renderFields = array_values(array_filter($fields, fn($f) => !str_starts_with($f['field_name'], 'cur_')));
+            $syncableFields = array_values(array_filter($fields, fn($f) => !empty($f['is_syncable'])));
+            $total = count($renderFields);
+            $cursor = 0;
 
             if (!empty($layout)) {
+                $blade .= "<div x-data=\"{ sameAsPermanent: false, formData: @entangle('formData').live, sync() { if(this.sameAsPermanent) { ";
+                foreach ($syncableFields as $field) {
+                    $name = $field['field_name'];
+                    $blade .= "this.formData.cur_{$name} = this.formData.{$name}; ";
+                }
+                $blade .= "this.\$nextTick(() => { setTimeout(() => { document.querySelectorAll('[name^=\\'cur_\\']').forEach(el => delete el.dataset.loaded); if(typeof window.initMasterData === 'function') window.initMasterData(); }, 100); }); ";
+                $blade .= " } } }\" x-init=\"\$watch('sameAsPermanent', v => sync()); ";
+                foreach ($syncableFields as $field) {
+                    $name = $field['field_name'];
+                    $blade .= "\$watch('formData.{$name}', v => { if(sameAsPermanent) sync(); }); ";
+                }
+                $blade .= "\">\n";
+
                 foreach ($layout as $row) {
                     if ($cursor >= $total)
                         break;
                     $cols = max(1, min(3, (int) $row['columns']));
-                    $rowFields = array_slice($fields, $cursor, $cols);
+                    $rowFields = array_slice($renderFields, $cursor, $cols);
                     $cursor += count($rowFields);
                     $blade .= "<div class=\"grid md:grid-cols-{$cols} gap-4 mt-4\">\n";
                     foreach ($rowFields as $field) {
@@ -243,11 +279,124 @@ class SchemewiseStoreDataJsonHelper
                     }
                     $blade .= "</div>\n";
                 }
-            }
-            while ($cursor < $total) {
-                $field = $fields[$cursor++];
-                $blade .= "<div class=\"grid md:grid-cols-1 gap-4 mt-4\">\n";
-                $blade .= self::renderField($field);
+
+                if ($cursor < $total) {
+                    while ($cursor < $total) {
+                        $field = $renderFields[$cursor++];
+                        $blade .= "<div class=\"grid md:grid-cols-1 gap-4 mt-4\">\n";
+                        $blade .= self::renderField($field);
+                        $blade .= "</div>\n";
+                    }
+                }
+
+                if ($isCurrentAddress) {
+                    $blade .= <<<HTML
+                    <div class="mt-8 mb-4 p-4 bg-gray-50 border-y border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">Current Address</h3>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" x-model="sameAsPermanent" class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm font-medium text-gray-700">Same as Permanent Address</span>
+                        </label>
+                    </div>
+                    HTML;
+
+
+                    // Filter fields that are marked as syncable
+                    $totalSync = count($syncableFields);
+
+                    $cursor = 0;
+                    foreach ($layout as $row) {
+                        if ($cursor >= $totalSync)
+                            break;
+                        $cols = max(1, min(3, (int) $row['columns']));
+                        $rowFields = array_slice($syncableFields, $cursor, $cols);
+                        $cursor += count($rowFields);
+                        $blade .= "<div class=\"grid md:grid-cols-{$cols} gap-4 mt-4\">\n";
+                        foreach ($rowFields as $field) {
+                            $curName = 'cur_' . $field['field_name'];
+                            $curField = collect($fields)->firstWhere('field_name', $curName);
+                            if ($curField) {
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            } else {
+                                $curField = $field;
+                                $curField['field_name'] = $curName;
+                                $curField['db_column'] = 'other_details';
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            }
+                        }
+                        $blade .= "</div>\n";
+                    }
+                    if ($cursor < $totalSync) {
+                        while ($cursor < $totalSync) {
+                            $field = $syncableFields[$cursor++];
+                            $blade .= "<div class=\"grid md:grid-cols-1 gap-4 mt-4\">\n";
+                            $curName = 'cur_' . $field['field_name'];
+                            $curField = collect($fields)->firstWhere('field_name', $curName);
+                            if ($curField) {
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            } else {
+                                $curField = $field;
+                                $curField['field_name'] = $curName;
+                                $curField['db_column'] = 'other_details';
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            }
+                            $blade .= "</div>\n";
+                        }
+                    }
+                }
+                $blade .= "</div>\n";
+            } else {
+                // No layout saved, default grid
+                $blade .= "<div x-data=\"{ sameAsPermanent: false, formData: @entangle('formData').live, sync() { if(this.sameAsPermanent) { ";
+                foreach ($syncableFields as $field) {
+                    $name = $field['field_name'];
+                    $blade .= "this.formData.cur_{$name} = this.formData.{$name}; ";
+                }
+                $blade .= "this.\$nextTick(() => { setTimeout(() => { document.querySelectorAll('[name^=\\'cur_\\']').forEach(el => delete el.dataset.loaded); if(typeof window.initMasterData === 'function') window.initMasterData(); }, 100); }); ";
+                $blade .= " } } }\" x-init=\"\$watch('sameAsPermanent', v => sync()); ";
+                foreach ($syncableFields as $field) {
+                    $name = $field['field_name'];
+                    $blade .= "\$watch('formData.{$name}', v => { if(sameAsPermanent) sync(); }); ";
+                }
+                $blade .= "\">\n";
+
+                $blade .= "<div class=\"grid md:grid-cols-2 gap-4 mt-4\">\n";
+                foreach ($renderFields as $field) {
+                    $blade .= self::renderField($field);
+                }
+                $blade .= "</div>\n";
+
+                if ($isCurrentAddress) {
+                    $blade .= <<<HTML
+                    <div class="mt-8 mb-4 p-4 bg-gray-50 border-y border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">Current Address</h3>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" x-model="sameAsPermanent" class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm font-medium text-gray-700">Same as Permanent Address</span>
+                        </label>
+                    </div>
+                    HTML;
+                    $blade .= "<div class=\"grid md:grid-cols-2 gap-4 mt-4\">\n";
+                        foreach ($syncableFields as $field) {
+                            $curName = 'cur_' . $field['field_name'];
+                            $curField = collect($fields)->firstWhere('field_name', $curName);
+                            if ($curField) {
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            } else {
+                                $curField = $field;
+                                $curField['field_name'] = $curName;
+                                $curField['db_column'] = 'other_details';
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            }
+                        }
+                    $blade .= "</div>\n";
+                }
                 $blade .= "</div>\n";
             }
             File::put("{$dir}/{$tabCode}.blade.php", $blade);
@@ -266,13 +415,17 @@ class SchemewiseStoreDataJsonHelper
         $dynamicAttr = self::generateDynamicInputLogic($name, $validation, $regex);
         if ($name === 'ifscode' || $name === 'ifsc_code') {
             $wireModelMode = 'wire:model.live';
-        } elseif (str_contains($validation, 'digits') || str_contains($validation, 'size')) {
+        } 
+        // বাকি যেসব ফিল্ডে digits বা size আছে সেগুলোতে .blur হবে
+        elseif (str_contains($validation, 'digits') || str_contains($validation, 'size')) {
             $wireModelMode = 'wire:model.blur';
-        } else {
+        } 
+        // অন্য সব সাধারণ ফিল্ডে .live থাকবে
+        else {
             $wireModelMode = 'wire:model.live';
         }
         $isConfirmField = false;
-        $isEdit = false;
+$isEdit = false;
         if (!empty($field['validation_rule'])) {
             $rules = explode('|', $field['validation_rule']);
             $isRequired = in_array('required', $rules, true);
@@ -299,8 +452,14 @@ class SchemewiseStoreDataJsonHelper
         }
 
         $requiredAttr = $isRequired ? 'required' : '';
-        $isReadonly = !empty($field['is_readonly']) && (int) $field['is_readonly'] === 1;
-        $readonlyAttr = $isReadonly ? 'readonly' : '';
+        $isReadonly = !empty($field['is_readonly']);
+        $readonlyVal = $field['is_readonly'] ?? 0;
+
+        if (is_string($readonlyVal) && $readonlyVal === 'sameAsPermanent') {
+            $readonlyAttr = '::readonly="sameAsPermanent" ::disabled="sameAsPermanent"';
+        } else {
+            $readonlyAttr = ((int)$readonlyVal === 1) ? 'readonly' : '';
+        }
         $disabledAttr = in_array($name, ['ds_registration_no', 'application_type', 'ds_date']) ? ':disabled="$isEdit"' : '';
         $ignore = !empty($field['field_class']);
         $wireIgnore = $ignore ? 'wire:ignore' : '';
@@ -352,44 +511,6 @@ class SchemewiseStoreDataJsonHelper
             $wireKey = 'wire:key="field-dep-' . $name . '"';
         } else {
             $wireKey = 'wire:key="field-norm-' . $name . '"';
-        }
-
-        $hasPlaceholder = str_contains($label, '[[input]]');
-        $parts = $hasPlaceholder ? explode('[[input]]', $label) : [$label, ''];
-        $before = $parts[0];
-        $after = $parts[1] ?? '';
-
-        if ($hasPlaceholder) {
-            $inputHtml = '';
-            switch ($type) {
-                case 'select':
-                    $optionsHtml = '';
-                    foreach (($field['options'] ?? []) as $key => $optionlabel) {
-                        $key = e($key);
-                        $optionlabel = e($optionlabel);
-                        $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
-                    }
-                    $inputHtml = "<select name=\"{$name}\" {$wireModelMode}=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-indigo-500 focus:border-indigo-500 inline-block w-auto mx-1\"><option value=\"\">-- Select --</option>{$optionsHtml}</select>";
-                    break;
-                case 'checkbox':
-                    $inputHtml = "<input type=\"checkbox\" name=\"{$name}\" value=\"{$value}\" {$wireModelMode}=\"formData.{$name}\" class=\"mx-1\" />";
-                    break;
-                case 'number':
-                    $inputHtml = "<input type=\"number\" name=\"{$name}\" {$wireModelMode}=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-indigo-500 focus:border-indigo-500 inline-block w-auto mx-1\" placeholder=\"{$placeholder}\" />";
-                    break;
-                default:
-                    $inputHtml = "<input type=\"text\" name=\"{$name}\" {$wireModelMode}=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-indigo-500 focus:border-indigo-500 inline-block w-auto mx-1\" placeholder=\"{$placeholder}\" {$dynamicAttr} />";
-                    break;
-            }
-
-            return <<<BLADE
-            <div {$xData} {$xShow} {$xCloak} {$wireKey} class="flex flex-wrap items-center gap-1 text-gray-700">
-                <span>{$before}</span>
-                {$inputHtml}
-                <span>{$after}</span>
-                <x-form.error name="formData.{$name}" />
-            </div>
-            BLADE;
         }
 
         switch ($type) {
@@ -550,39 +671,38 @@ class SchemewiseStoreDataJsonHelper
             }
         }
 
-        $levelName = $field->level_name;
-        $hasPlaceholder = str_contains($levelName, '[[input]]');
-        $parts = $hasPlaceholder ? explode('[[input]]', $levelName) : [$levelName, ''];
-        $before = $parts[0];
-        $after = $parts[1] ?? '';
-
-        $inputHtml = '';
         switch ($type) {
+
+            /* ===== NUMBER ===== */
             case 'number':
-                $inputHtml = <<<BLADE
-                <x-form.input
-                    type="number"
-                    name="{$name}"
-                    label=""
-                    placeholder="{$placeholder}"
-                    wire:model.live="formData.{$name}"
-                    class="inline-block w-auto"
-                />
+                return <<<BLADE
+                <div class="{$paddingClass}">
+                    <x-form.input
+                        type="number"
+                        name="{$name}"
+                        label="{$label}"
+                        placeholder="{$placeholder}"
+                        wire:model.live="formData.{$name}"
+                    />
+                </div>
                 BLADE;
-                break;
 
+                /* ===== TEXTAREA ===== */
             case 'textarea':
-                $inputHtml = <<<BLADE
-                <x-form.textarea
-                    name="{$name}"
-                    label=""
-                    placeholder="{$placeholder}"
-                    wire:model.live="formData.{$name}"
-                />
+                return <<<BLADE
+                <div class="{$paddingClass}">
+                    <x-form.textarea
+                        name="{$name}"
+                        label="{$label}"
+                        placeholder="{$placeholder}"
+                        wire:model.live="formData.{$name}"
+                    />
+                </div>
                 BLADE;
-                break;
 
+                /* ===== SELECT ===== */
             case 'select':
+
                 $optionsHtml = '';
                 foreach ($options as $key => $text) {
                     if (is_int($key)) {
@@ -590,133 +710,85 @@ class SchemewiseStoreDataJsonHelper
                     }
                     $key = e($key);
                     $text = e($text);
+
                     $optionsHtml .= "<option value=\"{$key}\">{$text}</option>\n";
                 }
-                $inputHtml = <<<BLADE
-                <x-form.select
-                    name="{$name}"
-                    label=""
-                    wire:model.live="formData.{$name}"
-                    class="inline-block w-auto mx-1"
-                >
-                    <option value="">-- Select --</option>
-                    {$optionsHtml}
-                </x-form.select>
-                BLADE;
-                break;
 
+                return <<<BLADE
+                <div class="{$paddingClass}">
+                    <x-form.select
+                        name="{$name}"
+                        label="{$label}"
+                        wire:model.live="formData.{$name}"
+                    >
+                        <option value="">-- Select {$label} --</option>
+                        {$optionsHtml}
+                    </x-form.select>
+                </div>
+                BLADE;
+
+                /* ===== RADIO ===== */
             case 'radio':
+
                 $radioHtml = '';
                 foreach ($options as $key => $text) {
                     if (is_int($key)) {
                         $key = $text;
                     }
+
                     $key = e($key);
                     $text = e($text);
+
                     $radioHtml .= <<<HTML
                     <label class="flex items-center gap-2">
-                        <input type="radio" name="{$name}" value="{$key}" wire:model.live="formData.{$name}" />
+                        <input
+                            type="radio"
+                            name="{$name}"
+                            value="{$key}"
+                            wire:model.live="formData.{$name}"
+                        />
                         {$text}
                     </label>
                     HTML;
                 }
-                $inputHtml = <<<HTML
-                <div class="flex flex-wrap gap-4 inline-flex">
-                    {$radioHtml}
-                </div>
-                HTML;
-                break;
 
-            case 'checkbox':
-                $inputHtml = <<<BLADE
-                <x-form.checkbox
-                    name="{$name}"
-                    label="{$label}"
-                    value="{$value}"
-                    wire:model.live="formData.{$name}"
-                />
+                return <<<BLADE
+                <div class="{$paddingClass}">
+                    <label class="block font-medium text-gray-700 mb-1">{$label}</label>
+                    <div class="flex flex-wrap gap-4">
+                        {$radioHtml}
+                    </div>
+                </div>
                 BLADE;
-                break;
 
-            case 'label':
-            case 'heading':
-                return <<<HTML
-                <div class="{$paddingClass} mt-4 mb-2">
-                    <span class="text-lg font-semibold text-gray-800">{!! $label !!}</span>
+                /* ===== CHECKBOX ===== */
+            case 'checkbox':
+                return <<<BLADE
+                <div class="{$paddingClass}">
+                    <x-form.checkbox
+                        name="{$name}"
+                        label="{$label}"
+                        value="{$value}"
+                        wire:model.live="formData.{$name}"
+                    />
                 </div>
-                HTML;
+                BLADE;
 
+                /* ===== DEFAULT TEXT ===== */
             default:
-                $inputHtml = <<<BLADE
+                return <<<BLADE
+            <div class="{$paddingClass}">
                 <x-form.input
                     type="text"
                     name="{$name}"
-                    label=""
+                    label="{$label}"
                     placeholder="{$placeholder}"
                     wire:model.live="formData.{$name}"
                     {$dynamicAttr}
-                    class="inline-block w-auto"
                 />
-                BLADE;
-                break;
-        }
-
-        if ($hasPlaceholder) {
-            $rawInputHtml = '';
-            switch ($type) {
-                case 'number':
-                    $rawInputHtml = "<input type=\"number\" name=\"{$name}\" wire:model.live=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-indigo-500 focus:border-indigo-500 inline-block w-auto mx-1\" placeholder=\"{$placeholder}\" />";
-                    break;
-                case 'select':
-                    $optionsHtml = '';
-                    foreach ($options as $key => $text) {
-                        if (is_int($key)) {
-                            $key = $text;
-                        }
-                        $key = e($key);
-                        $text = e($text);
-                        $optionsHtml .= "<option value=\"{$key}\">{$text}</option>\n";
-                    }
-                    $rawInputHtml = "<select name=\"{$name}\" wire:model.live=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-indigo-500 focus:border-indigo-500 inline-block w-auto mx-1\"><option value=\"\">-- Select --</option>{$optionsHtml}</select>";
-                    break;
-                case 'radio':
-                    $radioHtml = '';
-                    foreach ($options as $key => $text) {
-                        if (is_int($key)) {
-                            $key = $text;
-                        }
-                        $key = e($key);
-                        $text = e($text);
-                        $radioHtml .= "<label class=\"inline-flex items-center gap-1 mx-1\"><input type=\"radio\" name=\"{$name}\" value=\"{$key}\" wire:model.live=\"formData.{$name}\" /> {$text}</label>";
-                    }
-                    $rawInputHtml = $radioHtml;
-                    break;
-                case 'checkbox':
-                    $rawInputHtml = "<input type=\"checkbox\" name=\"{$name}\" value=\"{$value}\" wire:model.live=\"formData.{$name}\" class=\"mx-1\" />";
-                    break;
-                default:
-                    $rawInputHtml = "<input type=\"text\" name=\"{$name}\" wire:model.live=\"formData.{$name}\" class=\"border border-gray-300 rounded-lg p-1 focus:ring-indigo-500 focus:border-indigo-500 inline-block w-auto mx-1\" placeholder=\"{$placeholder}\" {$dynamicAttr} />";
-                    break;
-            }
-
-            return <<<BLADE
-            <div class="{$paddingClass} flex flex-wrap items-center gap-1 text-gray-700">
-                <span>{$before}</span>
-                {$rawInputHtml}
-                <span>{$after}</span>
-                <x-form.error name="formData.{$name}" />
             </div>
             BLADE;
         }
-
-        return <<<BLADE
-        <div class="{$paddingClass}">
-            @if(!in_array('{$type}', ['label', 'heading', 'checkbox']))
-                <label class="block font-medium text-gray-700 mb-1">{$label}</label>
-            @endif
-            {$inputHtml}
-        </div>
-        BLADE;
     }
 
     private static function generateDynamicInputLogic(string $name, ?string $validation, ?string $regex): string

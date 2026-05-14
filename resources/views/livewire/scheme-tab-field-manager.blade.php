@@ -481,22 +481,44 @@
                         :tab_code="$activeTabCode" />
                     @else
                     {{-- OTHER TABS --}}
+                    @if($activeTabCode == 102)
+                    <div class="mb-4 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" wire:model.live="isCurrentAddress" class="w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
+                            <span class="text-sm font-bold text-indigo-900">Include "Current Address" (Same as Permanent Address)</span>
+                        </label>
+                        @error('isSyncableSelected')
+                        <div class="mt-2 text-xs font-bold text-red-600">
+                            <i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}
+                        </div>
+                        @enderror
+                    </div>
+                    @endif
+
                     <div class="grid grid-cols-2 gap-3">
                         @foreach($modalFields as $field)
-                        <label class="flex gap-3 items-center p-3 rounded border
-                                                            {{ $field['is_mandatory']
-                                ? 'border-green-300 bg-green-50'
-                                : 'bg-gray-50 border-gray-200' }}">
-
-                            <input type="checkbox" wire:model="modalSelected" value="{{ $field['field_id'] }}"
-                                @if($field['is_mandatory'] && $field['tab_code'] !=0) disabled @endif>
-                            <span>
-                                {{ $field['field_name'] }}
-                                @if($field['is_mandatory'])
-                                <span class="text-red-500 font-bold">*</span>
-                                @endif
-                            </span>
-                        </label>
+                        <div class="flex flex-col p-3 rounded border {{ $field['is_mandatory'] ? 'border-green-300 bg-green-50' : 'bg-gray-50 border-gray-200' }}">
+                            <label class="flex gap-3 items-center cursor-pointer">
+                                <input type="checkbox" wire:model.live="modalSelected" value="{{ $field['field_id'] }}"
+                                    @if($field['is_mandatory'] && $field['tab_code'] !=0) disabled @endif>
+                                <span class="text-sm font-medium">
+                                    {{ $field['field_name'] }}
+                                    @if($field['is_mandatory'])
+                                    <span class="text-red-500 font-bold">*</span>
+                                    @endif
+                                </span>
+                            </label>
+                            
+                            @if($activeTabCode == 102 && $isCurrentAddress)
+                            <div class="mt-2 ml-8 flex items-center gap-2 border-t pt-2 border-gray-200 {{ !in_array($field['field_id'], $modalSelected) ? 'opacity-50 cursor-not-allowed' : '' }}">
+                                <input type="checkbox" wire:model="isSyncableSelected" value="{{ (string)$field['field_id'] }}" 
+                                    id="sync_{{ $field['field_id'] }}" 
+                                    @if(!in_array($field['field_id'], $modalSelected)) disabled @endif
+                                    class="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500">
+                                <label for="sync_{{ $field['field_id'] }}" class="text-xs font-bold text-orange-700 cursor-pointer uppercase">Sync</label>
+                            </div>
+                            @endif
+                        </div>
                         @endforeach
                     </div>
                     @endif

@@ -92,7 +92,7 @@ class DupAadhaarCheck extends Component
                             return [
                                 'status' => 'duplicate',
                                 'message' => $this->error,
-                                'ds_entry' => WorkFlowPermissionHelper::canDuareSarkarEntryAllow()
+                                'ds_entry' => WorkFlowPermissionHelper::canDuareSarkarEntryAllow($this->schemeId)
                             ];
                         }
                     } if ($config->is_cross && !empty($config->scheme_lists)) {
@@ -107,7 +107,8 @@ class DupAadhaarCheck extends Component
                             $this->dispatch('hideLoader');
                             return [
                                 'status' => 'duplicate',
-                                'message' => $this->error
+                                'message' => $this->error,
+                                'ds_entry' => WorkFlowPermissionHelper::canDuareSarkarEntryAllow($this->schemeId)
                             ];
                         }
                     }
