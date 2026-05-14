@@ -105,6 +105,11 @@ class DynamicForm extends Component
         if (!WorkFlowPermissionHelper::canEntry($schemeId)) {
             abort(403, 'You are not authorized to create entry.');
         }
+        
+        if (!WorkFlowPermissionHelper::canCreateEntry($schemeId)) {
+            abort(403, 'You are not authorized for any application type entry.');
+        }
+
         $this->loadAppTypeOptions();
         $this->loadScheme($schemeId);
 
@@ -184,6 +189,14 @@ class DynamicForm extends Component
     private function checkApplicationTypePermission(): bool
     {
         $type = $this->formData['application_type'] ?? null;
+
+        if (empty($type)) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Application type is required or not authorized.'
+            ]);
+            return false;
+        }
 
         if ($type == 1 && !WorkFlowPermissionHelper::canNormalEntryAllow($this->schemeId)) {
 
