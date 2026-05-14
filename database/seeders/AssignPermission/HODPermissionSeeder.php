@@ -17,6 +17,7 @@ class HODPermissionSeeder extends Seeder
     {
         $permissions = [
             'sarasori-mukhyamantri',
+            'cmo-grievance-mark',
         ];
 
         // 1️⃣ Find Role

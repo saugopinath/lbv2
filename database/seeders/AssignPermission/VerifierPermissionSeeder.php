@@ -43,6 +43,8 @@ class VerifierPermissionSeeder extends Seeder
             'Normal Entry Revert Allow',
             'back-from-jb',
             'back-from-jb-verifier-button',
+            'sarasori-mukhyamantri',
+            'cmo-grievance-mark',
         ];
 
         // 1) find role

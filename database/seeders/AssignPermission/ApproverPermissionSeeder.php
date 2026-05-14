@@ -68,6 +68,8 @@ class ApproverPermissionSeeder extends Seeder
             'manage-schemes',
             'back-from-jb',
             'back-from-jb-approver-button',
+            'sarasori-mukhyamantri',
+            'cmo-grievance-mark',
         ];
         try {
             $role = Role::findByName('Approver');
