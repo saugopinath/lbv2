@@ -25,6 +25,7 @@ use Throwable;
 use App\Attributes\Loggable;
 use App\Models\CmoSmData;
 use App\Models\DsPhase;
+use Illuminate\Validation\ValidationException;
 
 #[Loggable(level: 'Normal', nickname: 'Dynamic Form Entry')]
 
@@ -413,44 +414,56 @@ class DynamicForm extends Component
                 $tabCode !== $this->activeTab &&
                 !in_array($tabCode, $this->completedTabs, true)
             ) {
+                $this->dispatch('hideLoader');
                 return;
             }
         }
 
         $this->activeTab = $tabCode;
         $this->updateTabNavigation();
+        $this->dispatch('hideLoader');
     }
     #[Loggable(level: 'Moderate', nickname: 'Save Application details')]
     public function saveAndNext($nextTab)
     {
         if ((string) $this->activeTab === '104') {
             $this->dispatch('check-documents-before-next');
-
+            $this->dispatch('hideLoader');
             return;
         }
         $rules = $this->getValidationRulesForActiveTab();
-        if (!empty($rules)) {
-            $this->validate($rules);
+        
+        try {
+            if (!empty($rules)) {
+                $this->validate($rules);
+            }
+        } catch (ValidationException $e) {
+            $this->dispatch('hideLoader');
+            throw $e;
         }
 
         if ($this->isFirst) {
 
             if (!$this->checkApplicationTypePermission()) {
+                $this->dispatch('hideLoader');
                 return;
             }
 
             if (!$this->checkCapacity()) {
+                $this->dispatch('hideLoader');
                 return;
             }
         }
         $this->ensureApplicationIds();
         if (!$this->checkDuplicateEntries()) {
+            $this->dispatch('hideLoader');
             return;
         }
 
         $saved = $this->saveCurrentTabData();
 
         if ($saved !== true) {
+            $this->dispatch('hideLoader');
             return;
         }
         $this->markTabCompleted($this->activeTab);
@@ -459,6 +472,7 @@ class DynamicForm extends Component
             $this->activeTab = (string) $nextTab;
             $this->updateTabNavigation();
         }
+        $this->dispatch('hideLoader');
     }
 
     public function onDocumentTabPassed()
@@ -475,7 +489,7 @@ class DynamicForm extends Component
                 tabsData: $tabsData,
                 schemeId: $this->schemeId
             );
-
+            $this->dispatch('hideLoader');
             return;
         }
 
@@ -483,9 +497,12 @@ class DynamicForm extends Component
             $this->activeTab = (string) $this->nextTab;
             $this->updateTabNavigation();
         }
+        $this->dispatch('hideLoader');
     }
 
-    public function onDocumentTabFailed() {}
+    public function onDocumentTabFailed() {
+        $this->dispatch('hideLoader');
+    }
 
     private function markTabCompleted(string $tabCode): void
     {
@@ -501,22 +518,29 @@ class DynamicForm extends Component
     {
 
         if (!$this->isLast) {
+            $this->dispatch('hideLoader');
             return;
         }
         if (!$this->checkCapacity()) {
+            $this->dispatch('hideLoader');
             return;
         }
 
         if ((string) $this->activeTab === '104') {
             $this->dispatch('check-documents-before-next');
-
+            $this->dispatch('hideLoader');
             return;
         }
 
         $rules = $this->getValidationRulesForActiveTab();
 
-        if (!empty($rules)) {
-            $this->validate($rules);
+        try {
+            if (!empty($rules)) {
+                $this->validate($rules);
+            }
+        } catch (ValidationException $e) {
+            $this->dispatch('hideLoader');
+            throw $e;
         }
 
         $this->ensureApplicationIds();
@@ -525,6 +549,7 @@ class DynamicForm extends Component
         $tabsData = $this->prepareTabsReviewData();
 
         if (!$this->checkDuplicateEntries()) {
+            $this->dispatch('hideLoader');
             return;
         }
 
@@ -534,6 +559,7 @@ class DynamicForm extends Component
             tabsData: $tabsData,
             schemeId: $this->schemeId
         );
+        $this->dispatch('hideLoader');
     }
 
     private function prepareTabsReviewData()

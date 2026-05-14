@@ -12,7 +12,7 @@
             @foreach ($views as $view)
                 @php $tab = $tabs[$view] ?? null; @endphp
 
-                <button wire:click="setActiveTab({{ $view }})"
+                <button wire:click="setActiveTab({{ $view }})" x-on:click="Livewire.dispatch('showLoader')"
                     class="flex items-center gap-2 pb-2 text-sm font-medium
                                                                                 {{ $activeTab == $view
                                                                                     ? 'border-indigo-600 text-indigo-600'
@@ -77,7 +77,7 @@
                     {{-- LEFT --}}
                     <div>
                         @if (!$isFirst && $prevTab)
-                            <button wire:click="setActiveTab({{ $prevTab }})"
+                            <button wire:click="setActiveTab({{ $prevTab }})" x-on:click="Livewire.dispatch('showLoader')"
                                 class="px-4 py-2 bg-gray-500 text-white rounded">
                                 Previous
                             </button>
@@ -87,12 +87,12 @@
                     {{-- RIGHT --}}
                     <div class="flex gap-2">
                         @if (!$isLast && $nextTab)
-                            <button wire:click="saveAndNext({{ $nextTab }})"
+                            <button wire:click="saveAndNext({{ $nextTab }})" x-on:click="Livewire.dispatch('showLoader')"
                                 class="px-4 py-2 bg-indigo-600 text-white rounded">
                                 Save & Next
                             </button>
                         @else
-                            <button wire:click="finalSubmit" class="px-4 py-2 bg-green-600 text-white rounded">
+                            <button wire:click="finalSubmit" x-on:click="Livewire.dispatch('showLoader')" class="px-4 py-2 bg-green-600 text-white rounded">
                                 Submit
                             </button>
                         @endif
