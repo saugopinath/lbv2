@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\CheckAuthHelper;
 use App\Helpers\WorkFlowPermissionHelper;
+use App\Models\AgeManagements;
 use App\Models\BackFromJb;
 use App\Models\Codemaster;
 use Illuminate\Http\Request;
@@ -45,6 +46,15 @@ class BackFromJBController extends Controller
 
     public function backfromjbactions(Request $request)
     {
+        $app_id = Crypt::decryptString($request->id);
+        $record = BackFromJb::with([
+            'beneficiary',
+        ])->find($app_id);
+        if (!$record) {
+            return redirect()->back()->with('error', 'Record not found.');
+        }
+        $this->setDOBLimits($record->beneficiary->scheme_id);
+
         if ($request->isMethod('post')) {
             $messages = [
                 'new_dob.*' => "Date of birth must be between {$this->minDOB} and {$this->maxDOB}.",
@@ -64,12 +74,8 @@ class BackFromJBController extends Controller
             $validator->validate();
             DB::beginTransaction();
             try {
-                $app_id = Crypt::decryptString($request->id);
                 $new_dob = $request->new_dob;
                 $action = $request->action;
-                $record = BackFromJb::with([
-                    'beneficiary',
-                ])->find($app_id);
                 $msg = '';
                 if ($action == 'verify_and_forward_to_approver' && CheckAuthHelper::isCommmonVerifier()) {
                     $record->new_dob = $new_dob;
@@ -93,10 +99,7 @@ class BackFromJBController extends Controller
                 return redirect()->back();
             }
         }
-        $applicant_details['applicationId'] = Crypt::decryptString($request->id);
-        $record = BackFromJb::with([
-            'beneficiary',
-        ])->find($applicant_details['applicationId']);
+        $applicant_details['applicationId'] = $app_id;
         $applicant_details['jb_poposed_dob_show'] = Carbon::parse($record->jb_poposed_dob)->format('d-m-Y');
         $applicant_details['new_dob'] = Carbon::parse($record->new_dob)->format('d-m-Y');
         $applicant_details['jb_poposed_dob'] = $record->jb_poposed_dob;
@@ -122,5 +125,18 @@ class BackFromJBController extends Controller
         }
 
         return view('backfromjb.applicantDetails', compact('applicant_details', 'role', 'btnAction', 'btnActionText'));
+    }
+
+    private function setDOBLimits($schemeId)
+    {
+        $ageConfig = AgeManagements::where('scheme_id', $schemeId)->first();
+        if ($ageConfig) {
+            if ($ageConfig->max_age) {
+                $this->minDOB = now()->subYears($ageConfig->max_age)->format('Y-m-d');
+            }
+            if ($ageConfig->min_age) {
+                $this->maxDOB = now()->subYears($ageConfig->min_age)->format('Y-m-d');
+            }
+        }
     }
 }
