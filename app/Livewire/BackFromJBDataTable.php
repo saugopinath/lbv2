@@ -141,9 +141,9 @@ class BackFromJBDataTable extends DataTableComponent
                 ->label(fn($row) => $row->beneficiary->other_details['mobile_no']
                     ?? 'N/A'),
 
-            Column::make("Address", "Address")
-                ->label(fn($row) => $row->beneficiary->contact->getFullAddress() ?? 'N/A')
-                ->html(),
+            // Column::make("Address", "Address")
+            //     ->label(fn($row) => $row->beneficiary->contact->getFullAddress() ?? 'N/A')
+            //     ->html(),
 
             Column::make("Action")
                 ->label(function ($row) {

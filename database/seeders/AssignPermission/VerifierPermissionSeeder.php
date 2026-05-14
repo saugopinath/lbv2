@@ -40,7 +40,9 @@ class VerifierPermissionSeeder extends Seeder
             'Bulk Actions Normal Entry Verification Allow',
             'Normal Entry Verification Allow',
             'Normal Entry Reject Allow',
-            'Normal Entry Revert Allow'
+            'Normal Entry Revert Allow',
+            'back-from-jb',
+            'back-from-jb-verifier-button',
         ];
 
         // 1) find role

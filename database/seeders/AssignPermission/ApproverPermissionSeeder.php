@@ -66,6 +66,8 @@ class ApproverPermissionSeeder extends Seeder
             'manage-users',
             'manage-departments',
             'manage-schemes',
+            'back-from-jb',
+            'back-from-jb-approver-button',
         ];
         try {
             $role = Role::findByName('Approver');

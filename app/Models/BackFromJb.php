@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BackFromJb extends Model
+class BackFromJb extends BaseAuditableModel
 {
     protected $table = 'pension.back_from_jbs';
     protected $primaryKey = 'application_id';

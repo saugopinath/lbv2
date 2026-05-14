@@ -110,6 +110,7 @@ class BackFromJBController extends Controller
         $applicant_details['fatherName'] = $record->beneficiary->ben_father_name;
         $role = '';
         $btnAction = '';
+        $btnActionText = '';
         if (CheckAuthHelper::isCommmonVerifier() && WorkFlowPermissionHelper::canBackFromJbVerifierButton()) {
             $role = 'verifier';
             $btnAction = 'verify_and_forward_to_approver';

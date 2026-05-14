@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\BackFromJb;
 use App\Models\Codemaster;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\AcceptRejectInfo;
+use App\Models\BeneficiaryPersonalDetail;
 class AuthController extends Controller
 {
     public function login(Request $request)
@@ -85,11 +86,31 @@ class AuthController extends Controller
         ]);
         DB::beginTransaction();
         try {
+            $targatedModel = BeneficiaryPersonalDetail::find($validated['lb_application_id']);
+            if(!$targatedModel){
+                return response()->json([
+                    'error' => 'Data not found',
+                    'is_success' => false,
+                ], 404);
+            }
             $backFromJb = new BackFromJb();
             $backFromJb->application_id = $validated['lb_application_id'];
             $backFromJb->jb_poposed_dob = $validated['jb_poposed_dob'];
             $backFromJb->next_level_role_id = Codemaster::getIdByCode(4401);
             $backFromJb->save();
+            $AcceptRejectInfo = new AcceptRejectInfo;
+            $AcceptRejectInfo->application_id = $targatedModel->application_id;
+            $AcceptRejectInfo->beneficiary_id = $targatedModel->beneficiary_id;
+            $AcceptRejectInfo->ip_address = request()->ip();
+            $AcceptRejectInfo->scheme_id = $targatedModel->scheme_id;
+            $AcceptRejectInfo->user_id = 1;
+            $AcceptRejectInfo->browser = request()->header('User-Agent');
+            $AcceptRejectInfo->model_name = null;
+            $AcceptRejectInfo->op_type = 123;
+            $AcceptRejectInfo->revert_reason_cause_id = null;
+            $AcceptRejectInfo->revert_reason_remarks = null;
+            $AcceptRejectInfo->parent_id = null;
+            $AcceptRejectInfo->save();
             DB::commit();
             return response()->json([
                 'is_sendtolb' => true,
