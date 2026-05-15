@@ -119,9 +119,12 @@ class MasterTabCreate extends Component
 
     public function updatedTabName($value): void
     {
+        // dd($value);
+        $rawVal = $value;
+        $value = trim(preg_replace('/\(.*?\)/', '', $value));
         $this->model_name = Str::studly(Str::singular($value));
         $this->table_name = Str::snake(Str::pluralStudly($value));
-        $this->tab_short_name = Str::snake($value);
+        $this->tab_short_name = Str::snake($rawVal);
         $this->tab_code = MasterTab::max('tab_code') + 1;
         if ($this->model_name) {
             $checkModelName = MasterTab::where('tab_model_name', $this->model_name)->first();
@@ -516,7 +519,7 @@ class MasterTabCreate extends Component
     public function finalSubmit(DynamicModelMigrationService $service)
     {
         $this->is_append_multiple = $this->is_append_multiple === 'yes' ? 'yes' : 'no';
-
+        // dd($this->tab_name, $this->fields, $this->model_name);
         try {
             DB::beginTransaction();
 

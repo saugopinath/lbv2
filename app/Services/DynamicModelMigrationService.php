@@ -10,8 +10,9 @@ class DynamicModelMigrationService
 {
     public function generate(string $tabName, array $fields, string $isAppendMultiple): void
     {
+        $tabName = trim(preg_replace('/\(.*?\)/', '', $tabName));
         $model = Str::studly(Str::singular($tabName));
-        $table = Str::snake($tabName);
+        $table = Str::snake(Str::pluralStudly($tabName));
         $modelPath = app_path("Models/{$model}.php");
         $isAppendMultiple = $isAppendMultiple === 'yes' ? 'yes' : 'no';
 
@@ -21,7 +22,6 @@ class DynamicModelMigrationService
         $this->writeMigration($table, $fields, $isAppendMultiple);
         $this->updateModel($modelPath, $table, $fields);
         Artisan::call('migrate', ['--force' => false]);
-
     }
 
     private function getSchema(): string

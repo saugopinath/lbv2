@@ -217,11 +217,18 @@
                         Export
                     </button> -->
                     <button wire:click="finalSubmit"
-                        class="inline-flex items-center px-6 py-2 bg-green-600 border border-transparent rounded-lg font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        wire:loading.attr="disabled"
+                        wire:target="finalSubmit"
+                        class="inline-flex items-center px-6 py-2 bg-green-600 border border-transparent rounded-lg font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors disabled:opacity-75 disabled:cursor-not-allowed">
+                        <svg wire:loading.remove wire:target="finalSubmit" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Final Submit
+                        <svg wire:loading wire:target="finalSubmit" class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span wire:loading.remove wire:target="finalSubmit">Final Submit</span>
+                        <span wire:loading wire:target="finalSubmit">Please wait...</span>
                     </button>
                 </div>
             </div>
@@ -315,15 +322,15 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                                <x-form.input
-                                    name="level_name"
-                                    label="Level Name"
-                                    placeholder="Enter Level Name"
-                                    wire:model="level_name"
-                                    required />
-                                <p class="mt-1 text-xs text-indigo-600 font-medium italic">
-                                    Tip: Use <strong>[[input]]</strong> for inline input. Example: "I [[input]] hereby declare..."
-                                </p>
+                            <x-form.input
+                                name="level_name"
+                                label="Level Name"
+                                placeholder="Enter Level Name"
+                                wire:model="level_name"
+                                required />
+                            <p class="mt-1 text-xs text-indigo-600 font-medium italic">
+                                Tip: Use <strong>[[input]]</strong> for inline input. Example: "I [[input]] hereby declare..."
+                            </p>
 
                             <x-form.input
                                 name="field_name"
