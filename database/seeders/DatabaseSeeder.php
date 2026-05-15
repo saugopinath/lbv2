@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -41,6 +40,10 @@ class DatabaseSeeder extends Seeder
             ValidationFailedCodemasterSeeder::class,
             UpdateNextLevelRoleIdSeeder::class,
             OpTypeSeeder::class,
+            DsPhaseSeeder::class,
+            CmoAtrSeeder::class,
+            CmoRedressedStatusSeeder::class,
+            BackFromJBSeeder::class,
         ]);
     }
 }
