@@ -141,9 +141,9 @@ class BackFromJBDataTable extends DataTableComponent
                 ->label(fn($row) => $row->beneficiary->other_details['mobile_no']
                     ?? 'N/A'),
 
-            Column::make("Address", "Address")
-                ->label(fn($row) => $row->beneficiary->contact->getFullAddress() ?? 'N/A')
-                ->html(),
+            // Column::make("Address", "Address")
+            //     ->label(fn($row) => $row->beneficiary->contact->getFullAddress() ?? 'N/A')
+            //     ->html(),
 
             Column::make("Action")
                 ->label(function ($row) {
@@ -176,13 +176,26 @@ class BackFromJBDataTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $query = BackFromJb::with([
-            'beneficiary.contact'
-        ])->whereHas('beneficiary', function ($q) {
-            foreach ($this->filter_condition as $col => $val) {
-                $q->where($col, $val);
-            }
-        });
+        // $query = BackFromJb::with([
+        //     'beneficiary.contact'
+        // ])->whereHas('beneficiary', function ($q) {
+        //     foreach ($this->filter_condition as $col => $val) {
+        //         $q->where($col, $val);
+        //     }
+        // });
+
+        $query = BackFromJb::query()
+            ->select([
+                'application_id',
+                'next_level_role_id'
+            ])
+            ->with([
+                'beneficiary:application_id,beneficiary_name,other_details'
+            ])->whereHas('beneficiary', function ($q) {
+                foreach ($this->filter_condition as $col => $val) {
+                    $q->where($col, $val);
+                }
+            });
         if (!empty($this->next_level_role_id)) {
             $query->where('next_level_role_id', $this->next_level_role_id);
         }

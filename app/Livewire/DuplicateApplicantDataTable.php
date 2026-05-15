@@ -15,7 +15,7 @@ use App\Models\DsPhase;
 class DuplicateApplicantDataTable extends DataTableComponent
 {
     public ?int $perPage = 5;
-    public $key,$value;
+    public $key, $value;
     public function mount(): void {}
     public function configure(): void
     {
@@ -100,7 +100,7 @@ class DuplicateApplicantDataTable extends DataTableComponent
 
             $columns[] = Column::make("Actions")
                 ->label(function ($row) {
-                    if ($row->application_type == Codemaster::getIdByCode(41) || $row->ds_phase != DsPhase::where('is_current', true)->value('phase_code')) {
+                    if (empty($row->ds_registration_no) || $row->ds_phase != DsPhase::where('is_current', true)->value('phase_code')) {
                         $id = $row->application_id;
                         return view('coulmn_button.actions', [
                             'wireClick' => "\$dispatch('opendsMarkModal', { id: '$id' })",
@@ -120,24 +120,37 @@ class DuplicateApplicantDataTable extends DataTableComponent
     //     $benData = BeneficiaryCommonList::find($id);
     //     dd($benData);
     // }
-#[On('aadhaarCheckedds')]
-public function dsMark($benData)
-{
-    $this->key = key($benData);
-    $this->value = current($benData);
-}
-
-public function builder(): Builder
-{
-    $query = BeneficiaryPersonalDetail::with(['contact', 'aadhaar']);
-    if (!empty($this->value)) {
-        $query->whereHas('aadhaar', function ($q) {
-            $q->where('aadhaar_hash', $this->value);
-        });
+    #[On('aadhaarCheckedds')]
+    public function dsMark($benData)
+    {
+        $this->key = key($benData);
+        $this->value = current($benData);
     }
 
-    return $query;
-}
+    public function builder(): Builder
+    {
+        // $query = BeneficiaryPersonalDetail::with(['contact', 'aadhaar']);
+        // if (!empty($this->value)) {
+        //     $query->whereHas('aadhaar', function ($q) {
+        //         $q->where('aadhaar_hash', $this->value);
+        //     });
+        // }
+        $query = BeneficiaryPersonalDetail::query()
+            ->select([
+                'application_id',
+                'beneficiary_name',
+                'ben_father_name',
+                'other_details',
+                'ds_registration_no',
+                'ds_phase'
+            ]);
+        if (!empty($this->value)) {
+            $query->whereHas('aadhaar', function ($q) {
+                $q->where('aadhaar_hash', $this->value);
+            });
+        }
+        return $query;
+    }
 
     // public function builder(): Builder
     // {

@@ -24,7 +24,8 @@ class OperatorPermissionSeeder extends Seeder
             'view caste modification list',
             'edit caste',
             'update caste',
-
+'sarasori-mukhyamantri',
+            'cmo-grievance-mark',
         ];
 
         // 1) find role
