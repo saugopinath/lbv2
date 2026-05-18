@@ -26,7 +26,8 @@ class DynamicModelMigrationService
 
     private function getSchema(): string
     {
-        return config('database.connections.lb_scheme.schema', 'public');
+        $schema = 'pension';
+        return $schema;
     }
 
     /**
