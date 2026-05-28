@@ -299,7 +299,24 @@
                                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Name of Head of Family (HOF) * <br><span class="text-xs text-gray-500 font-normal">পরিবার প্রধানের নাম</span></label>
-                                        <input type="text" wire:model="formData.hof_name" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-data="{
+        val: @entangle('formData.hof_name'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.lettersOnly(this.val);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.name(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Letters/dots/spaces only' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                         @error('formData.hof_name') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
@@ -329,7 +346,24 @@
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Aadhaar of HOF * <br><span class="text-xs text-gray-500 font-normal">আধার নম্বর</span></label>
-                                        <input type="text" wire:model="formData.hof_aadhaar" maxlength="12" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-data="{
+        val: @entangle('formData.hof_aadhaar'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.numeric(this.val, 12);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.aadhaar(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Invalid checksum' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" maxlength="12" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 font-mono">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid Aadhaar</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                         @error('formData.hof_aadhaar') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
@@ -345,7 +379,24 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Contact No * <br><span class="text-xs text-gray-500 font-normal">যোগাযোগ নম্বর (মোবাইল)</span></label>
-                                        <input type="text" wire:model="formData.contact_no" maxlength="10" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-data="{
+        val: @entangle('formData.contact_no'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.numeric(this.val, 10);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.contact_no(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Must be 10 digits' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" maxlength="10" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                         @error('formData.contact_no') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
@@ -466,7 +517,24 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Pincode * <br><span class="text-xs text-gray-500 font-normal">পিন কোড</span></label>
-                                        <input type="text" wire:model="formData.pincode" maxlength="6" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-data="{
+        val: @entangle('formData.pincode'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.numeric(this.val, 6);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.pincode(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Must be 6 digits' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" maxlength="6" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 font-mono">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                         @error('formData.pincode') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
@@ -484,17 +552,68 @@
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">HOF Bank Name * <br><span class="text-xs text-gray-500 font-normal">ব্যাংকের নাম</span></label>
-                                        <input type="text" wire:model="formData.hof_bank_name" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-data="{
+        val: @entangle('formData.hof_bank_name'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.lettersOnly(this.val);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.name(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Letters only' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                         @error('formData.hof_bank_name') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">HOF Account Number * <br><span class="text-xs text-gray-500 font-normal">অ্যাকাউন্ট নম্বর</span></label>
-                                        <input type="text" wire:model="formData.hof_acc_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-data="{
+        val: @entangle('formData.hof_acc_no'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.numeric(this.val, 18);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.acc_no(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Must be 9-18 digits' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" maxlength="18" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 font-mono">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                         @error('formData.hof_acc_no') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">HOF IFSC Code * <br><span class="text-xs text-gray-500 font-normal">আইএফএসসি কোড</span></label>
-                                        <input type="text" wire:model="formData.hof_ifsc" maxlength="11" placeholder="e.g. SBIN0001234" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-data="{
+        val: @entangle('formData.hof_ifsc'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.alphaNumericUpper(this.val, 11);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.ifsc(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Format: ABCD0123456' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" maxlength="11" placeholder="e.g. SBIN0001234" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 uppercase font-mono">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                         @error('formData.hof_ifsc') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
@@ -512,7 +631,24 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">HOF EPIC/Voter No. <br><span class="text-xs text-gray-500 font-normal">ভোটার কার্ড নম্বর</span></label>
-                                        <input type="text" wire:model="formData.hof_epic_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-data="{
+        val: @entangle('formData.hof_epic_no'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.alphaNumericUpper(this.val, 10);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.epic(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Format: AAA1234567' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" maxlength="10" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 uppercase font-mono">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid EPIC</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">HOF AC & Part No. of Electoral Roll <br><span class="text-xs text-gray-500 font-normal">বিধানসভা ও পার্ট নং</span></label>
@@ -553,7 +689,24 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Full Name * <br><span class="text-xs text-gray-500 font-normal">সদস্যের নাম</span></label>
-                                        <input type="text" wire:model="members.{{ $index }}.name" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-data="{
+        val: @entangle('members.'.$index.'.name'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.lettersOnly(this.val);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.name(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Letters/dots/spaces' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                         @error("members.{$index}.name") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
@@ -581,7 +734,24 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Aadhaar Number (Optional for child &lt;5 years)<br><span class="text-xs text-gray-500 font-normal">আধার নম্বর</span></label>
-                                        <input type="text" wire:model="members.{{ $index }}.aadhaar" maxlength="12" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-data="{
+        val: @entangle('members.'.$index.'.aadhaar'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.numeric(this.val, 12);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.aadhaar(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Invalid checksum' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" maxlength="12" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 font-mono">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid Aadhaar</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                         @error("members.{$index}.aadhaar") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
@@ -597,7 +767,24 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Member EPIC/Voter No. <br><span class="text-xs text-gray-500 font-normal">ভোটার কার্ড নম্বর</span></label>
-                                        <input type="text" wire:model="members.{{ $index }}.epic_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-data="{
+        val: @entangle('members.'.$index.'.epic_no'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.alphaNumericUpper(this.val, 10);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.epic(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Format: AAA1234567' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" maxlength="10" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 uppercase font-mono">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid EPIC</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Member AC & Part No. <br><span class="text-xs text-gray-500 font-normal">বিধানসভা ও পার্ট নং</span></label>
@@ -620,17 +807,68 @@
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Bank Name * <br><span class="text-xs text-gray-500 font-normal">ব্যাংকের নাম</span></label>
-                                        <input type="text" wire:model="members.{{ $index }}.bank_name" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-data="{
+        val: @entangle('members.'.$index.'.bank_name'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.lettersOnly(this.val);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.name(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Letters only' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                         @error("members.{$index}.bank_name") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Account Number * <br><span class="text-xs text-gray-500 font-normal">অ্যাকাউন্ট নম্বর</span></label>
-                                        <input type="text" wire:model="members.{{ $index }}.acc_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-data="{
+        val: @entangle('members.'.$index.'.acc_no'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.numeric(this.val, 18);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.acc_no(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Must be 9-18 digits' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" maxlength="18" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 font-mono">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                         @error("members.{$index}.acc_no") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">IFSC Code * <br><span class="text-xs text-gray-500 font-normal">আইএফএসসি কোড</span></label>
-                                        <input type="text" wire:model="members.{{ $index }}.ifsc" maxlength="11" placeholder="e.g. SBIN0001234" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-data="{
+        val: @entangle('members.'.$index.'.ifsc'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.alphaNumericUpper(this.val, 11);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.ifsc(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Format: ABCD0123456' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" maxlength="11" placeholder="e.g. SBIN0001234" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 uppercase font-mono">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                         @error("members.{$index}.ifsc") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
@@ -804,10 +1042,24 @@
                                                 </div>
                                                 <div>
                                                     <label class="block text-xs font-semibold text-gray-600 mb-1">Registration No. / রেজিস্ট্রেশন নম্বর</label>
-                                                    <input type="text"
-                                                           wire:model="formData.vehicles.{{ $vi }}.reg_no"
-                                                           placeholder="e.g. WB-01-AB-1234"
-                                                           class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-amber-500 focus:border-amber-500">
+                                                    <div x-data="{
+        val: @entangle('formData.vehicles.'.$vi.'.reg_no'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.alphaNumericUpper(this.val, 10);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.vehicle(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Format: WB01AB1234' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" maxlength="10" placeholder="e.g. WB-01-AB-1234" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-amber-500 focus:border-amber-500 uppercase font-mono">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                                 </div>
                                                 <div>
                                                     <label class="block text-xs font-semibold text-gray-600 mb-1">Vehicle Model / মডেল নাম</label>
@@ -915,7 +1167,24 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">PAN Card No. (HOF) <br><span class="text-xs text-gray-500 font-normal">প্যান কার্ড নং</span></label>
-                                        <input type="text" wire:model="formData.hof_pan_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-data="{
+        val: @entangle('formData.hof_pan_no'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.alphaNumericUpper(this.val, 10);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.pan(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Format: AAAAA1111A' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" maxlength="10" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 uppercase font-mono">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid PAN</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Employment of HOF <br><span class="text-xs text-gray-500 font-normal">প্রধানের কর্মসংস্থান</span></label>
@@ -1048,7 +1317,24 @@
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
                                             <label class="block text-sm font-semibold text-gray-700 mb-1">PAN Card Number (If available) <br><span class="text-xs text-gray-500 font-normal">প্যান কার্ড নম্বর</span></label>
-                                            <input type="text" wire:model="members.{{ $index }}.pan_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                            <div x-data="{
+        val: @entangle('members.'.$index.'.pan_no'),
+        error: '',
+        valid: false,
+        check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.alphaNumericUpper(this.val, 10);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.pan(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Format: AAAAA1111A' : '';
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" maxlength="10" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 uppercase font-mono">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid PAN</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
                                         </div>
                                         <div>
                                             <label class="block text-sm font-semibold text-gray-700 mb-1">Nature of Employment <br><span class="text-xs text-gray-500 font-normal">কর্মসংস্থানের বিবরণ</span></label>
