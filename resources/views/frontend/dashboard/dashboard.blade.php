@@ -5,7 +5,7 @@
 @section('header_description', 'One Unbrella Scheme | Department of Finance | Government of West Bengal')
 
 
-@push('styles')
+@push('head_scripts')
 <!-- Optional: Add this CSS for subtle animations -->
 <style>
     @keyframes subtle-glow {
@@ -65,10 +65,10 @@
 </style>
 @endpush
 
-@push('meta')
+@push('head_scripts')
 <meta name="map-district-count-url" content="{{ route('map.district.count') }}">
 @endpush
-@push('styles')
+@push('head_scripts')
 <style>
     /* Premium Map Styles */
     .district {
@@ -270,43 +270,96 @@
 </div>
 
 
-   <!-- ================= MAP SECTION ================= -->
-            <div style="grid-area: map;">
-                <div class="glass-card rounded-3xl p-5 h-[650px] relative flex flex-col">
+<!-- Geographic Distribution Map Stats -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+    <!-- Card 1: Total Beneficiaries -->
+    <div class="glass-card rounded-2xl p-5 shadow-sm relative overflow-hidden">
+        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Beneficiaries</p>
+        <h3 class="text-3xl font-black text-indigo-600 tracking-tight" id="total-count">0</h3>
+    </div>
+    
+    <!-- Card 2: Total Districts -->
+    <div class="glass-card rounded-2xl p-5 shadow-sm relative overflow-hidden">
+        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Districts</p>
+        <h3 class="text-3xl font-black text-indigo-600 tracking-tight" id="district-count">23</h3>
+    </div>
 
-                    <div class="flex justify-between items-center mb-4 px-2 pb-2 border-b border-gray-100/50">
-                        <h2 class="font-bold text-gray-800 flex items-center gap-2 text-lg">
-                            <i class="fa-solid fa-map-location-dot text-indigo-500"></i>
-                            Geographic Distribution
-                        </h2>
-                        <div class="flex items-center gap-3">
-                            <div class="flex bg-gray-100/50 rounded-lg p-1 border border-gray-200/50">
-                                <button id="zoom-out" class="w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Zoom Out"><i class="fa-solid fa-minus"></i></button>
-                                <button id="zoom-reset" class="w-7 h-7 flex items-center justify-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Reset Map"><i class="fa-solid fa-expand"></i></button>
-                                <button id="zoom-in" class="w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Zoom In"><i class="fa-solid fa-plus"></i></button>
-                            </div>
-                            <span class="text-[10px] font-bold text-indigo-400 uppercase bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100">
-                                SVG Interactive
-                            </span>
-                        </div>
+    <!-- Card 3: Max. Applied Zone -->
+    <div class="glass-card rounded-2xl p-5 shadow-sm relative overflow-hidden">
+        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Max. Applied Zone</p>
+        <h3 class="text-2xl font-black text-indigo-600 truncate tracking-tight" id="highest-district">-</h3>
+    </div>
+
+    <!-- Card 4: Avg / District -->
+    <div class="glass-card rounded-2xl p-5 shadow-sm relative overflow-hidden">
+        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Avg / District</p>
+        <h3 class="text-3xl font-black text-indigo-600 tracking-tight" id="avg-count">0</h3>
+    </div>
+</div>
+
+<!-- ================= MAP SECTION ================= -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+    <!-- Map Column -->
+    <div class="lg:col-span-2">
+        <div class="glass-card rounded-3xl p-5 h-[650px] relative flex flex-col">
+
+            <div class="flex justify-between items-center mb-4 px-2 pb-2 border-b border-gray-100/50">
+                <h2 class="font-bold text-gray-800 flex items-center gap-2 text-lg">
+                    <i class="fa-solid fa-map-location-dot text-indigo-500"></i>
+                    Geographic Distribution
+                </h2>
+                <div class="flex items-center gap-3">
+                    <div class="flex bg-gray-100/50 rounded-lg p-1 border border-gray-200/50 gap-1">
+                        <button id="zoom-out" class="w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Zoom Out"><i class="fa-solid fa-minus"></i></button>
+                        <button id="zoom-reset" class="w-7 h-7 flex items-center justify-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Reset Map"><i class="fa-solid fa-expand"></i></button>
+                        <button id="zoom-in" class="w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Zoom In"><i class="fa-solid fa-plus"></i></button>
+                        <button id="reset-btn" class="w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Reset Selection"><i class="fa-solid fa-arrows-rotate"></i></button>
                     </div>
-
-                    <!-- LOADER -->
-                    <div id="loading" class="flex-1 flex flex-col items-center justify-center">
-                        <div class="loading-spinner mb-4"></div>
-                        <span class="text-indigo-500 font-bold animate-pulse tracking-widest text-sm uppercase">
-                            Fetching Data...
-                        </span>
-                    </div>
-
-                    <!-- SVG -->
-                    <div id="map-svg-wrapper" class="flex-1 hidden items-center justify-center overflow-hidden drop-shadow-sm">
-                        @include('frontend.maps.west_bengal')
-                    </div>
-
-                    <!-- TOOLTIP -->
+                    <span class="text-[10px] font-bold text-indigo-400 uppercase bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100">
+                        SVG Interactive
+                    </span>
                 </div>
             </div>
+
+            <!-- LOADER -->
+            <div id="loading" class="flex-1 flex flex-col items-center justify-center">
+                <div class="loading-spinner mb-4"></div>
+                <span class="text-indigo-500 font-bold animate-pulse tracking-widest text-sm uppercase">
+                    Fetching Data...
+                </span>
+            </div>
+
+            <!-- SVG -->
+            <div id="map-svg-wrapper" class="flex-1 hidden items-center justify-center overflow-hidden drop-shadow-sm">
+                @include('frontend.maps.west_bengal')
+            </div>
+
+            <!-- TOOLTIP -->
+        </div>
+    </div>
+
+    <!-- District Breakdown Column -->
+    <div class="lg:col-span-1">
+        <div class="glass-card rounded-3xl h-[650px] flex flex-col overflow-hidden">
+            <div class="p-6 border-b border-gray-100/50 bg-white/40">
+                <h3 class="text-lg font-bold flex items-center gap-2 text-gray-800">
+                    <i class="fa-solid fa-chart-pie text-violet-500"></i>
+                    District Breakdown
+                </h3>
+            </div>
+
+            <div id="district-info" class="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                <div class="p-8 bg-white/60 shadow-inner rounded-full mb-6 border border-gray-100">
+                    <i class="fa-solid fa-hand-pointer text-4xl text-indigo-200"></i>
+                </div>
+                <h4 class="font-black text-xl text-gray-800 tracking-tight">No Selection</h4>
+                <p class="text-gray-500 mt-2 max-w-xs font-medium">
+                    Click a district on the map to view detailed beneficiary insights
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Charts Section -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
@@ -322,13 +375,13 @@
 
         <div class="grid grid-cols-1 gap-6 items-center">
             <!-- Map Column -->
-            <div class="flex items-center justify-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 h-[600px] relative overflow-hidden" id="map-svg-wrapper">
+            <div class="flex items-center justify-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 h-[600px] relative overflow-hidden" id="charts-map-wrapper">
                 @include('frontend.maps.west_bengal')
             </div>
 
             <!-- List / Bar Chart Column -->
-             <div id="map-svg-wrapper" class="flex-1 hidden items-center justify-center overflow-hidden drop-shadow-sm">
-                        @include('frontend.maps.west_bengal')
+            <div class="flex-1 overflow-hidden drop-shadow-sm">
+                <div id="districtChart"></div>
             </div>
         </div>
     </div>
@@ -449,33 +502,39 @@
             lastRefreshed.classList.remove('hidden');
         }
 
-        document.getElementById('refreshSchemeStatus').addEventListener('click', function() {
-            const btn = this;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+        const refreshSchemeStatus = document.getElementById('refreshSchemeStatus');
+        if (refreshSchemeStatus) {
+            refreshSchemeStatus.addEventListener('click', function() {
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
 
-            fetch("{{ route('dashboard.refreshSchemeStatus') }}", {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(function() {
-                    loadSchemeStatusTable();
-                })
-                .catch(function() {
-                    alert('Failed to refresh materialized view');
-                })
-                .finally(function() {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Data';
-                });
-        });
+                fetch("{{ route('dashboard.refreshSchemeStatus') }}", {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(function() {
+                        loadSchemeStatusTable();
+                    })
+                    .catch(function() {
+                        alert('Failed to refresh materialized view');
+                    })
+                    .finally(function() {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Data';
+                    });
+            });
+        }
 
         loadSchemeStatusTable();
 
         function loadSchemeStatusTable() {
+            const schemeStatusTbody = document.getElementById('schemeStatusTbody');
+            if (!schemeStatusTbody) return;
+
             fetch("{{ route('dashboard.schemeStatusChart') }}", {
                     method: 'GET',
                     headers: {
@@ -531,10 +590,10 @@
                                                                         `;
                     }
 
-                    document.getElementById('schemeStatusTbody').innerHTML = tbody;
+                    schemeStatusTbody.innerHTML = tbody;
                 })
                 .catch(function() {
-                    document.getElementById('schemeStatusTbody').innerHTML = `
+                    schemeStatusTbody.innerHTML = `
                                                                         <tr>
                                                                             <td colspan="6" class="px-4 py-6 text-center text-red-500">Failed to load scheme status data</td>
                                                                         </tr>
@@ -548,315 +607,325 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
-        // Create the chart
-        Highcharts.chart('container', {
-            chart: {
-                type: 'pie'
-            },
-            title: {
-                text: 'Browser market shares. January, 2022'
-            },
-            subtitle: {
-                text: 'Click the slices to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
-            },
-
-            accessibility: {
-                announceNewData: {
-                    enabled: true
+        // Create the chart if container exists
+        const container = document.getElementById('container');
+        if (container) {
+            Highcharts.chart('container', {
+                chart: {
+                    type: 'pie'
                 },
-                point: {
-                    valueSuffix: '%'
-                }
-            },
+                title: {
+                    text: 'Browser market shares. January, 2022'
+                },
+                subtitle: {
+                    text: 'Click the slices to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
+                },
 
-            plotOptions: {
-                pie: {
-                    borderRadius: 5,
-                    dataLabels: [{
-                        enabled: true,
-                        distance: 15,
-                        format: '{point.name}'
-                    }, {
-                        enabled: true,
-                        distance: '-30%',
-                        filter: {
-                            property: 'percentage',
-                            operator: '>',
-                            value: 5
-                        },
-                        format: '{point.y:.1f}%',
-                        style: {
-                            fontSize: '0.9em',
-                            textOutline: 'none'
-                        }
-                    }],
-                    states: {
-                        inactive: {
-                            opacity: 0.8
+                accessibility: {
+                    announceNewData: {
+                        enabled: true
+                    },
+                    point: {
+                        valueSuffix: '%'
+                    }
+                },
+
+                plotOptions: {
+                    pie: {
+                        borderRadius: 5,
+                        dataLabels: [{
+                            enabled: true,
+                            distance: 15,
+                            format: '{point.name}'
+                        }, {
+                            enabled: true,
+                            distance: '-30%',
+                            filter: {
+                                property: 'percentage',
+                                operator: '>',
+                                value: 5
+                            },
+                            format: '{point.y:.1f}%',
+                            style: {
+                                fontSize: '0.9em',
+                                textOutline: 'none'
+                            }
+                        }],
+                        states: {
+                            inactive: {
+                                opacity: 0.8
+                            }
                         }
                     }
-                }
-            },
+                },
 
-            tooltip: {
-                headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-                pointFormat: '<span style="color:{point.color}">{point.name}</span>: ' +
-                    '<b>{point.y:.2f}%</b> of total<br/>'
-            },
+                tooltip: {
+                    headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                    pointFormat: '<span style="color:{point.color}">{point.name}</span>: ' +
+                        '<b>{point.y:.2f}%</b> of total<br/>'
+                },
 
-            series: [{
-                name: 'Browsers',
-                colorByPoint: true,
-                data: [{
-                        name: 'Chrome',
-                        y: 61.04,
-                        drilldown: 'Chrome'
-                    },
-                    {
-                        name: 'Safari',
-                        y: 9.47,
-                        drilldown: 'Safari'
-                    },
-                    {
-                        name: 'Edge',
-                        y: 9.32,
-                        drilldown: 'Edge'
-                    },
-                    {
-                        name: 'Firefox',
-                        y: 8.15,
-                        drilldown: 'Firefox'
-                    },
-                    {
-                        name: 'Other',
-                        y: 11.02,
-                        drilldown: null
-                    }
-                ]
-            }],
-            drilldown: {
                 series: [{
-                        name: 'Chrome',
-                        id: 'Chrome',
-                        data: [
-                            [
-                                'v97.0',
-                                36.89
-                            ],
-                            [
-                                'v96.0',
-                                18.16
-                            ],
-                            [
-                                'v95.0',
-                                0.54
-                            ],
-                            [
-                                'v94.0',
-                                0.7
-                            ],
-                            [
-                                'v93.0',
-                                0.8
-                            ],
-                            [
-                                'v92.0',
-                                0.41
-                            ],
-                            [
-                                'v91.0',
-                                0.31
-                            ],
-                            [
-                                'v90.0',
-                                0.13
-                            ],
-                            [
-                                'v89.0',
-                                0.14
-                            ],
-                            [
-                                'v88.0',
-                                0.1
-                            ],
-                            [
-                                'v87.0',
-                                0.35
-                            ],
-                            [
-                                'v86.0',
-                                0.17
-                            ],
-                            [
-                                'v85.0',
-                                0.18
-                            ],
-                            [
-                                'v84.0',
-                                0.17
-                            ],
-                            [
-                                'v83.0',
-                                0.21
-                            ],
-                            [
-                                'v81.0',
-                                0.1
-                            ],
-                            [
-                                'v80.0',
-                                0.16
-                            ],
-                            [
-                                'v79.0',
-                                0.43
-                            ],
-                            [
-                                'v78.0',
-                                0.11
-                            ],
-                            [
-                                'v76.0',
-                                0.16
-                            ],
-                            [
-                                'v75.0',
-                                0.15
-                            ],
-                            [
-                                'v72.0',
-                                0.14
-                            ],
-                            [
-                                'v70.0',
-                                0.11
-                            ],
-                            [
-                                'v69.0',
-                                0.13
-                            ],
-                            [
-                                'v56.0',
-                                0.12
-                            ],
-                            [
-                                'v49.0',
-                                0.17
+                    name: 'Browsers',
+                    colorByPoint: true,
+                    data: [{
+                            name: 'Chrome',
+                            y: 61.04,
+                            drilldown: 'Chrome'
+                        },
+                        {
+                            name: 'Safari',
+                            y: 9.47,
+                            drilldown: 'Safari'
+                        },
+                        {
+                            name: 'Edge',
+                            y: 9.32,
+                            drilldown: 'Edge'
+                        },
+                        {
+                            name: 'Firefox',
+                            y: 8.15,
+                            drilldown: 'Firefox'
+                        },
+                        {
+                            name: 'Other',
+                            y: 11.02,
+                            drilldown: null
+                        }
+                    ]
+                }],
+                drilldown: {
+                    series: [{
+                            name: 'Chrome',
+                            id: 'Chrome',
+                            data: [
+                                [
+                                    'v97.0',
+                                    36.89
+                                ],
+                                [
+                                    'v96.0',
+                                    18.16
+                                ],
+                                [
+                                    'v95.0',
+                                    0.54
+                                ],
+                                [
+                                    'v94.0',
+                                    0.7
+                                ],
+                                [
+                                    'v93.0',
+                                    0.8
+                                ],
+                                [
+                                    'v92.0',
+                                    0.41
+                                ],
+                                [
+                                    'v91.0',
+                                    0.31
+                                ],
+                                [
+                                    'v90.0',
+                                    0.13
+                                ],
+                                [
+                                    'v89.0',
+                                    0.14
+                                ],
+                                [
+                                    'v88.0',
+                                    0.1
+                                ],
+                                [
+                                    'v87.0',
+                                    0.35
+                                ],
+                                [
+                                    'v86.0',
+                                    0.17
+                                ],
+                                [
+                                    'v85.0',
+                                    0.18
+                                ],
+                                [
+                                    'v84.0',
+                                    0.17
+                                ],
+                                [
+                                    'v83.0',
+                                    0.21
+                                ],
+                                [
+                                    'v81.0',
+                                    0.1
+                                ],
+                                [
+                                    'v80.0',
+                                    0.16
+                                ],
+                                [
+                                    'v79.0',
+                                    0.43
+                                ],
+                                [
+                                    'v78.0',
+                                    0.11
+                                ],
+                                [
+                                    'v76.0',
+                                    0.16
+                                ],
+                                [
+                                    'v75.0',
+                                    0.15
+                                ],
+                                [
+                                    'v72.0',
+                                    0.14
+                                ],
+                                [
+                                    'v70.0',
+                                    0.11
+                                ],
+                                [
+                                    'v69.0',
+                                    0.13
+                                ],
+                                [
+                                    'v56.0',
+                                    0.12
+                                ],
+                                [
+                                    'v49.0',
+                                    0.17
+                                ]
                             ]
-                        ]
-                    },
-                    {
-                        name: 'Safari',
-                        id: 'Safari',
-                        data: [
-                            [
-                                'v15.3',
-                                0.1
-                            ],
-                            [
-                                'v15.2',
-                                2.01
-                            ],
-                            [
-                                'v15.1',
-                                2.29
-                            ],
-                            [
-                                'v15.0',
-                                0.49
-                            ],
-                            [
-                                'v14.1',
-                                2.48
-                            ],
-                            [
-                                'v14.0',
-                                0.64
-                            ],
-                            [
-                                'v13.1',
-                                1.17
-                            ],
-                            [
-                                'v13.0',
-                                0.13
-                            ],
-                            [
-                                'v12.1',
-                                0.16
+                        },
+                        {
+                            name: 'Safari',
+                            id: 'Safari',
+                            data: [
+                                [
+                                    'v15.3',
+                                    0.1
+                                ],
+                                [
+                                    'v15.2',
+                                    2.01
+                                ],
+                                [
+                                    'v15.1',
+                                    2.29
+                                ],
+                                [
+                                    'v15.0',
+                                    0.49
+                                ],
+                                [
+                                    'v14.1',
+                                    2.48
+                                ],
+                                [
+                                    'v14.0',
+                                    0.64
+                                ],
+                                [
+                                    'v13.1',
+                                    1.17
+                                ],
+                                [
+                                    'v13.0',
+                                    0.13
+                                ],
+                                [
+                                    'v12.1',
+                                    0.16
+                                ]
                             ]
-                        ]
-                    },
-                    {
-                        name: 'Edge',
-                        id: 'Edge',
-                        data: [
-                            [
-                                'v97',
-                                6.62
-                            ],
-                            [
-                                'v96',
-                                2.55
-                            ],
-                            [
-                                'v95',
-                                0.15
+                        },
+                        {
+                            name: 'Edge',
+                            id: 'Edge',
+                            data: [
+                                [
+                                    'v97',
+                                    6.62
+                                ],
+                                [
+                                    'v96',
+                                    2.55
+                                ],
+                                [
+                                    'v95',
+                                    0.15
+                                ]
                             ]
-                        ]
-                    },
-                    {
-                        name: 'Firefox',
-                        id: 'Firefox',
-                        data: [
-                            [
-                                'v96.0',
-                                4.17
-                            ],
-                            [
-                                'v95.0',
-                                3.33
-                            ],
-                            [
-                                'v94.0',
-                                0.11
-                            ],
-                            [
-                                'v91.0',
-                                0.23
-                            ],
-                            [
-                                'v78.0',
-                                0.16
-                            ],
-                            [
-                                'v52.0',
-                                0.15
+                        },
+                        {
+                            name: 'Firefox',
+                            id: 'Firefox',
+                            data: [
+                                [
+                                    'v96.0',
+                                    4.17
+                                ],
+                                [
+                                    'v95.0',
+                                    3.33
+                                ],
+                                [
+                                    'v94.0',
+                                    0.11
+                                ],
+                                [
+                                    'v91.0',
+                                    0.23
+                                ],
+                                [
+                                    'v78.0',
+                                    0.16
+                                ],
+                                [
+                                    'v52.0',
+                                    0.15
+                                ]
                             ]
-                        ]
-                    }
-                ]
-            },
+                        }
+                    ]
+                },
 
-            navigation: {
-                breadcrumbs: {
-                    buttonTheme: {
-                        style: {
-                            color: 'var(--highcharts-highlight-color-100)'
+                navigation: {
+                    breadcrumbs: {
+                        buttonTheme: {
+                            style: {
+                                color: 'var(--highcharts-highlight-color-100)'
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
 
 
-        loadSchemeWiseApplications('all');
+        const applicationsChartContainer = document.getElementById('applicationsChart');
+        if (applicationsChartContainer) {
+            loadSchemeWiseApplications('all');
+        }
 
-        document.getElementById('schemeFilter').addEventListener('change', function() {
-            loadSchemeWiseApplications(this.value);
-        });
+        const schemeFilter = document.getElementById('schemeFilter');
+        if (schemeFilter) {
+            schemeFilter.addEventListener('change', function() {
+                loadSchemeWiseApplications(this.value);
+            });
+        }
 
         function loadSchemeWiseApplications(days) {
+            if (!document.getElementById('applicationsChart')) return;
             fetch("{{ route('dashboard.schemeWiseApplications') }}?days=" + days, {
                     method: 'GET',
                     headers: {
@@ -865,6 +934,7 @@
                 })
                 .then(res => res.json())
                 .then(function(response) {
+                    if (!document.getElementById('applicationsChart')) return;
                     Highcharts.chart('applicationsChart', {
                         chart: {
                             type: 'column',
@@ -1297,58 +1367,60 @@
                     return;
                 }
 
-                Highcharts.chart('trendsChart', {
-                    chart: {
-                        type: 'areaspline',
-                        backgroundColor: 'transparent'
-                    },
-                    title: {
-                        text: null
-                    },
-                    xAxis: {
-                        categories: [
-                            'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
-                            'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'
-                        ]
-                    },
-                    yAxis: {
+                if (document.getElementById('trendsChart')) {
+                    Highcharts.chart('trendsChart', {
+                        chart: {
+                            type: 'areaspline',
+                            backgroundColor: 'transparent'
+                        },
                         title: {
-                            text: 'Payment Amount (₹)'
-                        }
-                    },
-                    legend: {
-                        enabled: false
-                    },
-                    plotOptions: {
-                        areaspline: {
-                            fillColor: {
-                                linearGradient: {
-                                    x1: 0,
-                                    y1: 0,
-                                    x2: 0,
-                                    y2: 1
-                                },
-                                stops: [
-                                    [0, 'rgba(102, 126, 234, 0.35)'],
-                                    [1, 'rgba(102, 126, 234, 0.05)']
-                                ]
-                            },
-                            lineWidth: 3,
-                            marker: {
-                                enabled: true,
-                                radius: 4
+                            text: null
+                        },
+                        xAxis: {
+                            categories: [
+                                'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+                                'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'
+                            ]
+                        },
+                        yAxis: {
+                            title: {
+                                text: 'Payment Amount (₹)'
                             }
+                        },
+                        legend: {
+                            enabled: false
+                        },
+                        plotOptions: {
+                            areaspline: {
+                                fillColor: {
+                                    linearGradient: {
+                                        x1: 0,
+                                        y1: 0,
+                                        x2: 0,
+                                        y2: 1
+                                    },
+                                    stops: [
+                                        [0, 'rgba(102, 126, 234, 0.35)'],
+                                        [1, 'rgba(102, 126, 234, 0.05)']
+                                    ]
+                                },
+                                lineWidth: 3,
+                                marker: {
+                                    enabled: true,
+                                    radius: 4
+                                }
+                            }
+                        },
+                        series: [{
+                            name: 'DBT Payment',
+                            data: response.series,
+                            color: '#667eea'
+                        }],
+                        credits: {
+                            enabled: false
                         }
-                    },
-                    series: [{
-                        name: 'DBT Payment',
-                        data: response.series,
-                        color: '#667eea'
-                    }],
-                    credits: {
-                        enabled: false
-                    }
-                });
+                    });
+                }
             })
             .catch(function() {
                 console.error('Fetch failed');
@@ -1673,11 +1745,16 @@ Highcharts.chart('mispiechart', {
 
         async function initMap() {
             try {
-                const response = await fetch(document.querySelector('meta[name="map-district-count-url"]').content, {
+                const mapUrlMeta = document.querySelector('meta[name="map-district-count-url"]');
+                if (!mapUrlMeta) {
+                    console.warn('map-district-count-url meta tag not found');
+                    return;
+                }
+                const response = await fetch(mapUrlMeta.content, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({})
                 });
@@ -1797,9 +1874,14 @@ Highcharts.chart('mispiechart', {
                 }
             });
 
-            document.getElementById('total-count').textContent = t.toLocaleString();
-            document.getElementById('avg-count').textContent = avg.toLocaleString();
-            document.getElementById('highest-district').textContent = highest.name;
+            const totalCountEl = document.getElementById('total-count');
+            if (totalCountEl) totalCountEl.textContent = t.toLocaleString();
+
+            const avgCountEl = document.getElementById('avg-count');
+            if (avgCountEl) avgCountEl.textContent = avg.toLocaleString();
+
+            const highestDistrictEl = document.getElementById('highest-district');
+            if (highestDistrictEl) highestDistrictEl.textContent = highest.name;
         }
 
         function total() {
@@ -1807,41 +1889,54 @@ Highcharts.chart('mispiechart', {
         }
 
         function showTooltip(e, name, count) {
-            document.getElementById('tooltip-content').innerHTML = `
-                                <div class="font-bold border-b border-gray-600/50 pb-1.5 mb-1.5 text-indigo-100 flex items-center justify-between gap-3">
-                                    <span>${name}</span>
-                                    <i class="fa-solid fa-map-pin text-[10px] text-indigo-400"></i>
-                                </div>
-                                <div class="text-indigo-200 text-xs font-medium">
-                                    Beneficiaries: <span class="text-white font-black ml-1">${count.toLocaleString()}</span>
-                                </div>
-                            `;
-            document.getElementById('custom-tooltip').style.display = 'block';
+            const tooltipContent = document.getElementById('tooltip-content');
+            if (tooltipContent) {
+                tooltipContent.innerHTML = `
+                                    <div class="font-bold border-b border-gray-600/50 pb-1.5 mb-1.5 text-indigo-100 flex items-center justify-between gap-3">
+                                        <span>${name}</span>
+                                        <i class="fa-solid fa-map-pin text-[10px] text-indigo-400"></i>
+                                    </div>
+                                    <div class="text-indigo-200 text-xs font-medium">
+                                        Beneficiaries: <span class="text-white font-black ml-1">${count.toLocaleString()}</span>
+                                    </div>
+                                `;
+            }
+            const customTooltip = document.getElementById('custom-tooltip');
+            if (customTooltip) customTooltip.style.display = 'block';
             moveTooltip(e);
         }
 
         function moveTooltip(e) {
             const tooltip = document.getElementById('custom-tooltip');
-            tooltip.style.left = e.clientX + 'px';
-            tooltip.style.top = e.clientY + 'px';
+            if (tooltip) {
+                tooltip.style.left = e.clientX + 'px';
+                tooltip.style.top = e.clientY + 'px';
+            }
         }
 
         function hideTooltip() {
-            document.getElementById('custom-tooltip').style.display = 'none';
+            const tooltip = document.getElementById('custom-tooltip');
+            if (tooltip) tooltip.style.display = 'none';
         }
 
-        document.getElementById('reset-btn').addEventListener('click', () => {
-            document.querySelectorAll('.district').forEach(el => el.classList.remove('selected'));
-            document.getElementById('district-info').innerHTML = `
-                                <div class="p-8 bg-white/60 shadow-inner rounded-full mb-6 border border-gray-100 animate-fade-in">
-                                    <i class="fa-solid fa-hand-pointer text-4xl text-indigo-200"></i>
-                                </div>
-                                <h4 class="font-black text-xl text-gray-800 tracking-tight animate-fade-in" style="animation-delay: 0.1s">No Selection</h4>
-                                <p class="text-gray-500 mt-2 max-w-xs font-medium animate-fade-in" style="animation-delay: 0.2s">
-                                    Click a district on the map to view detailed beneficiary insights
-                                </p>
-                            `;
-        });
+        const resetBtn = document.getElementById('reset-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                document.querySelectorAll('.district').forEach(el => el.classList.remove('selected'));
+                const infoEl = document.getElementById('district-info');
+                if (infoEl) {
+                    infoEl.innerHTML = `
+                                        <div class="p-8 bg-white/60 shadow-inner rounded-full mb-6 border border-gray-100 animate-fade-in">
+                                            <i class="fa-solid fa-hand-pointer text-4xl text-indigo-200"></i>
+                                        </div>
+                                        <h4 class="font-black text-xl text-gray-800 tracking-tight animate-fade-in" style="animation-delay: 0.1s">No Selection</h4>
+                                        <p class="text-gray-500 mt-2 max-w-xs font-medium animate-fade-in" style="animation-delay: 0.2s">
+                                            Click a district on the map to view detailed beneficiary insights
+                                        </p>
+                                    `;
+                }
+            });
+        }
 
         // Zoom and Pan Logic
         let currentZoom = 1;

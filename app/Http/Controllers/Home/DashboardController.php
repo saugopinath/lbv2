@@ -20,14 +20,15 @@ class DashboardController extends Controller
     }
     public function index(Request $request)
     {
-        $last_report_generation_time=null;
-        $totalApplied =0;
-        $totalVerified =0;
-        $totalApproved =0;
-        $totalReject =0;
-        $totalPayCurMonth=0;
-        $totalPayCurYear=0;
-        $financialYear=null;
+        $last_generation_time = null;
+        $totalApplied = 0;
+        $totalVerified = 0;
+        $totalApproved = 0;
+        $totalReject = 0;
+        $totalPayCurMonth = 0;
+        $totalPayCurYear = 0;
+        $financialYear = Helper::getCurrentFinancialYearIndia();
+
         $report_obj = DB::connection('pgsql_app_read')->table('mis.family_members_mis')
             ->select(DB::raw('max(last_report_generation_time) as last_report_generation_time'),
                      DB::raw('sum(applied) as applied'),
@@ -36,24 +37,14 @@ class DashboardController extends Controller
                      DB::raw('sum(reject) as reject')
             )
             ->first();
-            //dd($report_obj);
 
-            if(!is_null($report_obj)){
-               $last_generation_time= $report_obj->last_report_generation_time;
-               $totalApplied= $report_obj->applied;
-               $totalVerified= $report_obj->verified;
-               $totalApproved= $report_obj->approved;
-               $totalReject= $report_obj->reject;
-            }
-
-        $curMonthInt = (int) date('n');
-
-        // ✅ Get dynamic column name
-        $monthPayColumn = Helper::getMonthColumn($curMonthInt);
-        $monthPayColumn = $monthPayColumn['lot_payment_amount'];
-
-        // ✅ Current Month Total Payment
-       
+        if (!is_null($report_obj)) {
+            $last_generation_time = $report_obj->last_report_generation_time;
+            $totalApplied = $report_obj->applied;
+            $totalVerified = $report_obj->verified;
+            $totalApproved = $report_obj->approved;
+            $totalReject = $report_obj->reject;
+        }
 
         return view('frontend.dashboard.dashboard', [
             'last_report_generation_time'=> $last_generation_time,
@@ -144,7 +135,7 @@ class DashboardController extends Controller
     {
         $finYear = $request->get('fin_year');
 
-        $data = DB::connection('pgsql_pay_read')
+        $data = DB::connection('pgsql_lbpayread')
             ->table('payment.ben_transaction_details')
             ->selectRaw("
                 COALESCE(SUM(apr_payment_amount),0) AS apr,
