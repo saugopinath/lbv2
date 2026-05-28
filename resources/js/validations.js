@@ -45,7 +45,7 @@ window.validateEpic = function(val) {
 };
 
 window.validatePan = function(val) {
-    return /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(val);
+    return /^[A-Z]{3}[CPHFATBLJG][A-Z][0-9]{4}[A-Z]$/.test(val);
 };
 
 window.validateVehicle = function(val) {

@@ -934,7 +934,7 @@ class AnnapurnaYojanaForm extends Component
                 $rules = [
                     'formData.pays_tax' => 'required',
                     'formData.total_annual_income' => 'required|numeric|min:0',
-                    'formData.hof_pan_no'    => ['nullable', 'regex:/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/'],
+                    'formData.hof_pan_no'    => ['nullable', 'regex:/^[A-Z]{3}[CPHFATBLJG][A-Z][0-9]{4}[A-Z]$/'],
                 ];
                 $messages = [
                     'formData.pays_tax.required' => 'Income Tax payment selection is required.',
@@ -947,7 +947,7 @@ class AnnapurnaYojanaForm extends Component
                 $member = $this->members[$index];
                 if (($member['member_type'] ?? 'adult') === 'adult') {
                     $rules = [
-                        "members.{$index}.pan_no" => ['nullable', 'regex:/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/'],
+                        "members.{$index}.pan_no" => ['nullable', 'regex:/^[A-Z]{3}[CPHFATBLJG][A-Z][0-9]{4}[A-Z]$/'],
                     ];
                     $messages = [
                         "members.{$index}.pan_no.regex" => 'Member PAN format is invalid (e.g. ABCDE1234F).',
@@ -1014,7 +1014,7 @@ class AnnapurnaYojanaForm extends Component
             'formData.hof_bank_name' => ['required', 'string', 'max:100', 'regex:/^[\p{L}\s.\'\-]+$/u'],
             'formData.hof_acc_no'    => 'required|digits_between:9,18',
             'formData.hof_ifsc'      => ['required', 'size:11', 'regex:/^[A-Z]{4}0[A-Z0-9]{6}$/'],
-            'formData.hof_pan_no'    => ['nullable', 'regex:/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/'],
+            'formData.hof_pan_no'    => ['nullable', 'regex:/^[A-Z]{3}[CPHFATBLJG][A-Z][0-9]{4}[A-Z]$/'],
             'formData.hof_epic_no'   => ['nullable', 'regex:/^[A-Z]{3}[0-9]{7}$/'],
 
             'formData.has_pucca_rooms'   => 'required',
@@ -1116,7 +1116,7 @@ class AnnapurnaYojanaForm extends Component
                     }
                 ];
                 $rules["members.{$index}.epic_no"] = ['nullable', 'regex:/^[A-Z]{3}[0-9]{7}$/'];
-                $rules["members.{$index}.pan_no"]  = ['nullable', 'regex:/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/'];
+                $rules["members.{$index}.pan_no"]  = ['nullable', 'regex:/^[A-Z]{3}[CPHFATBLJG][A-Z][0-9]{4}[A-Z]$/'];
 
                 $messages["members.{$index}.aadhaar.digits"] = 'Member #' . ($index + 1) . ' Aadhaar must be 12 digits (numbers only).';
                 $messages["members.{$index}.epic_no.regex"] = 'Member #' . ($index + 1) . ' Voter ID (EPIC) format is invalid (e.g. ABC1234567).';
