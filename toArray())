@@ -15,8 +15,8 @@
     1329▕     /**
 
   1   vendor\psy\psysh\src\Shell.php:1865
-      Psy\Shell::setCode("print_r(App\Models\Scheme::select('id','name','short_name')-")
+      Psy\Shell::setCode("print_r(App\Models\Scheme::find(21)-")
 
   2   vendor\laravel\tinker\src\Console\TinkerCommand.php:77
-      Psy\Shell::execute("print_r(App\Models\Scheme::select('id','name','short_name')-")
+      Psy\Shell::execute("print_r(App\Models\Scheme::find(21)-")
 

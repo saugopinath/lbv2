@@ -1,4 +1,4 @@
-<form wire:submit.prevent="save" class="max-w-7xl mx-auto my-8 bg-white border-2 rounded-lg shadow-xl overflow-hidden" style="border-color: #b45309;">
+<form wire:submit.prevent="save" class="w-full my-4 bg-white border-2 rounded-lg shadow-xl overflow-hidden" style="border-color: #b45309;">
     {{-- Custom Theme Color Overrides for Government brand style --}}
     <style>
         .active-tab {

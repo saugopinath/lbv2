@@ -5,13 +5,13 @@
     </div>
     @endif
     @if ($schemeData)
-    <div class="max-w-auto mx-auto bg-white rounded-xl shadow-sm p-6">
         @if ($schemeId == 21)
             <livewire:annapurna-yojana-form :scheme-id="$schemeId" :schemeName="$schemeName" :grievanceId="$grievanceId" :wire:key="'annapurna-yojana-form-'.$schemeId" />
         @else
-            <livewire:dynamic-form :scheme-id="$schemeId" :schemeName="$schemeName" :grievanceId="$grievanceId" :wire:key="'dynamic-form-'.$schemeId" />
+            <div class="max-w-auto mx-auto bg-white rounded-xl shadow-sm p-6">
+                <livewire:dynamic-form :scheme-id="$schemeId" :schemeName="$schemeName" :grievanceId="$grievanceId" :wire:key="'dynamic-form-'.$schemeId" />
+            </div>
         @endif
-    </div>
     @endif
     @push('scripts')
     <script src="{{ asset('js/master-data/master-data-v2.js') }}"></script>

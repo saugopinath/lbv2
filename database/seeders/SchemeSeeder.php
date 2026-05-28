@@ -99,6 +99,13 @@ class SchemeSeeder extends Seeder
                 'short_name' => 'bandhu',
                 'dept_short_name' => 'BCWD',
             ],           
+            [
+                'id' => '21',
+                'name' => 'ANNAPURNA YOJANA',
+                'short_name' => 'AY',
+                'description' => 'Family Level Data Collection Form for Annapurna Yojana',
+                'dept_short_name' => 'WCD&SW',
+            ],
 
         ];
         //   foreach ($schemes as $scheme_item) {
@@ -110,12 +117,15 @@ class SchemeSeeder extends Seeder
         //     ]);
         // }
         foreach ($schemes as $scheme_item) {
-            Scheme::updateOrCreate([
-                'id' => $scheme_item['id'],
-                'name' => strtoupper($scheme_item['name']),
-                'short_name' => $scheme_item['short_name'],
-                'department_id' => Department::where('short_name', $scheme_item['dept_short_name'])->firstOrFail()->id,
-            ]);
+            Scheme::updateOrCreate(
+                ['id' => $scheme_item['id']],
+                [
+                    'name' => strtoupper($scheme_item['name']),
+                    'short_name' => $scheme_item['short_name'],
+                    'description' => $scheme_item['description'] ?? null,
+                    'department_id' => Department::where('short_name', $scheme_item['dept_short_name'])->firstOrFail()->id,
+                ]
+            );
         }
     }
 }

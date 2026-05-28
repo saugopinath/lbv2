@@ -208,7 +208,7 @@ class AnnapurnaYojanaForm extends Component
         } else {
             try {
                 $this->blocks = Municipality::where('district_id', $districtId)->orderBy('name', 'asc')->get();
-                if ($this->blocks->isEmpty()) {
+                if (count($this->blocks) === 0) {
                     $subdivisionIds = DB::table('public.subdivisions')->where('district_id', $districtId)->pluck('id');
                     $this->blocks = Municipality::whereIn('sub_division_id', $subdivisionIds)->orderBy('name', 'asc')->get();
                 }
