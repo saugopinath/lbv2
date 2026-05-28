@@ -270,32 +270,7 @@
 </div>
 
 
-<!-- Geographic Distribution Map Stats -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-    <!-- Card 1: Total Beneficiaries -->
-    <div class="glass-card rounded-2xl p-5 shadow-sm relative overflow-hidden">
-        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Beneficiaries</p>
-        <h3 class="text-3xl font-black text-indigo-600 tracking-tight" id="total-count">0</h3>
-    </div>
-    
-    <!-- Card 2: Total Districts -->
-    <div class="glass-card rounded-2xl p-5 shadow-sm relative overflow-hidden">
-        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Districts</p>
-        <h3 class="text-3xl font-black text-indigo-600 tracking-tight" id="district-count">23</h3>
-    </div>
 
-    <!-- Card 3: Max. Applied Zone -->
-    <div class="glass-card rounded-2xl p-5 shadow-sm relative overflow-hidden">
-        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Max. Applied Zone</p>
-        <h3 class="text-2xl font-black text-indigo-600 truncate tracking-tight" id="highest-district">-</h3>
-    </div>
-
-    <!-- Card 4: Avg / District -->
-    <div class="glass-card rounded-2xl p-5 shadow-sm relative overflow-hidden">
-        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Avg / District</p>
-        <h3 class="text-3xl font-black text-indigo-600 tracking-tight" id="avg-count">0</h3>
-    </div>
-</div>
 
 <!-- ================= MAP SECTION ================= -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
@@ -364,37 +339,15 @@
 <!-- Charts Section -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
     <!-- Scheme Applications Chart -->    <!-- District-wise Beneficiaries -->
-    <div class="chart-container col-span-1">
-        <div class="border-b border-gray-100 pb-4 mb-6">
-            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <i class="fa-solid fa-map-location-dot text-indigo-500"></i>
-                District-wise Member Distribution
-            </h3>
-            <p class="text-xs text-gray-500 mt-1">Geographic SVG Map & Bar Chart Breakdown</p>
-        </div>
+  <div class="chart-container">
+        
 
-        <div class="grid grid-cols-1 gap-6 items-center">
-            <!-- Map Column -->
-            <div class="flex items-center justify-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 h-[600px] relative overflow-hidden" id="charts-map-wrapper">
-                @include('frontend.maps.west_bengal')
-            </div>
-
-            <!-- List / Bar Chart Column -->
-            <div class="flex-1 overflow-hidden drop-shadow-sm">
-                <div id="districtChart"></div>
-            </div>
-        </div>
+        <div id="linechart" style="height: 350px;"></div>
     </div>
 
 
     <div class="chart-container">
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <h3 class="text-lg font-bold text-gray-800">
-                   Caste Wise Member 
-                </h3>
-            </div>
-        </div>
+        
 
         <div id="mispiechart" style="height: 350px;"></div>
     </div>
@@ -1085,183 +1038,7 @@
 
         loadDistrictWiseBeneficiaries();
 
-        function loadDistrictWiseBeneficiaries() {
-            Promise.all([
-                fetch("{{ route('dashboard.districtWiseBeneficiaries') }}", {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' }
-                }).then(res => res.json()).catch(err => {
-                    console.warn('Failed to load GET districtWiseBeneficiaries, using dummy fallback:', err);
-                    return { categories: [], data: [] };
-                }),
-                fetch("{{ route('map.district.count') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({})
-                }).then(res => res.json()).catch(err => {
-                    console.warn('Failed to load POST map district counts, using dummy fallback:', err);
-                    return {};
-                })
-            ])
-            .then(function([chartResponse, mapResponse]) {
-                const mapHasData = mapResponse && Object.values(mapResponse).some(v => parseInt(v) > 0);
-                if (mapHasData) {
-                    districtData = mapResponse;
-                } else {
-                    districtData = {};
-                    Object.keys(dummyDistrictData).forEach(code => {
-                        districtData[code] = dummyDistrictData[code].count;
-                    });
-                }
-
-                const chartHasData = chartResponse && chartResponse.categories && chartResponse.categories.length > 0;
-                if (!chartHasData) {
-                    chartResponse = {
-                        categories: Object.values(dummyDistrictData).map(d => d.name),
-                        data: Object.values(dummyDistrictData).map(d => d.count)
-                    };
-                }
-
-                const chartCountsByName = {};
-                if (chartResponse && chartResponse.categories) {
-                    chartResponse.categories.forEach((cat, idx) => {
-                        chartCountsByName[normalizeName(cat)] = chartResponse.data[idx] || 0;
-                    });
-                }
-
-                const counts = [];
-                
-                document.querySelectorAll('.district').forEach(function(path) {
-                    const code = path.getAttribute('district-code');
-                    const name = path.getAttribute('district-name') || path.dataset.name || '';
-                    
-                    let count = 0;
-                    if (districtData[code] !== undefined) {
-                        count = parseInt(districtData[code]) || 0;
-                    } else {
-                        count = chartCountsByName[normalizeName(name)] || 0;
-                        districtData[code] = count;
-                    }
-                    
-                    path.dataset.count = count;
-                    path.dataset.name = name;
-                    counts.push(count);
-                });
-
-                const maxCount = Math.max(...counts, 1);
-                const minCount = Math.min(...counts, 0);
-
-                document.querySelectorAll('.district').forEach(function(path) {
-                    const count = parseInt(path.dataset.count) || 0;
-                    path.style.fill = getHeatmapColor(count, minCount, maxCount);
-                    
-                    path.addEventListener('mouseenter', e => showTooltip(e, path.dataset.name, count));
-                    path.addEventListener('mousemove', moveTooltip);
-                    path.addEventListener('mouseleave', hideTooltip);
-                    path.addEventListener('click', () => selectDistrict(path));
-                });
-
-                const totalDistricts = chartResponse.categories.length;
-                const barHeight = 45;
-                const minHeight = 350;
-                const chartHeight = Math.max(totalDistricts * barHeight, minHeight);
-
-                districtChartInstance = Highcharts.chart('districtChart', {
-                    chart: {
-                        type: 'bar',
-                        height: chartHeight,
-                        backgroundColor: 'transparent'
-                    },
-                    title: {
-                        text: null
-                    },
-                    xAxis: {
-                        categories: chartResponse.categories,
-                        title: {
-                            text: null
-                        },
-                        labels: {
-                            style: {
-                                color: '#4b5563',
-                                fontSize: '11px',
-                                fontWeight: '500'
-                              }
-                        }
-                    },
-                    yAxis: {
-                        title: {
-                            text: 'Beneficiaries',
-                            style: {
-                                color: '#4b5563',
-                                fontWeight: '600'
-                            }
-                        },
-                        labels: {
-                            style: {
-                                color: '#6b7280'
-                            }
-                        }
-                    },
-                    legend: {
-                        enabled: false
-                    },
-                    plotOptions: {
-                        bar: {
-                            borderRadius: 6,
-                            borderWidth: 0,
-                            dataLabels: {
-                                enabled: true,
-                                style: {
-                                    fontSize: '10px',
-                                    fontWeight: 'bold',
-                                    textOutline: 'none'
-                                }
-                            },
-                            states: {
-                                select: {
-                                    color: '#4f46e5',
-                                    borderColor: '#312e81',
-                                    borderWidth: 2
-                                }
-                            },
-                            point: {
-                                events: {
-                                    click: function() {
-                                        highlightMapPathByName(this.category);
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    series: [{
-                        name: 'Beneficiaries',
-                        data: chartResponse.data,
-                        color: {
-                            linearGradient: {
-                                x1: 0,
-                                y1: 0,
-                                x2: 1,
-                                y2: 0
-                            },
-                            stops: [
-                                [0, '#818cf8'],
-                                [1, '#4f46e5']
-                            ]
-                        }
-                    }],
-                    credits: {
-                        enabled: false
-                    }
-                });
-            })
-            .catch(function(err) {
-                console.error(err);
-                alert('Failed to load district-wise beneficiary data');
-            });
-        }
+  
 
         function loadAgeDistribution() {
             fetch("{{ route('dashboard.ageDistribution') }}", {
@@ -1438,10 +1215,7 @@ Highcharts.chart('mispiechart', {
         type: 'pie'
     },
     title: {
-        text: 'Browser market shares. January, 2022'
-    },
-    subtitle: {
-        text: 'Click the slices to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
+        text: 'Caste wise Member Entry Stat'
     },
 
     accessibility: {
@@ -1490,31 +1264,36 @@ Highcharts.chart('mispiechart', {
 
     series: [
         {
-            name: 'Browsers',
+            name: 'Caste',
             colorByPoint: true,
             data: [
                 {
-                    name: 'Chrome',
+                    name: 'UR',
                     y: 61.04,
-                    drilldown: 'Chrome'
+                    drilldown: 'UR'
                 },
                 {
-                    name: 'Safari',
+                    name: 'UR-EWS',
                     y: 9.47,
-                    drilldown: 'Safari'
+                    drilldown: 'UR-EWS'
                 },
                 {
-                    name: 'Edge',
+                    name: 'SC',
                     y: 9.32,
-                    drilldown: 'Edge'
+                    drilldown: 'SC'
                 },
                 {
-                    name: 'Firefox',
+                    name: 'ST',
                     y: 8.15,
-                    drilldown: 'Firefox'
+                    drilldown: 'ST'
+                },
+                 {
+                    name: 'OBC',
+                    y: 8.15,
+                    drilldown: 'OBC'
                 },
                 {
-                    name: 'Other',
+                    name: 'PVTG',
                     y: 11.02,
                     drilldown: null
                 }
@@ -1736,6 +1515,45 @@ Highcharts.chart('mispiechart', {
         }
     }
 });
+// Data retrieved https://en.wikipedia.org/wiki/List_of_cities_by_average_temperature
+Highcharts.chart('linechart', {
+    title: {
+        text: 'Member Entry in last 7 days'
+    },
+
+    accessibility: {
+        point: {
+            valueDescriptionFormat:
+                '{xDescription}{separator}{value} million(s)'
+        }
+    },
+
+    xAxis: {
+        title: {
+            text: 'Year'
+        },
+        categories: ['day1', 'day2', 'day3', 'day4', 'day5', 'day6', 'day7']
+    },
+
+    yAxis: {
+        type: 'logarithmic',
+        title: {
+            text: 'Number of Members Entry (in thousands)'
+        }
+    },
+
+    tooltip: {
+        headerFormat: '<b>{series.name}</b><br />',
+        pointFormat: '{point.y} million(s)'
+    },
+
+    series: [{
+        name: 'Internet Users',
+        data: [16, 361, 1018, 2025, 3192, 4673, 5200],
+        color: 'var(--highcharts-color-1, #2caffe)'
+    }]
+});
+
 
     });
 </script>
@@ -2013,4 +1831,5 @@ Highcharts.chart('mispiechart', {
         initMap();
     });
 </script>
+
 @endpush
