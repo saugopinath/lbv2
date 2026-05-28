@@ -65,43 +65,5 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         User::observe(UserObserver::class);
-
-        if (config('scout.driver') === 'meilisearch') {
-
-            $client = new \Meilisearch\Client(
-                config('scout.meilisearch.host'),
-                config('scout.meilisearch.key')
-            );
-
-            $index = $client->index('pension_beneficiary_personals');
-
-            // ✅ Sortable attributes (must exist in searchable array)
-            $index->updateSortableAttributes([
-                'application_id',
-                'scheme_id',
-                'district_id',
-                'created_at',
-                'updated_at',
-                'beneficiary_id',
-                'application_id',
-                'created_by_dist_code',
-                'created_by_local_body_code',
-                'next_level_role_id'
-            ]);
-
-            // ✅ Filterable attributes (must exist in searchable array)
-            $index->updateFilterableAttributes([
-                'scheme_id',
-                'district_id',
-                'rural_urban',
-                'blockurban',
-                'gpward',
-                'next_level_role_id',
-                'application_id',
-                'beneficiary_id',
-                'created_by_dist_code',
-                'created_by_local_body_code',
-            ]);
-        }
     }
 }

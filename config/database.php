@@ -181,7 +181,7 @@ return [
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', 'localhost'),
             'port' => env('DB_PORT', '5432'),
-            'database' => 'lb_payments_db',
+            'database' => 'lb_payment_local',
             'username' => env('DB_USERNAME', 'postgres'),
             'password' => env('DB_PASSWORD', '12345'),
             'charset' => env('DB_CHARSET', 'utf8'),
@@ -202,6 +202,22 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'public',
+            'sslmode' => 'prefer',
+        ],
+
+
+        'pgsql_ay' => [
+            'driver' => 'pgsql',
+            'url' => env('DB_URL'),
+            'host' => env('AY_DB_HOST', 'localhost'),
+            'port' => env('AY_DB_PORT', '5432'),
+            'database' => env('AY_DB_DATABASE', 'postgres'),
+            'username' => env('AY_DB_USERNAME', 'postgres'),
+            'password' => env('AY_DB_PASSWORD', '12345'),
+            'charset' => env('DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'dbt_apy',
             'sslmode' => 'prefer',
         ],
 
