@@ -105,6 +105,22 @@ return [
             'search_path' => 'public',
             'sslmode' => 'prefer',
         ],
+
+        'pgsql_apy_uat' => [
+            'driver' => 'pgsql',
+            'url' => env('DB_URL'),
+            'host' => env('DB_APY_UAT_HOST', '10.176.56.59'),
+            'port' => env('DB_APY_UAT_PORT', '5432'),
+            'database' => env('DB_APY_UAT_DATABASE', 'apy_db_uat'),
+            'username' => env('DB_APY_UAT_USERNAME', 'postgres'),
+            'password' => env('DB_APY_UAT_PASSWORD', 'postgres'),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'schema' => env('DB_APY_UAT_SCHEMA', 'dbt_apy'),
+            'search_path' => env('DB_APY_UAT_SCHEMA', 'dbt_apy'),
+            'sslmode' => 'prefer',
+        ],
         'pgsql_jblbV2' => [
             'driver' => 'pgsql',
             'url' => env('DB_URL'),
