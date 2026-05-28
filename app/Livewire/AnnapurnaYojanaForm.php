@@ -2,25 +2,32 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use App\Models\District;
 use App\Models\Block;
+use App\Models\District;
 use App\Models\Municipality;
 use App\Models\Panchayat;
 use App\Models\Ward;
-use App\Models\UniqueAppBenId;
-use App\Models\AnnapurnaYojanaApplication;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Livewire\Component;
 
 class AnnapurnaYojanaForm extends Component
 {
     public $schemeId;
+
     public $schemeName;
+
     public $grievanceId;
+
+    public $familyId = null;
+
+    public $appId = null;
 
     // Form Navigation & Tabs
     public $activeMemberIndex = 0; // 0 = HOF, 1+ = Members
+
     public $activeSection = 'basic'; // basic, identity, bank, income, declaration
 
     // Form Data array
@@ -28,15 +35,19 @@ class AnnapurnaYojanaForm extends Component
 
     // Master lists for location dropdowns
     public $districts = [];
-    public $blocks = []; 
-    public $gps = [];    
+
+    public $blocks = [];
+
+    public $gps = [];
 
     // Dynamic list for family members (max 5)
     public array $members = [];
 
     // Status / Messages
     public $successMessage = null;
+
     public $errorMessage = null;
+
     public bool $showSubmitModal = false;
 
     public function mount($schemeId = 21, $schemeName = 'Annapurna Yojana', $grievanceId = null)
@@ -46,6 +57,9 @@ class AnnapurnaYojanaForm extends Component
         $this->grievanceId = $grievanceId;
         $this->activeMemberIndex = 0;
         $this->activeSection = 'basic';
+
+        // Clear session draft data to start fresh and avoid data retaining bugs
+        session()->forget(['annapurna_form_data', 'annapurna_members', 'annapurna_family_id', 'annapurna_app_id']);
 
         // Initialize form structures
         $this->formData = [
@@ -62,7 +76,7 @@ class AnnapurnaYojanaForm extends Component
             'caste_certificate_no' => '',
             'ews_certificate_no' => '',
             'pvtg_certificate_no' => '',
-            
+
             // Address details
             'state' => 'West Bengal',
             'district_id' => '',
@@ -74,7 +88,7 @@ class AnnapurnaYojanaForm extends Component
             'village_town' => '',
             'house_no' => '',
             'pincode' => '',
- 
+
             // HOF Bank & EPIC details
             'hof_bank_name' => '',
             'hof_acc_no' => '',
@@ -84,7 +98,7 @@ class AnnapurnaYojanaForm extends Component
 
             // Ration details (Section B)
             'has_digital_ration_card' => '',
-            'ration_card_type' => '', 
+            'ration_card_type' => '',
             'is_lifting_ration' => '',
 
             // Assets details (Section C)
@@ -121,13 +135,13 @@ class AnnapurnaYojanaForm extends Component
             'hof_caa_status' => 'Not Applicable', // Not Applicable / Applied / Issued
             'hof_caa_app_no' => '',
             'hof_caa_cert_no' => '',
-            
+
             // HOF Other Credit Cards (KCC, Student CC, etc.)
             'hof_kcc_type' => '', // None / KCC / KCC ARD / Artisan Credit Card / MJCC / Student CC / Others
             'hof_kcc_id_no' => '',
             'hof_kcc_date' => '',
             'hof_kcc_issuing_authority' => '',
-            
+
             // HOF SIR status
             'hof_sir_status' => 'Not Applicable', // Not Applicable / No / Yes
             'hof_sir_case_details' => '',
@@ -191,7 +205,7 @@ class AnnapurnaYojanaForm extends Component
         $districtId = $this->formData['district_id'] ?? null;
         $ruralUrban = $this->formData['rural_urban'] ?? null;
 
-        if (!$districtId || !$ruralUrban) {
+        if (! $districtId || ! $ruralUrban) {
             return;
         }
 
@@ -205,7 +219,7 @@ class AnnapurnaYojanaForm extends Component
                     $this->blocks = Municipality::whereIn('sub_division_id', $subdivisionIds)->orderBy('name', 'asc')->get();
                 }
             } catch (\Exception $e) {
-                Log::error('Error loading municipalities: ' . $e->getMessage());
+                Log::error('Error loading municipalities: '.$e->getMessage());
                 $this->blocks = [];
             }
         }
@@ -216,7 +230,7 @@ class AnnapurnaYojanaForm extends Component
         $blockUrbanId = $this->formData['blockurban'] ?? null;
         $ruralUrban = $this->formData['rural_urban'] ?? null;
 
-        if (!$blockUrbanId || !$ruralUrban) {
+        if (! $blockUrbanId || ! $ruralUrban) {
             return;
         }
 
@@ -227,9 +241,9 @@ class AnnapurnaYojanaForm extends Component
         }
     }
 
-    public function addMember()
+    public function getEmptyMemberStructure()
     {
-        $this->members[] = [
+        return [
             'name' => '',
             'dob' => '',
             'gender' => '',
@@ -241,13 +255,22 @@ class AnnapurnaYojanaForm extends Component
             'ifsc' => '',
             'epic_no' => '',
             'ac_part_no' => '',
-            
+
+            'member_type' => 'adult', // adult or child
+            'school_grade' => '',
+            'school_name' => '',
+            'school_type' => '',
+            'school_type_other' => '',
+            'vaccination_card_id' => '',
+            'vaccination_status' => '',
+            'vaccination_skip_reason_or_date' => '',
+
             // Section B (Ration Card / Food Subsidy)
             'has_digital_ration_card' => '',
             'ration_card_no' => '',
             'ration_card_type' => '',
             'is_lifting_ration' => '',
-            
+
             // Section C (Health Insurance)
             'health_insurance_type' => 'No',
             'health_insurance_premium' => '',
@@ -280,8 +303,41 @@ class AnnapurnaYojanaForm extends Component
                 ['scheme_name' => '', 'opt_out' => false],
             ],
         ];
+    }
+
+    public function updatedFormDataNumFamilyMembers($value)
+    {
+        $value = (int) $value;
+        if ($value < 1) {
+            $value = 1;
+            $this->formData['num_family_members'] = 1;
+        }
+
+        $neededMembers = $value - 1;
+        $currentCount = count($this->members);
+
+        if ($neededMembers > $currentCount) {
+            // Add empty members
+            for ($i = $currentCount; $i < $neededMembers; $i++) {
+                $this->members[] = $this->getEmptyMemberStructure();
+            }
+        } elseif ($neededMembers < $currentCount) {
+            // Truncate members
+            $this->members = array_slice($this->members, 0, $neededMembers);
+        }
+
+        if ($this->activeMemberIndex > count($this->members)) {
+            $this->activeMemberIndex = count($this->members);
+        }
+    }
+
+    public function addMember()
+    {
+        $this->saveDraft();
+
+        $this->members[] = $this->getEmptyMemberStructure();
         $this->formData['num_family_members'] = count($this->members) + 1;
-        
+
         // Auto-switch to the new member tab on basic info section
         $this->activeMemberIndex = count($this->members);
         $this->activeSection = 'basic';
@@ -294,13 +350,22 @@ class AnnapurnaYojanaForm extends Component
         $this->formData['num_family_members'] = count($this->members) + 1;
 
         if ($this->activeMemberIndex > count($this->members)) {
-            $this->activeMemberIndex = 0;
+            $this->activeMemberIndex = count($this->members);
         }
+
+        $this->saveDraft();
     }
 
     public function selectMember($index)
     {
+        $this->saveDraft();
         $this->activeMemberIndex = $index;
+
+        // Ensure the active section is valid for the newly selected member
+        $validSections = array_keys($this->getSections());
+        if (!in_array($this->activeSection, $validSections)) {
+            $this->activeSection = 'basic';
+        }
     }
 
     public function addChildSchool()
@@ -310,7 +375,7 @@ class AnnapurnaYojanaForm extends Component
             'grade' => '',
             'school_name' => '',
             'school_type' => '',
-            'school_type_other' => ''
+            'school_type_other' => '',
         ];
     }
 
@@ -327,7 +392,7 @@ class AnnapurnaYojanaForm extends Component
             'status' => '',
             'card_id' => '',
             'last_vaccination_date' => '',
-            'reason_skipped' => ''
+            'reason_skipped' => '',
         ];
     }
 
@@ -339,38 +404,201 @@ class AnnapurnaYojanaForm extends Component
 
     public function selectSection($section)
     {
+        if ($section === 'declaration' && !$this->areAllMembersFullyFilled()) {
+            return;
+        }
+        $this->saveDraft();
         $this->activeSection = $section;
     }
 
     public function getSections()
     {
-        return [
+        $sections = [
             'basic' => ['label' => 'Basic Info', 'bengali' => 'প্রাথমিক তথ্য'],
             'identity' => ['label' => 'Identity Docs', 'bengali' => 'পরিচয়পত্র'],
             'health' => ['label' => 'Health & Insurance', 'bengali' => 'স্বাস্থ্য ও বীমা'],
             'education' => ['label' => 'Education', 'bengali' => 'শিক্ষা'],
             'income' => ['label' => 'Income & Assets', 'bengali' => 'আয় ও সম্পদ'],
-            'declaration' => ['label' => 'Declaration', 'bengali' => 'ঘোষণা ও সম্মতি'],
         ];
+
+        if ($this->activeMemberIndex > 0) {
+            $index = $this->activeMemberIndex - 1;
+            $member = $this->members[$index] ?? null;
+            if ($member && ($member['member_type'] ?? 'adult') === 'child') {
+                unset($sections['identity']);
+                unset($sections['income']);
+            }
+        }
+
+        if ($this->areAllMembersFullyFilled()) {
+            $sections['declaration'] = ['label' => 'Declaration', 'bengali' => 'ঘোষণা ও সম্মতি'];
+        }
+
+        return $sections;
     }
 
     public function nextSection()
     {
         $this->validateSection($this->activeSection);
-        
+        $this->saveDraft();
+
         $sections = array_keys($this->getSections());
         $currentIndex = array_search($this->activeSection, $sections);
-        
+
         if ($currentIndex !== false && $currentIndex < count($sections) - 1) {
-            $this->activeSection = $sections[$currentIndex + 1];
+            $nextSec = $sections[$currentIndex + 1];
+            if ($nextSec === 'declaration' && !$this->areAllMembersFullyFilled()) {
+                return;
+            }
+            $this->activeSection = $nextSec;
         }
+    }
+
+    public function isSectionFilled($memberIndex, $section)
+    {
+        if ($memberIndex === 0) {
+            if ($section === 'basic') {
+                $category = $this->formData['category'] ?? '';
+                $certOk = true;
+                if (in_array($category, ['SC', 'ST', 'OBC'])) {
+                    $certOk = !empty($this->formData['caste_certificate_no']);
+                } elseif ($category === 'UR-EWS') {
+                    $certOk = !empty($this->formData['ews_certificate_no']);
+                } elseif ($category === 'PVTG') {
+                    $certOk = !empty($this->formData['pvtg_certificate_no']);
+                }
+
+                return !empty($this->formData['hof_name']) &&
+                    !empty($this->formData['hof_dob']) &&
+                    !empty($this->formData['hof_gender']) &&
+                    !empty($this->formData['contact_no']) &&
+                    strlen($this->formData['contact_no']) === 10 &&
+                    !empty($category) &&
+                    $certOk &&
+                    !empty($this->formData['district_id']) &&
+                    !empty($this->formData['rural_urban']) &&
+                    !empty($this->formData['blockurban']) &&
+                    !empty($this->formData['gpward']) &&
+                    !empty($this->formData['village_town']) &&
+                    !empty($this->formData['police_station']) &&
+                    !empty($this->formData['post_office']) &&
+                    !empty($this->formData['pincode']) &&
+                    strlen($this->formData['pincode']) === 6;
+            }
+
+            if ($section === 'identity') {
+                return !empty($this->formData['hof_aadhaar']) &&
+                    strlen($this->formData['hof_aadhaar']) === 12 &&
+                    !empty($this->formData['has_digital_ration_card']) &&
+                    !empty($this->formData['is_lifting_ration']) &&
+                    !empty($this->formData['hof_bank_name']) &&
+                    !empty($this->formData['hof_acc_no']) &&
+                    !empty($this->formData['hof_ifsc']) &&
+                    strlen($this->formData['hof_ifsc']) === 11;
+            }
+
+            if ($section === 'health') {
+                return true;
+            }
+
+            if ($section === 'education') {
+                return true;
+            }
+
+            if ($section === 'income') {
+                return !empty($this->formData['owns_4_wheeler']) &&
+                    !empty($this->formData['total_annual_income']) &&
+                    is_numeric($this->formData['total_annual_income']);
+            }
+
+            if ($section === 'declaration') {
+                return (bool) ($this->formData['agree_consent'] ?? false);
+            }
+        } else {
+            $index = $memberIndex - 1;
+            if (!isset($this->members[$index])) {
+                return false;
+            }
+            $member = $this->members[$index];
+
+            if ($section === 'basic') {
+                return !empty($member['member_type']) &&
+                    !empty($member['name']) &&
+                    !empty($member['dob']) &&
+                    !empty($member['gender']) &&
+                    !empty($member['relation']);
+            }
+
+            if ($section === 'identity') {
+                if (($member['member_type'] ?? 'adult') === 'child') {
+                    return true;
+                }
+                $aadhaar = $member['aadhaar'] ?? '';
+                $aadhaarOk = empty($aadhaar) || strlen($aadhaar) === 12;
+                
+                $bankOk = true;
+                if (($member['applying_for_ay'] ?? 'No') === 'Yes') {
+                    $bankOk = !empty($member['bank_name']) &&
+                        !empty($member['acc_no']) &&
+                        !empty($member['ifsc']) &&
+                        strlen($member['ifsc']) === 11;
+                }
+
+                return $aadhaarOk && $bankOk;
+            }
+
+            if ($section === 'health') {
+                return true;
+            }
+
+            if ($section === 'education') {
+                return true;
+            }
+            
+            return true;
+        }
+
+        return false;
+    }
+
+    public function isMemberFullyFilled($memberIndex)
+    {
+        if ($memberIndex === 0) {
+            return $this->isSectionFilled(0, 'basic') &&
+                $this->isSectionFilled(0, 'identity') &&
+                $this->isSectionFilled(0, 'health') &&
+                $this->isSectionFilled(0, 'education') &&
+                $this->isSectionFilled(0, 'income');
+        } else {
+            return $this->isSectionFilled($memberIndex, 'basic') &&
+                $this->isSectionFilled($memberIndex, 'identity') &&
+                $this->isSectionFilled($memberIndex, 'health') &&
+                $this->isSectionFilled($memberIndex, 'education');
+        }
+    }
+
+    public function areAllMembersFullyFilled()
+    {
+        if (!$this->isMemberFullyFilled(0)) {
+            return false;
+        }
+
+        foreach ($this->members as $index => $member) {
+            if (!$this->isMemberFullyFilled($index + 1)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public function previousSection()
     {
+        $this->saveDraft();
+
         $sections = array_keys($this->getSections());
         $currentIndex = array_search($this->activeSection, $sections);
-        
+
         if ($currentIndex !== false && $currentIndex > 0) {
             $this->activeSection = $sections[$currentIndex - 1];
         }
@@ -433,12 +661,14 @@ class AnnapurnaYojanaForm extends Component
             } else {
                 $index = $this->activeMemberIndex - 1;
                 $rules = [
+                    "members.{$index}.member_type" => 'required|in:adult,child',
                     "members.{$index}.name" => 'required|string|max:255',
                     "members.{$index}.dob" => 'required|date',
                     "members.{$index}.gender" => 'required',
                     "members.{$index}.relation" => 'required',
                 ];
                 $messages = [
+                    "members.{$index}.member_type.required" => 'Member category (Adult/Child) is required.',
                     "members.{$index}.name.required" => 'Member name is required.',
                     "members.{$index}.dob.required" => 'Member DOB is required.',
                     "members.{$index}.gender.required" => 'Member Gender is required.',
@@ -467,23 +697,28 @@ class AnnapurnaYojanaForm extends Component
                 ];
             } else {
                 $index = $this->activeMemberIndex - 1;
-                $rules = [
-                    "members.{$index}.aadhaar" => 'nullable|digits:12',
-                ];
-                $messages = [
-                    "members.{$index}.aadhaar.digits" => 'Member Aadhaar must be 12 digits.',
-                ];
-
                 $member = $this->members[$index];
-                if (($member['applying_for_ay'] ?? 'No') === 'Yes') {
-                    $rules["members.{$index}.bank_name"] = 'required';
-                    $rules["members.{$index}.acc_no"] = 'required';
-                    $rules["members.{$index}.ifsc"] = 'required|size:11';
+                if (($member['member_type'] ?? 'adult') === 'child') {
+                    $rules = [];
+                    $messages = [];
+                } else {
+                    $rules = [
+                        "members.{$index}.aadhaar" => 'nullable|digits:12',
+                    ];
+                    $messages = [
+                        "members.{$index}.aadhaar.digits" => 'Member Aadhaar must be 12 digits.',
+                    ];
 
-                    $messages["members.{$index}.bank_name.required"] = 'Member bank name is required since they are applying for AY.';
-                    $messages["members.{$index}.acc_no.required"] = 'Member bank account number is required since they are applying for AY.';
-                    $messages["members.{$index}.ifsc.required"] = 'Member IFSC is required since they are applying for AY.';
-                    $messages["members.{$index}.ifsc.size"] = 'Member IFSC must be 11 characters.';
+                    if (($member['applying_for_ay'] ?? 'No') === 'Yes') {
+                        $rules["members.{$index}.bank_name"] = 'required';
+                        $rules["members.{$index}.acc_no"] = 'required';
+                        $rules["members.{$index}.ifsc"] = 'required|size:11';
+
+                        $messages["members.{$index}.bank_name.required"] = 'Member bank name is required since they are applying for AY.';
+                        $messages["members.{$index}.acc_no.required"] = 'Member bank account number is required since they are applying for AY.';
+                        $messages["members.{$index}.ifsc.required"] = 'Member IFSC is required since they are applying for AY.';
+                        $messages["members.{$index}.ifsc.size"] = 'Member IFSC must be 11 characters.';
+                    }
                 }
             }
         } elseif ($section === 'health') {
@@ -506,7 +741,7 @@ class AnnapurnaYojanaForm extends Component
             }
         }
 
-        if (!empty($rules)) {
+        if (! empty($rules)) {
             $this->validate($rules, $messages);
         }
     }
@@ -515,6 +750,9 @@ class AnnapurnaYojanaForm extends Component
     {
         $this->activeMemberIndex = 0;
         $this->activeSection = 'basic';
+        $this->familyId = null;
+        $this->appId = null;
+        session()->forget(['annapurna_form_data', 'annapurna_members', 'annapurna_family_id', 'annapurna_app_id']);
         $this->mount($this->schemeId, $this->schemeName, $this->grievanceId);
     }
 
@@ -545,7 +783,7 @@ class AnnapurnaYojanaForm extends Component
             'formData.police_station' => 'required',
             'formData.post_office' => 'required',
             'formData.pincode' => 'required|digits:6',
-            
+
             'formData.hof_aadhaar' => 'required|digits:12',
             'formData.has_digital_ration_card' => 'required',
             'formData.is_lifting_ration' => 'required',
@@ -585,12 +823,12 @@ class AnnapurnaYojanaForm extends Component
             'formData.post_office.required' => 'Post Office is required.',
             'formData.pincode.required' => 'Pincode is required.',
             'formData.pincode.digits' => 'Pincode must be 6 digits.',
-            
+
             'formData.hof_aadhaar.required' => 'HOF Aadhaar number is required.',
             'formData.hof_aadhaar.digits' => 'HOF Aadhaar must be 12 digits.',
             'formData.has_digital_ration_card.required' => 'Ration card selection is required.',
             'formData.is_lifting_ration.required' => 'Ration lifting status selection is required.',
-            
+
             'formData.hof_bank_name.required' => 'HOF Bank Name is required.',
             'formData.hof_acc_no.required' => 'HOF Account Number is required.',
             'formData.hof_ifsc.required' => 'HOF IFSC is required.',
@@ -608,36 +846,36 @@ class AnnapurnaYojanaForm extends Component
             $rules["members.{$index}.gender"] = 'required';
             $rules["members.{$index}.relation"] = 'required';
             $rules["members.{$index}.aadhaar"] = 'nullable|digits:12';
-            
-            $messages["members.{$index}.name.required"] = 'Member #' . ($index + 1) . ' name is required.';
-            $messages["members.{$index}.dob.required"] = 'Member #' . ($index + 1) . ' DOB is required.';
-            $messages["members.{$index}.gender.required"] = 'Member #' . ($index + 1) . ' Gender is required.';
-            $messages["members.{$index}.relation.required"] = 'Member #' . ($index + 1) . ' Relation is required.';
-            $messages["members.{$index}.aadhaar.digits"] = 'Member #' . ($index + 1) . ' Aadhaar must be 12 digits.';
+
+            $messages["members.{$index}.name.required"] = 'Member #'.($index + 1).' name is required.';
+            $messages["members.{$index}.dob.required"] = 'Member #'.($index + 1).' DOB is required.';
+            $messages["members.{$index}.gender.required"] = 'Member #'.($index + 1).' Gender is required.';
+            $messages["members.{$index}.relation.required"] = 'Member #'.($index + 1).' Relation is required.';
+            $messages["members.{$index}.aadhaar.digits"] = 'Member #'.($index + 1).' Aadhaar must be 12 digits.';
 
             if (($member['applying_for_ay'] ?? 'No') === 'Yes') {
                 $rules["members.{$index}.bank_name"] = 'required';
                 $rules["members.{$index}.acc_no"] = 'required';
                 $rules["members.{$index}.ifsc"] = 'required|size:11';
 
-                $messages["members.{$index}.bank_name.required"] = 'Member #' . ($index + 1) . ' bank name is required since they are applying for AY.';
-                $messages["members.{$index}.acc_no.required"] = 'Member #' . ($index + 1) . ' account number is required since they are applying for AY.';
-                $messages["members.{$index}.ifsc.required"] = 'Member #' . ($index + 1) . ' IFSC is required since they are applying for AY.';
-                $messages["members.{$index}.ifsc.size"] = 'Member #' . ($index + 1) . ' IFSC must be 11 characters.';
+                $messages["members.{$index}.bank_name.required"] = 'Member #'.($index + 1).' bank name is required since they are applying for AY.';
+                $messages["members.{$index}.acc_no.required"] = 'Member #'.($index + 1).' account number is required since they are applying for AY.';
+                $messages["members.{$index}.ifsc.required"] = 'Member #'.($index + 1).' IFSC is required since they are applying for AY.';
+                $messages["members.{$index}.ifsc.size"] = 'Member #'.($index + 1).' IFSC must be 11 characters.';
             }
         }
 
         try {
             $this->validate($rules, $messages);
             $this->showSubmitModal = true;
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             // Smart UX redirection to tab containing error
             $firstErrorKey = array_key_first($e->validator->errors()->toArray());
             if ($firstErrorKey) {
                 if (str_starts_with($firstErrorKey, 'members.')) {
                     $parts = explode('.', $firstErrorKey);
                     if (isset($parts[1])) {
-                        $this->activeMemberIndex = ((int)$parts[1]) + 1;
+                        $this->activeMemberIndex = ((int) $parts[1]) + 1;
                         $field = $parts[2] ?? '';
                         if (in_array($field, ['name', 'dob', 'gender', 'relation'])) {
                             $this->activeSection = 'basic';
@@ -648,19 +886,19 @@ class AnnapurnaYojanaForm extends Component
                 } elseif (str_starts_with($firstErrorKey, 'formData.')) {
                     $this->activeMemberIndex = 0; // HOF
                     $field = str_replace('formData.', '', $firstErrorKey);
-                    
+
                     $basicFields = [
                         'hof_name', 'hof_dob', 'hof_gender', 'contact_no', 'category',
                         'caste_certificate_no', 'ews_certificate_no', 'pvtg_certificate_no',
                         'district_id', 'rural_urban', 'blockurban', 'gpward',
-                        'village_town', 'police_station', 'post_office', 'pincode'
+                        'village_town', 'police_station', 'post_office', 'pincode',
                     ];
-                    
+
                     $identityFields = [
                         'hof_aadhaar', 'has_digital_ration_card', 'is_lifting_ration',
-                        'hof_bank_name', 'hof_acc_no', 'hof_ifsc'
+                        'hof_bank_name', 'hof_acc_no', 'hof_ifsc',
                     ];
-                    
+
                     if (in_array($field, $basicFields)) {
                         $this->activeSection = 'basic';
                     } elseif (in_array($field, $identityFields)) {
@@ -685,119 +923,547 @@ class AnnapurnaYojanaForm extends Component
         $this->errorMessage = null;
 
         try {
-            DB::beginTransaction();
+            DB::connection('pgsql_annapurna')->beginTransaction();
 
-            // 1. Generate unique application ID and beneficiary ID from lb_scheme.unique_app_ben_ids
-            $applicationId = DB::table('lb_scheme.unique_app_ben_ids')->insertGetId([
-                'scheme_id' => $this->schemeId,
-                'created_at' => now(),
-                'updated_at' => now()
-            ], 'application_id');
-            
-            $uniqueRow = DB::table('lb_scheme.unique_app_ben_ids')->where('application_id', $applicationId)->first();
-            $beneficiaryId = $uniqueRow->beneficiary_id;
+            // 1. Get LGD codes for locations
+            $district = District::find($this->formData['district_id'] ?? null);
+            $lgdDistrictCode = $district ? $district->lgd_code : null;
 
-            // 2. Map caste category to integer
-            $casteId = 19; // Default General
-            if (($this->formData['category'] ?? '') === 'SC') {
-                $casteId = 17;
-            } elseif (($this->formData['category'] ?? '') === 'ST') {
-                $casteId = 18;
+            $lgdBlockMcCode = null;
+            if (($this->formData['rural_urban'] ?? null) == 2) {
+                $block = Block::find($this->formData['blockurban'] ?? null);
+                $lgdBlockMcCode = $block ? $block->lgd_code : null;
+            } else {
+                $municipality = Municipality::find($this->formData['blockurban'] ?? null);
+                $lgdBlockMcCode = $municipality ? $municipality->lgd_code : null;
             }
 
-            // 3. Insert family details into lb_scheme.annapurna_yojana_family_details
-            DB::table('lb_scheme.annapurna_yojana_family_details')->insert([
-                'scheme_id' => $this->schemeId,
-                'application_id' => $applicationId,
-                'beneficiary_id' => $beneficiaryId,
-                'application_type' => 'New',
-                'application_date' => now()->format('Y-m-d'),
-                'ds_registration_no' => null,
-                'ds_date' => null,
-                'applicant_name' => $this->formData['hof_name'] ?? null,
-                'dob' => !empty($this->formData['hof_dob']) ? $this->formData['hof_dob'] : null,
-                'age' => !empty($this->formData['hof_dob']) ? \Illuminate\Support\Carbon::parse($this->formData['hof_dob'])->age : null,
-                'gender' => $this->formData['hof_gender'] ?? null,
-                'father_husband_name' => null,
-                'mother_name' => null,
-                'marital_status' => null,
-                'spouse_name' => null,
-                'caste' => $casteId,
-                'caste_certificate_no' => (!empty($this->formData['caste_certificate_no']) ? $this->formData['caste_certificate_no'] : null)
-                    ?? (!empty($this->formData['ews_certificate_no']) ? $this->formData['ews_certificate_no'] : null)
-                    ?? (!empty($this->formData['pvtg_certificate_no']) ? $this->formData['pvtg_certificate_no'] : null),
-                'religion' => null,
-                'education' => $this->formData['hof_highest_qualification'] ?? null,
-                'occupation' => $this->formData['hof_employment_nature'] ?? null,
-                'aadhaar_no' => $this->formData['hof_aadhaar'] ?? null,
-                'epic_voter_id' => $this->formData['hof_epic_no'] ?? null,
-                'pan_no' => $this->formData['hof_pan_no'] ?? null,
-                'mobile_no' => $this->formData['contact_no'] ?? null,
-                'email' => null,
-                'district_id' => !empty($this->formData['district_id']) ? (int)$this->formData['district_id'] : null,
-                'rural_urban' => !empty($this->formData['rural_urban']) ? (int)$this->formData['rural_urban'] : null,
-                'blockurban' => !empty($this->formData['blockurban']) ? (int)$this->formData['blockurban'] : null,
-                'gpward' => !empty($this->formData['gpward']) ? (int)$this->formData['gpward'] : null,
-                'sub_division_id' => null,
-                'police_station' => $this->formData['police_station'] ?? null,
-                'post_office' => $this->formData['post_office'] ?? null,
-                'village_town' => $this->formData['village_town'] ?? null,
-                'house_no' => $this->formData['house_no'] ?? null,
-                'pincode' => $this->formData['pincode'] ?? null,
-                'years_dwelling_wb' => null,
-                'ration_card_type' => $this->formData['ration_card_type'] ?? null,
-                'ration_card_no' => $this->formData['hof_ration_card_id'] ?? null,
-                'ahl_tin' => null,
-                'total_family_members' => (int)($this->formData['num_family_members'] ?? 1),
-                'monthly_family_income' => !empty($this->formData['total_annual_income']) ? round((float)$this->formData['total_annual_income'] / 12, 2) : null,
-                'bpl_seq_no' => null,
-                'bpl_id_no' => null,
-                'bpl_total_score' => null,
-                'land_type' => null,
-                'land_area_bigha' => !empty($this->formData['land_size_decimals']) ? round((float)$this->formData['land_size_decimals'] / 33, 2) : null,
-                'bank_name' => $this->formData['hof_bank_name'] ?? null,
-                'bank_branch' => null,
-                'ifsc_code' => $this->formData['hof_ifsc'] ?? null,
-                'account_no' => $this->formData['hof_acc_no'] ?? null,
-                'account_holder_name' => $this->formData['hof_name'] ?? null,
-                'other_details' => json_encode($this->formData),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            $lgdGpWardCode = null;
+            if (($this->formData['rural_urban'] ?? null) == 2) {
+                $panchayat = Panchayat::find($this->formData['gpward'] ?? null);
+                $lgdGpWardCode = $panchayat ? $panchayat->lgd_code : null;
+            } else {
+                $ward = Ward::find($this->formData['gpward'] ?? null);
+                $lgdGpWardCode = $ward ? $ward->lgd_code : null;
+            }
 
-            // 4. Insert family members into lb_scheme.annapurna_yojana_family_members
-            foreach ($this->members as $member) {
-                DB::table('lb_scheme.annapurna_yojana_family_members')->insert([
-                    'application_id' => $applicationId,
-                    'member_name' => $member['name'] ?? null,
-                    'member_dob' => !empty($member['dob']) ? $member['dob'] : null,
-                    'member_age' => !empty($member['dob']) ? \Illuminate\Support\Carbon::parse($member['dob'])->age : null,
-                    'member_gender' => $member['gender'] ?? null,
-                    'member_relation' => $member['relation'] ?? null,
-                    'member_aadhaar' => $member['aadhaar'] ?? null,
-                    'member_occupation' => $member['employment_nature'] ?? null,
-                    'member_income' => null,
-                    'is_disabled' => 0,
-                    'disability_type' => null,
-                    'is_student' => 0,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+            $lgdDistrictCode = $lgdDistrictCode ? (int) $lgdDistrictCode : 0;
+            $lgdBlockMcCode = $lgdBlockMcCode ? (int) $lgdBlockMcCode : 0;
+            $lgdGpWardCode = $lgdGpWardCode ? (int) $lgdGpWardCode : 0;
+
+            // 2. Construct address string
+            $address = trim(($this->formData['house_no'] ? $this->formData['house_no'].', ' : '').$this->formData['village_town'].', P.O. '.$this->formData['post_office'].', P.S. '.$this->formData['police_station'].', PIN '.$this->formData['pincode']);
+
+            // 3. Generate or reuse UUID for application_id
+            if (! $this->appId) {
+                $this->appId = (string) Str::uuid();
+            }
+            $appId = $this->appId;
+
+            // 4. Update or Insert family details into dbt_apy.families
+            $familyData = [
+                'application_id' => $appId,
+                'total_family_members' => (int) ($this->formData['num_family_members'] ?? 1),
+                'lifting_monthly_ration' => (($this->formData['is_lifting_ration'] ?? '') === 'Yes'),
+                'has_electricity_connection' => false,
+                'is_agreed' => (bool) ($this->formData['agree_consent'] ?? false),
+                'application_status' => 'SUBMITTED',
+                'lgd_district_code' => $lgdDistrictCode,
+                'lgd_block_mc_code' => $lgdBlockMcCode,
+                'lgd_gp_ward_code' => $lgdGpWardCode,
+                'address' => $address,
+                'has_digital_ration_card' => (($this->formData['has_digital_ration_card'] ?? '') === 'Yes'),
+                'ration_card_household_id' => $this->formData['hof_ration_card_id'] ?? null,
+                'no_of_illiterate_adults' => ! empty($this->formData['num_illiterate_adults']) ? (int) $this->formData['num_illiterate_adults'] : null,
+                'no_of_literate_adults' => ! empty($this->formData['num_literate_adults']) ? (int) $this->formData['num_literate_adults'] : null,
+                'total_annual_family_income' => ! empty($this->formData['total_annual_income']) ? (int) $this->formData['total_annual_income'] : null,
+                'area_type' => $this->formData['rural_urban'] == 2 ? 'RURAL' : 'URBAN',
+                'ulb' => $this->formData['rural_urban'] == 1 ? (int) $this->formData['blockurban'] : null,
+                'updated_at' => now(),
+            ];
+
+            if ($this->familyId) {
+                DB::connection('pgsql_annapurna')->table('dbt_apy.families')->where('id', $this->familyId)->update($familyData);
+                $familyId = $this->familyId;
+            } else {
+                $familyData['created_at'] = now();
+                $familyId = DB::connection('pgsql_annapurna')->table('dbt_apy.families')->insertGetId($familyData, 'id');
+                $this->familyId = $familyId;
+            }
+
+            // Clear old entries to avoid duplicates on final submission
+            $existingMemberIds = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->pluck('id')->toArray();
+            if (! empty($existingMemberIds)) {
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->whereIn('family_member_id', $existingMemberIds)->delete();
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->whereIn('family_member_id', $existingMemberIds)->delete();
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->whereIn('family_member_id', $existingMemberIds)->delete();
+                DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->delete();
+            }
+
+            // 5. Insert HOF into dbt_apy.family_members
+            $hofMemberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->insertGetId([
+                'family_id' => $familyId,
+                'is_hof' => true,
+                'member_name' => $this->formData['hof_name'] ?? '',
+                'aadhaar_no' => $this->formData['hof_aadhaar'] ?? '',
+                'mobile_no' => $this->formData['contact_no'] ?? null,
+                'date_of_birth' => $this->formData['hof_dob'] ?? null,
+                'gender' => $this->formData['hof_gender'] ?? null,
+                'digital_ration_card_no' => $this->formData['hof_ration_card_id'] ?? null,
+                'digital_ration_card_type' => $this->formData['ration_card_type'] ?? null,
+                'social_category' => $this->formData['category'] ?? null,
+                'bank_name' => $this->formData['hof_bank_name'] ?? null,
+                'bank_account_no' => $this->formData['hof_acc_no'] ?? null,
+                'ifsc_code' => $this->formData['hof_ifsc'] ?? null,
+                'epic_no' => $this->formData['hof_epic_no'] ?? null,
+                'part_no' => $this->formData['hof_ac_part_no'] ?? null,
+                'caa_application_status' => $this->formData['hof_caa_status'] ?? 'Not Applicable',
+                'caa_application_no' => $this->formData['hof_caa_app_no'] ?? null,
+                'caa_certificate_no' => $this->formData['hof_caa_cert_no'] ?? null,
+                'sir2026tribunal_status' => $this->formData['hof_sir_status'] ?? 'Not Applicable',
+                'sir2026case_details' => $this->formData['hof_sir_case_details'] ?? null,
+                'has_four_wheeler' => (($this->formData['owns_4_wheeler'] ?? '') === 'Yes'),
+                'vehicle_count' => ! empty($this->formData['num_vehicles']) ? (int) $this->formData['num_vehicles'] : null,
+                'vehicle_registration_no' => $this->formData['vehicle_reg_no'] ?? null,
+                'vehicle_model' => $this->formData['vehicle_model'] ?? null,
+                'has_health_insurance' => (($this->formData['health_insurance_type'] ?? 'None') !== 'None'),
+                'health_insurance_type' => $this->formData['health_insurance_type'] ?? null,
+                'health_insurance_sum_assured' => ! empty($this->formData['health_insurance_sum_assured']) ? (float) $this->formData['health_insurance_sum_assured'] : null,
+                'health_insurance_annual_premium' => ! empty($this->formData['health_insurance_premium']) ? (float) $this->formData['health_insurance_premium'] : null,
+                'literacy_status' => $this->formData['hof_literate_status'] ?? null,
+                'highest_educational_qualifications' => $this->formData['hof_highest_qualification'] ?? null,
+                'gross_annual_income' => ! empty($this->formData['total_annual_income']) ? (float) $this->formData['total_annual_income'] : null,
+                'pays_income_or_professional_tax' => (($this->formData['pays_tax'] ?? '') === 'Yes'),
+                'pan_no' => $this->formData['hof_pan_no'] ?? null,
+                'holds_constitutional_post' => (($this->formData['has_constitutional_post'] ?? '') === 'Yes'),
+                'constitutional_post_member_no' => $this->formData['constitutional_post_details'] ?? null,
+                'is_registered_gst' => (($this->formData['has_gst_reg'] ?? '') === 'Yes'),
+                'gstin' => $this->formData['gstin'] ?? null,
+                'is_child' => false,
+                'is_govt_pensioner' => (($this->formData['has_pensioner'] ?? '') === 'Yes'),
+                'govt_pensioner_member_no' => $this->formData['pensioner_details'] ?? null,
+                'relation_with_head_of_family' => 'Self',
+                'applying_for_annapurna_bhandar' => (($this->formData['hof_applying_for_ay'] ?? '') === 'Yes'),
+                'has_pan_card' => ! empty($this->formData['hof_pan_no']),
+                'has_three_pucca_rooms' => (($this->formData['has_pucca_rooms'] ?? '') === 'Yes'),
+                'owns_land' => (($this->formData['owns_land'] ?? '') === 'Yes'),
+                'landholding_size_decimals' => ! empty($this->formData['land_size_decimals']) ? (float) $this->formData['land_size_decimals'] : null,
+                'lgd_district_code' => $lgdDistrictCode,
+                'lgd_block_mc_code' => $lgdBlockMcCode,
+                'lgd_gp_ward_code' => $lgdGpWardCode,
+            ], 'id');
+
+            // HOF employment nature
+            if (! empty($this->formData['hof_employment_nature'])) {
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->insert([
+                    'family_member_id' => $hofMemberId,
+                    'employment_type' => $this->formData['hof_employment_nature'],
+                    'lgd_district_code' => $lgdDistrictCode,
                 ]);
             }
 
-            DB::commit();
+            // HOF govt schemes
+            if (($this->formData['hof_has_dbt_benefits'] ?? 'No') === 'Yes') {
+                foreach ($this->formData['hof_dbt_benefits'] as $benefit) {
+                    if (! empty($benefit['scheme_name'])) {
+                        DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->insert([
+                            'family_member_id' => $hofMemberId,
+                            'scheme_name' => $benefit['scheme_name'],
+                            'opt_out' => (bool) ($benefit['opt_out'] ?? false),
+                            'lgd_district_code' => $lgdDistrictCode,
+                        ]);
+                    }
+                }
+            }
 
-            $this->successMessage = "Application submitted successfully! Application ID: " . $applicationId;
+            // HOF credit card / other id
+            if (! empty($this->formData['hof_kcc_type']) && $this->formData['hof_kcc_type'] !== 'None') {
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->insert([
+                    'family_member_id' => $hofMemberId,
+                    'id_type' => $this->formData['hof_kcc_type'],
+                    'issue_date' => $this->formData['hof_kcc_date'] ?? '',
+                    'lgd_district_code' => $lgdDistrictCode,
+                ]);
+            }
+
+            // 6. Insert other family members into dbt_apy.family_members
+            foreach ($this->members as $member) {
+                $isChild = (($member['member_type'] ?? 'adult') === 'child');
+                $memberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->insertGetId([
+                    'family_id' => $familyId,
+                    'is_hof' => false,
+                    'member_name' => $member['name'] ?? '',
+                    'aadhaar_no' => $member['aadhaar'] ?? '',
+                    'mobile_no' => null,
+                    'date_of_birth' => $member['dob'] ?? null,
+                    'gender' => $member['gender'] ?? null,
+                    'digital_ration_card_no' => $isChild ? null : ($member['ration_card_no'] ?? null),
+                    'digital_ration_card_type' => $isChild ? null : ($member['ration_card_type'] ?? null),
+                    'social_category' => $this->formData['category'] ?? null,
+                    'bank_name' => $isChild ? null : ($member['bank_name'] ?? null),
+                    'bank_account_no' => $isChild ? null : ($member['acc_no'] ?? null),
+                    'ifsc_code' => $isChild ? null : ($member['ifsc'] ?? null),
+                    'epic_no' => $isChild ? null : ($member['epic_no'] ?? null),
+                    'part_no' => $isChild ? null : ($member['ac_part_no'] ?? null),
+                    'caa_application_status' => $isChild ? 'Not Applicable' : ($member['caa_status'] ?? 'Not Applicable'),
+                    'caa_application_no' => $isChild ? null : ($member['caa_app_no'] ?? null),
+                    'caa_certificate_no' => $isChild ? null : ($member['caa_cert_no'] ?? null),
+                    'sir2026tribunal_status' => $isChild ? 'Not Applicable' : ($member['sir_status'] ?? 'Not Applicable'),
+                    'sir2026case_details' => $isChild ? null : ($member['sir_case_details'] ?? null),
+                    'has_four_wheeler' => false,
+                    'has_health_insurance' => $isChild ? false : (($member['health_insurance_type'] ?? 'No') !== 'No'),
+                    'health_insurance_type' => $isChild ? null : ($member['health_insurance_type'] ?? null),
+                    'health_insurance_sum_assured' => (!$isChild && !empty($member['health_insurance_sum_assured'])) ? (float) $member['health_insurance_sum_assured'] : null,
+                    'health_insurance_annual_premium' => (!$isChild && !empty($member['health_insurance_premium'])) ? (float) $member['health_insurance_premium'] : null,
+                    'literacy_status' => $isChild ? null : ($member['literate_status'] ?? null),
+                    'highest_educational_qualifications' => $isChild ? null : ($member['highest_qualification'] ?? null),
+                    'gross_annual_income' => null,
+                    'pays_income_or_professional_tax' => false,
+                    'pan_no' => $isChild ? null : ($member['pan_no'] ?? null),
+                    'holds_constitutional_post' => false,
+                    'is_registered_gst' => false,
+                    'is_child' => $isChild,
+                    'is_govt_pensioner' => false,
+                    'relation_with_head_of_family' => $member['relation'] ?? null,
+                    'applying_for_annapurna_bhandar' => !$isChild && (($member['applying_for_ay'] ?? 'No') === 'Yes'),
+                    'has_pan_card' => !$isChild && !empty($member['pan_no']),
+                    'lgd_district_code' => $lgdDistrictCode,
+                    'lgd_block_mc_code' => $lgdBlockMcCode,
+                    'lgd_gp_ward_code' => $lgdGpWardCode,
+
+                    // Child specific fields
+                    'school_grade' => $isChild ? ($member['school_grade'] ?? null) : null,
+                    'school_name' => $isChild ? ($member['school_name'] ?? null) : null,
+                    'school_type' => $isChild ? ($member['school_type'] ?? null) : null,
+                    'school_type_other' => $isChild ? ($member['school_type_other'] ?? null) : null,
+                    'vaccination_card_id' => $isChild ? ($member['vaccination_card_id'] ?? null) : null,
+                    'vaccination_status' => $isChild ? ($member['vaccination_status'] ?? null) : null,
+                    'vaccination_skip_reason_or_date' => $isChild ? ($member['vaccination_skip_reason_or_date'] ?? null) : null,
+                ], 'id');
+
+                // Member employment nature
+                if (!$isChild && !empty($member['employment_nature'])) {
+                    DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->insert([
+                        'family_member_id' => $memberId,
+                        'employment_type' => $member['employment_nature'],
+                        'lgd_district_code' => $lgdDistrictCode,
+                    ]);
+                }
+
+                // Member govt schemes
+                if (!$isChild && ($member['has_dbt_benefits'] ?? 'No') === 'Yes') {
+                    foreach ($member['dbt_benefits'] as $benefit) {
+                        if (! empty($benefit['scheme_name'])) {
+                            DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->insert([
+                                'family_member_id' => $memberId,
+                                'scheme_name' => $benefit['scheme_name'],
+                                'opt_out' => (bool) ($benefit['opt_out'] ?? false),
+                                'lgd_district_code' => $lgdDistrictCode,
+                            ]);
+                        }
+                    }
+                }
+
+                // Member credit card / other id
+                if (!$isChild && !empty($member['kcc_type']) && $member['kcc_type'] !== 'None') {
+                    DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->insert([
+                        'family_member_id' => $memberId,
+                        'id_type' => $member['kcc_type'],
+                        'issue_date' => $member['kcc_date'] ?? '',
+                        'lgd_district_code' => $lgdDistrictCode,
+                    ]);
+                }
+            }
+
+            DB::connection('pgsql_annapurna')->commit();
+
+            $this->successMessage = 'Application submitted successfully! Application ID: '.$appId;
             $this->showSubmitModal = false;
 
             // Reset form
             $this->resetForm();
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error saving Annapurna Yojana application: ' . $e->getMessage());
-            $this->errorMessage = "An error occurred while saving the application: " . $e->getMessage();
+            DB::connection('pgsql_annapurna')->rollBack();
+            Log::error('Error saving Annapurna Yojana application: '.$e->getMessage());
+            $this->errorMessage = 'An error occurred while saving the application: '.$e->getMessage();
             $this->showSubmitModal = false;
+        }
+    }
+
+    public function saveDraft()
+    {
+        // Don't save draft if HOF name and contact are both completely blank
+        if (empty($this->formData['hof_name']) && empty($this->formData['contact_no'])) {
+            return;
+        }
+
+        try {
+            DB::connection('pgsql_annapurna')->beginTransaction();
+
+            // 1. Get LGD codes for locations
+            $district = District::find($this->formData['district_id'] ?? null);
+            $lgdDistrictCode = $district ? $district->lgd_code : null;
+
+            $lgdBlockMcCode = null;
+            if (($this->formData['rural_urban'] ?? null) == 2) {
+                $block = Block::find($this->formData['blockurban'] ?? null);
+                $lgdBlockMcCode = $block ? $block->lgd_code : null;
+            } elseif (($this->formData['rural_urban'] ?? null) == 1) {
+                $municipality = Municipality::find($this->formData['blockurban'] ?? null);
+                $lgdBlockMcCode = $municipality ? $municipality->lgd_code : null;
+            }
+
+            $lgdGpWardCode = null;
+            if (($this->formData['rural_urban'] ?? null) == 2) {
+                $panchayat = Panchayat::find($this->formData['gpward'] ?? null);
+                $lgdGpWardCode = $panchayat ? $panchayat->lgd_code : null;
+            } elseif (($this->formData['rural_urban'] ?? null) == 1) {
+                $ward = Ward::find($this->formData['gpward'] ?? null);
+                $lgdGpWardCode = $ward ? $ward->lgd_code : null;
+            }
+
+            $lgdDistrictCode = $lgdDistrictCode ? (int) $lgdDistrictCode : 0;
+            $lgdBlockMcCode = $lgdBlockMcCode ? (int) $lgdBlockMcCode : 0;
+            $lgdGpWardCode = $lgdGpWardCode ? (int) $lgdGpWardCode : 0;
+
+            // 2. Construct address string
+            $address = trim(($this->formData['house_no'] ? $this->formData['house_no'].', ' : '').$this->formData['village_town'].', P.O. '.$this->formData['post_office'].', P.S. '.$this->formData['police_station'].', PIN '.$this->formData['pincode']);
+
+            // 3. Generate or reuse UUID for application_id
+            if (! $this->appId) {
+                $this->appId = (string) Str::uuid();
+            }
+            $appId = $this->appId;
+
+            // 4. Update or Insert family details into dbt_apy.families
+            $familyData = [
+                'application_id' => $appId,
+                'total_family_members' => (int) ($this->formData['num_family_members'] ?? 1),
+                'lifting_monthly_ration' => (($this->formData['is_lifting_ration'] ?? '') === 'Yes'),
+                'has_electricity_connection' => false,
+                'is_agreed' => (bool) ($this->formData['agree_consent'] ?? false),
+                'application_status' => 'DRAFT',
+                'lgd_district_code' => $lgdDistrictCode,
+                'lgd_block_mc_code' => $lgdBlockMcCode,
+                'lgd_gp_ward_code' => $lgdGpWardCode,
+                'address' => $address,
+                'has_digital_ration_card' => (($this->formData['has_digital_ration_card'] ?? '') === 'Yes'),
+                'ration_card_household_id' => $this->formData['hof_ration_card_id'] ?? null,
+                'no_of_illiterate_adults' => ! empty($this->formData['num_illiterate_adults']) ? (int) $this->formData['num_illiterate_adults'] : null,
+                'no_of_literate_adults' => ! empty($this->formData['num_literate_adults']) ? (int) $this->formData['num_literate_adults'] : null,
+                'total_annual_family_income' => ! empty($this->formData['total_annual_income']) ? (int) $this->formData['total_annual_income'] : null,
+                'area_type' => ($this->formData['rural_urban'] ?? '') == 2 ? 'RURAL' : (($this->formData['rural_urban'] ?? '') == 1 ? 'URBAN' : null),
+                'ulb' => ($this->formData['rural_urban'] ?? '') == 1 ? (int) ($this->formData['blockurban'] ?? null) : null,
+                'updated_at' => now(),
+            ];
+
+            if ($this->familyId) {
+                DB::connection('pgsql_annapurna')->table('dbt_apy.families')->where('id', $this->familyId)->update($familyData);
+                $familyId = $this->familyId;
+            } else {
+                $familyData['created_at'] = now();
+                $familyId = DB::connection('pgsql_annapurna')->table('dbt_apy.families')->insertGetId($familyData, 'id');
+                $this->familyId = $familyId;
+            }
+
+            // Clear old entries to avoid duplicates on draft transitions
+            $existingMemberIds = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->pluck('id')->toArray();
+            if (! empty($existingMemberIds)) {
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->whereIn('family_member_id', $existingMemberIds)->delete();
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->whereIn('family_member_id', $existingMemberIds)->delete();
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->whereIn('family_member_id', $existingMemberIds)->delete();
+                DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->delete();
+            }
+
+            // 5. Insert HOF into dbt_apy.family_members
+            $hofMemberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->insertGetId([
+                'family_id' => $familyId,
+                'is_hof' => true,
+                'member_name' => $this->formData['hof_name'] ?? '',
+                'aadhaar_no' => $this->formData['hof_aadhaar'] ?? '',
+                'mobile_no' => $this->formData['contact_no'] ?? null,
+                'date_of_birth' => $this->formData['hof_dob'] ?? null,
+                'gender' => $this->formData['hof_gender'] ?? null,
+                'digital_ration_card_no' => $this->formData['hof_ration_card_id'] ?? null,
+                'digital_ration_card_type' => $this->formData['ration_card_type'] ?? null,
+                'social_category' => $this->formData['category'] ?? null,
+                'bank_name' => $this->formData['hof_bank_name'] ?? null,
+                'bank_account_no' => $this->formData['hof_acc_no'] ?? null,
+                'ifsc_code' => $this->formData['hof_ifsc'] ?? null,
+                'epic_no' => $this->formData['hof_epic_no'] ?? null,
+                'part_no' => $this->formData['hof_ac_part_no'] ?? null,
+                'caa_application_status' => $this->formData['hof_caa_status'] ?? 'Not Applicable',
+                'caa_application_no' => $this->formData['hof_caa_app_no'] ?? null,
+                'caa_certificate_no' => $this->formData['hof_caa_cert_no'] ?? null,
+                'sir2026tribunal_status' => $this->formData['hof_sir_status'] ?? 'Not Applicable',
+                'sir2026case_details' => $this->formData['hof_sir_case_details'] ?? null,
+                'has_four_wheeler' => (($this->formData['owns_4_wheeler'] ?? '') === 'Yes'),
+                'vehicle_count' => ! empty($this->formData['num_vehicles']) ? (int) $this->formData['num_vehicles'] : null,
+                'vehicle_registration_no' => $this->formData['vehicle_reg_no'] ?? null,
+                'vehicle_model' => $this->formData['vehicle_model'] ?? null,
+                'has_health_insurance' => (($this->formData['health_insurance_type'] ?? 'None') !== 'None'),
+                'health_insurance_type' => $this->formData['health_insurance_type'] ?? null,
+                'health_insurance_sum_assured' => ! empty($this->formData['health_insurance_sum_assured']) ? (float) $this->formData['health_insurance_sum_assured'] : null,
+                'health_insurance_annual_premium' => ! empty($this->formData['health_insurance_premium']) ? (float) $this->formData['health_insurance_premium'] : null,
+                'literacy_status' => $this->formData['hof_literate_status'] ?? null,
+                'highest_educational_qualifications' => $this->formData['hof_highest_qualification'] ?? null,
+                'gross_annual_income' => ! empty($this->formData['total_annual_income']) ? (float) $this->formData['total_annual_income'] : null,
+                'pays_income_or_professional_tax' => (($this->formData['pays_tax'] ?? '') === 'Yes'),
+                'pan_no' => $this->formData['hof_pan_no'] ?? null,
+                'holds_constitutional_post' => (($this->formData['has_constitutional_post'] ?? '') === 'Yes'),
+                'constitutional_post_member_no' => $this->formData['constitutional_post_details'] ?? null,
+                'is_registered_gst' => (($this->formData['has_gst_reg'] ?? '') === 'Yes'),
+                'gstin' => $this->formData['gstin'] ?? null,
+                'is_child' => false,
+                'is_govt_pensioner' => (($this->formData['has_pensioner'] ?? '') === 'Yes'),
+                'govt_pensioner_member_no' => $this->formData['pensioner_details'] ?? null,
+                'relation_with_head_of_family' => 'Self',
+                'applying_for_annapurna_bhandar' => (($this->formData['hof_applying_for_ay'] ?? '') === 'Yes'),
+                'has_pan_card' => ! empty($this->formData['hof_pan_no']),
+                'has_three_pucca_rooms' => (($this->formData['has_pucca_rooms'] ?? '') === 'Yes'),
+                'owns_land' => (($this->formData['owns_land'] ?? '') === 'Yes'),
+                'landholding_size_decimals' => ! empty($this->formData['land_size_decimals']) ? (float) $this->formData['land_size_decimals'] : null,
+                'lgd_district_code' => $lgdDistrictCode,
+                'lgd_block_mc_code' => $lgdBlockMcCode,
+                'lgd_gp_ward_code' => $lgdGpWardCode,
+            ], 'id');
+
+            // HOF employment nature
+            if (! empty($this->formData['hof_employment_nature'])) {
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->insert([
+                    'family_member_id' => $hofMemberId,
+                    'employment_type' => $this->formData['hof_employment_nature'],
+                    'lgd_district_code' => $lgdDistrictCode,
+                ]);
+            }
+
+            // HOF govt schemes
+            if (($this->formData['hof_has_dbt_benefits'] ?? 'No') === 'Yes') {
+                foreach ($this->formData['hof_dbt_benefits'] as $benefit) {
+                    if (! empty($benefit['scheme_name'])) {
+                        DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->insert([
+                            'family_member_id' => $hofMemberId,
+                            'scheme_name' => $benefit['scheme_name'],
+                            'opt_out' => (bool) ($benefit['opt_out'] ?? false),
+                            'lgd_district_code' => $lgdDistrictCode,
+                        ]);
+                    }
+                }
+            }
+
+            // HOF credit card / other id
+            if (! empty($this->formData['hof_kcc_type']) && $this->formData['hof_kcc_type'] !== 'None') {
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->insert([
+                    'family_member_id' => $hofMemberId,
+                    'id_type' => $this->formData['hof_kcc_type'],
+                    'issue_date' => $this->formData['hof_kcc_date'] ?? '',
+                    'lgd_district_code' => $lgdDistrictCode,
+                ]);
+            }
+
+            // 6. Insert other family members into dbt_apy.family_members
+            foreach ($this->members as $member) {
+                $isChild = (($member['member_type'] ?? 'adult') === 'child');
+                $memberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->insertGetId([
+                    'family_id' => $familyId,
+                    'is_hof' => false,
+                    'member_name' => $member['name'] ?? '',
+                    'aadhaar_no' => $member['aadhaar'] ?? '',
+                    'mobile_no' => null,
+                    'date_of_birth' => $member['dob'] ?? null,
+                    'gender' => $member['gender'] ?? null,
+                    'digital_ration_card_no' => $isChild ? null : ($member['ration_card_no'] ?? null),
+                    'digital_ration_card_type' => $isChild ? null : ($member['ration_card_type'] ?? null),
+                    'social_category' => $this->formData['category'] ?? null,
+                    'bank_name' => $isChild ? null : ($member['bank_name'] ?? null),
+                    'bank_account_no' => $isChild ? null : ($member['acc_no'] ?? null),
+                    'ifsc_code' => $isChild ? null : ($member['ifsc'] ?? null),
+                    'epic_no' => $isChild ? null : ($member['epic_no'] ?? null),
+                    'part_no' => $isChild ? null : ($member['ac_part_no'] ?? null),
+                    'caa_application_status' => $isChild ? 'Not Applicable' : ($member['caa_status'] ?? 'Not Applicable'),
+                    'caa_application_no' => $isChild ? null : ($member['caa_app_no'] ?? null),
+                    'caa_certificate_no' => $isChild ? null : ($member['caa_cert_no'] ?? null),
+                    'sir2026tribunal_status' => $isChild ? 'Not Applicable' : ($member['sir_status'] ?? 'Not Applicable'),
+                    'sir2026case_details' => $isChild ? null : ($member['sir_case_details'] ?? null),
+                    'has_four_wheeler' => false,
+                    'has_health_insurance' => $isChild ? false : (($member['health_insurance_type'] ?? 'No') !== 'No'),
+                    'health_insurance_type' => $isChild ? null : ($member['health_insurance_type'] ?? null),
+                    'health_insurance_sum_assured' => (!$isChild && !empty($member['health_insurance_sum_assured'])) ? (float) $member['health_insurance_sum_assured'] : null,
+                    'health_insurance_annual_premium' => (!$isChild && !empty($member['health_insurance_premium'])) ? (float) $member['health_insurance_premium'] : null,
+                    'literacy_status' => $isChild ? null : ($member['literate_status'] ?? null),
+                    'highest_educational_qualifications' => $isChild ? null : ($member['highest_qualification'] ?? null),
+                    'gross_annual_income' => null,
+                    'pays_income_or_professional_tax' => false,
+                    'pan_no' => $isChild ? null : ($member['pan_no'] ?? null),
+                    'holds_constitutional_post' => false,
+                    'is_registered_gst' => false,
+                    'is_child' => $isChild,
+                    'is_govt_pensioner' => false,
+                    'relation_with_head_of_family' => $member['relation'] ?? null,
+                    'applying_for_annapurna_bhandar' => !$isChild && (($member['applying_for_ay'] ?? 'No') === 'Yes'),
+                    'has_pan_card' => !$isChild && !empty($member['pan_no']),
+                    'lgd_district_code' => $lgdDistrictCode,
+                    'lgd_block_mc_code' => $lgdBlockMcCode,
+                    'lgd_gp_ward_code' => $lgdGpWardCode,
+
+                    // Child specific fields
+                    'school_grade' => $isChild ? ($member['school_grade'] ?? null) : null,
+                    'school_name' => $isChild ? ($member['school_name'] ?? null) : null,
+                    'school_type' => $isChild ? ($member['school_type'] ?? null) : null,
+                    'school_type_other' => $isChild ? ($member['school_type_other'] ?? null) : null,
+                    'vaccination_card_id' => $isChild ? ($member['vaccination_card_id'] ?? null) : null,
+                    'vaccination_status' => $isChild ? ($member['vaccination_status'] ?? null) : null,
+                    'vaccination_skip_reason_or_date' => $isChild ? ($member['vaccination_skip_reason_or_date'] ?? null) : null,
+                ], 'id');
+
+                // Member employment nature
+                if (!$isChild && !empty($member['employment_nature'])) {
+                    DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->insert([
+                        'family_member_id' => $memberId,
+                        'employment_type' => $member['employment_nature'],
+                        'lgd_district_code' => $lgdDistrictCode,
+                    ]);
+                }
+
+                // Member govt schemes
+                if (!$isChild && ($member['has_dbt_benefits'] ?? 'No') === 'Yes') {
+                    foreach ($member['dbt_benefits'] as $benefit) {
+                        if (! empty($benefit['scheme_name'])) {
+                            DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->insert([
+                                'family_member_id' => $memberId,
+                                'scheme_name' => $benefit['scheme_name'],
+                                'opt_out' => (bool) ($benefit['opt_out'] ?? false),
+                                'lgd_district_code' => $lgdDistrictCode,
+                            ]);
+                        }
+                    }
+                }
+
+                // Member credit card / other id
+                if (!$isChild && !empty($member['kcc_type']) && $member['kcc_type'] !== 'None') {
+                    DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->insert([
+                        'family_member_id' => $memberId,
+                        'id_type' => $member['kcc_type'],
+                        'issue_date' => $member['kcc_date'] ?? '',
+                        'lgd_district_code' => $lgdDistrictCode,
+                    ]);
+                }
+            }
+
+            // Update session data
+            session([
+                'annapurna_form_data' => $this->formData,
+                'annapurna_members' => $this->members,
+                'annapurna_family_id' => $familyId,
+                'annapurna_app_id' => $this->appId,
+            ]);
+
+            DB::connection('pgsql_annapurna')->commit();
+
+        } catch (\Exception $e) {
+            DB::connection('pgsql_annapurna')->rollBack();
+            Log::error('Error saving draft of Annapurna Yojana: '.$e->getMessage());
         }
     }
 

@@ -1,4 +1,4 @@
-<form wire:submit.prevent="showConfirmation" class="max-w-7xl mx-auto my-8 bg-white border-2 rounded-lg shadow-xl overflow-hidden" style="border-color: #b45309;">
+<form wire:submit.prevent="showConfirmation" class="w-full my-4 bg-white border-2 rounded-lg shadow-xl overflow-hidden" style="border-color: #b45309;">
     {{-- Custom Theme Color Overrides for Government brand style --}}
     <style>
         .active-tab {
@@ -14,7 +14,7 @@
         .active-sidebar {
             background-color: #b45309 !important;
             color: #ffffff !important;
-        }
+        }        
         .active-sidebar-badge {
             background-color: #78350f !important;
             color: #ffffff !important;
@@ -186,7 +186,7 @@
                     @foreach ($this->getSections() as $secKey => $secVal)
                         @php
                             $isActive = ($activeSection === $secKey);
-                            $isHofOnly = in_array($secKey, ['income', 'declaration']);
+                            $isHofOnly = in_array($secKey, ['income']);
                             $isMember = ($activeMemberIndex > 0);
                         @endphp
                         <button type="button" 
@@ -270,12 +270,14 @@
                 @endforeach
 
                 <!-- Add Member Tab Button -->
-                <button type="button"
-                        wire:click="addMember"
-                        class="px-4 py-2 rounded-t-lg bg-emerald-600 text-white hover:bg-emerald-700 font-bold text-xs transition duration-150 flex items-center gap-1.5 self-center ml-2 border border-emerald-600 shadow shadow-emerald-200">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    <span>Add Member / সদস্য যোগ করুন</span>
-                </button>
+                @if ($this->isMemberFullyFilled($activeMemberIndex))
+                    <button type="button"
+                            wire:click="addMember"
+                            class="px-4 py-2 rounded-t-lg bg-emerald-600 text-white hover:bg-emerald-700 font-bold text-xs transition duration-150 flex items-center gap-1.5 self-center ml-2 border border-emerald-600 shadow shadow-emerald-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>Add Member / সদস্য যোগ করুন</span>
+                    </button>
+                @endif
             </div>
 
             {{-- Form Active Section Contents Container --}}
@@ -345,7 +347,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">No. of Family Members (number only)<br><span class="text-xs text-gray-500 font-normal">পরিবারের মোট সদস্য সংখ্যা</span></label>
-                                        <input type="text" wire:model="formData.num_family_members" readonly class="w-full bg-gray-100 border border-gray-300 rounded p-2 text-sm font-semibold text-gray-700">
+                                        <input type="number" min="1" wire:model.live="formData.num_family_members" class="w-full border border-gray-300 rounded p-2 text-sm font-semibold text-gray-700 focus:ring-amber-500 focus:border-amber-500">
                                     </div>
                                 </div>
 
@@ -470,6 +472,23 @@
                                     </h3>
                                 </div>
 
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4 pb-4 border-b border-gray-200">
+                                    <div class="md:col-span-4">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Member Category * <br><span class="text-xs text-gray-500 font-normal">সদস্যের বিভাগ</span></label>
+                                        <div class="flex items-center gap-6">
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="radio" wire:model.live="members.{{ $index }}.member_type" value="adult" class="h-4 w-4 text-amber-700 border-gray-300 focus:ring-amber-500">
+                                                <span class="ml-2 text-sm font-medium text-gray-900">Adult / প্রাপ্তবয়স্ক</span>
+                                            </label>
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="radio" wire:model.live="members.{{ $index }}.member_type" value="child" class="h-4 w-4 text-amber-700 border-gray-300 focus:ring-amber-500">
+                                                <span class="ml-2 text-sm font-medium text-gray-900">Child / শিশু</span>
+                                            </label>
+                                        </div>
+                                        @error("members.{$index}.member_type") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Full Name * <br><span class="text-xs text-gray-500 font-normal">সদস্যের নাম</span></label>
@@ -499,6 +518,7 @@
                                         <input type="text" wire:model="members.{{ $index }}.relation" placeholder="e.g. Spouse, Son" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                                         @error("members.{$index}.relation") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
+                                    @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Applying for Annapurna Yojana? <br><span class="text-xs text-gray-500 font-normal">অন্নপূর্ণা যোজনার জন্য আবেদন করছেন কি?</span></label>
                                         <select wire:model="members.{{ $index }}.applying_for_ay" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
@@ -506,6 +526,7 @@
                                             <option value="Yes">Yes / হ্যাঁ</option>
                                         </select>
                                     </div>
+                                    @endif
                                 </div>
 
                                 </div>
@@ -691,6 +712,7 @@
                             @php
                                 $index = $activeMemberIndex - 1;
                             @endphp
+                            @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
                             <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
                                 <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                     <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
@@ -795,7 +817,7 @@
                                         <input type="date" wire:model="members.{{ $index }}.kcc_date" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Issuing Authority <br><span class="text-xs text-gray-500 font-normal">প্রদানকারী কর্তৃপক্ষ</span></label>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Issuing Authority <br><span class="text-xs text-gray-500 font-normal">প্রدانকারী কর্তৃপক্ষ</span></label>
                                         <input type="text" wire:model="members.{{ $index }}.kcc_issuing_authority" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                                     </div>
                                 </div>
@@ -844,6 +866,14 @@
                                     </div>
                                 </div>
                             </div>
+                            @else
+                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-8 text-center text-amber-900 shadow-sm">
+                                <svg class="w-12 h-12 text-amber-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <h4 class="text-sm font-bold text-amber-950 mb-1">Not Required / আবশ্যক নয়</h4>
+                                <p class="text-xs">Identity documents and bank details are not required for child members.</p>
+                                <p class="text-[10px] text-amber-700 italic mt-1">শিশু সদস্যদের জন্য পরিচয়পত্র এবং ব্যাংকের বিবরণ প্রয়োজন নেই।</p>
+                            </div>
+                            @endif
                         @endif
                 @endif
 
@@ -885,6 +915,7 @@
                             @php
                                 $index = $activeMemberIndex - 1;
                             @endphp
+                            @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
                             <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
                                 <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                     <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
@@ -912,6 +943,37 @@
                                     </div>
                                 </div>
                             </div>
+                            @else
+                            {{-- Vaccination Status for Child Member --}}
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                                <div class="border-b-2 border-indigo-900 pb-2 mb-4">
+                                    <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
+                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">V</span>
+                                        Vaccination Status (Member #{{ $activeMemberIndex }}) | শিশুর টিকাকরণ স্থিতি
+                                    </h3>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Vaccinated? * <br><span class="text-xs text-gray-500 font-normal">টিকাকরণ করা হয়েছে?</span></label>
+                                        <select wire:model="members.{{ $index }}.vaccination_status" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                            <option value="">-- Select --</option>
+                                            <option value="Yes">Yes / হ্যাঁ</option>
+                                            <option value="No">No / না</option>
+                                            <option value="Partial">Partial / আংশিক</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Vaccination Card ID <br><span class="text-xs text-gray-500 font-normal">টিকা কার্ড আইডি</span></label>
+                                        <input type="text" wire:model="members.{{ $index }}.vaccination_card_id" placeholder="Enter Card ID" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Last Date or Reason Skipped <br><span class="text-xs text-gray-500 font-normal">সর্বশেষ তারিখ বা বাদ দেওয়ার কারণ</span></label>
+                                        <input type="text" wire:model="members.{{ $index }}.vaccination_skip_reason_or_date" placeholder="Date or skip reason" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
                         @endif
                     </div>
                 @endif
@@ -961,6 +1023,7 @@
                             @php
                                 $index = $activeMemberIndex - 1;
                             @endphp
+                            @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
                             <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
                                 <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                     <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
@@ -984,6 +1047,47 @@
                                     </div>
                                 </div>
                             </div>
+                            @else
+                            {{-- School Attendance for Child Member --}}
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                                <div class="border-b-2 border-indigo-900 pb-2 mb-4">
+                                    <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
+                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">S</span>
+                                        School Attendance (Member #{{ $activeMemberIndex }}) | বিদ্যালয়ে অধ্যয়নরত বিবরণ
+                                    </h3>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Class / Grade <br><span class="text-xs text-gray-500 font-normal">শ্রেণী</span></label>
+                                        <input type="text" wire:model="members.{{ $index }}.school_grade" placeholder="e.g. Class IV" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">School Name <br><span class="text-xs text-gray-500 font-normal">বিদ্যালয়ের নাম</span></label>
+                                        <input type="text" wire:model="members.{{ $index }}.school_name" placeholder="Enter School Name" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">School Type <br><span class="text-xs text-gray-500 font-normal">বিদ্যালয়ের প্রকার</span></label>
+                                        <select wire:model.live="members.{{ $index }}.school_type" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                            <option value="">-- Select --</option>
+                                            <option value="Government">Government / সরকারি</option>
+                                            <option value="Private">Private / বেসরকারি</option>
+                                            <option value="Recognized Madrasah">Recognized Madrasah / মাদ্রাসা</option>
+                                            <option value="Others">Others / অন্যান্য</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                @if (($members[$index]['school_type'] ?? '') === 'Others')
+                                <div class="grid grid-cols-1 gap-6 mt-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Other School Type Details <br><span class="text-xs text-gray-500 font-normal">অন্যান্য বিদ্যালয় বিবরণ</span></label>
+                                        <input type="text" wire:model="members.{{ $index }}.school_type_other" placeholder="Specify School Type" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
+                            @endif
                         @endif
                     </div>
                 @endif
@@ -1182,273 +1286,140 @@
                 {{-- SECTION 5: DECLARATION --}}
                 @if ($activeSection === 'declaration')
                     <div class="space-y-6">
-                        @if ($activeMemberIndex === 0)
-                            <!-- Children Attending School (Section F1) -->
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
-                                <div class="border-b-2 border-indigo-900 pb-2 mb-4 flex justify-between items-center">
-                                    <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
-                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">F1</span>
-                                        Children Attending School | বিদ্যালয়ে অধ্যয়নরত শিশুদের বিবরণ
-                                    </h3>
-                                    <button type="button" wire:click="addChildSchool" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold transition flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                        Add Child / শিশু যোগ করুন
-                                    </button>
-                                </div>
+                        <!-- Government Scheme Benefits (Section G) -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 mt-4">
+                            <div class="border-b-2 border-indigo-900 pb-2 mb-4">
+                                <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
+                                    <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">G</span>
+                                    Benefits under Government Schemes | অন্যান্য সরকারি সুবিধা
+                                </h3>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-4 leading-relaxed">
+                                Select which schemes the Head of Family and family members are currently receiving DBT benefits from. You can check the <strong>Opt Out</strong> box if they wish to voluntarily surrender the DBT benefit.
+                                <br><span class="text-[10px] text-gray-500">পরিবার প্রধান এবং সদস্যরা বর্তমানে কোন কোন সরকারি প্রকল্পে সুবিধা পাচ্ছেন তা চিহ্নিত করুন। সুবিধা প্রত্যাহার করতে চাইলে 'Opt Out' সিলেক্ট করুন।</span>
+                            </p>
+
+                            <!-- HOF Benefits -->
+                            <div class="mb-6 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <h4 class="font-bold text-sm text-indigo-950 mb-3 flex items-center gap-2">
+                                    <span class="bg-indigo-100 text-indigo-850 px-2 py-0.5 rounded text-xs">HoF</span>
+                                    {{ $formData['hof_name'] ?: 'Head of Family' }}
+                                </h4>
                                 
-                                <div class="space-y-4">
-                                    @if (empty($formData['children_school']))
-                                        <div class="text-center py-4 text-gray-500 text-xs font-medium bg-white border border-dashed border-gray-300 rounded-lg">
-                                            No children added for school attendance. Click "Add Child" above to add.
-                                        </div>
-                                    @else
-                                        @foreach ($formData['children_school'] as $c => $child)
-                                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm relative">
-                                                <div class="flex justify-between items-center mb-3">
-                                                    <h4 class="text-xs font-bold text-indigo-900 uppercase">Child #{{ $c + 1 }}</h4>
-                                                    <button type="button" wire:click="removeChildSchool({{ $c }})" class="p-1 rounded-full text-red-500 hover:bg-red-50 hover:text-red-700 transition" title="Remove Child">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                                    </button>
-                                                </div>
-                                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                                    <div>
-                                                        <label class="block text-xs font-semibold text-gray-700 mb-1">Child Name <br><span class="text-[10px] text-gray-500 font-normal">শিশুর নাম</span></label>
-                                                        <input type="text" wire:model="formData.children_school.{{ $c }}.name" placeholder="Child Full Name" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-xs font-semibold text-gray-700 mb-1">Class / Grade <br><span class="text-[10px] text-gray-500 font-normal">শ্রেণী</span></label>
-                                                        <input type="text" wire:model="formData.children_school.{{ $c }}.grade" placeholder="e.g. Class IV" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-xs font-semibold text-gray-700 mb-1">School Name <br><span class="text-[10px] text-gray-500 font-normal">বিদ্যালয়ের নাম</span></label>
-                                                        <input type="text" wire:model="formData.children_school.{{ $c }}.school_name" placeholder="School Name" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-xs font-semibold text-gray-700 mb-1">School Type <br><span class="text-[10px] text-gray-500 font-normal">বিদ্যালয়ের প্রকার</span></label>
-                                                        <select wire:model="formData.children_school.{{ $c }}.school_type" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
-                                                            <option value="">-- Select --</option>
-                                                            <option value="Government">Government / সরকারি</option>
-                                                            <option value="Private">Private / বেসরকারি</option>
-                                                            <option value="Recognized Madrasah">Recognized Madrasah / মাদ্রাসার</option>
-                                                            <option value="Others">Others / অন্যান্য</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    @endif
-                                </div>
-                            </div>
-
-                            <!-- Children Vaccination Status (Section F2) -->
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 mt-4">
-                                <div class="border-b-2 border-indigo-900 pb-2 mb-4 flex justify-between items-center">
-                                    <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
-                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">F2</span>
-                                        Children's Vaccination Status | শিশুদের টিকাকরণ স্থিতি
-                                    </h3>
-                                    <button type="button" wire:click="addChildVaccination" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold transition flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                        Add Child / শিশু যোগ করুন
-                                    </button>
-                                </div>
-
-                                <div class="space-y-4">
-                                    @if (empty($formData['children_vaccination']))
-                                        <div class="text-center py-4 text-gray-500 text-xs font-medium bg-white border border-dashed border-gray-300 rounded-lg">
-                                            No children added for vaccination status. Click "Add Child" above to add.
-                                        </div>
-                                    @else
-                                        @foreach ($formData['children_vaccination'] as $v => $child)
-                                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm relative">
-                                                <div class="flex justify-between items-center mb-3">
-                                                    <h4 class="text-xs font-bold text-indigo-900 uppercase">Child #{{ $v + 1 }}</h4>
-                                                    <button type="button" wire:click="removeChildVaccination({{ $v }})" class="p-1 rounded-full text-red-500 hover:bg-red-50 hover:text-red-700 transition" title="Remove Child">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                                    </button>
-                                                </div>
-                                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                                    <div>
-                                                        <label class="block text-xs font-semibold text-gray-700 mb-1">Child Name <br><span class="text-[10px] text-gray-500 font-normal">শিশুর নাম</span></label>
-                                                        <input type="text" wire:model="formData.children_vaccination.{{ $v }}.name" placeholder="Child Full Name" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-xs font-semibold text-gray-700 mb-1">Vaccinated? <br><span class="text-[10px] text-gray-500 font-normal">টিকাকরণ করা হয়েছে?</span></label>
-                                                        <select wire:model="formData.children_vaccination.{{ $v }}.status" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
-                                                            <option value="">-- Select --</option>
-                                                            <option value="Yes">Yes / হ্যাঁ</option>
-                                                            <option value="No">No / না</option>
-                                                            <option value="Partial">Partial / আংশিক</option>
-                                                        </select>
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-xs font-semibold text-gray-700 mb-1">Vaccination Card ID <br><span class="text-[10px] text-gray-500 font-normal">টিকা কার্ড আইডি</span></label>
-                                                        <input type="text" wire:model="formData.children_vaccination.{{ $v }}.card_id" placeholder="Card ID" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-xs font-semibold text-gray-700 mb-1">Last Date or Reason Skipped <br><span class="text-[10px] text-gray-500 font-normal">সর্বশেষ তারিখ বা বাদ দেওয়ার কারণ</span></label>
-                                                        <input type="text" wire:model="formData.children_vaccination.{{ $v }}.reason_skipped" placeholder="Date or skip reason" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    @endif
-                                </div>
-                            </div>
-
-                            <!-- Government Scheme Benefits (Section G) -->
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 mt-4">
-                                <div class="border-b-2 border-indigo-900 pb-2 mb-4">
-                                    <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
-                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">G</span>
-                                        Benefits under Government Schemes | অন্যান্য সরকারি সুবিধা
-                                    </h3>
-                                </div>
-                                <p class="text-xs text-gray-600 mb-4 leading-relaxed">
-                                    Select which schemes the Head of Family and family members are currently receiving DBT benefits from. You can check the <strong>Opt Out</strong> box if they wish to voluntarily surrender the DBT benefit.
-                                    <br><span class="text-[10px] text-gray-500">পরিবার প্রধান এবং সদস্যরা বর্তমানে কোন কোন সরকারি প্রকল্পে সুবিধা পাচ্ছেন তা চিহ্নিত করুন। সুবিধা প্রত্যাহার করতে চাইলে 'Opt Out' সিলেক্ট করুন।</span>
-                                </p>
-
-                                <!-- HOF Benefits -->
-                                <div class="mb-6 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-                                    <h4 class="font-bold text-sm text-indigo-950 mb-3 flex items-center gap-2">
-                                        <span class="bg-indigo-100 text-indigo-850 px-2 py-0.5 rounded text-xs">HoF</span>
-                                        {{ $formData['hof_name'] ?: 'Head of Family' }}
-                                    </h4>
-                                    
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                                        <div>
-                                            <label class="block text-xs font-semibold text-gray-700 mb-1">Receiving DBT Benefits? <br><span class="text-[10px] text-gray-500">ডিবিটি সুবিধা পান কি?</span></label>
-                                            <select wire:model="formData.hof_has_dbt_benefits" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
-                                                <option value="No">No / না</option>
-                                                <option value="Yes">Yes / হ্যাঁ</option>
-                                            </select>
-                                        </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 mb-1">Receiving DBT Benefits? <br><span class="text-[10px] text-gray-500">ডিবিটি সুবিধা পান কি?</span></label>
+                                        <select wire:model="formData.hof_has_dbt_benefits" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
+                                            <option value="No">No / না</option>
+                                            <option value="Yes">Yes / হ্যাঁ</option>
+                                        </select>
                                     </div>
-
-                                    @if ($formData['hof_has_dbt_benefits'] === 'Yes')
-                                        <div class="space-y-3">
-                                            @for ($i = 0; $i < 5; $i++)
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-2 bg-gray-50 rounded border border-gray-200">
-                                                    <div>
-                                                        <select wire:model="formData.hof_dbt_benefits.{{ $i }}.scheme_name" class="w-full border border-gray-300 rounded p-1.5 text-xs focus:ring-indigo-500 focus:border-indigo-500">
-                                                            <option value="">-- Select Scheme {{ $i + 1 }} --</option>
-                                                            <option value="Lakshmir Bhandar">Lakshmir Bhandar</option>
-                                                            <option value="Old Age Pension">Old Age Pension</option>
-                                                            <option value="Widow Pension">Widow Pension</option>
-                                                            <option value="Disability Pension">Disability Pension</option>
-                                                            <option value="Kanyashree">Kanyashree</option>
-                                                            <option value="Rupashree">Rupashree</option>
-                                                            <option value="Student Credit Card">Student Credit Card</option>
-                                                            <option value="Yuvashree">Yuvashree</option>
-                                                            <option value="Others">Others / অন্যান্য</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="flex items-center gap-2">
-                                                        <input type="checkbox" wire:model="formData.hof_dbt_benefits.{{ $i }}.opt_out" id="hof_dbt_opt_out_{{ $i }}" class="h-4 w-4 text-indigo-900 border-gray-300 rounded focus:ring-indigo-500">
-                                                        <label for="hof_dbt_opt_out_{{ $i }}" class="text-xs text-gray-700 font-medium">Voluntarily Opt Out from this DBT? / স্বেচ্ছায় সুবিধা ত্যাগ করতে চান</label>
-                                                    </div>
-                                                </div>
-                                            @endfor
-                                        </div>
-                                    @endif
                                 </div>
 
-                                <!-- Members Benefits -->
-                                @if (count($members) > 0)
-                                    <div class="space-y-6">
-                                        @foreach ($members as $mIdx => $m)
-                                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-                                                <h4 class="font-bold text-sm text-indigo-950 mb-3 flex items-center gap-2">
-                                                    <span class="bg-amber-100 text-amber-850 px-2 py-0.5 rounded text-xs">Member #{{ $mIdx + 1 }}</span>
-                                                    {{ $m['name'] ?: 'Unnamed Member' }}
-                                                </h4>
-                                                
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                                                    <div>
-                                                        <label class="block text-xs font-semibold text-gray-700 mb-1">Receiving DBT Benefits? <br><span class="text-[10px] text-gray-500">ডিবিটি সুবিধা পান কি?</span></label>
-                                                        <select wire:model="members.{{ $mIdx }}.has_dbt_benefits" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
-                                                            <option value="No">No / না</option>
-                                                            <option value="Yes">Yes / হ্যাঁ</option>
-                                                        </select>
-                                                    </div>
+                                @if ($formData['hof_has_dbt_benefits'] === 'Yes')
+                                    <div class="space-y-3">
+                                        @for ($i = 0; $i < 5; $i++)
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-2 bg-gray-50 rounded border border-gray-200">
+                                                <div>
+                                                    <select wire:model="formData.hof_dbt_benefits.{{ $i }}.scheme_name" class="w-full border border-gray-300 rounded p-1.5 text-xs focus:ring-indigo-500 focus:border-indigo-500">
+                                                        <option value="">-- Select Scheme {{ $i + 1 }} --</option>
+                                                        <option value="Lakshmir Bhandar">Lakshmir Bhandar</option>
+                                                        <option value="Old Age Pension">Old Age Pension</option>
+                                                        <option value="Widow Pension">Widow Pension</option>
+                                                        <option value="Disability Pension">Disability Pension</option>
+                                                        <option value="Kanyashree">Kanyashree</option>
+                                                        <option value="Rupashree">Rupashree</option>
+                                                        <option value="Student Credit Card">Student Credit Card</option>
+                                                        <option value="Yuvashree">Yuvashree</option>
+                                                        <option value="Others">Others / অন্যান্য</option>
+                                                    </select>
                                                 </div>
-
-                                                @if (($m['has_dbt_benefits'] ?? 'No') === 'Yes')
-                                                    <div class="space-y-3">
-                                                        @for ($i = 0; $i < 5; $i++)
-                                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-2 bg-gray-50 rounded border border-gray-200">
-                                                                <div>
-                                                                    <select wire:model="members.{{ $mIdx }}.dbt_benefits.{{ $i }}.scheme_name" class="w-full border border-gray-300 rounded p-1.5 text-xs focus:ring-indigo-500 focus:border-indigo-500">
-                                                                        <option value="">-- Select Scheme {{ $i + 1 }} --</option>
-                                                                        <option value="Lakshmir Bhandar">Lakshmir Bhandar</option>
-                                                                        <option value="Old Age Pension">Old Age Pension</option>
-                                                                        <option value="Widow Pension">Widow Pension</option>
-                                                                        <option value="Disability Pension">Disability Pension</option>
-                                                                        <option value="Kanyashree">Kanyashree</option>
-                                                                        <option value="Rupashree">Rupashree</option>
-                                                                        <option value="Student Credit Card">Student Credit Card</option>
-                                                                        <option value="Yuvashree">Yuvashree</option>
-                                                                        <option value="Others">Others / অন্যান্য</option>
-                                                                    </select>
-                                                                </div>
-                                                                <div class="flex items-center gap-2">
-                                                                    <input type="checkbox" wire:model="members.{{ $mIdx }}.dbt_benefits.{{ $i }}.opt_out" id="m_{{ $mIdx }}_dbt_opt_out_{{ $i }}" class="h-4 w-4 text-indigo-900 border-gray-300 rounded focus:ring-indigo-500">
-                                                                    <label for="m_{{ $mIdx }}_dbt_opt_out_{{ $i }}" class="text-xs text-gray-700 font-medium">Voluntarily Opt Out? / সুবিধা ত্যাগ করতে চান</label>
-                                                                </div>
-                                                            </div>
-                                                        @endfor
-                                                    </div>
-                                                @endif
+                                                <div class="flex items-center gap-2">
+                                                    <input type="checkbox" wire:model="formData.hof_dbt_benefits.{{ $i }}.opt_out" id="hof_dbt_opt_out_{{ $i }}" class="h-4 w-4 text-indigo-900 border-gray-300 rounded focus:ring-indigo-500">
+                                                    <label for="hof_dbt_opt_out_{{ $i }}" class="text-xs text-gray-700 font-medium">Voluntarily Opt Out from this DBT? / স্বেচ্ছায় সুবিধা ত্যাগ করতে চান</label>
+                                                </div>
                                             </div>
-                                        @endforeach
+                                        @endfor
                                     </div>
                                 @endif
                             </div>
 
+                            <!-- Members Benefits -->
+                            @if (count($members) > 0)
+                                <div class="space-y-6">
+                                    @foreach ($members as $mIdx => $m)
+                                        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                            <h4 class="font-bold text-sm text-indigo-950 mb-3 flex items-center gap-2">
+                                                <span class="bg-amber-100 text-amber-850 px-2 py-0.5 rounded text-xs">Member #{{ $mIdx + 1 }}</span>
+                                                {{ $m['name'] ?: 'Unnamed Member' }}
+                                            </h4>
+                                            
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-700 mb-1">Receiving DBT Benefits? <br><span class="text-[10px] text-gray-500">ডিবিটি সুবিধা পান কি?</span></label>
+                                                    <select wire:model="members.{{ $mIdx }}.has_dbt_benefits" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
+                                                        <option value="No">No / না</option>
+                                                        <option value="Yes">Yes / হ্যাঁ</option>
+                                                    </select>
+                                                </div>
+                                            </div>
 
-                            {{-- Declaration Consent --}}
-                            <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-5">
-                                <div class="border-b-2 border-indigo-900 pb-2 mb-4">
-                                    <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
-                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">B</span>
-                                        Declaration & Consent | ঘোষণা এবং সম্মতি
-                                    </h3>
+                                            @if (($m['has_dbt_benefits'] ?? 'No') === 'Yes')
+                                                <div class="space-y-3">
+                                                    @for ($i = 0; $i < 5; $i++)
+                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-2 bg-gray-50 rounded border border-gray-200">
+                                                            <div>
+                                                                <select wire:model="members.{{ $mIdx }}.dbt_benefits.{{ $i }}.scheme_name" class="w-full border border-gray-300 rounded p-1.5 text-xs focus:ring-indigo-500 focus:border-indigo-500">
+                                                                    <option value="">-- Select Scheme {{ $i + 1 }} --</option>
+                                                                    <option value="Lakshmir Bhandar">Lakshmir Bhandar</option>
+                                                                    <option value="Old Age Pension">Old Age Pension</option>
+                                                                    <option value="Widow Pension">Widow Pension</option>
+                                                                    <option value="Disability Pension">Disability Pension</option>
+                                                                    <option value="Kanyashree">Kanyashree</option>
+                                                                    <option value="Rupashree">Rupashree</option>
+                                                                    <option value="Student Credit Card">Student Credit Card</option>
+                                                                    <option value="Yuvashree">Yuvashree</option>
+                                                                    <option value="Others">Others / অন্যান্য</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="flex items-center gap-2">
+                                                                <input type="checkbox" wire:model="members.{{ $mIdx }}.dbt_benefits.{{ $i }}.opt_out" id="m_{{ $mIdx }}_dbt_opt_out_{{ $i }}" class="h-4 w-4 text-indigo-900 border-gray-300 rounded focus:ring-indigo-500">
+                                                                <label for="m_{{ $mIdx }}_dbt_opt_out_{{ $i }}" class="text-xs text-gray-700 font-medium">Voluntarily Opt Out? / সুবিধা ত্যাগ করতে চান</label>
+                                                            </div>
+                                                        </div>
+                                                    @endfor
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
                                 </div>
+                            @endif
+                        </div>
 
-                                <div class="space-y-4">
-                                    <div class="flex items-start gap-3">
-                                        <input type="checkbox" wire:model="formData.agree_consent" id="agree_consent" class="mt-1 h-4 w-4 text-indigo-900 border-gray-300 rounded focus:ring-indigo-500">
-                                        <label for="agree_consent" class="text-xs md:text-sm text-gray-700 font-medium leading-relaxed">
-                                            I hereby declare that the above information is true to the best of my knowledge and I have provided all the supporting documents where applicable and HAVE NOT missed any criteria as mentioned above. I understand that my social protection benefits will be stopped if any information provided by me turns out to be false.
-                                            <br>
-                                            <span class="text-xs text-gray-500 font-normal italic">
-                                                আমি ঘোষণা করছি যে আমার জ্ঞানত উপরোক্ত তথ্যগুলি সত্য এবং আমি প্রযোজ্য সমস্ত সহায়ক নথি প্রদান করেছি। আমি বুঝতে পারছি যে আমার দেওয়া কোনো তথ্য ভুল প্রমানিত হলে আমার সামাজিক সুরক্ষা সুবিধা বন্ধ করে দেওয়া হবে।
-                                            </span>
-                                        </label>
-                                    </div>
-                                    @error('formData.agree_consent') <div class="text-red-600 text-xs pl-7 font-semibold">{{ $message }}</div> @enderror
-                                </div>
+
+                        {{-- Declaration Consent --}}
+                        <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-5">
+                            <div class="border-b-2 border-indigo-900 pb-2 mb-4">
+                                <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
+                                    <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">B</span>
+                                    Declaration & Consent | ঘোষণা এবং সম্মতি
+                                </h3>
                             </div>
 
-                        @else
-                            {{-- Info card for members --}}
-                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-8 text-center text-amber-900 shadow-inner">
-                                <svg class="w-16 h-16 text-amber-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <h3 class="text-lg font-bold text-amber-950 mb-2">Final Declaration | চূড়ান্ত ঘোষণা</h3>
-                                <p class="text-sm max-w-lg mx-auto">
-                                    Consent agreements and the final application submit action must be processed under the <strong>Head of Family (HoF)</strong> tab.
-                                </p>
-                                <p class="text-xs text-amber-700 mt-2 font-normal italic">
-                                    চূড়ান্ত সম্মতিপত্র এবং আবেদনপত্র সাবমিট করার প্রক্রিয়া পরিবার প্রধান (HoF) ট্যাবের অধীনে সম্পন্ন করতে হবে।
-                                </p>
-                                <button type="button" 
-                                        wire:click="selectMember(0)" 
-                                        class="mt-6 px-5 py-2.5 bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs uppercase tracking-wider rounded shadow transition">
-                                    Switch to HoF / পরিবার প্রধান ট্যাবে যান
-                                </button>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <input type="checkbox" wire:model="formData.agree_consent" id="agree_consent" class="mt-1 h-4 w-4 text-indigo-900 border-gray-300 rounded focus:ring-indigo-500">
+                                    <label for="agree_consent" class="text-xs md:text-sm text-gray-700 font-medium leading-relaxed">
+                                        I hereby declare that the above information is true to the best of my knowledge and I have provided all the supporting documents where applicable and HAVE NOT missed any criteria as mentioned above. I understand that my social protection benefits will be stopped if any information provided by me turns out to be false.
+                                        <br>
+                                        <span class="text-xs text-gray-500 font-normal italic">
+                                            আমি ঘোষণা করছি যে আমার জ্ঞানত উপরোক্ত তথ্যগুলি সত্য এবং আমি প্রযোজ্য সমস্ত সহায়ক নথি প্রদান করেছি। আমি বুঝতে পারছি যে আমার দেওয়া কোনো তথ্য ভুল প্রমানিত হলে আমার সামাজিক সুরক্ষা সুবিধা বন্ধ করে দেওয়া হবে।
+                                        </span>
+                                    </label>
+                                </div>
+                                @error('formData.agree_consent') <div class="text-red-600 text-xs pl-7 font-semibold">{{ $message }}</div> @enderror
                             </div>
-                        @endif
+                        </div>
                     </div>
                 @endif
 
@@ -1469,11 +1440,36 @@
                     @endif
                 </div>
 
-                {{-- Next / Submit buttons --}}
+                {{-- Add Member button at the bottom (shows when current member is fully filled) --}}
                 <div>
-                    @if ($activeMemberIndex > 0)
+                    @if ($this->isMemberFullyFilled($activeMemberIndex) && $activeSection !== 'declaration')
+                        <button type="button" 
+                                wire:click="addMember" 
+                                class="hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded shadow transition text-sm flex items-center gap-1.5 uppercase tracking-wider bg-emerald-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Add Member / সদস্য যোগ করুন
+                        </button>
+                    @endif
+                </div>
+
+                {{-- Next / Submit buttons --}}
+                @php
+                    $sectionsKeys = array_keys($this->getSections());
+                    $inputSections = array_filter($sectionsKeys, function($s) { return $s !== 'declaration'; });
+                    $lastInputSection = end($inputSections);
+                    $isLastInputSection = ($activeSection === $lastInputSection);
+                @endphp
+                <div>
+                    @if ($activeSection === 'declaration')
+                        <button type="submit" 
+                                class="hover:bg-opacity-90 text-white font-bold px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition flex items-center gap-2 text-sm uppercase tracking-wider bg-amber-700" 
+                                style="background-color: #b45309;">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Submit Application / আবেদন জমা দিন
+                        </button>
+                    @elseif ($activeMemberIndex > 0)
                         {{-- Member tab flow --}}
-                        @if ($activeSection === 'income')
+                        @if ($isLastInputSection)
                             @if ($activeMemberIndex < count($members))
                                 {{-- Next member tab --}}
                                 <button type="button" 
@@ -1483,11 +1479,11 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                 </button>
                             @else
-                                {{-- Last member: guide back to HOF --}}
+                                {{-- Last member: guide to common Declaration tab --}}
                                 <button type="button" 
-                                        wire:click="selectMember(0); selectSection('declaration')" 
+                                        wire:click="selectSection('declaration')" 
                                         class="hover:bg-amber-800 text-white font-bold px-6 py-2.5 rounded shadow transition text-sm flex items-center gap-1 uppercase tracking-wider bg-amber-700">
-                                    Go to HoF Declaration / পরিবার প্রধানের ঘোষণা
+                                    Go to Declaration / ঘোষণা ও সম্মতি
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                 </button>
                             @endif
@@ -1502,21 +1498,12 @@
                         @endif
                     @else
                         {{-- HOF tab flow --}}
-                        @if ($activeSection !== 'declaration')
-                            <button type="button" 
-                                    wire:click="nextSection" 
-                                    class="hover:bg-amber-800 text-white font-bold px-6 py-2.5 rounded shadow transition text-sm flex items-center gap-1 uppercase tracking-wider bg-amber-700">
-                                Next / এগিয়ে চলুন
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                            </button>
-                        @else
-                            <button type="submit" 
-                                    class="hover:bg-opacity-90 text-white font-bold px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition flex items-center gap-2 text-sm uppercase tracking-wider bg-amber-700" 
-                                    style="background-color: #b45309;">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                Submit Application / আবেদন জমা দিন
-                            </button>
-                        @endif
+                        <button type="button" 
+                                wire:click="nextSection" 
+                                class="hover:bg-amber-800 text-white font-bold px-6 py-2.5 rounded shadow transition text-sm flex items-center gap-1 uppercase tracking-wider bg-amber-700">
+                            Next / এগিয়ে চলুন
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
                     @endif
                 </div>
 
