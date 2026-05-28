@@ -56,7 +56,7 @@ class AnnapurnaYojanaForm extends Component
         $this->schemeName = $schemeName;
         $this->grievanceId = $grievanceId;
         $this->activeMemberIndex = 0;
-        $this->activeSection = 'basic';
+        $this->activeSection = 'family_identity';
 
         // Clear session draft data to start fresh and avoid data retaining bugs
         session()->forget(['annapurna_form_data', 'annapurna_members', 'annapurna_family_id', 'annapurna_app_id']);
@@ -340,7 +340,7 @@ class AnnapurnaYojanaForm extends Component
 
         // Auto-switch to the new member tab on basic info section
         $this->activeMemberIndex = count($this->members);
-        $this->activeSection = 'basic';
+        $this->activeSection = 'family_identity';
     }
 
     public function removeMember($index)
@@ -364,7 +364,7 @@ class AnnapurnaYojanaForm extends Component
         // Ensure the active section is valid for the newly selected member
         $validSections = array_keys($this->getSections());
         if (!in_array($this->activeSection, $validSections)) {
-            $this->activeSection = 'basic';
+            $this->activeSection = 'family_identity';
         }
     }
 
@@ -414,24 +414,37 @@ class AnnapurnaYojanaForm extends Component
     public function getSections()
     {
         $sections = [
-            'basic' => ['label' => 'Basic Info', 'bengali' => 'প্রাথমিক তথ্য'],
-            'identity' => ['label' => 'Identity Docs', 'bengali' => 'পরিচয়পত্র'],
-            'health' => ['label' => 'Health & Insurance', 'bengali' => 'স্বাস্থ্য ও বীমা'],
-            'education' => ['label' => 'Education', 'bengali' => 'শিক্ষা'],
-            'income' => ['label' => 'Income & Assets', 'bengali' => 'আয় ও সম্পদ'],
+            'family_identity' => ['label' => 'A. Family Identity', 'bengali' => 'পারিবারিক পরিচিতি'],
+            'ration_subsidy' => ['label' => 'B. Ration Card / Food Subsidy', 'bengali' => 'রেশন কার্ড / খাদ্য ভর্তুকি'],
+            'assets' => ['label' => 'C. Assets', 'bengali' => 'সম্পত্তি'],
+            'income_profession' => ['label' => 'D. Income/Profession', 'bengali' => 'আয় ও পেশা'],
+            'other_docs' => ['label' => 'E. Other Identity Documents', 'bengali' => 'অন্যান্য পরিচয়পত্র'],
+            'social_dependents' => ['label' => 'F. Social Status & Dependents', 'bengali' => 'সামাজিক মর্যাদা ও নির্ভরশীল সদস্য'],
+            'gov_benefits' => ['label' => 'G. Gov Benefits', 'bengali' => 'সরকারি প্রকল্পের সুবিধা'],
+            'declaration' => ['label' => 'H. Declaration & Consent', 'bengali' => 'ঘোষণা ও সম্মতি'],
         ];
 
-        if ($this->activeMemberIndex > 0) {
+        $isMember = ($this->activeMemberIndex > 0);
+
+        if ($isMember) {
             $index = $this->activeMemberIndex - 1;
             $member = $this->members[$index] ?? null;
-            if ($member && ($member['member_type'] ?? 'adult') === 'child') {
-                unset($sections['identity']);
-                unset($sections['income']);
-            }
-        }
+            $isChild = $member && ($member['member_type'] ?? 'adult') === 'child';
 
-        if ($this->areAllMembersFullyFilled()) {
-            $sections['declaration'] = ['label' => 'Declaration', 'bengali' => 'ঘোষণা ও সম্মতি'];
+            if ($isChild) {
+                // Child members only need A, F, H
+                unset($sections['ration_subsidy']);
+                unset($sections['assets']);
+                unset($sections['income_profession']);
+                unset($sections['other_docs']);
+                unset($sections['gov_benefits']);
+            } else {
+                // Adult members need A, B, C, D, E, G, H (F is hidden)
+                unset($sections['social_dependents']);
+            }
+        } else {
+            // HOF needs A, B, C, D, E, G, H (F is hidden)
+            unset($sections['social_dependents']);
         }
 
         return $sections;
@@ -457,7 +470,7 @@ class AnnapurnaYojanaForm extends Component
     public function isSectionFilled($memberIndex, $section)
     {
         if ($memberIndex === 0) {
-            if ($section === 'basic') {
+            if ($section === 'family_identity') {
                 $category = $this->formData['category'] ?? '';
                 $certOk = true;
                 if (in_array($category, ['SC', 'ST', 'OBC'])) {
@@ -483,30 +496,28 @@ class AnnapurnaYojanaForm extends Component
                     !empty($this->formData['police_station']) &&
                     !empty($this->formData['post_office']) &&
                     !empty($this->formData['pincode']) &&
-                    strlen($this->formData['pincode']) === 6;
-            }
-
-            if ($section === 'identity') {
-                return !empty($this->formData['hof_aadhaar']) &&
+                    strlen($this->formData['pincode']) === 6 &&
+                    !empty($this->formData['hof_aadhaar']) &&
                     strlen($this->formData['hof_aadhaar']) === 12 &&
-                    !empty($this->formData['has_digital_ration_card']) &&
-                    !empty($this->formData['is_lifting_ration']) &&
                     !empty($this->formData['hof_bank_name']) &&
                     !empty($this->formData['hof_acc_no']) &&
                     !empty($this->formData['hof_ifsc']) &&
                     strlen($this->formData['hof_ifsc']) === 11;
             }
 
-            if ($section === 'health') {
-                return true;
+            if ($section === 'ration_subsidy') {
+                return !empty($this->formData['has_digital_ration_card']) &&
+                    !empty($this->formData['is_lifting_ration']);
             }
 
-            if ($section === 'education') {
-                return true;
+            if ($section === 'assets') {
+                return !empty($this->formData['has_pucca_rooms']) &&
+                    !empty($this->formData['owns_land']) &&
+                    !empty($this->formData['owns_4_wheeler']);
             }
 
-            if ($section === 'income') {
-                return !empty($this->formData['owns_4_wheeler']) &&
+            if ($section === 'income_profession') {
+                return !empty($this->formData['pays_tax']) &&
                     !empty($this->formData['total_annual_income']) &&
                     is_numeric($this->formData['total_annual_income']);
             }
@@ -514,6 +525,8 @@ class AnnapurnaYojanaForm extends Component
             if ($section === 'declaration') {
                 return (bool) ($this->formData['agree_consent'] ?? false);
             }
+            
+            return true;
         } else {
             $index = $memberIndex - 1;
             if (!isset($this->members[$index])) {
@@ -521,18 +534,21 @@ class AnnapurnaYojanaForm extends Component
             }
             $member = $this->members[$index];
 
-            if ($section === 'basic') {
-                return !empty($member['member_type']) &&
+            if ($section === 'family_identity') {
+                $basicFilled = !empty($member['member_type']) &&
                     !empty($member['name']) &&
                     !empty($member['dob']) &&
                     !empty($member['gender']) &&
                     !empty($member['relation']);
-            }
+                
+                if (!$basicFilled) {
+                    return false;
+                }
 
-            if ($section === 'identity') {
                 if (($member['member_type'] ?? 'adult') === 'child') {
                     return true;
                 }
+                
                 $aadhaar = $member['aadhaar'] ?? '';
                 $aadhaarOk = empty($aadhaar) || strlen($aadhaar) === 12;
                 
@@ -547,12 +563,8 @@ class AnnapurnaYojanaForm extends Component
                 return $aadhaarOk && $bankOk;
             }
 
-            if ($section === 'health') {
-                return true;
-            }
-
-            if ($section === 'education') {
-                return true;
+            if ($section === 'declaration') {
+                return (bool) ($this->formData['agree_consent'] ?? false);
             }
             
             return true;
@@ -564,16 +576,29 @@ class AnnapurnaYojanaForm extends Component
     public function isMemberFullyFilled($memberIndex)
     {
         if ($memberIndex === 0) {
-            return $this->isSectionFilled(0, 'basic') &&
-                $this->isSectionFilled(0, 'identity') &&
-                $this->isSectionFilled(0, 'health') &&
-                $this->isSectionFilled(0, 'education') &&
-                $this->isSectionFilled(0, 'income');
+            return $this->isSectionFilled(0, 'family_identity') &&
+                $this->isSectionFilled(0, 'ration_subsidy') &&
+                $this->isSectionFilled(0, 'assets') &&
+                $this->isSectionFilled(0, 'income_profession') &&
+                $this->isSectionFilled(0, 'other_docs') &&
+                $this->isSectionFilled(0, 'gov_benefits');
         } else {
-            return $this->isSectionFilled($memberIndex, 'basic') &&
-                $this->isSectionFilled($memberIndex, 'identity') &&
-                $this->isSectionFilled($memberIndex, 'health') &&
-                $this->isSectionFilled($memberIndex, 'education');
+            $index = $memberIndex - 1;
+            $member = $this->members[$index] ?? null;
+            if (!$member) {
+                return false;
+            }
+            if (($member['member_type'] ?? 'adult') === 'child') {
+                return $this->isSectionFilled($memberIndex, 'family_identity') &&
+                    $this->isSectionFilled($memberIndex, 'social_dependents');
+            } else {
+                return $this->isSectionFilled($memberIndex, 'family_identity') &&
+                    $this->isSectionFilled($memberIndex, 'ration_subsidy') &&
+                    $this->isSectionFilled($memberIndex, 'assets') &&
+                    $this->isSectionFilled($memberIndex, 'income_profession') &&
+                    $this->isSectionFilled($memberIndex, 'other_docs') &&
+                    $this->isSectionFilled($memberIndex, 'gov_benefits');
+            }
         }
     }
 
@@ -612,7 +637,7 @@ class AnnapurnaYojanaForm extends Component
         $rules = [];
         $messages = [];
 
-        if ($section === 'basic') {
+        if ($section === 'family_identity') {
             if ($this->activeMemberIndex === 0) {
                 $rules = [
                     'formData.hof_name' => 'required|string|max:255',
@@ -628,6 +653,10 @@ class AnnapurnaYojanaForm extends Component
                     'formData.police_station' => 'required',
                     'formData.post_office' => 'required',
                     'formData.pincode' => 'required|digits:6',
+                    'formData.hof_aadhaar' => 'required|digits:12',
+                    'formData.hof_bank_name' => 'required',
+                    'formData.hof_acc_no' => 'required',
+                    'formData.hof_ifsc' => 'required|size:11',
                 ];
 
                 if (in_array($this->formData['category'], ['SC', 'ST', 'OBC'])) {
@@ -657,9 +686,16 @@ class AnnapurnaYojanaForm extends Component
                     'formData.post_office.required' => 'Post Office is required.',
                     'formData.pincode.required' => 'Pincode is required.',
                     'formData.pincode.digits' => 'Pincode must be 6 digits.',
+                    'formData.hof_aadhaar.required' => 'HOF Aadhaar number is required.',
+                    'formData.hof_aadhaar.digits' => 'HOF Aadhaar must be 12 digits.',
+                    'formData.hof_bank_name.required' => 'HOF Bank Name is required.',
+                    'formData.hof_acc_no.required' => 'HOF Account Number is required.',
+                    'formData.hof_ifsc.required' => 'HOF IFSC is required.',
+                    'formData.hof_ifsc.size' => 'HOF IFSC must be 11 characters.',
                 ];
             } else {
                 $index = $this->activeMemberIndex - 1;
+                $member = $this->members[$index];
                 $rules = [
                     "members.{$index}.member_type" => 'required|in:adult,child',
                     "members.{$index}.name" => 'required|string|max:255',
@@ -674,40 +710,10 @@ class AnnapurnaYojanaForm extends Component
                     "members.{$index}.gender.required" => 'Member Gender is required.',
                     "members.{$index}.relation.required" => 'Member Relation is required.',
                 ];
-            }
-        } elseif ($section === 'identity') {
-            if ($this->activeMemberIndex === 0) {
-                $rules = [
-                    'formData.hof_aadhaar' => 'required|digits:12',
-                    'formData.has_digital_ration_card' => 'required',
-                    'formData.is_lifting_ration' => 'required',
-                    'formData.hof_bank_name' => 'required',
-                    'formData.hof_acc_no' => 'required',
-                    'formData.hof_ifsc' => 'required|size:11',
-                ];
-                $messages = [
-                    'formData.hof_aadhaar.required' => 'HOF Aadhaar number is required.',
-                    'formData.hof_aadhaar.digits' => 'HOF Aadhaar must be 12 digits.',
-                    'formData.has_digital_ration_card.required' => 'Ration card selection is required.',
-                    'formData.is_lifting_ration.required' => 'Ration lifting status selection is required.',
-                    'formData.hof_bank_name.required' => 'HOF Bank Name is required.',
-                    'formData.hof_acc_no.required' => 'HOF Account Number is required.',
-                    'formData.hof_ifsc.required' => 'HOF IFSC is required.',
-                    'formData.hof_ifsc.size' => 'HOF IFSC must be 11 characters.',
-                ];
-            } else {
-                $index = $this->activeMemberIndex - 1;
-                $member = $this->members[$index];
-                if (($member['member_type'] ?? 'adult') === 'child') {
-                    $rules = [];
-                    $messages = [];
-                } else {
-                    $rules = [
-                        "members.{$index}.aadhaar" => 'nullable|digits:12',
-                    ];
-                    $messages = [
-                        "members.{$index}.aadhaar.digits" => 'Member Aadhaar must be 12 digits.',
-                    ];
+
+                if (($member['member_type'] ?? 'adult') === 'adult') {
+                    $rules["members.{$index}.aadhaar"] = 'nullable|digits:12';
+                    $messages["members.{$index}.aadhaar.digits"] = 'Member Aadhaar must be 12 digits.';
 
                     if (($member['applying_for_ay'] ?? 'No') === 'Yes') {
                         $rules["members.{$index}.bank_name"] = 'required';
@@ -721,20 +727,38 @@ class AnnapurnaYojanaForm extends Component
                     }
                 }
             }
-        } elseif ($section === 'health') {
-            $rules = [];
-            $messages = [];
-        } elseif ($section === 'education') {
-            $rules = [];
-            $messages = [];
-        } elseif ($section === 'income') {
+        } elseif ($section === 'ration_subsidy') {
             if ($this->activeMemberIndex === 0) {
                 $rules = [
+                    'formData.has_digital_ration_card' => 'required',
+                    'formData.is_lifting_ration' => 'required',
+                ];
+                $messages = [
+                    'formData.has_digital_ration_card.required' => 'Ration card selection is required.',
+                    'formData.is_lifting_ration.required' => 'Ration lifting status selection is required.',
+                ];
+            }
+        } elseif ($section === 'assets') {
+            if ($this->activeMemberIndex === 0) {
+                $rules = [
+                    'formData.has_pucca_rooms' => 'required',
+                    'formData.owns_land' => 'required',
                     'formData.owns_4_wheeler' => 'required',
+                ];
+                $messages = [
+                    'formData.has_pucca_rooms.required' => 'House size selection is required.',
+                    'formData.owns_land.required' => 'Land ownership selection is required.',
+                    'formData.owns_4_wheeler.required' => '4-wheeler ownership selection is required.',
+                ];
+            }
+        } elseif ($section === 'income_profession') {
+            if ($this->activeMemberIndex === 0) {
+                $rules = [
+                    'formData.pays_tax' => 'required',
                     'formData.total_annual_income' => 'required|numeric|min:0',
                 ];
                 $messages = [
-                    'formData.owns_4_wheeler.required' => '4-wheeler ownership selection is required.',
+                    'formData.pays_tax.required' => 'Income Tax payment selection is required.',
                     'formData.total_annual_income.required' => 'Annual Income is required.',
                     'formData.total_annual_income.numeric' => 'Annual Income must be a number.',
                 ];
@@ -749,7 +773,7 @@ class AnnapurnaYojanaForm extends Component
     public function resetForm()
     {
         $this->activeMemberIndex = 0;
-        $this->activeSection = 'basic';
+        $this->activeSection = 'family_identity';
         $this->familyId = null;
         $this->appId = null;
         session()->forget(['annapurna_form_data', 'annapurna_members', 'annapurna_family_id', 'annapurna_app_id']);
@@ -792,7 +816,11 @@ class AnnapurnaYojanaForm extends Component
             'formData.hof_acc_no' => 'required',
             'formData.hof_ifsc' => 'required|size:11',
 
+            'formData.has_pucca_rooms' => 'required',
+            'formData.owns_land' => 'required',
             'formData.owns_4_wheeler' => 'required',
+            
+            'formData.pays_tax' => 'required',
             'formData.total_annual_income' => 'required|numeric|min:0',
         ];
 
@@ -834,34 +862,43 @@ class AnnapurnaYojanaForm extends Component
             'formData.hof_ifsc.required' => 'HOF IFSC is required.',
             'formData.hof_ifsc.size' => 'HOF IFSC must be 11 characters.',
 
+            'formData.has_pucca_rooms.required' => 'House size selection is required.',
+            'formData.owns_land.required' => 'Land ownership selection is required.',
             'formData.owns_4_wheeler.required' => '4-wheeler ownership selection is required.',
+            
+            'formData.pays_tax.required' => 'Income Tax payment selection is required.',
             'formData.total_annual_income.required' => 'Annual Income is required.',
             'formData.total_annual_income.numeric' => 'Annual Income must be a number.',
         ];
 
         // Validate each member
         foreach ($this->members as $index => $member) {
+            $rules["members.{$index}.member_type"] = 'required|in:adult,child';
             $rules["members.{$index}.name"] = 'required|string|max:255';
             $rules["members.{$index}.dob"] = 'required|date';
             $rules["members.{$index}.gender"] = 'required';
             $rules["members.{$index}.relation"] = 'required';
-            $rules["members.{$index}.aadhaar"] = 'nullable|digits:12';
 
-            $messages["members.{$index}.name.required"] = 'Member #'.($index + 1).' name is required.';
-            $messages["members.{$index}.dob.required"] = 'Member #'.($index + 1).' DOB is required.';
-            $messages["members.{$index}.gender.required"] = 'Member #'.($index + 1).' Gender is required.';
-            $messages["members.{$index}.relation.required"] = 'Member #'.($index + 1).' Relation is required.';
-            $messages["members.{$index}.aadhaar.digits"] = 'Member #'.($index + 1).' Aadhaar must be 12 digits.';
+            $messages["members.{$index}.member_type.required"] = 'Member #' . ($index + 1) . ' category is required.';
+            $messages["members.{$index}.name.required"] = 'Member #' . ($index + 1) . ' name is required.';
+            $messages["members.{$index}.dob.required"] = 'Member #' . ($index + 1) . ' DOB is required.';
+            $messages["members.{$index}.gender.required"] = 'Member #' . ($index + 1) . ' Gender is required.';
+            $messages["members.{$index}.relation.required"] = 'Member #' . ($index + 1) . ' Relation is required.';
 
-            if (($member['applying_for_ay'] ?? 'No') === 'Yes') {
-                $rules["members.{$index}.bank_name"] = 'required';
-                $rules["members.{$index}.acc_no"] = 'required';
-                $rules["members.{$index}.ifsc"] = 'required|size:11';
+            if (($member['member_type'] ?? 'adult') === 'adult') {
+                $rules["members.{$index}.aadhaar"] = 'nullable|digits:12';
+                $messages["members.{$index}.aadhaar.digits"] = 'Member #' . ($index + 1) . ' Aadhaar must be 12 digits.';
 
-                $messages["members.{$index}.bank_name.required"] = 'Member #'.($index + 1).' bank name is required since they are applying for AY.';
-                $messages["members.{$index}.acc_no.required"] = 'Member #'.($index + 1).' account number is required since they are applying for AY.';
-                $messages["members.{$index}.ifsc.required"] = 'Member #'.($index + 1).' IFSC is required since they are applying for AY.';
-                $messages["members.{$index}.ifsc.size"] = 'Member #'.($index + 1).' IFSC must be 11 characters.';
+                if (($member['applying_for_ay'] ?? 'No') === 'Yes') {
+                    $rules["members.{$index}.bank_name"] = 'required';
+                    $rules["members.{$index}.acc_no"] = 'required';
+                    $rules["members.{$index}.ifsc"] = 'required|size:11';
+
+                    $messages["members.{$index}.bank_name.required"] = 'Member #' . ($index + 1) . ' bank name is required since they are applying for AY.';
+                    $messages["members.{$index}.acc_no.required"] = 'Member #' . ($index + 1) . ' account number is required since they are applying for AY.';
+                    $messages["members.{$index}.ifsc.required"] = 'Member #' . ($index + 1) . ' IFSC is required since they are applying for AY.';
+                    $messages["members.{$index}.ifsc.size"] = 'Member #' . ($index + 1) . ' IFSC must be 11 characters.';
+                }
             }
         }
 
@@ -877,34 +914,60 @@ class AnnapurnaYojanaForm extends Component
                     if (isset($parts[1])) {
                         $this->activeMemberIndex = ((int) $parts[1]) + 1;
                         $field = $parts[2] ?? '';
-                        if (in_array($field, ['name', 'dob', 'gender', 'relation'])) {
-                            $this->activeSection = 'basic';
-                        } else {
-                            $this->activeSection = 'identity';
+                        if (in_array($field, ['member_type', 'name', 'dob', 'gender', 'relation', 'aadhaar', 'bank_name', 'acc_no', 'ifsc', 'epic_no', 'ac_part_no', 'applying_for_ay'])) {
+                            $this->activeSection = 'family_identity';
+                        } elseif (in_array($field, ['has_digital_ration_card', 'ration_card_no', 'ration_card_type'])) {
+                            $this->activeSection = 'ration_subsidy';
+                        } elseif (in_array($field, ['health_insurance_type', 'health_insurance_premium', 'health_insurance_sum_assured'])) {
+                            $this->activeSection = 'assets';
+                        } elseif (in_array($field, ['pan_no', 'employment_nature', 'literate_status', 'highest_qualification'])) {
+                            $this->activeSection = 'income_profession';
+                        } elseif (in_array($field, ['caa_status', 'caa_app_no', 'caa_cert_no', 'kcc_type', 'kcc_id_no', 'kcc_date', 'kcc_issuing_authority', 'sir_status', 'sir_case_details'])) {
+                            $this->activeSection = 'other_docs';
+                        } elseif (in_array($field, ['school_grade', 'school_name', 'school_type', 'school_type_other', 'vaccination_card_id', 'vaccination_status', 'vaccination_skip_reason_or_date'])) {
+                            $this->activeSection = 'social_dependents';
                         }
                     }
                 } elseif (str_starts_with($firstErrorKey, 'formData.')) {
                     $this->activeMemberIndex = 0; // HOF
                     $field = str_replace('formData.', '', $firstErrorKey);
 
-                    $basicFields = [
+                    $familyIdentityFields = [
                         'hof_name', 'hof_dob', 'hof_gender', 'contact_no', 'category',
                         'caste_certificate_no', 'ews_certificate_no', 'pvtg_certificate_no',
                         'district_id', 'rural_urban', 'blockurban', 'gpward',
                         'village_town', 'police_station', 'post_office', 'pincode',
+                        'hof_aadhaar', 'hof_bank_name', 'hof_acc_no', 'hof_ifsc',
+                        'hof_epic_no', 'hof_ac_part_no',
                     ];
 
-                    $identityFields = [
-                        'hof_aadhaar', 'has_digital_ration_card', 'is_lifting_ration',
-                        'hof_bank_name', 'hof_acc_no', 'hof_ifsc',
+                    $rationSubsidyFields = [
+                        'has_digital_ration_card', 'is_lifting_ration', 'hof_ration_card_id', 'ration_card_type',
                     ];
 
-                    if (in_array($field, $basicFields)) {
-                        $this->activeSection = 'basic';
-                    } elseif (in_array($field, $identityFields)) {
-                        $this->activeSection = 'identity';
+                    $assetsFields = [
+                        'has_pucca_rooms', 'owns_land', 'land_size_decimals', 'owns_4_wheeler',
+                        'num_vehicles', 'vehicle_reg_no', 'vehicle_model',
+                        'health_insurance_type', 'health_insurance_premium', 'health_insurance_sum_assured',
+                    ];
+
+                    $incomeProfessionFields = [
+                        'pays_tax', 'hof_pan_no', 'hof_employment_nature', 'total_annual_income',
+                        'has_constitutional_post', 'constitutional_post_details', 'has_gst_reg', 'gstin',
+                        'has_pensioner', 'pensioner_details', 'num_literate_adults', 'num_illiterate_adults',
+                        'hof_literate_status', 'hof_highest_qualification',
+                    ];
+
+                    if (in_array($field, $familyIdentityFields)) {
+                        $this->activeSection = 'family_identity';
+                    } elseif (in_array($field, $rationSubsidyFields)) {
+                        $this->activeSection = 'ration_subsidy';
+                    } elseif (in_array($field, $assetsFields)) {
+                        $this->activeSection = 'assets';
+                    } elseif (in_array($field, $incomeProfessionFields)) {
+                        $this->activeSection = 'income_profession';
                     } else {
-                        $this->activeSection = 'income';
+                        $this->activeSection = 'other_docs';
                     }
                 }
             }
