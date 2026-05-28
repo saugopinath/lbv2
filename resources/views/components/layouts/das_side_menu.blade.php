@@ -347,5 +347,14 @@ break;
             <span x-show="sidebar" class="mr-2 truncate">Annapurna Yojana Verification</span>
         </a>
 
+        <a href="{{ route('annapurna-yojana-approval') }}"
+            class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
+            <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+
+            </svg>
+            <span x-show="sidebar" class="mr-2 truncate">Annapurna Yojana Approval</span>
+        </a>
+
     </nav>
 </aside>

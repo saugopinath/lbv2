@@ -267,5 +267,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::controller(AnnapurnaYojanaVerificationController::class)->group(function () {
         Route::get('annapurna-yojana-verification', 'verifierIndex')->name('annapurna-yojana-verification');
         Route::get('annapurna-yojana-verification/{family_id}', 'verifierDetails')->name('annapurna-yojana-verification.details');
+        Route::get('annapurna-yojana-approval', 'approverIndex')->name('annapurna-yojana-approval');
+        Route::get('annapurna-yojana-approval/{family_id}', 'approverDetails')->name('annapurna-yojana-approval.details');
     });
 });

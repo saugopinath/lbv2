@@ -58,7 +58,7 @@
     /** Row-group palette — alternates per family */
     $groupColors = [
         'bg-white',
-        'bg-violet-50/40',
+        'bg-emerald-50/20',
     ];
 @endphp
 
@@ -83,13 +83,13 @@
         </div>
     @endif
 
-    {{-- ── Stats Cards ──────────────────────────────────────────────────── --}}
+    {{-- ── Stats Cards ── --}}
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         @foreach ([
-            ['label' => 'Total Applications', 'value' => $stats->total_families ?? 0,  'bgStyle' => 'linear-gradient(135deg, #4f46e5 0%, #1e1b4b 100%)', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
-            ['label' => 'Total Members',      'value' => $stats->total_members  ?? 0,  'bgStyle' => 'linear-gradient(135deg, #0284c7 0%, #0c4a6e 100%)', 'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0'],
-            ['label' => 'Pending',            'value' => $stats->pending        ?? 0,  'bgStyle' => 'linear-gradient(135deg, #d97706 0%, #7c2d12 100%)', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
-            ['label' => 'Verified',           'value' => $stats->verified       ?? 0,  'bgStyle' => 'linear-gradient(135deg, #059669 0%, #064e3b 100%)', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+            ['label' => 'Total Applications',   'value' => $stats->total_families ?? 0,      'bgStyle' => 'linear-gradient(135deg, #0d9488 0%, #042f2e 100%)', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+            ['label' => 'Total Family Members', 'value' => $stats->total_members  ?? 0,      'bgStyle' => 'linear-gradient(135deg, #0284c7 0%, #0c4a6e 100%)', 'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0'],
+            ['label' => 'Pending Approval',     'value' => $stats->pending_approval ?? 0,    'bgStyle' => 'linear-gradient(135deg, #d97706 0%, #7c2d12 100%)', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+            ['label' => 'Approved Applications', 'value' => $stats->approved  ?? 0,          'bgStyle' => 'linear-gradient(135deg, #059669 0%, #064e3b 100%)', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
         ] as $card)
             <div class="relative overflow-hidden rounded-xl p-4 text-white shadow-md border border-white/5" style="background: {{ $card['bgStyle'] }};">
                 <p class="text-xs font-medium opacity-80">{{ $card['label'] }}</p>
@@ -101,24 +101,16 @@
         @endforeach
     </div>
 
-    {{-- ── Filters ───────────────────────────────────────────────────────── --}}
+    {{-- ── Filters ── --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 space-y-3">
-
-        {{-- LGD Location Filter (District / Rural-Urban / Block-ULB / GP-Ward) --}}
         <livewire:filter-lgd-master :button_show="1" />
 
-        {{-- Secondary filters: Gender + Free-text Search --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-gray-100 dark:border-gray-700">
-
             {{-- Gender --}}
             <div>
-                <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
-                    Gender
-                </label>
+                <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Gender</label>
                 <select wire:model.live="gender"
-                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg
-                           focus:ring-2 focus:ring-violet-500 focus:border-violet-500
-                           dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     <option value="">All Genders</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -128,33 +120,25 @@
 
             {{-- Search --}}
             <div>
-                <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
-                    Search
-                </label>
+                <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Search</label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
                         </svg>
                     </span>
                     <input wire:model.live.debounce.500ms="search"
                         type="text"
                         placeholder="App ID / Member Name / Aadhaar / Mobile"
-                        class="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg
-                               focus:ring-2 focus:ring-violet-500 focus:border-violet-500
-                               dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                        class="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
                 </div>
             </div>
-
         </div>
 
-        {{-- Reset all --}}
         @if ($search || $gender)
             <div class="flex justify-end">
                 <button wire:click="resetFilters"
-                    class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium
-                           text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition">
+                    class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -164,19 +148,14 @@
         @endif
     </div>
 
-    {{-- ── Table ─────────────────────────────────────────────────────────── --}}
+    {{-- ── Table ── --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-
-        {{-- Loading bar --}}
-        <div wire:loading.delay
-            class="h-1 w-full bg-gradient-to-r from-violet-500 via-indigo-500 to-violet-500
-                   animate-pulse rounded-t-2xl">
-        </div>
+        <div wire:loading.delay class="h-1 w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 animate-pulse rounded-t-2xl"></div>
 
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
                 <thead>
-                    <tr class="bg-violet-800 text-white text-xs uppercase tracking-wider">
+                    <tr class="bg-emerald-800 text-white text-xs uppercase tracking-wider">
                         <th class="px-4 py-3 text-left whitespace-nowrap">Temp. Application ID</th>
                         <th class="px-4 py-3 text-left whitespace-nowrap">Family Members Name</th>
                         <th class="px-4 py-3 text-left whitespace-nowrap">Mobile No</th>
@@ -189,7 +168,6 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y-0">
-
                     @forelse ($families as $familyId => $members)
                         @php
                             $first      = $members->first();
@@ -197,20 +175,17 @@
                             $memberCount = $members->count();
                         @endphp
 
-                        {{-- Top border between families --}}
                         @if (!$loop->first)
                             <tr><td colspan="9" class="h-px bg-gray-200 dark:bg-gray-600 p-0"></td></tr>
                         @endif
 
                         @foreach ($members as $mIdx => $member)
-                            <tr class="{{ $colorClass }} hover:bg-violet-50/60 dark:hover:bg-gray-700 transition-colors duration-100">
-
-                                {{-- Application ID — shown only for first member of group --}}
+                            <tr class="{{ $colorClass }} hover:bg-emerald-50/40 dark:hover:bg-gray-700 transition-colors duration-100">
+                                {{-- Application ID --}}
                                 <td class="px-4 py-2.5 align-top whitespace-nowrap">
                                     @if ($mIdx === 0)
                                         <div class="flex flex-col gap-1">
-                                            <span class="font-mono text-xs font-semibold text-indigo-700 dark:text-indigo-300
-                                                         bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded border border-indigo-100">
+                                            <span class="font-mono text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded border border-emerald-100">
                                                 #{{ substr($first->application_id, 0, 8) }}…
                                             </span>
                                             <span class="text-[10px] text-gray-400">
@@ -220,61 +195,42 @@
                                     @endif
                                 </td>
 
-                                {{-- Member Name + HoF badge --}}
+                                {{-- Member Name --}}
                                 <td class="px-4 py-2.5 align-middle">
                                     <div class="flex items-center gap-2">
-                                        {{-- Avatar initial --}}
                                         <div class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
-                                            {{ $member->is_hof
-                                                ? 'bg-violet-600 text-white'
-                                                : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300' }}">
+                                            {{ $member->is_hof ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300' }}">
                                             {{ strtoupper(substr($member->member_name ?? '?', 0, 1)) }}
                                         </div>
                                         <div>
-                                            <p class="font-medium text-gray-800 dark:text-gray-100 leading-tight">
-                                                {{ $member->member_name ?? '—' }}
-                                            </p>
+                                            <p class="font-medium text-gray-800 dark:text-gray-100 leading-tight">{{ $member->member_name ?? '—' }}</p>
                                             @if ($member->is_hof)
-                                                <span class="text-[10px] font-semibold text-violet-600 dark:text-violet-400">
-                                                    ★ Head of Family
-                                                </span>
+                                                <span class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">★ Head of Family</span>
                                             @endif
                                         </div>
                                     </div>
                                 </td>
 
-                                {{-- Mobile (shown only for HoF) --}}
-                                <td class="px-4 py-2.5 align-middle whitespace-nowrap text-gray-600 dark:text-gray-300">
-                                    @if ($member->is_hof && $member->mobile_no)
-                                        <span class="font-mono text-xs">{{ $member->mobile_no }}</span>
-                                    @else
-                                        <span class="text-gray-300 dark:text-gray-600">—</span>
-                                    @endif
+                                {{-- Mobile --}}
+                                <td class="px-4 py-2.5 align-middle whitespace-nowrap text-gray-600 dark:text-gray-300 font-mono text-xs">
+                                    {{ ($member->is_hof && $member->mobile_no) ? $member->mobile_no : '—' }}
                                 </td>
 
-                                {{-- Aadhaar (masked) --}}
-                                <td class="px-4 py-2.5 align-middle whitespace-nowrap">
-                                    <span class="font-mono text-xs tracking-wider text-gray-700 dark:text-gray-300">
-                                        {{ $maskAadhaar($member->aadhaar_no) }}
-                                    </span>
+                                {{-- Aadhaar --}}
+                                <td class="px-4 py-2.5 align-middle whitespace-nowrap font-mono text-xs text-gray-700 dark:text-gray-300">
+                                    {{ $maskAadhaar($member->aadhaar_no) }}
                                 </td>
 
                                 {{-- Age --}}
-                                <td class="px-4 py-2.5 align-middle text-center">
-                                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                        {{ $calcAge($member->date_of_birth) }}
-                                    </span>
+                                <td class="px-4 py-2.5 align-middle text-center font-semibold text-gray-700 dark:text-gray-300">
+                                    {{ $calcAge($member->date_of_birth) }}
                                 </td>
 
                                 {{-- Gender --}}
                                 <td class="px-4 py-2.5 align-middle text-center">
                                     @if ($member->gender)
                                         <span class="px-2 py-0.5 text-xs rounded-full font-medium
-                                            {{ strtolower($member->gender) === 'male'
-                                                ? 'bg-sky-100 text-sky-700'
-                                                : (strtolower($member->gender) === 'female'
-                                                    ? 'bg-pink-100 text-pink-700'
-                                                    : 'bg-gray-100 text-gray-600') }}">
+                                            {{ strtolower($member->gender) === 'male' ? 'bg-sky-100 text-sky-700' : (strtolower($member->gender) === 'female' ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-600') }}">
                                             {{ $member->gender }}
                                         </span>
                                     @else
@@ -282,15 +238,12 @@
                                     @endif
                                 </td>
 
-                                {{-- Address (shown only for first member) --}}
+                                {{-- Address --}}
                                 <td class="px-4 py-2.5 align-top text-xs text-gray-600 dark:text-gray-400 max-w-[200px]">
                                     @if ($mIdx === 0)
                                         <div class="leading-snug">
                                             @if ($first->area_type)
-                                                <span class="inline-block px-1.5 py-0.5 text-[10px] rounded
-                                                    {{ $first->area_type === 'Rural'
-                                                        ? 'bg-emerald-100 text-emerald-700'
-                                                        : 'bg-sky-100 text-sky-700' }} mb-1">
+                                                <span class="inline-block px-1.5 py-0.5 text-[10px] rounded {{ $first->area_type === 'Rural' ? 'bg-emerald-100 text-emerald-700' : 'bg-sky-100 text-sky-700' }} mb-1">
                                                     {{ $first->area_type }}
                                                 </span>
                                             @endif
@@ -300,32 +253,28 @@
                                     @endif
                                 </td>
 
-                                {{-- Status (shown only for first member) --}}
+                                {{-- Status --}}
                                 <td class="px-4 py-2.5 align-top text-center whitespace-nowrap">
                                     @if ($mIdx === 0)
                                         @php
                                             $wfStatus = $getWorkflowStatus($first);
                                         @endphp
-                                        <span class="px-2 py-1 text-xs font-semibold border rounded-md
-                                                     {{ $statusColor($wfStatus) }}">
+                                        <span class="px-2 py-1 text-xs font-semibold border rounded-md {{ $statusColor($wfStatus) }}">
                                             {{ $wfStatus }}
                                         </span>
                                     @endif
                                 </td>
 
-                                {{-- Actions (shown for each member) --}}
+                                {{-- Actions --}}
                                 <td class="px-4 py-2.5 align-middle text-center whitespace-nowrap">
                                     <div class="flex flex-col items-center gap-1.5">
-                                        <a href="{{ route('annapurna-yojana-verification.details', ['family_id' => $member->family_id]) }}"
+                                        <a href="{{ route('annapurna-yojana-approval.details', ['family_id' => $member->family_id]) }}"
                                             title="View Form Details"
                                             class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium
-                                                   rounded-md border border-indigo-300 text-indigo-600 hover:bg-indigo-50 dark:border-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-950/20 transition-colors">
+                                                   rounded-md border border-emerald-300 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-950/20 transition-colors">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7
-                                                        -1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7 -1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                             </svg>
                                             View Form
                                         </a>
@@ -334,23 +283,11 @@
                                             $roleId = isset($member->next_level_role_id) ? (int)$member->next_level_role_id : 0;
                                         @endphp
 
-                                        @if($roleId === 0 || $roleId === -50)
-                                            <button wire:click="openActionModal({{ $member->family_id }}, 'Verify')"
-                                                title="Verify Application"
-                                                class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium
-                                                       rounded-md border border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-950/20 transition-colors">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                </svg>
-                                                Verify
-                                            </button>
-                                        @elseif($roleId === 50)
+                                        @if($roleId === 50)
                                             <div class="flex flex-col gap-1 w-full">
                                                 <button wire:click="openActionModal({{ $member->family_id }}, 'Approve')"
                                                     title="Approve Application"
-                                                    class="inline-flex items-center justify-center gap-1 px-2.5 py-1 text-[11px] font-bold
-                                                           text-white bg-gradient-to-r from-emerald-500 to-teal-600 rounded-md hover:from-emerald-600 hover:to-teal-700 shadow-sm transition">
+                                                    class="inline-flex items-center justify-center gap-1 px-2.5 py-1 text-[11px] font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-600 rounded-md hover:from-emerald-600 hover:to-teal-700 shadow-sm transition">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                                     </svg>
@@ -358,8 +295,7 @@
                                                 </button>
                                                 <button wire:click="openActionModal({{ $member->family_id }}, 'Revert')"
                                                     title="Revert Application"
-                                                    class="inline-flex items-center justify-center gap-1 px-2.5 py-1 text-[11px] font-medium
-                                                           rounded-md border border-orange-300 text-orange-700 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-400 dark:hover:bg-orange-950/20 transition-colors">
+                                                    class="inline-flex items-center justify-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-md border border-orange-300 text-orange-700 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-400 dark:hover:bg-orange-950/20 transition-colors">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
                                                     </svg>
@@ -373,58 +309,42 @@
                                                 </svg>
                                                 Approved
                                             </span>
-                                        @elseif($roleId === -100)
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold text-red-700 bg-red-50 border border-red-200 rounded">
-                                                Rejected
-                                            </span>
                                         @endif
                                     </div>
                                 </td>
-
                             </tr>
                         @endforeach
-
                     @empty
                         <tr>
                             <td colspan="9" class="px-6 py-16 text-center">
                                 <div class="flex flex-col items-center gap-3 text-gray-400">
                                     <svg class="w-12 h-12 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2
-                                               M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2 M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                                     </svg>
-                                    <p class="text-sm font-semibold text-gray-500">No applications found</p>
-                                    <p class="text-xs text-gray-400">Try adjusting your search or filter criteria</p>
+                                    <p class="text-sm font-semibold text-gray-500">No verified applications pending approval</p>
+                                    <p class="text-xs text-gray-400">Try adjusting your search or LGD filters</p>
                                 </div>
                             </td>
                         </tr>
                     @endforelse
-
                 </tbody>
             </table>
         </div>
 
-        {{-- ── Footer: per-page + pagination ──────────────────────────────── --}}
-        <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3
-                    border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30">
-
+        {{-- Footer --}}
+        <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30">
             <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                 <label for="perPage" class="font-medium">Rows per page:</label>
                 <select id="perPage" wire:model.live="perPage"
-                    class="border border-gray-200 rounded-md px-2 py-1 text-xs
-                           dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                           focus:ring-2 focus:ring-violet-500">
+                    class="border border-gray-200 rounded-md px-2 py-1 text-xs dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-emerald-500">
                     @foreach ([10, 15, 25, 50, 100] as $n)
                         <option value="{{ $n }}">{{ $n }}</option>
                     @endforeach
                 </select>
                 <span>
-                    Showing
-                    <strong>{{ $paginator->firstItem() ?? 0 }}</strong>–<strong>{{ $paginator->lastItem() ?? 0 }}</strong>
-                    of <strong>{{ number_format($paginator->total()) }}</strong> families
+                    Showing <strong>{{ $paginator->firstItem() ?? 0 }}</strong>–<strong>{{ $paginator->lastItem() ?? 0 }}</strong> of <strong>{{ number_format($paginator->total()) }}</strong> families
                 </span>
             </div>
-
             <div class="text-xs">
                 {{ $paginator->links() }}
             </div>
@@ -439,20 +359,15 @@
             $hofMember = $selectedMembers->firstWhere('is_hof', true) ?? $selectedFamily;
             $hofName = $hofMember->member_name ?? '—';
         @endphp
-        <div class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none bg-slate-900/60 backdrop-blur-sm"
-             x-data="{ uploading: false, progress: 0 }"
-             x-on:livewire-upload-start="uploading = true"
-             x-on:livewire-upload-finish="uploading = false"
-             x-on:livewire-upload-error="uploading = false"
-             x-on:livewire-upload-progress="progress = $event.detail.progress">
+        <div class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none bg-slate-900/60 backdrop-blur-sm">
             <div class="relative w-full max-w-lg mx-auto my-6 p-4">
                 <div class="relative flex flex-col w-full bg-white dark:bg-gray-800 border-0 rounded-3xl shadow-2xl outline-none focus:outline-none">
                     
                     {{-- Modal Header --}}
                     <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700 rounded-t-3xl bg-slate-50 dark:bg-gray-900/20">
                         <h3 class="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2">
-                            <i class="fas fa-file-signature text-indigo-500"></i>
-                            Action Decision Panel
+                            <i class="fas fa-file-signature text-emerald-500"></i>
+                            Approver Decision Panel
                         </h3>
                         <button type="button" wire:click="closeActionModal" class="p-1.5 text-gray-400 hover:text-gray-600 rounded-full transition">
                             <i class="fas fa-times text-base"></i>
@@ -462,9 +377,9 @@
                     {{-- Modal Body --}}
                     <div class="relative p-6 flex-auto space-y-4 max-h-[70vh] overflow-y-auto">
                         
-                        {{-- Jist of Application --}}
-                        <div class="bg-indigo-50/30 dark:bg-indigo-950/20 rounded-2xl p-4 border border-indigo-100/50 space-y-2">
-                            <h4 class="text-xs font-bold text-indigo-500 uppercase tracking-wide">Application Summary</h4>
+                        {{-- Application Summary --}}
+                        <div class="bg-emerald-50/30 dark:bg-emerald-950/20 rounded-2xl p-4 border border-emerald-100/50 space-y-2">
+                            <h4 class="text-xs font-bold text-emerald-600 uppercase tracking-wide">Application Summary</h4>
                             <div class="grid grid-cols-2 gap-3 text-xs">
                                 <div>
                                     <span class="text-gray-400 block font-medium">Family ID</span>
@@ -472,9 +387,7 @@
                                 </div>
                                 <div>
                                     <span class="text-gray-400 block font-medium">Applicant Head</span>
-                                    <span class="font-bold text-slate-800 dark:text-slate-200 truncate block">
-                                        {{ $hofName }}
-                                    </span>
+                                    <span class="font-bold text-slate-800 dark:text-slate-200 truncate block">{{ $hofName }}</span>
                                 </div>
                                 <div>
                                     <span class="text-gray-400 block font-medium">District</span>
@@ -487,26 +400,19 @@
                             </div>
                         </div>
 
-                        {{-- Operation Type Selector --}}
+                        {{-- Operation Type --}}
                         <div class="space-y-2">
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Operation Type</label>
-                            @if($modalOpType === 'Approve')
-                                <div class="flex items-center gap-2 p-3 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-xs font-bold">
-                                    <i class="fas fa-check-double text-emerald-500"></i>
-                                    Approve & Finalize Application
-                                </div>
-                            @else
-                                <div class="grid grid-cols-2 gap-3">
-                                    <label class="flex items-center gap-2 p-3 rounded-2xl border cursor-pointer hover:bg-slate-50/50 transition {{ $modalOpType === 'Verify' ? 'bg-indigo-50/70 border-indigo-500 text-indigo-700 font-bold shadow-sm shadow-indigo-100' : 'border-gray-200 text-gray-400 dark:border-gray-700' }}">
-                                        <input type="radio" wire:model.live="modalOpType" value="Verify" class="text-indigo-600 focus:ring-indigo-500">
-                                        <span class="text-xs">Verify</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-3 rounded-2xl border cursor-pointer hover:bg-slate-50/50 transition {{ $modalOpType === 'Revert' ? 'bg-orange-50/70 border-orange-500 text-orange-700 font-bold shadow-sm shadow-orange-100' : 'border-gray-200 text-gray-400 dark:border-gray-700' }}">
-                                        <input type="radio" wire:model.live="modalOpType" value="Revert" class="text-orange-600 focus:ring-orange-500">
-                                        <span class="text-xs">Revert</span>
-                                    </label>
-                                </div>
-                            @endif
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="flex items-center gap-2 p-3 rounded-2xl border cursor-pointer hover:bg-slate-50/50 transition {{ $modalOpType === 'Approve' ? 'bg-emerald-50/70 border-emerald-500 text-emerald-700 font-bold shadow-sm shadow-emerald-100' : 'border-gray-200 text-gray-400 dark:border-gray-700' }}">
+                                    <input type="radio" wire:model.live="modalOpType" value="Approve" class="text-emerald-600 focus:ring-emerald-500">
+                                    <span class="text-xs">Approve</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 rounded-2xl border cursor-pointer hover:bg-slate-50/50 transition {{ $modalOpType === 'Revert' ? 'bg-orange-50/70 border-orange-500 text-orange-700 font-bold shadow-sm shadow-orange-100' : 'border-gray-200 text-gray-400 dark:border-gray-700' }}">
+                                    <input type="radio" wire:model.live="modalOpType" value="Revert" class="text-orange-600 focus:ring-orange-500">
+                                    <span class="text-xs">Revert</span>
+                                </label>
+                            </div>
                         </div>
 
                         {{-- Remarks --}}
@@ -521,44 +427,12 @@
                             </label>
                             <textarea wire:model.defer="modalRemarks" 
                                       rows="3" 
-                                      placeholder="Provide descriptive remarks detailing your verification findings, approval justification, or reversion reasons..."
-                                      class="w-full text-xs p-3.5 border rounded-2xl border-slate-200 focus:ring-indigo-500 focus:border-indigo-500 block shadow-sm"></textarea>
+                                      placeholder="Provide descriptive remarks detailing your approval decision or reversion reasons..."
+                                      class="w-full text-xs p-3.5 border rounded-2xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500 block shadow-sm"></textarea>
                             @error('modalRemarks')
                                 <span class="text-[10px] font-bold text-rose-500 block mt-1">{{ $message }}</span>
                             @enderror
                         </div>
-
-                        {{-- Document Upload --}}
-                        <div class="space-y-1">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Optional supporting document</label>
-                            <div class="flex items-center justify-center w-full">
-                                <label class="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed rounded-2xl cursor-pointer hover:bg-slate-50/50 border-slate-200 transition">
-                                    <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
-                                        <i class="fas fa-cloud-upload-alt text-slate-400 text-2xl mb-1.5"></i>
-                                        <p class="text-xs text-slate-500 font-medium"><span class="font-bold text-indigo-600">Click to upload</span> or drag and drop</p>
-                                        <p class="text-[10px] text-slate-400">PDF, PNG, JPG up to 2MB</p>
-                                    </div>
-                                    <input type="file" wire:model="modalDocument" class="hidden">
-                                </label>
-                            </div>
-
-                            {{-- Livewire upload indicator --}}
-                            <div x-show="uploading" class="w-full bg-slate-100 rounded-full h-1.5 mt-2">
-                                <div class="bg-indigo-600 h-1.5 rounded-full transition-all duration-300" :style="`width: ${progress}%`"></div>
-                            </div>
-                            
-                            @if ($modalDocument)
-                                <div class="mt-2 p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-[10px] font-mono text-slate-500">
-                                    <span class="truncate max-w-[200px]">{{ $modalDocument->getClientOriginalName() }}</span>
-                                    <span>({{ round($modalDocument->getSize() / 1024) }} KB)</span>
-                                </div>
-                            @endif
-
-                            @error('modalDocument')
-                                <span class="text-[10px] font-bold text-rose-500 block mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
-
                     </div>
 
                     {{-- Modal Footer --}}
@@ -567,12 +441,11 @@
                             Cancel
                         </button>
                         <button type="button" wire:click="submitModalAction" wire:loading.attr="disabled" class="px-6 py-2 text-xs font-bold text-white rounded-xl shadow-md transition
-                            {{ $modalOpType === 'Approve' ? 'bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/10 hover:from-emerald-600 hover:to-teal-700' : ($modalOpType === 'Revert' ? 'bg-gradient-to-r from-orange-500 to-amber-600 shadow-orange-500/10 hover:from-orange-600 hover:to-amber-700' : 'bg-gradient-to-r from-indigo-500 to-purple-600 shadow-indigo-500/10 hover:from-indigo-600 hover:to-purple-700') }}">
+                            {{ $modalOpType === 'Approve' ? 'bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/10 hover:from-emerald-600 hover:to-teal-700' : 'bg-gradient-to-r from-orange-500 to-amber-600 shadow-orange-500/10 hover:from-orange-600 hover:to-amber-700' }}">
                             <span wire:loading.remove>Submit Action</span>
                             <span wire:loading><i class="fas fa-spinner fa-spin mr-1"></i> Processing...</span>
                         </button>
                     </div>
-
                 </div>
             </div>
         </div>

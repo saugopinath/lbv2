@@ -3,13 +3,13 @@
 
         {{-- Page Header --}}
         <div class="shadow-md rounded-2xl px-6 py-4 flex items-center justify-between border border-white/5"
-             style="background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 50%, #4c1d95 100%);">
+             style="background: linear-gradient(135deg, #022c22 0%, #064e3b 50%, #0f766e 100%);">
             <div>
                 <h1 class="text-lg font-bold text-white tracking-wide">
-                    Annapurna Yojana — Verification
+                    Annapurna Yojana — Approval
                 </h1>
-                <p class="text-violet-200 text-xs mt-0.5">
-                    Review and verify Annapurna Yojana family applications
+                <p class="text-emerald-200 text-xs mt-0.5">
+                    Review and finalize verified Annapurna Yojana family applications
                 </p>
             </div>
             <svg class="w-10 h-10 text-white opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -21,7 +21,7 @@
         </div>
 
         {{-- Livewire Table Component --}}
-        <livewire:annapurna-yojana.verifier-index-table />
+        <livewire:annapurna-yojana.approver-index-table />
 
     </div>
 </x-layouts.app>

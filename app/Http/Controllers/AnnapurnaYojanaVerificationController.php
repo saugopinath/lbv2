@@ -19,4 +19,15 @@ class AnnapurnaYojanaVerificationController extends Controller
     {
         return view('livewire.annapurna-yojana.verifier-details-page', ['family_id' => $family_id]);
     }
+
+
+    public function approverIndex(Request $request)
+    {
+        return view('livewire.annapurna-yojana.approver-index');
+    }
+
+    public function approverDetails(Request $request, $family_id)
+    {
+        return view('livewire.annapurna-yojana.approver-details-page', ['family_id' => $family_id]);
+    }
 }

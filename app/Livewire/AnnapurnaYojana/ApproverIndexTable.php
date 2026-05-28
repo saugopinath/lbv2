@@ -4,15 +4,13 @@ namespace App\Livewire\AnnapurnaYojana;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\WithFileUploads;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class VerifierIndexTable extends Component
+class ApproverIndexTable extends Component
 {
     use WithPagination;
-    use WithFileUploads;
 
     // ── LGD Filter values (populated by filtersApplied event) ──────────────
     public $district_id    = null;
@@ -29,9 +27,8 @@ class VerifierIndexTable extends Component
     // ── Modal action properties ─────────────────────────────────────────────
     public $showActionModal = false;
     public $selectedFamilyId = null;
-    public $modalOpType = 'Verify'; // 'Verify', 'Revert', 'Approve'
+    public $modalOpType = 'Approve'; // 'Approve', 'Revert'
     public $modalRemarks = '';
-    public $modalDocument = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -132,13 +129,13 @@ class VerifierIndexTable extends Component
     }
 
     /**
-     * Build shared WHERE clause and bindings.
+     * Build shared WHERE clause and bindings for Approver Pending Queue.
      */
     private function buildWhere(): array
     {
         $conditions = [
             'COALESCE(f.is_reverted, 0) = 0',
-            'COALESCE(f.next_level_role_id, 0) = 0'
+            'COALESCE(f.next_level_role_id, 0) = 50' // Verified applications pending approval
         ];
         $bindings   = [];
 
@@ -192,12 +189,11 @@ class VerifierIndexTable extends Component
     /**
      * Action Modal controls
      */
-    public function openActionModal($familyId, $opType = 'Verify')
+    public function openActionModal($familyId, $opType = 'Approve')
     {
         $this->selectedFamilyId = (int)$familyId;
         $this->modalOpType = $opType;
         $this->modalRemarks = '';
-        $this->modalDocument = null;
         $this->resetErrorBag();
         $this->showActionModal = true;
     }
@@ -207,18 +203,16 @@ class VerifierIndexTable extends Component
         $this->showActionModal = false;
         $this->selectedFamilyId = null;
         $this->modalRemarks = '';
-        $this->modalDocument = null;
         $this->resetErrorBag();
     }
 
     /**
-     * Handle modal action submission (Verify, Revert, Approve)
+     * Handle modal action submission (Approve, Revert)
      */
     public function submitModalAction()
     {
         $rules = [
-            'modalOpType'   => 'required|in:Verify,Revert,Approve',
-            'modalDocument' => 'nullable|file|mimes:pdf,png,jpg,jpeg|max:2048', // max 2MB
+            'modalOpType'   => 'required|in:Approve,Revert',
         ];
 
         if ($this->modalOpType === 'Revert') {
@@ -229,35 +223,8 @@ class VerifierIndexTable extends Component
 
         $this->validate($rules);
 
-        $docPath = null;
-        if ($this->modalDocument) {
-            $docPath = $this->modalDocument->store('verification_docs', 'public');
-        }
-
         try {
-            if ($this->modalOpType === 'Verify') {
-                DB::connection('pgsql_ay')->update("
-                    UPDATE dbt_apy.families 
-                    SET    next_level_role_id = 50, 
-                           is_reverted = 0,
-                           verification_datetime = NOW(), 
-                           status = 'Verified',
-                           verification_remarks = ?,
-                           verification_doc_path = ?,
-                           updated_at = NOW() 
-                    WHERE  id = ?
-                ", [$this->modalRemarks, $docPath, $this->selectedFamilyId]);
-
-                DB::connection('pgsql_ay')->update("
-                    UPDATE dbt_apy.family_members 
-                    SET    next_level_role_id = 50, 
-                           is_reverted = 0,
-                           verification_datetime = NOW() 
-                    WHERE  family_id = ?
-                ", [$this->selectedFamilyId]);
-
-                session()->flash('success', 'Family application verified successfully.');
-            } elseif ($this->modalOpType === 'Approve') {
+            if ($this->modalOpType === 'Approve') {
                 DB::connection('pgsql_ay')->update("
                     UPDATE dbt_apy.families 
                     SET    next_level_role_id = 100, 
@@ -265,10 +232,9 @@ class VerifierIndexTable extends Component
                            approval_datetime = NOW(), 
                            status = 'Approved',
                            approval_remarks = ?,
-                           approval_doc_path = ?,
                            updated_at = NOW() 
                     WHERE  id = ?
-                ", [$this->modalRemarks, $docPath, $this->selectedFamilyId]);
+                ", [$this->modalRemarks, $this->selectedFamilyId]);
 
                 DB::connection('pgsql_ay')->update("
                     UPDATE dbt_apy.family_members 
@@ -284,21 +250,22 @@ class VerifierIndexTable extends Component
                     UPDATE dbt_apy.families 
                     SET    next_level_role_id = 0, 
                            is_reverted = 1,
+                           approval_datetime = NOW(), 
                            status = 'Reverted',
-                           verification_remarks = ?,
-                           verification_doc_path = ?,
+                           approval_remarks = ?,
                            updated_at = NOW() 
                     WHERE  id = ?
-                ", [$this->modalRemarks, $docPath, $this->selectedFamilyId]);
+                ", [$this->modalRemarks, $this->selectedFamilyId]);
 
                 DB::connection('pgsql_ay')->update("
                     UPDATE dbt_apy.family_members 
                     SET    next_level_role_id = 0, 
-                           is_reverted = 1 
+                           is_reverted = 1,
+                           approval_datetime = NOW() 
                     WHERE  family_id = ?
                 ", [$this->selectedFamilyId]);
 
-                session()->flash('success', 'Family application reverted back for correction.');
+                session()->flash('success', 'Family application reverted back to operator.');
             }
 
             $this->closeActionModal();
@@ -388,19 +355,21 @@ class VerifierIndexTable extends Component
             $families = collect($rows)->groupBy('family_id');
         }
 
-        // ── 4. Stats counters (Mapped to role status workflow) ────────────────
+        // ── 4. Stats counters (Mapped to approver workflow) ──────────────────
+        // The Approver wants stats based on:
+        // - Total Verified pending approval (role_id = 50)
+        // - Total Approved finalized (role_id = 100)
+        // Let's query across the complete un-filtered tables so counts remain accurate.
         $statsSql = "
             SELECT
-                COUNT(DISTINCT f.id)                                               AS total_families,
-                COUNT(fm.id)                                                       AS total_members,
-                COUNT(DISTINCT CASE WHEN COALESCE(f.next_level_role_id, 0) = 0 THEN f.id END) AS pending,
-                COUNT(DISTINCT CASE WHEN COALESCE(f.next_level_role_id, 0) IN (50, 100) THEN f.id END) AS verified,
-                COUNT(DISTINCT CASE WHEN f.next_level_role_id = 100 THEN f.id END) AS approved
+                COUNT(DISTINCT f.id)                                                          AS total_families,
+                COUNT(fm.id)                                                                  AS total_members,
+                COUNT(DISTINCT CASE WHEN COALESCE(f.next_level_role_id, 0) = 50 THEN f.id END) AS pending_approval,
+                COUNT(DISTINCT CASE WHEN f.next_level_role_id = 100 THEN f.id END)            AS approved
             FROM dbt_apy.families f
             INNER JOIN dbt_apy.family_members fm ON fm.family_id = f.id
-            WHERE {$where}
         ";
-        $stats = DB::connection('pgsql_ay')->selectOne($statsSql, $bindings);
+        $stats = DB::connection('pgsql_ay')->selectOne($statsSql);
 
         // ── 5. Paginator for links ───────────────────────────────────────────
         $paginator = new LengthAwarePaginator(
@@ -411,7 +380,7 @@ class VerifierIndexTable extends Component
             ['path' => request()->url(), 'query' => request()->query()]
         );
 
-        return view('livewire.annapurna-yojana.verifier-index-table', [
+        return view('livewire.annapurna-yojana.approver-index-table', [
             'families'  => $families,
             'paginator' => $paginator,
             'stats'     => $stats,

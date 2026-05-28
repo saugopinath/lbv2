@@ -3,6 +3,7 @@
 namespace App\Livewire\AnnapurnaYojana;
 
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,12 +13,74 @@ class VerifierDetails extends Component
     public $family;
     public $members = [];
     public $verificationStatus;
-    public $actionRemarks = '';
+    public $isApprover = false;
 
-    public function mount($familyId): void
+    public function mount($familyId, $isApprover = false): void
     {
         $this->familyId = (int)$familyId;
+        $this->isApprover = (bool)$isApprover;
+        $this->ensureSchema();
         $this->loadData();
+    }
+
+    /**
+     * Run dynamic ALTER TABLE commands to ensure verification/approval remarks and document columns exist.
+     */
+    protected function ensureSchema(): void
+    {
+        try {
+            $conn = DB::connection('pgsql_ay');
+
+            // Columns to add to families
+            $familiesCols = [
+                'next_level_role_id' => 'SMALLINT DEFAULT 0',
+                'is_reverted' => 'SMALLINT DEFAULT 0',
+                'verification_datetime' => 'TIMESTAMP WITHOUT TIME ZONE',
+                'approval_datetime' => 'TIMESTAMP WITHOUT TIME ZONE',
+                'verification_remarks' => 'TEXT',
+                'verification_doc_path' => 'TEXT',
+                'approval_remarks' => 'TEXT',
+                'approval_doc_path' => 'TEXT'
+            ];
+
+            foreach ($familiesCols as $colName => $colType) {
+                $exists = $conn->selectOne("
+                    SELECT 1 
+                    FROM information_schema.columns 
+                    WHERE table_schema = 'dbt_apy' 
+                      AND table_name = 'families' 
+                      AND column_name = ?
+                ", [$colName]);
+
+                if (!$exists) {
+                    $conn->statement("ALTER TABLE dbt_apy.families ADD COLUMN {$colName} {$colType}");
+                }
+            }
+
+            // Columns to add to family_members
+            $membersCols = [
+                'next_level_role_id' => 'SMALLINT DEFAULT 0',
+                'is_reverted' => 'SMALLINT DEFAULT 0',
+                'verification_datetime' => 'TIMESTAMP WITHOUT TIME ZONE',
+                'approval_datetime' => 'TIMESTAMP WITHOUT TIME ZONE'
+            ];
+
+            foreach ($membersCols as $colName => $colType) {
+                $exists = $conn->selectOne("
+                    SELECT 1 
+                    FROM information_schema.columns 
+                    WHERE table_schema = 'dbt_apy' 
+                      AND table_name = 'family_members' 
+                      AND column_name = ?
+                ", [$colName]);
+
+                if (!$exists) {
+                    $conn->statement("ALTER TABLE dbt_apy.family_members ADD COLUMN {$colName} {$colType}");
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Dynamic schema update failed: ' . $e->getMessage());
+        }
     }
 
     public function loadData(): void
@@ -37,7 +100,21 @@ class VerifierDetails extends Component
             return;
         }
 
-        $this->verificationStatus = $this->family->application_status ?? $this->family->status ?? 'Pending';
+        // Dynamically compute verification status based on next_level_role_id
+        $roleId = isset($this->family->next_level_role_id) ? (int)$this->family->next_level_role_id : 0;
+        if ($roleId === 0) {
+            $this->verificationStatus = 'Submitted';
+        } elseif ($roleId === 50) {
+            $this->verificationStatus = 'Verified';
+        } elseif ($roleId === 100) {
+            $this->verificationStatus = 'Approved';
+        } elseif ($roleId === -50 || (isset($this->family->status) && strtolower($this->family->status) === 'reverted')) {
+            $this->verificationStatus = 'Reverted';
+        } elseif ($roleId < 0 || (isset($this->family->status) && strtolower($this->family->status) === 'rejected')) {
+            $this->verificationStatus = 'Rejected';
+        } else {
+            $this->verificationStatus = $this->family->status ?? 'Submitted';
+        }
 
         // ── 2. Fetch all members via raw SQL ────────────────────────────────
         $membersSql = "
@@ -53,62 +130,9 @@ class VerifierDetails extends Component
         }
     }
 
-    /**
-     * Verify the family application
-     */
-    public function verifyApplication()
-    {
-        try {
-            DB::connection('pgsql_ay')->update(
-                "UPDATE dbt_apy.families SET application_status = 'Verified', updated_at = NOW() WHERE id = ?",
-                [$this->familyId]
-            );
-
-            session()->flash('success', 'Family application verified successfully.');
-            $this->loadData();
-        } catch (\Exception $e) {
-            session()->flash('error', 'Failed to verify application: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Reject the family application
-     */
-    public function rejectApplication()
-    {
-        try {
-            DB::connection('pgsql_ay')->update(
-                "UPDATE dbt_apy.families SET application_status = 'Rejected', updated_at = NOW() WHERE id = ?",
-                [$this->familyId]
-            );
-
-            session()->flash('success', 'Family application rejected.');
-            $this->loadData();
-        } catch (\Exception $e) {
-            session()->flash('error', 'Failed to reject application: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Revert the family application
-     */
-    public function revertApplication()
-    {
-        try {
-            DB::connection('pgsql_ay')->update(
-                "UPDATE dbt_apy.families SET application_status = 'Reverted', updated_at = NOW() WHERE id = ?",
-                [$this->familyId]
-            );
-
-            session()->flash('success', 'Family application reverted back for correction.');
-            $this->loadData();
-        } catch (\Exception $e) {
-            session()->flash('error', 'Failed to revert application: ' . $e->getMessage());
-        }
-    }
 
     public function render()
     {
-        return view('livewire.annapurna-yojana.verifier-details');
+        return view('livewire.annapurna-yojana.applicant-family-details');
     }
 }
