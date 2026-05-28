@@ -1,4 +1,4 @@
-<form wire:submit.prevent="save" class="max-w-7xl mx-auto my-8 bg-white border-2 rounded-lg shadow-xl overflow-hidden" style="border-color: #b45309;">
+<form wire:submit.prevent="showConfirmation" class="max-w-7xl mx-auto my-8 bg-white border-2 rounded-lg shadow-xl overflow-hidden" style="border-color: #b45309;">
     {{-- Custom Theme Color Overrides for Government brand style --}}
     <style>
         .active-tab {
@@ -1431,63 +1431,6 @@
                                 </div>
                             </div>
 
-                            {{-- For Official Use Section --}}
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
-                                <div class="border-b-2 border-indigo-900 pb-2 mb-4">
-                                    <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
-                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">C</span>
-                                        For Official Use (Enquiry Report) | শুধুমাত্র সরকারি ব্যবহারের জন্য
-                                    </h3>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Verifying Officer Name <br><span class="text-xs text-gray-500 font-normal">তদন্তকারী আধিকারিকের নাম</span></label>
-                                        <input type="text" wire:model="formData.official_verified_by" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Officer Name">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Designation <br><span class="text-xs text-gray-500 font-normal">পদবী</span></label>
-                                        <input type="text" wire:model="formData.official_designation" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g. BDO, GP Secretary">
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Place <br><span class="text-xs text-gray-500 font-normal">স্থান</span></label>
-                                        <input type="text" wire:model="formData.official_place" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Place">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Date <br><span class="text-xs text-gray-500 font-normal">তারিখ</span></label>
-                                        <input type="date" wire:model="formData.official_date" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 pt-4 border-t border-gray-200">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Verification Status <br><span class="text-xs text-gray-500 font-normal">যাচাইকরণের স্থিতি</span></label>
-                                        <select wire:model="formData.official_status" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                            <option value="">-- Select Status --</option>
-                                            <option value="Correct">Information found to be correct / তথ্য সঠিক পাওয়া গেছে</option>
-                                            <option value="Incorrect">Information found not to be correct / তথ্য সঠিক নয়</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Recommendation <br><span class="text-xs text-gray-500 font-normal">সুপারিশ</span></label>
-                                        <select wire:model="formData.official_recommendation" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                            <option value="">-- Select Recommendation --</option>
-                                            <option value="Acceptance">Recommend for Acceptance / গ্রহণের সুপারিশ</option>
-                                            <option value="Rejection">Recommend for Rejection / প্রত্যাখ্যানের সুপারিশ</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                @if ($formData['official_status'] === 'Incorrect')
-                                    <div class="mt-4">
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Incorrect Details (Specify Section and Point) <br><span class="text-xs text-gray-500 font-normal">ভুল তথ্যের বিবরণ (ধারা ও পয়েন্ট উল্লেখ করুন)</span></label>
-                                        <textarea wire:model="formData.official_incorrect_details" rows="3" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Please mention relevant Section and point..."></textarea>
-                                    </div>
-                                @endif
-                            </div>
                         @else
                             {{-- Info card for members --}}
                             <div class="bg-amber-50 border border-amber-200 rounded-lg p-8 text-center text-amber-900 shadow-inner">
@@ -1577,10 +1520,64 @@
                     @endif
                 </div>
 
+
             </div>
 
         </div>
 
     </div>
 
+    {{-- Confirmation Modal --}}
+    @if ($showSubmitModal)
+        <!-- Backdrop -->
+        <div class="fixed inset-0 transition-opacity backdrop-blur-sm" style="background-color: rgba(0,0,0,0.55); z-index: 40;" wire:click="closeSubmitModal"></div>
+
+        <!-- Modal Wrapper -->
+        <div class="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style="z-index: 50;">
+            <!-- Modal Panel -->
+            <div class="relative bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all max-w-lg w-full border-2 border-amber-600">
+                <div class="bg-amber-700 px-4 py-3 sm:px-6 flex items-center justify-between">
+                    <h3 class="text-lg font-bold leading-6 text-white flex items-center gap-2" id="modal-title">
+                        <svg class="w-6 h-6 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Confirm Submission | নিশ্চিতকরণ
+                    </h3>
+                    <button type="button" wire:click="closeSubmitModal" class="text-white hover:text-amber-200 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                            <p class="text-sm text-gray-700 font-semibold mb-3">
+                                Are you sure you want to submit this Annapurna Yojana Application?
+                            </p>
+                            <p class="text-xs text-gray-500 leading-relaxed mb-4">
+                                আপনি কি নিশ্চিত যে আপনি এই অন্নপূর্ণা যোজনা আবেদনপত্রটি জমা দিতে চান? একবার জমা দিলে আর কোনো পরিবর্তন করা যাবে না।
+                            </p>
+                            
+                            <div class="bg-amber-50 border border-amber-200 rounded p-3 text-xs text-amber-900 space-y-1.5">
+                                <div><strong>Head of Family:</strong> {{ $formData['hof_name'] ?? 'N/A' }}</div>
+                                <div><strong>Contact Number:</strong> {{ $formData['contact_no'] ?? 'N/A' }}</div>
+                                <div><strong>Total Family Members:</strong> {{ count($members) + 1 }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-amber-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                    <button type="button" 
+                            wire:click="save" 
+                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-emerald-600 text-base font-medium text-white hover:bg-emerald-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition duration-150">
+                        Yes, Submit / হ্যাঁ, জমা দিন
+                    </button>
+                    <button type="button" 
+                            wire:click="closeSubmitModal" 
+                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm transition duration-150">
+                        Cancel / বাতিল করুন
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
 </form>
+

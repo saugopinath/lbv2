@@ -37,6 +37,7 @@ class AnnapurnaYojanaForm extends Component
     // Status / Messages
     public $successMessage = null;
     public $errorMessage = null;
+    public bool $showSubmitModal = false;
 
     public function mount($schemeId = 21, $schemeName = 'Annapurna Yojana', $grievanceId = null)
     {
@@ -151,15 +152,6 @@ class AnnapurnaYojanaForm extends Component
 
             // Declaration & Consent (Section H)
             'agree_consent' => false,
-
-            // For Official Use (Enquiry Report)
-            'official_verified_by' => '',
-            'official_designation' => '',
-            'official_place' => '',
-            'official_date' => '',
-            'official_status' => '', // Correct / Incorrect
-            'official_incorrect_details' => '',
-            'official_recommendation' => '', // Acceptance / Rejection
         ];
 
         // Load all districts
@@ -526,7 +518,7 @@ class AnnapurnaYojanaForm extends Component
         $this->mount($this->schemeId, $this->schemeName, $this->grievanceId);
     }
 
-    public function save()
+    public function showConfirmation()
     {
         $this->successMessage = null;
         $this->errorMessage = null;
@@ -635,34 +627,169 @@ class AnnapurnaYojanaForm extends Component
             }
         }
 
-        $this->validate($rules, $messages);
+        try {
+            $this->validate($rules, $messages);
+            $this->showSubmitModal = true;
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Smart UX redirection to tab containing error
+            $firstErrorKey = array_key_first($e->validator->errors()->toArray());
+            if ($firstErrorKey) {
+                if (str_starts_with($firstErrorKey, 'members.')) {
+                    $parts = explode('.', $firstErrorKey);
+                    if (isset($parts[1])) {
+                        $this->activeMemberIndex = ((int)$parts[1]) + 1;
+                        $field = $parts[2] ?? '';
+                        if (in_array($field, ['name', 'dob', 'gender', 'relation'])) {
+                            $this->activeSection = 'basic';
+                        } else {
+                            $this->activeSection = 'identity';
+                        }
+                    }
+                } elseif (str_starts_with($firstErrorKey, 'formData.')) {
+                    $this->activeMemberIndex = 0; // HOF
+                    $field = str_replace('formData.', '', $firstErrorKey);
+                    
+                    $basicFields = [
+                        'hof_name', 'hof_dob', 'hof_gender', 'contact_no', 'category',
+                        'caste_certificate_no', 'ews_certificate_no', 'pvtg_certificate_no',
+                        'district_id', 'rural_urban', 'blockurban', 'gpward',
+                        'village_town', 'police_station', 'post_office', 'pincode'
+                    ];
+                    
+                    $identityFields = [
+                        'hof_aadhaar', 'has_digital_ration_card', 'is_lifting_ration',
+                        'hof_bank_name', 'hof_acc_no', 'hof_ifsc'
+                    ];
+                    
+                    if (in_array($field, $basicFields)) {
+                        $this->activeSection = 'basic';
+                    } elseif (in_array($field, $identityFields)) {
+                        $this->activeSection = 'identity';
+                    } else {
+                        $this->activeSection = 'income';
+                    }
+                }
+            }
+            throw $e;
+        }
+    }
+
+    public function closeSubmitModal()
+    {
+        $this->showSubmitModal = false;
+    }
+
+    public function save()
+    {
+        $this->successMessage = null;
+        $this->errorMessage = null;
 
         try {
             DB::beginTransaction();
 
-            // Generate unique application ID
-            $uniqueRow = UniqueAppBenId::create([
+            // 1. Generate unique application ID and beneficiary ID from lb_scheme.unique_app_ben_ids
+            $applicationId = DB::table('lb_scheme.unique_app_ben_ids')->insertGetId([
                 'scheme_id' => $this->schemeId,
-            ]);
-            $applicationId = $uniqueRow->application_id;
+                'created_at' => now(),
+                'updated_at' => now()
+            ], 'application_id');
+            
+            $uniqueRow = DB::table('lb_scheme.unique_app_ben_ids')->where('application_id', $applicationId)->first();
+            $beneficiaryId = $uniqueRow->beneficiary_id;
 
-            // Merge members into formData to save all together
-            $fullData = $this->formData;
-            $fullData['members'] = $this->members;
-            $fullData['application_id'] = $applicationId;
-            $fullData['scheme_id'] = $this->schemeId;
+            // 2. Map caste category to integer
+            $casteId = 19; // Default General
+            if (($this->formData['category'] ?? '') === 'SC') {
+                $casteId = 17;
+            } elseif (($this->formData['category'] ?? '') === 'ST') {
+                $casteId = 18;
+            }
 
-            // Save in our simple JSON table
-            AnnapurnaYojanaApplication::create([
+            // 3. Insert family details into lb_scheme.annapurna_yojana_family_details
+            DB::table('lb_scheme.annapurna_yojana_family_details')->insert([
+                'scheme_id' => $this->schemeId,
                 'application_id' => $applicationId,
-                'scheme_id' => $this->schemeId,
-                'form_data' => $fullData
+                'beneficiary_id' => $beneficiaryId,
+                'application_type' => 'New',
+                'application_date' => now()->format('Y-m-d'),
+                'ds_registration_no' => null,
+                'ds_date' => null,
+                'applicant_name' => $this->formData['hof_name'] ?? null,
+                'dob' => !empty($this->formData['hof_dob']) ? $this->formData['hof_dob'] : null,
+                'age' => !empty($this->formData['hof_dob']) ? \Illuminate\Support\Carbon::parse($this->formData['hof_dob'])->age : null,
+                'gender' => $this->formData['hof_gender'] ?? null,
+                'father_husband_name' => null,
+                'mother_name' => null,
+                'marital_status' => null,
+                'spouse_name' => null,
+                'caste' => $casteId,
+                'caste_certificate_no' => (!empty($this->formData['caste_certificate_no']) ? $this->formData['caste_certificate_no'] : null)
+                    ?? (!empty($this->formData['ews_certificate_no']) ? $this->formData['ews_certificate_no'] : null)
+                    ?? (!empty($this->formData['pvtg_certificate_no']) ? $this->formData['pvtg_certificate_no'] : null),
+                'religion' => null,
+                'education' => $this->formData['hof_highest_qualification'] ?? null,
+                'occupation' => $this->formData['hof_employment_nature'] ?? null,
+                'aadhaar_no' => $this->formData['hof_aadhaar'] ?? null,
+                'epic_voter_id' => $this->formData['hof_epic_no'] ?? null,
+                'pan_no' => $this->formData['hof_pan_no'] ?? null,
+                'mobile_no' => $this->formData['contact_no'] ?? null,
+                'email' => null,
+                'district_id' => !empty($this->formData['district_id']) ? (int)$this->formData['district_id'] : null,
+                'rural_urban' => !empty($this->formData['rural_urban']) ? (int)$this->formData['rural_urban'] : null,
+                'blockurban' => !empty($this->formData['blockurban']) ? (int)$this->formData['blockurban'] : null,
+                'gpward' => !empty($this->formData['gpward']) ? (int)$this->formData['gpward'] : null,
+                'sub_division_id' => null,
+                'police_station' => $this->formData['police_station'] ?? null,
+                'post_office' => $this->formData['post_office'] ?? null,
+                'village_town' => $this->formData['village_town'] ?? null,
+                'house_no' => $this->formData['house_no'] ?? null,
+                'pincode' => $this->formData['pincode'] ?? null,
+                'years_dwelling_wb' => null,
+                'ration_card_type' => $this->formData['ration_card_type'] ?? null,
+                'ration_card_no' => $this->formData['hof_ration_card_id'] ?? null,
+                'ahl_tin' => null,
+                'total_family_members' => (int)($this->formData['num_family_members'] ?? 1),
+                'monthly_family_income' => !empty($this->formData['total_annual_income']) ? round((float)$this->formData['total_annual_income'] / 12, 2) : null,
+                'bpl_seq_no' => null,
+                'bpl_id_no' => null,
+                'bpl_total_score' => null,
+                'land_type' => null,
+                'land_area_bigha' => !empty($this->formData['land_size_decimals']) ? round((float)$this->formData['land_size_decimals'] / 33, 2) : null,
+                'bank_name' => $this->formData['hof_bank_name'] ?? null,
+                'bank_branch' => null,
+                'ifsc_code' => $this->formData['hof_ifsc'] ?? null,
+                'account_no' => $this->formData['hof_acc_no'] ?? null,
+                'account_holder_name' => $this->formData['hof_name'] ?? null,
+                'other_details' => json_encode($this->formData),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
+
+            // 4. Insert family members into lb_scheme.annapurna_yojana_family_members
+            foreach ($this->members as $member) {
+                DB::table('lb_scheme.annapurna_yojana_family_members')->insert([
+                    'application_id' => $applicationId,
+                    'member_name' => $member['name'] ?? null,
+                    'member_dob' => !empty($member['dob']) ? $member['dob'] : null,
+                    'member_age' => !empty($member['dob']) ? \Illuminate\Support\Carbon::parse($member['dob'])->age : null,
+                    'member_gender' => $member['gender'] ?? null,
+                    'member_relation' => $member['relation'] ?? null,
+                    'member_aadhaar' => $member['aadhaar'] ?? null,
+                    'member_occupation' => $member['employment_nature'] ?? null,
+                    'member_income' => null,
+                    'is_disabled' => 0,
+                    'disability_type' => null,
+                    'is_student' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
 
             DB::commit();
 
             $this->successMessage = "Application submitted successfully! Application ID: " . $applicationId;
-            
+            $this->showSubmitModal = false;
+
             // Reset form
             $this->resetForm();
 
@@ -670,6 +797,7 @@ class AnnapurnaYojanaForm extends Component
             DB::rollBack();
             Log::error('Error saving Annapurna Yojana application: ' . $e->getMessage());
             $this->errorMessage = "An error occurred while saving the application: " . $e->getMessage();
+            $this->showSubmitModal = false;
         }
     }
 
