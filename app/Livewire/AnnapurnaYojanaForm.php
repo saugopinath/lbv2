@@ -50,6 +50,9 @@ class AnnapurnaYojanaForm extends Component
 
     public bool $showSubmitModal = false;
 
+    // Dirty tracking — true when any field has changed since last save
+    public bool $isDirty = false;
+
     public function mount($schemeId = 21, $schemeName = 'Annapurna Yojana', $grievanceId = null)
     {
         $this->schemeId = $schemeId;
@@ -182,6 +185,8 @@ class AnnapurnaYojanaForm extends Component
         $this->blocks = [];
         $this->gps = [];
         $this->loadBlocks();
+        $this->isDirty = true;
+        $this->saveDraftIfDirty();
     }
 
     public function updatedFormDataRuralUrban($value)
@@ -191,6 +196,8 @@ class AnnapurnaYojanaForm extends Component
         $this->blocks = [];
         $this->gps = [];
         $this->loadBlocks();
+        $this->isDirty = true;
+        $this->saveDraftIfDirty();
     }
 
     public function updatedFormDataBlockurban($value)
@@ -198,6 +205,53 @@ class AnnapurnaYojanaForm extends Component
         $this->formData['gpward'] = '';
         $this->gps = [];
         $this->loadGps();
+        $this->isDirty = true;
+        $this->saveDraftIfDirty();
+    }
+
+    public function updatedFormDataGpward($value)
+    {
+        // GP/Ward was selected by user — mark dirty and save
+        if (!empty($value)) {
+            $this->isDirty = true;
+            $this->saveDraftIfDirty();
+        }
+    }
+
+    /**
+     * Livewire hook: fires whenever ANY formData field changes.
+     * Marks the form as dirty so saveDraft() knows to persist it.
+     */
+    public function updatedFormData($value, $field)
+    {
+        // Skip location cascade fields that have their own specific hooks
+        // to avoid double-saving. gpward is NOT skipped as it has its own hook
+        // that handles empty-value resets (cascade clear) separately.
+        $skipFields = ['district_id', 'rural_urban', 'blockurban', 'gpward'];
+        if (!in_array($field, $skipFields)) {
+            $this->isDirty = true;
+            $this->saveDraftIfDirty();
+        }
+    }
+
+    /**
+     * Livewire hook: fires whenever any member field changes.
+     */
+    public function updatedMembers($value, $field)
+    {
+        $this->isDirty = true;
+        $this->saveDraftIfDirty();
+    }
+
+    /**
+     * Save draft immediately only when dirty (called after any field change).
+     * Uses a debounce-like guard: skips if nothing changed.
+     */
+    public function saveDraftIfDirty()
+    {
+        if ($this->isDirty) {
+            $this->saveDraft();
+        }
     }
 
     public function loadBlocks()
@@ -333,6 +387,8 @@ class AnnapurnaYojanaForm extends Component
 
     public function addMember()
     {
+        // Adding a member is always a structural change — force save
+        $this->isDirty = true;
         $this->saveDraft();
 
         $this->members[] = $this->getEmptyMemberStructure();
@@ -353,12 +409,17 @@ class AnnapurnaYojanaForm extends Component
             $this->activeMemberIndex = count($this->members);
         }
 
+        // Removing a member is always a structural change — force save
+        $this->isDirty = true;
         $this->saveDraft();
     }
 
     public function selectMember($index)
     {
-        $this->saveDraft();
+        // Only save if something actually changed
+        if ($this->isDirty) {
+            $this->saveDraft();
+        }
         $this->activeMemberIndex = $index;
 
         // Ensure the active section is valid for the newly selected member
@@ -407,7 +468,10 @@ class AnnapurnaYojanaForm extends Component
         if ($section === 'declaration' && !$this->areAllMembersFullyFilled()) {
             return;
         }
-        $this->saveDraft();
+        // Only hit DB if something actually changed
+        if ($this->isDirty) {
+            $this->saveDraft();
+        }
         $this->activeSection = $section;
     }
 
@@ -453,7 +517,10 @@ class AnnapurnaYojanaForm extends Component
     public function nextSection()
     {
         $this->validateSection($this->activeSection);
-        $this->saveDraft();
+        // Only persist to DB if something actually changed
+        if ($this->isDirty) {
+            $this->saveDraft();
+        }
 
         $sections = array_keys($this->getSections());
         $currentIndex = array_search($this->activeSection, $sections);
@@ -619,7 +686,10 @@ class AnnapurnaYojanaForm extends Component
 
     public function previousSection()
     {
-        $this->saveDraft();
+        // Only persist to DB if something actually changed
+        if ($this->isDirty) {
+            $this->saveDraft();
+        }
 
         $sections = array_keys($this->getSections());
         $currentIndex = array_search($this->activeSection, $sections);
@@ -1517,12 +1587,15 @@ class AnnapurnaYojanaForm extends Component
             // Update session data
             session([
                 'annapurna_form_data' => $this->formData,
-                'annapurna_members' => $this->members,
+                'annapurna_members'   => $this->members,
                 'annapurna_family_id' => $familyId,
-                'annapurna_app_id' => $this->appId,
+                'annapurna_app_id'    => $this->appId,
             ]);
 
             DB::connection('pgsql_annapurna')->commit();
+
+            // Mark as clean — no unsaved changes anymore
+            $this->isDirty = false;
 
         } catch (\Exception $e) {
             DB::connection('pgsql_annapurna')->rollBack();
