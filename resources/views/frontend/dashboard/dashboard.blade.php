@@ -347,7 +347,19 @@
 
 
     <div class="chart-container">
-        
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h3 class="text-lg font-bold text-gray-800">Caste wise Member Entry Stat</h3>
+                <p class="text-sm text-gray-500 mt-1">Caste breakdown of member entry statistics</p>
+            </div>
+            <div>
+                <select id="casteSchemeFilter" class="text-xs bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-1.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-indigo-500 dark:focus:border-indigo-500 font-medium">
+                    <option value="all">All Schemes</option>
+                    <option value="lb">Lakshmir Bhandar</option>
+                    <option value="ay">Annapurna Yojana</option>
+                </select>
+            </div>
+        </div>
 
         <div id="mispiechart" style="height: 350px;"></div>
     </div>
@@ -1210,12 +1222,12 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
        // Create the chart
-Highcharts.chart('mispiechart', {
+const misPieChart = Highcharts.chart('mispiechart', {
     chart: {
         type: 'pie'
     },
     title: {
-        text: 'Caste wise Member Entry Stat'
+        text: null
     },
 
     accessibility: {
@@ -1554,6 +1566,45 @@ Highcharts.chart('linechart', {
     }]
 });
 
+        // Dynamic Caste Scheme Filter Dropdown Handler
+        const casteSchemeFilter = document.getElementById('casteSchemeFilter');
+        if (casteSchemeFilter) {
+            casteSchemeFilter.addEventListener('change', function() {
+                const scheme = this.value;
+                let newData = [];
+                if (scheme === 'all') {
+                    newData = [
+                        { name: 'UR', y: 61.04, drilldown: 'UR' },
+                        { name: 'UR-EWS', y: 9.47, drilldown: 'UR-EWS' },
+                        { name: 'SC', y: 9.32, drilldown: 'SC' },
+                        { name: 'ST', y: 8.15, drilldown: 'ST' },
+                        { name: 'OBC', y: 8.15, drilldown: 'OBC' },
+                        { name: 'PVTG', y: 11.02, drilldown: null }
+                    ];
+                } else if (scheme === 'lb') {
+                    newData = [
+                        { name: 'UR', y: 45.0, drilldown: 'UR' },
+                        { name: 'UR-EWS', y: 12.0, drilldown: 'UR-EWS' },
+                        { name: 'SC', y: 22.0, drilldown: 'SC' },
+                        { name: 'ST', y: 11.0, drilldown: 'ST' },
+                        { name: 'OBC', y: 8.0, drilldown: 'OBC' },
+                        { name: 'PVTG', y: 2.0, drilldown: null }
+                    ];
+                } else if (scheme === 'ay') {
+                    newData = [
+                        { name: 'UR', y: 55.0, drilldown: 'UR' },
+                        { name: 'UR-EWS', y: 8.0, drilldown: 'UR-EWS' },
+                        { name: 'SC', y: 18.0, drilldown: 'SC' },
+                        { name: 'ST', y: 9.0, drilldown: 'ST' },
+                        { name: 'OBC', y: 7.0, drilldown: 'OBC' },
+                        { name: 'PVTG', y: 3.0, drilldown: null }
+                    ];
+                }
+                if (typeof misPieChart !== 'undefined') {
+                    misPieChart.series[0].setData(newData);
+                }
+            });
+        }
 
     });
 </script>
