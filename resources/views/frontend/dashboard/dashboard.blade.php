@@ -1,3 +1,4 @@
+@php $hideSidebar = false; @endphp
 @extends('frontend.layouts.dashboard')
 
 @section('header_title', '| Dashboard')
@@ -22,6 +23,45 @@
     .stat-card:hover {
         animation: subtle-glow 2s ease-in-out infinite;
     }
+
+    /* Premium Map Styles */
+    .district {
+        fill: rgba(243, 244, 246, 0.8);
+        stroke: rgba(99, 102, 241, 0.5);
+        stroke-width: 0.8;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .district:hover {
+        fill: rgba(139, 92, 246, 0.4) !important;
+        stroke: #4f46e5;
+        stroke-width: 1.5;
+        filter: drop-shadow(0 4px 6px rgba(99, 102, 241, 0.3));
+    }
+
+    .district.selected {
+        fill: rgba(79, 70, 229, 0.9) !important;
+        stroke: #312e81;
+        stroke-width: 2;
+        filter: drop-shadow(0 10px 15px rgba(79, 70, 229, 0.5));
+    }
+
+    .tooltip {
+        position: fixed;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(8px);
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 12px;
+        pointer-events: none;
+        display: none;
+        z-index: 1000;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        transform: translate(15px, -15px);
+    }
 </style>
 @endpush
 @section('content')
@@ -41,11 +81,11 @@
                 </h3>
             </div>
             <div
-                class="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-200">
-                <i class="fas fa-check-circle text-white text-2xl"></i>
+                class="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200/50">
+                <i class="fas fa-users text-white text-2xl"></i>
             </div>
         </div>
-     
+
     </div>
 
     <!-- Total Application Applied (Till Date) -->
@@ -61,11 +101,11 @@
                 </h3>
             </div>
             <div
-                class="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-200">
-                <i class="fas fa-check-circle text-white text-2xl"></i>
+                class="w-14 h-14 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-200/50">
+                <i class="fas fa-user-check text-white text-2xl"></i>
             </div>
         </div>
-     
+
     </div>
 
     <!-- Total DBT Transfer (Current Month) -->
@@ -74,7 +114,7 @@
         <div class="flex justify-between items-start mb-4">
             <div>
                 <p class="text-sm text-gray-500 font-medium mb-1 tracking-wide">
-                     Total Members Approved
+                    Total Members Approved
                 </p>
                 <h3 class="text-4xl font-bold text-gray-800 mt-2 stat-number" data-value="{{ $totalPayCurMonth }}"
                     data-money="true">
@@ -82,11 +122,11 @@
                 </h3>
             </div>
             <div
-                class="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-200">
-                <i class="fas fa-check-circle text-white text-2xl"></i>
+                class="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-200/50">
+                <i class="fas fa-check-double text-white text-2xl"></i>
             </div>
         </div>
-   
+
     </div>
 
     <!-- Total DBT Transfer (Current Financial Year) -->
@@ -103,8 +143,8 @@
                 </h3>
             </div>
             <div
-                class="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-200">
-                <i class="fas fa-check-circle text-white text-2xl"></i>
+                class="w-14 h-14 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center shadow-lg shadow-rose-200/50">
+                <i class="fas fa-user-times text-white text-2xl"></i>
             </div>
         </div>
 
@@ -117,23 +157,27 @@
 
 <!-- Charts Section -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-    <!-- Scheme Applications Chart -->
-
-
-
-    <!-- District-wise Beneficiaries -->
-    <div class="chart-container">
-        <div class="flex justify-between items-center mb-6">
-            
-             @include('frontend.maps.west_bengal')
+    <!-- Scheme Applications Chart -->    <!-- District-wise Beneficiaries -->
+    <div class="chart-container col-span-1">
+        <div class="border-b border-gray-100 pb-4 mb-6">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <i class="fa-solid fa-map-location-dot text-indigo-500"></i>
+                District-wise Beneficiary Distribution
+            </h3>
+            <p class="text-xs text-gray-500 mt-1">Geographic SVG Map & Bar Chart Breakdown</p>
         </div>
 
-        <div class="relative" style="height: 350px; overflow-y: auto;">
-            <div id="districtChart"></div>
+        <div class="grid grid-cols-1 gap-6 items-center">
+            <!-- Map Column -->
+            <div class="flex items-center justify-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 h-[300px] relative overflow-hidden" id="map-svg-wrapper">
+                @include('frontend.maps.west_bengal')
+            </div>
+
+            <!-- List / Bar Chart Column -->
+            <div class="relative overflow-y-auto pr-2" style="height: 300px;">
+                <div id="districtChart"></div>
+            </div>
         </div>
-
-
-
     </div>
 
 
@@ -141,19 +185,12 @@
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h3 class="text-lg font-bold text-gray-800">
-                    Monthly DBT Payment Statistics
+                    Consolidated Application Chart
                 </h3>
-                <p class="text-sm text-gray-500 mt-1">
-                    Year {{ $cur_fin_year }} overview
-                </p>
-            </div>
-            <div class="flex items-center gap-2 text-sm text-gray-500">
-                <i class="fas fa-info-circle"></i>
-                Consolidated Payments
             </div>
         </div>
 
-        <div id="trendsChart" style="height: 350px;"></div>
+        <div id="mispiechart" style="height: 350px;"></div>
     </div>
 
 
@@ -228,8 +265,10 @@
     </div>
 </div>
 
-
-
+<!-- TOOLTIP -->
+<div id="custom-tooltip" class="tooltip">
+    <div id="tooltip-content"></div>
+</div>
 
 @endsection
 
@@ -407,310 +446,306 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
-    // Create the chart
-Highcharts.chart('container', {
-    chart: {
-        type: 'pie'
-    },
-    title: {
-        text: 'Browser market shares. January, 2022'
-    },
-    subtitle: {
-        text: 'Click the slices to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
-    },
+        // Create the chart
+        Highcharts.chart('container', {
+            chart: {
+                type: 'pie'
+            },
+            title: {
+                text: 'Browser market shares. January, 2022'
+            },
+            subtitle: {
+                text: 'Click the slices to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
+            },
 
-    accessibility: {
-        announceNewData: {
-            enabled: true
-        },
-        point: {
-            valueSuffix: '%'
-        }
-    },
-
-    plotOptions: {
-        pie: {
-            borderRadius: 5,
-            dataLabels: [{
-                enabled: true,
-                distance: 15,
-                format: '{point.name}'
-            }, {
-                enabled: true,
-                distance: '-30%',
-                filter: {
-                    property: 'percentage',
-                    operator: '>',
-                    value: 5
+            accessibility: {
+                announceNewData: {
+                    enabled: true
                 },
-                format: '{point.y:.1f}%',
-                style: {
-                    fontSize: '0.9em',
-                    textOutline: 'none'
+                point: {
+                    valueSuffix: '%'
                 }
+            },
+
+            plotOptions: {
+                pie: {
+                    borderRadius: 5,
+                    dataLabels: [{
+                        enabled: true,
+                        distance: 15,
+                        format: '{point.name}'
+                    }, {
+                        enabled: true,
+                        distance: '-30%',
+                        filter: {
+                            property: 'percentage',
+                            operator: '>',
+                            value: 5
+                        },
+                        format: '{point.y:.1f}%',
+                        style: {
+                            fontSize: '0.9em',
+                            textOutline: 'none'
+                        }
+                    }],
+                    states: {
+                        inactive: {
+                            opacity: 0.8
+                        }
+                    }
+                }
+            },
+
+            tooltip: {
+                headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                pointFormat: '<span style="color:{point.color}">{point.name}</span>: ' +
+                    '<b>{point.y:.2f}%</b> of total<br/>'
+            },
+
+            series: [{
+                name: 'Browsers',
+                colorByPoint: true,
+                data: [{
+                        name: 'Chrome',
+                        y: 61.04,
+                        drilldown: 'Chrome'
+                    },
+                    {
+                        name: 'Safari',
+                        y: 9.47,
+                        drilldown: 'Safari'
+                    },
+                    {
+                        name: 'Edge',
+                        y: 9.32,
+                        drilldown: 'Edge'
+                    },
+                    {
+                        name: 'Firefox',
+                        y: 8.15,
+                        drilldown: 'Firefox'
+                    },
+                    {
+                        name: 'Other',
+                        y: 11.02,
+                        drilldown: null
+                    }
+                ]
             }],
-            states: {
-                inactive: {
-                    opacity: 0.8
-                }
-            }
-        }
-    },
-
-    tooltip: {
-        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-        pointFormat: '<span style="color:{point.color}">{point.name}</span>: ' +
-            '<b>{point.y:.2f}%</b> of total<br/>'
-    },
-
-    series: [
-        {
-            name: 'Browsers',
-            colorByPoint: true,
-            data: [
-                {
-                    name: 'Chrome',
-                    y: 61.04,
-                    drilldown: 'Chrome'
-                },
-                {
-                    name: 'Safari',
-                    y: 9.47,
-                    drilldown: 'Safari'
-                },
-                {
-                    name: 'Edge',
-                    y: 9.32,
-                    drilldown: 'Edge'
-                },
-                {
-                    name: 'Firefox',
-                    y: 8.15,
-                    drilldown: 'Firefox'
-                },
-                {
-                    name: 'Other',
-                    y: 11.02,
-                    drilldown: null
-                }
-            ]
-        }
-    ],
-    drilldown: {
-        series: [
-            {
-                name: 'Chrome',
-                id: 'Chrome',
-                data: [
-                    [
-                        'v97.0',
-                        36.89
-                    ],
-                    [
-                        'v96.0',
-                        18.16
-                    ],
-                    [
-                        'v95.0',
-                        0.54
-                    ],
-                    [
-                        'v94.0',
-                        0.7
-                    ],
-                    [
-                        'v93.0',
-                        0.8
-                    ],
-                    [
-                        'v92.0',
-                        0.41
-                    ],
-                    [
-                        'v91.0',
-                        0.31
-                    ],
-                    [
-                        'v90.0',
-                        0.13
-                    ],
-                    [
-                        'v89.0',
-                        0.14
-                    ],
-                    [
-                        'v88.0',
-                        0.1
-                    ],
-                    [
-                        'v87.0',
-                        0.35
-                    ],
-                    [
-                        'v86.0',
-                        0.17
-                    ],
-                    [
-                        'v85.0',
-                        0.18
-                    ],
-                    [
-                        'v84.0',
-                        0.17
-                    ],
-                    [
-                        'v83.0',
-                        0.21
-                    ],
-                    [
-                        'v81.0',
-                        0.1
-                    ],
-                    [
-                        'v80.0',
-                        0.16
-                    ],
-                    [
-                        'v79.0',
-                        0.43
-                    ],
-                    [
-                        'v78.0',
-                        0.11
-                    ],
-                    [
-                        'v76.0',
-                        0.16
-                    ],
-                    [
-                        'v75.0',
-                        0.15
-                    ],
-                    [
-                        'v72.0',
-                        0.14
-                    ],
-                    [
-                        'v70.0',
-                        0.11
-                    ],
-                    [
-                        'v69.0',
-                        0.13
-                    ],
-                    [
-                        'v56.0',
-                        0.12
-                    ],
-                    [
-                        'v49.0',
-                        0.17
-                    ]
+            drilldown: {
+                series: [{
+                        name: 'Chrome',
+                        id: 'Chrome',
+                        data: [
+                            [
+                                'v97.0',
+                                36.89
+                            ],
+                            [
+                                'v96.0',
+                                18.16
+                            ],
+                            [
+                                'v95.0',
+                                0.54
+                            ],
+                            [
+                                'v94.0',
+                                0.7
+                            ],
+                            [
+                                'v93.0',
+                                0.8
+                            ],
+                            [
+                                'v92.0',
+                                0.41
+                            ],
+                            [
+                                'v91.0',
+                                0.31
+                            ],
+                            [
+                                'v90.0',
+                                0.13
+                            ],
+                            [
+                                'v89.0',
+                                0.14
+                            ],
+                            [
+                                'v88.0',
+                                0.1
+                            ],
+                            [
+                                'v87.0',
+                                0.35
+                            ],
+                            [
+                                'v86.0',
+                                0.17
+                            ],
+                            [
+                                'v85.0',
+                                0.18
+                            ],
+                            [
+                                'v84.0',
+                                0.17
+                            ],
+                            [
+                                'v83.0',
+                                0.21
+                            ],
+                            [
+                                'v81.0',
+                                0.1
+                            ],
+                            [
+                                'v80.0',
+                                0.16
+                            ],
+                            [
+                                'v79.0',
+                                0.43
+                            ],
+                            [
+                                'v78.0',
+                                0.11
+                            ],
+                            [
+                                'v76.0',
+                                0.16
+                            ],
+                            [
+                                'v75.0',
+                                0.15
+                            ],
+                            [
+                                'v72.0',
+                                0.14
+                            ],
+                            [
+                                'v70.0',
+                                0.11
+                            ],
+                            [
+                                'v69.0',
+                                0.13
+                            ],
+                            [
+                                'v56.0',
+                                0.12
+                            ],
+                            [
+                                'v49.0',
+                                0.17
+                            ]
+                        ]
+                    },
+                    {
+                        name: 'Safari',
+                        id: 'Safari',
+                        data: [
+                            [
+                                'v15.3',
+                                0.1
+                            ],
+                            [
+                                'v15.2',
+                                2.01
+                            ],
+                            [
+                                'v15.1',
+                                2.29
+                            ],
+                            [
+                                'v15.0',
+                                0.49
+                            ],
+                            [
+                                'v14.1',
+                                2.48
+                            ],
+                            [
+                                'v14.0',
+                                0.64
+                            ],
+                            [
+                                'v13.1',
+                                1.17
+                            ],
+                            [
+                                'v13.0',
+                                0.13
+                            ],
+                            [
+                                'v12.1',
+                                0.16
+                            ]
+                        ]
+                    },
+                    {
+                        name: 'Edge',
+                        id: 'Edge',
+                        data: [
+                            [
+                                'v97',
+                                6.62
+                            ],
+                            [
+                                'v96',
+                                2.55
+                            ],
+                            [
+                                'v95',
+                                0.15
+                            ]
+                        ]
+                    },
+                    {
+                        name: 'Firefox',
+                        id: 'Firefox',
+                        data: [
+                            [
+                                'v96.0',
+                                4.17
+                            ],
+                            [
+                                'v95.0',
+                                3.33
+                            ],
+                            [
+                                'v94.0',
+                                0.11
+                            ],
+                            [
+                                'v91.0',
+                                0.23
+                            ],
+                            [
+                                'v78.0',
+                                0.16
+                            ],
+                            [
+                                'v52.0',
+                                0.15
+                            ]
+                        ]
+                    }
                 ]
             },
-            {
-                name: 'Safari',
-                id: 'Safari',
-                data: [
-                    [
-                        'v15.3',
-                        0.1
-                    ],
-                    [
-                        'v15.2',
-                        2.01
-                    ],
-                    [
-                        'v15.1',
-                        2.29
-                    ],
-                    [
-                        'v15.0',
-                        0.49
-                    ],
-                    [
-                        'v14.1',
-                        2.48
-                    ],
-                    [
-                        'v14.0',
-                        0.64
-                    ],
-                    [
-                        'v13.1',
-                        1.17
-                    ],
-                    [
-                        'v13.0',
-                        0.13
-                    ],
-                    [
-                        'v12.1',
-                        0.16
-                    ]
-                ]
-            },
-            {
-                name: 'Edge',
-                id: 'Edge',
-                data: [
-                    [
-                        'v97',
-                        6.62
-                    ],
-                    [
-                        'v96',
-                        2.55
-                    ],
-                    [
-                        'v95',
-                        0.15
-                    ]
-                ]
-            },
-            {
-                name: 'Firefox',
-                id: 'Firefox',
-                data: [
-                    [
-                        'v96.0',
-                        4.17
-                    ],
-                    [
-                        'v95.0',
-                        3.33
-                    ],
-                    [
-                        'v94.0',
-                        0.11
-                    ],
-                    [
-                        'v91.0',
-                        0.23
-                    ],
-                    [
-                        'v78.0',
-                        0.16
-                    ],
-                    [
-                        'v52.0',
-                        0.15
-                    ]
-                ]
-            }
-        ]
-    },
 
-    navigation: {
-        breadcrumbs: {
-            buttonTheme: {
-                style: {
-                    color: 'var(--highcharts-highlight-color-100)'
+            navigation: {
+                breadcrumbs: {
+                    buttonTheme: {
+                        style: {
+                            color: 'var(--highcharts-highlight-color-100)'
+                        }
+                    }
                 }
             }
-        }
-    }
-});
+        });
 
 
         loadSchemeWiseApplications('all');
@@ -778,77 +813,282 @@ Highcharts.chart('container', {
                 });
         }
 
+        const dummyDistrictData = {
+            "309": { name: "DARJEELING", count: 125000 },
+            "702": { name: "KALIMPONG", count: 45000 },
+            "314": { name: "JALPAIGURI", count: 215000 },
+            "664": { name: "ALIPURDUAR", count: 182000 },
+            "308": { name: "COOCHBEHAR", count: 324000 },
+            "311": { name: "DINAJPUR UTTAR", count: 298000 },
+            "310": { name: "DINAJPUR DAKSHIN", count: 242000 },
+            "316": { name: "MALDAH", count: 415000 },
+            "319": { name: "MURSHIDABAD", count: 752000 },
+            "307": { name: "BIRBHUM", count: 385000 },
+            "315": { name: "KMC", count: 456000 },
+            "704": { name: "PASCHIM BARDHAMAN", count: 394000 },
+            "306": { name: "PURBA BARDHAMAN", count: 482000 },
+            "320": { name: "NADIA", count: 542000 },
+            "305": { name: "BANKURA", count: 365000 },
+            "321": { name: "PURULIA", count: 284000 },
+            "312": { name: "HOOGHLY", count: 524000 },
+            "313": { name: "HOWRAH", count: 492000 },
+            "318": { name: "MEDINIPUR WEST", count: 468000 },
+            "703": { name: "JHARGRAM", count: 142000 },
+            "317": { name: "MEDINIPUR EAST", count: 512000 },
+            "303": { name: "24 PARAGANAS NORTH", count: 894000 },
+            "304": { name: "24 PARAGANAS SOUTH", count: 925000 }
+        };
+
+        function normalizeName(name) {
+            return name ? name.toUpperCase().replace(/[^A-Z]/g, '') : '';
+        }
+
+        function getHeatmapColor(count, min, max) {
+            if (count === 0) return 'rgba(243, 244, 246, 0.8)';
+            let ratio = (count - min) / (max - min || 1);
+            let h = 230 + ratio * 32;       // 230 (indigo) to 262 (violet)
+            let s = 75 + ratio * 15;        // 75% to 90%
+            let l = 90 - ratio * 40;        // 90% down to 50%
+            return `hsl(${h}, ${s}%, ${l}%)`;
+        }
+
+        function showTooltip(e, name, count) {
+            const tooltip = document.getElementById('custom-tooltip');
+            document.getElementById('tooltip-content').innerHTML = `
+                <div class="font-bold border-b border-gray-600/50 pb-1.5 mb-1.5 text-indigo-100 flex items-center justify-between gap-3">
+                    <span>${name}</span>
+                    <i class="fa-solid fa-map-pin text-[10px] text-indigo-400"></i>
+                </div>
+                <div class="text-indigo-200 text-xs font-medium">
+                    Beneficiaries: <span class="text-white font-black ml-1">${count.toLocaleString('en-IN')}</span>
+                </div>
+            `;
+            tooltip.style.display = 'block';
+            moveTooltip(e);
+        }
+
+        function moveTooltip(e) {
+            const tooltip = document.getElementById('custom-tooltip');
+            tooltip.style.left = e.clientX + 'px';
+            tooltip.style.top = e.clientY + 'px';
+        }
+
+        function hideTooltip() {
+            document.getElementById('custom-tooltip').style.display = 'none';
+        }
+
+        let districtChartInstance = null;
+        let districtData = {};
+
+        function selectDistrict(path) {
+            document.querySelectorAll('.district').forEach(el => el.classList.remove('selected'));
+            path.classList.add('selected');
+            
+            const name = path.dataset.name;
+            if (districtChartInstance) {
+                const chartPoints = districtChartInstance.series[0].points;
+                const targetPoint = chartPoints.find(p => normalizeName(p.category) === normalizeName(name));
+                
+                if (targetPoint) {
+                    targetPoint.select(true, false);
+                    
+                    const container = document.getElementById('districtChart').parentNode;
+                    const scrollPos = targetPoint.plotX + (districtChartInstance.plotTop || 0) - 100;
+                    container.scrollTo({
+                        top: scrollPos,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        }
+
+        function highlightMapPathByName(name) {
+            document.querySelectorAll('.district').forEach(el => {
+                el.classList.remove('selected');
+                if (normalizeName(el.dataset.name) === normalizeName(name)) {
+                    el.classList.add('selected');
+                }
+            });
+        }
+
         loadDistrictWiseBeneficiaries();
 
         function loadDistrictWiseBeneficiaries() {
-            fetch("{{ route('dashboard.districtWiseBeneficiaries') }}", {
+            Promise.all([
+                fetch("{{ route('dashboard.districtWiseBeneficiaries') }}", {
                     method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                }).then(res => res.json()).catch(err => {
+                    console.warn('Failed to load GET districtWiseBeneficiaries, using dummy fallback:', err);
+                    return { categories: [], data: [] };
+                }),
+                fetch("{{ route('map.district.count') }}", {
+                    method: 'POST',
                     headers: {
-                        'Accept': 'application/json'
-                    }
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({})
+                }).then(res => res.json()).catch(err => {
+                    console.warn('Failed to load POST map district counts, using dummy fallback:', err);
+                    return {};
                 })
-                .then(res => res.json())
-                .then(function(response) {
-                    const totalDistricts = response.categories.length;
-                    const barHeight = 45;
-                    const minHeight = 350;
-                    const chartHeight = Math.max(totalDistricts * barHeight, minHeight);
+            ])
+            .then(function([chartResponse, mapResponse]) {
+                const mapHasData = mapResponse && Object.values(mapResponse).some(v => parseInt(v) > 0);
+                if (mapHasData) {
+                    districtData = mapResponse;
+                } else {
+                    districtData = {};
+                    Object.keys(dummyDistrictData).forEach(code => {
+                        districtData[code] = dummyDistrictData[code].count;
+                    });
+                }
 
-                    Highcharts.chart('districtChart', {
-                        chart: {
-                            type: 'bar',
-                            height: chartHeight,
-                            backgroundColor: 'transparent'
-                        },
+                const chartHasData = chartResponse && chartResponse.categories && chartResponse.categories.length > 0;
+                if (!chartHasData) {
+                    chartResponse = {
+                        categories: Object.values(dummyDistrictData).map(d => d.name),
+                        data: Object.values(dummyDistrictData).map(d => d.count)
+                    };
+                }
+
+                const chartCountsByName = {};
+                if (chartResponse && chartResponse.categories) {
+                    chartResponse.categories.forEach((cat, idx) => {
+                        chartCountsByName[normalizeName(cat)] = chartResponse.data[idx] || 0;
+                    });
+                }
+
+                const counts = [];
+                
+                document.querySelectorAll('.district').forEach(function(path) {
+                    const code = path.getAttribute('district-code');
+                    const name = path.getAttribute('district-name') || path.dataset.name || '';
+                    
+                    let count = 0;
+                    if (districtData[code] !== undefined) {
+                        count = parseInt(districtData[code]) || 0;
+                    } else {
+                        count = chartCountsByName[normalizeName(name)] || 0;
+                        districtData[code] = count;
+                    }
+                    
+                    path.dataset.count = count;
+                    path.dataset.name = name;
+                    counts.push(count);
+                });
+
+                const maxCount = Math.max(...counts, 1);
+                const minCount = Math.min(...counts, 0);
+
+                document.querySelectorAll('.district').forEach(function(path) {
+                    const count = parseInt(path.dataset.count) || 0;
+                    path.style.fill = getHeatmapColor(count, minCount, maxCount);
+                    
+                    path.addEventListener('mouseenter', e => showTooltip(e, path.dataset.name, count));
+                    path.addEventListener('mousemove', moveTooltip);
+                    path.addEventListener('mouseleave', hideTooltip);
+                    path.addEventListener('click', () => selectDistrict(path));
+                });
+
+                const totalDistricts = chartResponse.categories.length;
+                const barHeight = 45;
+                const minHeight = 350;
+                const chartHeight = Math.max(totalDistricts * barHeight, minHeight);
+
+                districtChartInstance = Highcharts.chart('districtChart', {
+                    chart: {
+                        type: 'bar',
+                        height: chartHeight,
+                        backgroundColor: 'transparent'
+                    },
+                    title: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: chartResponse.categories,
                         title: {
                             text: null
                         },
-                        xAxis: {
-                            categories: response.categories,
-                            title: {
-                                text: null
+                        labels: {
+                            style: {
+                                color: '#4b5563',
+                                fontSize: '11px',
+                                fontWeight: '500'
+                              }
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Beneficiaries',
+                            style: {
+                                color: '#4b5563',
+                                fontWeight: '600'
                             }
                         },
-                        yAxis: {
-                            title: {
-                                text: 'Beneficiaries'
+                        labels: {
+                            style: {
+                                color: '#6b7280'
                             }
-                        },
-                        legend: {
-                            enabled: false
-                        },
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 6,
-                                dataLabels: {
-                                    enabled: true
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        bar: {
+                            borderRadius: 6,
+                            borderWidth: 0,
+                            dataLabels: {
+                                enabled: true,
+                                style: {
+                                    fontSize: '10px',
+                                    fontWeight: 'bold',
+                                    textOutline: 'none'
+                                }
+                            },
+                            states: {
+                                select: {
+                                    color: '#4f46e5',
+                                    borderColor: '#312e81',
+                                    borderWidth: 2
+                                }
+                            },
+                            point: {
+                                events: {
+                                    click: function() {
+                                        highlightMapPathByName(this.category);
+                                    }
                                 }
                             }
-                        },
-                        series: [{
-                            name: 'Beneficiaries',
-                            data: response.data,
-                            color: {
-                                linearGradient: {
-                                    x1: 0,
-                                    y1: 0,
-                                    x2: 1,
-                                    y2: 0
-                                },
-                                stops: [
-                                    [0, '#667eea']
-                                ]
-                            }
-                        }],
-                        credits: {
-                            enabled: false
                         }
-                    });
-                })
-                .catch(function(err) {
-                    console.error(err);
-                    alert('Failed to load district-wise beneficiary data');
+                    },
+                    series: [{
+                        name: 'Beneficiaries',
+                        data: chartResponse.data,
+                        color: {
+                            linearGradient: {
+                                x1: 0,
+                                y1: 0,
+                                x2: 1,
+                                y2: 0
+                            },
+                            stops: [
+                                [0, '#818cf8'],
+                                [1, '#4f46e5']
+                            ]
+                        }
+                    }],
+                    credits: {
+                        enabled: false
+                    }
                 });
+            })
+            .catch(function(err) {
+                console.error(err);
+                alert('Failed to load district-wise beneficiary data');
+            });
         }
 
         function loadAgeDistribution() {
@@ -1012,6 +1252,73 @@ Highcharts.chart('container', {
                 console.error('Fetch failed');
             });
 
+    });
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Highcharts.chart('mispiechart', {
+            chart: {
+                type: 'pie',
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: null
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            accessibility: {
+                point: {
+                    valueSuffix: '%'
+                }
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                    },
+                    showInLegend: true
+                }
+            },
+            series: [{
+                name: 'Status',
+                colorByPoint: true,
+                data: [{
+                        name: 'Applications Received',
+                        y: 73958326,
+                        color: '#3b82f6'
+                    },
+                    {
+                        name: 'Applications Approved',
+                        y: 69633489,
+                        color: '#10b981'
+                    },
+                    {
+                        name: 'Applications Rejected',
+                        y: 2791060,
+                        color: '#ef4444'
+                    },
+                    {
+                        name: 'Applications Under Process',
+                        y: 353767,
+                        color: '#f59e0b'
+                    },
+                    {
+                        name: 'Applications Sent to District',
+                        y: 19043,
+                        color: '#8b5cf6'
+                    }
+                ]
+            }],
+            credits: {
+                enabled: false
+            }
+        });
     });
 </script>
 

@@ -186,10 +186,12 @@
 
 <body>
     <!-- Sidebar -->
-    @include('frontend.dashboard.components.sidebar')
+    @if(!isset($hideSidebar) || !$hideSidebar)
+        @include('frontend.dashboard.components.sidebar')
+    @endif
 
     <!-- Main Content -->
-    <div class="relative min-h-screen w-full lg:ps-64 bg-gray-50">
+    <div class="relative min-h-screen w-full {{ (isset($hideSidebar) && $hideSidebar) ? '' : 'lg:ps-64' }} bg-gray-50">
 
         <div class="p-4 sm:p-6 space-y-6">
 
