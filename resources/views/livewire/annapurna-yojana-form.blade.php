@@ -748,6 +748,7 @@
                                     </h3>
                                 </div>
 
+                                {{-- Land & house --}}
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">House size: &ge; 3 Pucca Rooms? * <br><span class="text-xs text-gray-500 font-normal">৩ বা তার বেশি পাকা ঘর আছে কি?</span></label>
@@ -773,9 +774,10 @@
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-4">
+                                {{-- 4-Wheeler + Vehicle Count --}}
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                                     <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Owns 4-Wheeler? * <br><span class="text-xs text-gray-500 font-normal">৪-চাকার গাড়ি আছে কি?</span></label>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Owns 4-Wheeler? * <br><span class="text-xs text-gray-500 font-normal">৪-চাকার গাড়ি আছে কি?</span></label>
                                         <select wire:model="formData.owns_4_wheeler" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                                             <option value="">-- Select --</option>
                                             <option value="Yes">Yes / হ্যাঁ</option>
@@ -784,18 +786,41 @@
                                         @error('formData.owns_4_wheeler') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">No. of Vehicles <br><span class="text-xs text-gray-500 font-normal">গাড়ির সংখ্যা</span></label>
-                                        <input type="number" wire:model="formData.num_vehicles" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Vehicle Registration No. <br><span class="text-xs text-gray-500 font-normal">রেজিস্ট্রেশন নম্বর</span></label>
-                                        <input type="text" wire:model="formData.vehicle_reg_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Vehicle Model <br><span class="text-xs text-gray-500 font-normal">মডেল নাম</span></label>
-                                        <input type="text" wire:model="formData.vehicle_model" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">No. of Vehicles <br><span class="text-xs text-gray-500 font-normal">গাড়ির সংখ্যা</span></label>
+                                        <input type="number" min="0" wire:model.live="formData.num_vehicles"
+                                               class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                                     </div>
                                 </div>
+
+                                {{-- Dynamic vehicle detail rows — one row per vehicle --}}
+                                @if(!empty($formData['vehicles']) && count($formData['vehicles']) > 0)
+                                    <div class="mt-4 space-y-2">
+                                        <p class="text-sm font-semibold text-gray-600 mb-2">Vehicle Details / গাড়ির বিবরণ</p>
+                                        @foreach($formData['vehicles'] as $vi => $vehicle)
+                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 border border-amber-200 rounded-lg bg-amber-50 items-center">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-700 text-white text-xs font-bold">{{ $vi + 1 }}</span>
+                                                    <span class="text-sm text-gray-700 font-medium">Vehicle {{ $vi + 1 }}</span>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Registration No. / রেজিস্ট্রেশন নম্বর</label>
+                                                    <input type="text"
+                                                           wire:model="formData.vehicles.{{ $vi }}.reg_no"
+                                                           placeholder="e.g. WB-01-AB-1234"
+                                                           class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-amber-500 focus:border-amber-500">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Vehicle Model / মডেল নাম</label>
+                                                    <input type="text"
+                                                           wire:model="formData.vehicles.{{ $vi }}.model"
+                                                           placeholder="e.g. Maruti Swift"
+                                                           class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-amber-500 focus:border-amber-500">
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+
                             </div>
 
                             {{-- Health Insurance for HOF --}}

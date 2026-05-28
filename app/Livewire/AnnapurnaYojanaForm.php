@@ -109,9 +109,8 @@ class AnnapurnaYojanaForm extends Component
             'owns_land' => '',
             'land_size_decimals' => '',
             'owns_4_wheeler' => '',
-            'num_vehicles' => '',
-            'vehicle_reg_no' => '',
-            'vehicle_model' => '',
+            'num_vehicles'   => '',
+            'vehicles'       => [], // [{reg_no: '', model: ''}, ...] — one entry per vehicle,
 
             // HOF Assets (Health Insurance)
             'health_insurance_type' => 'None', // None / Government / Private
@@ -216,6 +215,30 @@ class AnnapurnaYojanaForm extends Component
             $this->isDirty = true;
             $this->saveDraftIfDirty();
         }
+    }
+
+    /**
+     * When num_vehicles changes, resize the vehicles array to match.
+     * Existing entries are preserved; new ones are added as empty rows.
+     */
+    public function updatedFormDataNumVehicles($value)
+    {
+        $count = max(0, (int) $value);
+        $current = $this->formData['vehicles'] ?? [];
+
+        if ($count > count($current)) {
+            // Add empty rows
+            for ($i = count($current); $i < $count; $i++) {
+                $current[] = ['reg_no' => '', 'model' => ''];
+            }
+        } elseif ($count < count($current)) {
+            // Trim excess rows
+            $current = array_slice($current, 0, $count);
+        }
+
+        $this->formData['vehicles'] = $current;
+        $this->isDirty = true;
+        $this->saveDraftIfDirty();
     }
 
     /**
@@ -1017,7 +1040,7 @@ class AnnapurnaYojanaForm extends Component
 
                     $assetsFields = [
                         'has_pucca_rooms', 'owns_land', 'land_size_decimals', 'owns_4_wheeler',
-                        'num_vehicles', 'vehicle_reg_no', 'vehicle_model',
+                        'num_vehicles', 'vehicles',
                         'health_insurance_type', 'health_insurance_premium', 'health_insurance_sum_assured',
                     ];
 
@@ -1156,9 +1179,9 @@ class AnnapurnaYojanaForm extends Component
                 'sir2026tribunal_status' => $this->formData['hof_sir_status'] ?? 'Not Applicable',
                 'sir2026case_details' => $this->formData['hof_sir_case_details'] ?? null,
                 'has_four_wheeler' => (($this->formData['owns_4_wheeler'] ?? '') === 'Yes'),
-                'vehicle_count' => ! empty($this->formData['num_vehicles']) ? (int) $this->formData['num_vehicles'] : null,
-                'vehicle_registration_no' => $this->formData['vehicle_reg_no'] ?? null,
-                'vehicle_model' => $this->formData['vehicle_model'] ?? null,
+                'vehicle_count'           => ! empty($this->formData['num_vehicles']) ? (int) $this->formData['num_vehicles'] : null,
+                'vehicle_registration_no' => !empty($this->formData['vehicles']) ? json_encode(array_column($this->formData['vehicles'], 'reg_no')) : null,
+                'vehicle_model'           => !empty($this->formData['vehicles']) ? json_encode(array_column($this->formData['vehicles'], 'model')) : null,
                 'has_health_insurance' => (($this->formData['health_insurance_type'] ?? 'None') !== 'None'),
                 'health_insurance_type' => $this->formData['health_insurance_type'] ?? null,
                 'health_insurance_sum_assured' => ! empty($this->formData['health_insurance_sum_assured']) ? (float) $this->formData['health_insurance_sum_assured'] : null,
@@ -1432,9 +1455,9 @@ class AnnapurnaYojanaForm extends Component
                 'sir2026tribunal_status' => $this->formData['hof_sir_status'] ?? 'Not Applicable',
                 'sir2026case_details' => $this->formData['hof_sir_case_details'] ?? null,
                 'has_four_wheeler' => (($this->formData['owns_4_wheeler'] ?? '') === 'Yes'),
-                'vehicle_count' => ! empty($this->formData['num_vehicles']) ? (int) $this->formData['num_vehicles'] : null,
-                'vehicle_registration_no' => $this->formData['vehicle_reg_no'] ?? null,
-                'vehicle_model' => $this->formData['vehicle_model'] ?? null,
+                'vehicle_count'           => ! empty($this->formData['num_vehicles']) ? (int) $this->formData['num_vehicles'] : null,
+                'vehicle_registration_no' => !empty($this->formData['vehicles']) ? json_encode(array_column($this->formData['vehicles'], 'reg_no')) : null,
+                'vehicle_model'           => !empty($this->formData['vehicles']) ? json_encode(array_column($this->formData['vehicles'], 'model')) : null,
                 'has_health_insurance' => (($this->formData['health_insurance_type'] ?? 'None') !== 'None'),
                 'health_insurance_type' => $this->formData['health_insurance_type'] ?? null,
                 'health_insurance_sum_assured' => ! empty($this->formData['health_insurance_sum_assured']) ? (float) $this->formData['health_insurance_sum_assured'] : null,
