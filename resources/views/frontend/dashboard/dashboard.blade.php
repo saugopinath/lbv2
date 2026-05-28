@@ -124,19 +124,8 @@
     <!-- District-wise Beneficiaries -->
     <div class="chart-container">
         <div class="flex justify-between items-center mb-6">
-            <div>
-                <h3 class="text-lg font-bold text-gray-800">
-                    District-Wise Distribution
-                </h3>
-                <p class="text-sm text-gray-500 mt-1">
-                    District Wise Distribution by Approved beneficiaries
-                </p>
-            </div>
-            <button
-                class="py-2 px-3 inline-flex items-center gap-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 hover:bg-gray-50">
-                <i class="fas fa-map-marker-alt"></i>
-                View Map
-            </button>
+            
+             @include('frontend.maps.west_bengal')
         </div>
 
         <div class="relative" style="height: 350px; overflow-y: auto;">
