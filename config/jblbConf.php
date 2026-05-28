@@ -13,7 +13,7 @@ if ($portal == 'lb') {
     $bg_image = 'background-cover.jpg';
     $schemeIds = [20];
     $footerText = 'Design and develpod By NIC.';
-    $deptName = 'Women and Child Development & Social Welfare Department';
+    $deptName = '';
     $indexName = 'Annapurna Bhandar | Government of West Bengal';
     $initiallogo = 'biswo-1.png';
     $dept_logo = 'biswo_logo.png';

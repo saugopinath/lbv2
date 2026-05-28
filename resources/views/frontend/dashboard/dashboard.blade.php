@@ -34,7 +34,7 @@
         <div class="flex justify-between items-start mb-4">
             <div>
                 <p class="text-sm text-gray-500 font-medium mb-1 tracking-wide">
-                    Total Approved (Till Date)
+                    Total Members Applied
                 </p>
                 <h3 class="text-4xl font-bold text-gray-800 mt-2 stat-number" data-value="{{ $totalApproved }}">
                     0
@@ -45,16 +45,7 @@
                 <i class="fas fa-check-circle text-white text-2xl"></i>
             </div>
         </div>
-        <div class="pt-4 border-t border-gray-100">
-            <div class="flex items-center gap-2 text-sm">
-                <span
-                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 text-xs font-semibold border border-green-100">
-                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                    <i class="fas fa-shield-check text-green-600"></i>
-                    Verified & Approved
-                </span>
-            </div>
-        </div>
+     
     </div>
 
     <!-- Total Application Applied (Till Date) -->
@@ -63,28 +54,18 @@
         <div class="flex justify-between items-start mb-4">
             <div>
                 <p class="text-sm text-gray-500 font-medium mb-1 tracking-wide">
-                    Total Applications Applied (Till Date)
+                    Total Members Verified
                 </p>
                 <h3 class="text-4xl font-bold text-gray-800 mt-2 stat-number" data-value="{{ $totalApplied }}">
                     0
                 </h3>
             </div>
             <div
-                class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-200">
-                <i class="fas fa-file-alt text-white text-2xl"></i>
+                class="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-200">
+                <i class="fas fa-check-circle text-white text-2xl"></i>
             </div>
         </div>
-        <div class="pt-4 border-t border-gray-100">
-            <div class="flex items-center gap-2 text-sm">
-                <span
-                    class="text-blue-600 font-semibold flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100">
-                    <i class="fas fa-layer-group text-blue-500"></i>
-                    Cumulative count
-                    <span class="text-blue-400 ml-1">•</span>
-                    <span class="text-xs font-normal text-blue-500">All time</span>
-                </span>
-            </div>
-        </div>
+     
     </div>
 
     <!-- Total DBT Transfer (Current Month) -->
@@ -93,7 +74,7 @@
         <div class="flex justify-between items-start mb-4">
             <div>
                 <p class="text-sm text-gray-500 font-medium mb-1 tracking-wide">
-                    Total DBT Transfer (Current Month)
+                     Total Members Approved
                 </p>
                 <h3 class="text-4xl font-bold text-gray-800 mt-2 stat-number" data-value="{{ $totalPayCurMonth }}"
                     data-money="true">
@@ -101,24 +82,11 @@
                 </h3>
             </div>
             <div
-                class="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg shadow-orange-200">
-                <i class="fas fa-rupee-sign text-white text-2xl"></i>
+                class="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-200">
+                <i class="fas fa-check-circle text-white text-2xl"></i>
             </div>
         </div>
-        <div class="pt-4 border-t border-gray-100">
-            <div class="flex items-center gap-2 text-sm">
-                <span
-                    class="text-orange-600 font-semibold flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-100">
-                    <div class="relative">
-                        <i class="fas fa-calendar-alt text-orange-500"></i>
-                        <span class="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
-                    </div>
-                    Current month
-                    <span class="text-orange-400 ml-1">•</span>
-                    <span class="text-xs font-normal text-orange-500">Active</span>
-                </span>
-            </div>
-        </div>
+   
     </div>
 
     <!-- Total DBT Transfer (Current Financial Year) -->
@@ -127,7 +95,7 @@
         <div class="flex justify-between items-start mb-4">
             <div>
                 <p class="text-sm text-gray-500 font-medium mb-1 tracking-wide">
-                    Total DBT Transfer (Current FY)
+                    Total Members Rejected
                 </p>
                 <h3 class="text-4xl font-bold text-gray-800 mt-2 stat-number" data-value="{{ $totalPayCurYear }}"
                     data-money="true">
@@ -135,21 +103,11 @@
                 </h3>
             </div>
             <div
-                class="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-purple-200">
-                <i class="fas fa-chart-line text-white text-2xl"></i>
+                class="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-200">
+                <i class="fas fa-check-circle text-white text-2xl"></i>
             </div>
         </div>
-        <div class="pt-4 border-t border-gray-100">
-            <div class="flex items-center gap-2 text-sm">
-                <span
-                    class="text-purple-600 font-semibold flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-50 to-fuchsia-50 border border-purple-100">
-                    <i class="fas fa-calendar-check text-purple-500"></i>
-                    Financial year total
-                    <span class="text-purple-400 ml-1">•</span>
-                    <span class="text-xs font-normal text-purple-500">FY 2023-24</span>
-                </span>
-            </div>
-        </div>
+
     </div>
 
 </div>
@@ -160,28 +118,7 @@
 <!-- Charts Section -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
     <!-- Scheme Applications Chart -->
-    <div class="chart-container">
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <h3 class="text-lg font-bold text-gray-800">
-                    Scheme-wise Applications
-                </h3>
-                <p class="text-sm text-gray-500 mt-1">
-                    Cumulative performance
-                </p>
-            </div>
 
-            <select id="schemeFilter"
-                class="py-2 px-3 pe-9 block border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500">
-                <option value="all">All Time</option>
-                <option value="30">Last 30 Days</option>
-                <option value="90">Last 90 Days</option>
-            </select>
-
-        </div>
-
-        <div id="applicationsChart" style="height: 350px;"></div>
-    </div>
 
 
     <!-- District-wise Beneficiaries -->
@@ -480,6 +417,312 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
+    // Create the chart
+Highcharts.chart('container', {
+    chart: {
+        type: 'pie'
+    },
+    title: {
+        text: 'Browser market shares. January, 2022'
+    },
+    subtitle: {
+        text: 'Click the slices to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
+    },
+
+    accessibility: {
+        announceNewData: {
+            enabled: true
+        },
+        point: {
+            valueSuffix: '%'
+        }
+    },
+
+    plotOptions: {
+        pie: {
+            borderRadius: 5,
+            dataLabels: [{
+                enabled: true,
+                distance: 15,
+                format: '{point.name}'
+            }, {
+                enabled: true,
+                distance: '-30%',
+                filter: {
+                    property: 'percentage',
+                    operator: '>',
+                    value: 5
+                },
+                format: '{point.y:.1f}%',
+                style: {
+                    fontSize: '0.9em',
+                    textOutline: 'none'
+                }
+            }],
+            states: {
+                inactive: {
+                    opacity: 0.8
+                }
+            }
+        }
+    },
+
+    tooltip: {
+        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+        pointFormat: '<span style="color:{point.color}">{point.name}</span>: ' +
+            '<b>{point.y:.2f}%</b> of total<br/>'
+    },
+
+    series: [
+        {
+            name: 'Browsers',
+            colorByPoint: true,
+            data: [
+                {
+                    name: 'Chrome',
+                    y: 61.04,
+                    drilldown: 'Chrome'
+                },
+                {
+                    name: 'Safari',
+                    y: 9.47,
+                    drilldown: 'Safari'
+                },
+                {
+                    name: 'Edge',
+                    y: 9.32,
+                    drilldown: 'Edge'
+                },
+                {
+                    name: 'Firefox',
+                    y: 8.15,
+                    drilldown: 'Firefox'
+                },
+                {
+                    name: 'Other',
+                    y: 11.02,
+                    drilldown: null
+                }
+            ]
+        }
+    ],
+    drilldown: {
+        series: [
+            {
+                name: 'Chrome',
+                id: 'Chrome',
+                data: [
+                    [
+                        'v97.0',
+                        36.89
+                    ],
+                    [
+                        'v96.0',
+                        18.16
+                    ],
+                    [
+                        'v95.0',
+                        0.54
+                    ],
+                    [
+                        'v94.0',
+                        0.7
+                    ],
+                    [
+                        'v93.0',
+                        0.8
+                    ],
+                    [
+                        'v92.0',
+                        0.41
+                    ],
+                    [
+                        'v91.0',
+                        0.31
+                    ],
+                    [
+                        'v90.0',
+                        0.13
+                    ],
+                    [
+                        'v89.0',
+                        0.14
+                    ],
+                    [
+                        'v88.0',
+                        0.1
+                    ],
+                    [
+                        'v87.0',
+                        0.35
+                    ],
+                    [
+                        'v86.0',
+                        0.17
+                    ],
+                    [
+                        'v85.0',
+                        0.18
+                    ],
+                    [
+                        'v84.0',
+                        0.17
+                    ],
+                    [
+                        'v83.0',
+                        0.21
+                    ],
+                    [
+                        'v81.0',
+                        0.1
+                    ],
+                    [
+                        'v80.0',
+                        0.16
+                    ],
+                    [
+                        'v79.0',
+                        0.43
+                    ],
+                    [
+                        'v78.0',
+                        0.11
+                    ],
+                    [
+                        'v76.0',
+                        0.16
+                    ],
+                    [
+                        'v75.0',
+                        0.15
+                    ],
+                    [
+                        'v72.0',
+                        0.14
+                    ],
+                    [
+                        'v70.0',
+                        0.11
+                    ],
+                    [
+                        'v69.0',
+                        0.13
+                    ],
+                    [
+                        'v56.0',
+                        0.12
+                    ],
+                    [
+                        'v49.0',
+                        0.17
+                    ]
+                ]
+            },
+            {
+                name: 'Safari',
+                id: 'Safari',
+                data: [
+                    [
+                        'v15.3',
+                        0.1
+                    ],
+                    [
+                        'v15.2',
+                        2.01
+                    ],
+                    [
+                        'v15.1',
+                        2.29
+                    ],
+                    [
+                        'v15.0',
+                        0.49
+                    ],
+                    [
+                        'v14.1',
+                        2.48
+                    ],
+                    [
+                        'v14.0',
+                        0.64
+                    ],
+                    [
+                        'v13.1',
+                        1.17
+                    ],
+                    [
+                        'v13.0',
+                        0.13
+                    ],
+                    [
+                        'v12.1',
+                        0.16
+                    ]
+                ]
+            },
+            {
+                name: 'Edge',
+                id: 'Edge',
+                data: [
+                    [
+                        'v97',
+                        6.62
+                    ],
+                    [
+                        'v96',
+                        2.55
+                    ],
+                    [
+                        'v95',
+                        0.15
+                    ]
+                ]
+            },
+            {
+                name: 'Firefox',
+                id: 'Firefox',
+                data: [
+                    [
+                        'v96.0',
+                        4.17
+                    ],
+                    [
+                        'v95.0',
+                        3.33
+                    ],
+                    [
+                        'v94.0',
+                        0.11
+                    ],
+                    [
+                        'v91.0',
+                        0.23
+                    ],
+                    [
+                        'v78.0',
+                        0.16
+                    ],
+                    [
+                        'v52.0',
+                        0.15
+                    ]
+                ]
+            }
+        ]
+    },
+
+    navigation: {
+        breadcrumbs: {
+            buttonTheme: {
+                style: {
+                    color: 'var(--highcharts-highlight-color-100)'
+                }
+            }
+        }
+    }
+});
+
 
         loadSchemeWiseApplications('all');
 

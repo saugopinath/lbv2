@@ -20,18 +20,31 @@ class DashboardController extends Controller
     }
     public function index(Request $request)
     {
-        $financialYear = Helper::getCurrentFinancialYearIndia();
-        // ✅ Total Approved (next_level_role_id = 0 means fully approved)
-        $totalApproved = DB::connection('pgsql_app_read')
-            ->table('pension.beneficiary_personals')
-            ->where('next_level_role_id', 0)
-            ->count();
+        $last_report_generation_time=null;
+        $totalApplied =0;
+        $totalVerified =0;
+        $totalApproved =0;
+        $totalReject =0;
+        $totalPayCurMonth=0;
+        $totalPayCurYear=0;
+        $financialYear=null;
+        $report_obj = DB::connection('pgsql_app_read')->table('mis.family_members_mis')
+            ->select(DB::raw('max(last_report_generation_time) as last_report_generation_time'),
+                     DB::raw('sum(applied) as applied'),
+                     DB::raw('sum(verified) as verified'),
+                     DB::raw('sum(approved) as approved'),
+                     DB::raw('sum(reject) as reject')
+            )
+            ->first();
+            //dd($report_obj);
 
-        // ✅ Total Applied (next_level_role_id >= 0)
-        $totalApplied = DB::connection('pgsql_app_read')
-            ->table('pension.beneficiary_personals')
-            ->where('next_level_role_id', '>=', 0)
-            ->count();
+            if(!is_null($report_obj)){
+               $last_generation_time= $report_obj->last_report_generation_time;
+               $totalApplied= $report_obj->applied;
+               $totalVerified= $report_obj->verified;
+               $totalApproved= $report_obj->approved;
+               $totalReject= $report_obj->reject;
+            }
 
         $curMonthInt = (int) date('n');
 
@@ -40,54 +53,10 @@ class DashboardController extends Controller
         $monthPayColumn = $monthPayColumn['lot_payment_amount'];
 
         // ✅ Current Month Total Payment
-        $totalPayCurMonth = DB::connection('pgsql_pay_read')
-            ->table('payment.ben_transaction_details')
-            ->selectRaw("COALESCE(SUM($monthPayColumn), 0) AS total")
-            ->where('fin_year', $financialYear)
-            // ->when(in_array($this->schemeIds, [20]), function ($query) {
-            //     $query->whereIn('scheme_id', $this->schemeIds);
-            // })
-            ->value('total');
-
-        // ✅ Financial Year Consolidated (month-wise)
-        $totalPayCurYearRow = DB::connection('pgsql_pay_read')
-            ->table('payment.ben_transaction_details')
-            ->selectRaw("
-                COALESCE(SUM(apr_payment_amount),0) AS apr,
-                COALESCE(SUM(may_payment_amount),0) AS may,
-                COALESCE(SUM(jun_payment_amount),0) AS jun,
-                COALESCE(SUM(jul_payment_amount),0) AS jul,
-                COALESCE(SUM(aug_payment_amount),0) AS aug,
-                COALESCE(SUM(sep_payment_amount),0) AS sep,
-                COALESCE(SUM(oct_payment_amount),0) AS oct,
-                COALESCE(SUM(nov_payment_amount),0) AS nov,
-                COALESCE(SUM(dec_payment_amount),0) AS dec,
-                COALESCE(SUM(jan_payment_amount),0) AS jan,
-                COALESCE(SUM(feb_payment_amount),0) AS feb,
-                COALESCE(SUM(mar_payment_amount),0) AS mar
-            ")
-            ->where('fin_year', $financialYear)
-            // ->when(in_array($this->schemeIds, [20]), function ($query) {
-            //     $query->whereIn('scheme_id', $this->schemeIds);
-            // })
-            ->first();
-
-        // ✅ Calculate total FY amount
-        $totalPayCurYear =
-            $totalPayCurYearRow->apr
-            + $totalPayCurYearRow->may
-            + $totalPayCurYearRow->jun
-            + $totalPayCurYearRow->jul
-            + $totalPayCurYearRow->aug
-            + $totalPayCurYearRow->sep
-            + $totalPayCurYearRow->oct
-            + $totalPayCurYearRow->nov
-            + $totalPayCurYearRow->dec
-            + $totalPayCurYearRow->jan
-            + $totalPayCurYearRow->feb
-            + $totalPayCurYearRow->mar;
+       
 
         return view('frontend.dashboard.dashboard', [
+            'last_report_generation_time'=> $last_generation_time,
             'cur_fin_year'     => $financialYear,
             'totalApproved'    => $totalApproved,
             'totalApplied'     => $totalApplied,

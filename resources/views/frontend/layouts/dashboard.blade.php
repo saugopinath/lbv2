@@ -207,17 +207,14 @@
 
                         <!-- Logo + Title -->
                         <div class="flex items-center gap-4">
-                            <img src="{{ asset('images/home/biswo_logo.png') }}" class="w-16 sm:w-20 shrink-0"
-                                alt="Jai Bangla Logo">
+                            
 
                             <div>
                                 <h1 class="text-2xl sm:text-3xl font-bold gradient-text leading-tight">
                                     {{ config('jblbConf.title') }}
                                     <!-- <span class="block sm:inline">@yield('header_title')</span> -->
                                 </h1>
-                                <p class="text-gray-600 text-sm sm:text-base mt-1">
-                                    {{ config('jblbConf.indexName') }}
-                                </p>
+                               
                             </div>
                         </div>
                     </div>
@@ -227,7 +224,7 @@
                         <span
                             class="inline-flex items-center gap-2 py-2 px-4 rounded-full text-sm font-medium bg-green-100 text-green-700">
                             <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                            Live Portal
+                            {{$last_report_generation_time}}
                         </span>
                     </div>
 

@@ -34,7 +34,7 @@
             <div class="flex items-center gap-3">
                 <div
                     class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg bg-gradient-to-br from-blue-500 to-indigo-600">
-                    <img src="{{ asset('images/home/biswo_logo.png') }}" alt="Logo" class="w-10 h-10">
+                   
                 </div>
                 <div>
                     <h1 class="text-lg font-bold text-white">{{ $sidebar['title'] }}</h1>
