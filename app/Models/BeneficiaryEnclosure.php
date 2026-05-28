@@ -7,7 +7,8 @@ use Laravel\Scout\Searchable;
 
 class BeneficiaryEnclosure extends BaseAuditableModel
 {
-    use HasFactory, Searchable;
+    //use HasFactory, Searchable;
+    use HasFactory;
 
     protected $table = 'pension.beneficiary_documents';
     protected $primaryKey = 'id';

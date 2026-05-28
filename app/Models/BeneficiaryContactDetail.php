@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class BeneficiaryContactDetail extends BaseAuditableModel
 {
-    use Searchable;
+    //use Searchable;
     protected $table = "pension.beneficiary_contacts";
     protected $primaryKey = 'application_id';
     public $incrementing = false;

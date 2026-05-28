@@ -7,7 +7,7 @@ use Laravel\Scout\Searchable;
 
 class BenPaymentDetailsLB extends Model
 {
-    use Searchable;
+    //use Searchable;
 
     protected $connection = 'pgsql_lbpayread';
     protected $table = 'payment.ben_payment_details';

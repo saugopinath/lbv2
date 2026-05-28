@@ -6,7 +6,7 @@ use Laravel\Scout\Searchable;
 
 class BeneficiaryAadhaar extends BaseAuditableModel
 {
-    use Searchable;
+    //use Searchable;
     protected $guarded = [];
     protected $primaryKey = 'application_id';
     protected $table = 'pension.beneficiary_aadhaars';

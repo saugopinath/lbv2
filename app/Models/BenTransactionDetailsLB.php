@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BenTransactionDetailsLB extends Model
 {
-    use Searchable, SoftDeletes;
+    //use Searchable, SoftDeletes;
+    use SoftDeletes;
     protected $connection = 'pgsql_lbpayread';
     protected $table = 'payment.ben_transaction_details';
     protected $primaryKey = 'id';

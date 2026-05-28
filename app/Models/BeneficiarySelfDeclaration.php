@@ -6,7 +6,7 @@ use Laravel\Scout\Searchable;
 
 class BeneficiarySelfDeclaration extends BaseAuditableModel
 {
-    use Searchable;
+   // use Searchable;
     protected $guarded = [];
     protected $table = 'pension.beneficiary_self_declarations';
     protected $primaryKey = 'application_id';

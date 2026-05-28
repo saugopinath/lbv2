@@ -10,7 +10,7 @@ use Laravel\Scout\Searchable;
 class AcceptRejectInfo extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
-    use Searchable;
+   // use Searchable;
     protected $table = 'accept_reject_infos';
 
     protected $fillable = [

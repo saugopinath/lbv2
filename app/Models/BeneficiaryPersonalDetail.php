@@ -6,7 +6,7 @@ use Laravel\Scout\Searchable;
 
 class BeneficiaryPersonalDetail extends BaseAuditableModel
 {
-    use Searchable;
+   // use Searchable;
 
     protected $guarded = [];
 

@@ -6,7 +6,7 @@ use Laravel\Scout\Searchable;
 
 class BeneficiaryBankDetail extends BaseAuditableModel
 {
-    use Searchable;
+    //use Searchable;
     protected $table = "pension.beneficiary_banks";
     protected $primaryKey = 'application_id';
     public $incrementing = false;
