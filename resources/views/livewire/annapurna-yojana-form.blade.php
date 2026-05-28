@@ -457,6 +457,67 @@
                                     </div>
                                 </div>
                             </div>
+
+                            {{-- HOF Aadhaar, Ration Card ID & EPIC --}}
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 mt-6">
+                                <div class="border-b-2 border-indigo-900 pb-2 mb-4">
+                                    <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
+                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">C</span>
+                                        Aadhaar, Ration Card & EPIC (HOF) | পরিচয়পত্র ও রেশন আইডি
+                                    </h3>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Aadhaar of HOF * <br><span class="text-xs text-gray-500 font-normal">আধার নম্বর</span></label>
+                                        <input type="text" wire:model="formData.hof_aadhaar" maxlength="12" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        @error('formData.hof_aadhaar') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Household ID of Digital Ration Card, if any <br><span class="text-xs text-gray-500 font-normal">রেশন কার্ডের গৃহস্থালি আইডি</span></label>
+                                        <input type="text" wire:model="formData.hof_ration_card_id" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">HOF EPIC/Voter No. <br><span class="text-xs text-gray-500 font-normal">ভোটার কার্ড নম্বর</span></label>
+                                        <input type="text" wire:model="formData.hof_epic_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">HOF AC & Part No. <br><span class="text-xs text-gray-500 font-normal">বিধানসভা ও পার্ট নং</span></label>
+                                        <input type="text" wire:model="formData.hof_ac_part_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- HOF Bank Details (For Cash Transfer) --}}
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 mt-6">
+                                <div class="border-b-2 border-indigo-900 pb-2 mb-4">
+                                    <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
+                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">D</span>
+                                        HOF Bank Details (For Cash Transfer) | পরিবার প্রধানের ব্যাংক বিবরণী
+                                    </h3>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">HOF Bank Name * <br><span class="text-xs text-gray-500 font-normal">ব্যাংকের নাম</span></label>
+                                        <input type="text" wire:model="formData.hof_bank_name" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        @error('formData.hof_bank_name') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">HOF Account Number * <br><span class="text-xs text-gray-500 font-normal">অ্যাকাউন্ট নম্বর</span></label>
+                                        <input type="text" wire:model="formData.hof_acc_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        @error('formData.hof_acc_no') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">HOF IFSC Code * <br><span class="text-xs text-gray-500 font-normal">আইএফএসসি কোড</span></label>
+                                        <input type="text" wire:model="formData.hof_ifsc" maxlength="11" placeholder="e.g. SBIN0001234" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        @error('formData.hof_ifsc') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+                            </div>
                         @else
                             {{-- Member Basic Identity --}}
                             @php
@@ -508,50 +569,114 @@
                                     </div>
                                 </div>
 
+                                <!-- Member Identity Docs (Aadhaar & EPIC) -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4 border-t border-gray-200 pt-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Aadhaar Number (Optional for &lt;5 years)<br><span class="text-xs text-gray-500 font-normal">আধার নম্বর</span></label>
+                                        <input type="text" wire:model="members.{{ $index }}.aadhaar" maxlength="12" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        @error("members.{$index}.aadhaar") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">EPIC No. <br><span class="text-xs text-gray-500 font-normal">ভোটার কার্ড নম্বর</span></label>
+                                        <input type="text" wire:model="members.{{ $index }}.epic_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">AC & Part No. <br><span class="text-xs text-gray-500 font-normal">বিধানসভা ও পার্ট নং</span></label>
+                                        <input type="text" wire:model="members.{{ $index }}.ac_part_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                </div>
+
+                                <!-- Member Bank details -->
+                                <div class="bg-white border border-gray-200 rounded-lg p-5 mt-6 shadow-sm">
+                                    <div class="border-b border-indigo-900 pb-2 mb-4">
+                                        <h4 class="text-sm font-bold text-indigo-950 flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-indigo-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                                            Member Bank Details (For Cash Transfer) | সদস্যের ব্যাংক বিবরণী
+                                        </h4>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-1">Bank Name * <br><span class="text-xs text-gray-500 font-normal">ব্যাংকের নাম</span></label>
+                                            <input type="text" wire:model="members.{{ $index }}.bank_name" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                            @error("members.{$index}.bank_name") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-1">Account Number * <br><span class="text-xs text-gray-500 font-normal">অ্যাকাউন্ট নম্বর</span></label>
+                                            <input type="text" wire:model="members.{{ $index }}.acc_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                            @error("members.{$index}.acc_no") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-1">IFSC Code * <br><span class="text-xs text-gray-500 font-normal">আইএফএসসি কোড</span></label>
+                                            <input type="text" wire:model="members.{{ $index }}.ifsc" maxlength="11" placeholder="e.g. SBIN0001234" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                            @error("members.{$index}.ifsc") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         @endif
                     </div>
                 @endif
 
-                {{-- SECTION 2: IDENTITY DOCS --}}
+
+                {{-- SECTION 2: RATION CARD & FOOD SUBSIDY --}}
                 @if ($activeSection === 'identity')
                     <div class="space-y-6">
                         @if ($activeMemberIndex === 0)
-                            {{-- HOF Identity Docs --}}
+                            {{-- Ration Card Details --}}
                             <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
                                 <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                     <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
-                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">A</span>
-                                        Aadhaar & Identity Cards (HOF) | পরিচয়পত্র ও রেশন বিবরণী
+                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">B</span>
+                                        Ration Card & Food Subsidy | Ration Card Details & Subsidy
                                     </h3>
                                 </div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Aadhaar of HOF * <br><span class="text-xs text-gray-500 font-normal">আধার নম্বর</span></label>
-                                        <input type="text" wire:model="formData.hof_aadhaar" maxlength="12" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                        @error('formData.hof_aadhaar') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Do you have a Digital Ration Card? * <br><span class="text-xs text-gray-500 font-normal">রেশন কার্ড আছে কি?</span></label>
+                                        <select wire:model="formData.has_digital_ration_card" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                            <option value="">-- Select --</option>
+                                            <option value="Yes">Yes / হ্যাঁ</option>
+                                            <option value="No">No / না</option>
+                                        </select>
+                                        @error('formData.has_digital_ration_card') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Household ID of Digital Ration Card, if any <br><span class="text-xs text-gray-500 font-normal">রেশন কার্ডের গৃহস্থালি আইডি</span></label>
-                                        <input type="text" wire:model="formData.hof_ration_card_id" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">If Yes, Card Type <br><span class="text-xs text-gray-500 font-normal">রেশন কার্ডের ধরন</span></label>
+                                        <select wire:model="formData.ration_card_type" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                            <option value="">-- Select --</option>
+                                            <option value="AAY">AAY (Antyodaya Anna Yojana)</option>
+                                            <option value="PHH">PHH (Priority Household)</option>
+                                            <option value="SPHH">SPHH (Special Priority Household)</option>
+                                            <option value="RKSY1">RKSY-I</option>
+                                            <option value="RKSY2">RKSY-II</option>
+                                            <option value="Non-subsidized">Non-Subsidized / ভর্তুকিহীন</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Lifting Monthly Ration? * <br><span class="text-xs text-gray-500 font-normal">রেশন পাচ্ছেন কি?</span></label>
+                                        <select wire:model="formData.is_lifting_ration" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                            <option value="">-- Select --</option>
+                                            <option value="Yes">Yes / হ্যাঁ</option>
+                                            <option value="No">No / না</option>
+                                        </select>
+                                        @error('formData.is_lifting_ration') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">HOF EPIC/Voter No. <br><span class="text-xs text-gray-500 font-normal">ভোটার কার্ড নম্বর</span></label>
-                                        <input type="text" wire:model="formData.hof_epic_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">HOF AC & Part No. <br><span class="text-xs text-gray-500 font-normal">বিধানসভা ও পার্ট নং</span></label>
-                                        <input type="text" wire:model="formData.hof_ac_part_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                    </div>
+                            {{-- HOF Other Registration details (CAA, KCC, SIR) --}}
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                                <div class="border-b-2 border-indigo-900 pb-2 mb-4">
+                                    <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
+                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">E</span>
+                                        Other Registrations & Documents | অন্যান্য নথি ও প্রমাণপত্র
+                                    </h3>
                                 </div>
 
                                 <!-- CAA Status -->
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4 border-t border-gray-200 pt-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">CAA Application Status <br><span class="text-xs text-gray-500 font-normal">সিএএ আবেদন স্থিতি</span></label>
                                         <select wire:model="formData.hof_caa_status" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
@@ -615,8 +740,11 @@
                                     </div>
                                 </div>
                             </div>
-
-                            {{-- Ration Card Details --}}
+                        @else
+                            {{-- Member Ration Card Details --}}
+                            @php
+                                $index = $activeMemberIndex - 1;
+                            @endphp
                             <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
                                 <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                     <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
@@ -625,98 +753,7 @@
                                     </h3>
                                 </div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Do you have a Digital Ration Card? * <br><span class="text-xs text-gray-500 font-normal">রেশন কার্ড আছে কি?</span></label>
-                                        <select wire:model="formData.has_digital_ration_card" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                            <option value="">-- Select --</option>
-                                            <option value="Yes">Yes / হ্যাঁ</option>
-                                            <option value="No">No / না</option>
-                                        </select>
-                                        @error('formData.has_digital_ration_card') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">If Yes, Card Type <br><span class="text-xs text-gray-500 font-normal">রেশন কার্ডের ধরন</span></label>
-                                        <select wire:model="formData.ration_card_type" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                            <option value="">-- Select --</option>
-                                            <option value="AAY">AAY (Antyodaya Anna Yojana)</option>
-                                            <option value="PHH">PHH (Priority Household)</option>
-                                            <option value="SPHH">SPHH (Special Priority Household)</option>
-                                            <option value="RKSY1">RKSY-I</option>
-                                            <option value="RKSY2">RKSY-II</option>
-                                            <option value="Non-subsidized">Non-Subsidized / ভর্তুকিহীন</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Lifting Monthly Ration? * <br><span class="text-xs text-gray-500 font-normal">রেশন পাচ্ছেন কি?</span></label>
-                                        <select wire:model="formData.is_lifting_ration" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                            <option value="">-- Select --</option>
-                                            <option value="Yes">Yes / হ্যাঁ</option>
-                                            <option value="No">No / না</option>
-                                        </select>
-                                        @error('formData.is_lifting_ration') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- HOF Bank Details --}}
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 mt-6">
-                                <div class="border-b-2 border-indigo-900 pb-2 mb-4">
-                                    <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
-                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">B</span>
-                                        HOF Bank Details (For Cash Transfer) | পরিবার প্রধানের ব্যাংক বিবরণী
-                                    </h3>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">HOF Bank Name * <br><span class="text-xs text-gray-500 font-normal">ব্যাংকের নাম</span></label>
-                                        <input type="text" wire:model="formData.hof_bank_name" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                        @error('formData.hof_bank_name') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">HOF Account Number * <br><span class="text-xs text-gray-500 font-normal">অ্যাকাউন্ট নম্বর</span></label>
-                                        <input type="text" wire:model="formData.hof_acc_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                        @error('formData.hof_acc_no') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">HOF IFSC Code * <br><span class="text-xs text-gray-500 font-normal">আইএফএসসি কোড</span></label>
-                                        <input type="text" wire:model="formData.hof_ifsc" maxlength="11" placeholder="e.g. SBIN0001234" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                        @error('formData.hof_ifsc') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
-                                    </div>
-                                </div>
-                            </div>
-                        @else
-                            {{-- Member Identity Docs --}}
-                            @php
-                                $index = $activeMemberIndex - 1;
-                            @endphp
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
-                                <div class="border-b-2 border-indigo-900 pb-2 mb-4">
-                                    <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
-                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">M</span>
-                                        Aadhaar & Identity Cards (Member #{{ $activeMemberIndex }})
-                                    </h3>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Aadhaar Number (Optional for &lt;5 years)<br><span class="text-xs text-gray-500 font-normal">আধার নম্বর</span></label>
-                                        <input type="text" wire:model="members.{{ $index }}.aadhaar" maxlength="12" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                        @error("members.{$index}.aadhaar") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">EPIC No. <br><span class="text-xs text-gray-500 font-normal">ভোটার কার্ড নম্বর</span></label>
-                                        <input type="text" wire:model="members.{{ $index }}.epic_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">AC & Part No. <br><span class="text-xs text-gray-500 font-normal">বিধানসভা ও পার্ট নং</span></label>
-                                        <input type="text" wire:model="members.{{ $index }}.ac_part_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                    </div>
-                                </div>
-
-                                <!-- Ration Card Details -->
-                                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-4 border-t border-gray-200 pt-4">
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Do they have a Digital Ration Card? <br><span class="text-xs text-gray-500 font-normal">রেশন কার্ড আছে কি?</span></label>
                                         <select wire:model="members.{{ $index }}.has_digital_ration_card" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
@@ -750,9 +787,19 @@
                                         </select>
                                     </div>
                                 </div>
+                            </div>
+
+                            {{-- Member Other Registrations (CAA, KCC, SIR) --}}
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                                <div class="border-b-2 border-indigo-900 pb-2 mb-4">
+                                    <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
+                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">E</span>
+                                        Other Registrations & Documents | অন্যান্য নথি ও প্রমাণপত্র
+                                    </h3>
+                                </div>
 
                                 <!-- CAA Status -->
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4 border-t border-gray-200 pt-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">CAA Application Status <br><span class="text-xs text-gray-500 font-normal">সিএএ আবেদন স্থিতি</span></label>
                                         <select wire:model="members.{{ $index }}.caa_status" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
@@ -813,34 +860,6 @@
                                     <div class="md:col-span-2">
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Case Details <br><span class="text-xs text-gray-500 font-normal">মামলার বিবরণ</span></label>
                                         <input type="text" wire:model="members.{{ $index }}.sir_case_details" placeholder="Enter Tribunal Case Details" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Member Bank details --}}
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 mt-6">
-                                <div class="border-b-2 border-indigo-900 pb-2 mb-4">
-                                    <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
-                                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" style="background-color: #1e1b4b;">M</span>
-                                        Member Bank Details (For Cash Transfer) | সদস্যের ব্যাংক বিবরণী
-                                    </h3>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Bank Name * <br><span class="text-xs text-gray-500 font-normal">ব্যাংকের নাম</span></label>
-                                        <input type="text" wire:model="members.{{ $index }}.bank_name" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                        @error("members.{$index}.bank_name") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Account Number * <br><span class="text-xs text-gray-500 font-normal">অ্যাকাউন্ট নম্বর</span></label>
-                                        <input type="text" wire:model="members.{{ $index }}.acc_no" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                        @error("members.{$index}.acc_no") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">IFSC Code * <br><span class="text-xs text-gray-500 font-normal">আইএফএসসি কোড</span></label>
-                                        <input type="text" wire:model="members.{{ $index }}.ifsc" maxlength="11" placeholder="e.g. SBIN0001234" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                        @error("members.{$index}.ifsc") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
                             </div>

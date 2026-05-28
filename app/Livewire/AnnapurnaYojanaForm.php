@@ -353,8 +353,8 @@ class AnnapurnaYojanaForm extends Component
     public function getSections()
     {
         return [
-            'basic' => ['label' => 'Basic Info', 'bengali' => 'প্রাথমিক তথ্য'],
-            'identity' => ['label' => 'Identity Docs', 'bengali' => 'পরিচয়পত্র'],
+            'basic' => ['label' => 'A. Family Identity', 'bengali' => 'পারিবারিক পরিচিতি'],
+            'identity' => ['label' => 'B. Ration Card / Food Subsidy', 'bengali' => 'রেশন কার্ড ও খাদ্য ভর্তুকি'],
             'health' => ['label' => 'Health & Insurance', 'bengali' => 'স্বাস্থ্য ও বীমা'],
             'education' => ['label' => 'Education', 'bengali' => 'শিক্ষা'],
             'income' => ['label' => 'Income & Assets', 'bengali' => 'আয় ও সম্পদ'],
@@ -408,6 +408,10 @@ class AnnapurnaYojanaForm extends Component
                     'formData.police_station' => 'required',
                     'formData.post_office' => 'required',
                     'formData.pincode' => 'required|digits:6',
+                    'formData.hof_aadhaar' => 'required|digits:12',
+                    'formData.hof_bank_name' => 'required',
+                    'formData.hof_acc_no' => 'required',
+                    'formData.hof_ifsc' => 'required|size:11',
                 ];
 
                 if (in_array($this->formData['category'], ['SC', 'ST', 'OBC'])) {
@@ -437,37 +441,8 @@ class AnnapurnaYojanaForm extends Component
                     'formData.post_office.required' => 'Post Office is required.',
                     'formData.pincode.required' => 'Pincode is required.',
                     'formData.pincode.digits' => 'Pincode must be 6 digits.',
-                ];
-            } else {
-                $index = $this->activeMemberIndex - 1;
-                $rules = [
-                    "members.{$index}.name" => 'required|string|max:255',
-                    "members.{$index}.dob" => 'required|date',
-                    "members.{$index}.gender" => 'required',
-                    "members.{$index}.relation" => 'required',
-                ];
-                $messages = [
-                    "members.{$index}.name.required" => 'Member name is required.',
-                    "members.{$index}.dob.required" => 'Member DOB is required.',
-                    "members.{$index}.gender.required" => 'Member Gender is required.',
-                    "members.{$index}.relation.required" => 'Member Relation is required.',
-                ];
-            }
-        } elseif ($section === 'identity') {
-            if ($this->activeMemberIndex === 0) {
-                $rules = [
-                    'formData.hof_aadhaar' => 'required|digits:12',
-                    'formData.has_digital_ration_card' => 'required',
-                    'formData.is_lifting_ration' => 'required',
-                    'formData.hof_bank_name' => 'required',
-                    'formData.hof_acc_no' => 'required',
-                    'formData.hof_ifsc' => 'required|size:11',
-                ];
-                $messages = [
                     'formData.hof_aadhaar.required' => 'HOF Aadhaar number is required.',
                     'formData.hof_aadhaar.digits' => 'HOF Aadhaar must be 12 digits.',
-                    'formData.has_digital_ration_card.required' => 'Ration card selection is required.',
-                    'formData.is_lifting_ration.required' => 'Ration lifting status selection is required.',
                     'formData.hof_bank_name.required' => 'HOF Bank Name is required.',
                     'formData.hof_acc_no.required' => 'HOF Account Number is required.',
                     'formData.hof_ifsc.required' => 'HOF IFSC is required.',
@@ -476,9 +451,17 @@ class AnnapurnaYojanaForm extends Component
             } else {
                 $index = $this->activeMemberIndex - 1;
                 $rules = [
+                    "members.{$index}.name" => 'required|string|max:255',
+                    "members.{$index}.dob" => 'required|date',
+                    "members.{$index}.gender" => 'required',
+                    "members.{$index}.relation" => 'required',
                     "members.{$index}.aadhaar" => 'nullable|digits:12',
                 ];
                 $messages = [
+                    "members.{$index}.name.required" => 'Member name is required.',
+                    "members.{$index}.dob.required" => 'Member DOB is required.',
+                    "members.{$index}.gender.required" => 'Member Gender is required.',
+                    "members.{$index}.relation.required" => 'Member Relation is required.',
                     "members.{$index}.aadhaar.digits" => 'Member Aadhaar must be 12 digits.',
                 ];
 
@@ -493,6 +476,20 @@ class AnnapurnaYojanaForm extends Component
                     $messages["members.{$index}.ifsc.required"] = 'Member IFSC is required since they are applying for AY.';
                     $messages["members.{$index}.ifsc.size"] = 'Member IFSC must be 11 characters.';
                 }
+            }
+        } elseif ($section === 'identity') {
+            if ($this->activeMemberIndex === 0) {
+                $rules = [
+                    'formData.has_digital_ration_card' => 'required',
+                    'formData.is_lifting_ration' => 'required',
+                ];
+                $messages = [
+                    'formData.has_digital_ration_card.required' => 'Ration card selection is required.',
+                    'formData.is_lifting_ration.required' => 'Ration lifting status selection is required.',
+                ];
+            } else {
+                $rules = [];
+                $messages = [];
             }
         } elseif ($section === 'health') {
             $rules = [];
