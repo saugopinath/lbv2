@@ -103,5 +103,11 @@ class AppServiceProvider extends ServiceProvider
                 'created_by_local_body_code',
             ]);
         }
+
+        if (app()->environment('local', 'staging')) {
+            \Illuminate\Support\Facades\Validator::extend('captcha', function ($attribute, $value, $parameters, $validator) {
+                return true;
+            });
+        }
     }
 }
