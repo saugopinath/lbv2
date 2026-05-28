@@ -1,4 +1,3 @@
-Total Pages: 11
 --- PAGE 1 ---
  
 Page 1 of 11  
@@ -6,7 +5,7 @@ Family Level Data Collection Form for Annapurna Yojana Each Section has clear fi
 8. Contact No.  (Preferably Aadhaar linked mobile no. of HOF) 9. Name, DOB, Gender, Relation with Head of Family, Aadhaar (of all family members)     HOF:   Member1: Name: ______________________________ DOB: ________________________________ Gender: _____________________________ Relation with Head of Family: ___________ Aadhaar No.__________________________  Member 2: Name: _______________________________ DOB: ________________________________ Gender: ______________________________ Relation with Head of Family: ____________ Aadhaar No.: __________________________  Member 3: Name: _______________________________ DOB: _______________________________ Gender: ______________________________ Relation with Head of Family: ____________ Aadhaar No.: __________________________  Member 4: 
 Applying for Annapurna Yojana  ☐ Yes        ☐ Yes      ☐ Yes      ☐ Yes   
 (For children below 5 years of age, NA may be written where adhaar is not available ) 
-==================================================
+
 --- PAGE 2 ---
  
 Page 2 of 11  
@@ -16,7 +15,7 @@ Section / Field Options / Input Instructions Name:______________________________
 (Aadhaar linked Bank accounts for DBT credit) 
 11. EPIC (HOF and all adult members) with Part Nos. of Electoral Roll HOF EPIC No.______________________, AC & Part No.: _____________________   Member 1 EPIC No. __________________ AC & Part No.: _____________________;   Member2 EPIC No. __________________ AC & Part No.: _____________________;  
  
-==================================================
+
 --- PAGE 3 ---
  
 Page 3 of 11  
@@ -24,7 +23,7 @@ Section / Field Options / Input Instructions  Member3 EPIC No. _________________
 Member3: ☐ Government     ☐ Private Premium: Sum Assured:  
 Member4: ☐ Government     ☐ Private 
  
-==================================================
+
 --- PAGE 4 ---
  
 Page 4 of 11  
@@ -33,13 +32,13 @@ Member5: ☐ Government     ☐ Private Premium: Sum Assured: D. Income/Professi
  
 3. Nature of employment HOF: _________________________ ☐ Government Sector    ☐ Salaried, in Private Sector            ☐ Formal Sector Self-Employed (Entrepreneur/Business/ Proprietor/etc.)        ☐ Part-time job           ☐ Informal Sector Self-Employed (Artisan/Craftsman/Farmer/etc.)   ☐ Migrant Labourer       ☐ Unemployed       ☐ Others  Member1: _________________________ ☐ Government Sector    ☐ Salaried, in Private Sector            ☐ Formal Sector Self-Employed (Entrepreneur/Business/ Proprietor/etc.)        ☐ Part-time job           ☐ Informal Sector Self-Employed (Artisan/Craftsman/Farmer/etc.)   ☐ Migrant Labourer       ☐ Unemployed       ☐ Others  Member 2: _________________________ ☐ Government Sector    ☐ Salaried, in Private Sector            ☐ Formal Sector Self-Employed (Entrepreneur/Business/ Proprietor/etc.)        ☐ Part-time job           ☐ Informal Sector Self-Employed (Artisan/Craftsman/Farmer/etc.)   ☐ Migrant Labourer       ☐ Unemployed       ☐ Others  Member 3: _________________________ ☐ Government Sector    ☐ Salaried, in Private Sector            ☐ Formal Sector Self-Employed (Entrepreneur/Business/ Proprietor/etc.)        ☐ Part-time job           ☐ Informal Sector Self-
 (Choose most appropriate box, can tick on multiple options). (Provide necessary supporting documents if available/ self-declaration) 
-==================================================
+
 --- PAGE 5 ---
  
 Page 5 of 11  
 Section / Field Options / Input Instructions Employed (Artisan/Craftsman/Farmer/etc.)   ☐ Migrant Labourer       ☐ Unemployed       ☐ Others  Member 4: _________________________ ☐ Government Sector    ☐ Salaried, in Private Sector            ☐ Formal Sector Self-Employed (Entrepreneur/Business/ Proprietor/etc.)        ☐ Part-time job           ☐ Informal Sector Self-Employed (Artisan/Craftsman/Farmer/etc.)   ☐ Migrant Labourer       ☐ Unemployed       ☐ Others  Member 5: _________________________ ☐ Government Sector    ☐ Salaried, in Private Sector            ☐ Formal Sector Self-Employed (Entrepreneur/Business/ Proprietor/etc.)        ☐ Part-time job           ☐ Informal Sector Self-Employed (Artisan/Craftsman/Farmer/etc.)   ☐ Migrant Labourer       ☐ Unemployed       ☐ Others 4. No. of literate adult family members, and no. of illiterate adult family members _____________ literate adult members _____________ illiterate adult members  HOF: _________________________ ☐ Literate ☐ Illiterate Highest qualification :   Member1: _________________________ ☐ Literate ☐ Illiterate Highest qualification :    Member 2: _________________________ ☐ Literate ☐ Illiterate Highest qualification :    Member 3: _________________________ ☐ Literate ☐ Illiterate Highest qualification :    Member 4: _________________________ ☐ Literate ☐ Illiterate Highest qualification :    Member 5: _________________________ ☐ Literate 
 Highest Educational Qualifications may be provided of all literate Adult Family members 
-==================================================
+
 --- PAGE 6 ---
  
 Page 6 of 11  
@@ -48,7 +47,7 @@ Section / Field Options / Input Instructions ☐ Illiterate Highest qualificatio
 6. Is any member a government pensioner? ☐ Yes       ☐ No Member no. who is a government pensioner _____________________________ _____________________________ (If yes, attach pension slip) 
 7. Is any member registered under GST? ☐ Yes       ☐ No (If yes, GSTIN: ________________) 8. Total annual family income (INR): Rs. _______________________ (in digits)     E. Other Identity Documents   1. CAA Application Status, if any HOF: _________________________ ☐ Not Applicable ☐ Applied, if yes, Application No…………… ☐ Issued, if yes, Certificate No………………  Member1: _________________________ ☐ Not Applicable ☐ Applied, if yes, Application No…………… ☐ Issued, if yes, Certificate No………………  Member 2: _________________________ ☐ Not Applicable ☐ Applied, if yes, Application No…………… ☐ Issued, if yes, Certificate No………………  Member 3: _________________________ ☐ Not Applicable ☐ Applied, if yes, Application No…………… ☐ Issued, if yes, Certificate No………………  Member 4: _________________________ ☐ Not Applicable ☐ Applied, if yes, Application No…………… ☐ Issued, if yes, Certificate No………………   Member 5: _________________________ ☐ Not Applicable ☐ Applied, if yes, Application No…………… ☐ Issued, if yes, Certificate No………………   
  
-==================================================
+
 --- PAGE 7 ---
  
 Page 7 of 11  
@@ -56,7 +55,7 @@ Section / Field Options / Input Instructions 2. Others (like KCC, KCC ARD, Artis
 (Provide details of issuing authority) 
 3. If Deleted in SIR 2026, whether case pending in Tribunal HOF: _________________________ ☐ Not Applicable ☐ NO ☐ Yes, If yes case details_________________  Member1: _________________________ ☐ Not Applicable ☐ NO ☐ Yes, If yes case details_________________  Member 2: _________________________ ☐ Not Applicable ☐ NO ☐ Yes, If yes case details_________________  Member 3: _________________________ ☐ Not Applicable ☐ NO ☐ Yes, If yes case details_________________  Member 4: _________________________ ☐ Not Applicable ☐ NO ☐ Yes, If yes case details_________________  Member 5: _________________________ ☐ Not Applicable ☐ NO ☐ Yes, If yes case details_________________ 
  
-==================================================
+
 --- PAGE 8 ---
  
 Page 8 of 11  
@@ -64,7 +63,7 @@ Section / Field Options / Input Instructions
 F. Social Status and Dependents   1. Details of all children in the family attending school: Member no. Name of child 1:  Grade:  School Name: Type:  ☐ Govt / Govt Aided / Sponsored School  ☐ Private School  ☐ Recognized Madrasah  ☐ Other Madrasah  ☐ Others __________  Member no. Name of child 2:  Grade:  School Name: Type:  ☐ Govt / Govt Aided / Sponsored School  ☐ Private School  ☐ Recognized Madrasah  ☐ Other Madrasah  ☐ Others __________  Member no. Name of child 3:  Grade:  School Name: Type:  ☐ Govt / Govt Aided / Sponsored School  ☐ Private School  ☐ Recognized Madrasah  ☐ Other Madrasah  ☐ Others __________  Member no. Name of child 4:  Grade:  School Name: Type:  ☐ Govt / Govt Aided / Sponsored School  ☐ Private School  ☐ Recognized Madrasah  ☐ Other Madrasah  ☐ Others __________ 
  If type of school is “Others,” please specify details (like Open Schooling, Home Schooling, etc.) 
 2. Children's vaccination status. Child 1: ☐ Yes, vaccination started /completed        If Yes Vaccination Card ID, 
-==================================================
+
 --- PAGE 9 ---
  
 Page 9 of 11  
@@ -72,7 +71,7 @@ Section / Field Options / Input Instructions ☐ Not vaccinated  Child 2: ☐ Ye
 (If no, last vaccination date/ reason for skip) 
 G. Benefits under government schemes    1. Are you receiving any benefits under Government Schemes through DBT? HOF: ☐ Yes       ☐ No Scheme:   Scheme Opt out of scheme 1  ☐ Yes 2  ☐ Yes 3  ☐ Yes 4  ☐ Yes 5  ☐ Yes  Member 1: ☐ Yes       ☐ No Scheme:   Name of Scheme  Opt out of scheme 1  ☐ Yes 2  ☐ Yes 3  ☐ Yes 4  ☐ Yes 5  ☐ Yes  Member 2: ☐ Yes       ☐ No Scheme:   Name of Scheme Opt out of scheme 1  ☐ Yes 2  ☐ Yes 3  ☐ Yes 4  ☐ Yes 5  ☐ Yes    Member 3: ☐ Yes       ☐ No Scheme:   
 (Specify name of scheme, if Yes) (For opting out of the scheme, checkbox should be marked )  
-==================================================
+
 --- PAGE 10 ---
  
 Page 10 of 11  
@@ -80,9 +79,9 @@ Section / Field Options / Input Instructions  Name of Scheme Opt out of scheme 1
 2. If excluded, reasons (to be filled by officer):   H. Declaration & Consent   I hereby declare that above information is true to the best of my knowledge and I have provided all the supporting documents where applicable and HAVE NOT missed any criteria as mentioned above. I understand that my social protection benefits will be stopped if any information provided by me turns out to be false.  
 ☐ Agree    -------------------------------------------------------                    (Signature) (This form is subject to verification.) 
 **Note: ‘Family’ is defined as a group of persons who normally live together and take their meals from a common kitchen.”   (End of form)   
-==================================================
+
 --- PAGE 11 ---
  
 Page 11 of 11  
  For official use Enquiry Report on Family Level Data Collection Form for Annapurna Yojana  I have verified the application submitted by ………………………s/o/d/o, …………………, Village/Town……., GP…………., Block ……………/ Municipality……………. …….., District…………………………. I have found the application and information provided therein to be correct.  Or  The following information submitted by the applicant are found not to be correct. (Please mention relevant Section and point)       I hereby recommend the application for acceptance/ rejection.  Date       Signature Place       Name          Designation  
-==================================================
+
