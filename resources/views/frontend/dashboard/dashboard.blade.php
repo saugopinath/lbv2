@@ -64,6 +64,123 @@
     }
 </style>
 @endpush
+
+@push('meta')
+<meta name="map-district-count-url" content="{{ route('map.district.count') }}">
+@endpush
+@push('styles')
+<style>
+    /* Premium Map Styles */
+    .district {
+        fill: rgba(255, 255, 255, 0.8);
+        stroke: rgba(99, 102, 241, 0.5);
+        stroke-width: 1;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .district:hover {
+        fill: rgba(139, 92, 246, 0.4) !important;
+        stroke: #4f46e5;
+        stroke-width: 1.5;
+        filter: drop-shadow(0 4px 6px rgba(99, 102, 241, 0.4));
+    }
+
+    .district.selected {
+        fill: rgba(79, 70, 229, 0.9) !important;
+        stroke: #312e81;
+        stroke-width: 2;
+        filter: drop-shadow(0 10px 15px rgba(79, 70, 229, 0.5));
+    }
+
+    .tooltip {
+        position: fixed;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(8px);
+        color: #fff;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 13px;
+        pointer-events: none;
+        display: none;
+        z-index: 1000;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        transform: translate(15px, -15px);
+        user-select: none;
+        transition: opacity 0.2s ease;
+    }
+
+    .loading-spinner {
+        border: 3px solid rgba(243, 244, 246, 0.5);
+        border-top: 3px solid #4f46e5;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes blob {
+        0% {
+            transform: translate(0px, 0px) scale(1);
+        }
+
+        33% {
+            transform: translate(30px, -50px) scale(1.1);
+        }
+
+        66% {
+            transform: translate(-20px, 20px) scale(0.9);
+        }
+
+        100% {
+            transform: translate(0px, 0px) scale(1);
+        }
+    }
+
+    .animate-blob {
+        animation: blob 7s infinite;
+    }
+
+    .animation-delay-2000 {
+        animation-delay: 2s;
+    }
+
+    .animation-delay-4000 {
+        animation-delay: 4s;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+</style>
+@endpush
 @section('content')
 <!-- Stats Cards -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -153,7 +270,43 @@
 </div>
 
 
+   <!-- ================= MAP SECTION ================= -->
+            <div style="grid-area: map;">
+                <div class="glass-card rounded-3xl p-5 h-[650px] relative flex flex-col">
 
+                    <div class="flex justify-between items-center mb-4 px-2 pb-2 border-b border-gray-100/50">
+                        <h2 class="font-bold text-gray-800 flex items-center gap-2 text-lg">
+                            <i class="fa-solid fa-map-location-dot text-indigo-500"></i>
+                            Geographic Distribution
+                        </h2>
+                        <div class="flex items-center gap-3">
+                            <div class="flex bg-gray-100/50 rounded-lg p-1 border border-gray-200/50">
+                                <button id="zoom-out" class="w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Zoom Out"><i class="fa-solid fa-minus"></i></button>
+                                <button id="zoom-reset" class="w-7 h-7 flex items-center justify-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Reset Map"><i class="fa-solid fa-expand"></i></button>
+                                <button id="zoom-in" class="w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Zoom In"><i class="fa-solid fa-plus"></i></button>
+                            </div>
+                            <span class="text-[10px] font-bold text-indigo-400 uppercase bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100">
+                                SVG Interactive
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- LOADER -->
+                    <div id="loading" class="flex-1 flex flex-col items-center justify-center">
+                        <div class="loading-spinner mb-4"></div>
+                        <span class="text-indigo-500 font-bold animate-pulse tracking-widest text-sm uppercase">
+                            Fetching Data...
+                        </span>
+                    </div>
+
+                    <!-- SVG -->
+                    <div id="map-svg-wrapper" class="flex-1 hidden items-center justify-center overflow-hidden drop-shadow-sm">
+                        @include('frontend.maps.west_bengal')
+                    </div>
+
+                    <!-- TOOLTIP -->
+                </div>
+            </div>
 
 <!-- Charts Section -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
@@ -162,20 +315,20 @@
         <div class="border-b border-gray-100 pb-4 mb-6">
             <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                 <i class="fa-solid fa-map-location-dot text-indigo-500"></i>
-                District-wise Beneficiary Distribution
+                District-wise Member Distribution
             </h3>
             <p class="text-xs text-gray-500 mt-1">Geographic SVG Map & Bar Chart Breakdown</p>
         </div>
 
         <div class="grid grid-cols-1 gap-6 items-center">
             <!-- Map Column -->
-            <div class="flex items-center justify-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 h-[300px] relative overflow-hidden" id="map-svg-wrapper">
+            <div class="flex items-center justify-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 h-[600px] relative overflow-hidden" id="map-svg-wrapper">
                 @include('frontend.maps.west_bengal')
             </div>
 
             <!-- List / Bar Chart Column -->
-            <div class="relative overflow-y-auto pr-2" style="height: 300px;">
-                <div id="districtChart"></div>
+             <div id="map-svg-wrapper" class="flex-1 hidden items-center justify-center overflow-hidden drop-shadow-sm">
+                        @include('frontend.maps.west_bengal')
             </div>
         </div>
     </div>
@@ -185,7 +338,7 @@
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h3 class="text-lg font-bold text-gray-800">
-                    Consolidated Application Chart
+                   Caste Wise Member 
                 </h3>
             </div>
         </div>
@@ -212,58 +365,7 @@
 </div>
 
 
-<div class="bg-white rounded-xl shadow mt-6">
 
-    <!-- Header -->
-    <div class="flex items-center justify-between px-6 py-4 border-b">
-        <div>
-            <h3 class="text-lg font-semibold text-gray-800">
-                Scheme-wise Consolidated Status
-            </h3>
-            <p class="text-xs text-gray-500 mt-1">
-                Consolidated workflow status across schemes
-            </p>
-        </div>
-
-        <div class="flex items-center gap-3">
-            <span id="lastRefreshed" class="text-xs text-gray-500 hidden sm:inline">
-                Last refreshed: --
-            </span>
-
-            <button id="refreshSchemeStatus"
-                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
-                                                                                                                                                                                                   bg-blue-600 text-white hover:bg-blue-700
-                                                                                                                                                                                                   disabled:opacity-50 disabled:cursor-not-allowed">
-                <i class="fas fa-sync-alt"></i>
-                Refresh
-            </button>
-        </div>
-    </div>
-
-    <!-- Table -->
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 text-sm" id="schemeStatusTable">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Scheme</th>
-                    <th class="px-4 py-3 text-right font-semibold text-gray-600">Entry</th>
-                    <th class="px-4 py-3 text-right font-semibold text-gray-600">Verified</th>
-                    <th class="px-4 py-3 text-right font-semibold text-gray-600">Approved</th>
-                    <th class="px-4 py-3 text-right font-semibold text-gray-600">Recommended</th>
-                    <th class="px-4 py-3 text-right font-semibold text-gray-600">Rejected</th>
-                </tr>
-            </thead>
-
-            <tbody class="divide-y divide-gray-100" id="schemeStatusTbody">
-                <tr>
-                    <td colspan="6" class="px-4 py-6 text-center text-gray-400">
-                        Loading data...
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
 
 <!-- TOOLTIP -->
 <div id="custom-tooltip" class="tooltip">
@@ -1258,68 +1360,562 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        Highcharts.chart('mispiechart', {
-            chart: {
-                type: 'pie',
-                backgroundColor: 'transparent'
-            },
-            title: {
-                text: null
-            },
-            tooltip: {
-                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-            },
-            accessibility: {
-                point: {
-                    valueSuffix: '%'
+       // Create the chart
+Highcharts.chart('mispiechart', {
+    chart: {
+        type: 'pie'
+    },
+    title: {
+        text: 'Browser market shares. January, 2022'
+    },
+    subtitle: {
+        text: 'Click the slices to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
+    },
+
+    accessibility: {
+        announceNewData: {
+            enabled: true
+        },
+        point: {
+            valueSuffix: '%'
+        }
+    },
+
+    plotOptions: {
+        pie: {
+            borderRadius: 5,
+            dataLabels: [{
+                enabled: true,
+                distance: 15,
+                format: '{point.name}'
+            }, {
+                enabled: true,
+                distance: '-30%',
+                filter: {
+                    property: 'percentage',
+                    operator: '>',
+                    value: 5
+                },
+                format: '{point.y:.1f}%',
+                style: {
+                    fontSize: '0.9em',
+                    textOutline: 'none'
                 }
-            },
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        format: '<b>{point.name}</b>: {point.percentage:.1f} %'
-                    },
-                    showInLegend: true
-                }
-            },
-            series: [{
-                name: 'Status',
-                colorByPoint: true,
-                data: [{
-                        name: 'Applications Received',
-                        y: 73958326,
-                        color: '#3b82f6'
-                    },
-                    {
-                        name: 'Applications Approved',
-                        y: 69633489,
-                        color: '#10b981'
-                    },
-                    {
-                        name: 'Applications Rejected',
-                        y: 2791060,
-                        color: '#ef4444'
-                    },
-                    {
-                        name: 'Applications Under Process',
-                        y: 353767,
-                        color: '#f59e0b'
-                    },
-                    {
-                        name: 'Applications Sent to District',
-                        y: 19043,
-                        color: '#8b5cf6'
-                    }
-                ]
             }],
-            credits: {
-                enabled: false
+            states: {
+                inactive: {
+                    opacity: 0.8
+                }
             }
-        });
+        }
+    },
+
+    tooltip: {
+        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+        pointFormat: '<span style="color:{point.color}">{point.name}</span>: ' +
+            '<b>{point.y:.2f}%</b> of total<br/>'
+    },
+
+    series: [
+        {
+            name: 'Browsers',
+            colorByPoint: true,
+            data: [
+                {
+                    name: 'Chrome',
+                    y: 61.04,
+                    drilldown: 'Chrome'
+                },
+                {
+                    name: 'Safari',
+                    y: 9.47,
+                    drilldown: 'Safari'
+                },
+                {
+                    name: 'Edge',
+                    y: 9.32,
+                    drilldown: 'Edge'
+                },
+                {
+                    name: 'Firefox',
+                    y: 8.15,
+                    drilldown: 'Firefox'
+                },
+                {
+                    name: 'Other',
+                    y: 11.02,
+                    drilldown: null
+                }
+            ]
+        }
+    ],
+    drilldown: {
+        series: [
+            {
+                name: 'Chrome',
+                id: 'Chrome',
+                data: [
+                    [
+                        'v97.0',
+                        36.89
+                    ],
+                    [
+                        'v96.0',
+                        18.16
+                    ],
+                    [
+                        'v95.0',
+                        0.54
+                    ],
+                    [
+                        'v94.0',
+                        0.7
+                    ],
+                    [
+                        'v93.0',
+                        0.8
+                    ],
+                    [
+                        'v92.0',
+                        0.41
+                    ],
+                    [
+                        'v91.0',
+                        0.31
+                    ],
+                    [
+                        'v90.0',
+                        0.13
+                    ],
+                    [
+                        'v89.0',
+                        0.14
+                    ],
+                    [
+                        'v88.0',
+                        0.1
+                    ],
+                    [
+                        'v87.0',
+                        0.35
+                    ],
+                    [
+                        'v86.0',
+                        0.17
+                    ],
+                    [
+                        'v85.0',
+                        0.18
+                    ],
+                    [
+                        'v84.0',
+                        0.17
+                    ],
+                    [
+                        'v83.0',
+                        0.21
+                    ],
+                    [
+                        'v81.0',
+                        0.1
+                    ],
+                    [
+                        'v80.0',
+                        0.16
+                    ],
+                    [
+                        'v79.0',
+                        0.43
+                    ],
+                    [
+                        'v78.0',
+                        0.11
+                    ],
+                    [
+                        'v76.0',
+                        0.16
+                    ],
+                    [
+                        'v75.0',
+                        0.15
+                    ],
+                    [
+                        'v72.0',
+                        0.14
+                    ],
+                    [
+                        'v70.0',
+                        0.11
+                    ],
+                    [
+                        'v69.0',
+                        0.13
+                    ],
+                    [
+                        'v56.0',
+                        0.12
+                    ],
+                    [
+                        'v49.0',
+                        0.17
+                    ]
+                ]
+            },
+            {
+                name: 'Safari',
+                id: 'Safari',
+                data: [
+                    [
+                        'v15.3',
+                        0.1
+                    ],
+                    [
+                        'v15.2',
+                        2.01
+                    ],
+                    [
+                        'v15.1',
+                        2.29
+                    ],
+                    [
+                        'v15.0',
+                        0.49
+                    ],
+                    [
+                        'v14.1',
+                        2.48
+                    ],
+                    [
+                        'v14.0',
+                        0.64
+                    ],
+                    [
+                        'v13.1',
+                        1.17
+                    ],
+                    [
+                        'v13.0',
+                        0.13
+                    ],
+                    [
+                        'v12.1',
+                        0.16
+                    ]
+                ]
+            },
+            {
+                name: 'Edge',
+                id: 'Edge',
+                data: [
+                    [
+                        'v97',
+                        6.62
+                    ],
+                    [
+                        'v96',
+                        2.55
+                    ],
+                    [
+                        'v95',
+                        0.15
+                    ]
+                ]
+            },
+            {
+                name: 'Firefox',
+                id: 'Firefox',
+                data: [
+                    [
+                        'v96.0',
+                        4.17
+                    ],
+                    [
+                        'v95.0',
+                        3.33
+                    ],
+                    [
+                        'v94.0',
+                        0.11
+                    ],
+                    [
+                        'v91.0',
+                        0.23
+                    ],
+                    [
+                        'v78.0',
+                        0.16
+                    ],
+                    [
+                        'v52.0',
+                        0.15
+                    ]
+                ]
+            }
+        ]
+    },
+
+    navigation: {
+        breadcrumbs: {
+            buttonTheme: {
+                style: {
+                    color: 'var(--highcharts-highlight-color-100)'
+                }
+            }
+        }
+    }
+});
+
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let districtData = {};
 
+        async function initMap() {
+            try {
+                const response = await fetch(document.querySelector('meta[name="map-district-count-url"]').content, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({})
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+
+                districtData = await response.json();
+
+                document.getElementById('loading').style.display = 'none';
+                const mapWrapper = document.getElementById('map-svg-wrapper');
+                mapWrapper.classList.remove('hidden');
+                mapWrapper.classList.add('flex');
+
+                bindDistricts();
+                updateStats();
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading').innerHTML = `
+                                    <div class="text-center">
+                                        <i class="fa-solid fa-triangle-exclamation text-red-500 text-3xl mb-2"></i>
+                                        <p class="text-red-600 font-bold">Failed to load district data</p>
+                                    </div>
+                                `;
+            }
+        }
+
+        function bindDistricts() {
+            document.querySelectorAll('.district').forEach(function(d) {
+                const code = d.getAttribute('district-code');
+                const name = d.dataset.name;
+                const count = parseInt(districtData[code] || 0);
+
+                d.dataset.count = count;
+                d.dataset.name = name;
+                setColor(d, count);
+
+                d.addEventListener('mouseenter', e => showTooltip(e, name, count));
+                d.addEventListener('mousemove', moveTooltip);
+                d.addEventListener('mouseleave', hideTooltip);
+                d.addEventListener('click', () => selectDistrict(d, code, name, count));
+            });
+        }
+
+        function setColor(d, count) {
+            let c = 'rgba(255, 255, 255, 0.7)';
+            if (count > 500) c = 'rgba(79, 70, 229, 0.95)';
+            else if (count > 200) c = 'rgba(99, 102, 241, 0.8)';
+            else if (count > 50) c = 'rgba(129, 140, 248, 0.6)';
+            else if (count > 0) c = 'rgba(199, 210, 254, 0.5)';
+            d.style.fill = c;
+        }
+
+        function selectDistrict(d, code, name, count) {
+            document.querySelectorAll('.district').forEach(el => el.classList.remove('selected'));
+            d.classList.add('selected');
+
+            const totalBeneficiaries = total();
+            const pct = totalBeneficiaries > 0 ? ((count / totalBeneficiaries) * 100).toFixed(2) : 0;
+
+            const infoEl = document.getElementById('district-info');
+            infoEl.style.opacity = '0';
+            infoEl.style.transition = 'opacity 0.15s';
+
+            setTimeout(() => {
+                infoEl.innerHTML = `
+                                    <div class="w-full animate-fade-in">
+                                        <div class="text-center mb-8">
+                                            <span class="bg-indigo-100/50 text-indigo-700 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border border-indigo-200/50 shadow-sm">District Selected</span>
+                                            <h4 class="text-3xl font-black text-gray-900 mt-5 tracking-tight">${name}</h4>
+                                            <div class="w-16 h-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto mt-4 rounded-full"></div>
+                                        </div>
+                                        <div class="space-y-4">
+                                            <div class="glass-card rounded-2xl p-6 text-center shadow-sm relative overflow-hidden">
+                                                <div class="absolute -right-4 -top-4 opacity-[0.03] text-8xl"><i class="fa-solid fa-users"></i></div>
+                                                <p class="text-gray-500 text-xs font-bold uppercase mb-2 tracking-wider">Total Beneficiaries</p>
+                                                <p class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 to-violet-600 tracking-tighter">${count.toLocaleString()}</p>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div class="glass-card rounded-2xl p-4 text-left shadow-sm">
+                                                    <p class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">State Share</p>
+                                                    <p class="text-2xl font-black text-gray-800">${pct}%</p>
+                                                </div>
+                                                <div class="glass-card rounded-2xl p-4 text-left shadow-sm">
+                                                    <p class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">Status</p>
+                                                    <p class="text-xl font-black text-emerald-500 truncate flex items-center gap-1.5">
+                                                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Active
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                infoEl.style.opacity = '1';
+            }, 150);
+        }
+
+        function updateStats() {
+            const t = total();
+            const keys = Object.keys(districtData);
+            const d = keys.length;
+            const avg = d ? Math.round(t / d) : 0;
+
+            let highest = {
+                name: '-',
+                count: 0
+            };
+            document.querySelectorAll('.district').forEach(function(el) {
+                const c = parseInt(el.dataset.count || 0);
+                if (c > highest.count) {
+                    highest = {
+                        name: el.dataset.name,
+                        count: c
+                    };
+                }
+            });
+
+            document.getElementById('total-count').textContent = t.toLocaleString();
+            document.getElementById('avg-count').textContent = avg.toLocaleString();
+            document.getElementById('highest-district').textContent = highest.name;
+        }
+
+        function total() {
+            return Object.values(districtData).reduce((a, b) => a + (parseInt(b) || 0), 0);
+        }
+
+        function showTooltip(e, name, count) {
+            document.getElementById('tooltip-content').innerHTML = `
+                                <div class="font-bold border-b border-gray-600/50 pb-1.5 mb-1.5 text-indigo-100 flex items-center justify-between gap-3">
+                                    <span>${name}</span>
+                                    <i class="fa-solid fa-map-pin text-[10px] text-indigo-400"></i>
+                                </div>
+                                <div class="text-indigo-200 text-xs font-medium">
+                                    Beneficiaries: <span class="text-white font-black ml-1">${count.toLocaleString()}</span>
+                                </div>
+                            `;
+            document.getElementById('custom-tooltip').style.display = 'block';
+            moveTooltip(e);
+        }
+
+        function moveTooltip(e) {
+            const tooltip = document.getElementById('custom-tooltip');
+            tooltip.style.left = e.clientX + 'px';
+            tooltip.style.top = e.clientY + 'px';
+        }
+
+        function hideTooltip() {
+            document.getElementById('custom-tooltip').style.display = 'none';
+        }
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            document.querySelectorAll('.district').forEach(el => el.classList.remove('selected'));
+            document.getElementById('district-info').innerHTML = `
+                                <div class="p-8 bg-white/60 shadow-inner rounded-full mb-6 border border-gray-100 animate-fade-in">
+                                    <i class="fa-solid fa-hand-pointer text-4xl text-indigo-200"></i>
+                                </div>
+                                <h4 class="font-black text-xl text-gray-800 tracking-tight animate-fade-in" style="animation-delay: 0.1s">No Selection</h4>
+                                <p class="text-gray-500 mt-2 max-w-xs font-medium animate-fade-in" style="animation-delay: 0.2s">
+                                    Click a district on the map to view detailed beneficiary insights
+                                </p>
+                            `;
+        });
+
+        // Zoom and Pan Logic
+        let currentZoom = 1;
+        let isDragging = false;
+        let startX, startY, translateX = 0,
+            translateY = 0;
+
+        const zoomStep = 0.2;
+        const minZoom = 0.5;
+        const maxZoom = 4;
+        const svgWrapper = document.getElementById('map-svg-wrapper');
+        let svgElement = null;
+
+        document.getElementById('zoom-in').addEventListener('click', () => {
+            if (currentZoom < maxZoom) currentZoom += zoomStep;
+            updateZoom();
+        });
+
+        document.getElementById('zoom-out').addEventListener('click', () => {
+            if (currentZoom > minZoom) currentZoom -= zoomStep;
+            updateZoom();
+        });
+
+        document.getElementById('zoom-reset').addEventListener('click', () => {
+            currentZoom = 1;
+            translateX = 0;
+            translateY = 0;
+            updateZoom();
+        });
+
+        svgWrapper.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+            svgWrapper.style.cursor = 'grabbing';
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+            svgWrapper.style.cursor = 'grab';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            updateZoom();
+        });
+
+        // Scroll to zoom
+        svgWrapper.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                if (currentZoom < maxZoom) currentZoom += zoomStep;
+            } else {
+                if (currentZoom > minZoom) currentZoom -= zoomStep;
+            }
+            updateZoom();
+        }, {
+            passive: false
+        });
+
+        function updateZoom() {
+            if (!svgElement) svgElement = svgWrapper.querySelector('svg');
+            if (svgElement) {
+                svgElement.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
+                svgElement.style.transition = isDragging ? 'none' : 'transform 0.2s ease-out';
+            }
+        }
+
+        svgWrapper.style.cursor = 'grab';
+
+        initMap();
+    });
+</script>
 @endpush
