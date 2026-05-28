@@ -1383,7 +1383,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-700 mb-1">Receiving DBT Benefits? <br><span class="text-[10px] text-gray-500">ডিবিটি সুবিধা পান কি?</span></label>
-                                        <select wire:model="formData.hof_has_dbt_benefits" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
+                                        <select wire:model.live="formData.hof_has_dbt_benefits" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
                                             <option value="No">No / না</option>
                                             <option value="Yes">Yes / হ্যাঁ</option>
                                         </select>
@@ -1437,7 +1437,7 @@
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                                         <div>
                                             <label class="block text-xs font-semibold text-gray-700 mb-1">Receiving DBT Benefits? <br><span class="text-[10px] text-gray-500">ডিবিটি সুবিধা পান কি?</span></label>
-                                            <select wire:model="members.{{ $index }}.has_dbt_benefits" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
+                                            <select wire:model.live="members.{{ $index }}.has_dbt_benefits" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
                                                 <option value="No">No / না</option>
                                                 <option value="Yes">Yes / হ্যাঁ</option>
                                             </select>
