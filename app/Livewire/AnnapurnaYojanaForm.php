@@ -1526,6 +1526,7 @@ class AnnapurnaYojanaForm extends Component
                 'digital_ration_card_no' => $rationCardHouseholdId,
                 'digital_ration_card_type' => $rationCardType,
                 'social_category' => $this->formData['category'] ?? null,
+
                 'bank_name' => $this->formData['hof_bank_name'] ?? null,
                 'bank_account_no' => $this->formData['hof_acc_no'] ?? null,
                 'ifsc_code' => $this->formData['hof_ifsc'] ?? null,

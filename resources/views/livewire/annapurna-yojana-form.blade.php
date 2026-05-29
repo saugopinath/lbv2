@@ -490,8 +490,8 @@
                                                 class="text-xs text-gray-500 font-normal">পরিবারের মোট সদস্য
                                                 সংখ্যা</span></label>
                                         <input type="number" min="1"
-                                            wire:model.live="formData.num_family_members"
-                                            class="w-full border border-gray-300 rounded p-2 text-sm font-semibold text-gray-700 focus:ring-amber-500 focus:border-amber-500">
+                                            wire:model.live="formData.num_family_members" readonly
+                                            class="w-full border border-gray-300 rounded p-2 text-sm font-semibold text-gray-700 bg-gray-100 cursor-not-allowed">
                                     </div>
                                 </div>
 
