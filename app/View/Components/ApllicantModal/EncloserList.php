@@ -21,7 +21,11 @@ class EncloserList extends Component
 
         foreach ($enclosures as $enclosure) {
             if (!empty($enclosure->attched_document)) {
-                $enclosure->attched_document = 'data:' . $enclosure->document_mime_type . ';base64,' . $enclosure->attched_document;
+                if (\Illuminate\Support\Str::isUuid($enclosure->attched_document)) {
+                    $enclosure->attched_document = route('document.view', $enclosure->id);
+                } else {
+                    $enclosure->attched_document = 'data:' . $enclosure->document_mime_type . ';base64,' . $enclosure->attched_document;
+                }
             } else {
                 $enclosure->attched_document = null;
             }

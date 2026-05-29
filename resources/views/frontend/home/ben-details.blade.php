@@ -528,7 +528,12 @@
                                                 </div>
 
                                                 @if(in_array($image_extension, ['jpg', 'png']))
-                                                    <?php                $row_image = "data:image/" . $image_extension . ";base64," . $doc->attched_document; ?>
+                                                    @php
+                                                        $isUuid = \Illuminate\Support\Str::isUuid($doc->attched_document);
+                                                        $row_image = $isUuid 
+                                                            ? route('document.view', $doc->id) 
+                                                            : "data:image/" . $image_extension . ";base64," . $doc->attched_document;
+                                                    @endphp
                                                     <div class="mb-4">
                                                         <div class="relative overflow-hidden rounded-lg border border-gray-200">
                                                             <a href="{{$row_image}}" target="_blank" class="block">

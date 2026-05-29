@@ -243,10 +243,45 @@ class EnclosureList extends Component
         }
 
         $this->validate();
-        $base64 = base64_encode(file_get_contents($this->singleDocument->getRealPath()));
+        
+        $baseUrl = config('services.doc_storage.base_url');
+        $appId = config('services.doc_storage.app_id');
+        $clientSecret = config('services.doc_storage.client_secret');
+
+        if (empty($appId) || empty($clientSecret)) {
+            // Fallback: save as Base64 directly
+            $documentValue = base64_encode(file_get_contents($this->singleDocument->getRealPath()));
+        } else {
+            $apiUrl = rtrim($baseUrl, '/') . '/api/Documents/upload';
+            try {
+                $response = \Illuminate\Support\Facades\Http::withHeaders([
+                    'app_id' => $appId,
+                    'client_secret' => $clientSecret,
+                ])->attach(
+                    'File',
+                    file_get_contents($this->singleDocument->getRealPath()),
+                    $this->singleDocument->getClientOriginalName()
+                )->post($apiUrl, [
+                    'CreatedBy' => \Illuminate\Support\Facades\Auth::id() ?? 1,
+                ]);
+
+                if ($response->successful() && $response->json('apiResponseStatus') == 1) {
+                    $documentValue = $response->json('result.documentId');
+                } else {
+                    $msg = $response->json('message') ?? 'API rejected upload';
+                    $this->addError('singleDocument', "Failed to upload file to storage: " . $msg);
+                    return;
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Document Storage upload exception: " . $e->getMessage());
+                $this->addError('singleDocument', "Connection to storage API failed: " . $e->getMessage());
+                return;
+            }
+        }
+
         $model = $this->enclosureModel();
         $beneficiaryId = BeneficiaryPersonalDetail::where('application_id', $this->application_id)->value('beneficiary_id');
-        // dd($model);
+        
         $existingDoc = $model::where('application_id', $this->application_id)
             ->where('document_type', $this->currentDocId)
             ->where('scheme_id', $this->scheme_id)
@@ -255,10 +290,10 @@ class EnclosureList extends Component
                 fn($q) => $q->where('tab_code', $this->tabCode)
             )
             ->first();
-        // dd($existingDoc);
+
         if ($existingDoc) {
             $updateData = [
-                'attched_document' => $base64,
+                'attched_document' => $documentValue,
                 'ip_address' => request()->ip(),
                 'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
                 'document_mime_type' => $this->singleDocument->getMimeType(),
@@ -270,11 +305,10 @@ class EnclosureList extends Component
             }
             $existingDoc->update($updateData);
         } else {
-            // dd('juhsjh');
             $createData = [
                 'application_id' => $this->application_id,
                 'beneficiary_id' => $beneficiaryId,
-                'attched_document' => $base64,
+                'attched_document' => $documentValue,
                 'ip_address' => request()->ip(),
                 'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
                 'document_mime_type' => $this->singleDocument->getMimeType(),
@@ -285,9 +319,7 @@ class EnclosureList extends Component
             if ((int) $this->enclosureSource !== 5) {
                 $createData['tab_code'] = $this->tabCode;
             }
-            // dd($createData);
             $model::create($createData);
-            // dd($is_upload);
         }
         $docId = $this->currentDocId;
         $this->singleDocument = null;
@@ -324,7 +356,34 @@ class EnclosureList extends Component
     {
         $model = $this->enclosureModel();
         $document = $model::findOrFail($id);
-        $decoded = base64_decode($document->attched_document);
+        
+        $attVal = $document->attched_document;
+        
+        if (\Illuminate\Support\Str::isUuid($attVal)) {
+            $baseUrl = config('services.doc_storage.base_url');
+            $appId = config('services.doc_storage.app_id');
+            $clientSecret = config('services.doc_storage.client_secret');
+            $apiUrl = rtrim($baseUrl, '/') . "/api/Documents/{$attVal}/download";
+            
+            try {
+                $response = \Illuminate\Support\Facades\Http::withHeaders([
+                    'app_id' => $appId,
+                    'client_secret' => $clientSecret,
+                ])->get($apiUrl);
+                
+                if ($response->successful()) {
+                    return response()->streamDownload(function () use ($response) {
+                        echo $response->body();
+                    }, 'document_' . $document->document_type . '.' . $document->document_extension, [
+                        'Content-Type' => $document->document_mime_type,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Download document API failure: " . $e->getMessage());
+            }
+        }
+
+        $decoded = base64_decode($attVal);
         $filename = 'document_' . $document->document_type . '.' . $document->document_extension;
         return response()->streamDownload(function () use ($decoded) {
             echo $decoded;

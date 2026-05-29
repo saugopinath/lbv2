@@ -36,5 +36,10 @@ return [
         'username' => env('ELK_USERNAME'),
         'password' => env('ELK_PASSWORD')
     ],
+    'doc_storage' => [
+        'base_url' => env('DOCUMENT_STORAGE_BASE_URL', 'http://10.176.100.17:5000'),
+        'app_id' => env('DOCUMENT_STORAGE_APP_ID'),
+        'client_secret' => env('DOCUMENT_STORAGE_CLIENT_SECRET'),
+    ],
 
 ];

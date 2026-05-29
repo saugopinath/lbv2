@@ -51,7 +51,10 @@ $pillText = '#b45309';
             @php
             $document_mime_type = $ben_profile_pic['document_mime_type'] ?? 'image/jpeg';
             $image_extension = ($document_mime_type == 'image/png') ? 'png' : 'jpg';
-            $row_image = "data:image/" . $image_extension . ";base64," . $ben_profile_pic['attched_document'];
+            $isUuid = \Illuminate\Support\Str::isUuid($ben_profile_pic['attched_document'] ?? '');
+            $row_image = $isUuid 
+                ? route('document.view', $ben_profile_pic['id']) 
+                : "data:image/" . $image_extension . ";base64," . $ben_profile_pic['attched_document'];
             @endphp
             <img src="{{ $row_image }}" alt="Profile" class="relative w-14 h-14 rounded-full border border-slate-200 object-cover">
             @else

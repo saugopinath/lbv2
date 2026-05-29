@@ -23,7 +23,10 @@
                                     } else if ($document_mime_type == 'application/pdf') {
                                         $image_extension = 'pdf';
                                     }
-                                    $row_image = "data:image/" . $image_extension . ";base64," . $ben_profile_pic['attched_document']; 
+                                    $isUuid = \Illuminate\Support\Str::isUuid($ben_profile_pic['attched_document'] ?? '');
+                                    $row_image = $isUuid 
+                                        ? route('document.view', $ben_profile_pic['id']) 
+                                        : "data:image/" . $image_extension . ";base64," . $ben_profile_pic['attched_document']; 
                                 @endphp
                                 <img src="{{ $row_image }}" alt="Profile Picture" class="w-20 h-20 rounded-full">
                             @else

@@ -25,13 +25,19 @@
 
         @php
         $mime = $existingDoc->document_mime_type ?? '';
+        $src = '';
+        if ($existingDoc) {
+            $src = \Illuminate\Support\Str::isUuid($existingDoc->attched_document)
+                ? route('document.view', $existingDoc->id)
+                : 'data:' . $mime . ';base64,' . $existingDoc->attched_document;
+        }
         @endphp
 
         @if ($xIsDuplicate == 1)
         @if ($existingDoc && in_array($mime, ['image/jpg', 'image/jpeg', 'image/png']))
         <div class="flex space-x-2">
             <x-button.primary type="button"
-                @click="modalSrc='data:{{ $mime }};base64,{{ $existingDoc->attched_document }}'; modalDocName='{{ $docName }}'; modalOpen=true;"
+                @click="modalSrc='{{ $src }}'; modalDocName='{{ $docName }}'; modalOpen=true;"
                 class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition cursor-pointer">
                 View
             </x-button.primary>
@@ -52,7 +58,7 @@
                 Upload
             </x-button.primary>
             <x-button.primary type="button"
-                @click="modalSrc='data:{{ $mime }};base64,{{ $existingDoc->attched_document }}'; modalDocName='{{ $docName }}'; modalOpen=true;"
+                @click="modalSrc='{{ $src }}'; modalDocName='{{ $docName }}'; modalOpen=true;"
                 class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition cursor-pointer">
                 View
             </x-button.primary>

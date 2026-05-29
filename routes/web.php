@@ -56,8 +56,13 @@ Route::get('/session-expired', function () {
     return view('auth.session-expired', ['expired_at' => now()->format('h:i:s A')]);
 })->name('session.expired');
 
-// Route::get('/', fn() => view('welcome'));
 Route::get('refresh-captcha', [CaptchaController::class, 'refreshCaptcha'])->name('refresh-captcha');
+
+// Document Storage API Test Routes
+Route::get('test-doc-storage', [\App\Http\Controllers\TestDocStorageController::class, 'index'])->name('test-doc-storage.index');
+Route::post('test-doc-storage/upload', [\App\Http\Controllers\TestDocStorageController::class, 'upload'])->name('test-doc-storage.upload');
+Route::get('test-doc-storage/download/{id}', [\App\Http\Controllers\TestDocStorageController::class, 'download'])->name('test-doc-storage.download');
+Route::post('test-doc-storage/delete/{id}', [\App\Http\Controllers\TestDocStorageController::class, 'delete'])->name('test-doc-storage.delete');
 
 Route::controller(AuthenticationController::class)->group(function () {
     Route::get('/login', 'login')->name('login');
@@ -76,6 +81,7 @@ Route::controller(AuthenticationController::class)->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/document/view/{id}', [\App\Http\Controllers\DocumentViewController::class, 'view'])->name('document.view');
 
     Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])->name('lb-application-list');
 
