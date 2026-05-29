@@ -36,5 +36,10 @@ return [
         'username' => env('ELK_USERNAME'),
         'password' => env('ELK_PASSWORD')
     ],
+    'ifms' => [
+        'sms_base_url' => env('IFMS_SMS_BASE_URL', 'https://train-ifms.wb.gov.in'),
+        'sms_template_id' => env('IFMS_SMS_TEMPLATE_ID'),
+        'send_on_local_staging' => filter_var(env('IFMS_SMS_SEND_ON_LOCAL_STAGING', false), FILTER_VALIDATE_BOOLEAN),
+    ],
 
 ];
