@@ -256,6 +256,7 @@
                     @include('livewire.annapurna.section-g')
                 @endif
 
+
                 @if ($activeSection === 'declaration')
                     @include('livewire.annapurna.section-h')
                 @endif
@@ -431,5 +432,8 @@
             </div>
         </div>
     @endif
+
+    {{-- Global Upload Modal for the entire form --}}
+    @include('livewire.annapurna.global-upload-modal')
 
 </form>

@@ -6,9 +6,12 @@ use App\Services\AnnapurnaYojanaService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Http;
 
 class AnnapurnaYojanaForm extends Component
 {
+    use WithFileUploads;
     public $schemeId;
 
     public $schemeName;
@@ -69,6 +72,14 @@ class AnnapurnaYojanaForm extends Component
 
     // Dirty tracking — true when any field has changed since last save
     public bool $isDirty = false;
+
+    // File Upload properties
+    public $singleDocument;
+    public $showUploadModal = false;
+    public $currentDocId = null;
+    public $currentDocMaxSize = '2048 KB';
+    public $currentDocExtensions = 'JPG, PNG, PDF';
+    public $uploadedDocuments = [];
 
     public function mount($schemeId = 21, $schemeName = 'Annapurna Yojana', $grievanceId = null)
     {
@@ -777,11 +788,11 @@ class AnnapurnaYojanaForm extends Component
                 unset($sections['other_docs']);
                 unset($sections['gov_benefits']);
             } else {
-                // Adult members need A, B, C, D, E, G, H (F is hidden)
+                // Adult members need A, B, C, D, E, G, H, I (F is hidden)
                 unset($sections['social_dependents']);
             }
         } else {
-            // HOF needs A, B, C, D, E, G, H (F is hidden)
+            // HOF needs A, B, C, D, E, G, H, I (F is hidden)
             unset($sections['social_dependents']);
         }
 
@@ -790,7 +801,8 @@ class AnnapurnaYojanaForm extends Component
 
     public function nextSection()
     {
-        $this->validateSection($this->activeSection);
+        try{
+$this->validateSection($this->activeSection);
         // Only persist to DB if something actually changed
         if ($this->isDirty) {
             $this->saveDraft();
@@ -806,6 +818,10 @@ class AnnapurnaYojanaForm extends Component
             }
             $this->activeSection = $nextSec;
         }
+        }catch(\Exception $e){
+            dd($e);
+        }
+        
     }
 
     public function isSectionFilled($memberIndex, $section)
@@ -1598,6 +1614,138 @@ class AnnapurnaYojanaForm extends Component
         $this->mount($this->schemeId, $this->schemeName, $this->grievanceId);
     }
 
+    private function getDocumentRules($docTypeId)
+    {
+        $jsonPath = public_path('js/document-master.json');
+        $validations = [];
+        if (file_exists($jsonPath)) {
+            $jsonContent = file_get_contents($jsonPath);
+            $docsArray = json_decode($jsonContent, true) ?: [];
+            foreach ($docsArray as $doc) {
+                if (isset($doc['doc_type_id'])) {
+                    $validations[$doc['doc_type_id']] = $doc;
+                }
+            }
+        }
+        
+        return $validations[$docTypeId] ?? [
+            'maxSize' => 2048,
+            'extensions' => 'jpg,jpeg,png,pdf',
+            'displayExtensions' => 'JPG, PNG, PDF'
+        ];
+    }
+
+    public function resetSingleDocumentErrors()
+    {
+        $this->resetErrorBag('singleDocument');
+    }
+
+    public function setCurrentDoc($docTypeId)
+    {
+        $this->currentDocId = $docTypeId;
+        $this->resetErrorBag('singleDocument');
+
+        $docRules = $this->getDocumentRules($docTypeId);
+
+        $this->currentDocMaxSize = $docRules['maxSize'] . ' KB';
+        $this->currentDocExtensions = $docRules['displayExtensions'];
+    }
+
+    public function saveSingleDocument()
+    {
+        if (!$this->singleDocument) {
+            $this->addError('singleDocument', "Document is required.");
+            return;
+        }
+
+        $docRules = $this->getDocumentRules($this->currentDocId);
+
+        $this->validate([
+            'singleDocument' => 'required|file|max:' . $docRules['maxSize'] . '|mimes:' . $docRules['extensions'],
+        ]);
+
+        $baseUrl = env('DOC_STORAGE_BASE_URL');
+        $appId = env('DOC_STORAGE_APP_ID');
+        $clientSecret = env('DOC_STORAGE_CLIENT_SECRET');
+        try {
+            $response = Http::withHeaders([
+                'app_id' => $appId,
+                'client_secret' => $clientSecret,
+            ])->attach(
+                'File', file_get_contents($this->singleDocument->getRealPath()), $this->singleDocument->getClientOriginalName()
+            )->post($baseUrl . '/api/Documents/upload', [
+                'CreatedBy' => auth()->id() ?? 1
+            ]);
+            if ($response->successful()) {
+                $data = $response->json();
+                if (isset($data['apiResponseStatus']) && $data['apiResponseStatus'] == 1) {
+                    $this->uploadedDocuments[$this->currentDocId] = $data['result']['documentId'] ?? true;
+                    // Persist uploaded documents state to session immediately
+                    session(['annapurna_uploaded_documents' => $this->uploadedDocuments]);
+                    
+                    $docId = $this->currentDocId;
+                    $this->singleDocument = null;
+                    $this->currentDocId = null;
+                    $this->showUploadModal = false;
+                    $this->dispatch('enclosure-saved', message: 'Document uploaded successfully.', docId: $docId);
+                } else {
+                    $this->addError('singleDocument', 'Upload failed: ' . ($data['message'] ?? 'Unknown API error'));
+                }
+            } else {
+                $this->addError('singleDocument', 'Upload failed: API connection error (' . $response->status() . ')');
+            }
+        } catch (\Exception $e) {
+            $this->addError('singleDocument', 'Upload error: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadDocument($documentId)
+    {
+        $baseUrl = env('DOC_STORAGE_BASE_URL');
+        $appId = env('DOC_STORAGE_APP_ID');
+        $clientSecret = env('DOC_STORAGE_CLIENT_SECRET');
+
+        $response = Http::withHeaders([
+            'app_id' => $appId,
+            'client_secret' => $clientSecret,
+        ])->get($baseUrl . "/api/Documents/{$documentId}/download");
+
+        if ($response->successful()) {
+            $contentType = $response->header('Content-Type');
+            $contentDisposition = $response->header('Content-Disposition');
+            
+            $filename = 'downloaded_file';
+
+            if ($contentDisposition && preg_match('/filename="?([^"; ]+)"?/', $contentDisposition, $matches)) {
+                $filename = trim($matches[1]);
+            } else {
+                $extensions = [
+                    'application/msword' => '.doc',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => '.docx',
+                    'application/pdf' => '.pdf',
+                    'image/jpeg' => '.jpg',
+                    'image/png' => '.png',
+                    'application/vnd.ms-excel' => '.xls',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => '.xlsx',
+                    'text/plain' => '.txt',
+                    'application/zip' => '.zip'
+                ];
+                
+                $typeString = is_array($contentType) ? ($contentType[0] ?? '') : ($contentType ?? '');
+                $ext = $extensions[$typeString] ?? '';
+                $filename .= $ext;
+            }
+
+            return response()->streamDownload(function () use ($response) {
+                echo $response->body();
+            }, $filename, [
+                'Content-Type' => is_array($contentType) ? ($contentType[0] ?? 'application/octet-stream') : ($contentType ?? 'application/octet-stream')
+            ]); 
+        }
+
+        $this->addError('singleDocument', 'Download failed.');
+    }
+
     public function showConfirmation()
     {
         $this->successMessage = null;
@@ -1742,7 +1890,8 @@ class AnnapurnaYojanaForm extends Component
                 $this->members,
                 $this->familyId,
                 $this->appId,
-                'SUBMITTED'
+                'SUBMITTED',
+                $this->uploadedDocuments
             );
 
             if ($result['success']) {
@@ -1773,7 +1922,8 @@ class AnnapurnaYojanaForm extends Component
                 $this->members,
                 $this->familyId,
                 $this->appId,
-                'DRAFT'
+                'DRAFT',
+                $this->uploadedDocuments
             );
 
             if ($result['success']) {
@@ -1786,6 +1936,7 @@ class AnnapurnaYojanaForm extends Component
                     'annapurna_members' => $this->members,
                     'annapurna_family_id' => $this->familyId,
                     'annapurna_app_id' => $this->appId,
+                    'annapurna_uploaded_documents' => $this->uploadedDocuments,
                 ]);
 
                 // Mark as clean — no unsaved changes anymore

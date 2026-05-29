@@ -128,6 +128,8 @@
                     @error('formData.hof_aadhaar')
                         <span class="text-red-600 text-xs">{{ $message }}</span>
                     @enderror
+
+                    <x-upload-button doc-id="101" />
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Household ID of
@@ -231,6 +233,8 @@
                         @error('formData.caste_certificate_no')
                             <span class="text-red-600 text-xs">{{ $message }}</span>
                         @enderror
+                        
+                        <x-upload-button doc-id="106" />
                     </div>
                 @elseif (($formData['category'] ?? '') == 'UR-EWS')
                     <div>
@@ -244,6 +248,8 @@
                         @error('formData.ews_certificate_no')
                             <span class="text-red-600 text-xs">{{ $message }}</span>
                         @enderror
+
+                        <x-upload-button doc-id="106" />
                     </div>
                 @elseif (($formData['category'] ?? '') == 'PVTG')
                     <div>
@@ -257,6 +263,8 @@
                         @error('formData.pvtg_certificate_no')
                             <span class="text-red-600 text-xs">{{ $message }}</span>
                         @enderror
+
+                        <x-upload-button doc-id="114" />
                     </div>
                 @endif
             </div>
@@ -589,6 +597,8 @@
                     @error('formData.hof_acc_no')
                         <span class="text-red-600 text-xs">{{ $message }}</span>
                     @enderror
+
+                    <x-upload-button doc-id="104" />
                 </div>
             </div>
         </div>
@@ -638,6 +648,8 @@
                     @error('formData.hof_epic_no')
                         <span class="text-red-600 text-xs">{{ $message }}</span>
                     @enderror
+
+                    <x-upload-button doc-id="102" />
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Assembly Constituency No. <br><span

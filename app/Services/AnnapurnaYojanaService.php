@@ -23,7 +23,8 @@ class AnnapurnaYojanaService
         array $members,
         ?int $familyId,
         ?string $appId,
-        string $status
+        string $status,
+        array $uploadedDocuments = []
     ): array {
         DB::connection('pgsql_annapurna')->beginTransaction();
 
@@ -346,6 +347,25 @@ class AnnapurnaYojanaService
                                 'lgd_district_code' => $lgdDistrictCode,
                             ]);
                         }
+                    }
+                }
+            }
+
+            // 9. Save Uploaded Documents
+            if (!empty($uploadedDocuments)) {
+                DB::connection('pgsql_annapurna')->table('dbt_apy.family_member_documents')
+                    ->where('family_member_id', $hofMemberId)
+                    ->delete();
+
+                foreach ($uploadedDocuments as $docTypeId => $responseId) {
+                    if (is_string($responseId) || is_numeric($responseId)) {
+                        DB::connection('pgsql_annapurna')->table('dbt_apy.family_member_documents')->insert([
+                            'family_member_id' => $hofMemberId,
+                            'doc_type_id' => (int) $docTypeId,
+                            'response_id' => (string) $responseId,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
                     }
                 }
             }
