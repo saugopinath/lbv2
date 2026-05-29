@@ -4,8 +4,8 @@ $portal = config('app.app_portal', 'ay');
 if ($portal == 'ay') {
     $title = 'Annapurna Yojana | Government of West Bengal';
     $headLine = 'Annapurna Yojana';
-    $logo = 'biswo.png';
-    $headerlogo = 'Emblem_of_India.png';
+    $logo = 'biswo5.png';
+    $headerlogo = 'Emblem_of_India5.png';
     $logo_class = 'w-48 sm:w-64 mb-4';
     $das_logo = 'default-user.png';
     $logo_das_width = 'w-8';
@@ -15,8 +15,8 @@ if ($portal == 'ay') {
     $footerText = 'Design and develpod By NIC.';
     $deptName = 'Women and Child Development & Social Welfare Department';
     $indexName = 'Annapurna Yojana | Government of West Bengal';
-    $initiallogo = 'biswo.png';
-    $dept_logo = 'biswo.png';
+    $initiallogo = 'biswo5.png';
+    $dept_logo = 'biswo5.png';
     $indexName = 'Women and Child Development & Social Welfare Department | Government of West Bengal';
     $footerDescription = 'A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic development and welfare.';
 } else if ($portal == 'jb') {
