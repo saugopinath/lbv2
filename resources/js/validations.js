@@ -31,7 +31,8 @@ const verhoeffTables = {
 };
 
 window.validateVerhoeff = function(num) {
-    if (!/^\d{12}$/.test(num)) return false;
+    if (!/^[2-9]\d{11}$/.test(num)) return false;
+    if (/^(\d)\1{11}$/.test(num)) return false;
     let c = 0;
     const arr = num.split('').reverse().map(Number);
     for (let i = 0; i < arr.length; i++) {

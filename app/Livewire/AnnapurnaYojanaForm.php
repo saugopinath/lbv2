@@ -670,6 +670,7 @@ class AnnapurnaYojanaForm extends Component
         // Auto-switch to the new member tab on basic info section
         $this->activeMemberIndex = count($this->members);
         $this->activeSection = 'family_identity';
+        $this->dispatch('hideLoader');
     }
 
     public function removeMember($index)
@@ -688,6 +689,7 @@ class AnnapurnaYojanaForm extends Component
         // Removing a member is always a structural change — force save
         $this->isDirty = true;
         $this->saveDraft();
+        $this->dispatch('hideLoader');
     }
 
     public function addHofKccCard()
@@ -797,11 +799,13 @@ class AnnapurnaYojanaForm extends Component
         if (! in_array($this->activeSection, $validSections)) {
             $this->activeSection = 'family_identity';
         }
+        $this->dispatch('hideLoader');
     }
 
     public function selectSection($section)
     {
         if ($section === 'declaration' && ! $this->areAllMembersFullyFilled()) {
+            $this->dispatch('hideLoader');
             return;
         }
         // Only hit DB if something actually changed
@@ -809,6 +813,7 @@ class AnnapurnaYojanaForm extends Component
             $this->saveDraft();
         }
         $this->activeSection = $section;
+        $this->dispatch('hideLoader');
     }
 
     public function getSections()
@@ -852,21 +857,25 @@ class AnnapurnaYojanaForm extends Component
 
     public function nextSection()
     {
-        $this->validateSection($this->activeSection);
-        // Only persist to DB if something actually changed
-        if ($this->isDirty) {
-            $this->saveDraft();
-        }
-
-        $sections = array_keys($this->getSections());
-        $currentIndex = array_search($this->activeSection, $sections);
-
-        if ($currentIndex !== false && $currentIndex < count($sections) - 1) {
-            $nextSec = $sections[$currentIndex + 1];
-            if ($nextSec === 'declaration' && ! $this->areAllMembersFullyFilled()) {
-                return;
+        try {
+            $this->validateSection($this->activeSection);
+            // Only persist to DB if something actually changed
+            if ($this->isDirty) {
+                $this->saveDraft();
             }
-            $this->activeSection = $nextSec;
+
+            $sections = array_keys($this->getSections());
+            $currentIndex = array_search($this->activeSection, $sections);
+
+            if ($currentIndex !== false && $currentIndex < count($sections) - 1) {
+                $nextSec = $sections[$currentIndex + 1];
+                if ($nextSec === 'declaration' && ! $this->areAllMembersFullyFilled()) {
+                    return;
+                }
+                $this->activeSection = $nextSec;
+            }
+        } finally {
+            $this->dispatch('hideLoader');
         }
     }
 
@@ -1087,6 +1096,15 @@ class AnnapurnaYojanaForm extends Component
     protected function getValidationRules(?string $section = null): array
     {
         $rules = [];
+        $jsonRules = $this->getValidationRulesFromJson();
+
+        $epicRegex = !empty($jsonRules['epic']['regex'])
+            ? 'regex:/' . $jsonRules['epic']['regex'] . '/'
+            : 'regex:/^[A-Z]{3}[0-9]{7}$/';
+
+        $panRegex = !empty($jsonRules['pan']['regex'])
+            ? 'regex:/' . $jsonRules['pan']['regex'] . '/'
+            : 'regex:/^[A-Z]{3}[CPHFATBLJG][A-Z][0-9]{4}[A-Z]$/';
 
         if ($section !== null) {
             // Section-specific validation (for validateSection)
@@ -1117,7 +1135,7 @@ class AnnapurnaYojanaForm extends Component
                     $rules['formData.hof_bank_name'] = ['required', 'string', 'max:100', 'regex:/^[\p{L}\s.\'\-]+$/u'];
                     $rules['formData.hof_acc_no'] = 'required|digits_between:9,18';
                     $rules['formData.hof_ifsc'] = ['required', 'size:11', 'regex:/^[A-Z]{4}0[A-Z0-9]{6}$/'];
-                    $rules['formData.hof_epic_no'] = ['nullable', 'regex:/^[A-Z]{3}[0-9]{7}$/'];
+                    $rules['formData.hof_epic_no'] = ['nullable', $epicRegex];
                     if (!empty($this->formData['hof_epic_no'])) {
                         $rules['formData.hof_assembly_constituency'] = 'required';
                         $rules['formData.hof_part_no'] = 'required|string|max:100';
@@ -1150,7 +1168,7 @@ class AnnapurnaYojanaForm extends Component
                                 }
                             },
                         ];
-                        $rules["members.{$index}.epic_no"] = ['nullable', 'regex:/^[A-Z]{3}[0-9]{7}$/'];
+                        $rules["members.{$index}.epic_no"] = ['nullable', $epicRegex];
                         if (!empty($member['epic_no'])) {
                             $rules["members.{$index}.assembly_constituency"] = 'required';
                             $rules["members.{$index}.part_no"] = 'required|string|max:100';
@@ -1203,7 +1221,7 @@ class AnnapurnaYojanaForm extends Component
                     $rules['formData.has_pan_card'] = 'required|in:Yes,No';
                     if (($this->formData['has_pan_card'] ?? '') === 'Yes') {
                         $rules['formData.hof_pan_name'] = ['required', 'string', 'max:255', 'regex:/^[\p{L}\s.\'\-]+$/u'];
-                        $rules['formData.hof_pan_no'] = ['required', 'regex:/^[A-Z]{3}[CPHFATBLJG][A-Z][0-9]{4}[A-Z]$/'];
+                        $rules['formData.hof_pan_no'] = ['required', $panRegex];
                     }
                     $rules['formData.has_constitutional_post'] = 'required|in:Yes,No';
                     if (($this->formData['has_constitutional_post'] ?? '') === 'Yes') {
@@ -1224,7 +1242,7 @@ class AnnapurnaYojanaForm extends Component
                         $rules["members.{$index}.has_pan_card"] = 'required|in:Yes,No';
                         if (($member['has_pan_card'] ?? '') === 'Yes') {
                             $rules["members.{$index}.pan_name"] = ['required', 'string', 'max:255', 'regex:/^[\p{L}\s.\'\-]+$/u'];
-                            $rules["members.{$index}.pan_no"] = ['required', 'regex:/^[A-Z]{3}[CPHFATBLJG][A-Z][0-9]{4}[A-Z]$/'];
+                            $rules["members.{$index}.pan_no"] = ['required', $panRegex];
                         }
                     }
                 }
@@ -1285,7 +1303,7 @@ class AnnapurnaYojanaForm extends Component
                 'formData.hof_acc_no' => 'required|digits_between:9,18',
                 'formData.hof_ifsc' => ['required', 'size:11', 'regex:/^[A-Z]{4}0[A-Z0-9]{6}$/'],
                 'formData.has_pan_card' => 'required|in:Yes,No',
-                'formData.hof_epic_no' => ['nullable', 'regex:/^[A-Z]{3}[0-9]{7}$/'],
+                'formData.hof_epic_no' => ['nullable', $epicRegex],
 
                 'formData.has_pucca_rooms' => 'required',
                 'formData.owns_land' => 'required',
@@ -1310,7 +1328,7 @@ class AnnapurnaYojanaForm extends Component
 
             if (($this->formData['has_pan_card'] ?? '') === 'Yes') {
                 $rules['formData.hof_pan_name'] = ['required', 'string', 'max:255', 'regex:/^[\p{L}\s.\'\-]+$/u'];
-                $rules['formData.hof_pan_no'] = ['required', 'regex:/^[A-Z]{3}[CPHFATBLJG][A-Z][0-9]{4}[A-Z]$/'];
+                $rules['formData.hof_pan_no'] = ['required', $panRegex];
             }
 
             if (($this->formData['has_constitutional_post'] ?? '') === 'Yes') {
@@ -1369,12 +1387,12 @@ class AnnapurnaYojanaForm extends Component
                             }
                         },
                     ];
-                    $rules["members.{$index}.epic_no"] = ['nullable', 'regex:/^[A-Z]{3}[0-9]{7}$/'];
+                    $rules["members.{$index}.epic_no"] = ['nullable', $epicRegex];
                     if (!empty($member['epic_no'])) {
                         $rules["members.{$index}.assembly_constituency"] = 'required';
                         $rules["members.{$index}.part_no"] = 'required|string|max:100';
                     }
-                    $rules["members.{$index}.pan_no"] = ['nullable', 'regex:/^[A-Z]{3}[CPHFATBLJG][A-Z][0-9]{4}[A-Z]$/'];
+                    $rules["members.{$index}.pan_no"] = ['nullable', $panRegex];
 
                     $rules["members.{$index}.has_health_insurance"] = 'required';
                     if (($member['has_health_insurance'] ?? '') === 'Yes') {
@@ -1658,6 +1676,7 @@ class AnnapurnaYojanaForm extends Component
         $this->appId = null;
         session()->forget(['annapurna_form_data', 'annapurna_members', 'annapurna_family_id', 'annapurna_app_id']);
         $this->mount($this->schemeId, $this->schemeName, $this->grievanceId);
+        $this->dispatch('hideLoader');
     }
 
     public function showConfirmation()
@@ -1665,125 +1684,129 @@ class AnnapurnaYojanaForm extends Component
         $this->successMessage = null;
         $this->errorMessage = null;
 
-        // 1. Validate declaration consent first
-        $this->validate([
-            'formData.agree_consent' => 'accepted',
-        ], [
-            'formData.agree_consent.accepted' => 'You must accept the declaration and consent.',
-        ]);
-
-        // 2. Validate full form rules for HOF and members
-        $rules = $this->getValidationRules(null);
-        $messages = $this->getValidationMessages(null);
-
         try {
-            $this->validate($rules, $messages);
-            $this->showSubmitModal = true;
-        } catch (ValidationException $e) {
-            // Smart UX redirection to tab containing error
-            $firstErrorKey = array_key_first($e->validator->errors()->toArray());
-            if ($firstErrorKey) {
-                if (str_starts_with($firstErrorKey, 'members.')) {
-                    $parts = explode('.', $firstErrorKey);
-                    if (isset($parts[1])) {
-                        $this->activeMemberIndex = ((int) $parts[1]) + 1;
-                        $field = $parts[2] ?? '';
-                        if (in_array($field, ['member_type', 'name', 'dob', 'gender', 'relation', 'aadhaar', 'bank_name', 'acc_no', 'ifsc', 'epic_no', 'assembly_constituency', 'part_no', 'applying_for_ay'])) {
+            // 1. Validate declaration consent first
+            $this->validate([
+                'formData.agree_consent' => 'accepted',
+            ], [
+                'formData.agree_consent.accepted' => 'You must accept the declaration and consent.',
+            ]);
+
+            // 2. Validate full form rules for HOF and members
+            $rules = $this->getValidationRules(null);
+            $messages = $this->getValidationMessages(null);
+
+            try {
+                $this->validate($rules, $messages);
+                $this->showSubmitModal = true;
+            } catch (ValidationException $e) {
+                // Smart UX redirection to tab containing error
+                $firstErrorKey = array_key_first($e->validator->errors()->toArray());
+                if ($firstErrorKey) {
+                    if (str_starts_with($firstErrorKey, 'members.')) {
+                        $parts = explode('.', $firstErrorKey);
+                        if (isset($parts[1])) {
+                            $this->activeMemberIndex = ((int) $parts[1]) + 1;
+                            $field = $parts[2] ?? '';
+                            if (in_array($field, ['member_type', 'name', 'dob', 'gender', 'relation', 'aadhaar', 'bank_name', 'acc_no', 'ifsc', 'epic_no', 'assembly_constituency', 'part_no', 'applying_for_ay'])) {
+                                $this->activeSection = 'family_identity';
+                            } elseif (in_array($field, ['has_digital_ration_card', 'ration_card_no', 'ration_card_type'])) {
+                                $this->activeSection = 'ration_subsidy';
+                            } elseif (in_array($field, ['health_insurance_type', 'health_insurance_premium', 'health_insurance_sum_assured'])) {
+                                $this->activeSection = 'assets';
+                            } elseif (in_array($field, ['has_pan_card', 'pan_name', 'pan_no', 'employment_nature', 'literate_status', 'highest_qualification'])) {
+                                $this->activeSection = 'income_profession';
+                            } elseif (in_array($field, ['caa_status', 'caa_app_no', 'caa_cert_no', 'kcc_type', 'kcc_id_no', 'kcc_date', 'kcc_issuing_authority', 'sir_status', 'sir_case_details', 'kcc_cards'])) {
+                                $this->activeSection = 'other_docs';
+                            } elseif (in_array($field, ['school_grade', 'school_name', 'school_type', 'school_type_other', 'vaccination_card_id', 'vaccination_status', 'vaccination_skip_reason_or_date'])) {
+                                $this->activeSection = 'social_dependents';
+                            }
+                        }
+                    } elseif (str_starts_with($firstErrorKey, 'formData.')) {
+                        $this->activeMemberIndex = 0; // HOF
+                        $field = str_replace('formData.', '', $firstErrorKey);
+     
+                        $familyIdentityFields = [
+                            'hof_name',
+                            'hof_dob',
+                            'hof_gender',
+                            'contact_no',
+                            'category',
+                            'caste_certificate_no',
+                            'ews_certificate_no',
+                            'pvtg_certificate_no',
+                            'district_id',
+                            'rural_urban',
+                            'blockurban',
+                            'gpward',
+                            'village_town',
+                            'police_station',
+                            'post_office',
+                            'pincode',
+                            'hof_aadhaar',
+                            'hof_bank_name',
+                            'hof_acc_no',
+                            'hof_ifsc',
+                            'hof_epic_no',
+                            'hof_assembly_constituency',
+                            'hof_part_no',
+                        ];
+
+                        $rationSubsidyFields = [
+                            'has_digital_ration_card',
+                            'is_lifting_ration',
+                            'hof_ration_card_id',
+                            'ration_card_type',
+                        ];
+
+                        $assetsFields = [
+                            'has_pucca_rooms',
+                            'owns_land',
+                            'land_size_decimals',
+                            'owns_4_wheeler',
+                            'num_vehicles',
+                            'vehicles',
+                            'health_insurance_type',
+                            'health_insurance_premium',
+                            'health_insurance_sum_assured',
+                        ];
+
+                        $incomeProfessionFields = [
+                            'pays_tax',
+                            'has_pan_card',
+                            'hof_pan_name',
+                            'hof_pan_no',
+                            'hof_employment_nature',
+                            'total_annual_income',
+                            'has_constitutional_post',
+                            'constitutional_post_details',
+                            'has_gst_reg',
+                            'gstin',
+                            'has_pensioner',
+                            'pensioner_details',
+                            'num_literate_adults',
+                            'num_illiterate_adults',
+                            'hof_literate_status',
+                            'hof_highest_qualification',
+                        ];
+
+                        if (in_array($field, $familyIdentityFields)) {
                             $this->activeSection = 'family_identity';
-                        } elseif (in_array($field, ['has_digital_ration_card', 'ration_card_no', 'ration_card_type'])) {
+                        } elseif (in_array($field, $rationSubsidyFields)) {
                             $this->activeSection = 'ration_subsidy';
-                        } elseif (in_array($field, ['health_insurance_type', 'health_insurance_premium', 'health_insurance_sum_assured'])) {
+                        } elseif (in_array($field, $assetsFields)) {
                             $this->activeSection = 'assets';
-                        } elseif (in_array($field, ['has_pan_card', 'pan_name', 'pan_no', 'employment_nature', 'literate_status', 'highest_qualification'])) {
+                        } elseif (in_array($field, $incomeProfessionFields)) {
                             $this->activeSection = 'income_profession';
-                        } elseif (in_array($field, ['caa_status', 'caa_app_no', 'caa_cert_no', 'kcc_type', 'kcc_id_no', 'kcc_date', 'kcc_issuing_authority', 'sir_status', 'sir_case_details', 'kcc_cards'])) {
+                        } elseif (in_array($field, ['caa_status', 'caa_app_no', 'caa_cert_no', 'kcc_type', 'kcc_id_no', 'kcc_date', 'kcc_issuing_authority', 'sir_status', 'sir_case_details']) || str_starts_with($field, 'hof_kcc_cards')) {
                             $this->activeSection = 'other_docs';
-                        } elseif (in_array($field, ['school_grade', 'school_name', 'school_type', 'school_type_other', 'vaccination_card_id', 'vaccination_status', 'vaccination_skip_reason_or_date'])) {
-                            $this->activeSection = 'social_dependents';
                         }
                     }
-                } elseif (str_starts_with($firstErrorKey, 'formData.')) {
-                    $this->activeMemberIndex = 0; // HOF
-                    $field = str_replace('formData.', '', $firstErrorKey);
- 
-                    $familyIdentityFields = [
-                        'hof_name',
-                        'hof_dob',
-                        'hof_gender',
-                        'contact_no',
-                        'category',
-                        'caste_certificate_no',
-                        'ews_certificate_no',
-                        'pvtg_certificate_no',
-                        'district_id',
-                        'rural_urban',
-                        'blockurban',
-                        'gpward',
-                        'village_town',
-                        'police_station',
-                        'post_office',
-                        'pincode',
-                        'hof_aadhaar',
-                        'hof_bank_name',
-                        'hof_acc_no',
-                        'hof_ifsc',
-                        'hof_epic_no',
-                        'hof_assembly_constituency',
-                        'hof_part_no',
-                    ];
-
-                    $rationSubsidyFields = [
-                        'has_digital_ration_card',
-                        'is_lifting_ration',
-                        'hof_ration_card_id',
-                        'ration_card_type',
-                    ];
-
-                    $assetsFields = [
-                        'has_pucca_rooms',
-                        'owns_land',
-                        'land_size_decimals',
-                        'owns_4_wheeler',
-                        'num_vehicles',
-                        'vehicles',
-                        'health_insurance_type',
-                        'health_insurance_premium',
-                        'health_insurance_sum_assured',
-                    ];
-
-                    $incomeProfessionFields = [
-                        'pays_tax',
-                        'has_pan_card',
-                        'hof_pan_name',
-                        'hof_pan_no',
-                        'hof_employment_nature',
-                        'total_annual_income',
-                        'has_constitutional_post',
-                        'constitutional_post_details',
-                        'has_gst_reg',
-                        'gstin',
-                        'has_pensioner',
-                        'pensioner_details',
-                        'num_literate_adults',
-                        'num_illiterate_adults',
-                        'hof_literate_status',
-                        'hof_highest_qualification',
-                    ];
-
-                    if (in_array($field, $familyIdentityFields)) {
-                        $this->activeSection = 'family_identity';
-                    } elseif (in_array($field, $rationSubsidyFields)) {
-                        $this->activeSection = 'ration_subsidy';
-                    } elseif (in_array($field, $assetsFields)) {
-                        $this->activeSection = 'assets';
-                    } elseif (in_array($field, $incomeProfessionFields)) {
-                        $this->activeSection = 'income_profession';
-                    } elseif (in_array($field, ['caa_status', 'caa_app_no', 'caa_cert_no', 'kcc_type', 'kcc_id_no', 'kcc_date', 'kcc_issuing_authority', 'sir_status', 'sir_case_details']) || str_starts_with($field, 'hof_kcc_cards')) {
-                        $this->activeSection = 'other_docs';
-                    }
                 }
+                throw $e;
             }
-            throw $e;
+        } finally {
+            $this->dispatch('hideLoader');
         }
     }
 
@@ -1818,6 +1841,8 @@ class AnnapurnaYojanaForm extends Component
             Log::error('Error saving Annapurna Yojana application: ' . $e->getMessage());
             $this->errorMessage = 'An error occurred while saving the application: ' . $e->getMessage();
             $this->showSubmitModal = false;
+        } finally {
+            $this->dispatch('hideLoader');
         }
     }
 
@@ -1856,6 +1881,8 @@ class AnnapurnaYojanaForm extends Component
         } catch (\Exception $e) {
             Log::error('Error saving draft of Annapurna Yojana: ' . $e->getMessage());
             session()->flash('error', 'Draft save failed. Please try again.');
+        } finally {
+            $this->dispatch('hideLoader');
         }
     }
 
@@ -1891,35 +1918,33 @@ class AnnapurnaYojanaForm extends Component
         return is_array($decoded) ? $decoded : [];
     }
 
+    private function getValidationRulesFromJson(): array
+    {
+        $path = public_path('js/masterData.json');
+        if (file_exists($path)) {
+            $data = json_decode(file_get_contents($path), true);
+            return $data['validationRules'] ?? [];
+        }
+        return [];
+    }
+
     private function validateVerhoeff($aadhaar)
     {
-        if (! preg_match('/^\d{12}$/', $aadhaar)) {
+        if (! preg_match('/^[2-9]\d{11}$/', $aadhaar)) {
             return false;
         }
 
-        $d = [
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-            [1, 2, 3, 4, 0, 6, 7, 8, 9, 5],
-            [2, 3, 4, 0, 1, 7, 8, 9, 5, 6],
-            [3, 4, 0, 1, 2, 8, 9, 5, 6, 7],
-            [4, 0, 1, 2, 3, 9, 5, 6, 7, 8],
-            [5, 9, 8, 7, 6, 0, 4, 3, 2, 1],
-            [6, 5, 9, 8, 7, 1, 0, 4, 3, 2],
-            [7, 6, 5, 9, 8, 2, 1, 0, 4, 3],
-            [8, 7, 6, 5, 9, 3, 2, 1, 0, 4],
-            [9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
-        ];
+        if (preg_match('/^(\d)\1{11}$/', $aadhaar)) {
+            return false;
+        }
 
-        $p = [
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-            [1, 5, 7, 6, 2, 8, 3, 0, 9, 4],
-            [5, 8, 0, 3, 7, 9, 6, 1, 4, 2],
-            [8, 9, 1, 6, 0, 4, 3, 5, 2, 7],
-            [9, 4, 5, 3, 1, 2, 6, 8, 7, 0],
-            [4, 2, 8, 6, 5, 7, 3, 9, 0, 1],
-            [2, 7, 9, 3, 8, 0, 6, 4, 1, 5],
-            [7, 0, 4, 6, 9, 1, 3, 2, 5, 8],
-        ];
+        $rules = $this->getValidationRulesFromJson();
+        $d = $rules['aadhaar']['verhoeff']['d'] ?? [];
+        $p = $rules['aadhaar']['verhoeff']['p'] ?? [];
+
+        if (empty($d) || empty($p)) {
+            return false;
+        }
 
         $digits = array_reverse(str_split($aadhaar));
         $c = 0;

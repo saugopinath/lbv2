@@ -304,7 +304,7 @@
                 @endphp
                 <div>
                     @if ($activeSection === 'declaration')
-                        <button type="submit"
+                        <button type="submit" x-on:click="Livewire.dispatch('showLoader')"
                             class="hover:bg-opacity-90 text-white font-bold px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition flex items-center gap-2 text-sm uppercase tracking-wider bg-amber-700"
                             style="background-color: #b45309;">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,6 +320,7 @@
                                 {{-- Next member tab --}}
                                 <button type="button"
                                     wire:click="selectMember({{ $activeMemberIndex + 1 }}); selectSection('family_identity')"
+                                    x-on:click="Livewire.dispatch('showLoader')"
                                     class="hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded shadow transition text-sm flex items-center gap-1 uppercase tracking-wider bg-emerald-600">
                                     Next Member / পরবর্তী সদস্য
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -331,6 +332,7 @@
                             @else
                                 {{-- Last member: guide to common Declaration tab --}}
                                 <button type="button" wire:click="selectSection('declaration')"
+                                    x-on:click="Livewire.dispatch('showLoader')"
                                     class="hover:bg-amber-800 text-white font-bold px-6 py-2.5 rounded shadow transition text-sm flex items-center gap-1 uppercase tracking-wider bg-amber-700">
                                     Go to Declaration / ঘোষণা ও সম্মতি
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -343,6 +345,7 @@
                         @else
                             {{-- Normal next section inside member tab --}}
                             <button type="button" wire:click="nextSection"
+                                x-on:click="Livewire.dispatch('showLoader')"
                                 class="hover:bg-amber-800 text-white font-bold px-6 py-2.5 rounded shadow transition text-sm flex items-center gap-1 uppercase tracking-wider bg-amber-700">
                                 Next / এগিয়ে চলুন
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -354,6 +357,7 @@
                     @else
                         {{-- HOF tab flow --}}
                         <button type="button" wire:click="nextSection"
+                            x-on:click="Livewire.dispatch('showLoader')"
                             class="hover:bg-amber-800 text-white font-bold px-6 py-2.5 rounded shadow transition text-sm flex items-center gap-1 uppercase tracking-wider bg-amber-700">
                             Next / এগিয়ে চলুন
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -420,6 +424,7 @@
                 </div>
                 <div class="bg-amber-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
                     <button type="button" wire:click="save"
+                        x-on:click="Livewire.dispatch('showLoader')"
                         class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-emerald-600 text-base font-medium text-white hover:bg-emerald-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition duration-150">
                         Yes, Submit / হ্যাঁ, জমা দিন
                     </button>
