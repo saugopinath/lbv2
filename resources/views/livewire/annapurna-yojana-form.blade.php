@@ -436,5 +436,6 @@
             </div>
         </div>
     @endif
-
+{{-- Global Upload Modal for the entire form --}}
+    @include('livewire.annapurna.global-upload-modal')
 </form>

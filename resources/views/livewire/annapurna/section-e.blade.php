@@ -31,6 +31,9 @@
                                 নম্বর</span></label>
                         <input type="text" wire:model="formData.hof_caa_app_no"
                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        @error('formData.hof_caa_app_no')
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                 @elseif ($formData['hof_caa_status'] === 'Issued')
                     <div>
@@ -40,6 +43,9 @@
                                 নম্বর</span></label>
                         <input type="text" wire:model="formData.hof_caa_cert_no"
                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        @error('formData.hof_caa_cert_no')
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                 @endif
             </div>
@@ -161,6 +167,9 @@
                         <input type="text" wire:model="formData.hof_sir_case_details"
                             placeholder="Enter case details"
                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        @error('formData.hof_sir_case_details')
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                 @endif
             </div>
@@ -206,6 +215,9 @@
                             <input type="text"
                                 wire:model="members.{{ $index }}.caa_app_no"
                                 class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            @error("members.{$index}.caa_app_no")
+                                <span class="text-red-600 text-xs">{{ $message }}</span>
+                            @enderror
                         </div>
                     @elseif (($members[$index]['caa_status'] ?? '') === 'Issued')
                         <div>
@@ -216,6 +228,9 @@
                             <input type="text"
                                 wire:model="members.{{ $index }}.caa_cert_no"
                                 class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            @error("members.{$index}.caa_cert_no")
+                                <span class="text-red-600 text-xs">{{ $message }}</span>
+                            @enderror
                         </div>
                     @endif
                 </div>
@@ -325,6 +340,9 @@
                                 wire:model="members.{{ $index }}.sir_case_details"
                                 placeholder="Enter case details"
                                 class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            @error("members.{$index}.sir_case_details")
+                                <span class="text-red-600 text-xs">{{ $message }}</span>
+                            @enderror
                         </div>
                     @endif
                 </div>

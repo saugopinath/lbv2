@@ -58,6 +58,9 @@
                             </option>
                         @endforeach
                     </select>
+                    @error('formData.ration_card_type')
+                        <span class="text-red-600 text-xs block mt-1">{{ $message }}</span>
+                    @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Lifting Monthly
@@ -103,6 +106,9 @@
                         <option value="Yes">Yes / হ্যাঁ</option>
                         <option value="No">No / না</option>
                     </select>
+                    @error("members.{$index}.has_digital_ration_card")
+                        <span class="text-red-600 text-xs block mt-1">{{ $message }}</span>
+                    @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Ration Card
@@ -110,6 +116,9 @@
                             নম্বর</span></label>
                     <input type="text" wire:model="members.{{ $index }}.ration_card_no"
                         class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    @error("members.{$index}.ration_card_no")
+                        <span class="text-red-600 text-xs block mt-1">{{ $message }}</span>
+                    @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Ration Card Type
@@ -137,6 +146,9 @@
                             </option>
                         @endforeach
                     </select>
+                    @error("members.{$index}.ration_card_type")
+                        <span class="text-red-600 text-xs block mt-1">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
         </div>

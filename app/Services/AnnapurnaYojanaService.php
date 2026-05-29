@@ -10,12 +10,8 @@ class AnnapurnaYojanaService
     /**
      * Compile and save the application data to the database (draft or final submission).
      *
-     * @param array $formData
-     * @param array $members
-     * @param int|null $familyId
-     * @param string|null $appId
-     * @param string $status
      * @return array Contains success status, familyId, and appId
+     *
      * @throws \Exception
      */
     public function saveApplication(
@@ -23,32 +19,33 @@ class AnnapurnaYojanaService
         array $members,
         ?int $familyId,
         ?string $appId,
-        string $status
+        string $status,
+        array $uploadedDocuments = []
     ): array {
         DB::connection('pgsql_annapurna')->beginTransaction();
 
         try {
             // 1. Resolve LGD location codes directly (inputs are verified during validation)
-            $lgdDistrictCode = !empty($formData['district_id']) ? (int) $formData['district_id'] : 0;
-            $lgdBlockMcCode = !empty($formData['blockurban']) ? (int) $formData['blockurban'] : 0;
-            $lgdGpWardCode = !empty($formData['gpward']) ? (int) $formData['gpward'] : 0;
+            $lgdDistrictCode = ! empty($formData['district_id']) ? (int) $formData['district_id'] : 0;
+            $lgdBlockMcCode = ! empty($formData['blockurban']) ? (int) $formData['blockurban'] : 0;
+            $lgdGpWardCode = ! empty($formData['gpward']) ? (int) $formData['gpward'] : 0;
 
             // 2. Construct address string
             $addressParts = [];
-            if (!empty($formData['house_no'])) {
+            if (! empty($formData['house_no'])) {
                 $addressParts[] = trim($formData['house_no']);
             }
-            if (!empty($formData['village_town'])) {
+            if (! empty($formData['village_town'])) {
                 $addressParts[] = trim($formData['village_town']);
             }
-            if (!empty($formData['post_office'])) {
-                $addressParts[] = 'P.O. ' . trim($formData['post_office']);
+            if (! empty($formData['post_office'])) {
+                $addressParts[] = 'P.O. '.trim($formData['post_office']);
             }
-            if (!empty($formData['police_station'])) {
-                $addressParts[] = 'P.S. ' . trim($formData['police_station']);
+            if (! empty($formData['police_station'])) {
+                $addressParts[] = 'P.S. '.trim($formData['police_station']);
             }
-            if (!empty($formData['pincode'])) {
-                $addressParts[] = 'PIN ' . trim($formData['pincode']);
+            if (! empty($formData['pincode'])) {
+                $addressParts[] = 'PIN '.trim($formData['pincode']);
             }
             $address = implode(', ', $addressParts);
 
@@ -81,16 +78,16 @@ class AnnapurnaYojanaService
 
             $hasHealthInsurance = (($formData['has_health_insurance'] ?? '') === 'Yes');
             $healthInsuranceType = $hasHealthInsurance ? ($formData['health_insurance_type'] ?? null) : null;
-            $healthInsurancePremium = ($hasHealthInsurance && !empty($formData['health_insurance_premium'])) ? (float) $formData['health_insurance_premium'] : null;
-            $healthInsuranceSumAssured = ($hasHealthInsurance && !empty($formData['health_insurance_sum_assured'])) ? (float) $formData['health_insurance_sum_assured'] : null;
+            $healthInsurancePremium = ($hasHealthInsurance && ! empty($formData['health_insurance_premium'])) ? (float) $formData['health_insurance_premium'] : null;
+            $healthInsuranceSumAssured = ($hasHealthInsurance && ! empty($formData['health_insurance_sum_assured'])) ? (float) $formData['health_insurance_sum_assured'] : null;
 
             $ownsLand = (($formData['owns_land'] ?? '') === 'Yes');
-            $landSizeDecimals = ($ownsLand && !empty($formData['land_size_decimals'])) ? (float) $formData['land_size_decimals'] : null;
+            $landSizeDecimals = ($ownsLand && ! empty($formData['land_size_decimals'])) ? (float) $formData['land_size_decimals'] : null;
 
             $hasFourWheeler = (($formData['owns_4_wheeler'] ?? '') === 'Yes');
-            $vehicleCount = $hasFourWheeler && !empty($formData['num_vehicles']) ? (int) $formData['num_vehicles'] : null;
-            $vehicleReg = $hasFourWheeler && !empty($formData['vehicles']) ? json_encode(array_column($formData['vehicles'], 'reg_no')) : null;
-            $vehicleModel = $hasFourWheeler && !empty($formData['vehicles']) ? json_encode(array_column($formData['vehicles'], 'model')) : null;
+            $vehicleCount = $hasFourWheeler && ! empty($formData['num_vehicles']) ? (int) $formData['num_vehicles'] : null;
+            $vehicleReg = $hasFourWheeler && ! empty($formData['vehicles']) ? json_encode(array_column($formData['vehicles'], 'reg_no')) : null;
+            $vehicleModel = $hasFourWheeler && ! empty($formData['vehicles']) ? json_encode(array_column($formData['vehicles'], 'model')) : null;
 
             // 5. Update or Insert family details
             $familyData = [
@@ -106,9 +103,9 @@ class AnnapurnaYojanaService
                 'address' => $address,
                 'has_digital_ration_card' => $hasDigitalRationCard,
                 'ration_card_household_id' => $rationCardHouseholdId,
-                'no_of_illiterate_adults' => !empty($formData['num_illiterate_adults']) ? (int) $formData['num_illiterate_adults'] : null,
-                'no_of_literate_adults' => !empty($formData['num_literate_adults']) ? (int) $formData['num_literate_adults'] : null,
-                'total_annual_family_income' => !empty($formData['total_annual_income']) ? (int) $formData['total_annual_income'] : null,
+                'no_of_illiterate_adults' => ! empty($formData['num_illiterate_adults']) ? (int) $formData['num_illiterate_adults'] : null,
+                'no_of_literate_adults' => ! empty($formData['num_literate_adults']) ? (int) $formData['num_literate_adults'] : null,
+                'total_annual_family_income' => ! empty($formData['total_annual_income']) ? (int) $formData['total_annual_income'] : null,
                 'area_type' => ($formData['rural_urban'] ?? '') == 2 ? 'RURAL' : (($formData['rural_urban'] ?? '') == 1 ? 'URBAN' : null),
                 'ulb' => ($formData['rural_urban'] ?? '') == 1 ? (int) ($formData['blockurban'] ?? null) : null,
                 'updated_at' => now(),
@@ -128,7 +125,7 @@ class AnnapurnaYojanaService
                 ->pluck('id')
                 ->toArray();
 
-            if (!empty($existingMemberIds)) {
+            if (! empty($existingMemberIds)) {
                 DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->whereIn('family_member_id', $existingMemberIds)->delete();
                 DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->whereIn('family_member_id', $existingMemberIds)->delete();
                 DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->whereIn('family_member_id', $existingMemberIds)->delete();
@@ -143,7 +140,7 @@ class AnnapurnaYojanaService
                 'member_name' => $formData['hof_name'] ?? '',
                 'aadhaar_no' => $formData['hof_aadhaar'] ?? '',
                 'mobile_no' => $formData['contact_no'] ?? null,
-                'date_of_birth' => !empty($formData['hof_dob']) ? $formData['hof_dob'] : null,
+                'date_of_birth' => ! empty($formData['hof_dob']) ? $formData['hof_dob'] : null,
                 'gender' => $formData['hof_gender'] ?? null,
                 'digital_ration_card_no' => $rationCardHouseholdId,
                 'digital_ration_card_type' => $rationCardType,
@@ -169,7 +166,7 @@ class AnnapurnaYojanaService
                 'health_insurance_annual_premium' => $healthInsurancePremium,
                 'literacy_status' => $formData['hof_literate_status'] ?? null,
                 'highest_educational_qualifications' => $formData['hof_highest_qualification'] ?? null,
-                'gross_annual_income' => !empty($formData['total_annual_income']) ? (float) $formData['total_annual_income'] : null,
+                'gross_annual_income' => ! empty($formData['total_annual_income']) ? (float) $formData['total_annual_income'] : null,
                 'pays_income_or_professional_tax' => (($formData['pays_tax'] ?? '') === 'Yes'),
                 'pan_no' => (($formData['has_pan_card'] ?? '') === 'Yes') ? ($formData['hof_pan_no'] ?? null) : null,
                 'pan_name' => (($formData['has_pan_card'] ?? '') === 'Yes') ? ($formData['hof_pan_name'] ?? null) : null,
@@ -192,10 +189,10 @@ class AnnapurnaYojanaService
             ], 'id');
 
             // Save HOF Employment Nature
-            if (!empty($formData['hof_employment_nature'])) {
+            if (! empty($formData['hof_employment_nature'])) {
                 $natures = (array) $formData['hof_employment_nature'];
                 foreach ($natures as $nature) {
-                    if (!empty($nature)) {
+                    if (! empty($nature)) {
                         DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->insert([
                             'family_member_id' => $hofMemberId,
                             'employment_type' => $nature,
@@ -206,9 +203,9 @@ class AnnapurnaYojanaService
             }
 
             // Save HOF DBT Benefits
-            if (($formData['hof_has_dbt_benefits'] ?? 'No') === 'Yes' && !empty($formData['hof_dbt_benefits'])) {
+            if (($formData['hof_has_dbt_benefits'] ?? 'No') === 'Yes' && ! empty($formData['hof_dbt_benefits'])) {
                 foreach ($formData['hof_dbt_benefits'] as $benefit) {
-                    if (!empty($benefit['scheme_name'])) {
+                    if (! empty($benefit['scheme_name'])) {
                         DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->insert([
                             'family_member_id' => $hofMemberId,
                             'scheme_name' => $benefit['scheme_name'],
@@ -220,9 +217,9 @@ class AnnapurnaYojanaService
             }
 
             // Save HOF Other Credit Cards
-            if (!empty($formData['hof_kcc_cards'])) {
+            if (! empty($formData['hof_kcc_cards'])) {
                 foreach ($formData['hof_kcc_cards'] as $card) {
-                    if (!empty($card['type']) && $card['type'] !== 'None') {
+                    if (! empty($card['type']) && $card['type'] !== 'None') {
                         DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->insert([
                             'family_member_id' => $hofMemberId,
                             'id_type' => $card['type'],
@@ -237,28 +234,28 @@ class AnnapurnaYojanaService
             foreach ($members as $index => $member) {
                 $isChild = (($member['member_type'] ?? 'adult') === 'child');
 
-                $mHasDigitalRationCard = !$isChild && (($member['has_digital_ration_card'] ?? '') === 'Yes');
+                $mHasDigitalRationCard = ! $isChild && (($member['has_digital_ration_card'] ?? '') === 'Yes');
                 $mRationCardNo = $mHasDigitalRationCard ? ($member['ration_card_no'] ?? null) : null;
                 $mRationCardType = $mHasDigitalRationCard ? ($member['ration_card_type'] ?? null) : null;
 
                 $mIsEligible = $this->isFemale25to60($member['gender'] ?? '', $member['dob'] ?? '');
-                $mApplyingForAY = !$isChild && ($mIsEligible || (($member['applying_for_ay'] ?? 'No') === 'Yes'));
-                
+                $mApplyingForAY = ! $isChild && ($mIsEligible || (($member['applying_for_ay'] ?? 'No') === 'Yes'));
+
                 $mBankName = $mApplyingForAY ? ($member['bank_name'] ?? null) : null;
                 $mAccNo = $mApplyingForAY ? ($member['acc_no'] ?? null) : null;
                 $mIfsc = $mApplyingForAY ? ($member['ifsc'] ?? null) : null;
 
                 $mCaaStatus = $isChild ? 'Not Applicable' : ($member['caa_status'] ?? 'Not Applicable');
-                $mCaaAppNo = !$isChild && $mCaaStatus === 'Applied' ? ($member['caa_app_no'] ?? null) : null;
-                $mCaaCertNo = !$isChild && $mCaaStatus === 'Issued' ? ($member['caa_cert_no'] ?? null) : null;
+                $mCaaAppNo = ! $isChild && $mCaaStatus === 'Applied' ? ($member['caa_app_no'] ?? null) : null;
+                $mCaaCertNo = ! $isChild && $mCaaStatus === 'Issued' ? ($member['caa_cert_no'] ?? null) : null;
 
                 $mSirStatus = $isChild ? 'Not Applicable' : ($member['sir_status'] ?? 'Not Applicable');
-                $mSirCaseDetails = !$isChild && $mSirStatus === 'Yes' ? ($member['sir_case_details'] ?? null) : null;
+                $mSirCaseDetails = ! $isChild && $mSirStatus === 'Yes' ? ($member['sir_case_details'] ?? null) : null;
 
-                $mHasHealthInsurance = !$isChild && (($member['has_health_insurance'] ?? '') === 'Yes');
+                $mHasHealthInsurance = ! $isChild && (($member['has_health_insurance'] ?? '') === 'Yes');
                 $mHealthInsuranceType = $mHasHealthInsurance ? ($member['health_insurance_type'] ?? null) : null;
-                $mHealthInsurancePremium = ($mHasHealthInsurance && !empty($member['health_insurance_premium'])) ? (float) $member['health_insurance_premium'] : null;
-                $mHealthInsuranceSumAssured = ($mHasHealthInsurance && !empty($member['health_insurance_sum_assured'])) ? (float) $member['health_insurance_sum_assured'] : null;
+                $mHealthInsurancePremium = ($mHasHealthInsurance && ! empty($member['health_insurance_premium'])) ? (float) $member['health_insurance_premium'] : null;
+                $mHealthInsuranceSumAssured = ($mHasHealthInsurance && ! empty($member['health_insurance_sum_assured'])) ? (float) $member['health_insurance_sum_assured'] : null;
 
                 $memberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->insertGetId([
                     'family_id' => $familyId,
@@ -266,17 +263,17 @@ class AnnapurnaYojanaService
                     'member_name' => $member['name'] ?? '',
                     'aadhaar_no' => $member['aadhaar'] ?? '',
                     'mobile_no' => null,
-                    'date_of_birth' => !empty($member['dob']) ? $member['dob'] : null,
-                    'gender' => !empty($member['gender']) ? $member['gender'] : null,
+                    'date_of_birth' => ! empty($member['dob']) ? $member['dob'] : null,
+                    'gender' => ! empty($member['gender']) ? $member['gender'] : null,
                     'digital_ration_card_no' => $mRationCardNo,
                     'digital_ration_card_type' => $mRationCardType,
                     'social_category' => $formData['category'] ?? null,
                     'bank_name' => $mBankName,
                     'bank_account_no' => $mAccNo,
                     'ifsc_code' => $mIfsc,
-                    'epic_no' => $isChild ? null : (!empty($member['epic_no']) ? $member['epic_no'] : null),
-                    'assembly_constituency_no' => $isChild ? null : (!empty($member['assembly_constituency']) ? $member['assembly_constituency'] : null),
-                    'part_no' => $isChild ? null : (!empty($member['part_no']) ? $member['part_no'] : null),
+                    'epic_no' => $isChild ? null : (! empty($member['epic_no']) ? $member['epic_no'] : null),
+                    'assembly_constituency_no' => $isChild ? null : (! empty($member['assembly_constituency']) ? $member['assembly_constituency'] : null),
+                    'part_no' => $isChild ? null : (! empty($member['part_no']) ? $member['part_no'] : null),
                     'caa_application_status' => $mCaaStatus,
                     'caa_application_no' => $mCaaAppNo,
                     'caa_certificate_no' => $mCaaCertNo,
@@ -287,8 +284,8 @@ class AnnapurnaYojanaService
                     'health_insurance_type' => $mHealthInsuranceType === 'No' ? null : $mHealthInsuranceType,
                     'health_insurance_sum_assured' => $mHealthInsuranceSumAssured,
                     'health_insurance_annual_premium' => $mHealthInsurancePremium,
-                    'literacy_status' => $isChild ? null : (!empty($member['literate_status']) ? $member['literate_status'] : null),
-                    'highest_educational_qualifications' => $isChild ? null : (!empty($member['highest_qualification']) ? $member['highest_qualification'] : null),
+                    'literacy_status' => $isChild ? null : (! empty($member['literate_status']) ? $member['literate_status'] : null),
+                    'highest_educational_qualifications' => $isChild ? null : (! empty($member['highest_qualification']) ? $member['highest_qualification'] : null),
                     'gross_annual_income' => null,
                     'pays_income_or_professional_tax' => false,
                     'pan_no' => ($isChild || (($member['has_pan_card'] ?? '') !== 'Yes')) ? null : ($member['pan_no'] ?? null),
@@ -297,23 +294,23 @@ class AnnapurnaYojanaService
                     'is_registered_gst' => false,
                     'is_child' => $isChild,
                     'is_govt_pensioner' => false,
-                    'relation_with_head_of_family' => !empty($member['relation']) ? $member['relation'] : null,
+                    'relation_with_head_of_family' => ! empty($member['relation']) ? $member['relation'] : null,
                     'applying_for_annapurna_bhandar' => $mApplyingForAY,
-                    'has_pan_card' => !$isChild && (($member['has_pan_card'] ?? '') === 'Yes'),
+                    'has_pan_card' => ! $isChild && (($member['has_pan_card'] ?? '') === 'Yes'),
                     'lgd_district_code' => $lgdDistrictCode,
                     'lgd_block_mc_code' => $lgdBlockMcCode,
                     'lgd_gp_ward_code' => $lgdGpWardCode,
-                    'school_grade' => $isChild ? (!empty($member['school_grade']) ? $member['school_grade'] : null) : null,
-                    'school_name' => $isChild ? (!empty($member['school_name']) ? $member['school_name'] : null) : null,
-                    'school_type' => $isChild ? (!empty($member['school_type']) ? $member['school_type'] : null) : null,
-                    'school_type_other' => $isChild ? (!empty($member['school_type_other']) ? $member['school_type_other'] : null) : null,
+                    'school_grade' => $isChild ? (! empty($member['school_grade']) ? $member['school_grade'] : null) : null,
+                    'school_name' => $isChild ? (! empty($member['school_name']) ? $member['school_name'] : null) : null,
+                    'school_type' => $isChild ? (! empty($member['school_type']) ? $member['school_type'] : null) : null,
+                    'school_type_other' => $isChild ? (! empty($member['school_type_other']) ? $member['school_type_other'] : null) : null,
                     'vaccination_card_id' => ($isChild && (($member['vaccination_status'] ?? '') === 'Yes' || ($member['vaccination_status'] ?? '') === 'Partial')) ? ($member['vaccination_card_id'] ?? null) : null,
-                    'vaccination_status' => $isChild ? (!empty($member['vaccination_status']) ? $member['vaccination_status'] : null) : null,
+                    'vaccination_status' => $isChild ? (! empty($member['vaccination_status']) ? $member['vaccination_status'] : null) : null,
                     'vaccination_skip_reason_or_date' => ($isChild && (($member['vaccination_status'] ?? '') === 'No' || ($member['vaccination_status'] ?? '') === 'Partial')) ? ($member['vaccination_skip_reason_or_date'] ?? null) : null,
                 ], 'id');
 
                 // Save Member Employment Nature
-                if (!$isChild && !empty($member['employment_nature'])) {
+                if (! $isChild && ! empty($member['employment_nature'])) {
                     DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->insert([
                         'family_member_id' => $memberId,
                         'employment_type' => $member['employment_nature'],
@@ -322,9 +319,9 @@ class AnnapurnaYojanaService
                 }
 
                 // Save Member DBT Benefits
-                if (!$isChild && ($member['has_dbt_benefits'] ?? 'No') === 'Yes' && !empty($member['dbt_benefits'])) {
+                if (! $isChild && ($member['has_dbt_benefits'] ?? 'No') === 'Yes' && ! empty($member['dbt_benefits'])) {
                     foreach ($member['dbt_benefits'] as $benefit) {
-                        if (!empty($benefit['scheme_name'])) {
+                        if (! empty($benefit['scheme_name'])) {
                             DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->insert([
                                 'family_member_id' => $memberId,
                                 'scheme_name' => $benefit['scheme_name'],
@@ -336,9 +333,9 @@ class AnnapurnaYojanaService
                 }
 
                 // Save Member Other Cards
-                if (!$isChild && !empty($member['kcc_cards'])) {
+                if (! $isChild && ! empty($member['kcc_cards'])) {
                     foreach ($member['kcc_cards'] as $card) {
-                        if (!empty($card['type']) && $card['type'] !== 'None') {
+                        if (! empty($card['type']) && $card['type'] !== 'None') {
                             DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->insert([
                                 'family_member_id' => $memberId,
                                 'id_type' => $card['type'],
@@ -349,7 +346,23 @@ class AnnapurnaYojanaService
                     }
                 }
             }
+            if (! empty($uploadedDocuments)) {
+                DB::connection('pgsql_annapurna')->table('dbt_apy.family_member_documents')
+                    ->where('family_member_id', $hofMemberId)
+                    ->delete();
 
+                foreach ($uploadedDocuments as $docTypeId => $responseId) {
+                    if (is_string($responseId) || is_numeric($responseId)) {
+                        DB::connection('pgsql_annapurna')->table('dbt_apy.family_member_documents')->insert([
+                            'family_member_id' => $hofMemberId,
+                            'doc_type_id' => (int) $docTypeId,
+                            'response_id' => (string) $responseId,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
+            }
             DB::connection('pgsql_annapurna')->commit();
 
             return [
@@ -365,9 +378,6 @@ class AnnapurnaYojanaService
 
     /**
      * Calculate age from Date of Birth.
-     *
-     * @param string|null $dob
-     * @return int
      */
     public function getAgeFromDob(?string $dob): int
     {
@@ -377,6 +387,7 @@ class AnnapurnaYojanaService
         try {
             $birthDate = new \DateTime($dob);
             $today = new \DateTime;
+
             return $today->diff($birthDate)->y;
         } catch (\Exception $e) {
             return 0;
@@ -385,14 +396,11 @@ class AnnapurnaYojanaService
 
     /**
      * Check if a person is female and aged 25 to 60.
-     *
-     * @param string $gender
-     * @param string|null $dob
-     * @return bool
      */
     public function isFemale25to60(string $gender, ?string $dob): bool
     {
         $age = $this->getAgeFromDob($dob);
+
         return $gender === 'Female' && $age >= 25 && $age <= 60;
     }
 }

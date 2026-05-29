@@ -4,8 +4,7 @@
         <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
             <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                 <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
-                    <span
-                        class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                    <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
                         style="background-color: #78350f;">A1</span>
                     Family Head Identity | পরিবার প্রধানের পরিচয়
                 </h3>
@@ -38,8 +37,7 @@
                         <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
                             <span x-show="valid" class="text-xs text-green-600 font-semibold">✓
                                 Valid</span>
-                            <span x-show="error" x-text="error"
-                                class="text-red-500 text-xs font-semibold"></span>
+                            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
                         </div>
                     </div>
                     @error('formData.hof_name')
@@ -80,17 +78,17 @@
                     @enderror
                 </div>
                 @if ($this->isHofFemale25to60())
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Applying for
-                        Annapurna Yojana? <br><span
-                            class="text-xs text-gray-500 font-normal">অন্নপূর্ণা যোজনার জন্য আবেদন
-                            করছেন?</span></label>
-                    <select wire:model="formData.hof_applying_for_ay"
-                        class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="Yes">Yes / হ্যাঁ</option>
-                        <option value="No">No / না</option>
-                    </select>
-                </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Applying for
+                            Annapurna Yojana? <br><span class="text-xs text-gray-500 font-normal">অন্নপূর্ণা যোজনার জন্য
+                                আবেদন
+                                করছেন?</span></label>
+                        <select wire:model="formData.hof_applying_for_ay"
+                            class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="Yes">Yes / হ্যাঁ</option>
+                            <option value="No">No / না</option>
+                        </select>
+                    </div>
                 @endif
             </div>
 
@@ -121,29 +119,28 @@
                         <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
                             <span x-show="valid" class="text-xs text-green-600 font-semibold">✓
                                 Valid Aadhaar</span>
-                            <span x-show="error" x-text="error"
-                                class="text-red-500 text-xs font-semibold"></span>
+                            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
                         </div>
                     </div>
                     @error('formData.hof_aadhaar')
                         <span class="text-red-600 text-xs">{{ $message }}</span>
                     @enderror
+
+                    <x-upload-button doc-id="101" />
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Household ID of
-                        Digital Ration Card, if any <br><span
-                            class="text-xs text-gray-500 font-normal">রেশন কার্ডের গৃহস্থালি
+                        Digital Ration Card, if any <br><span class="text-xs text-gray-500 font-normal">রেশন কার্ডের
+                            গৃহস্থালি
                             আইডি</span></label>
                     <input type="text" wire:model="formData.hof_ration_card_id"
                         class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">No. of Family
-                        Members (number only)<br><span
-                            class="text-xs text-gray-500 font-normal">পরিবারের মোট সদস্য
+                        Members (number only)<br><span class="text-xs text-gray-500 font-normal">পরিবারের মোট সদস্য
                             সংখ্যা</span></label>
-                    <input type="number" min="1"
-                        wire:model.live="formData.num_family_members" readonly
+                    <input type="number" min="1" wire:model.live="formData.num_family_members" readonly
                         class="w-full border border-gray-300 rounded p-2 text-sm font-semibold text-gray-700 bg-gray-100 cursor-not-allowed">
                 </div>
             </div>
@@ -175,8 +172,7 @@
                         <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
                             <span x-show="valid" class="text-xs text-green-600 font-semibold">✓
                                 Valid</span>
-                            <span x-show="error" x-text="error"
-                                class="text-red-500 text-xs font-semibold"></span>
+                            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
                         </div>
                     </div>
                     @error('formData.contact_no')
@@ -222,8 +218,7 @@
                 @if (in_array($formData['category'] ?? '', ['SC', 'ST', 'OBC']))
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Caste
-                            Certificate No. * <br><span
-                                class="text-xs text-gray-500 font-normal">জাতিগত সংশাপত্র
+                            Certificate No. * <br><span class="text-xs text-gray-500 font-normal">জাতিগত সংশাপত্র
                                 নং</span></label>
                         <input type="text" wire:model="formData.caste_certificate_no"
                             placeholder="Enter Caste Certificate Number"
@@ -231,12 +226,12 @@
                         @error('formData.caste_certificate_no')
                             <span class="text-red-600 text-xs">{{ $message }}</span>
                         @enderror
+                        <x-upload-button doc-id="106" />
                     </div>
                 @elseif (($formData['category'] ?? '') == 'UR-EWS')
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">EWS
-                            Certificate No. * <br><span
-                                class="text-xs text-gray-500 font-normal">ইডব্লিউএস সংশাপত্র
+                            Certificate No. * <br><span class="text-xs text-gray-500 font-normal">ইডব্লিউএস সংশাপত্র
                                 নং</span></label>
                         <input type="text" wire:model="formData.ews_certificate_no"
                             placeholder="Enter EWS Certificate Number"
@@ -244,12 +239,13 @@
                         @error('formData.ews_certificate_no')
                             <span class="text-red-600 text-xs">{{ $message }}</span>
                         @enderror
+                        <x-upload-button doc-id="106" />
                     </div>
                 @elseif (($formData['category'] ?? '') == 'PVTG')
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">PVTG
-                            Certificate/Declaration No. * <br><span
-                                class="text-xs text-gray-500 font-normal">পিভিটিজি সংশাপত্র
+                            Certificate/Declaration No. * <br><span class="text-xs text-gray-500 font-normal">পিভিটিজি
+                                সংশাপত্র
                                 নং</span></label>
                         <input type="text" wire:model="formData.pvtg_certificate_no"
                             placeholder="Enter PVTG ID/Declaration No"
@@ -257,6 +253,7 @@
                         @error('formData.pvtg_certificate_no')
                             <span class="text-red-600 text-xs">{{ $message }}</span>
                         @enderror
+                        <x-upload-button doc-id="114" />
                     </div>
                 @endif
             </div>
@@ -266,8 +263,7 @@
         <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
             <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                 <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
-                    <span
-                        class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                    <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
                         style="background-color: #78350f;">A2</span>
                     Address (Permanent Address) | স্থায়ী ঠিকানা
                 </h3>
@@ -409,8 +405,7 @@
                         <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
                             <span x-show="valid" class="text-xs text-green-600 font-semibold">✓
                                 Valid</span>
-                            <span x-show="error" x-text="error"
-                                class="text-red-500 text-xs font-semibold"></span>
+                            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
                         </div>
                     </div>
                     @error('formData.pincode')
@@ -424,8 +419,7 @@
         <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
             <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                 <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
-                    <span
-                        class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                    <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
                         style="background-color: #78350f;">A3</span>
                     HOF Bank Details (For Cash Transfer) | পরিবার প্রধানের ব্যাংক বিবরণী
                 </h3>
@@ -436,7 +430,7 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-1">HOF IFSC Code *
                         <br><span class="text-xs text-gray-500 font-normal">আইএফএসসি
                             কোড</span></label>
-                     <div class="relative" x-data="{
+                    <div class="relative" x-data="{
                         val: @entangle('formData.hof_ifsc'),
                         error: '',
                         valid: false,
@@ -474,7 +468,7 @@
                             } else {
                                 this.suggestions = [];
                             }
-
+                    
                             if (this.valid) {
                                 await this.loadBanks();
                                 let found = this.banksList.find(b => b.ifsc.toUpperCase() === this.val.toUpperCase());
@@ -493,17 +487,17 @@
                         }
                     }" x-init="check();
                     $watch('val', () => check())"
-                    @click.outside="suggestions = []">
-                        <input type="text" x-model="val" maxlength="11"
-                            placeholder="e.g. SBIN0001234"
+                        @click.outside="suggestions = []">
+                        <input type="text" x-model="val" maxlength="11" placeholder="e.g. SBIN0001234"
                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 uppercase font-mono">
-                        
+
                         <!-- Suggestions Dropdown -->
-                        <ul x-show="suggestions.length > 0" 
+                        <ul x-show="suggestions.length > 0"
                             class="absolute z-50 w-full bg-white border border-gray-300 rounded mt-1 max-h-60 overflow-y-auto shadow-lg text-sm"
                             style="display: none;">
                             <template x-for="item in suggestions" :key="item.ifsc">
-                                <li @click="selectSuggestion(item)" class="p-2 hover:bg-orange-50 cursor-pointer border-b border-gray-100 last:border-b-0">
+                                <li @click="selectSuggestion(item)"
+                                    class="p-2 hover:bg-orange-50 cursor-pointer border-b border-gray-100 last:border-b-0">
                                     <div class="font-bold text-amber-800" x-text="item.ifsc"></div>
                                     <div class="text-[11px] text-gray-600" x-text="item.bankName"></div>
                                     <div class="text-[10px] text-gray-400 italic" x-text="item.branchName"></div>
@@ -514,8 +508,7 @@
                         <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
                             <span x-show="valid" class="text-xs text-green-600 font-semibold">✓
                                 Valid</span>
-                            <span x-show="error" x-text="error"
-                                class="text-red-500 text-xs font-semibold"></span>
+                            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
                         </div>
                     </div>
                     @error('formData.hof_ifsc')
@@ -548,8 +541,7 @@
                         <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
                             <span x-show="valid" class="text-xs text-green-600 font-semibold">✓
                                 Valid</span>
-                            <span x-show="error" x-text="error"
-                                class="text-red-500 text-xs font-semibold"></span>
+                            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
                         </div>
                     </div>
                     @error('formData.hof_bank_name')
@@ -582,13 +574,13 @@
                         <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
                             <span x-show="valid" class="text-xs text-green-600 font-semibold">✓
                                 Valid</span>
-                            <span x-show="error" x-text="error"
-                                class="text-red-500 text-xs font-semibold"></span>
+                            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
                         </div>
                     </div>
                     @error('formData.hof_acc_no')
                         <span class="text-red-600 text-xs">{{ $message }}</span>
                     @enderror
+                    <x-upload-button doc-id="104" />
                 </div>
             </div>
         </div>
@@ -597,8 +589,7 @@
         <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
             <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                 <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
-                    <span
-                        class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                    <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
                         style="background-color: #78350f;">A4</span>
                     HOF EPIC/Voter Card Details | ভোটার কার্ড বিবরণী
                 </h3>
@@ -631,13 +622,13 @@
                         <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
                             <span x-show="valid" class="text-xs text-green-600 font-semibold">✓
                                 Valid EPIC</span>
-                            <span x-show="error" x-text="error"
-                                class="text-red-500 text-xs font-semibold"></span>
+                            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
                         </div>
                     </div>
                     @error('formData.hof_epic_no')
                         <span class="text-red-600 text-xs">{{ $message }}</span>
                     @enderror
+                    <x-upload-button doc-id="102" />
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Assembly Constituency No. <br><span
@@ -669,12 +660,10 @@
         @php
             $index = $activeMemberIndex - 1;
         @endphp
-        <div class="bg-gray-50 border border-gray-200 rounded-lg p-5"
-            wire:key="member-identity-{{ $index }}">
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-identity-{{ $index }}">
             <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                 <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
-                    <span
-                        class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                    <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
                         style="background-color: #78350f;">M1</span>
                     Member #{{ $activeMemberIndex }} Basic Identity | সদস্যের পরিচয় ও সম্পর্ক
                 </h3>
@@ -687,18 +676,14 @@
                             বিভাগ</span></label>
                     <div class="flex items-center gap-6">
                         <label class="inline-flex items-center cursor-pointer">
-                            <input type="radio"
-                                wire:model.live="members.{{ $index }}.member_type"
-                                value="adult"
-                                class="h-4 w-4 text-amber-700 border-gray-300 focus:ring-amber-500">
+                            <input type="radio" wire:model.live="members.{{ $index }}.member_type"
+                                value="adult" class="h-4 w-4 text-amber-700 border-gray-300 focus:ring-amber-500">
                             <span class="ml-2 text-sm font-medium text-gray-900">Adult /
                                 প্রাপ্তবয়স্ক</span>
                         </label>
                         <label class="inline-flex items-center cursor-pointer">
-                            <input type="radio"
-                                wire:model.live="members.{{ $index }}.member_type"
-                                value="child"
-                                class="h-4 w-4 text-amber-700 border-gray-300 focus:ring-amber-500">
+                            <input type="radio" wire:model.live="members.{{ $index }}.member_type"
+                                value="child" class="h-4 w-4 text-amber-700 border-gray-300 focus:ring-amber-500">
                             <span class="ml-2 text-sm font-medium text-gray-900">Child /
                                 শিশু</span>
                         </label>
@@ -736,8 +721,7 @@
                         <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
                             <span x-show="valid" class="text-xs text-green-600 font-semibold">✓
                                 Valid</span>
-                            <span x-show="error" x-text="error"
-                                class="text-red-500 text-xs font-semibold"></span>
+                            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
                         </div>
                     </div>
                     @error("members.{$index}.name")
@@ -789,7 +773,7 @@
                         selectVal: '',
                         customVal: '',
                         standards: {{ json_encode(array_values(array_filter($relations, fn($r) => $r !== 'Others'))) }},
-                        
+                    
                         init() {
                             this.updateFromReal();
                             this.$watch('realVal', value => {
@@ -882,8 +866,8 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Aadhaar Number
-                        (Optional for child &lt;5 years)<br><span
-                            class="text-xs text-gray-500 font-normal">আধার নম্বর</span></label>
+                        (Optional for child &lt;5 years)<br><span class="text-xs text-gray-500 font-normal">আধার
+                            নম্বর</span></label>
                     <div x-data="{
                         val: @entangle('members.' . $index . '.aadhaar'),
                         error: '',
@@ -906,8 +890,7 @@
                         <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
                             <span x-show="valid" class="text-xs text-green-600 font-semibold">✓
                                 Valid Aadhaar</span>
-                            <span x-show="error" x-text="error"
-                                class="text-red-500 text-xs font-semibold"></span>
+                            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
                         </div>
                     </div>
                     @error("members.{$index}.aadhaar")
@@ -917,12 +900,11 @@
             </div>
 
             @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
-                <div
-                    class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-4 pt-4 border-t border-gray-200">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-4 pt-4 border-t border-gray-200">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Applying for
-                            Annapurna Yojana? <br><span
-                                class="text-xs text-gray-500 font-normal">অন্নপূর্ণা যোজনার জন্য
+                            Annapurna Yojana? <br><span class="text-xs text-gray-500 font-normal">অন্নপূর্ণা যোজনার
+                                জন্য
                                 আবেদন করছেন কি?</span></label>
                         <select wire:model="members.{{ $index }}.applying_for_ay"
                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
@@ -932,8 +914,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Member
-                            EPIC/Voter No. <br><span
-                                class="text-xs text-gray-500 font-normal">ভোটার কার্ড
+                            EPIC/Voter No. <br><span class="text-xs text-gray-500 font-normal">ভোটার কার্ড
                                 নম্বর</span></label>
                         <div x-data="{
                             val: @entangle('members.' . $index . '.epic_no'),
@@ -954,10 +935,8 @@
                         $watch('val', () => check())">
                             <input type="text" x-model="val" maxlength="10"
                                 class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 uppercase font-mono">
-                            <div class="flex items-center gap-2 mt-0.5"
-                                style="min-height: 1.25rem;">
-                                <span x-show="valid"
-                                    class="text-xs text-green-600 font-semibold">✓ Valid
+                            <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+                                <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid
                                     EPIC</span>
                                 <span x-show="error" x-text="error"
                                     class="text-red-500 text-xs font-semibold"></span>
@@ -968,8 +947,8 @@
                         @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Assembly Constituency No. <br><span
-                                class="text-xs text-gray-500 font-normal">বিধানসভা নং</span></label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Assembly Constituency No.
+                            <br><span class="text-xs text-gray-500 font-normal">বিধানসভা নং</span></label>
                         <select wire:model.live="members.{{ $index }}.assembly_constituency"
                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                             <option value="">-- Select AC --</option>
@@ -982,8 +961,8 @@
                         @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Part No. of Electoral Roll <br><span
-                                class="text-xs text-gray-500 font-normal">পার্ট নং</span></label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Part No. of Electoral Roll
+                            <br><span class="text-xs text-gray-500 font-normal">পার্ট নং</span></label>
                         <input type="text" wire:model.live="members.{{ $index }}.part_no"
                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                         @error("members.{$index}.part_no")
@@ -1000,8 +979,7 @@
                 wire:key="member-bank-{{ $index }}">
                 <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                     <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
-                        <span
-                            class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                        <span class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
                             style="background-color: #78350f;">M2</span>
                         Member Bank Details (For Cash Transfer) | সদস্যের ব্যাংক বিবরণী
                     </h3>
@@ -1051,7 +1029,7 @@
                                 } else {
                                     this.suggestions = [];
                                 }
-
+                        
                                 if (this.valid) {
                                     await this.loadBanks();
                                     let found = this.banksList.find(b => b.ifsc.toUpperCase() === this.val.toUpperCase());
@@ -1070,17 +1048,17 @@
                             }
                         }" x-init="check();
                         $watch('val', () => check())"
-                        @click.outside="suggestions = []">
-                            <input type="text" x-model="val" maxlength="11"
-                                placeholder="e.g. SBIN0001234"
+                            @click.outside="suggestions = []">
+                            <input type="text" x-model="val" maxlength="11" placeholder="e.g. SBIN0001234"
                                 class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 uppercase font-mono">
-                            
+
                             <!-- Suggestions Dropdown -->
-                            <ul x-show="suggestions.length > 0" 
+                            <ul x-show="suggestions.length > 0"
                                 class="absolute z-50 w-full bg-white border border-gray-300 rounded mt-1 max-h-60 overflow-y-auto shadow-lg text-sm"
                                 style="display: none;">
                                 <template x-for="item in suggestions" :key="item.ifsc">
-                                    <li @click="selectSuggestion(item)" class="p-2 hover:bg-orange-50 cursor-pointer border-b border-gray-100 last:border-b-0">
+                                    <li @click="selectSuggestion(item)"
+                                        class="p-2 hover:bg-orange-50 cursor-pointer border-b border-gray-100 last:border-b-0">
                                         <div class="font-bold text-amber-800" x-text="item.ifsc"></div>
                                         <div class="text-[11px] text-gray-600" x-text="item.bankName"></div>
                                         <div class="text-[10px] text-gray-400 italic" x-text="item.branchName"></div>
@@ -1088,10 +1066,8 @@
                                 </template>
                             </ul>
 
-                            <div class="flex items-center gap-2 mt-0.5"
-                                style="min-height: 1.25rem;">
-                                <span x-show="valid"
-                                    class="text-xs text-green-600 font-semibold">✓ Valid</span>
+                            <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+                                <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
                                 <span x-show="error" x-text="error"
                                     class="text-red-500 text-xs font-semibold"></span>
                             </div>
@@ -1123,10 +1099,8 @@
                         $watch('val', () => check())">
                             <input type="text" x-model="val"
                                 class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            <div class="flex items-center gap-2 mt-0.5"
-                                style="min-height: 1.25rem;">
-                                <span x-show="valid"
-                                    class="text-xs text-green-600 font-semibold">✓ Valid</span>
+                            <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+                                <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
                                 <span x-show="error" x-text="error"
                                     class="text-red-500 text-xs font-semibold"></span>
                             </div>
@@ -1158,10 +1132,8 @@
                         $watch('val', () => check())">
                             <input type="text" x-model="val" maxlength="18"
                                 class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 font-mono">
-                            <div class="flex items-center gap-2 mt-0.5"
-                                style="min-height: 1.25rem;">
-                                <span x-show="valid"
-                                    class="text-xs text-green-600 font-semibold">✓ Valid</span>
+                            <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+                                <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
                                 <span x-show="error" x-text="error"
                                     class="text-red-500 text-xs font-semibold"></span>
                             </div>
@@ -1173,11 +1145,11 @@
                 </div>
             </div>
         @else
-            <div
-                class="bg-amber-50 border border-amber-200 rounded-lg p-5 mt-4 text-center text-amber-900 shadow-sm">
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-5 mt-4 text-center text-amber-900 shadow-sm">
                 <p class="text-xs font-semibold">Note: Bank account and Voter details are not
                     required for child members.</p>
-                <p class="text-[10px] text-amber-700 mt-1"> hishu sadoshoder jonyo bank account abong voter biboronir proyojon nei.</p>
+                <p class="text-[10px] text-amber-700 mt-1"> hishu sadoshoder jonyo bank account abong voter biboronir
+                    proyojon nei.</p>
             </div>
         @endif
     @endif

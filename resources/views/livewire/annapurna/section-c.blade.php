@@ -44,10 +44,13 @@
                 @if (($formData['owns_land'] ?? '') === 'Yes')
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Size of Land (in
-                        Decimals) <br><span class="text-xs text-gray-500 font-normal">জমির মোট
+                        Decimals) * <br><span class="text-xs text-gray-500 font-normal">জমির মোট
                             পরিমাণ (ডেসিমেলে)</span></label>
                     <input type="number" step="0.01" wire:model="formData.land_size_decimals"
                         class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    @error('formData.land_size_decimals')
+                        <span class="text-red-600 text-xs">{{ $message }}</span>
+                    @enderror
                 </div>
                 @endif
             </div>
@@ -70,11 +73,14 @@
                 </div>
                 @if (($formData['owns_4_wheeler'] ?? '') === 'Yes')
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">No. of Vehicles
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">No. of Vehicles *
                         <br><span class="text-xs text-gray-500 font-normal">গাড়ির
                             সংখ্যা</span></label>
                     <input type="number" min="0" wire:model.live="formData.num_vehicles"
                         class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    @error('formData.num_vehicles')
+                        <span class="text-red-600 text-xs">{{ $message }}</span>
+                    @enderror
                 </div>
                 @endif
             </div>
@@ -125,6 +131,9 @@
                                         <span x-show="error" x-text="error"
                                             class="text-red-500 text-xs font-semibold"></span>
                                     </div>
+                                    @error("formData.vehicles.{$vi}.reg_no")
+                                        <span class="text-red-600 text-xs block mt-1">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             </div>
                             <div>
@@ -135,6 +144,9 @@
                                     wire:model="formData.vehicles.{{ $vi }}.model"
                                     placeholder="e.g. Maruti Swift"
                                     class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-amber-500 focus:border-amber-500">
+                                @error("formData.vehicles.{$vi}.model")
+                                    <span class="text-red-600 text-xs block mt-1">{{ $message }}</span>
+                                @enderror
                             </div>
                         </div>
                     @endforeach

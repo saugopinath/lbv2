@@ -238,6 +238,9 @@
                     <input type="text" wire:model="formData.hof_highest_qualification"
                         placeholder="e.g. Graduate, Higher Secondary"
                         class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    @error('formData.hof_highest_qualification')
+                        <span class="text-red-600 text-xs">{{ $message }}</span>
+                    @enderror
                 </div>
                 @endif
             </div>
@@ -532,6 +535,9 @@
                             wire:model="members.{{ $index }}.highest_qualification"
                             placeholder="e.g. Graduate, Class X"
                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        @error("members.{$index}.highest_qualification")
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     @endif
                 </div>

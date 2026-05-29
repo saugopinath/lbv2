@@ -58,6 +58,9 @@
                                         <option value="Yuvashree">Yuvashree</option>
                                     @endif
                                 </select>
+                                @error("formData.hof_dbt_benefits.{$i}.scheme_name")
+                                    <span class="text-red-600 text-xs block mt-1">{{ $message }}</span>
+                                @enderror
                             </div>
                             <div class="w-full md:w-5/12 flex items-center gap-2 mt-4 md:mt-5">
                                 <input type="checkbox"
@@ -155,6 +158,9 @@
                                             <option value="Yuvashree">Yuvashree</option>
                                         @endif
                                     </select>
+                                    @error("members.{$index}.dbt_benefits.{$i}.scheme_name")
+                                        <span class="text-red-600 text-xs block mt-1">{{ $message }}</span>
+                                    @enderror
                                 </div>
                                 <div class="w-full md:w-5/12 flex items-center gap-2 mt-4 md:mt-5">
                                     <input type="checkbox"
