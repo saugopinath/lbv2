@@ -1461,22 +1461,22 @@ class AnnapurnaYojanaForm extends Component
                 'updated_at' => now(),
             ];
 
-            if ($this->familyId) {
-                DB::connection('pgsql_annapurna')->table('dbt_apy.families')->where('id', $this->familyId)->update($familyData);
-                $familyId = $this->familyId;
+            $familyId = $this->familyId;
+            if ($familyId) {
+                // Clear old entries first to avoid foreign key constraint violations when updating families.lgd_district_code
+                $existingMemberIds = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->pluck('id')->toArray();
+                if (! empty($existingMemberIds)) {
+                    DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->whereIn('family_member_id', $existingMemberIds)->delete();
+                    DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->whereIn('family_member_id', $existingMemberIds)->delete();
+                    DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->whereIn('family_member_id', $existingMemberIds)->delete();
+                    DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->delete();
+                }
+
+                DB::connection('pgsql_annapurna')->table('dbt_apy.families')->where('id', $familyId)->update($familyData);
             } else {
                 $familyData['created_at'] = now();
                 $familyId = DB::connection('pgsql_annapurna')->table('dbt_apy.families')->insertGetId($familyData, 'id');
                 $this->familyId = $familyId;
-            }
-
-            // Clear old entries to avoid duplicates on final submission
-            $existingMemberIds = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->pluck('id')->toArray();
-            if (! empty($existingMemberIds)) {
-                DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->whereIn('family_member_id', $existingMemberIds)->delete();
-                DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->whereIn('family_member_id', $existingMemberIds)->delete();
-                DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->whereIn('family_member_id', $existingMemberIds)->delete();
-                DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->delete();
             }
 
             // 6. Insert HOF into dbt_apy.family_members
@@ -1827,22 +1827,22 @@ class AnnapurnaYojanaForm extends Component
                 'updated_at' => now(),
             ];
 
-            if ($this->familyId) {
-                DB::connection('pgsql_annapurna')->table('dbt_apy.families')->where('id', $this->familyId)->update($familyData);
-                $familyId = $this->familyId;
+            $familyId = $this->familyId;
+            if ($familyId) {
+                // Clear old entries first to avoid foreign key constraint violations when updating families.lgd_district_code
+                $existingMemberIds = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->pluck('id')->toArray();
+                if (! empty($existingMemberIds)) {
+                    DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->whereIn('family_member_id', $existingMemberIds)->delete();
+                    DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->whereIn('family_member_id', $existingMemberIds)->delete();
+                    DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->whereIn('family_member_id', $existingMemberIds)->delete();
+                    DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->delete();
+                }
+
+                DB::connection('pgsql_annapurna')->table('dbt_apy.families')->where('id', $familyId)->update($familyData);
             } else {
                 $familyData['created_at'] = now();
                 $familyId = DB::connection('pgsql_annapurna')->table('dbt_apy.families')->insertGetId($familyData, 'id');
                 $this->familyId = $familyId;
-            }
-
-            // Clear old entries to avoid duplicates on draft transitions
-            $existingMemberIds = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->pluck('id')->toArray();
-            if (! empty($existingMemberIds)) {
-                DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->whereIn('family_member_id', $existingMemberIds)->delete();
-                DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->whereIn('family_member_id', $existingMemberIds)->delete();
-                DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->whereIn('family_member_id', $existingMemberIds)->delete();
-                DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->delete();
             }
 
             // 6. Insert HOF into dbt_apy.family_members
