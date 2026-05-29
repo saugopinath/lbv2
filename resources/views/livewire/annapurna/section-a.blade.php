@@ -748,7 +748,7 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Date of Birth *
                         <br><span class="text-xs text-gray-500 font-normal">জন্ম
                             তারিখ</span></label>
-                    <input type="date" wire:model="members.{{ $index }}.dob"
+                    <input type="date" wire:model.live="members.{{ $index }}.dob"
                         class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                     @error("members.{$index}.dob")
                         <span class="text-red-600 text-xs">{{ $message }}</span>
@@ -760,7 +760,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Gender *
                         <br><span class="text-xs text-gray-500 font-normal">লিঙ্গ</span></label>
-                    <select wire:model="members.{{ $index }}.gender"
+                    <select wire:model.live="members.{{ $index }}.gender"
                         class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">-- Select --</option>
                         @foreach ($genders as $gender)
@@ -919,17 +919,19 @@
             @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
                 <div
                     class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-4 pt-4 border-t border-gray-200">
+                    @if ($this->isMemberFemale25to60($index))
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Applying for
                             Annapurna Yojana? <br><span
                                 class="text-xs text-gray-500 font-normal">অন্নপূর্ণা যোজনার জন্য
                                 আবেদন করছেন কি?</span></label>
-                        <select wire:model="members.{{ $index }}.applying_for_ay"
+                        <select wire:model.live="members.{{ $index }}.applying_for_ay"
                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                             <option value="No">No / না</option>
                             <option value="Yes">Yes / হ্যাঁ</option>
                         </select>
                     </div>
+                    @endif
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Member
                             EPIC/Voter No. <br><span
