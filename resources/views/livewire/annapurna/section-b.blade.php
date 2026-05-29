@@ -61,6 +61,10 @@
                     @error('formData.ration_card_type')
                         <span class="text-red-600 text-xs block mt-1">{{ $message }}</span>
                     @enderror
+
+                    @if (($formData['has_digital_ration_card'] ?? '') === 'Yes')
+                        <x-upload-button doc-id="105" />
+                    @endif
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Lifting Monthly
@@ -149,6 +153,10 @@
                     @error("members.{$index}.ration_card_type")
                         <span class="text-red-600 text-xs block mt-1">{{ $message }}</span>
                     @enderror
+
+                    @if (($members[$index]['has_digital_ration_card'] ?? '') === 'Yes')
+                        <x-upload-button doc-id="105" />
+                    @endif
                 </div>
             </div>
         </div>

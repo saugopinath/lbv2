@@ -106,6 +106,8 @@
                     @error('formData.hof_pan_no')
                         <span class="text-red-600 text-xs">{{ $message }}</span>
                     @enderror
+
+                    <x-upload-button doc-id="103" />
                 </div>
                 @endif
                 <div x-data="{
@@ -188,6 +190,7 @@
                             </template>
                         </div>
                     </div>
+                    <x-upload-button doc-id="112" />
                 </div>
             </div>
 
@@ -351,6 +354,8 @@
                         @error('formData.pensioner_details')
                             <span class="text-red-600 text-xs">{{ $message }}</span>
                         @enderror
+
+                        <x-upload-button doc-id="113" />
                     </div>
                     @endif
                 </div>
@@ -456,6 +461,8 @@
                         @error("members.{$index}.pan_no")
                             <span class="text-red-600 text-xs">{{ $message }}</span>
                         @enderror
+
+                        <x-upload-button doc-id="103" />
                     </div>
                     @endif
                     <div>
@@ -509,6 +516,7 @@
                                 </option>
                             @endif
                         </select>
+                        <x-upload-button doc-id="112" />
                     </div>
                 </div>
 

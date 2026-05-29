@@ -896,6 +896,8 @@
                     @error("members.{$index}.aadhaar")
                         <span class="text-red-600 text-xs">{{ $message }}</span>
                     @enderror
+
+                    <x-upload-button doc-id="101" />
                 </div>
             </div>
 
@@ -948,6 +950,8 @@
                         @error("members.{$index}.epic_no")
                             <span class="text-red-600 text-xs">{{ $message }}</span>
                         @enderror
+
+                        <x-upload-button doc-id="102" />
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Assembly Constituency No.
@@ -1144,6 +1148,8 @@
                         @error("members.{$index}.acc_no")
                             <span class="text-red-600 text-xs">{{ $message }}</span>
                         @enderror
+
+                        <x-upload-button doc-id="104" />
                     </div>
                 </div>
             </div>

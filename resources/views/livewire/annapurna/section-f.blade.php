@@ -130,6 +130,8 @@
                     @error("members.{$index}.vaccination_card_id")
                         <span class="text-red-600 text-xs block mt-1">{{ $message }}</span>
                     @enderror
+
+                    <x-upload-button doc-id="109" />
                 </div>
                 @endif
                 @if (($members[$index]['vaccination_status'] ?? '') === 'No' || ($members[$index]['vaccination_status'] ?? '') === 'Partial')

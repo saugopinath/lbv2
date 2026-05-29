@@ -174,7 +174,7 @@ class AnnapurnaYojanaForm extends Component
             'total_annual_income' => '',
 
             // Other identity documents (Section E)
-            'hof_caa_status' => 'Not Applicable', // Not Applicable / Applied / Issued
+            'hof_caa_status' => '', // Not Applicable / Applied / Issued
             'hof_caa_app_no' => '',
             'hof_caa_cert_no' => '',
 
@@ -184,7 +184,7 @@ class AnnapurnaYojanaForm extends Component
             ],
 
             // HOF SIR status
-            'hof_sir_status' => 'Not Applicable', // Not Applicable / No / Yes
+            'hof_sir_status' => '', // Not Applicable / No / Yes
             'hof_sir_case_details' => '',
 
             // Children details (Section F)
@@ -196,7 +196,7 @@ class AnnapurnaYojanaForm extends Component
             ],
 
             // Government Scheme Benefits (Section G)
-            'hof_has_dbt_benefits' => 'No',
+            'hof_has_dbt_benefits' => '',
             'hof_dbt_benefits' => [
                 ['scheme_name' => '', 'opt_out' => false],
             ],
@@ -373,7 +373,7 @@ class AnnapurnaYojanaForm extends Component
             $parts = explode('.', $field);
             if (count($parts) === 3 && $parts[2] === 'type') {
                 $cIndex = (int) $parts[1];
-                if (empty($value)) {
+                if (empty($value) || $value === 'None') {
                     $this->formData['hof_kcc_cards'][$cIndex]['id_no'] = '';
                     $this->formData['hof_kcc_cards'][$cIndex]['date'] = '';
                     $this->formData['hof_kcc_cards'][$cIndex]['issuing_authority'] = '';
@@ -414,7 +414,7 @@ class AnnapurnaYojanaForm extends Component
         if (count($parts) === 4 && $parts[1] === 'kcc_cards' && $parts[3] === 'type') {
             $index = (int) $parts[0];
             $cIndex = (int) $parts[2];
-            if (empty($value) && isset($this->members[$index]['kcc_cards'][$cIndex])) {
+            if ((empty($value) || $value === 'None') && isset($this->members[$index]['kcc_cards'][$cIndex])) {
                 $this->members[$index]['kcc_cards'][$cIndex]['id_no'] = '';
                 $this->members[$index]['kcc_cards'][$cIndex]['date'] = '';
                 $this->members[$index]['kcc_cards'][$cIndex]['issuing_authority'] = '';
@@ -650,17 +650,17 @@ class AnnapurnaYojanaForm extends Component
             'highest_qualification' => '',
 
             // Section E (CAA / KCC / SIR)
-            'caa_status' => 'Not Applicable',
+            'caa_status' => '',
             'caa_app_no' => '',
             'caa_cert_no' => '',
             'kcc_cards' => [
                 ['type' => '', 'id_no' => '', 'date' => '', 'issuing_authority' => ''],
             ],
-            'sir_status' => 'Not Applicable',
+            'sir_status' => '',
             'sir_case_details' => '',
 
             // Section G (Government Scheme Benefits)
-            'has_dbt_benefits' => 'No',
+            'has_dbt_benefits' => '',
             'dbt_benefits' => [
                 ['scheme_name' => '', 'opt_out' => false],
             ],
@@ -1154,7 +1154,7 @@ class AnnapurnaYojanaForm extends Component
                     return false;
                 }
                 foreach ($this->formData['hof_kcc_cards'] ?? [] as $card) {
-                    if (!empty($card['type']) && empty($card['id_no'])) {
+                    if (!empty($card['type']) && $card['type'] !== 'None' && empty($card['id_no'])) {
                         return false;
                     }
                 }
@@ -1291,7 +1291,7 @@ class AnnapurnaYojanaForm extends Component
                     return false;
                 }
                 foreach ($member['kcc_cards'] ?? [] as $card) {
-                    if (!empty($card['type']) && empty($card['id_no'])) {
+                    if (!empty($card['type']) && $card['type'] !== 'None' && empty($card['id_no'])) {
                         return false;
                     }
                 }
@@ -1552,7 +1552,7 @@ private function getDocumentRules($docTypeId)
 
         $panRegex = !empty($jsonRules['pan']['regex'])
             ? 'regex:/' . $jsonRules['pan']['regex'] . '/'
-            : 'regex:/^[A-Z]{3}[CPHFATBLJG][A-Z][0-9]{4}[A-Z]$/';
+            : 'regex:/^[A-Z]{5}[0-9]{4}[A-Z]$/';
 
         if ($section !== null) {
             // Section-specific validation (for validateSection)
@@ -1734,7 +1734,8 @@ private function getDocumentRules($docTypeId)
                     }
 
                     foreach ($this->formData['hof_kcc_cards'] ?? [] as $ki => $card) {
-                        if (!empty($card['type'])) {
+                        $rules["formData.hof_kcc_cards.{$ki}.type"] = 'required';
+                        if (!empty($card['type']) && $card['type'] !== 'None') {
                             $rules["formData.hof_kcc_cards.{$ki}.id_no"] = 'required|string|max:100';
                             $rules["formData.hof_kcc_cards.{$ki}.date"] = 'nullable|date|before:today';
                             $rules["formData.hof_kcc_cards.{$ki}.issuing_authority"] = 'nullable|string|max:255';
@@ -1757,7 +1758,8 @@ private function getDocumentRules($docTypeId)
                         }
 
                         foreach ($member['kcc_cards'] ?? [] as $ki => $card) {
-                            if (!empty($card['type'])) {
+                            $rules["members.{$index}.kcc_cards.{$ki}.type"] = 'required';
+                            if (!empty($card['type']) && $card['type'] !== 'None') {
                                 $rules["members.{$index}.kcc_cards.{$ki}.id_no"] = 'required|string|max:100';
                                 $rules["members.{$index}.kcc_cards.{$ki}.date"] = 'nullable|date|before:today';
                                 $rules["members.{$index}.kcc_cards.{$ki}.issuing_authority"] = 'nullable|string|max:255';
@@ -1930,7 +1932,8 @@ private function getDocumentRules($docTypeId)
 
             // HOF cards validation
             foreach ($this->formData['hof_kcc_cards'] ?? [] as $ki => $card) {
-                if (!empty($card['type'])) {
+                $rules["formData.hof_kcc_cards.{$ki}.type"] = 'required';
+                if (!empty($card['type']) && $card['type'] !== 'None') {
                     $rules["formData.hof_kcc_cards.{$ki}.id_no"] = 'required|string|max:100';
                     $rules["formData.hof_kcc_cards.{$ki}.date"] = 'nullable|date|before:today';
                     $rules["formData.hof_kcc_cards.{$ki}.issuing_authority"] = 'nullable|string|max:255';
@@ -2009,7 +2012,8 @@ private function getDocumentRules($docTypeId)
                     }
 
                     foreach ($member['kcc_cards'] ?? [] as $ki => $card) {
-                        if (!empty($card['type'])) {
+                        $rules["members.{$index}.kcc_cards.{$ki}.type"] = 'required';
+                        if (!empty($card['type']) && $card['type'] !== 'None') {
                             $rules["members.{$index}.kcc_cards.{$ki}.id_no"] = 'required|string|max:100';
                             $rules["members.{$index}.kcc_cards.{$ki}.date"] = 'nullable|date|before:today';
                             $rules["members.{$index}.kcc_cards.{$ki}.issuing_authority"] = 'nullable|string|max:255';
@@ -2169,6 +2173,7 @@ private function getDocumentRules($docTypeId)
                     $messages['formData.hof_sir_status.required'] = 'SIR pending tribunal status is required.';
                     $messages['formData.hof_sir_case_details.required'] = 'SIR pending case details are required.';
                     foreach ($this->formData['hof_kcc_cards'] ?? [] as $ki => $card) {
+                        $messages["formData.hof_kcc_cards.{$ki}.type.required"] = 'Card Type selection is required for HOF Card ' . ($ki + 1) . '.';
                         $messages["formData.hof_kcc_cards.{$ki}.id_no.required"] = 'Card ID Number is required for HOF Card ' . ($ki + 1) . '.';
                         $messages["formData.hof_kcc_cards.{$ki}.date.before"] = 'Issue Date must be in the past for HOF Card ' . ($ki + 1) . '.';
                     }
@@ -2180,6 +2185,7 @@ private function getDocumentRules($docTypeId)
                     $messages["members.{$index}.sir_status.required"] = 'SIR status is required for member.';
                     $messages["members.{$index}.sir_case_details.required"] = 'SIR case details are required for member.';
                     foreach ($this->members[$index]['kcc_cards'] ?? [] as $ki => $card) {
+                        $messages["members.{$index}.kcc_cards.{$ki}.type.required"] = 'Card Type selection is required for Member Card ' . ($ki + 1) . '.';
                         $messages["members.{$index}.kcc_cards.{$ki}.id_no.required"] = 'Card ID Number is required for Member Card ' . ($ki + 1) . '.';
                         $messages["members.{$index}.kcc_cards.{$ki}.date.before"] = 'Issue Date must be in the past for Member Card ' . ($ki + 1) . '.';
                     }
@@ -2285,6 +2291,7 @@ private function getDocumentRules($docTypeId)
 
             // HOF cards validation messages
             foreach ($this->formData['hof_kcc_cards'] ?? [] as $ki => $card) {
+                $messages["formData.hof_kcc_cards.{$ki}.type.required"] = 'Card Type selection is required for HOF Card ' . ($ki + 1) . '.';
                 $messages["formData.hof_kcc_cards.{$ki}.id_no.required"] = 'Card ID Number is required for HOF Card ' . ($ki + 1) . '.';
                 $messages["formData.hof_kcc_cards.{$ki}.date.before"] = 'Issue Date must be in the past for HOF Card ' . ($ki + 1) . '.';
             }
@@ -2337,6 +2344,7 @@ private function getDocumentRules($docTypeId)
                 $messages["members.{$index}.part_no.required"] = 'Member #' . ($index + 1) . ' Part Number of Electoral Roll is required when Voter ID is entered.';
 
                 foreach ($member['kcc_cards'] ?? [] as $ki => $card) {
+                    $messages["members.{$index}.kcc_cards.{$ki}.type.required"] = 'Card Type selection is required for Member #' . ($index + 1) . ' Card ' . ($ki + 1) . '.';
                     $messages["members.{$index}.kcc_cards.{$ki}.id_no.required"] = 'Card ID Number is required for Member #' . ($index + 1) . ' Card ' . ($ki + 1) . '.';
                     $messages["members.{$index}.kcc_cards.{$ki}.date.before"] = 'Issue Date must be in the past for Member #' . ($index + 1) . ' Card ' . ($ki + 1) . '.';
                 }
@@ -3455,11 +3463,7 @@ private function getDocumentRules($docTypeId)
 
     private function validateVerhoeff($aadhaar)
     {
-        if (! preg_match('/^[2-9]\d{11}$/', $aadhaar)) {
-            return false;
-        }
-
-        if (preg_match('/^(\d)\1{11}$/', $aadhaar)) {
+        if (! preg_match('/^\d{12}$/', $aadhaar)) {
             return false;
         }
 

@@ -18,10 +18,14 @@
                             স্থিতি</span></label>
                     <select wire:model.live="formData.hof_caa_status"
                         class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">-- Select --</option>
                         <option value="Not Applicable">Not Applicable / প্রযোজ্য নয়</option>
                         <option value="Applied">Applied / আবেদন করা হয়েছে</option>
                         <option value="Issued">Issued / সংশাপত্র প্রদান করা হয়েছে</option>
                     </select>
+                    @error('formData.hof_caa_status')
+                        <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span>
+                    @enderror
                 </div>
                 @if ($formData['hof_caa_status'] === 'Applied')
                     <div>
@@ -34,6 +38,7 @@
                         @error('formData.hof_caa_app_no')
                             <span class="text-red-600 text-xs">{{ $message }}</span>
                         @enderror
+                        <x-upload-button doc-id="111" />
                     </div>
                 @elseif ($formData['hof_caa_status'] === 'Issued')
                     <div>
@@ -46,6 +51,7 @@
                         @error('formData.hof_caa_cert_no')
                             <span class="text-red-600 text-xs">{{ $message }}</span>
                         @enderror
+                        <x-upload-button doc-id="111" />
                     </div>
                 @endif
             </div>
@@ -88,7 +94,8 @@
                                     <br><span class="text-xs text-gray-500 font-normal">কার্ডের প্রকার</span></label>
                                 <select wire:model.live="formData.hof_kcc_cards.{{ $ki }}.type"
                                     class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                    <option value="">None / কোনোটিই নয়</option>
+                                    <option value="">-- Select Card Type --</option>
+                                    <option value="None">None / কোনোটিই নয়</option>
                                     @foreach ($documentTypes as $docType)
                                         <option value="{{ $docType['value'] }}">
                                             {{ $docType['label'] }}
@@ -102,8 +109,11 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                @error("formData.hof_kcc_cards.{$ki}.type")
+                                    <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
                             </div>
-                            @if (!empty($card['type']))
+                            @if (!empty($card['type']) && $card['type'] !== 'None')
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-1">Card ID Number *
                                         <br><span class="text-xs text-gray-500 font-normal">কার্ড আইডি নম্বর</span></label>
@@ -133,6 +143,10 @@
                     </div>
                 @endforeach
             </div>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <p class="text-xs font-semibold text-gray-600 mb-1">Upload KCC/Artisan Card Document (if any):</p>
+                <x-upload-button doc-id="114" />
+            </div>
         </div>
 
         {{-- HOF SIR Status --}}
@@ -154,10 +168,14 @@
                             স্থিতি</span></label>
                     <select wire:model.live="formData.hof_sir_status"
                         class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">-- Select --</option>
                         <option value="Not Applicable">Not Applicable / প্রযোজ্য নয়</option>
                         <option value="No">No Pending Case / কোনো মামলা নেই</option>
                         <option value="Yes">Yes, Case Pending / মামলা বিচারাধীন আছে</option>
                     </select>
+                    @error('formData.hof_sir_status')
+                        <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span>
+                    @enderror
                 </div>
                 @if ($formData['hof_sir_status'] === 'Yes')
                     <div class="md:col-span-2">
@@ -170,6 +188,7 @@
                         @error('formData.hof_sir_case_details')
                             <span class="text-red-600 text-xs">{{ $message }}</span>
                         @enderror
+                        <x-upload-button doc-id="110" />
                     </div>
                 @endif
             </div>
@@ -201,10 +220,14 @@
                                 স্থিতি</span></label>
                         <select wire:model.live="members.{{ $index }}.caa_status"
                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">-- Select --</option>
                             <option value="Not Applicable">Not Applicable / প্রযোজ্য নয়</option>
                             <option value="Applied">Applied / আবেদন করা হয়েছে</option>
                             <option value="Issued">Issued / সংশাপত্র প্রদান করা হয়েছে</option>
                         </select>
+                        @error("members.{$index}.caa_status")
+                            <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span>
+                        @enderror
                     </div>
                     @if (($members[$index]['caa_status'] ?? '') === 'Applied')
                         <div>
@@ -218,6 +241,7 @@
                             @error("members.{$index}.caa_app_no")
                                 <span class="text-red-600 text-xs">{{ $message }}</span>
                             @enderror
+                            <x-upload-button doc-id="111" />
                         </div>
                     @elseif (($members[$index]['caa_status'] ?? '') === 'Issued')
                         <div>
@@ -231,6 +255,7 @@
                             @error("members.{$index}.caa_cert_no")
                                 <span class="text-red-600 text-xs">{{ $message }}</span>
                             @enderror
+                            <x-upload-button doc-id="111" />
                         </div>
                     @endif
                 </div>
@@ -269,7 +294,8 @@
                                             <br><span class="text-xs text-gray-500 font-normal">কার্ডের প্রকার</span></label>
                                         <select wire:model.live="members.{{ $index }}.kcc_cards.{{ $ci }}.type"
                                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                            <option value="">None / কোনোটিই নয়</option>
+                                            <option value="">-- Select Card Type --</option>
+                                            <option value="None">None / কোনোটিই নয়</option>
                                             @foreach ($documentTypes as $docType)
                                                 <option value="{{ $docType['value'] }}">
                                                     {{ $docType['label'] }}
@@ -283,8 +309,11 @@
                                                 </option>
                                             @endforeach
                                         </select>
+                                        @error("members.{$index}.kcc_cards.{$ci}.type")
+                                            <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                        @enderror
                                     </div>
-                                    @if (!empty($card['type']))
+                                    @if (!empty($card['type']) && $card['type'] !== 'None')
                                         <div>
                                             <label class="block text-sm font-semibold text-gray-700 mb-1">Card ID Number *
                                                 <br><span class="text-xs text-gray-500 font-normal">কার্ড আইডি নম্বর</span></label>
@@ -314,6 +343,10 @@
                             </div>
                         @endforeach
                     </div>
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <p class="text-xs font-semibold text-gray-600 mb-1">Upload KCC/Artisan Card Document (if any):</p>
+                        <x-upload-button doc-id="114" />
+                    </div>
                 </div>
 
                 {{-- SIR Status --}}
@@ -325,10 +358,14 @@
                                 স্থিতি</span></label>
                         <select wire:model.live="members.{{ $index }}.sir_status"
                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">-- Select --</option>
                             <option value="Not Applicable">Not Applicable / প্রযোজ্য নয়</option>
                             <option value="No">No Pending Case / কোনো মামলা নেই</option>
                             <option value="Yes">Yes, Case Pending / মামলা বিচারাধীন আছে</option>
                         </select>
+                        @error("members.{$index}.sir_status")
+                            <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span>
+                        @enderror
                     </div>
                     @if (($members[$index]['sir_status'] ?? '') === 'Yes')
                         <div class="md:col-span-2">
@@ -343,6 +380,7 @@
                             @error("members.{$index}.sir_case_details")
                                 <span class="text-red-600 text-xs">{{ $message }}</span>
                             @enderror
+                            <x-upload-button doc-id="110" />
                         </div>
                     @endif
                 </div>

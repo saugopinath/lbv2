@@ -51,6 +51,8 @@
                     @error('formData.land_size_decimals')
                         <span class="text-red-600 text-xs">{{ $message }}</span>
                     @enderror
+
+                    <x-upload-button doc-id="108" />
                 </div>
                 @endif
             </div>
@@ -195,6 +197,8 @@
                     @error('formData.health_insurance_type')
                         <span class="text-red-600 text-xs">{{ $message }}</span>
                     @enderror
+
+                    <x-upload-button doc-id="107" />
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Annual Premium
@@ -261,6 +265,8 @@
                         @error("members.{$index}.health_insurance_type")
                             <span class="text-red-600 text-xs">{{ $message }}</span>
                         @enderror
+
+                        <x-upload-button doc-id="107" />
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Annual

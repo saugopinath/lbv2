@@ -26,9 +26,13 @@
                             কি?</span></label>
                     <select wire:model.live="formData.hof_has_dbt_benefits"
                         class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">-- Select --</option>
                         <option value="No">No / না</option>
                         <option value="Yes">Yes / হ্যাঁ</option>
                     </select>
+                    @error('formData.hof_has_dbt_benefits')
+                        <span class="text-red-600 text-xs block mt-1">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
 
@@ -126,9 +130,13 @@
                                 সুবিধা পান কি?</span></label>
                         <select wire:model.live="members.{{ $index }}.has_dbt_benefits"
                             class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">-- Select --</option>
                             <option value="No">No / না</option>
                             <option value="Yes">Yes / হ্যাঁ</option>
                         </select>
+                        @error("members.{$index}.has_dbt_benefits")
+                            <span class="text-red-600 text-xs block mt-1">{{ $message }}</span>
+                        @enderror
                     </div>
                 </div>
 
