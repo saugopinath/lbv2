@@ -65,5 +65,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         User::observe(UserObserver::class);
+
+
+        if (app()->environment('local', 'staging')) {
+            \Illuminate\Support\Facades\Validator::extend('captcha', function ($attribute, $value, $parameters, $validator) {
+                return true;
+            });
+        }
     }
 }

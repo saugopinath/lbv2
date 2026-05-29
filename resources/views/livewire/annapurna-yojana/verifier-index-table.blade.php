@@ -83,23 +83,6 @@
         </div>
     @endif
 
-    {{-- ── Stats Cards ──────────────────────────────────────────────────── --}}
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        @foreach ([
-            ['label' => 'Total Applications', 'value' => $stats->total_families ?? 0,  'bgStyle' => 'linear-gradient(135deg, #4f46e5 0%, #1e1b4b 100%)', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
-            ['label' => 'Total Members',      'value' => $stats->total_members  ?? 0,  'bgStyle' => 'linear-gradient(135deg, #0284c7 0%, #0c4a6e 100%)', 'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0'],
-            ['label' => 'Pending',            'value' => $stats->pending        ?? 0,  'bgStyle' => 'linear-gradient(135deg, #d97706 0%, #7c2d12 100%)', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
-            ['label' => 'Verified',           'value' => $stats->verified       ?? 0,  'bgStyle' => 'linear-gradient(135deg, #059669 0%, #064e3b 100%)', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
-        ] as $card)
-            <div class="relative overflow-hidden rounded-xl p-4 text-white shadow-md border border-white/5" style="background: {{ $card['bgStyle'] }};">
-                <p class="text-xs font-medium opacity-80">{{ $card['label'] }}</p>
-                <p class="mt-1 text-2xl font-bold">{{ number_format($card['value']) }}</p>
-                <svg class="absolute -right-2 -bottom-2 w-14 h-14 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="{{ $card['icon'] }}"/>
-                </svg>
-            </div>
-        @endforeach
-    </div>
 
     {{-- ── Filters ───────────────────────────────────────────────────────── --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 space-y-3">
@@ -172,20 +155,19 @@
             class="h-1 w-full bg-gradient-to-r from-violet-500 via-indigo-500 to-violet-500
                    animate-pulse rounded-t-2xl">
         </div>
-
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
-                <thead>
-                    <tr class="bg-violet-800 text-white text-xs uppercase tracking-wider">
-                        <th class="px-4 py-3 text-left whitespace-nowrap">Temp. Application ID</th>
-                        <th class="px-4 py-3 text-left whitespace-nowrap">Family Members Name</th>
-                        <th class="px-4 py-3 text-left whitespace-nowrap">Mobile No</th>
-                        <th class="px-4 py-3 text-left whitespace-nowrap">Aadhaar No</th>
-                        <th class="px-4 py-3 text-center whitespace-nowrap">Age</th>
-                        <th class="px-4 py-3 text-center whitespace-nowrap">Gender</th>
-                        <th class="px-4 py-3 text-left whitespace-nowrap">Address</th>
-                        <th class="px-4 py-3 text-center whitespace-nowrap">Status</th>
-                        <th class="px-4 py-3 text-center whitespace-nowrap">Action</th>
+                <thead style="background-color: #5b21b6 !important; color: #ffffff !important;" class="text-xs uppercase tracking-wider">
+                    <tr style="background-color: #5b21b6 !important; color: #ffffff !important;">
+                        <th style="background-color: #5b21b6 !important; color: #ffffff !important; color: white !important;" class="px-4 py-3 text-left whitespace-nowrap">Temp. Application ID</th>
+                        <th style="background-color: #5b21b6 !important; color: #ffffff !important; color: white !important;" class="px-4 py-3 text-left whitespace-nowrap">Family Members Name</th>
+                        <th style="background-color: #5b21b6 !important; color: #ffffff !important; color: white !important;" class="px-4 py-3 text-left whitespace-nowrap">Mobile No</th>
+                        <th style="background-color: #5b21b6 !important; color: #ffffff !important; color: white !important;" class="px-4 py-3 text-left whitespace-nowrap">Aadhaar No</th>
+                        <th style="background-color: #5b21b6 !important; color: #ffffff !important; color: white !important;" class="px-4 py-3 text-center whitespace-nowrap">Age</th>
+                        <th style="background-color: #5b21b6 !important; color: #ffffff !important; color: white !important;" class="px-4 py-3 text-center whitespace-nowrap">Gender</th>
+                        <th style="background-color: #5b21b6 !important; color: #ffffff !important; color: white !important;" class="px-4 py-3 text-left whitespace-nowrap">Address</th>
+                        <th style="background-color: #5b21b6 !important; color: #ffffff !important; color: white !important;" class="px-4 py-3 text-center whitespace-nowrap">Status</th>
+                        <th style="background-color: #5b21b6 !important; color: #ffffff !important; color: white !important;" class="px-4 py-3 text-center whitespace-nowrap">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y-0">

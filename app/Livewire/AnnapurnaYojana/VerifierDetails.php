@@ -94,6 +94,23 @@ class VerifierDetails extends Component
         ";
         $this->family = DB::connection('pgsql_ay')->selectOne($familySql, [$this->familyId]);
 
+        if ($this->family) {
+            $f = $this->family;
+            $f->district = !empty($f->lgd_district_code) ? \App\Models\District::find($f->lgd_district_code)?->name : null;
+            if ($f->area_type === 'Rural') {
+                $f->block = !empty($f->lgd_block_mc_code) ? \App\Models\Block::find($f->lgd_block_mc_code)?->name : null;
+                $f->gp = !empty($f->lgd_gp_ward_code) ? \App\Models\Panchayat::find($f->lgd_gp_ward_code)?->name : null;
+                $f->ward = null;
+                $f->ulb = null;
+            } else {
+                $f->block = null;
+                $f->gp = null;
+                $f->ulb = !empty($f->ulb) ? \App\Models\Municipality::find($f->ulb)?->name : null;
+                $f->ward = !empty($f->lgd_gp_ward_code) ? \App\Models\Ward::find($f->lgd_gp_ward_code)?->name : null;
+            }
+            $f->status = $f->application_status ?? null;
+        }
+
         if (!$this->family) {
             session()->flash('error', 'Family application not found.');
             $this->redirect(route('annapurna-yojana-verification'));
@@ -121,12 +138,12 @@ class VerifierDetails extends Component
             SELECT * 
             FROM   dbt_apy.family_members 
             WHERE  family_id = ? 
-            ORDER  BY is_ho_f DESC, id ASC
+            ORDER  BY is_hof DESC, id ASC
         ";
         $this->members = DB::connection('pgsql_ay')->select($membersSql, [$this->familyId]);
         
         foreach ($this->members as $m) {
-            $m->is_hof = $m->is_ho_f ?? false;
+            $m->is_hof = $m->is_hof ?? false;
         }
     }
 

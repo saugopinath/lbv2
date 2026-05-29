@@ -140,7 +140,7 @@ class ApproverIndexTable extends Component
         $bindings   = [];
 
         if ($this->district_id) {
-            $conditions[] = 'f.district = ?';
+            $conditions[] = 'f.lgd_district_code = ?';
             $bindings[]   = $this->district_id;
         }
 
@@ -151,17 +151,17 @@ class ApproverIndexTable extends Component
                 $bindings[]   = $this->blockurban;
             }
             if ($this->gp_ward) {
-                $conditions[] = 'f.ward = ?';
+                $conditions[] = 'f.lgd_gp_ward_code = ?';
                 $bindings[]   = $this->gp_ward;
             }
         } elseif ($this->rural_urban == 2) {
             $conditions[] = "f.area_type ILIKE 'Rural'";
             if ($this->blockurban) {
-                $conditions[] = 'f.block = ?';
+                $conditions[] = 'f.lgd_block_mc_code = ?';
                 $bindings[]   = $this->blockurban;
             }
             if ($this->gp_ward) {
-                $conditions[] = 'f.gp = ?';
+                $conditions[] = 'f.lgd_gp_ward_code = ?';
                 $bindings[]   = $this->gp_ward;
             }
         }
@@ -326,18 +326,17 @@ class ApproverIndexTable extends Component
                     f.id                                 AS family_id,
                     CAST(f.application_id AS TEXT)       AS application_id,
                     f.area_type,
-                    f.gp,
+                    f.lgd_gp_ward_code,
                     f.ulb,
-                    f.ward,
-                    f.district,
-                    f.block,
-                    f.status,
+                    f.lgd_district_code,
+                    f.lgd_block_mc_code,
+                    f.application_status,
                     f.next_level_role_id,
                     f.is_reverted,
                     f.total_family_members,
                     fm.id                                AS member_id,
                     fm.member_name,
-                    fm.is_ho_f                           AS is_hof,
+                    fm.is_hof,
                     fm.mobile_no,
                     fm.aadhaar_no,
                     fm.date_of_birth,
@@ -348,28 +347,16 @@ class ApproverIndexTable extends Component
                 FROM   dbt_apy.families f
                 INNER  JOIN dbt_apy.family_members fm ON fm.family_id = f.id
                 WHERE  {$memberWhere}
-                ORDER  BY f.id ASC, fm.is_ho_f DESC, fm.id ASC
+                ORDER  BY f.id ASC, fm.is_hof DESC, fm.id ASC
             ";
 
             $rows     = DB::connection('pgsql_ay')->select($membersSql, $memberBindings);
+            
+            // Resolve location names and status dynamically
+            $this->resolveLocationNames($rows);
+
             $families = collect($rows)->groupBy('family_id');
         }
-
-        // ── 4. Stats counters (Mapped to approver workflow) ──────────────────
-        // The Approver wants stats based on:
-        // - Total Verified pending approval (role_id = 50)
-        // - Total Approved finalized (role_id = 100)
-        // Let's query across the complete un-filtered tables so counts remain accurate.
-        $statsSql = "
-            SELECT
-                COUNT(DISTINCT f.id)                                                          AS total_families,
-                COUNT(fm.id)                                                                  AS total_members,
-                COUNT(DISTINCT CASE WHEN COALESCE(f.next_level_role_id, 0) = 50 THEN f.id END) AS pending_approval,
-                COUNT(DISTINCT CASE WHEN f.next_level_role_id = 100 THEN f.id END)            AS approved
-            FROM dbt_apy.families f
-            INNER JOIN dbt_apy.family_members fm ON fm.family_id = f.id
-        ";
-        $stats = DB::connection('pgsql_ay')->selectOne($statsSql);
 
         // ── 5. Paginator for links ───────────────────────────────────────────
         $paginator = new LengthAwarePaginator(
@@ -383,7 +370,53 @@ class ApproverIndexTable extends Component
         return view('livewire.annapurna-yojana.approver-index-table', [
             'families'  => $families,
             'paginator' => $paginator,
-            'stats'     => $stats,
         ]);
+    }
+
+    /**
+     * Bulk resolve LGD names from the default connection to avoid N+1 queries.
+     */
+    protected function resolveLocationNames(array $rows): void
+    {
+        if (empty($rows)) return;
+
+        $districtIds = [];
+        $blockIds = [];
+        $gpIds = [];
+        $ulbIds = [];
+        $wardIds = [];
+
+        foreach ($rows as $row) {
+            if (!empty($row->lgd_district_code)) $districtIds[] = $row->lgd_district_code;
+            if ($row->area_type === 'Rural') {
+                if (!empty($row->lgd_block_mc_code)) $blockIds[] = $row->lgd_block_mc_code;
+                if (!empty($row->lgd_gp_ward_code)) $gpIds[] = $row->lgd_gp_ward_code;
+            } else {
+                if (!empty($row->ulb)) $ulbIds[] = $row->ulb;
+                if (!empty($row->lgd_gp_ward_code)) $wardIds[] = $row->lgd_gp_ward_code;
+            }
+        }
+
+        $districts = !empty($districtIds) ? \App\Models\District::whereIn('id', array_unique($districtIds))->pluck('name', 'id') : collect();
+        $blocks = !empty($blockIds) ? \App\Models\Block::whereIn('id', array_unique($blockIds))->pluck('name', 'id') : collect();
+        $gps = !empty($gpIds) ? \App\Models\Panchayat::whereIn('id', array_unique($gpIds))->pluck('name', 'id') : collect();
+        $ulbs = !empty($ulbIds) ? \App\Models\Municipality::whereIn('id', array_unique($ulbIds))->pluck('name', 'id') : collect();
+        $wards = !empty($wardIds) ? \App\Models\Ward::whereIn('id', array_unique($wardIds))->pluck('name', 'id') : collect();
+
+        foreach ($rows as $row) {
+            $row->district = $districts[$row->lgd_district_code] ?? null;
+            if ($row->area_type === 'Rural') {
+                $row->block = $blocks[$row->lgd_block_mc_code] ?? null;
+                $row->gp = $gps[$row->lgd_gp_ward_code] ?? null;
+                $row->ward = null;
+                $row->ulb = null;
+            } else {
+                $row->block = null;
+                $row->gp = null;
+                $row->ulb = $ulbs[$row->ulb] ?? null;
+                $row->ward = $wards[$row->lgd_gp_ward_code] ?? null;
+            }
+            $row->status = $row->application_status ?? null;
+        }
     }
 }
