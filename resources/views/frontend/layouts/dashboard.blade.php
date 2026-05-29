@@ -226,7 +226,7 @@
                         <span
                             class="inline-flex items-center gap-2 py-2 px-4 rounded-full text-sm font-medium bg-green-100 text-green-700">
                             <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                            {{$last_report_generation_time}}
+                            Report Generation Time: <span id="report-gen-time">{{ \Carbon\Carbon::now('Asia/Kolkata')->format('d-m-Y h:i:s A') }}</span>
                         </span>
                     </div>
 
@@ -241,7 +241,7 @@
         </div>
     </div>
 
-    <!-- Sidebar Active Link Handler -->
+    <!-- Sidebar Active Link Handler & Live Clock -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.sidebar-link').forEach(function(link) {
@@ -250,6 +250,27 @@
                     this.classList.add('active');
                 });
             });
+
+            // Live clock for Report Generation Time
+            const timeEl = document.getElementById('report-gen-time');
+            if (timeEl) {
+                function updateClock() {
+                    const now = new Date();
+                    const dd = String(now.getDate()).padStart(2, '0');
+                    const mm = String(now.getMonth() + 1).padStart(2, '0');
+                    const yyyy = now.getFullYear();
+                    let hours = now.getHours();
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    const seconds = String(now.getSeconds()).padStart(2, '0');
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    hours = hours % 12;
+                    hours = hours ? hours : 12; // the hour '0' should be '12'
+                    const hh = String(hours).padStart(2, '0');
+                    timeEl.textContent = `${dd}-${mm}-${yyyy} ${hh}:${minutes}:${seconds} ${ampm}`;
+                }
+                updateClock();
+                setInterval(updateClock, 1000);
+            }
         });
     </script>
 
