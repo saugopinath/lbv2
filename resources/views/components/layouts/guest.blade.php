@@ -38,7 +38,8 @@
                 </a>
                 <!-- <img class="w-64 mb-6" src="https://c.animaapp.com/mdn4r47eB5hzlO/img/biswo-1.png" alt="Logo"> -->
                 <div class="flex justify-center items-center ">
-                    <img src="{{ asset('images/' . config('jblbConf.logo')) }}" alt="Logo" class="{{ config('jblbConf.logo_class') }}">
+                    {{-- <img src="{{ asset('images/' . config('jblbConf.logo')) }}" alt="Logo"
+                        class="{{ config('jblbConf.logo_class') }}"> --}}
                 </div>
                 <div class="flex justify-center items-center ">
                     <!-- <div class="w-48 sm:w-64 mb-4 flex items-center justify-center text-center text-2xl sm:text-3xl font-bold text-green-800">
@@ -63,20 +64,21 @@
           </div> -->
                 <!-- Top Right Logo -->
                 <div class="w-full flex justify-center mb-2">
-                    <!-- @if(config('app.jblb_logo') == 1)
-                    <img src="{{ asset('images/biswo_bangla.png') }}" alt="Centered Logo" class="w-24 h-auto sm:block">
-                    @else
-                    <img src="{{ asset('images/biswo-1.png') }}" alt="Centered Logo" class="w-24 h-auto sm:block">
-                    @endif -->
+                    <!-- @if (config('app.jblb_logo') == 1)
+<img src="{{ asset('images/biswo_bangla.png') }}" alt="Centered Logo" class="w-24 h-auto sm:block">
+@else
+<img src="{{ asset('images/biswo-1.png') }}" alt="Centered Logo" class="w-24 h-auto sm:block">
+@endif -->
                     <!-- <h2 class="text-2xl lg:text-3xl text-center text-[#003974] font-bold">Lakshmir Bhandar Portal</h2> -->
-                    <img src="{{ asset('images/' . config('jblbConf.headerlogo')) }}" alt="Centered Logo" class="w-24 h-auto sm:block">
+                    {{-- <img src="{{ asset('images/' . config('jblbConf.headerlogo')) }}" alt="Centered Logo"
+                        class="w-24 h-auto sm:block"> --}}
                 </div>
                 <div class="text-center mb-2">
-                    <!-- @if(config('app.jblb_logo')==1)
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Jai Bangla Portal</h1>
-                    @else
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Lakshmir Bhandar Portal</h1>
-                    @endif -->
+                    <!-- @if (config('app.jblb_logo') == 1)
+<h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Jai Bangla Portal</h1>
+@else
+<h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Lakshmir Bhandar Portal</h1>
+@endif -->
                     <h1 class="text-2xl sm:text-3xl font-bold gradient-text">{{ config('jblbConf.headLine') }}</h1>
                 </div>
                 {{ $slot }}
@@ -89,19 +91,22 @@
                 <div class="flex flex-col items-center gap-3 text-center">
                     <!-- Copyright -->
                     <p class="text-[11px] md:text-xs font-medium text-white leading-relaxed drop-shadow-sm">
-                        &copy; {{ date('Y') }} This site is designed by National Informatics Centre (NIC). <br class="md:hidden">
-                        Content, DATA, Process and Operation owned and maintained by {{ config('jblbConf.deptName') }}, Government of West Bengal.
+                        Data,information, process owned and maintained by Government of West Bengal.
                     </p>
 
                     <!-- Links -->
                     <nav class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] md:text-xs">
-                        <a href="#" class="text-indigo-100 hover:text-white transition-colors duration-200">Privacy Policy</a>
+                        <a href="#"
+                            class="text-indigo-100 hover:text-white transition-colors duration-200">Privacy Policy</a>
                         <span class="text-white/30">|</span>
-                        <a href="#" class="text-indigo-100 hover:text-white transition-colors duration-200">Terms &amp; Conditions</a>
+                        <a href="#" class="text-indigo-100 hover:text-white transition-colors duration-200">Terms
+                            &amp; Conditions</a>
                         <span class="text-white/30">|</span>
-                        <a href="#" class="text-indigo-100 hover:text-white transition-colors duration-200">Help &amp; Support</a>
+                        <a href="#" class="text-indigo-100 hover:text-white transition-colors duration-200">Help
+                            &amp; Support</a>
                         <span class="text-white/30">|</span>
-                        <a href="#" class="text-indigo-100 hover:text-white transition-colors duration-200">Disclaimer</a>
+                        <a href="#"
+                            class="text-indigo-100 hover:text-white transition-colors duration-200">Disclaimer</a>
                     </nav>
                 </div>
             </div>

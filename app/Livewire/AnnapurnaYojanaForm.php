@@ -1428,11 +1428,11 @@ class AnnapurnaYojanaForm extends Component
 
             $healthInsuranceType = $this->formData['health_insurance_type'] ?? 'None';
             $hasHealthInsurance = ($healthInsuranceType !== 'None');
-            $healthInsurancePremium = $hasHealthInsurance ? ($this->formData['health_insurance_premium'] ?? null) : null;
-            $healthInsuranceSumAssured = $hasHealthInsurance ? ($this->formData['health_insurance_sum_assured'] ?? null) : null;
+            $healthInsurancePremium = ($hasHealthInsurance && !empty($this->formData['health_insurance_premium'])) ? (float) $this->formData['health_insurance_premium'] : null;
+            $healthInsuranceSumAssured = ($hasHealthInsurance && !empty($this->formData['health_insurance_sum_assured'])) ? (float) $this->formData['health_insurance_sum_assured'] : null;
 
             $ownsLand = (($this->formData['owns_land'] ?? '') === 'Yes');
-            $landSizeDecimals = $ownsLand ? ($this->formData['land_size_decimals'] ?? null) : null;
+            $landSizeDecimals = ($ownsLand && !empty($this->formData['land_size_decimals'])) ? (float) $this->formData['land_size_decimals'] : null;
 
             $hasFourWheeler = (($this->formData['owns_4_wheeler'] ?? '') === 'Yes');
             $vehicleCount = $hasFourWheeler && ! empty($this->formData['num_vehicles']) ? (int) $this->formData['num_vehicles'] : null;
@@ -1486,7 +1486,7 @@ class AnnapurnaYojanaForm extends Component
                 'member_name' => $this->formData['hof_name'] ?? '',
                 'aadhaar_no' => $this->formData['hof_aadhaar'] ?? '',
                 'mobile_no' => $this->formData['contact_no'] ?? null,
-                'date_of_birth' => $this->formData['hof_dob'] ?? null,
+                'date_of_birth' => !empty($this->formData['hof_dob']) ? $this->formData['hof_dob'] : null,
                 'gender' => $this->formData['hof_gender'] ?? null,
                 'digital_ration_card_no' => $rationCardHouseholdId,
                 'digital_ration_card_type' => $rationCardType,
@@ -1587,8 +1587,8 @@ class AnnapurnaYojanaForm extends Component
 
                 $mHealthInsuranceType = $isChild ? 'No' : ($member['health_insurance_type'] ?? 'No');
                 $mHasHealthInsurance = ! $isChild && ($mHealthInsuranceType !== 'No');
-                $mHealthInsurancePremium = $mHasHealthInsurance ? ($member['health_insurance_premium'] ?? null) : null;
-                $mHealthInsuranceSumAssured = $mHasHealthInsurance ? ($member['health_insurance_sum_assured'] ?? null) : null;
+                $mHealthInsurancePremium = ($mHasHealthInsurance && !empty($member['health_insurance_premium'])) ? (float) $member['health_insurance_premium'] : null;
+                $mHealthInsuranceSumAssured = ($mHasHealthInsurance && !empty($member['health_insurance_sum_assured'])) ? (float) $member['health_insurance_sum_assured'] : null;
 
                 $memberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->insertGetId([
                     'family_id' => $familyId,
@@ -1794,11 +1794,11 @@ class AnnapurnaYojanaForm extends Component
 
             $healthInsuranceType = $this->formData['health_insurance_type'] ?? 'None';
             $hasHealthInsurance = ($healthInsuranceType !== 'None');
-            $healthInsurancePremium = $hasHealthInsurance ? ($this->formData['health_insurance_premium'] ?? null) : null;
-            $healthInsuranceSumAssured = $hasHealthInsurance ? ($this->formData['health_insurance_sum_assured'] ?? null) : null;
+            $healthInsurancePremium = ($hasHealthInsurance && !empty($this->formData['health_insurance_premium'])) ? (float) $this->formData['health_insurance_premium'] : null;
+            $healthInsuranceSumAssured = ($hasHealthInsurance && !empty($this->formData['health_insurance_sum_assured'])) ? (float) $this->formData['health_insurance_sum_assured'] : null;
 
             $ownsLand = (($this->formData['owns_land'] ?? '') === 'Yes');
-            $landSizeDecimals = $ownsLand ? ($this->formData['land_size_decimals'] ?? null) : null;
+            $landSizeDecimals = ($ownsLand && !empty($this->formData['land_size_decimals'])) ? (float) $this->formData['land_size_decimals'] : null;
 
             $hasFourWheeler = (($this->formData['owns_4_wheeler'] ?? '') === 'Yes');
             $vehicleCount = $hasFourWheeler && ! empty($this->formData['num_vehicles']) ? (int) $this->formData['num_vehicles'] : null;
@@ -1852,7 +1852,7 @@ class AnnapurnaYojanaForm extends Component
                 'member_name' => $this->formData['hof_name'] ?? '',
                 'aadhaar_no' => $this->formData['hof_aadhaar'] ?? '',
                 'mobile_no' => $this->formData['contact_no'] ?? null,
-                'date_of_birth' => $this->formData['hof_dob'] ?? null,
+                'date_of_birth' => !empty($this->formData['hof_dob']) ? $this->formData['hof_dob'] : null,
                 'gender' => $this->formData['hof_gender'] ?? null,
                 'digital_ration_card_no' => $rationCardHouseholdId,
                 'digital_ration_card_type' => $rationCardType,
@@ -1953,8 +1953,8 @@ class AnnapurnaYojanaForm extends Component
 
                 $mHealthInsuranceType = $isChild ? 'No' : ($member['health_insurance_type'] ?? 'No');
                 $mHasHealthInsurance = ! $isChild && ($mHealthInsuranceType !== 'No');
-                $mHealthInsurancePremium = $mHasHealthInsurance ? ($member['health_insurance_premium'] ?? null) : null;
-                $mHealthInsuranceSumAssured = $mHasHealthInsurance ? ($member['health_insurance_sum_assured'] ?? null) : null;
+                $mHealthInsurancePremium = ($mHasHealthInsurance && !empty($member['health_insurance_premium'])) ? (float) $member['health_insurance_premium'] : null;
+                $mHealthInsuranceSumAssured = ($mHasHealthInsurance && !empty($member['health_insurance_sum_assured'])) ? (float) $member['health_insurance_sum_assured'] : null;
 
                 $memberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->insertGetId([
                     'family_id' => $familyId,

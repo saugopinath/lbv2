@@ -158,7 +158,7 @@
                     <h2 class="text-xs md:text-sm font-semibold uppercase tracking-wider" style="color: #fed7aa;">
                         Government of West Bengal</h2>
                     <h1 class="text-xl md:text-2xl font-bold font-serif text-amber-400">ANNAPURNA YOJANA</h1>
-                    <p class="text-xs" style="color: #ffedd5;">Department of Food & Supplies | খাদ্য ও সরবরাহ দপ্তর</p>
+
                 </div>
             </div>
             <div class="text-center md:text-right">
@@ -370,8 +370,11 @@
                                             error: '',
                                             valid: false,
                                             check() {
-                                                if (!this.val) { this.valid = false;
-                                                    this.error = ''; return; }
+                                                if (!this.val) {
+                                                    this.valid = false;
+                                                    this.error = '';
+                                                    return;
+                                                }
                                                 let cleaned = window.cleanInput.lettersOnly(this.val);
                                                 if (this.val !== cleaned) { this.val = cleaned; }
                                                 this.valid = window.checkValid.name(this.val);
@@ -448,8 +451,11 @@
                                             error: '',
                                             valid: false,
                                             check() {
-                                                if (!this.val) { this.valid = false;
-                                                    this.error = ''; return; }
+                                                if (!this.val) {
+                                                    this.valid = false;
+                                                    this.error = '';
+                                                    return;
+                                                }
                                                 let cleaned = window.cleanInput.numeric(this.val, 12);
                                                 if (this.val !== cleaned) { this.val = cleaned; }
                                                 this.valid = window.checkValid.aadhaar(this.val);
@@ -499,8 +505,11 @@
                                             error: '',
                                             valid: false,
                                             check() {
-                                                if (!this.val) { this.valid = false;
-                                                    this.error = ''; return; }
+                                                if (!this.val) {
+                                                    this.valid = false;
+                                                    this.error = '';
+                                                    return;
+                                                }
                                                 let cleaned = window.cleanInput.numeric(this.val, 10);
                                                 if (this.val !== cleaned) { this.val = cleaned; }
                                                 this.valid = window.checkValid.contact_no(this.val);
@@ -730,8 +739,11 @@
                                             error: '',
                                             valid: false,
                                             check() {
-                                                if (!this.val) { this.valid = false;
-                                                    this.error = ''; return; }
+                                                if (!this.val) {
+                                                    this.valid = false;
+                                                    this.error = '';
+                                                    return;
+                                                }
                                                 let cleaned = window.cleanInput.numeric(this.val, 6);
                                                 if (this.val !== cleaned) { this.val = cleaned; }
                                                 this.valid = window.checkValid.pincode(this.val);
@@ -776,8 +788,11 @@
                                             error: '',
                                             valid: false,
                                             async check() {
-                                                if (!this.val) { this.valid = false;
-                                                    this.error = ''; return; }
+                                                if (!this.val) {
+                                                    this.valid = false;
+                                                    this.error = '';
+                                                    return;
+                                                }
                                                 let cleaned = window.cleanInput.alphaNumericUpper(this.val, 11);
                                                 if (this.val !== cleaned) { this.val = cleaned; }
                                                 this.valid = window.checkValid.ifsc(this.val);
@@ -823,8 +838,11 @@
                                             error: '',
                                             valid: false,
                                             check() {
-                                                if (!this.val) { this.valid = false;
-                                                    this.error = ''; return; }
+                                                if (!this.val) {
+                                                    this.valid = false;
+                                                    this.error = '';
+                                                    return;
+                                                }
                                                 let cleaned = window.cleanInput.lettersOnly(this.val);
                                                 if (this.val !== cleaned) { this.val = cleaned; }
                                                 this.valid = window.checkValid.name(this.val);
@@ -854,8 +872,11 @@
                                             error: '',
                                             valid: false,
                                             check() {
-                                                if (!this.val) { this.valid = false;
-                                                    this.error = ''; return; }
+                                                if (!this.val) {
+                                                    this.valid = false;
+                                                    this.error = '';
+                                                    return;
+                                                }
                                                 let cleaned = window.cleanInput.numeric(this.val, 18);
                                                 if (this.val !== cleaned) { this.val = cleaned; }
                                                 this.valid = window.checkValid.acc_no(this.val);
@@ -900,8 +921,11 @@
                                             error: '',
                                             valid: false,
                                             check() {
-                                                if (!this.val) { this.valid = false;
-                                                    this.error = ''; return; }
+                                                if (!this.val) {
+                                                    this.valid = false;
+                                                    this.error = '';
+                                                    return;
+                                                }
                                                 let cleaned = window.cleanInput.alphaNumericUpper(this.val, 10);
                                                 if (this.val !== cleaned) { this.val = cleaned; }
                                                 this.valid = window.checkValid.epic(this.val);
@@ -934,7 +958,8 @@
                             @php
                                 $index = $activeMemberIndex - 1;
                             @endphp
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-identity-{{ $index }}">
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5"
+                                wire:key="member-identity-{{ $index }}">
                                 <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                     <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                         <span
@@ -983,8 +1008,11 @@
                                             error: '',
                                             valid: false,
                                             check() {
-                                                if (!this.val) { this.valid = false;
-                                                    this.error = ''; return; }
+                                                if (!this.val) {
+                                                    this.valid = false;
+                                                    this.error = '';
+                                                    return;
+                                                }
                                                 let cleaned = window.cleanInput.lettersOnly(this.val);
                                                 if (this.val !== cleaned) { this.val = cleaned; }
                                                 this.valid = window.checkValid.name(this.val);
@@ -1061,8 +1089,11 @@
                                             error: '',
                                             valid: false,
                                             check() {
-                                                if (!this.val) { this.valid = false;
-                                                    this.error = ''; return; }
+                                                if (!this.val) {
+                                                    this.valid = false;
+                                                    this.error = '';
+                                                    return;
+                                                }
                                                 let cleaned = window.cleanInput.numeric(this.val, 12);
                                                 if (this.val !== cleaned) { this.val = cleaned; }
                                                 this.valid = window.checkValid.aadhaar(this.val);
@@ -1109,8 +1140,11 @@
                                                 error: '',
                                                 valid: false,
                                                 check() {
-                                                    if (!this.val) { this.valid = false;
-                                                        this.error = ''; return; }
+                                                    if (!this.val) {
+                                                        this.valid = false;
+                                                        this.error = '';
+                                                        return;
+                                                    }
                                                     let cleaned = window.cleanInput.alphaNumericUpper(this.val, 10);
                                                     if (this.val !== cleaned) { this.val = cleaned; }
                                                     this.valid = window.checkValid.epic(this.val);
@@ -1143,7 +1177,8 @@
 
                             @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
                                 {{-- Member Bank details --}}
-                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 mt-4" wire:key="member-bank-{{ $index }}">
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 mt-4"
+                                    wire:key="member-bank-{{ $index }}">
                                     <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                         <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                             <span
@@ -1164,8 +1199,11 @@
                                                 error: '',
                                                 valid: false,
                                                 async check() {
-                                                    if (!this.val) { this.valid = false;
-                                                        this.error = ''; return; }
+                                                    if (!this.val) {
+                                                        this.valid = false;
+                                                        this.error = '';
+                                                        return;
+                                                    }
                                                     let cleaned = window.cleanInput.alphaNumericUpper(this.val, 11);
                                                     if (this.val !== cleaned) { this.val = cleaned; }
                                                     this.valid = window.checkValid.ifsc(this.val);
@@ -1212,8 +1250,11 @@
                                                 error: '',
                                                 valid: false,
                                                 check() {
-                                                    if (!this.val) { this.valid = false;
-                                                        this.error = ''; return; }
+                                                    if (!this.val) {
+                                                        this.valid = false;
+                                                        this.error = '';
+                                                        return;
+                                                    }
                                                     let cleaned = window.cleanInput.lettersOnly(this.val);
                                                     if (this.val !== cleaned) { this.val = cleaned; }
                                                     this.valid = window.checkValid.name(this.val);
@@ -1244,8 +1285,11 @@
                                                 error: '',
                                                 valid: false,
                                                 check() {
-                                                    if (!this.val) { this.valid = false;
-                                                        this.error = ''; return; }
+                                                    if (!this.val) {
+                                                        this.valid = false;
+                                                        this.error = '';
+                                                        return;
+                                                    }
                                                     let cleaned = window.cleanInput.numeric(this.val, 18);
                                                     if (this.val !== cleaned) { this.val = cleaned; }
                                                     this.valid = window.checkValid.acc_no(this.val);
@@ -1366,7 +1410,8 @@
                             @php
                                 $index = $activeMemberIndex - 1;
                             @endphp
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-ration-{{ $index }}">
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5"
+                                wire:key="member-ration-{{ $index }}">
                                 <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                     <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                         <span
@@ -1532,8 +1577,11 @@
                                                         error: '',
                                                         valid: false,
                                                         check() {
-                                                            if (!this.val) { this.valid = false;
-                                                                this.error = ''; return; }
+                                                            if (!this.val) {
+                                                                this.valid = false;
+                                                                this.error = '';
+                                                                return;
+                                                            }
                                                             let cleaned = window.cleanInput.alphaNumericUpper(this.val, 10);
                                                             if (this.val !== cleaned) { this.val = cleaned; }
                                                             this.valid = window.checkValid.vehicle(this.val);
@@ -1616,7 +1664,8 @@
                                 $index = $activeMemberIndex - 1;
                             @endphp
                             @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
-                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-insurance-{{ $index }}">
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5"
+                                    wire:key="member-insurance-{{ $index }}">
                                     <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                         <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                             <span
@@ -1705,8 +1754,11 @@
                                             error: '',
                                             valid: false,
                                             check() {
-                                                if (!this.val) { this.valid = false;
-                                                    this.error = ''; return; }
+                                                if (!this.val) {
+                                                    this.valid = false;
+                                                    this.error = '';
+                                                    return;
+                                                }
                                                 let cleaned = window.cleanInput.alphaNumericUpper(this.val, 10);
                                                 if (this.val !== cleaned) { this.val = cleaned; }
                                                 this.valid = window.checkValid.pan(this.val);
@@ -1928,7 +1980,8 @@
                                 $index = $activeMemberIndex - 1;
                             @endphp
                             @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
-                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-income-{{ $index }}">
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5"
+                                    wire:key="member-income-{{ $index }}">
                                     <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                         <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                             <span
@@ -1950,8 +2003,11 @@
                                                 error: '',
                                                 valid: false,
                                                 check() {
-                                                    if (!this.val) { this.valid = false;
-                                                        this.error = ''; return; }
+                                                    if (!this.val) {
+                                                        this.valid = false;
+                                                        this.error = '';
+                                                        return;
+                                                    }
                                                     let cleaned = window.cleanInput.alphaNumericUpper(this.val, 10);
                                                     if (this.val !== cleaned) { this.val = cleaned; }
                                                     this.valid = window.checkValid.pan(this.val);
@@ -2206,7 +2262,8 @@
                                 $index = $activeMemberIndex - 1;
                             @endphp
                             @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
-                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-otherdocs-{{ $index }}">
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5"
+                                    wire:key="member-otherdocs-{{ $index }}">
                                     <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                         <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                             <span
@@ -2349,7 +2406,8 @@
                         @endphp
                         @if ($activeMemberIndex > 0 && ($members[$index]['member_type'] ?? 'adult') === 'child')
                             {{-- Child School details --}}
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-school-{{ $index }}">
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5"
+                                wire:key="member-school-{{ $index }}">
                                 <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                     <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                         <span
@@ -2424,7 +2482,8 @@
                             </div>
 
                             {{-- Child Vaccination details --}}
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-vaccination-{{ $index }}">
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5"
+                                wire:key="member-vaccination-{{ $index }}">
                                 <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                     <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                         <span
@@ -2561,7 +2620,8 @@
                                 $index = $activeMemberIndex - 1;
                             @endphp
                             @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
-                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-benefits-{{ $index }}">
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5"
+                                    wire:key="member-benefits-{{ $index }}">
                                     <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                         <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                             <span

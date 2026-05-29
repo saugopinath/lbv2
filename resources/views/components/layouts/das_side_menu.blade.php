@@ -22,7 +22,7 @@
             'icon' => $icons['default'] . $icons['dashboard_smile'],
         ],
         [
-            'label' => 'ANNAPURNA BHANDAR',
+            'label' => 'ANNAPURNA Yojana',
             'key' => 'LBFrom',
             'icon' => $icons['default'] . $icons['dashboard_smile'],
             'permission' => 'canAnyLbMenu',
@@ -251,7 +251,7 @@
     <!-- Logo -->
     <div
         class="flex flex-col items-center border-b border-gray-700 dark:border-gray-700 bg-white {{ config('jblbConf.das_logo_class') }}">
-        <img src="{{ asset('images/' . config('jblbConf.das_logo')) }}" alt="Lakshmir Bhandar"
+        <img src="{{ asset('images/' . config('jblbConf.das_logo')) }}" alt="Lakshmir Yojana"
             class="{{ config('jblbConf.logo_das_width') }}" />
         @if (config('jblbConf.is_lb'))
             <template x-if="sidebar">
