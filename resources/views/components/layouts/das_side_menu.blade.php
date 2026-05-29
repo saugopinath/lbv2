@@ -251,16 +251,16 @@ break;
 }
 @endphp
 <aside :class="sidebar ? 'w-60' : 'w-16'"
-    class="transition-all duration-300 bg-gradient-to-r from-cyan-800 to-cyan-600 dark:bg-gray-800 shadow-lg flex flex-col h-screen"
+    class="transition-all duration-300 bg-gradient-to-b from-[#b34700] via-[#e06b00] to-[#f5a623] shadow-2xl flex flex-col h-screen border-r border-orange-900/30"
     x-data="{ activeMenu: '{{ $activeMenu }}' }">
     <!-- Logo -->
     <div
-        class="flex flex-col items-center border-b border-gray-700 dark:border-gray-700 bg-white {{ config('jblbConf.das_logo_class') }}">
+        class="flex flex-col items-center border-b border-orange-900/30 bg-white py-2 {{ config('jblbConf.das_logo_class') }}">
         <img src="{{ asset('images/' . config('jblbConf.das_logo')) }}" alt="Annapurna Yojana"
             class="{{ config('jblbConf.logo_das_width') }}" />
         @if (config('jblbConf.is_ay'))
         <template x-if="sidebar">
-            <div class="text-center font-bold text-sm text-blue-600">{{ config('jblbConf.headLine') }}</div>
+            <div class="text-center font-bold text-sm text-orange-700">{{ config('jblbConf.headLine') }}</div>
         </template>
         @endif
     </div>
@@ -281,7 +281,7 @@ break;
             @if ($isGroup)
             <button
                 @click="activeMenu === '{{ $item['key'] }}' ? activeMenu = null : activeMenu = '{{ $item['key'] }}'"
-                class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded {{ $isGroupActive ? 'bg-slate-800/50 border-l-4 border-white' : '' }}">
+                class="flex items-center w-full px-4 py-2.5 text-left transition-all duration-200 hover:bg-black/15 text-yellow-50 hover:text-white rounded-lg {{ $isGroupActive ? 'bg-black/20 border-l-4 border-yellow-300 text-white font-semibold' : '' }}">
                 <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
                     {!! $item['icon'] !!}
@@ -310,7 +310,7 @@ break;
                     @if ($canShowChild)
                     <li>
                         <a href="{{ $childUrl }}"
-                            class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white {{ $isChildActive ? 'bg-slate-700 text-white' : '' }}">
+                            class="flex items-center px-3 py-1.5 text-left text-yellow-100 rounded-md transition-all duration-200 hover:bg-black/15 hover:text-white {{ $isChildActive ? 'bg-black/20 text-yellow-200 font-semibold border-l-2 border-yellow-300' : '' }}">
                             <svg class="w-5 h-5 mr-2 flex-shrink-0"
                                 xmlns="http://www.w3.org/2000/svg" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
@@ -325,7 +325,7 @@ break;
             </div>
             @else
             <a href="{{ route($item['route']) }}"
-                class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded {{ $isActive ? 'bg-slate-700 text-white' : '' }}">
+                class="flex items-center w-full px-4 py-2.5 text-left transition-all duration-200 hover:bg-black/15 text-yellow-50 hover:text-white rounded-lg {{ $isActive ? 'bg-black/20 border-l-4 border-yellow-300 text-white font-semibold' : '' }}">
                 <svg class="w-5 h-5 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
                     {!! $item['icon'] !!}
