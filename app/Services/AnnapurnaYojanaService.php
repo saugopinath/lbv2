@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -28,6 +29,20 @@ class AnnapurnaYojanaService
         DB::connection('pgsql_annapurna')->beginTransaction();
 
         try {
+            $selectLgd = session('lgd_session');
+            $createdByDistCode = null;
+            $createdByLocalBodyCode = null;
+
+            if (! empty($selectLgd['district_id'])) {
+                $createdByDistCode = (int) Crypt::decryptString($selectLgd['district_id']);
+            }
+            if (! empty($selectLgd['block_id'])) {
+                $createdByLocalBodyCode = (int) Crypt::decryptString($selectLgd['block_id']);
+            }
+            if (! empty($selectLgd['subdivision_id'])) {
+                $createdByLocalBodyCode = (int) Crypt::decryptString($selectLgd['subdivision_id']);
+            }
+
             // 1. Resolve LGD location codes directly (inputs are verified during validation)
             $lgdDistrictCode = !empty($formData['district_id']) ? (int) $formData['district_id'] : 0;
             $lgdBlockMcCode = !empty($formData['blockurban']) ? (int) $formData['blockurban'] : 0;
@@ -112,6 +127,8 @@ class AnnapurnaYojanaService
                 'area_type' => ($formData['rural_urban'] ?? '') == 2 ? 'RURAL' : (($formData['rural_urban'] ?? '') == 1 ? 'URBAN' : null),
                 'ulb' => ($formData['rural_urban'] ?? '') == 1 ? (int) ($formData['blockurban'] ?? null) : null,
                 'updated_at' => now(),
+                'created_by_dist_code' => $createdByDistCode,
+                'created_by_local_body_code' => $createdByLocalBodyCode,
             ];
 
             if ($familyId) {
@@ -189,6 +206,8 @@ class AnnapurnaYojanaService
                 'lgd_district_code' => $lgdDistrictCode,
                 'lgd_block_mc_code' => $lgdBlockMcCode,
                 'lgd_gp_ward_code' => $lgdGpWardCode,
+                'created_by_dist_code' => $createdByDistCode,
+                'created_by_local_body_code' => $createdByLocalBodyCode,
             ], 'id');
 
             // Save HOF Employment Nature
@@ -310,6 +329,8 @@ class AnnapurnaYojanaService
                     'vaccination_card_id' => ($isChild && (($member['vaccination_status'] ?? '') === 'Yes' || ($member['vaccination_status'] ?? '') === 'Partial')) ? ($member['vaccination_card_id'] ?? null) : null,
                     'vaccination_status' => $isChild ? (!empty($member['vaccination_status']) ? $member['vaccination_status'] : null) : null,
                     'vaccination_skip_reason_or_date' => ($isChild && (($member['vaccination_status'] ?? '') === 'No' || ($member['vaccination_status'] ?? '') === 'Partial')) ? ($member['vaccination_skip_reason_or_date'] ?? null) : null,
+                    'created_by_dist_code' => $createdByDistCode,
+                    'created_by_local_body_code' => $createdByLocalBodyCode,
                 ], 'id');
 
                 // Save Member Employment Nature

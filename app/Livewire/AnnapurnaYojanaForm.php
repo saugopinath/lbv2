@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Services\AnnapurnaYojanaService;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -20,6 +21,10 @@ class AnnapurnaYojanaForm extends Component
     public $familyId = null;
 
     public $appId = null;
+
+    public $createdByDistCode = null;
+
+    public $createdByLocalBodyCode = null;
 
     // Form Navigation & Tabs
     public $activeMemberIndex = 0; // 0 = HOF, 1+ = Members
@@ -226,6 +231,18 @@ class AnnapurnaYojanaForm extends Component
 
         // Start with empty members list
         $this->members = [];
+
+        // Initialize created_by location codes from session
+        $selectLgd = session('lgd_session');
+        if (! empty($selectLgd['district_id'])) {
+            $this->createdByDistCode = (int) Crypt::decryptString($selectLgd['district_id']);
+        }
+        if (! empty($selectLgd['block_id'])) {
+            $this->createdByLocalBodyCode = (int) Crypt::decryptString($selectLgd['block_id']);
+        }
+        if (! empty($selectLgd['subdivision_id'])) {
+            $this->createdByLocalBodyCode = (int) Crypt::decryptString($selectLgd['subdivision_id']);
+        }
     }
 
     public function updatedFormDataDistrictId($value)
@@ -795,6 +812,13 @@ class AnnapurnaYojanaForm extends Component
 
     public function selectMember($index)
     {
+        if ($index > $this->activeMemberIndex) {
+            // Going forwards: validate intermediate members
+            for ($m = $this->activeMemberIndex; $m < $index; $m++) {
+                $this->validateMember($m);
+            }
+        }
+
         // Only save if something actually changed
         if ($this->isDirty) {
             $this->saveDraft();
@@ -810,6 +834,23 @@ class AnnapurnaYojanaForm extends Component
 
     public function selectSection($section)
     {
+        $sectionsList = array_keys($this->getSections());
+        $indexX = array_search($this->activeSection, $sectionsList);
+        $indexY = array_search($section, $sectionsList);
+
+        if ($indexX !== false && $indexY !== false && $indexY > $indexX) {
+            // Going forwards: validate intermediate sections for the current member
+            for ($i = $indexX; $i < $indexY; $i++) {
+                $sectionToValidate = $sectionsList[$i];
+                try {
+                    $this->validateSection($sectionToValidate);
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    $this->activeSection = $sectionToValidate;
+                    throw $e;
+                }
+            }
+        }
+
         if ($section === 'declaration' && ! $this->areAllMembersFullyFilled()) {
             return;
         }
@@ -818,6 +859,30 @@ class AnnapurnaYojanaForm extends Component
             $this->saveDraft();
         }
         $this->activeSection = $section;
+    }
+
+    private function validateMember($memberIndex)
+    {
+        $originalMemberIndex = $this->activeMemberIndex;
+        $originalSection = $this->activeSection;
+
+        $this->activeMemberIndex = $memberIndex;
+
+        $sectionsList = array_keys($this->getSections());
+        foreach ($sectionsList as $sec) {
+            if ($sec === 'declaration') {
+                continue;
+            }
+            try {
+                $this->validateSection($sec);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                $this->activeSection = $sec;
+                throw $e;
+            }
+        }
+
+        $this->activeMemberIndex = $originalMemberIndex;
+        $this->activeSection = $originalSection;
     }
 
     public function getSections()
@@ -1329,7 +1394,6 @@ class AnnapurnaYojanaForm extends Component
             if (($this->formData['has_gst_reg'] ?? '') === 'Yes') {
                 $rules['formData.gstin'] = 'required|string|max:100';
             }
-
             if (($this->formData['has_pensioner'] ?? '') === 'Yes') {
                 $rules['formData.pensioner_details'] = 'required|string|max:255';
             }
@@ -1714,7 +1778,7 @@ class AnnapurnaYojanaForm extends Component
                 } elseif (str_starts_with($firstErrorKey, 'formData.')) {
                     $this->activeMemberIndex = 0; // HOF
                     $field = str_replace('formData.', '', $firstErrorKey);
- 
+
                     $familyIdentityFields = [
                         'hof_name',
                         'hof_dob',
@@ -1934,6 +1998,8 @@ class AnnapurnaYojanaForm extends Component
                 'area_type' => $this->formData['rural_urban'] == 2 ? 'RURAL' : 'URBAN',
                 'ulb' => $this->formData['rural_urban'] == 1 ? (int) $this->formData['blockurban'] : null,
                 'updated_at' => now(),
+                'created_by_dist_code' => $this->createdByDistCode,
+                'created_by_local_body_code' => $this->createdByLocalBodyCode,
             ];
 
             if ($this->familyId) {
@@ -2000,6 +2066,8 @@ class AnnapurnaYojanaForm extends Component
                 'lgd_gp_ward_code' => $lgdGpWardCode,
                 'is_deleted' => 0,
                 'deleted_at' => null,
+                'created_by_dist_code' => $this->createdByDistCode,
+                'created_by_local_body_code' => $this->createdByLocalBodyCode,
             ];
 
             $hofMember = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
@@ -2122,6 +2190,8 @@ class AnnapurnaYojanaForm extends Component
                     'vaccination_skip_reason_or_date' => ($isChild && (($member['vaccination_status'] ?? '') === 'No' || ($member['vaccination_status'] ?? '') === 'Partial')) ? ($member['vaccination_skip_reason_or_date'] ?? null) : null,
                     'is_deleted' => 0,
                     'deleted_at' => null,
+                    'created_by_dist_code' => $this->createdByDistCode,
+                    'created_by_local_body_code' => $this->createdByLocalBodyCode,
                 ];
 
                 if (!empty($member['id'])) {
@@ -2298,6 +2368,8 @@ class AnnapurnaYojanaForm extends Component
                 'area_type' => ($this->formData['rural_urban'] ?? '') == 2 ? 'RURAL' : (($this->formData['rural_urban'] ?? '') == 1 ? 'URBAN' : null),
                 'ulb' => ($this->formData['rural_urban'] ?? '') == 1 ? (int) ($this->formData['blockurban'] ?? null) : null,
                 'updated_at' => now(),
+                'created_by_dist_code' => $this->createdByDistCode,
+                'created_by_local_body_code' => $this->createdByLocalBodyCode,
             ];
 
             if ($this->familyId) {
@@ -2364,6 +2436,8 @@ class AnnapurnaYojanaForm extends Component
                 'lgd_gp_ward_code' => $lgdGpWardCode,
                 'is_deleted' => 0,
                 'deleted_at' => null,
+                'created_by_dist_code' => $this->createdByDistCode,
+                'created_by_local_body_code' => $this->createdByLocalBodyCode,
             ];
 
             $hofMember = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
@@ -2486,6 +2560,8 @@ class AnnapurnaYojanaForm extends Component
                     'vaccination_skip_reason_or_date' => ($isChild && (($member['vaccination_status'] ?? '') === 'No' || ($member['vaccination_status'] ?? '') === 'Partial')) ? ($member['vaccination_skip_reason_or_date'] ?? null) : null,
                     'is_deleted' => 0,
                     'deleted_at' => null,
+                    'created_by_dist_code' => $this->createdByDistCode,
+                    'created_by_local_body_code' => $this->createdByLocalBodyCode,
                 ];
 
                 if (!empty($member['id'])) {
