@@ -305,7 +305,7 @@
                         $memberName = trim($member['name']) !== '' ? $member['name'] : "Member {$memberTabNo}";
                         $isActive = $activeMemberIndex === $index + 1;
                     @endphp
-                    <div class="relative flex items-stretch">
+                    <div class="relative flex items-stretch" wire:key="member-tab-{{ $index }}">
                         <button type="button" wire:click="selectMember({{ $index + 1 }})"
                             class="pl-4 pr-8 py-2.5 rounded-t-lg font-bold text-xs md:text-sm transition-all duration-150 flex items-center gap-2 border-t border-x {{ $isActive ? 'active-tab shadow-inner' : 'inactive-tab hover:bg-orange-100' }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -934,7 +934,7 @@
                             @php
                                 $index = $activeMemberIndex - 1;
                             @endphp
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-identity-{{ $index }}">
                                 <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                     <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                         <span
@@ -1143,7 +1143,7 @@
 
                             @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
                                 {{-- Member Bank details --}}
-                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 mt-4">
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 mt-4" wire:key="member-bank-{{ $index }}">
                                     <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                         <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                             <span
@@ -1366,7 +1366,7 @@
                             @php
                                 $index = $activeMemberIndex - 1;
                             @endphp
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-ration-{{ $index }}">
                                 <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                     <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                         <span
@@ -1515,7 +1515,7 @@
                                         <p class="text-sm font-semibold text-gray-600 mb-2">Vehicle Details / গাড়ির
                                             বিবরণ</p>
                                         @foreach ($formData['vehicles'] as $vi => $vehicle)
-                                            <div
+                                            <div wire:key="hof-vehicle-{{ $vi }}"
                                                 class="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 border border-amber-200 rounded-lg bg-amber-50 items-center">
                                                 <div class="flex items-center gap-2">
                                                     <span
@@ -1616,7 +1616,7 @@
                                 $index = $activeMemberIndex - 1;
                             @endphp
                             @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
-                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-insurance-{{ $index }}">
                                     <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                         <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                             <span
@@ -1928,7 +1928,7 @@
                                 $index = $activeMemberIndex - 1;
                             @endphp
                             @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
-                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-income-{{ $index }}">
                                     <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                         <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                             <span
@@ -2206,7 +2206,7 @@
                                 $index = $activeMemberIndex - 1;
                             @endphp
                             @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
-                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-otherdocs-{{ $index }}">
                                     <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                         <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                             <span
@@ -2349,7 +2349,7 @@
                         @endphp
                         @if ($activeMemberIndex > 0 && ($members[$index]['member_type'] ?? 'adult') === 'child')
                             {{-- Child School details --}}
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-school-{{ $index }}">
                                 <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                     <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                         <span
@@ -2424,7 +2424,7 @@
                             </div>
 
                             {{-- Child Vaccination details --}}
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-vaccination-{{ $index }}">
                                 <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                     <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                         <span
@@ -2561,7 +2561,7 @@
                                 $index = $activeMemberIndex - 1;
                             @endphp
                             @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
-                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-5" wire:key="member-benefits-{{ $index }}">
                                     <div class="border-b-2 border-indigo-900 pb-2 mb-4">
                                         <h3 class="text-lg font-bold text-indigo-950 flex items-center gap-2">
                                             <span
