@@ -307,9 +307,9 @@ class AnnapurnaYojanaService
                     'school_name' => $isChild ? (!empty($member['school_name']) ? $member['school_name'] : null) : null,
                     'school_type' => $isChild ? (!empty($member['school_type']) ? $member['school_type'] : null) : null,
                     'school_type_other' => $isChild ? (!empty($member['school_type_other']) ? $member['school_type_other'] : null) : null,
-                    'vaccination_card_id' => $isChild ? (!empty($member['vaccination_card_id']) ? $member['vaccination_card_id'] : null) : null,
+                    'vaccination_card_id' => ($isChild && (($member['vaccination_status'] ?? '') === 'Yes' || ($member['vaccination_status'] ?? '') === 'Partial')) ? ($member['vaccination_card_id'] ?? null) : null,
                     'vaccination_status' => $isChild ? (!empty($member['vaccination_status']) ? $member['vaccination_status'] : null) : null,
-                    'vaccination_skip_reason_or_date' => $isChild ? (!empty($member['vaccination_skip_reason_or_date']) ? $member['vaccination_skip_reason_or_date'] : null) : null,
+                    'vaccination_skip_reason_or_date' => ($isChild && (($member['vaccination_status'] ?? '') === 'No' || ($member['vaccination_status'] ?? '') === 'Partial')) ? ($member['vaccination_skip_reason_or_date'] ?? null) : null,
                 ], 'id');
 
                 // Save Member Employment Nature

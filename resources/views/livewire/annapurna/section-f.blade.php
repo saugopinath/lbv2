@@ -87,7 +87,7 @@
                     <span
                         class="text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
                         style="background-color: #78350f;">F2</span>
-                    Vaccination Status | শিশুর টিকাকরণ স্থিতি
+                    Vaccinated? | শিশুর টিকাকরণ স্থিতি
                 </h3>
             </div>
 
@@ -96,14 +96,14 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Vaccinated?
                         <br><span class="text-xs text-gray-500 font-normal">টিকাকরণ করা
                             হয়েছে?</span></label>
-                    <select wire:model="members.{{ $index }}.vaccination_status"
+                    <select wire:model.live="members.{{ $index }}.vaccination_status"
                         class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">-- Select --</option>
                         <option value="Yes">Yes / হ্যাঁ</option>
-                        <option value="No">No / না</option>
-                        <option value="Partial">Partial / আংশিক</option>
+                        <option value="No">No / না</option>                        
                     </select>
                 </div>
+                @if (($members[$index]['vaccination_status'] ?? '') === 'Yes' || ($members[$index]['vaccination_status'] ?? '') === 'Partial')
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Vaccination Card
                         ID <br><span class="text-xs text-gray-500 font-normal">টিকা কার্ড
@@ -113,6 +113,8 @@
                         placeholder="Enter Card ID"
                         class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
+                @endif
+                @if (($members[$index]['vaccination_status'] ?? '') === 'No' || ($members[$index]['vaccination_status'] ?? '') === 'Partial')
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Last Date or
                         Reason Skipped <br><span class="text-xs text-gray-500 font-normal">সর্বশেষ
@@ -122,6 +124,7 @@
                         placeholder="Date or skip reason"
                         class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
+                @endif
             </div>
         </div>
     @else

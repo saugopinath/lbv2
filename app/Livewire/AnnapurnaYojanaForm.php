@@ -180,10 +180,6 @@ class AnnapurnaYojanaForm extends Component
             'hof_has_dbt_benefits' => 'No',
             'hof_dbt_benefits' => [
                 ['scheme_name' => '', 'opt_out' => false],
-                ['scheme_name' => '', 'opt_out' => false],
-                ['scheme_name' => '', 'opt_out' => false],
-                ['scheme_name' => '', 'opt_out' => false],
-                ['scheme_name' => '', 'opt_out' => false],
             ],
 
             // Declaration & Consent (Section H)
@@ -353,6 +349,10 @@ class AnnapurnaYojanaForm extends Component
             }
         } elseif ($field === 'hof_sir_status' && $value !== 'Yes') {
             $this->formData['hof_sir_case_details'] = '';
+        } elseif ($field === 'hof_has_dbt_benefits' && $value !== 'Yes') {
+            $this->formData['hof_dbt_benefits'] = [
+                ['scheme_name' => '', 'opt_out' => false],
+            ];
         }
 
         if ($field === 'hof_gender' || $field === 'hof_dob') {
@@ -430,6 +430,15 @@ class AnnapurnaYojanaForm extends Component
                     $this->members[$index]['caa_cert_no'] = '';
                 } elseif ($subField === 'sir_status' && $value !== 'Yes') {
                     $this->members[$index]['sir_case_details'] = '';
+                } elseif ($subField === 'vaccination_status') {
+                    if ($value === 'Yes') {
+                        $this->members[$index]['vaccination_skip_reason_or_date'] = '';
+                    } elseif ($value === 'No') {
+                        $this->members[$index]['vaccination_card_id'] = '';
+                    } elseif (empty($value)) {
+                        $this->members[$index]['vaccination_card_id'] = '';
+                        $this->members[$index]['vaccination_skip_reason_or_date'] = '';
+                    }
                 } elseif ($subField === 'literate_status') {
                     if ($value !== 'Literate') {
                         $this->members[$index]['highest_qualification'] = '';
@@ -439,8 +448,20 @@ class AnnapurnaYojanaForm extends Component
                     if ($value === 'child') {
                         $this->members[$index]['literate_status'] = '';
                         $this->members[$index]['highest_qualification'] = '';
+                    } else {
+                        $this->members[$index]['school_grade'] = '';
+                        $this->members[$index]['school_name'] = '';
+                        $this->members[$index]['school_type'] = '';
+                        $this->members[$index]['school_type_other'] = '';
+                        $this->members[$index]['vaccination_status'] = '';
+                        $this->members[$index]['vaccination_card_id'] = '';
+                        $this->members[$index]['vaccination_skip_reason_or_date'] = '';
                     }
                     $this->calculateAdultLiteracyCounts();
+                } elseif ($subField === 'has_dbt_benefits' && $value !== 'Yes') {
+                    $this->members[$index]['dbt_benefits'] = [
+                        ['scheme_name' => '', 'opt_out' => false],
+                    ];
                 }
             }
         }
@@ -603,10 +624,6 @@ class AnnapurnaYojanaForm extends Component
             'has_dbt_benefits' => 'No',
             'dbt_benefits' => [
                 ['scheme_name' => '', 'opt_out' => false],
-                ['scheme_name' => '', 'opt_out' => false],
-                ['scheme_name' => '', 'opt_out' => false],
-                ['scheme_name' => '', 'opt_out' => false],
-                ['scheme_name' => '', 'opt_out' => false],
             ],
         ];
     }
@@ -716,6 +733,48 @@ class AnnapurnaYojanaForm extends Component
             } else {
                 $this->members[$mIndex]['kcc_cards'] = [
                     ['type' => '', 'id_no' => '', 'date' => '', 'issuing_authority' => ''],
+                ];
+            }
+            $this->isDirty = true;
+        }
+    }
+
+    public function addHofDbtBenefit()
+    {
+        $this->formData['hof_dbt_benefits'][] = ['scheme_name' => '', 'opt_out' => false];
+        $this->isDirty = true;
+    }
+
+    public function removeHofDbtBenefit($index)
+    {
+        if (count($this->formData['hof_dbt_benefits']) > 1) {
+            unset($this->formData['hof_dbt_benefits'][$index]);
+            $this->formData['hof_dbt_benefits'] = array_values($this->formData['hof_dbt_benefits']);
+        } else {
+            $this->formData['hof_dbt_benefits'] = [
+                ['scheme_name' => '', 'opt_out' => false],
+            ];
+        }
+        $this->isDirty = true;
+    }
+
+    public function addMemberDbtBenefit($mIndex)
+    {
+        if (isset($this->members[$mIndex])) {
+            $this->members[$mIndex]['dbt_benefits'][] = ['scheme_name' => '', 'opt_out' => false];
+            $this->isDirty = true;
+        }
+    }
+
+    public function removeMemberDbtBenefit($mIndex, $bIndex)
+    {
+        if (isset($this->members[$mIndex])) {
+            if (count($this->members[$mIndex]['dbt_benefits']) > 1) {
+                unset($this->members[$mIndex]['dbt_benefits'][$bIndex]);
+                $this->members[$mIndex]['dbt_benefits'] = array_values($this->members[$mIndex]['dbt_benefits']);
+            } else {
+                $this->members[$mIndex]['dbt_benefits'] = [
+                    ['scheme_name' => '', 'opt_out' => false],
                 ];
             }
             $this->isDirty = true;
