@@ -332,6 +332,12 @@ class AnnapurnaYojanaForm extends Component
         } elseif ($field === 'hof_sir_status' && $value !== 'Yes') {
             $this->formData['hof_sir_case_details'] = '';
         }
+
+        if ($field === 'hof_gender' || $field === 'hof_dob') {
+            if (!$this->isHofFemale25to60()) {
+                $this->formData['hof_applying_for_ay'] = 'Yes';
+            }
+        }
     }
 
     /**

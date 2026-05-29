@@ -399,7 +399,7 @@
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Date of Birth of
                                             HOF * <br><span class="text-xs text-gray-500 font-normal">জন্ম
                                                 তারিখ</span></label>
-                                        <input type="date" wire:model="formData.hof_dob"
+                                        <input type="date" wire:model.live="formData.hof_dob"
                                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                                         @error('formData.hof_dob')
                                             <span class="text-red-600 text-xs">{{ $message }}</span>
@@ -408,7 +408,7 @@
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Gender of HOF *
                                             <br><span class="text-xs text-gray-500 font-normal">লিঙ্গ</span></label>
-                                        <select wire:model="formData.hof_gender"
+                                        <select wire:model.live="formData.hof_gender"
                                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                                             <option value="">-- Select --</option>
                                             @foreach ($genders as $gender)
@@ -428,6 +428,7 @@
                                             <span class="text-red-600 text-xs">{{ $message }}</span>
                                         @enderror
                                     </div>
+                                    @if ($this->isHofFemale25to60())
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Applying for
                                             Annapurna Yojana? <br><span
@@ -439,6 +440,7 @@
                                             <option value="No">No / না</option>
                                         </select>
                                     </div>
+                                    @endif
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
