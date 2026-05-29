@@ -221,6 +221,21 @@ return [
             'sslmode' => 'prefer',
         ],
 
+        'pgsql_annapurna' => [
+            'driver'         => 'pgsql',
+            'url'            => env('DB_URL'),
+            'host'           => env('ANNAPURNA_DB_HOST', '127.0.0.1'),
+            'port'           => env('ANNAPURNA_DB_PORT', '5434'),
+            'database'       => env('ANNAPURNA_DB_DATABASE', 'annapurna'),
+            'username'       => env('ANNAPURNA_DB_USERNAME', 'postgres'),
+            'password'       => env('ANNAPURNA_DB_PASSWORD', ''),
+            'charset'        => 'utf8',
+            'prefix'         => '',
+            'prefix_indexes' => true,
+            'search_path'    => 'public',
+            'sslmode'        => 'prefer',
+        ],
+
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DB_URL'),

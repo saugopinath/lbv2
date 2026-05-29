@@ -1,4 +1,5 @@
 import "./bootstrap";
+import "./validations";
 // import '../../vendor/masmerise/livewire-toaster/resources/js';
 import toastr from "toastr";
 import Sortable from 'sortablejs';
