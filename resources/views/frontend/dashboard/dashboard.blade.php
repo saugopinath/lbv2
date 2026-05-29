@@ -346,11 +346,7 @@
     </div>
 
 
-    <div class="chart-container">
-        
-
-        <div id="mispiechart" style="height: 350px;"></div>
-    </div>
+  
 
 
     <!-- Scheme Categories -->
