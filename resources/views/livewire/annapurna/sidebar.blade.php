@@ -9,12 +9,16 @@
             @foreach ($this->getSections() as $secKey => $secVal)
                 @php
                     $isActive = $activeSection === $secKey;
-                    $isHofOnly = false;
-                    $isMember = $activeMemberIndex > 0;
+                    $isClickable = $this->isSectionClickable($secKey);
                 @endphp
-                <button type="button" wire:click="selectSection('{{ $secKey }}')"
-                    x-on:click="Livewire.dispatch('showLoader')"
-                    class="w-full text-left px-3 py-2.5 rounded-md flex items-center gap-3 transition-all duration-150 {{ $isActive ? 'active-sidebar shadow-sm' : 'inactive-sidebar' }}">
+                <button type="button"
+                    @if ($isClickable)
+                        wire:click="selectSection('{{ $secKey }}')"
+                        x-on:click="Livewire.dispatch('showLoader')"
+                    @else
+                        disabled
+                    @endif
+                    class="w-full text-left px-3 py-2.5 rounded-md flex items-center gap-3 transition-all duration-150 {{ $isActive ? 'active-sidebar shadow-sm' : 'inactive-sidebar' }} {{ !$isClickable ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' }}">
                     <div
                         class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold {{ $isActive ? 'active-sidebar-badge' : 'inactive-sidebar-badge' }}">
                         @if ($secKey === 'family_identity')

@@ -822,58 +822,121 @@ class AnnapurnaYojanaForm extends Component
         }
     }
 
-    public function selectMember($index)
+    public function isSectionClickable($section)
     {
-        if ($index > $this->activeMemberIndex) {
-            // Going forwards: validate intermediate members
-            for ($m = $this->activeMemberIndex; $m < $index; $m++) {
-                $this->validateMember($m);
+        $sectionsList = array_keys($this->getSections());
+        $targetIndex = array_search($section, $sectionsList);
+        $currentIndex = array_search($this->activeSection, $sectionsList);
+
+        if ($targetIndex === false || $currentIndex === false) {
+            return false;
+        }
+
+        // Always allow clicking the current section or going backward
+        if ($targetIndex <= $currentIndex) {
+            return true;
+        }
+
+        // Going forward: all sections from 0 up to targetIndex - 1 must be filled
+        for ($i = 0; $i < $targetIndex; $i++) {
+            if (! $this->isSectionFilled($this->activeMemberIndex, $sectionsList[$i])) {
+                return false;
             }
         }
 
-        // Only save if something actually changed
-        if ($this->isDirty) {
-            $this->saveDraft();
-        }
-        $this->activeMemberIndex = $index;
+        return true;
+    }
 
-        // Ensure the active section is valid for the newly selected member
-        $validSections = array_keys($this->getSections());
-        if (! in_array($this->activeSection, $validSections)) {
-            $this->activeSection = 'family_identity';
+    public function isMemberClickable($mIndex)
+    {
+        // Always allow clicking the active member or going backward
+        if ($mIndex <= $this->activeMemberIndex) {
+            return true;
         }
-        $this->dispatch('hideLoader');
+
+        // Going forward: all members from 0 up to mIndex - 1 must be fully filled
+        for ($m = 0; $m < $mIndex; $m++) {
+            if (! $this->isMemberFullyFilled($m)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function selectMember($index)
+    {
+        try {
+            if ($index > $this->activeMemberIndex) {
+                // Check if target member is clickable
+                if (! $this->isMemberClickable($index)) {
+                    $this->dispatch('toastr', [
+                        'type' => 'error',
+                        'message' => 'Please fill and save the current member details first.',
+                    ]);
+                    return;
+                }
+                // Going forwards: validate intermediate members
+                for ($m = $this->activeMemberIndex; $m < $index; $m++) {
+                    $this->validateMember($m);
+                }
+            }
+
+            // Only save if something actually changed
+            if ($this->isDirty) {
+                $this->saveDraft();
+            }
+            $this->activeMemberIndex = $index;
+
+            // Ensure the active section is valid for the newly selected member
+            $validSections = array_keys($this->getSections());
+            if (! in_array($this->activeSection, $validSections)) {
+                $this->activeSection = 'family_identity';
+            }
+        } finally {
+            $this->dispatch('hideLoader');
+        }
     }
 
     public function selectSection($section)
     {
-        $sectionsList = array_keys($this->getSections());
-        $indexX = array_search($this->activeSection, $sectionsList);
-        $indexY = array_search($section, $sectionsList);
+        try {
+            $sectionsList = array_keys($this->getSections());
+            $indexX = array_search($this->activeSection, $sectionsList);
+            $indexY = array_search($section, $sectionsList);
 
-        if ($indexX !== false && $indexY !== false && $indexY > $indexX) {
-            // Going forwards: validate intermediate sections for the current member
-            for ($i = $indexX; $i < $indexY; $i++) {
-                $sectionToValidate = $sectionsList[$i];
-                try {
-                    $this->validateSection($sectionToValidate);
-                } catch (\Illuminate\Validation\ValidationException $e) {
-                    $this->activeSection = $sectionToValidate;
-                    throw $e;
+            if ($indexX !== false && $indexY !== false && $indexY > $indexX) {
+                // Check if target section is clickable
+                if (! $this->isSectionClickable($section)) {
+                    $this->dispatch('toastr', [
+                        'type' => 'error',
+                        'message' => 'Please fill and save the current section details first.',
+                    ]);
+                    return;
+                }
+                // Going forwards: validate intermediate sections for the current member
+                for ($i = $indexX; $i < $indexY; $i++) {
+                    $sectionToValidate = $sectionsList[$i];
+                    try {
+                        $this->validateSection($sectionToValidate);
+                    } catch (\Illuminate\Validation\ValidationException $e) {
+                        $this->activeSection = $sectionToValidate;
+                        throw $e;
+                    }
                 }
             }
-        }
 
-        if ($section === 'declaration' && ! $this->areAllMembersFullyFilled()) {
+            if ($section === 'declaration' && ! $this->areAllMembersFullyFilled()) {
+                return;
+            }
+            // Only hit DB if something actually changed
+            if ($this->isDirty) {
+                $this->saveDraft();
+            }
+            $this->activeSection = $section;
+        } finally {
             $this->dispatch('hideLoader');
-            return;
         }
-        // Only hit DB if something actually changed
-        if ($this->isDirty) {
-            $this->saveDraft();
-        }
-        $this->activeSection = $section;
-        $this->dispatch('hideLoader');
     }
 
     private function validateMember($memberIndex)
@@ -977,6 +1040,11 @@ class AnnapurnaYojanaForm extends Component
                     $certOk = ! empty($this->formData['pvtg_certificate_no']);
                 }
 
+                $epicOk = true;
+                if (!empty($this->formData['hof_epic_no'])) {
+                    $epicOk = !empty($this->formData['hof_assembly_constituency']) && !empty($this->formData['hof_part_no']);
+                }
+
                 return ! empty($this->formData['hof_name']) &&
                     ! empty($this->formData['hof_dob']) &&
                     ! empty($this->formData['hof_gender']) &&
@@ -984,6 +1052,7 @@ class AnnapurnaYojanaForm extends Component
                     strlen($this->formData['contact_no']) === 10 &&
                     ! empty($category) &&
                     $certOk &&
+                    $epicOk &&
                     ! empty($this->formData['district_id']) &&
                     ! empty($this->formData['rural_urban']) &&
                     ! empty($this->formData['blockurban']) &&
@@ -1002,40 +1071,108 @@ class AnnapurnaYojanaForm extends Component
             }
 
             if ($section === 'ration_subsidy') {
-                return ! empty($this->formData['has_digital_ration_card']) &&
-                    ! empty($this->formData['is_lifting_ration']);
+                $hasCard = $this->formData['has_digital_ration_card'] ?? '';
+                if (empty($hasCard) || empty($this->formData['is_lifting_ration'])) {
+                    return false;
+                }
+                if ($hasCard === 'Yes' && empty($this->formData['ration_card_type'])) {
+                    return false;
+                }
+                return true;
             }
 
             if ($section === 'assets') {
-                $hasIns = ! empty($this->formData['has_health_insurance']);
-                $insOk = $hasIns && ($this->formData['has_health_insurance'] === 'No' || ! empty($this->formData['health_insurance_type']));
-                return ! empty($this->formData['has_pucca_rooms']) &&
-                    ! empty($this->formData['owns_land']) &&
-                    ! empty($this->formData['owns_4_wheeler']) &&
-                    $insOk;
+                if (empty($this->formData['has_pucca_rooms']) ||
+                    empty($this->formData['owns_land']) ||
+                    empty($this->formData['owns_4_wheeler']) ||
+                    empty($this->formData['has_health_insurance'])) {
+                    return false;
+                }
+                if ($this->formData['owns_land'] === 'Yes' && empty($this->formData['land_size_decimals'])) {
+                    return false;
+                }
+                if ($this->formData['owns_4_wheeler'] === 'Yes') {
+                    if (empty($this->formData['num_vehicles'])) {
+                        return false;
+                    }
+                    foreach ($this->formData['vehicles'] ?? [] as $vehicle) {
+                        if (empty($vehicle['reg_no']) || empty($vehicle['model'])) {
+                            return false;
+                        }
+                    }
+                }
+                if ($this->formData['has_health_insurance'] === 'Yes' && empty($this->formData['health_insurance_type'])) {
+                    return false;
+                }
+                return true;
             }
 
             if ($section === 'income_profession') {
-                return ! empty($this->formData['pays_tax']) &&
-                    ! empty($this->formData['total_annual_income']) &&
-                    is_numeric($this->formData['total_annual_income']);
+                if (empty($this->formData['pays_tax']) ||
+                    !isset($this->formData['total_annual_income']) ||
+                    !is_numeric($this->formData['total_annual_income']) ||
+                    empty($this->formData['has_pan_card']) ||
+                    empty($this->formData['has_constitutional_post']) ||
+                    empty($this->formData['has_gst_reg']) ||
+                    empty($this->formData['has_pensioner']) ||
+                    empty($this->formData['hof_literate_status'])) {
+                    return false;
+                }
+                if ($this->formData['has_pan_card'] === 'Yes') {
+                    if (empty($this->formData['hof_pan_name']) || empty($this->formData['hof_pan_no'])) {
+                        return false;
+                    }
+                }
+                if ($this->formData['has_constitutional_post'] === 'Yes' && empty($this->formData['constitutional_post_details'])) {
+                    return false;
+                }
+                if ($this->formData['has_gst_reg'] === 'Yes' && empty($this->formData['gstin'])) {
+                    return false;
+                }
+                if ($this->formData['has_pensioner'] === 'Yes' && empty($this->formData['pensioner_details'])) {
+                    return false;
+                }
+                if ($this->formData['hof_literate_status'] === 'Literate' && empty($this->formData['hof_highest_qualification'])) {
+                    return false;
+                }
+                return true;
             }
 
             if ($section === 'other_docs') {
-                $caaStatus = $this->formData['hof_caa_status'] ?? 'Not Applicable';
+                if (empty($this->formData['hof_caa_status']) || empty($this->formData['hof_sir_status'])) {
+                    return false;
+                }
+                $caaStatus = $this->formData['hof_caa_status'];
                 if ($caaStatus === 'Applied' && empty($this->formData['hof_caa_app_no'])) {
                     return false;
                 }
                 if ($caaStatus === 'Issued' && empty($this->formData['hof_caa_cert_no'])) {
                     return false;
                 }
-                $sirStatus = $this->formData['hof_sir_status'] ?? 'Not Applicable';
+                $sirStatus = $this->formData['hof_sir_status'];
                 if ($sirStatus === 'Yes' && empty($this->formData['hof_sir_case_details'])) {
                     return false;
                 }
                 foreach ($this->formData['hof_kcc_cards'] ?? [] as $card) {
                     if (!empty($card['type']) && empty($card['id_no'])) {
                         return false;
+                    }
+                }
+                return true;
+            }
+
+            if ($section === 'gov_benefits') {
+                if (empty($this->formData['hof_has_dbt_benefits'])) {
+                    return false;
+                }
+                if ($this->formData['hof_has_dbt_benefits'] === 'Yes') {
+                    if (empty($this->formData['hof_dbt_benefits'])) {
+                        return false;
+                    }
+                    foreach ($this->formData['hof_dbt_benefits'] as $benefit) {
+                        if (empty($benefit['scheme_name'])) {
+                            return false;
+                        }
                     }
                 }
                 return true;
@@ -1052,6 +1189,7 @@ class AnnapurnaYojanaForm extends Component
                 return false;
             }
             $member = $this->members[$index];
+            $isChild = ($member['member_type'] ?? 'adult') === 'child';
 
             if ($section === 'family_identity') {
                 $basicFilled = ! empty($member['member_type']) &&
@@ -1064,8 +1202,14 @@ class AnnapurnaYojanaForm extends Component
                     return false;
                 }
 
-                if (($member['member_type'] ?? 'adult') === 'child') {
+                if ($isChild) {
                     return true;
+                }
+
+                if (!empty($member['epic_no'])) {
+                    if (empty($member['assembly_constituency']) || empty($member['part_no'])) {
+                        return false;
+                    }
                 }
 
                 $aadhaar = $member['aadhaar'] ?? '';
@@ -1082,24 +1226,114 @@ class AnnapurnaYojanaForm extends Component
                 return $aadhaarOk && $bankOk;
             }
 
-            if ($section === 'other_docs') {
-                if (($member['member_type'] ?? 'adult') === 'child') {
+            if ($section === 'ration_subsidy') {
+                if ($isChild) {
                     return true;
                 }
-                $caaStatus = $member['caa_status'] ?? 'Not Applicable';
+                if (empty($member['has_digital_ration_card'])) {
+                    return false;
+                }
+                if ($member['has_digital_ration_card'] === 'Yes') {
+                    if (empty($member['ration_card_no']) || empty($member['ration_card_type'])) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            if ($section === 'assets') {
+                if ($isChild) {
+                    return true;
+                }
+                if (empty($member['has_health_insurance'])) {
+                    return false;
+                }
+                if ($member['has_health_insurance'] === 'Yes' && empty($member['health_insurance_type'])) {
+                    return false;
+                }
+                return true;
+            }
+
+            if ($section === 'income_profession') {
+                if ($isChild) {
+                    return true;
+                }
+                if (empty($member['has_pan_card']) || empty($member['literate_status'])) {
+                    return false;
+                }
+                if ($member['has_pan_card'] === 'Yes') {
+                    if (empty($member['pan_name']) || empty($member['pan_no'])) {
+                        return false;
+                    }
+                }
+                if ($member['literate_status'] === 'Literate' && empty($member['highest_qualification'])) {
+                    return false;
+                }
+                return true;
+            }
+
+            if ($section === 'other_docs') {
+                if ($isChild) {
+                    return true;
+                }
+                if (empty($member['caa_status']) || empty($member['sir_status'])) {
+                    return false;
+                }
+                $caaStatus = $member['caa_status'];
                 if ($caaStatus === 'Applied' && empty($member['caa_app_no'])) {
                     return false;
                 }
                 if ($caaStatus === 'Issued' && empty($member['caa_cert_no'])) {
                     return false;
                 }
-                $sirStatus = $member['sir_status'] ?? 'Not Applicable';
+                $sirStatus = $member['sir_status'];
                 if ($sirStatus === 'Yes' && empty($member['sir_case_details'])) {
                     return false;
                 }
                 foreach ($member['kcc_cards'] ?? [] as $card) {
                     if (!empty($card['type']) && empty($card['id_no'])) {
                         return false;
+                    }
+                }
+                return true;
+            }
+
+            if ($section === 'social_dependents') {
+                if (!$isChild) {
+                    return true;
+                }
+                if (!empty($member['school_type']) && $member['school_type'] === 'Others') {
+                    if (empty($member['school_type_other'])) {
+                        return false;
+                    }
+                }
+                if (empty($member['vaccination_status'])) {
+                    return false;
+                }
+                if ($member['vaccination_status'] === 'Yes' && empty($member['vaccination_card_id'])) {
+                    return false;
+                }
+                if ($member['vaccination_status'] === 'No' && empty($member['vaccination_skip_reason_or_date'])) {
+                    return false;
+                }
+                return true;
+            }
+
+            if ($section === 'gov_benefits') {
+                if ($isChild) {
+                    return true;
+                }
+                if (empty($member['has_dbt_benefits'])) {
+                    return false;
+                }
+                if ($member['has_dbt_benefits'] === 'Yes') {
+                    if (empty($member['dbt_benefits'])) {
+                        return false;
+                    }
+                    foreach ($member['dbt_benefits'] as $benefit) {
+                        if (empty($benefit['scheme_name'])) {
+                            return false;
+                        }
                     }
                 }
                 return true;
