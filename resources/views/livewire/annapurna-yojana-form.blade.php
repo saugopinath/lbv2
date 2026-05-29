@@ -551,6 +551,43 @@
 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">HOF IFSC Code * <br><span class="text-xs text-gray-500 font-normal">আইএফএসসি কোড</span></label>
+                                        <div x-data="{
+        val: @entangle('formData.hof_ifsc'),
+        error: '',
+        valid: false,
+        async check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.alphaNumericUpper(this.val, 11);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.ifsc(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Format: ABCD0123456' : '';
+            
+            if (this.valid) {
+                try {
+                    let response = await fetch('/js/bank-ifsc-master.json');
+                    if (response.ok) {
+                        let banks = await response.json();
+                        let found = banks.find(b => b.ifsc.toUpperCase() === this.val.toUpperCase());
+                        if (found) {
+                            $wire.set('formData.hof_bank_name', found.bankName);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error looking up IFSC:', e);
+                }
+            }
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" maxlength="11" placeholder="e.g. SBIN0001234" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 uppercase font-mono">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
+                                        @error('formData.hof_ifsc') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">HOF Bank Name * <br><span class="text-xs text-gray-500 font-normal">ব্যাংকের নাম</span></label>
                                         <div x-data="{
         val: @entangle('formData.hof_bank_name'),
@@ -593,28 +630,6 @@
         </div>
     </div>
                                         @error('formData.hof_acc_no') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">HOF IFSC Code * <br><span class="text-xs text-gray-500 font-normal">আইএফএসসি কোড</span></label>
-                                        <div x-data="{
-        val: @entangle('formData.hof_ifsc'),
-        error: '',
-        valid: false,
-        check() {
-            if (!this.val) { this.valid = false; this.error = ''; return; }
-            let cleaned = window.cleanInput.alphaNumericUpper(this.val, 11);
-            if (this.val !== cleaned) { this.val = cleaned; }
-            this.valid = window.checkValid.ifsc(this.val);
-            this.error = this.val.length > 0 && !this.valid ? 'Format: ABCD0123456' : '';
-        }
-    }" x-init="check(); $watch('val', () => check())">
-        <input type="text" x-model="val" maxlength="11" placeholder="e.g. SBIN0001234" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 uppercase font-mono">
-        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
-            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
-            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
-        </div>
-    </div>
-                                        @error('formData.hof_ifsc') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
                             </div>
@@ -806,6 +821,44 @@
 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">IFSC Code * <br><span class="text-xs text-gray-500 font-normal">আইএফএসসি কোড</span></label>
+                                        <div x-data="{
+        val: @entangle('members.'.$index.'.ifsc'),
+        index: {{ $index }},
+        error: '',
+        valid: false,
+        async check() {
+            if (!this.val) { this.valid = false; this.error = ''; return; }
+            let cleaned = window.cleanInput.alphaNumericUpper(this.val, 11);
+            if (this.val !== cleaned) { this.val = cleaned; }
+            this.valid = window.checkValid.ifsc(this.val);
+            this.error = this.val.length > 0 && !this.valid ? 'Format: ABCD0123456' : '';
+            
+            if (this.valid) {
+                try {
+                    let response = await fetch('/js/bank-ifsc-master.json');
+                    if (response.ok) {
+                        let banks = await response.json();
+                        let found = banks.find(b => b.ifsc.toUpperCase() === this.val.toUpperCase());
+                        if (found) {
+                            $wire.set('members.' + this.index + '.bank_name', found.bankName);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error looking up IFSC:', e);
+                }
+            }
+        }
+    }" x-init="check(); $watch('val', () => check())">
+        <input type="text" x-model="val" maxlength="11" placeholder="e.g. SBIN0001234" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 uppercase font-mono">
+        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
+            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
+            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
+        </div>
+    </div>
+                                        @error("members.{$index}.ifsc") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Bank Name * <br><span class="text-xs text-gray-500 font-normal">ব্যাংকের নাম</span></label>
                                         <div x-data="{
         val: @entangle('members.'.$index.'.bank_name'),
@@ -848,28 +901,6 @@
         </div>
     </div>
                                         @error("members.{$index}.acc_no") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">IFSC Code * <br><span class="text-xs text-gray-500 font-normal">আইএফএসসি কোড</span></label>
-                                        <div x-data="{
-        val: @entangle('members.'.$index.'.ifsc'),
-        error: '',
-        valid: false,
-        check() {
-            if (!this.val) { this.valid = false; this.error = ''; return; }
-            let cleaned = window.cleanInput.alphaNumericUpper(this.val, 11);
-            if (this.val !== cleaned) { this.val = cleaned; }
-            this.valid = window.checkValid.ifsc(this.val);
-            this.error = this.val.length > 0 && !this.valid ? 'Format: ABCD0123456' : '';
-        }
-    }" x-init="check(); $watch('val', () => check())">
-        <input type="text" x-model="val" maxlength="11" placeholder="e.g. SBIN0001234" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 uppercase font-mono">
-        <div class="flex items-center gap-2 mt-0.5" style="min-height: 1.25rem;">
-            <span x-show="valid" class="text-xs text-green-600 font-semibold">✓ Valid</span>
-            <span x-show="error" x-text="error" class="text-red-500 text-xs font-semibold"></span>
-        </div>
-    </div>
-                                        @error("members.{$index}.ifsc") <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
                             </div>

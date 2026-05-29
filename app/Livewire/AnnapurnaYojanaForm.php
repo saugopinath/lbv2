@@ -170,8 +170,19 @@ class AnnapurnaYojanaForm extends Component
             'agree_consent' => false,
         ];
 
-        // Load all districts
-        $this->districts = District::orderBy('name', 'asc')->get();
+        // Load all districts from master-data file
+        $rawDistricts = $this->getMasterDataArray('districts.js', 'districts');
+        $districts = [];
+        foreach ($rawDistricts as $d) {
+            $obj = new \stdClass();
+            $obj->id = $d['id'];
+            $obj->name = strtoupper($d['text']);
+            $districts[] = $obj;
+        }
+        usort($districts, function ($a, $b) {
+            return strcmp($a->name, $b->name);
+        });
+        $this->districts = $districts;
 
         // Start with empty members list
         $this->members = [];
@@ -246,6 +257,26 @@ class AnnapurnaYojanaForm extends Component
             $this->isDirty = true;
         }
 
+        if ($field === 'hof_ifsc') {
+            $ifsc = strtoupper(trim($value));
+            if (strlen($ifsc) === 11) {
+                $path = public_path('js/bank-ifsc-master.json');
+                if (file_exists($path)) {
+                    $json = file_get_contents($path);
+                    $banks = json_decode($json, true);
+                    if (is_array($banks)) {
+                        foreach ($banks as $bank) {
+                            if (strtoupper($bank['ifsc'] ?? '') === $ifsc) {
+                                $this->formData['hof_bank_name'] = $bank['bankName'] ?? '';
+                                $this->isDirty = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Cleanup conditional fields
         if ($field === 'owns_4_wheeler' && $value === 'No') {
             $this->formData['num_vehicles'] = '';
@@ -285,7 +316,24 @@ class AnnapurnaYojanaForm extends Component
             $subField = $parts[1];
             
             if (isset($this->members[$index])) {
-                if ($subField === 'applying_for_ay' && $value === 'No') {
+                if ($subField === 'ifsc') {
+                    $ifsc = strtoupper(trim($value));
+                    if (strlen($ifsc) === 11) {
+                        $path = public_path('js/bank-ifsc-master.json');
+                        if (file_exists($path)) {
+                            $json = file_get_contents($path);
+                            $banks = json_decode($json, true);
+                            if (is_array($banks)) {
+                                foreach ($banks as $bank) {
+                                    if (strtoupper($bank['ifsc'] ?? '') === $ifsc) {
+                                        $this->members[$index]['bank_name'] = $bank['bankName'] ?? '';
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } elseif ($subField === 'applying_for_ay' && $value === 'No') {
                     $this->members[$index]['bank_name'] = '';
                     $this->members[$index]['acc_no'] = '';
                     $this->members[$index]['ifsc'] = '';
@@ -326,20 +374,34 @@ class AnnapurnaYojanaForm extends Component
             return;
         }
 
+        $blocks = [];
         if ($ruralUrban == 2) {
-            $this->blocks = Block::where('district_id', $districtId)->orderBy('name', 'asc')->get();
-        } else {
-            try {
-                $this->blocks = Municipality::where('district_id', $districtId)->orderBy('name', 'asc')->get();
-                if ($this->blocks->isEmpty()) {
-                    $subdivisionIds = DB::table('public.subdivisions')->where('district_id', $districtId)->pluck('id');
-                    $this->blocks = Municipality::whereIn('sub_division_id', $subdivisionIds)->orderBy('name', 'asc')->get();
+            $rawBlocks = $this->getMasterDataArray('blocks.js', 'blocks');
+            foreach ($rawBlocks as $b) {
+                if (isset($b['district_code']) && (string) $b['district_code'] === (string) $districtId) {
+                    $obj = new \stdClass();
+                    $obj->id = $b['id'];
+                    $obj->name = strtoupper($b['text']);
+                    $blocks[] = $obj;
                 }
-            } catch (\Exception $e) {
-                Log::error('Error loading municipalities: '.$e->getMessage());
-                $this->blocks = [];
+            }
+        } else {
+            $rawUlbs = $this->getMasterDataArray('ulbs.js', 'ulbs');
+            foreach ($rawUlbs as $u) {
+                if (isset($u['district_code']) && (string) $u['district_code'] === (string) $districtId) {
+                    $obj = new \stdClass();
+                    $obj->id = $u['id'];
+                    $obj->name = strtoupper($u['text']);
+                    $blocks[] = $obj;
+                }
             }
         }
+        
+        usort($blocks, function ($a, $b) {
+            return strcmp($a->name, $b->name);
+        });
+
+        $this->blocks = $blocks;
     }
 
     public function loadGps()
@@ -351,11 +413,34 @@ class AnnapurnaYojanaForm extends Component
             return;
         }
 
+        $gps = [];
         if ($ruralUrban == 2) {
-            $this->gps = Panchayat::where('block_id', $blockUrbanId)->orderBy('name', 'asc')->get();
+            $rawGps = $this->getMasterDataArray('gps.js', 'gps');
+            foreach ($rawGps as $g) {
+                if (isset($g['block_code']) && (string) $g['block_code'] === (string) $blockUrbanId) {
+                    $obj = new \stdClass();
+                    $obj->id = $g['id'];
+                    $obj->name = strtoupper($g['text']);
+                    $gps[] = $obj;
+                }
+            }
         } else {
-            $this->gps = Ward::where('municipality_id', $blockUrbanId)->orderBy('name', 'asc')->get();
+            $rawWards = $this->getMasterDataArray('ulb_wards.js', 'ulb_wards');
+            foreach ($rawWards as $w) {
+                if (isset($w['urban_body_code']) && (string) $w['urban_body_code'] === (string) $blockUrbanId) {
+                    $obj = new \stdClass();
+                    $obj->id = $w['id'];
+                    $obj->name = strtoupper($w['text']);
+                    $gps[] = $obj;
+                }
+            }
         }
+
+        usort($gps, function ($a, $b) {
+            return strcmp($a->name, $b->name);
+        });
+
+        $this->gps = $gps;
     }
 
     public function getEmptyMemberStructure()
@@ -1218,25 +1303,60 @@ class AnnapurnaYojanaForm extends Component
             DB::connection('pgsql_annapurna')->beginTransaction();
 
             // 1. Get LGD codes for locations
-            $district = District::find($this->formData['district_id'] ?? null);
-            $lgdDistrictCode = $district ? $district->lgd_code : null;
+            $districtId = $this->formData['district_id'] ?? null;
+            $lgdDistrictCode = null;
+            if ($districtId) {
+                $districts = $this->getMasterDataArray('districts.js', 'districts');
+                foreach ($districts as $d) {
+                    if ((string) $d['id'] === (string) $districtId) {
+                        $lgdDistrictCode = $d['id'];
+                        break;
+                    }
+                }
+            }
 
             $lgdBlockMcCode = null;
-            if (($this->formData['rural_urban'] ?? null) == 2) {
-                $block = Block::find($this->formData['blockurban'] ?? null);
-                $lgdBlockMcCode = $block ? $block->lgd_code : null;
-            } else {
-                $municipality = Municipality::find($this->formData['blockurban'] ?? null);
-                $lgdBlockMcCode = $municipality ? $municipality->lgd_code : null;
+            $blockUrbanId = $this->formData['blockurban'] ?? null;
+            if ($blockUrbanId) {
+                if (($this->formData['rural_urban'] ?? null) == 2) {
+                    $blocks = $this->getMasterDataArray('blocks.js', 'blocks');
+                    foreach ($blocks as $b) {
+                        if ((string) $b['id'] === (string) $blockUrbanId) {
+                            $lgdBlockMcCode = $b['id'];
+                            break;
+                        }
+                    }
+                } else {
+                    $ulbs = $this->getMasterDataArray('ulbs.js', 'ulbs');
+                    foreach ($ulbs as $u) {
+                        if ((string) $u['id'] === (string) $blockUrbanId) {
+                            $lgdBlockMcCode = $u['id'];
+                            break;
+                        }
+                    }
+                }
             }
 
             $lgdGpWardCode = null;
-            if (($this->formData['rural_urban'] ?? null) == 2) {
-                $panchayat = Panchayat::find($this->formData['gpward'] ?? null);
-                $lgdGpWardCode = $panchayat ? $panchayat->lgd_code : null;
-            } else {
-                $ward = Ward::find($this->formData['gpward'] ?? null);
-                $lgdGpWardCode = $ward ? $ward->lgd_code : null;
+            $gpWardId = $this->formData['gpward'] ?? null;
+            if ($gpWardId) {
+                if (($this->formData['rural_urban'] ?? null) == 2) {
+                    $gps = $this->getMasterDataArray('gps.js', 'gps');
+                    foreach ($gps as $g) {
+                        if ((string) $g['id'] === (string) $gpWardId) {
+                            $lgdGpWardCode = $g['id'];
+                            break;
+                        }
+                    }
+                } else {
+                    $wards = $this->getMasterDataArray('ulb_wards.js', 'ulb_wards');
+                    foreach ($wards as $w) {
+                        if ((string) $w['id'] === (string) $gpWardId) {
+                            $lgdGpWardCode = $w['id'];
+                            break;
+                        }
+                    }
+                }
             }
 
             $lgdDistrictCode = $lgdDistrictCode ? (int) $lgdDistrictCode : 0;
@@ -1549,25 +1669,60 @@ class AnnapurnaYojanaForm extends Component
             DB::connection('pgsql_annapurna')->beginTransaction();
 
             // 1. Get LGD codes for locations
-            $district = District::find($this->formData['district_id'] ?? null);
-            $lgdDistrictCode = $district ? $district->lgd_code : null;
+            $districtId = $this->formData['district_id'] ?? null;
+            $lgdDistrictCode = null;
+            if ($districtId) {
+                $districts = $this->getMasterDataArray('districts.js', 'districts');
+                foreach ($districts as $d) {
+                    if ((string) $d['id'] === (string) $districtId) {
+                        $lgdDistrictCode = $d['id'];
+                        break;
+                    }
+                }
+            }
 
             $lgdBlockMcCode = null;
-            if (($this->formData['rural_urban'] ?? null) == 2) {
-                $block = Block::find($this->formData['blockurban'] ?? null);
-                $lgdBlockMcCode = $block ? $block->lgd_code : null;
-            } elseif (($this->formData['rural_urban'] ?? null) == 1) {
-                $municipality = Municipality::find($this->formData['blockurban'] ?? null);
-                $lgdBlockMcCode = $municipality ? $municipality->lgd_code : null;
+            $blockUrbanId = $this->formData['blockurban'] ?? null;
+            if ($blockUrbanId) {
+                if (($this->formData['rural_urban'] ?? null) == 2) {
+                    $blocks = $this->getMasterDataArray('blocks.js', 'blocks');
+                    foreach ($blocks as $b) {
+                        if ((string) $b['id'] === (string) $blockUrbanId) {
+                            $lgdBlockMcCode = $b['id'];
+                            break;
+                        }
+                    }
+                } else {
+                    $ulbs = $this->getMasterDataArray('ulbs.js', 'ulbs');
+                    foreach ($ulbs as $u) {
+                        if ((string) $u['id'] === (string) $blockUrbanId) {
+                            $lgdBlockMcCode = $u['id'];
+                            break;
+                        }
+                    }
+                }
             }
 
             $lgdGpWardCode = null;
-            if (($this->formData['rural_urban'] ?? null) == 2) {
-                $panchayat = Panchayat::find($this->formData['gpward'] ?? null);
-                $lgdGpWardCode = $panchayat ? $panchayat->lgd_code : null;
-            } elseif (($this->formData['rural_urban'] ?? null) == 1) {
-                $ward = Ward::find($this->formData['gpward'] ?? null);
-                $lgdGpWardCode = $ward ? $ward->lgd_code : null;
+            $gpWardId = $this->formData['gpward'] ?? null;
+            if ($gpWardId) {
+                if (($this->formData['rural_urban'] ?? null) == 2) {
+                    $gps = $this->getMasterDataArray('gps.js', 'gps');
+                    foreach ($gps as $g) {
+                        if ((string) $g['id'] === (string) $gpWardId) {
+                            $lgdGpWardCode = $g['id'];
+                            break;
+                        }
+                    }
+                } else {
+                    $wards = $this->getMasterDataArray('ulb_wards.js', 'ulb_wards');
+                    foreach ($wards as $w) {
+                        if ((string) $w['id'] === (string) $gpWardId) {
+                            $lgdGpWardCode = $w['id'];
+                            break;
+                        }
+                    }
+                }
             }
 
             $lgdDistrictCode = $lgdDistrictCode ? (int) $lgdDistrictCode : 0;
@@ -1870,6 +2025,37 @@ class AnnapurnaYojanaForm extends Component
             DB::connection('pgsql_annapurna')->rollBack();
             Log::error('Error saving draft of Annapurna Yojana: '.$e->getMessage());
         }
+    }
+
+    private function getMasterDataArray($filename, $varName)
+    {
+        $filePath = public_path('js/master-data/' . $filename);
+        if (!file_exists($filePath)) {
+            $filePath = base_path('public/js/master-data/' . $filename);
+            if (!file_exists($filePath)) {
+                return [];
+            }
+        }
+
+        $content = file_get_contents($filePath);
+        $startPos = strpos($content, '[');
+        $endPos = strrpos($content, ']');
+        if ($startPos === false || $endPos === false) {
+            return [];
+        }
+
+        $jsArrayStr = substr($content, $startPos, $endPos - $startPos + 1);
+
+        // Normalize JavaScript keys to valid double-quoted JSON keys
+        $jsonStr = preg_replace('/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/', '$1"$2":', $jsArrayStr);
+        // Remove trailing commas before closing braces/brackets
+        $jsonStr = preg_replace('/,\s*([}\]])/', '$1', $jsonStr);
+        // Strip JS comments
+        $jsonStr = preg_replace('!/\*.*?\*/!s', '', $jsonStr);
+        $jsonStr = preg_replace('!//.*?[\r\n]!', '', $jsonStr);
+
+        $decoded = json_decode($jsonStr, true);
+        return is_array($decoded) ? $decoded : [];
     }
 
     private function validateVerhoeff($aadhaar)
