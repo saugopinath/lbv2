@@ -79,8 +79,8 @@ class AnnapurnaYojanaService
             $sirStatus = $formData['hof_sir_status'] ?? 'Not Applicable';
             $sirCaseDetails = $sirStatus === 'Yes' ? ($formData['hof_sir_case_details'] ?? null) : null;
 
-            $healthInsuranceType = $formData['health_insurance_type'] ?? 'None';
-            $hasHealthInsurance = ($healthInsuranceType !== 'None');
+            $hasHealthInsurance = (($formData['has_health_insurance'] ?? '') === 'Yes');
+            $healthInsuranceType = $hasHealthInsurance ? ($formData['health_insurance_type'] ?? null) : null;
             $healthInsurancePremium = ($hasHealthInsurance && !empty($formData['health_insurance_premium'])) ? (float) $formData['health_insurance_premium'] : null;
             $healthInsuranceSumAssured = ($hasHealthInsurance && !empty($formData['health_insurance_sum_assured'])) ? (float) $formData['health_insurance_sum_assured'] : null;
 
@@ -170,7 +170,8 @@ class AnnapurnaYojanaService
                 'highest_educational_qualifications' => $formData['hof_highest_qualification'] ?? null,
                 'gross_annual_income' => !empty($formData['total_annual_income']) ? (float) $formData['total_annual_income'] : null,
                 'pays_income_or_professional_tax' => (($formData['pays_tax'] ?? '') === 'Yes'),
-                'pan_no' => $formData['hof_pan_no'] ?? null,
+                'pan_no' => (($formData['has_pan_card'] ?? '') === 'Yes') ? ($formData['hof_pan_no'] ?? null) : null,
+                'pan_name' => (($formData['has_pan_card'] ?? '') === 'Yes') ? ($formData['hof_pan_name'] ?? null) : null,
                 'holds_constitutional_post' => $hasConstitutionalPost,
                 'constitutional_post_member_no' => $constitutionalPostDetails,
                 'is_registered_gst' => $hasGstReg,
@@ -180,7 +181,7 @@ class AnnapurnaYojanaService
                 'govt_pensioner_member_no' => $pensionerDetails,
                 'relation_with_head_of_family' => 'Self',
                 'applying_for_annapurna_bhandar' => $isHofEligible || (($formData['hof_applying_for_ay'] ?? '') === 'Yes'),
-                'has_pan_card' => !empty($formData['hof_pan_no']),
+                'has_pan_card' => (($formData['has_pan_card'] ?? '') === 'Yes'),
                 'has_three_pucca_rooms' => (($formData['has_pucca_rooms'] ?? '') === 'Yes'),
                 'owns_land' => $ownsLand,
                 'landholding_size_decimals' => $landSizeDecimals,
@@ -191,11 +192,16 @@ class AnnapurnaYojanaService
 
             // Save HOF Employment Nature
             if (!empty($formData['hof_employment_nature'])) {
-                DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->insert([
-                    'family_member_id' => $hofMemberId,
-                    'employment_type' => $formData['hof_employment_nature'],
-                    'lgd_district_code' => $lgdDistrictCode,
-                ]);
+                $natures = (array) $formData['hof_employment_nature'];
+                foreach ($natures as $nature) {
+                    if (!empty($nature)) {
+                        DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->insert([
+                            'family_member_id' => $hofMemberId,
+                            'employment_type' => $nature,
+                            'lgd_district_code' => $lgdDistrictCode,
+                        ]);
+                    }
+                }
             }
 
             // Save HOF DBT Benefits
@@ -244,8 +250,8 @@ class AnnapurnaYojanaService
                 $mSirStatus = $isChild ? 'Not Applicable' : ($member['sir_status'] ?? 'Not Applicable');
                 $mSirCaseDetails = !$isChild && $mSirStatus === 'Yes' ? ($member['sir_case_details'] ?? null) : null;
 
-                $mHealthInsuranceType = $isChild ? 'No' : ($member['health_insurance_type'] ?? 'No');
-                $mHasHealthInsurance = !$isChild && ($mHealthInsuranceType !== 'No');
+                $mHasHealthInsurance = !$isChild && (($member['has_health_insurance'] ?? '') === 'Yes');
+                $mHealthInsuranceType = $mHasHealthInsurance ? ($member['health_insurance_type'] ?? null) : null;
                 $mHealthInsurancePremium = ($mHasHealthInsurance && !empty($member['health_insurance_premium'])) ? (float) $member['health_insurance_premium'] : null;
                 $mHealthInsuranceSumAssured = ($mHasHealthInsurance && !empty($member['health_insurance_sum_assured'])) ? (float) $member['health_insurance_sum_assured'] : null;
 
@@ -279,14 +285,15 @@ class AnnapurnaYojanaService
                     'highest_educational_qualifications' => $isChild ? null : (!empty($member['highest_qualification']) ? $member['highest_qualification'] : null),
                     'gross_annual_income' => null,
                     'pays_income_or_professional_tax' => false,
-                    'pan_no' => $isChild ? null : (!empty($member['pan_no']) ? $member['pan_no'] : null),
+                    'pan_no' => ($isChild || (($member['has_pan_card'] ?? '') !== 'Yes')) ? null : ($member['pan_no'] ?? null),
+                    'pan_name' => ($isChild || (($member['has_pan_card'] ?? '') !== 'Yes')) ? null : ($member['pan_name'] ?? null),
                     'holds_constitutional_post' => false,
                     'is_registered_gst' => false,
                     'is_child' => $isChild,
                     'is_govt_pensioner' => false,
                     'relation_with_head_of_family' => !empty($member['relation']) ? $member['relation'] : null,
                     'applying_for_annapurna_bhandar' => $mApplyingForAY,
-                    'has_pan_card' => !$isChild && !empty($member['pan_no']),
+                    'has_pan_card' => !$isChild && (($member['has_pan_card'] ?? '') === 'Yes'),
                     'lgd_district_code' => $lgdDistrictCode,
                     'lgd_block_mc_code' => $lgdBlockMcCode,
                     'lgd_gp_ward_code' => $lgdGpWardCode,

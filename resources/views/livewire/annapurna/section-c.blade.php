@@ -154,18 +154,35 @@
                 </h3>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Has Health Insurance? *
+                        <br><span class="text-xs text-gray-500 font-normal">স্বাস্থ্য বীমা আছে কি?</span></label>
+                    <select wire:model.live="formData.has_health_insurance"
+                        class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">-- Select --</option>
+                        <option value="Yes">Yes / হ্যাঁ</option>
+                        <option value="No">No / না</option>
+                    </select>
+                    @error('formData.has_health_insurance')
+                        <span class="text-red-600 text-xs">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                @if (($formData['has_health_insurance'] ?? '') === 'Yes')
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Health Insurance
-                        Type <br><span class="text-xs text-gray-500 font-normal">বীমার
+                        Type * <br><span class="text-xs text-gray-500 font-normal">বীমার
                             প্রকার</span></label>
                     <select wire:model="formData.health_insurance_type"
                         class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="None">None / নেই</option>
-                        <option value="Government">Government / সরকারি (যেমন স্বাস্থ্যসাথী)
-                        </option>
+                        <option value="">-- Select Type --</option>
+                        <option value="Government">Government / সরকারি (যেমন স্বাস্থ্যসাথী)</option>
                         <option value="Private">Private / ব্যক্তিগত</option>
                     </select>
+                    @error('formData.health_insurance_type')
+                        <span class="text-red-600 text-xs">{{ $message }}</span>
+                    @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Annual Premium
@@ -181,6 +198,7 @@
                     <input type="number" wire:model="formData.health_insurance_sum_assured"
                         class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
+                @endif
             </div>
         </div>
     @else
@@ -201,19 +219,36 @@
                     </h3>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Has Health Insurance? *
+                            <br><span class="text-xs text-gray-500 font-normal">স্বাস্থ্য বীমা আছে কি?</span></label>
+                        <select wire:model.live="members.{{ $index }}.has_health_insurance"
+                            class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">-- Select --</option>
+                            <option value="Yes">Yes / হ্যাঁ</option>
+                            <option value="No">No / না</option>
+                        </select>
+                        @error("members.{$index}.has_health_insurance")
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    @if (($members[$index]['has_health_insurance'] ?? '') === 'Yes')
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Health
-                            Insurance Type <br><span
+                            Insurance Type * <br><span
                                 class="text-xs text-gray-500 font-normal">বীমার
                                 প্রকার</span></label>
                         <select wire:model="members.{{ $index }}.health_insurance_type"
                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="No">None / নেই</option>
-                            <option value="Government">Government / সরকারি (যেমন স্বাস্থ্যসাথী)
-                            </option>
+                            <option value="">-- Select Type --</option>
+                            <option value="Government">Government / সরকারি (যেমন স্বাস্থ্যসাথী)</option>
                             <option value="Private">Private / ব্যক্তিগত</option>
                         </select>
+                        @error("members.{$index}.health_insurance_type")
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Annual
@@ -232,6 +267,7 @@
                             wire:model="members.{{ $index }}.health_insurance_sum_assured"
                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
+                    @endif
                 </div>
             </div>
         @endif
