@@ -43,5 +43,27 @@
     "Widow Pension",
     "PM-Kisan",
     "Others"
+  ],
+  "relations": [
+    "Spouse",
+    "Son",
+    "Daughter",
+    "Father",
+    "Mother",
+    "Brother",
+    "Sister",
+    "Father-in-law",
+    "Mother-in-law",
+    "Son-in-law",
+    "Daughter-in-law",
+    "Grandson",
+    "Granddaughter",
+    "Grandfather",
+    "Grandmother",
+    "Uncle",
+    "Aunt",
+    "Nephew",
+    "Niece",
+    "Others"
   ]
 }

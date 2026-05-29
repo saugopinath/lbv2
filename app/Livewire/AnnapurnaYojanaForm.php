@@ -57,6 +57,8 @@ class AnnapurnaYojanaForm extends Component
 
     public $benefitSchemes = [];
 
+    public $relations = [];
+
     // Dynamic list for family members (max 5)
     public array $members = [];
 
@@ -200,6 +202,7 @@ class AnnapurnaYojanaForm extends Component
             $this->documentTypes = $masterData['documentTypes'] ?? [];
             $this->schoolTypes = $masterData['schoolTypes'] ?? [];
             $this->benefitSchemes = $masterData['benefitSchemes'] ?? [];
+            $this->relations = $masterData['relations'] ?? [];
         }
 
         // Load all districts from master-data file

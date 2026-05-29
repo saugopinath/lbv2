@@ -784,9 +784,98 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Relation to HOF *
                         <br><span class="text-xs text-gray-500 font-normal">পরিবার প্রধানের সাথে
                             সম্পর্ক</span></label>
-                    <input type="text" wire:model="members.{{ $index }}.relation"
-                        placeholder="e.g. Spouse, Son"
-                        class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <div x-data="{
+                        realVal: @entangle('members.' . $index . '.relation'),
+                        selectVal: '',
+                        customVal: '',
+                        standards: {{ json_encode(array_values(array_filter($relations, fn($r) => $r !== 'Others'))) }},
+                        
+                        init() {
+                            this.updateFromReal();
+                            this.$watch('realVal', value => {
+                                this.updateFromReal();
+                            });
+                        },
+                        updateFromReal() {
+                            if (!this.realVal) {
+                                this.selectVal = '';
+                                this.customVal = '';
+                            } else if (this.standards.includes(this.realVal)) {
+                                this.selectVal = this.realVal;
+                                this.customVal = '';
+                            } else {
+                                this.selectVal = 'Others';
+                                this.customVal = this.realVal;
+                            }
+                        },
+                        onSelectChange() {
+                            if (this.selectVal === 'Others') {
+                                this.realVal = this.customVal || 'Others';
+                            } else {
+                                this.realVal = this.selectVal;
+                            }
+                        },
+                        onCustomChange() {
+                            this.realVal = this.customVal || 'Others';
+                        }
+                    }" x-init="init()">
+                        <select x-model="selectVal" @change="onSelectChange()"
+                            class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">-- Select --</option>
+                            @foreach ($relations as $rel)
+                                <option value="{{ $rel }}">
+                                    {{ $rel }}
+                                    @if ($rel === 'Spouse')
+                                        / স্ত্রী/স্বামী
+                                    @elseif($rel === 'Son')
+                                        / পুত্র
+                                    @elseif($rel === 'Daughter')
+                                        / কন্যা
+                                    @elseif($rel === 'Father')
+                                        / পিতা
+                                    @elseif($rel === 'Mother')
+                                        / মাতা
+                                    @elseif($rel === 'Brother')
+                                        / ভাই
+                                    @elseif($rel === 'Sister')
+                                        / বোন
+                                    @elseif($rel === 'Father-in-law')
+                                        / শ্বশুর
+                                    @elseif($rel === 'Mother-in-law')
+                                        / শাশুড়ি
+                                    @elseif($rel === 'Son-in-law')
+                                        / জামাতা
+                                    @elseif($rel === 'Daughter-in-law')
+                                        / পুত্রবধূ
+                                    @elseif($rel === 'Grandson')
+                                        / নাতি
+                                    @elseif($rel === 'Granddaughter')
+                                        / নাতনি
+                                    @elseif($rel === 'Grandfather')
+                                        / ঠাকুরদা/দাদু
+                                    @elseif($rel === 'Grandmother')
+                                        / ঠাকুমা/দিদিমা
+                                    @elseif($rel === 'Uncle')
+                                        / কাকা/জ্যাঠা/মামা
+                                    @elseif($rel === 'Aunt')
+                                        / কাকিমা/জেঠিমা/মাসি/পিসি
+                                    @elseif($rel === 'Nephew')
+                                        / ভাইপো/ভাগ্নে
+                                    @elseif($rel === 'Niece')
+                                        / ভাইঝি/ভাগ্নি
+                                    @elseif($rel === 'Others')
+                                        / অন্যান্য
+                                    @endif
+                                </option>
+                            @endforeach
+                        </select>
+
+                        <div x-show="selectVal === 'Others'" class="mt-2" style="display: none;">
+                            <input type="text" x-model="customVal" @input="onCustomChange()"
+                                placeholder="Specify Relationship / সম্পর্ক উল্লেখ করুন"
+                                class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
                     @error("members.{$index}.relation")
                         <span class="text-red-600 text-xs">{{ $message }}</span>
                     @enderror
