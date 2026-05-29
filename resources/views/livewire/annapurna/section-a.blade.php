@@ -604,7 +604,7 @@
                 </h3>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">HOF EPIC/Voter
                         No. <br><span class="text-xs text-gray-500 font-normal">ভোটার কার্ড
@@ -635,14 +635,32 @@
                                 class="text-red-500 text-xs font-semibold"></span>
                         </div>
                     </div>
+                    @error('formData.hof_epic_no')
+                        <span class="text-red-600 text-xs">{{ $message }}</span>
+                    @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">HOF AC & Part No.
-                        of Electoral Roll <br><span
-                            class="text-xs text-gray-500 font-normal">বিধানসভা ও পার্ট
-                            নং</span></label>
-                    <input type="text" wire:model="formData.hof_ac_part_no"
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Assembly Constituency No. <br><span
+                            class="text-xs text-gray-500 font-normal">বিধানসভা নং</span></label>
+                    <select wire:model.live="formData.hof_assembly_constituency"
                         class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">-- Select AC --</option>
+                        @foreach ($this->getFilteredAssemblies() as $assembly)
+                            <option value="{{ $assembly['id'] }}">{{ $assembly['text'] }}</option>
+                        @endforeach
+                    </select>
+                    @error('formData.hof_assembly_constituency')
+                        <span class="text-red-600 text-xs">{{ $message }}</span>
+                    @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Part No. of Electoral Roll <br><span
+                            class="text-xs text-gray-500 font-normal">পার্ট নং</span></label>
+                    <input type="text" wire:model.live="formData.hof_part_no"
+                        class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    @error('formData.hof_part_no')
+                        <span class="text-red-600 text-xs">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
         </div>
@@ -811,7 +829,7 @@
 
             @if (($members[$index]['member_type'] ?? 'adult') === 'adult')
                 <div
-                    class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4 pt-4 border-t border-gray-200">
+                    class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-4 pt-4 border-t border-gray-200">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Applying for
                             Annapurna Yojana? <br><span
@@ -856,13 +874,32 @@
                                     class="text-red-500 text-xs font-semibold"></span>
                             </div>
                         </div>
+                        @error("members.{$index}.epic_no")
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Member AC &
-                            Part No. <br><span class="text-xs text-gray-500 font-normal">বিধানসভা ও
-                                পার্ট নং</span></label>
-                        <input type="text" wire:model="members.{{ $index }}.ac_part_no"
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Assembly Constituency No. <br><span
+                                class="text-xs text-gray-500 font-normal">বিধানসভা নং</span></label>
+                        <select wire:model.live="members.{{ $index }}.assembly_constituency"
                             class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">-- Select AC --</option>
+                            @foreach ($this->getFilteredAssemblies() as $assembly)
+                                <option value="{{ $assembly['id'] }}">{{ $assembly['text'] }}</option>
+                            @endforeach
+                        </select>
+                        @error("members.{$index}.assembly_constituency")
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Part No. of Electoral Roll <br><span
+                                class="text-xs text-gray-500 font-normal">পার্ট নং</span></label>
+                        <input type="text" wire:model.live="members.{{ $index }}.part_no"
+                            class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        @error("members.{$index}.part_no")
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                 </div>
             @endif

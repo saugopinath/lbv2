@@ -152,7 +152,8 @@ class AnnapurnaYojanaService
                 'bank_account_no' => $formData['hof_acc_no'] ?? null,
                 'ifsc_code' => $formData['hof_ifsc'] ?? null,
                 'epic_no' => $formData['hof_epic_no'] ?? null,
-                'part_no' => $formData['hof_ac_part_no'] ?? null,
+                'assembly_constituency_no' => $formData['hof_assembly_constituency'] ?? null,
+                'part_no' => $formData['hof_part_no'] ?? null,
                 'caa_application_status' => $caaStatus,
                 'caa_application_no' => $caaAppNo,
                 'caa_certificate_no' => $caaCertNo,
@@ -219,13 +220,17 @@ class AnnapurnaYojanaService
             }
 
             // Save HOF Other Credit Cards
-            if (!empty($formData['hof_kcc_type']) && $formData['hof_kcc_type'] !== 'None') {
-                DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->insert([
-                    'family_member_id' => $hofMemberId,
-                    'id_type' => $formData['hof_kcc_type'],
-                    'issue_date' => $formData['hof_kcc_date'] ?? '',
-                    'lgd_district_code' => $lgdDistrictCode,
-                ]);
+            if (!empty($formData['hof_kcc_cards'])) {
+                foreach ($formData['hof_kcc_cards'] as $card) {
+                    if (!empty($card['type']) && $card['type'] !== 'None') {
+                        DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->insert([
+                            'family_member_id' => $hofMemberId,
+                            'id_type' => $card['type'],
+                            'issue_date' => $card['date'] ?? '',
+                            'lgd_district_code' => $lgdDistrictCode,
+                        ]);
+                    }
+                }
             }
 
             // 8. Save Family Members
@@ -270,7 +275,8 @@ class AnnapurnaYojanaService
                     'bank_account_no' => $mAccNo,
                     'ifsc_code' => $mIfsc,
                     'epic_no' => $isChild ? null : (!empty($member['epic_no']) ? $member['epic_no'] : null),
-                    'part_no' => $isChild ? null : (!empty($member['ac_part_no']) ? $member['ac_part_no'] : null),
+                    'assembly_constituency_no' => $isChild ? null : (!empty($member['assembly_constituency']) ? $member['assembly_constituency'] : null),
+                    'part_no' => $isChild ? null : (!empty($member['part_no']) ? $member['part_no'] : null),
                     'caa_application_status' => $mCaaStatus,
                     'caa_application_no' => $mCaaAppNo,
                     'caa_certificate_no' => $mCaaCertNo,
@@ -330,13 +336,17 @@ class AnnapurnaYojanaService
                 }
 
                 // Save Member Other Cards
-                if (!$isChild && !empty($member['kcc_type']) && $member['kcc_type'] !== 'None') {
-                    DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->insert([
-                        'family_member_id' => $memberId,
-                        'id_type' => $member['kcc_type'],
-                        'issue_date' => $member['kcc_date'] ?? '',
-                        'lgd_district_code' => $lgdDistrictCode,
-                    ]);
+                if (!$isChild && !empty($member['kcc_cards'])) {
+                    foreach ($member['kcc_cards'] as $card) {
+                        if (!empty($card['type']) && $card['type'] !== 'None') {
+                            DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->insert([
+                                'family_member_id' => $memberId,
+                                'id_type' => $card['type'],
+                                'issue_date' => $card['date'] ?? '',
+                                'lgd_district_code' => $lgdDistrictCode,
+                            ]);
+                        }
+                    }
                 }
             }
 

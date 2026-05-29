@@ -34,6 +34,8 @@ class AnnapurnaYojanaForm extends Component
 
     public $gps = [];
 
+    public $assemblies = [];
+
     // Loaded from masterData.json
     public $genders = [];
 
@@ -112,7 +114,8 @@ class AnnapurnaYojanaForm extends Component
             'hof_acc_no' => '',
             'hof_ifsc' => '',
             'hof_epic_no' => '',
-            'hof_ac_part_no' => '',
+            'hof_assembly_constituency' => '',
+            'hof_part_no' => '',
 
             // Ration details (Section B)
             'has_digital_ration_card' => '',
@@ -157,10 +160,9 @@ class AnnapurnaYojanaForm extends Component
             'hof_caa_cert_no' => '',
 
             // HOF Other Credit Cards (KCC, Student CC, etc.)
-            'hof_kcc_type' => '', // None / KCC / KCC ARD / Artisan Credit Card / MJCC / Student CC / Others
-            'hof_kcc_id_no' => '',
-            'hof_kcc_date' => '',
-            'hof_kcc_issuing_authority' => '',
+            'hof_kcc_cards' => [
+                ['type' => '', 'id_no' => '', 'date' => '', 'issuing_authority' => ''],
+            ],
 
             // HOF SIR status
             'hof_sir_status' => 'Not Applicable', // Not Applicable / No / Yes
@@ -217,6 +219,9 @@ class AnnapurnaYojanaForm extends Component
             return strcmp($a->name, $b->name);
         });
         $this->districts = $districts;
+
+        // Load all assemblies from master-data file
+        $this->assemblies = $this->getMasterDataArray('assemblies.js', 'assemblies');
 
         // Start with empty members list
         $this->members = [];
@@ -336,10 +341,16 @@ class AnnapurnaYojanaForm extends Component
         } elseif ($field === 'hof_caa_status' && $value === 'Not Applicable') {
             $this->formData['hof_caa_app_no'] = '';
             $this->formData['hof_caa_cert_no'] = '';
-        } elseif ($field === 'hof_kcc_type' && (empty($value) || $value === 'None')) {
-            $this->formData['hof_kcc_id_no'] = '';
-            $this->formData['hof_kcc_date'] = '';
-            $this->formData['hof_kcc_issuing_authority'] = '';
+        } elseif (str_starts_with($field, 'hof_kcc_cards.')) {
+            $parts = explode('.', $field);
+            if (count($parts) === 3 && $parts[2] === 'type') {
+                $cIndex = (int) $parts[1];
+                if (empty($value)) {
+                    $this->formData['hof_kcc_cards'][$cIndex]['id_no'] = '';
+                    $this->formData['hof_kcc_cards'][$cIndex]['date'] = '';
+                    $this->formData['hof_kcc_cards'][$cIndex]['issuing_authority'] = '';
+                }
+            }
         } elseif ($field === 'hof_sir_status' && $value !== 'Yes') {
             $this->formData['hof_sir_case_details'] = '';
         }
@@ -367,6 +378,17 @@ class AnnapurnaYojanaForm extends Component
 
         // $field format is like: "0.applying_for_ay", "1.bank_name", etc.
         $parts = explode('.', $field);
+
+        if (count($parts) === 4 && $parts[1] === 'kcc_cards' && $parts[3] === 'type') {
+            $index = (int) $parts[0];
+            $cIndex = (int) $parts[2];
+            if (empty($value) && isset($this->members[$index]['kcc_cards'][$cIndex])) {
+                $this->members[$index]['kcc_cards'][$cIndex]['id_no'] = '';
+                $this->members[$index]['kcc_cards'][$cIndex]['date'] = '';
+                $this->members[$index]['kcc_cards'][$cIndex]['issuing_authority'] = '';
+            }
+        }
+
         if (count($parts) === 2) {
             $index = (int) $parts[0];
             $subField = $parts[1];
@@ -406,14 +428,12 @@ class AnnapurnaYojanaForm extends Component
                 } elseif ($subField === 'caa_status' && $value === 'Not Applicable') {
                     $this->members[$index]['caa_app_no'] = '';
                     $this->members[$index]['caa_cert_no'] = '';
-                } elseif ($subField === 'kcc_type' && (empty($value) || $value === 'None')) {
-                    $this->members[$index]['kcc_id_no'] = '';
-                    $this->members[$index]['kcc_date'] = '';
-                    $this->members[$index]['kcc_issuing_authority'] = '';
                 } elseif ($subField === 'sir_status' && $value !== 'Yes') {
                     $this->members[$index]['sir_case_details'] = '';
-                } elseif ($subField === 'literate_status' && $value !== 'Literate') {
-                    $this->members[$index]['highest_qualification'] = '';
+                } elseif ($subField === 'literate_status') {
+                    if ($value !== 'Literate') {
+                        $this->members[$index]['highest_qualification'] = '';
+                    }
                     $this->calculateAdultLiteracyCounts();
                 } elseif ($subField === 'member_type') {
                     if ($value === 'child') {
@@ -515,6 +535,15 @@ class AnnapurnaYojanaForm extends Component
         $this->gps = $gps;
     }
 
+    public function getFilteredAssemblies()
+    {
+        $assemblies = $this->getMasterDataArray('assemblies.js', 'assemblies');
+        usort($assemblies, function ($a, $b) {
+            return strcmp($a['text'] ?? '', $b['text'] ?? '');
+        });
+        return array_values($assemblies);
+    }
+
     public function getEmptyMemberStructure()
     {
         return [
@@ -528,7 +557,8 @@ class AnnapurnaYojanaForm extends Component
             'acc_no' => '',
             'ifsc' => '',
             'epic_no' => '',
-            'ac_part_no' => '',
+            'assembly_constituency' => '',
+            'part_no' => '',
 
             'member_type' => 'adult', // adult or child
             'school_grade' => '',
@@ -563,10 +593,9 @@ class AnnapurnaYojanaForm extends Component
             'caa_status' => 'Not Applicable',
             'caa_app_no' => '',
             'caa_cert_no' => '',
-            'kcc_type' => '',
-            'kcc_id_no' => '',
-            'kcc_date' => '',
-            'kcc_issuing_authority' => '',
+            'kcc_cards' => [
+                ['type' => '', 'id_no' => '', 'date' => '', 'issuing_authority' => ''],
+            ],
             'sir_status' => 'Not Applicable',
             'sir_case_details' => '',
 
@@ -639,6 +668,58 @@ class AnnapurnaYojanaForm extends Component
         // Removing a member is always a structural change — force save
         $this->isDirty = true;
         $this->saveDraft();
+    }
+
+    public function addHofKccCard()
+    {
+        $this->formData['hof_kcc_cards'][] = [
+            'type' => '',
+            'id_no' => '',
+            'date' => '',
+            'issuing_authority' => '',
+        ];
+        $this->isDirty = true;
+    }
+
+    public function removeHofKccCard($index)
+    {
+        if (count($this->formData['hof_kcc_cards']) > 1) {
+            unset($this->formData['hof_kcc_cards'][$index]);
+            $this->formData['hof_kcc_cards'] = array_values($this->formData['hof_kcc_cards']);
+        } else {
+            $this->formData['hof_kcc_cards'] = [
+                ['type' => '', 'id_no' => '', 'date' => '', 'issuing_authority' => ''],
+            ];
+        }
+        $this->isDirty = true;
+    }
+
+    public function addMemberKccCard($mIndex)
+    {
+        if (isset($this->members[$mIndex])) {
+            $this->members[$mIndex]['kcc_cards'][] = [
+                'type' => '',
+                'id_no' => '',
+                'date' => '',
+                'issuing_authority' => '',
+            ];
+            $this->isDirty = true;
+        }
+    }
+
+    public function removeMemberKccCard($mIndex, $cIndex)
+    {
+        if (isset($this->members[$mIndex])) {
+            if (count($this->members[$mIndex]['kcc_cards']) > 1) {
+                unset($this->members[$mIndex]['kcc_cards'][$cIndex]);
+                $this->members[$mIndex]['kcc_cards'] = array_values($this->members[$mIndex]['kcc_cards']);
+            } else {
+                $this->members[$mIndex]['kcc_cards'] = [
+                    ['type' => '', 'id_no' => '', 'date' => '', 'issuing_authority' => ''],
+                ];
+            }
+            $this->isDirty = true;
+        }
     }
 
     public function selectMember($index)
@@ -785,6 +866,26 @@ class AnnapurnaYojanaForm extends Component
                     is_numeric($this->formData['total_annual_income']);
             }
 
+            if ($section === 'other_docs') {
+                $caaStatus = $this->formData['hof_caa_status'] ?? 'Not Applicable';
+                if ($caaStatus === 'Applied' && empty($this->formData['hof_caa_app_no'])) {
+                    return false;
+                }
+                if ($caaStatus === 'Issued' && empty($this->formData['hof_caa_cert_no'])) {
+                    return false;
+                }
+                $sirStatus = $this->formData['hof_sir_status'] ?? 'Not Applicable';
+                if ($sirStatus === 'Yes' && empty($this->formData['hof_sir_case_details'])) {
+                    return false;
+                }
+                foreach ($this->formData['hof_kcc_cards'] ?? [] as $card) {
+                    if (!empty($card['type']) && empty($card['id_no'])) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
             if ($section === 'declaration') {
                 return (bool) ($this->formData['agree_consent'] ?? false);
             }
@@ -824,6 +925,29 @@ class AnnapurnaYojanaForm extends Component
                 }
 
                 return $aadhaarOk && $bankOk;
+            }
+
+            if ($section === 'other_docs') {
+                if (($member['member_type'] ?? 'adult') === 'child') {
+                    return true;
+                }
+                $caaStatus = $member['caa_status'] ?? 'Not Applicable';
+                if ($caaStatus === 'Applied' && empty($member['caa_app_no'])) {
+                    return false;
+                }
+                if ($caaStatus === 'Issued' && empty($member['caa_cert_no'])) {
+                    return false;
+                }
+                $sirStatus = $member['sir_status'] ?? 'Not Applicable';
+                if ($sirStatus === 'Yes' && empty($member['sir_case_details'])) {
+                    return false;
+                }
+                foreach ($member['kcc_cards'] ?? [] as $card) {
+                    if (!empty($card['type']) && empty($card['id_no'])) {
+                        return false;
+                    }
+                }
+                return true;
             }
 
             if ($section === 'declaration') {
@@ -932,6 +1056,10 @@ class AnnapurnaYojanaForm extends Component
                     $rules['formData.hof_acc_no'] = 'required|digits_between:9,18';
                     $rules['formData.hof_ifsc'] = ['required', 'size:11', 'regex:/^[A-Z]{4}0[A-Z0-9]{6}$/'];
                     $rules['formData.hof_epic_no'] = ['nullable', 'regex:/^[A-Z]{3}[0-9]{7}$/'];
+                    if (!empty($this->formData['hof_epic_no'])) {
+                        $rules['formData.hof_assembly_constituency'] = 'required';
+                        $rules['formData.hof_part_no'] = 'required|string|max:100';
+                    }
 
                     $category = $this->formData['category'] ?? '';
                     if (in_array($category, ['SC', 'ST', 'OBC'])) {
@@ -961,6 +1089,10 @@ class AnnapurnaYojanaForm extends Component
                             },
                         ];
                         $rules["members.{$index}.epic_no"] = ['nullable', 'regex:/^[A-Z]{3}[0-9]{7}$/'];
+                        if (!empty($member['epic_no'])) {
+                            $rules["members.{$index}.assembly_constituency"] = 'required';
+                            $rules["members.{$index}.part_no"] = 'required|string|max:100';
+                        }
 
                         if ($this->isMemberFemale25to60($index) || (($member['applying_for_ay'] ?? 'No') === 'Yes')) {
                             $rules["members.{$index}.bank_name"] = ['required', 'string', 'max:100', 'regex:/^[\p{L}\s.\'\-]+$/u'];
@@ -1034,6 +1166,28 @@ class AnnapurnaYojanaForm extends Component
                         }
                     }
                 }
+            } elseif ($section === 'other_docs') {
+                if ($this->activeMemberIndex === 0) {
+                    foreach ($this->formData['hof_kcc_cards'] ?? [] as $ki => $card) {
+                        if (!empty($card['type'])) {
+                            $rules["formData.hof_kcc_cards.{$ki}.id_no"] = 'required|string|max:100';
+                            $rules["formData.hof_kcc_cards.{$ki}.date"] = 'nullable|date|before:today';
+                            $rules["formData.hof_kcc_cards.{$ki}.issuing_authority"] = 'nullable|string|max:255';
+                        }
+                    }
+                } else {
+                    $index = $this->activeMemberIndex - 1;
+                    $member = $this->members[$index] ?? [];
+                    if (($member['member_type'] ?? 'adult') === 'adult') {
+                        foreach ($member['kcc_cards'] ?? [] as $ki => $card) {
+                            if (!empty($card['type'])) {
+                                $rules["members.{$index}.kcc_cards.{$ki}.id_no"] = 'required|string|max:100';
+                                $rules["members.{$index}.kcc_cards.{$ki}.date"] = 'nullable|date|before:today';
+                                $rules["members.{$index}.kcc_cards.{$ki}.issuing_authority"] = 'nullable|string|max:255';
+                            }
+                        }
+                    }
+                }
             }
         } else {
             // Full Form validation on Submit (showConfirmation)
@@ -1087,6 +1241,11 @@ class AnnapurnaYojanaForm extends Component
                 $rules['formData.health_insurance_type'] = 'required|in:Government,Private';
             }
 
+            if (!empty($this->formData['hof_epic_no'])) {
+                $rules['formData.hof_assembly_constituency'] = 'required';
+                $rules['formData.hof_part_no'] = 'required|string|max:100';
+            }
+
             if (($this->formData['has_pan_card'] ?? '') === 'Yes') {
                 $rules['formData.hof_pan_name'] = ['required', 'string', 'max:255', 'regex:/^[\p{L}\s.\'\-]+$/u'];
                 $rules['formData.hof_pan_no'] = ['required', 'regex:/^[A-Z]{3}[CPHFATBLJG][A-Z][0-9]{4}[A-Z]$/'];
@@ -1121,6 +1280,15 @@ class AnnapurnaYojanaForm extends Component
                 }
             }
 
+            // HOF cards validation
+            foreach ($this->formData['hof_kcc_cards'] ?? [] as $ki => $card) {
+                if (!empty($card['type'])) {
+                    $rules["formData.hof_kcc_cards.{$ki}.id_no"] = 'required|string|max:100';
+                    $rules["formData.hof_kcc_cards.{$ki}.date"] = 'nullable|date|before:today';
+                    $rules["formData.hof_kcc_cards.{$ki}.issuing_authority"] = 'nullable|string|max:255';
+                }
+            }
+
             // 2. Validate all members rules
             foreach ($this->members as $index => $member) {
                 $rules["members.{$index}.member_type"] = 'required|in:adult,child';
@@ -1140,6 +1308,10 @@ class AnnapurnaYojanaForm extends Component
                         },
                     ];
                     $rules["members.{$index}.epic_no"] = ['nullable', 'regex:/^[A-Z]{3}[0-9]{7}$/'];
+                    if (!empty($member['epic_no'])) {
+                        $rules["members.{$index}.assembly_constituency"] = 'required';
+                        $rules["members.{$index}.part_no"] = 'required|string|max:100';
+                    }
                     $rules["members.{$index}.pan_no"] = ['nullable', 'regex:/^[A-Z]{3}[CPHFATBLJG][A-Z][0-9]{4}[A-Z]$/'];
 
                     $rules["members.{$index}.has_health_insurance"] = 'required';
@@ -1151,6 +1323,14 @@ class AnnapurnaYojanaForm extends Component
                         $rules["members.{$index}.bank_name"] = ['required', 'string', 'max:100', 'regex:/^[\p{L}\s.\'\-]+$/u'];
                         $rules["members.{$index}.acc_no"] = 'required|digits_between:9,18';
                         $rules["members.{$index}.ifsc"] = ['required', 'size:11', 'regex:/^[A-Z]{4}0[A-Z0-9]{6}$/'];
+                    }
+
+                    foreach ($member['kcc_cards'] ?? [] as $ki => $card) {
+                        if (!empty($card['type'])) {
+                            $rules["members.{$index}.kcc_cards.{$ki}.id_no"] = 'required|string|max:100';
+                            $rules["members.{$index}.kcc_cards.{$ki}.date"] = 'nullable|date|before:today';
+                            $rules["members.{$index}.kcc_cards.{$ki}.issuing_authority"] = 'nullable|string|max:255';
+                        }
                     }
                 }
             }
@@ -1200,6 +1380,8 @@ class AnnapurnaYojanaForm extends Component
                     $messages['formData.hof_ifsc.size'] = 'IFSC Code must be exactly 11 characters.';
                     $messages['formData.hof_ifsc.regex'] = 'IFSC format is invalid (e.g. SBIN0001234).';
                     $messages['formData.hof_epic_no.regex'] = 'Voter ID (EPIC) format is invalid (e.g. ABC1234567).';
+                    $messages['formData.hof_assembly_constituency.required'] = 'HOF Assembly Constituency is required when Voter ID is entered.';
+                    $messages['formData.hof_part_no.required'] = 'HOF Part Number of Electoral Roll is required when Voter ID is entered.';
                 } else {
                     $index = $this->activeMemberIndex - 1;
                     $messages["members.{$index}.member_type.required"] = 'Member category (Adult/Child) is required.';
@@ -1218,6 +1400,8 @@ class AnnapurnaYojanaForm extends Component
                     $messages["members.{$index}.ifsc.required"] = 'Member IFSC is required since they are applying for AY.';
                     $messages["members.{$index}.ifsc.size"] = 'Member IFSC must be exactly 11 characters.';
                     $messages["members.{$index}.ifsc.regex"] = 'Member IFSC format is invalid (e.g. SBIN0001234).';
+                    $messages["members.{$index}.assembly_constituency.required"] = 'Member Assembly Constituency is required when Voter ID is entered.';
+                    $messages["members.{$index}.part_no.required"] = 'Member Part Number of Electoral Roll is required when Voter ID is entered.';
                 }
             } elseif ($section === 'ration_subsidy') {
                 if ($this->activeMemberIndex === 0) {
@@ -1268,6 +1452,19 @@ class AnnapurnaYojanaForm extends Component
                     $messages["members.{$index}.pan_no.required"] = 'Member PAN Card Number is required.';
                     $messages["members.{$index}.pan_no.regex"] = 'Member PAN format is invalid (e.g. ABCDE1234F).';
                 }
+            } elseif ($section === 'other_docs') {
+                if ($this->activeMemberIndex === 0) {
+                    foreach ($this->formData['hof_kcc_cards'] ?? [] as $ki => $card) {
+                        $messages["formData.hof_kcc_cards.{$ki}.id_no.required"] = 'Card ID Number is required for HOF Card ' . ($ki + 1) . '.';
+                        $messages["formData.hof_kcc_cards.{$ki}.date.before"] = 'Issue Date must be in the past for HOF Card ' . ($ki + 1) . '.';
+                    }
+                } else {
+                    $index = $this->activeMemberIndex - 1;
+                    foreach ($this->members[$index]['kcc_cards'] ?? [] as $ki => $card) {
+                        $messages["members.{$index}.kcc_cards.{$ki}.id_no.required"] = 'Card ID Number is required for Member Card ' . ($ki + 1) . '.';
+                        $messages["members.{$index}.kcc_cards.{$ki}.date.before"] = 'Issue Date must be in the past for Member Card ' . ($ki + 1) . '.';
+                    }
+                }
             }
         } else {
             // Full Form validation messages on Submit
@@ -1311,6 +1508,8 @@ class AnnapurnaYojanaForm extends Component
                 'formData.hof_pan_no.required' => 'PAN Card Number is required.',
                 'formData.hof_pan_no.regex' => 'PAN format is invalid (e.g. ABCDE1234F).',
                 'formData.hof_epic_no.regex' => 'Voter ID (EPIC) format is invalid (e.g. ABC1234567).',
+                'formData.hof_assembly_constituency.required' => 'HOF Assembly Constituency is required when Voter ID is entered.',
+                'formData.hof_part_no.required' => 'HOF Part Number of Electoral Roll is required when Voter ID is entered.',
 
                 'formData.has_pucca_rooms.required' => 'House size selection is required.',
                 'formData.owns_land.required' => 'Land ownership selection is required.',
@@ -1330,6 +1529,12 @@ class AnnapurnaYojanaForm extends Component
                 'formData.has_pensioner.required' => 'Please select if HOF is a government pensioner.',
                 'formData.pensioner_details.required' => 'HOF Government pensioner details are required.',
             ];
+
+            // HOF cards validation messages
+            foreach ($this->formData['hof_kcc_cards'] ?? [] as $ki => $card) {
+                $messages["formData.hof_kcc_cards.{$ki}.id_no.required"] = 'Card ID Number is required for HOF Card ' . ($ki + 1) . '.';
+                $messages["formData.hof_kcc_cards.{$ki}.date.before"] = 'Issue Date must be in the past for HOF Card ' . ($ki + 1) . '.';
+            }
 
             foreach ($this->members as $index => $member) {
                 $messages["members.{$index}.member_type.required"] = 'Member #' . ($index + 1) . ' category is required.';
@@ -1354,9 +1559,16 @@ class AnnapurnaYojanaForm extends Component
                 $messages["members.{$index}.bank_name.regex"] = 'Bank Name should contain letters only (no numbers).';
                 $messages["members.{$index}.acc_no.required"] = 'Member #' . ($index + 1) . ' account number is required since they are applying for AY.';
                 $messages["members.{$index}.acc_no.digits_between"] = 'Account Number must be 9 to 18 digits (numbers only).';
-                $messages["members.{$index}.ifsc.required"] = 'Member #' . ($index + 1) . ' IFSC is required since they are applying for AY.';
+                $messages["members.{$index}.ifsc.required"] = 'Member #' . ($index + 1) . ' bank account number is required since they are applying for AY.';
                 $messages["members.{$index}.ifsc.size"] = 'Member #' . ($index + 1) . ' IFSC must be exactly 11 characters.';
                 $messages["members.{$index}.ifsc.regex"] = 'Member #' . ($index + 1) . ' IFSC format is invalid (e.g. SBIN0001234).';
+                $messages["members.{$index}.assembly_constituency.required"] = 'Member #' . ($index + 1) . ' Assembly Constituency is required when Voter ID is entered.';
+                $messages["members.{$index}.part_no.required"] = 'Member #' . ($index + 1) . ' Part Number of Electoral Roll is required when Voter ID is entered.';
+
+                foreach ($member['kcc_cards'] ?? [] as $ki => $card) {
+                    $messages["members.{$index}.kcc_cards.{$ki}.id_no.required"] = 'Card ID Number is required for Member #' . ($index + 1) . ' Card ' . ($ki + 1) . '.';
+                    $messages["members.{$index}.kcc_cards.{$ki}.date.before"] = 'Issue Date must be in the past for Member #' . ($index + 1) . ' Card ' . ($ki + 1) . '.';
+                }
             }
         }
 
@@ -1414,7 +1626,7 @@ class AnnapurnaYojanaForm extends Component
                     if (isset($parts[1])) {
                         $this->activeMemberIndex = ((int) $parts[1]) + 1;
                         $field = $parts[2] ?? '';
-                        if (in_array($field, ['member_type', 'name', 'dob', 'gender', 'relation', 'aadhaar', 'bank_name', 'acc_no', 'ifsc', 'epic_no', 'ac_part_no', 'applying_for_ay'])) {
+                        if (in_array($field, ['member_type', 'name', 'dob', 'gender', 'relation', 'aadhaar', 'bank_name', 'acc_no', 'ifsc', 'epic_no', 'assembly_constituency', 'part_no', 'applying_for_ay'])) {
                             $this->activeSection = 'family_identity';
                         } elseif (in_array($field, ['has_digital_ration_card', 'ration_card_no', 'ration_card_type'])) {
                             $this->activeSection = 'ration_subsidy';
@@ -1422,7 +1634,7 @@ class AnnapurnaYojanaForm extends Component
                             $this->activeSection = 'assets';
                         } elseif (in_array($field, ['has_pan_card', 'pan_name', 'pan_no', 'employment_nature', 'literate_status', 'highest_qualification'])) {
                             $this->activeSection = 'income_profession';
-                        } elseif (in_array($field, ['caa_status', 'caa_app_no', 'caa_cert_no', 'kcc_type', 'kcc_id_no', 'kcc_date', 'kcc_issuing_authority', 'sir_status', 'sir_case_details'])) {
+                        } elseif (in_array($field, ['caa_status', 'caa_app_no', 'caa_cert_no', 'kcc_type', 'kcc_id_no', 'kcc_date', 'kcc_issuing_authority', 'sir_status', 'sir_case_details', 'kcc_cards'])) {
                             $this->activeSection = 'other_docs';
                         } elseif (in_array($field, ['school_grade', 'school_name', 'school_type', 'school_type_other', 'vaccination_card_id', 'vaccination_status', 'vaccination_skip_reason_or_date'])) {
                             $this->activeSection = 'social_dependents';
@@ -1431,7 +1643,7 @@ class AnnapurnaYojanaForm extends Component
                 } elseif (str_starts_with($firstErrorKey, 'formData.')) {
                     $this->activeMemberIndex = 0; // HOF
                     $field = str_replace('formData.', '', $firstErrorKey);
-
+ 
                     $familyIdentityFields = [
                         'hof_name',
                         'hof_dob',
@@ -1454,7 +1666,8 @@ class AnnapurnaYojanaForm extends Component
                         'hof_acc_no',
                         'hof_ifsc',
                         'hof_epic_no',
-                        'hof_ac_part_no',
+                        'hof_assembly_constituency',
+                        'hof_part_no',
                     ];
 
                     $rationSubsidyFields = [
@@ -1503,7 +1716,7 @@ class AnnapurnaYojanaForm extends Component
                         $this->activeSection = 'assets';
                     } elseif (in_array($field, $incomeProfessionFields)) {
                         $this->activeSection = 'income_profession';
-                    } elseif (in_array($field, ['caa_status', 'caa_app_no', 'caa_cert_no', 'kcc_type', 'kcc_id_no', 'kcc_date', 'kcc_issuing_authority', 'sir_status', 'sir_case_details'])) {
+                    } elseif (in_array($field, ['caa_status', 'caa_app_no', 'caa_cert_no', 'kcc_type', 'kcc_id_no', 'kcc_date', 'kcc_issuing_authority', 'sir_status', 'sir_case_details']) || str_starts_with($field, 'hof_kcc_cards')) {
                         $this->activeSection = 'other_docs';
                     }
                 }
@@ -1724,6 +1937,10 @@ class AnnapurnaYojanaForm extends Component
 
     public function render()
     {
+        \Illuminate\Support\Facades\Log::info('AnnapurnaYojanaForm rendering', [
+            'district_id' => $this->formData['district_id'] ?? null,
+            'activeSection' => $this->activeSection,
+        ]);
         return view('livewire.annapurna-yojana-form');
     }
 }
