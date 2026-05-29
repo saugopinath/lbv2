@@ -2303,51 +2303,39 @@ class AnnapurnaYojanaForm extends Component
             $lgdDistrictCode = $lgdDistrictCode ? (int) $lgdDistrictCode : 0;
             $lgdBlockMcCode = $lgdBlockMcCode ? (int) $lgdBlockMcCode : 0;
             $lgdGpWardCode = $lgdGpWardCode ? (int) $lgdGpWardCode : 0;
-
             // 2. Construct address string
             $address = trim(($this->formData['house_no'] ? $this->formData['house_no'] . ', ' : '') . $this->formData['village_town'] . ', P.O. ' . $this->formData['post_office'] . ', P.S. ' . $this->formData['police_station'] . ', PIN ' . $this->formData['pincode']);
-
             // 3. Generate or reuse UUID for application_id
             if (! $this->appId) {
                 $this->appId = (string) Str::uuid();
             }
             $appId = $this->appId;
-
             // 4. Pre-clean conditional fields
             $hasDigitalRationCard = (($this->formData['has_digital_ration_card'] ?? '') === 'Yes');
             $rationCardHouseholdId = $hasDigitalRationCard ? ($this->formData['hof_ration_card_id'] ?? null) : null;
             $rationCardType = $hasDigitalRationCard ? ($this->formData['ration_card_type'] ?? null) : null;
             $liftingMonthlyRation = $hasDigitalRationCard && (($this->formData['is_lifting_ration'] ?? '') === 'Yes');
-
             $hasConstitutionalPost = (($this->formData['has_constitutional_post'] ?? '') === 'Yes');
             $constitutionalPostDetails = $hasConstitutionalPost ? ($this->formData['constitutional_post_details'] ?? null) : null;
-
             $hasGstReg = (($this->formData['has_gst_reg'] ?? '') === 'Yes');
             $gstin = $hasGstReg ? ($this->formData['gstin'] ?? null) : null;
-
             $hasPensioner = (($this->formData['has_pensioner'] ?? '') === 'Yes');
             $pensionerDetails = $hasPensioner ? ($this->formData['pensioner_details'] ?? null) : null;
-
             $caaStatus = $this->formData['hof_caa_status'] ?? 'Not Applicable';
             $caaAppNo = $caaStatus === 'Applied' ? ($this->formData['hof_caa_app_no'] ?? null) : null;
             $caaCertNo = $caaStatus === 'Issued' ? ($this->formData['hof_caa_cert_no'] ?? null) : null;
-
             $sirStatus = $this->formData['hof_sir_status'] ?? 'Not Applicable';
             $sirCaseDetails = $sirStatus === 'Yes' ? ($this->formData['hof_sir_case_details'] ?? null) : null;
-
             $healthInsuranceType = $this->formData['health_insurance_type'] ?? 'None';
             $hasHealthInsurance = ($healthInsuranceType !== 'None');
             $healthInsurancePremium = ($hasHealthInsurance && !empty($this->formData['health_insurance_premium'])) ? (float) $this->formData['health_insurance_premium'] : null;
             $healthInsuranceSumAssured = ($hasHealthInsurance && !empty($this->formData['health_insurance_sum_assured'])) ? (float) $this->formData['health_insurance_sum_assured'] : null;
-
             $ownsLand = (($this->formData['owns_land'] ?? '') === 'Yes');
             $landSizeDecimals = ($ownsLand && !empty($this->formData['land_size_decimals'])) ? (float) $this->formData['land_size_decimals'] : null;
-
             $hasFourWheeler = (($this->formData['owns_4_wheeler'] ?? '') === 'Yes');
             $vehicleCount = $hasFourWheeler && ! empty($this->formData['num_vehicles']) ? (int) $this->formData['num_vehicles'] : null;
             $vehicleReg = $hasFourWheeler && ! empty($this->formData['vehicles']) ? json_encode(array_column($this->formData['vehicles'], 'reg_no')) : null;
             $vehicleModel = $hasFourWheeler && ! empty($this->formData['vehicles']) ? json_encode(array_column($this->formData['vehicles'], 'model')) : null;
-
             // 5. Update or Insert family details into dbt_apy.families
             $familyData = [
                 'application_id' => $appId,
@@ -2371,7 +2359,6 @@ class AnnapurnaYojanaForm extends Component
                 'created_by_dist_code' => $this->createdByDistCode,
                 'created_by_local_body_code' => $this->createdByLocalBodyCode,
             ];
-
             if ($this->familyId) {
                 DB::connection('pgsql_annapurna')->table('dbt_apy.families')->where('id', $this->familyId)->update($familyData);
                 $familyId = $this->familyId;
@@ -2380,7 +2367,6 @@ class AnnapurnaYojanaForm extends Component
                 $familyId = DB::connection('pgsql_annapurna')->table('dbt_apy.families')->insertGetId($familyData, 'id');
                 $this->familyId = $familyId;
             }
-
             // 6. Get or Create HOF in dbt_apy.family_members
             $hofMemberData = [
                 'family_id' => $familyId,
@@ -2439,13 +2425,11 @@ class AnnapurnaYojanaForm extends Component
                 'created_by_dist_code' => $this->createdByDistCode,
                 'created_by_local_body_code' => $this->createdByLocalBodyCode,
             ];
-
             $hofMember = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
                 ->where('family_id', $familyId)
                 ->where('is_hof', true)
                 ->where('is_deleted', 0)
                 ->first();
-
             if ($hofMember) {
                 $hofMemberId = $hofMember->id;
                 DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
@@ -2455,10 +2439,8 @@ class AnnapurnaYojanaForm extends Component
                 $hofMemberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
                     ->insertGetId($hofMemberData, 'id');
             }
-
             // HOF employment nature
             $this->syncMemberEmploymentNatures($hofMemberId, (array) ($this->formData['hof_employment_nature'] ?? []), $lgdDistrictCode);
-
             // HOF govt schemes
             $hofBenefits = (($this->formData['hof_has_dbt_benefits'] ?? 'No') === 'Yes') ? ($this->formData['hof_dbt_benefits'] ?? []) : [];
             $this->syncMemberGovtSchemes($hofMemberId, $hofBenefits, $lgdDistrictCode);
@@ -2754,12 +2736,10 @@ class AnnapurnaYojanaForm extends Component
             }
         }
         $activeTypes = array_unique($activeTypes);
-
         $existing = DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')
             ->where('family_member_id', $memberId)
             ->get()
             ->keyBy('employment_type');
-
         // Soft delete those in DB but not active in input
         $toDelete = $existing->keys()->diff($activeTypes);
         if ($toDelete->isNotEmpty()) {
@@ -2768,7 +2748,6 @@ class AnnapurnaYojanaForm extends Component
                 ->whereIn('employment_type', $toDelete)
                 ->update(['is_deleted' => 1, 'deleted_at' => now()]);
         }
-
         // Restore or Insert active ones
         foreach ($activeTypes as $type) {
             if ($existing->has($type)) {
