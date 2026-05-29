@@ -478,6 +478,7 @@ class AnnapurnaYojanaForm extends Component
     public function getEmptyMemberStructure()
     {
         return [
+            'id' => null,
             'name' => '',
             'dob' => '',
             'gender' => '',
@@ -645,6 +646,17 @@ class AnnapurnaYojanaForm extends Component
 
     public function selectSection($section)
     {
+        $sections = array_keys($this->getSections());
+        $targetIndex = array_search($section, $sections);
+        if ($targetIndex !== false) {
+            for ($i = 0; $i < $targetIndex; $i++) {
+                $prevSec = $sections[$i];
+                if (! $this->isSectionFilled($this->activeMemberIndex, $prevSec)) {
+                    return;
+                }
+            }
+        }
+
         if ($section === 'declaration' && ! $this->areAllMembersFullyFilled()) {
             return;
         }
@@ -1505,17 +1517,8 @@ class AnnapurnaYojanaForm extends Component
                 $this->familyId = $familyId;
             }
 
-            // Clear old entries to avoid duplicates on final submission
-            $existingMemberIds = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->pluck('id')->toArray();
-            if (! empty($existingMemberIds)) {
-                DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->whereIn('family_member_id', $existingMemberIds)->delete();
-                DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->whereIn('family_member_id', $existingMemberIds)->delete();
-                DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->whereIn('family_member_id', $existingMemberIds)->delete();
-                DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->delete();
-            }
-
-            // 6. Insert HOF into dbt_apy.family_members
-            $hofMemberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->insertGetId([
+            // 6. Get or Create HOF in dbt_apy.family_members
+            $hofMemberData = [
                 'family_id' => $familyId,
                 'is_hof' => true,
                 'member_name' => $this->formData['hof_name'] ?? '',
@@ -1526,7 +1529,6 @@ class AnnapurnaYojanaForm extends Component
                 'digital_ration_card_no' => $rationCardHouseholdId,
                 'digital_ration_card_type' => $rationCardType,
                 'social_category' => $this->formData['category'] ?? null,
-
                 'bank_name' => $this->formData['hof_bank_name'] ?? null,
                 'bank_account_no' => $this->formData['hof_acc_no'] ?? null,
                 'ifsc_code' => $this->formData['hof_ifsc'] ?? null,
@@ -1566,9 +1568,28 @@ class AnnapurnaYojanaForm extends Component
                 'lgd_district_code' => $lgdDistrictCode,
                 'lgd_block_mc_code' => $lgdBlockMcCode,
                 'lgd_gp_ward_code' => $lgdGpWardCode,
-            ], 'id');
+            ];
+
+            $hofMember = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
+                ->where('family_id', $familyId)
+                ->where('is_hof', true)
+                ->where('is_deleted', 0)
+                ->first();
+
+            if ($hofMember) {
+                $hofMemberId = $hofMember->id;
+                DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
+                    ->where('id', $hofMemberId)
+                    ->update($hofMemberData);
+            } else {
+                $hofMemberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
+                    ->insertGetId($hofMemberData, 'id');
+            }
 
             // HOF employment nature
+            DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')
+                ->where('family_member_id', $hofMemberId)
+                ->update(['is_deleted' => 1, 'deleted_at' => now()]);
             if (! empty($this->formData['hof_employment_nature'])) {
                 DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->insert([
                     'family_member_id' => $hofMemberId,
@@ -1578,6 +1599,9 @@ class AnnapurnaYojanaForm extends Component
             }
 
             // HOF govt schemes
+            DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')
+                ->where('family_member_id', $hofMemberId)
+                ->update(['is_deleted' => 1, 'deleted_at' => now()]);
             if (($this->formData['hof_has_dbt_benefits'] ?? 'No') === 'Yes') {
                 foreach ($this->formData['hof_dbt_benefits'] as $benefit) {
                     if (! empty($benefit['scheme_name'])) {
@@ -1592,6 +1616,9 @@ class AnnapurnaYojanaForm extends Component
             }
 
             // HOF credit card / other id
+            DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')
+                ->where('family_member_id', $hofMemberId)
+                ->update(['is_deleted' => 1, 'deleted_at' => now()]);
             if (! empty($this->formData['hof_kcc_type']) && $this->formData['hof_kcc_type'] !== 'None') {
                 DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->insert([
                     'family_member_id' => $hofMemberId,
@@ -1601,7 +1628,24 @@ class AnnapurnaYojanaForm extends Component
                 ]);
             }
 
-            // 7. Insert other family members into dbt_apy.family_members
+            // Identify non-HOF members in DB that need to be soft-deleted
+            $currentThreadMemberIds = array_filter(array_column($this->members, 'id'));
+            $existingDBCallMemberIds = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
+                ->where('family_id', $familyId)
+                ->where('is_hof', false)
+                ->where('is_deleted', 0)
+                ->pluck('id')
+                ->toArray();
+
+            $membersToDelete = array_diff($existingDBCallMemberIds, $currentThreadMemberIds);
+            if (! empty($membersToDelete)) {
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->whereIn('family_member_id', $membersToDelete)->update(['is_deleted' => 1, 'deleted_at' => now()]);
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->whereIn('family_member_id', $membersToDelete)->update(['is_deleted' => 1, 'deleted_at' => now()]);
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->whereIn('family_member_id', $membersToDelete)->update(['is_deleted' => 1, 'deleted_at' => now()]);
+                DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->whereIn('id', $membersToDelete)->update(['is_deleted' => 1, 'deleted_at' => now()]);
+            }
+
+            // 7. Insert or update other family members
             foreach ($this->members as $index => $member) {
                 $isChild = (($member['member_type'] ?? 'adult') === 'child');
 
@@ -1626,7 +1670,7 @@ class AnnapurnaYojanaForm extends Component
                 $mHealthInsurancePremium = ($mHasHealthInsurance && !empty($member['health_insurance_premium'])) ? (float) $member['health_insurance_premium'] : null;
                 $mHealthInsuranceSumAssured = ($mHasHealthInsurance && !empty($member['health_insurance_sum_assured'])) ? (float) $member['health_insurance_sum_assured'] : null;
 
-                $memberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->insertGetId([
+                $memberData = [
                     'family_id' => $familyId,
                     'is_hof' => false,
                     'member_name' => $member['name'] ?? '',
@@ -1674,9 +1718,23 @@ class AnnapurnaYojanaForm extends Component
                     'vaccination_card_id' => $isChild ? (!empty($member['vaccination_card_id']) ? $member['vaccination_card_id'] : null) : null,
                     'vaccination_status' => $isChild ? (!empty($member['vaccination_status']) ? $member['vaccination_status'] : null) : null,
                     'vaccination_skip_reason_or_date' => $isChild ? (!empty($member['vaccination_skip_reason_or_date']) ? $member['vaccination_skip_reason_or_date'] : null) : null,
-                ], 'id');
+                ];
+
+                if (!empty($member['id'])) {
+                    $memberId = $member['id'];
+                    DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
+                        ->where('id', $memberId)
+                        ->update($memberData);
+                } else {
+                    $memberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
+                        ->insertGetId($memberData, 'id');
+                    $this->members[$index]['id'] = $memberId;
+                }
 
                 // Member employment nature
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')
+                    ->where('family_member_id', $memberId)
+                    ->update(['is_deleted' => 1, 'deleted_at' => now()]);
                 if (! $isChild && ! empty($member['employment_nature'])) {
                     DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->insert([
                         'family_member_id' => $memberId,
@@ -1686,6 +1744,9 @@ class AnnapurnaYojanaForm extends Component
                 }
 
                 // Member govt schemes
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')
+                    ->where('family_member_id', $memberId)
+                    ->update(['is_deleted' => 1, 'deleted_at' => now()]);
                 if (! $isChild && ($member['has_dbt_benefits'] ?? 'No') === 'Yes') {
                     foreach ($member['dbt_benefits'] as $benefit) {
                         if (! empty($benefit['scheme_name'])) {
@@ -1700,6 +1761,9 @@ class AnnapurnaYojanaForm extends Component
                 }
 
                 // Member credit card / other id
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')
+                    ->where('family_member_id', $memberId)
+                    ->update(['is_deleted' => 1, 'deleted_at' => now()]);
                 if (! $isChild && ! empty($member['kcc_type']) && $member['kcc_type'] !== 'None') {
                     DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->insert([
                         'family_member_id' => $memberId,
@@ -1871,17 +1935,8 @@ class AnnapurnaYojanaForm extends Component
                 $this->familyId = $familyId;
             }
 
-            // Clear old entries to avoid duplicates on draft transitions
-            $existingMemberIds = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->pluck('id')->toArray();
-            if (! empty($existingMemberIds)) {
-                DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->whereIn('family_member_id', $existingMemberIds)->delete();
-                DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->whereIn('family_member_id', $existingMemberIds)->delete();
-                DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->whereIn('family_member_id', $existingMemberIds)->delete();
-                DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->where('family_id', $familyId)->delete();
-            }
-
-            // 6. Insert HOF into dbt_apy.family_members
-            $hofMemberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->insertGetId([
+            // 6. Get or Create HOF in dbt_apy.family_members
+            $hofMemberData = [
                 'family_id' => $familyId,
                 'is_hof' => true,
                 'member_name' => $this->formData['hof_name'] ?? '',
@@ -1931,9 +1986,28 @@ class AnnapurnaYojanaForm extends Component
                 'lgd_district_code' => $lgdDistrictCode,
                 'lgd_block_mc_code' => $lgdBlockMcCode,
                 'lgd_gp_ward_code' => $lgdGpWardCode,
-            ], 'id');
+            ];
+
+            $hofMember = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
+                ->where('family_id', $familyId)
+                ->where('is_hof', true)
+                ->where('is_deleted', 0)
+                ->first();
+
+            if ($hofMember) {
+                $hofMemberId = $hofMember->id;
+                DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
+                    ->where('id', $hofMemberId)
+                    ->update($hofMemberData);
+            } else {
+                $hofMemberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
+                    ->insertGetId($hofMemberData, 'id');
+            }
 
             // HOF employment nature
+            DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')
+                ->where('family_member_id', $hofMemberId)
+                ->update(['is_deleted' => 1, 'deleted_at' => now()]);
             if (! empty($this->formData['hof_employment_nature'])) {
                 DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->insert([
                     'family_member_id' => $hofMemberId,
@@ -1943,6 +2017,9 @@ class AnnapurnaYojanaForm extends Component
             }
 
             // HOF govt schemes
+            DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')
+                ->where('family_member_id', $hofMemberId)
+                ->update(['is_deleted' => 1, 'deleted_at' => now()]);
             if (($this->formData['hof_has_dbt_benefits'] ?? 'No') === 'Yes') {
                 foreach ($this->formData['hof_dbt_benefits'] as $benefit) {
                     if (! empty($benefit['scheme_name'])) {
@@ -1957,6 +2034,9 @@ class AnnapurnaYojanaForm extends Component
             }
 
             // HOF credit card / other id
+            DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')
+                ->where('family_member_id', $hofMemberId)
+                ->update(['is_deleted' => 1, 'deleted_at' => now()]);
             if (! empty($this->formData['hof_kcc_type']) && $this->formData['hof_kcc_type'] !== 'None') {
                 DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->insert([
                     'family_member_id' => $hofMemberId,
@@ -1966,7 +2046,24 @@ class AnnapurnaYojanaForm extends Component
                 ]);
             }
 
-            // 6. Insert other family members into dbt_apy.family_members
+            // Identify non-HOF members in DB that need to be soft-deleted
+            $currentThreadMemberIds = array_filter(array_column($this->members, 'id'));
+            $existingDBCallMemberIds = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
+                ->where('family_id', $familyId)
+                ->where('is_hof', false)
+                ->where('is_deleted', 0)
+                ->pluck('id')
+                ->toArray();
+
+            $membersToDelete = array_diff($existingDBCallMemberIds, $currentThreadMemberIds);
+            if (! empty($membersToDelete)) {
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->whereIn('family_member_id', $membersToDelete)->update(['is_deleted' => 1, 'deleted_at' => now()]);
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')->whereIn('family_member_id', $membersToDelete)->update(['is_deleted' => 1, 'deleted_at' => now()]);
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->whereIn('family_member_id', $membersToDelete)->update(['is_deleted' => 1, 'deleted_at' => now()]);
+                DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->whereIn('id', $membersToDelete)->update(['is_deleted' => 1, 'deleted_at' => now()]);
+            }
+
+            // 7. Insert or update other family members
             foreach ($this->members as $index => $member) {
                 $isChild = (($member['member_type'] ?? 'adult') === 'child');
 
@@ -1991,7 +2088,7 @@ class AnnapurnaYojanaForm extends Component
                 $mHealthInsurancePremium = ($mHasHealthInsurance && !empty($member['health_insurance_premium'])) ? (float) $member['health_insurance_premium'] : null;
                 $mHealthInsuranceSumAssured = ($mHasHealthInsurance && !empty($member['health_insurance_sum_assured'])) ? (float) $member['health_insurance_sum_assured'] : null;
 
-                $memberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')->insertGetId([
+                $memberData = [
                     'family_id' => $familyId,
                     'is_hof' => false,
                     'member_name' => $member['name'] ?? '',
@@ -2039,9 +2136,23 @@ class AnnapurnaYojanaForm extends Component
                     'vaccination_card_id' => $isChild ? (!empty($member['vaccination_card_id']) ? $member['vaccination_card_id'] : null) : null,
                     'vaccination_status' => $isChild ? (!empty($member['vaccination_status']) ? $member['vaccination_status'] : null) : null,
                     'vaccination_skip_reason_or_date' => $isChild ? (!empty($member['vaccination_skip_reason_or_date']) ? $member['vaccination_skip_reason_or_date'] : null) : null,
-                ], 'id');
+                ];
+
+                if (!empty($member['id'])) {
+                    $memberId = $member['id'];
+                    DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
+                        ->where('id', $memberId)
+                        ->update($memberData);
+                } else {
+                    $memberId = DB::connection('pgsql_annapurna')->table('dbt_apy.family_members')
+                        ->insertGetId($memberData, 'id');
+                    $this->members[$index]['id'] = $memberId;
+                }
 
                 // Member employment nature
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')
+                    ->where('family_member_id', $memberId)
+                    ->update(['is_deleted' => 1, 'deleted_at' => now()]);
                 if (! $isChild && ! empty($member['employment_nature'])) {
                     DB::connection('pgsql_annapurna')->table('dbt_apy.member_employment_natures')->insert([
                         'family_member_id' => $memberId,
@@ -2051,6 +2162,9 @@ class AnnapurnaYojanaForm extends Component
                 }
 
                 // Member govt schemes
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_govt_schemes')
+                    ->where('family_member_id', $memberId)
+                    ->update(['is_deleted' => 1, 'deleted_at' => now()]);
                 if (! $isChild && ($member['has_dbt_benefits'] ?? 'No') === 'Yes') {
                     foreach ($member['dbt_benefits'] as $benefit) {
                         if (! empty($benefit['scheme_name'])) {
@@ -2065,6 +2179,9 @@ class AnnapurnaYojanaForm extends Component
                 }
 
                 // Member credit card / other id
+                DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')
+                    ->where('family_member_id', $memberId)
+                    ->update(['is_deleted' => 1, 'deleted_at' => now()]);
                 if (! $isChild && ! empty($member['kcc_type']) && $member['kcc_type'] !== 'None') {
                     DB::connection('pgsql_annapurna')->table('dbt_apy.member_other_ids')->insert([
                         'family_member_id' => $memberId,
@@ -2074,7 +2191,6 @@ class AnnapurnaYojanaForm extends Component
                     ]);
                 }
             }
-
             // Update session data
             session([
                 'annapurna_form_data' => $this->formData,
@@ -2082,9 +2198,7 @@ class AnnapurnaYojanaForm extends Component
                 'annapurna_family_id' => $familyId,
                 'annapurna_app_id' => $this->appId,
             ]);
-
             DB::connection('pgsql_annapurna')->commit();
-
             // Mark as clean — no unsaved changes anymore
             $this->isDirty = false;
         } catch (\Exception $e) {
