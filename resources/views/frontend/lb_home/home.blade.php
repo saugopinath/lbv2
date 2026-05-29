@@ -17,7 +17,7 @@
 <section class="relative overflow-hidden h-[500px] md:h-[600px]">
 
     <div id="hero-carousel" class="relative h-full">
-        @if (config('jblbConf.is_lb'))
+        @if (config('jblbConf.is_ay'))
         @foreach ($data['lb_home_image'] as $key => $value)
         @include('frontend.components.carousel-img', [
         'image' => $value['image'],
