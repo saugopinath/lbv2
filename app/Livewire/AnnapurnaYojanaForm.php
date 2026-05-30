@@ -1041,7 +1041,9 @@ class AnnapurnaYojanaForm extends Component
                 }
 
                 $epicOk = true;
-                if (!empty($this->formData['hof_epic_no'])) {
+                if ($this->getAgeFromDob($this->formData['hof_dob'] ?? '') >= 18) {
+                    $epicOk = !empty($this->formData['hof_epic_no']) && !empty($this->formData['hof_assembly_constituency']) && !empty($this->formData['hof_part_no']);
+                } elseif (!empty($this->formData['hof_epic_no'])) {
                     $epicOk = !empty($this->formData['hof_assembly_constituency']) && !empty($this->formData['hof_part_no']);
                 }
 
@@ -1082,10 +1084,12 @@ class AnnapurnaYojanaForm extends Component
             }
 
             if ($section === 'assets') {
-                if (empty($this->formData['has_pucca_rooms']) ||
+                if (
+                    empty($this->formData['has_pucca_rooms']) ||
                     empty($this->formData['owns_land']) ||
                     empty($this->formData['owns_4_wheeler']) ||
-                    empty($this->formData['has_health_insurance'])) {
+                    empty($this->formData['has_health_insurance'])
+                ) {
                     return false;
                 }
                 if ($this->formData['owns_land'] === 'Yes' && empty($this->formData['land_size_decimals'])) {
@@ -1108,14 +1112,16 @@ class AnnapurnaYojanaForm extends Component
             }
 
             if ($section === 'income_profession') {
-                if (empty($this->formData['pays_tax']) ||
+                if (
+                    empty($this->formData['pays_tax']) ||
                     !isset($this->formData['total_annual_income']) ||
                     !is_numeric($this->formData['total_annual_income']) ||
                     empty($this->formData['has_pan_card']) ||
                     empty($this->formData['has_constitutional_post']) ||
                     empty($this->formData['has_gst_reg']) ||
                     empty($this->formData['has_pensioner']) ||
-                    empty($this->formData['hof_literate_status'])) {
+                    empty($this->formData['hof_literate_status'])
+                ) {
                     return false;
                 }
                 if ($this->formData['has_pan_card'] === 'Yes') {
@@ -1206,7 +1212,11 @@ class AnnapurnaYojanaForm extends Component
                     return true;
                 }
 
-                if (!empty($member['epic_no'])) {
+                if ($this->getAgeFromDob($member['dob'] ?? '') >= 18) {
+                    if (empty($member['epic_no']) || empty($member['assembly_constituency']) || empty($member['part_no'])) {
+                        return false;
+                    }
+                } elseif (!empty($member['epic_no'])) {
                     if (empty($member['assembly_constituency']) || empty($member['part_no'])) {
                         return false;
                     }
@@ -1407,7 +1417,7 @@ class AnnapurnaYojanaForm extends Component
             $this->activeSection = $sections[$currentIndex - 1];
         }
     }
-private function getDocumentRules($docTypeId)
+    private function getDocumentRules($docTypeId)
     {
         $jsonPath = public_path('js/document-master.json');
         $validations = [];
@@ -1420,7 +1430,7 @@ private function getDocumentRules($docTypeId)
                 }
             }
         }
-        
+
         return $validations[$docTypeId] ?? [
             'maxSize' => 2048,
             'extensions' => 'jpg,jpeg,png,pdf',
@@ -1465,7 +1475,9 @@ private function getDocumentRules($docTypeId)
                 'app_id' => $appId,
                 'client_secret' => $clientSecret,
             ])->attach(
-                'File', file_get_contents($this->singleDocument->getRealPath()), $this->singleDocument->getClientOriginalName()
+                'File',
+                file_get_contents($this->singleDocument->getRealPath()),
+                $this->singleDocument->getClientOriginalName()
             )->post($baseUrl . '/api/Documents/upload', [
                 'CreatedBy' => auth()->id() ?? 1
             ]);
@@ -1475,7 +1487,7 @@ private function getDocumentRules($docTypeId)
                     $this->uploadedDocuments[$this->currentDocId] = $data['result']['documentId'] ?? true;
                     // Persist uploaded documents state to session immediately
                     session(['annapurna_uploaded_documents' => $this->uploadedDocuments]);
-                    
+
                     $docId = $this->currentDocId;
                     $this->singleDocument = null;
                     $this->currentDocId = null;
@@ -1506,7 +1518,7 @@ private function getDocumentRules($docTypeId)
         if ($response->successful()) {
             $contentType = $response->header('Content-Type');
             $contentDisposition = $response->header('Content-Disposition');
-            
+
             $filename = 'downloaded_file';
 
             if ($contentDisposition && preg_match('/filename="?([^"; ]+)"?/', $contentDisposition, $matches)) {
@@ -1523,7 +1535,7 @@ private function getDocumentRules($docTypeId)
                     'text/plain' => '.txt',
                     'application/zip' => '.zip'
                 ];
-                
+
                 $typeString = is_array($contentType) ? ($contentType[0] ?? '') : ($contentType ?? '');
                 $ext = $extensions[$typeString] ?? '';
                 $filename .= $ext;
@@ -1533,7 +1545,7 @@ private function getDocumentRules($docTypeId)
                 echo $response->body();
             }, $filename, [
                 'Content-Type' => is_array($contentType) ? ($contentType[0] ?? 'application/octet-stream') : ($contentType ?? 'application/octet-stream')
-            ]); 
+            ]);
         }
 
         $this->addError('singleDocument', 'Download failed.');
@@ -1583,10 +1595,16 @@ private function getDocumentRules($docTypeId)
                     $rules['formData.hof_bank_name'] = ['required', 'string', 'max:100', 'regex:/^[\p{L}\s.\'\-]+$/u'];
                     $rules['formData.hof_acc_no'] = 'required|digits_between:9,18';
                     $rules['formData.hof_ifsc'] = ['required', 'size:11', 'regex:/^[A-Z]{4}0[A-Z0-9]{6}$/'];
-                    $rules['formData.hof_epic_no'] = ['nullable', $epicRegex];
-                    if (!empty($this->formData['hof_epic_no'])) {
+                    if ($this->getAgeFromDob($this->formData['hof_dob'] ?? '') >= 18) {
+                        $rules['formData.hof_epic_no'] = ['required', $epicRegex];
                         $rules['formData.hof_assembly_constituency'] = 'required';
                         $rules['formData.hof_part_no'] = 'required|string|max:100';
+                    } else {
+                        $rules['formData.hof_epic_no'] = ['nullable', $epicRegex];
+                        if (!empty($this->formData['hof_epic_no'])) {
+                            $rules['formData.hof_assembly_constituency'] = 'required';
+                            $rules['formData.hof_part_no'] = 'required|string|max:100';
+                        }
                     }
 
                     $category = $this->formData['category'] ?? '';
@@ -1616,10 +1634,16 @@ private function getDocumentRules($docTypeId)
                                 }
                             },
                         ];
-                        $rules["members.{$index}.epic_no"] = ['nullable', $epicRegex];
-                        if (!empty($member['epic_no'])) {
+                        if ($this->getAgeFromDob($member['dob'] ?? '') >= 18) {
+                            $rules["members.{$index}.epic_no"] = ['required', $epicRegex];
                             $rules["members.{$index}.assembly_constituency"] = 'required';
                             $rules["members.{$index}.part_no"] = 'required|string|max:100';
+                        } else {
+                            $rules["members.{$index}.epic_no"] = ['nullable', $epicRegex];
+                            if (!empty($member['epic_no'])) {
+                                $rules["members.{$index}.assembly_constituency"] = 'required';
+                                $rules["members.{$index}.part_no"] = 'required|string|max:100';
+                            }
                         }
 
                         if ($this->isMemberFemale25to60($index) || (($member['applying_for_ay'] ?? 'No') === 'Yes')) {
@@ -2079,9 +2103,11 @@ private function getDocumentRules($docTypeId)
                     $messages['formData.hof_ifsc.required'] = 'HOF IFSC Code is required.';
                     $messages['formData.hof_ifsc.size'] = 'IFSC Code must be exactly 11 characters.';
                     $messages['formData.hof_ifsc.regex'] = 'IFSC format is invalid (e.g. SBIN0001234).';
+                    $isHof18Plus = $this->getAgeFromDob($this->formData['hof_dob'] ?? '') >= 18;
+                    $messages['formData.hof_epic_no.required'] = $isHof18Plus ? 'HOF Voter ID (EPIC) is required as age is 18 or above.' : 'HOF Voter ID (EPIC) is required.';
                     $messages['formData.hof_epic_no.regex'] = 'Voter ID (EPIC) format is invalid (e.g. ABC1234567).';
-                    $messages['formData.hof_assembly_constituency.required'] = 'HOF Assembly Constituency is required when Voter ID is entered.';
-                    $messages['formData.hof_part_no.required'] = 'HOF Part Number of Electoral Roll is required when Voter ID is entered.';
+                    $messages['formData.hof_assembly_constituency.required'] = $isHof18Plus ? 'HOF Assembly Constituency is required.' : 'HOF Assembly Constituency is required when Voter ID is entered.';
+                    $messages['formData.hof_part_no.required'] = $isHof18Plus ? 'HOF Part Number of Electoral Roll is required.' : 'HOF Part Number of Electoral Roll is required when Voter ID is entered.';
                 } else {
                     $index = $this->activeMemberIndex - 1;
                     $messages["members.{$index}.member_type.required"] = 'Member category (Adult/Child) is required.';
@@ -2099,9 +2125,11 @@ private function getDocumentRules($docTypeId)
                     $messages["members.{$index}.acc_no.digits_between"] = 'Account Number must be 9 to 18 digits (numbers only).';
                     $messages["members.{$index}.ifsc.required"] = 'Member IFSC is required since they are applying for AY.';
                     $messages["members.{$index}.ifsc.size"] = 'Member IFSC must be exactly 11 characters.';
+                    $isMember18Plus = $this->getAgeFromDob($this->members[$index]['dob'] ?? '') >= 18;
+                    $messages["members.{$index}.epic_no.required"] = $isMember18Plus ? 'Member Voter ID (EPIC) is required as age is 18 or above.' : 'Member Voter ID (EPIC) is required.';
                     $messages["members.{$index}.ifsc.regex"] = 'Member IFSC format is invalid (e.g. SBIN0001234).';
-                    $messages["members.{$index}.assembly_constituency.required"] = 'Member Assembly Constituency is required when Voter ID is entered.';
-                    $messages["members.{$index}.part_no.required"] = 'Member Part Number of Electoral Roll is required when Voter ID is entered.';
+                    $messages["members.{$index}.assembly_constituency.required"] = $isMember18Plus ? 'Member Assembly Constituency is required.' : 'Member Assembly Constituency is required when Voter ID is entered.';
+                    $messages["members.{$index}.part_no.required"] = $isMember18Plus ? 'Member Part Number of Electoral Roll is required.' : 'Member Part Number of Electoral Roll is required when Voter ID is entered.';
                 }
             } elseif ($section === 'ration_subsidy') {
                 if ($this->activeMemberIndex === 0) {
@@ -2254,9 +2282,10 @@ private function getDocumentRules($docTypeId)
                 'formData.hof_pan_name.regex' => 'Name on PAN Card should contain letters only.',
                 'formData.hof_pan_no.required' => 'PAN Card Number is required.',
                 'formData.hof_pan_no.regex' => 'PAN format is invalid (e.g. ABCDE1234F).',
+                'formData.hof_epic_no.required' => ($this->getAgeFromDob($this->formData['hof_dob'] ?? '') >= 18) ? 'HOF Voter ID (EPIC) is required as age is 18 or above.' : 'HOF Voter ID (EPIC) is required.',
                 'formData.hof_epic_no.regex' => 'Voter ID (EPIC) format is invalid (e.g. ABC1234567).',
-                'formData.hof_assembly_constituency.required' => 'HOF Assembly Constituency is required when Voter ID is entered.',
-                'formData.hof_part_no.required' => 'HOF Part Number of Electoral Roll is required when Voter ID is entered.',
+                'formData.hof_assembly_constituency.required' => ($this->getAgeFromDob($this->formData['hof_dob'] ?? '') >= 18) ? 'HOF Assembly Constituency is required.' : 'HOF Assembly Constituency is required when Voter ID is entered.',
+                'formData.hof_part_no.required' => ($this->getAgeFromDob($this->formData['hof_dob'] ?? '') >= 18) ? 'HOF Part Number of Electoral Roll is required.' : 'HOF Part Number of Electoral Roll is required when Voter ID is entered.',
 
                 'formData.has_pucca_rooms.required' => 'House size selection is required.',
                 'formData.owns_land.required' => 'Land ownership selection is required.',
@@ -2340,8 +2369,10 @@ private function getDocumentRules($docTypeId)
                 $messages["members.{$index}.ifsc.required"] = 'Member #' . ($index + 1) . ' bank account number is required since they are applying for AY.';
                 $messages["members.{$index}.ifsc.size"] = 'Member #' . ($index + 1) . ' IFSC must be exactly 11 characters.';
                 $messages["members.{$index}.ifsc.regex"] = 'Member #' . ($index + 1) . ' IFSC format is invalid (e.g. SBIN0001234).';
-                $messages["members.{$index}.assembly_constituency.required"] = 'Member #' . ($index + 1) . ' Assembly Constituency is required when Voter ID is entered.';
-                $messages["members.{$index}.part_no.required"] = 'Member #' . ($index + 1) . ' Part Number of Electoral Roll is required when Voter ID is entered.';
+                $isMember18Plus = $this->getAgeFromDob($member['dob'] ?? '') >= 18;
+                $messages["members.{$index}.epic_no.required"] = $isMember18Plus ? 'Member #' . ($index + 1) . ' Voter ID (EPIC) is required as age is 18 or above.' : 'Member #' . ($index + 1) . ' Voter ID (EPIC) is required.';
+                $messages["members.{$index}.assembly_constituency.required"] = $isMember18Plus ? 'Member #' . ($index + 1) . ' Assembly Constituency is required.' : 'Member #' . ($index + 1) . ' Assembly Constituency is required.';
+                $messages["members.{$index}.part_no.required"] = $isMember18Plus ? 'Member #' . ($index + 1) . ' Part Number of Electoral Roll is required.' : 'Member #' . ($index + 1) . ' Part Number of Electoral Roll is required.';
 
                 foreach ($member['kcc_cards'] ?? [] as $ki => $card) {
                     $messages["members.{$index}.kcc_cards.{$ki}.type.required"] = 'Card Type selection is required for Member #' . ($index + 1) . ' Card ' . ($ki + 1) . '.';
@@ -2459,7 +2490,7 @@ private function getDocumentRules($docTypeId)
                         $this->activeMemberIndex = 0; // HOF
                         $field = str_replace('formData.', '', $firstErrorKey);
                         $baseField = explode('.', $field)[0];
-     
+
                         $familyIdentityFields = [
                             'hof_name',
                             'hof_dob',
@@ -2736,7 +2767,6 @@ private function getDocumentRules($docTypeId)
 
             // 2. Construct address string
             $address = trim(($this->formData['house_no'] ? $this->formData['house_no'] . ', ' : '') . $this->formData['village_town'] . ', P.O. ' . $this->formData['post_office'] . ', P.S. ' . $this->formData['police_station'] . ', PIN ' . $this->formData['pincode']);
-
             // 3. Generate or reuse UUID for application_id
             if (! $this->appId) {
                 $this->appId = (string) Str::uuid();
