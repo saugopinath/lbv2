@@ -9,31 +9,41 @@ class RevertRejectModal extends Component
     public $open = false;
     public $remark = '';
     public $action = '';
-    public $revertrejectCauses = '';
+    public $revertrejectCauses = [];
     public $cause = '';
-    protected $listeners = ['open-bulk-revert-modal' => 'openModal'];
 
-    public function openModal($action, $revertrejectCauses)
+    protected $listeners = [
+        'open-bulk-revert-modal' => 'openModal'
+    ];
+
+    public function openModal($action, $revertrejectCauses = [])
     {
+        $this->reset(['remark', 'cause']);
         $this->open = true;
         $this->action = $action;
-        $this->revertrejectCauses = $revertrejectCauses;
+        $this->revertrejectCauses = $revertrejectCauses ?? [];
     }
 
     public function close()
     {
-        $this->open = false;
-        $this->remark = '';
-        $this->cause = '';
+        $this->reset(['open', 'remark', 'cause']);
     }
 
     public function confirm()
     {
-        $validated = $this->validate([
+        $rules = [
             'remark' => 'required|string|max:500',
-            'cause' => 'required',
-        ]);
-        $this->dispatch('confirm-bulk-revert',$validated);
+        ];
+
+        // Cause only required for revert & reject
+        if (in_array($this->action, ['revert', 'reject'])) {
+            $rules['cause'] = 'required';
+        }
+
+        $validated = $this->validate($rules);
+
+        $this->dispatch('confirm-bulk-revert', $validated);
+
         $this->close();
     }
 

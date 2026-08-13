@@ -3,32 +3,35 @@
 namespace App\Livewire\BankUpdate;
 
 use Livewire\Component;
-use App\Models\Codemaster;
-use App\Models\BeneficiaryPersonal;
-use App\Models\BeneficiaryCommonList;
+use App\Models\BeneficiaryPersonalDetail;
+use App\Models\Scheme;
 use Illuminate\Support\Facades\Crypt;
-
+use App\Services\WorkflowService;
+use App\Models\WorkflowsteproleMapping;
 class SearchBeneficiary extends Component
 {
     public $searchType = '';
     public $searchValue = '';
     public $searchBy = '';
     public $results = null;
+    public $schemeOptions = [];
     public $items = [];
     public $currentLabel = 'Select Search Type';
     public $filter_condition = [];
 
+    public $selectScheme = '';
+
     public $searchOptions = [
         1 => 'Application ID',
         2 => 'Beneficiary ID',
-        3 => 'Aadhar Number',
+        3 => 'Aadhaar Number',
         4 => 'Mobile No',
     ];
 
     protected $searchTypeMap = [
-        1 => 'sourceable_id',
+        1 => 'application_id',
         2 => 'beneficiary_id',
-        3 => 'encoded_aadhar',
+        3 => 'encoded_aadhaar',
         4 => 'mobile_no',
     ];
 
@@ -45,6 +48,10 @@ class SearchBeneficiary extends Component
         if (!empty($select_lgd['subdivision_id'])) {
             $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
+
+        $this->schemeOptions = Scheme::where('is_active', true)
+            ->pluck('name', 'id')
+            ->toArray();
     }
 
     public function updatedSearchType($value)
@@ -62,97 +69,118 @@ class SearchBeneficiary extends Component
     protected function rules()
     {
         return [
-            'searchType'  => 'required|in:1,2,3,4',
-            'searchValue' => ['required', function ($attribute, $value, $fail) {
-                switch ($this->searchType) {
-                    case 1: // Application ID
-                    case 2: // Beneficiary ID
-                        if (!is_numeric($value)) {
-                            $fail('This field must be numeric.');
-                        }
-                        break;
-                    case 3: // Aadhar Number
-                        if (!preg_match('/^\d{12}$/', $value)) {
-                            $fail('Aadhar number must be exactly 12 digits.');
-                        }
-                        break;
-                    case 4: // Mobile No
-                        if (!preg_match('/^\d{10}$/', $value)) {
-                            $fail('Mobile number must be exactly 10 digits.');
-                        }
-                        break;
-                    default:
-                        $fail('Invalid search type selected.');
+            'selectScheme' => 'required',
+            'searchType' => 'required|in:1,2,3,4',
+            'searchValue' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    switch ($this->searchType) {
+                        case 1:
+                        case 2:
+                            if (!is_numeric($value)) {
+                                $fail('This field must be numeric.');
+                            }
+                            break;
+                        case 3:
+                            if (!preg_match('/^\d{12}$/', $value)) {
+                                $fail('Aadhaar must be 12 digits.');
+                            }
+                            break;
+                        case 4:
+                            if (!preg_match('/^\d{10}$/', $value)) {
+                                $fail('Mobile must be 10 digits.');
+                            }
+                            break;
+                    }
                 }
-            }]
+            ]
         ];
     }
 
-    protected $messages = [
-        'searchType.required' => 'Please select a search type.',
-        'searchType.in'       => 'Invalid search type selected.',
-        'searchValue.required' => 'Please enter a value to search.',
-    ];
-
-    public function search()
+    public function search(WorkflowService $workflowService)
     {
         $this->validate();
+
+        // 🔹 Workflow setup
+        $this->getMinMaxWorkflowStep = WorkflowsteproleMapping::getMinMaxWorkflowStep($this->selectScheme);
+
+        $this->nextLevelRoleId = $workflowService->getLevelRoles(
+            $this->selectScheme,
+            $this->getMinMaxWorkflowStep['max']
+        );
+
+        $this->filterRoleId = $this->nextLevelRoleId->next_level_role_id;
+
+        // 🔹 Search column
         $column = $this->searchTypeMap[$this->searchType] ?? null;
 
         if (!$column) {
-            session()->flash('xerror', 'Invalid search type selected.');
+            session()->flash('xerror', 'Invalid search type.');
             return;
         }
+        
+        $this->searchBy = ($column === 'encoded_aadhaar')
+            ? md5(trim($this->searchValue))
+            : trim($this->searchValue);
+       
+        $query = BeneficiaryPersonalDetail::query()
+            ->with(['contact', 'banks', 'aadhaar', 'scheme']);
+       
+        if (!empty($this->selectScheme)) {
+            $query->where('scheme_id', $this->selectScheme);
+        }
+      
+        $query->where('next_level_role_id', $this->filterRoleId);
+        
+        if ($column === 'encoded_aadhaar') {
 
-        if ($column === 'encoded_aadhar') {
-            $this->searchBy = md5(trim($this->searchValue));
+            $query->whereHas('aadhaar', function ($q) {
+                $q->where('encoded_aadhaar', $this->searchBy);
+            });
+
+        } elseif ($column === 'mobile_no') {
+           
+            $query->where('other_details->mobile_no', $this->searchBy);
+
         } else {
-            $this->searchBy = trim($this->searchValue);
+
+            $query->where($column, $this->searchBy);
         }
-
-        if (empty($this->searchBy)) {
-            session()->flash('xerror', 'Please enter a valid search value.');
-            return;
-        }
-
-        $query = BeneficiaryCommonList::query()->with(['sourceable', 'sourceable.contact', 'sourceable.bank']);
-        $query->where($column, $this->searchBy);
-
+      
         if (!empty($this->filter_condition)) {
-            $query->where($this->filter_condition);
+            $query->whereHas('contact', function ($q) {
+                foreach ($this->filter_condition as $key => $value) {
+                    $q->where($key, $value);
+                }
+            });
         }
-
+     
         $this->results = $query->get();
 
         if ($this->results->isEmpty()) {
             $this->items = [];
-            session()->flash('xerror', 'No matching beneficiary found.');
+            session()->flash('xerror', 'No data found.');
             return;
         }
+      
+        $this->items = $this->results->map(fn($item) => [
+            'application_id' => $item->application_id ?? '-',
+            'beneficiary_id' => $item->beneficiary_id ?? '-',
+            
+            'mobile_no' => $item->other_details['mobile_no'] ?? '-',
 
-        $approvedItems = $this->results->filter(
-            fn($item) =>
-            $item->sourceable_type === 'App\Models\BeneficiaryPersonal'
-        );
+            'applicant_name' => $item->beneficiary_name ?? '-',
+            'scheme_name' => $item->scheme->name ?? '-',
 
-        if ($approvedItems->isEmpty()) {
-            $this->items = [];
-            session()->flash('xwarning', 'This Beneficiary is not approved yet.');
-            return;
-        }
+            'district' => $item->contact->district->name ?? '-',
+            'block' => $item->contact->block->name ?? '-',
+            'panchayat' => $item->contact->panchayat->name ?? '-',
 
-        $this->items = $approvedItems->map(fn($item) => [
-            'application_id' => $item->sourceable->application_id ?? '-',
-            'beneficiary_id' => $item->sourceable->beneficiary_id ?? '-',
-            'mobile_no'      => $item->sourceable->mobile_no ?? '-',
-            'applicant_name' => $item->sourceable->full_name ?? '-',
-            'district'       => $item->sourceable->contact->district->name ?? '-',
-            'block'          => $item->sourceable->contact->block->name ?? '-',
-            'panchayat'      => $item->sourceable->contact->panchayat->name ?? '-',
-            'bank_account'   => $item->sourceable->bank->bank_account_number ?? '-',
-            'ifsc'           => $item->sourceable->bank->ifsc ?? '-',
+            'bank_account' => $item->banks->bankaccountnumber ?? '-',
+            'ifsc' => $item->banks->ifscode ?? '-',
         ])->values();
     }
+
     public function render()
     {
         return view('livewire.bank-update.search-beneficiary');

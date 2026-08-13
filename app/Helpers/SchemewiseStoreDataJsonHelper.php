@@ -1,0 +1,825 @@
+<?php
+
+namespace App\Helpers;
+
+use App\Models\SchemeAttachedDocMappings;
+use App\Models\SchemeTabBasefield;
+use App\Models\SchemeTabMapping;
+use App\Models\SchemeTabFormField;
+use App\Models\SectionLevelMaster;
+use App\Models\SelfDeclerationBasefield;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
+use App\Models\SchemeTabLayout;
+use App\Models\AgeManagements;
+use Illuminate\Support\Facades\Storage;
+
+class SchemewiseStoreDataJsonHelper
+{
+    public static function generateSchemeJson(int $schemeId): array
+    {
+        $tabs = SchemeTabMapping::with('masterTab')
+            ->where('scheme_id', $schemeId)
+            ->where('is_active', true)
+            ->orderBy('position')
+            ->get();
+        $tabData = [];
+        foreach ($tabs as $tab) {
+            $model = match ($tab->tab_code) {
+                105 => SelfDeclerationBasefield::class,
+                104 => SchemeAttachedDocMappings::class,
+                default => SchemeTabFormField::class,
+            };
+            if ($tab->tab_code == 104) {
+                $fields = $model::with('docType')
+                    ->where('scheme_id', $schemeId)
+                    ->where('tab_code', $tab->tab_code)
+                    ->where('is_active', true)
+                    ->orderBy('field_position')
+                    ->get()
+                    ->map(function ($field) {
+                        $data = $field->toArray();
+                        $data['doc_type_name'] = $field->docType?->name;
+                        $data['doc_type_code'] = $field->docType?->code ?? null;
+                        return $data;
+                    })
+                    ->toArray();
+            } else {
+                $fields = $model::where('scheme_id', $schemeId)
+                    ->where('tab_code', $tab->tab_code)
+                    ->where('is_active', true)
+                    ->orderBy('field_position')
+                    ->get()
+                    ->toArray();
+            }
+            /** ================= LAYOUT ================= */
+
+            $schemeTabLayout = SchemeTabLayout::where('scheme_id', $schemeId)
+                ->where('tab_code', $tab->tab_code)
+                ->first();
+
+            $layout = $schemeTabLayout?->layout_json;
+
+            if ($tab->tab_code == 102 && ($tab->is_current_address ?? false)) {
+                $curFields = [];
+                $existingNames = array_column($fields, 'field_name');
+                foreach ($fields as $field) {
+                    if (!empty($field['is_syncable']) && !str_starts_with($field['field_name'], 'cur_')) {
+                        $name = $field['field_name'];
+                        if (in_array('cur_' . $name, $existingNames)) continue;
+
+                        $curField = $field;
+                        $curField['field_name'] = 'cur_' . $name;
+                        
+                        $curField['db_column'] = 'other_details';
+                        
+                        $curField['level_name'] = 'Current ' . $field['level_name'];
+                        if (!empty($curField['dependent_on'])) {
+                            $curField['dependent_on'] = 'cur_' . $curField['dependent_on'];
+                        }
+                        $curField['is_syncable'] = false;
+                        $curFields[] = $curField;
+                    }
+                }
+                $fields = array_merge($fields, $curFields);
+            }
+
+            $tabData[] = [
+                'tab_code' => $tab->tab_code,
+                'tab_name' => $tab->masterTab->tab_name ?? '',
+                'tab_icon' => $tab->masterTab->tab_icon ?? '',
+                'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
+                'is_current_address' => $tab->is_current_address,
+                'fields' => $fields,
+                'layout' => $layout,
+            ];
+        }
+        return [
+            'scheme_id' => $schemeId,
+            'generated_at' => now()->toDateTimeString(),
+            'tabs' => $tabData,
+        ];
+    }
+
+    public static function storeSchemeJson(int $schemeId, array $data): string
+    {
+        $path = "final_schemes_formdata/scheme_{$schemeId}.json";
+        Storage::disk('local')->put(
+            $path,
+            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+        );
+        return $path;
+    }
+
+    public static function checkMandatoryBaseFields(int $schemeId): array
+    {
+        $mandatoryBaseFields = SchemeTabBasefield::where('is_mendetory', 1)
+            ->pluck('id')
+            ->toArray();
+        $configuredFields = SchemeTabFormField::where('scheme_id', $schemeId)
+            ->where('is_active', true)
+            ->pluck('tab_field_id')
+            ->toArray();
+        $missingFields = array_diff($mandatoryBaseFields, $configuredFields);
+        $missingFieldNames = SchemeTabBasefield::whereIn('id', $missingFields)
+            ->pluck('level_name')
+            ->toArray();
+        return $missingFieldNames;
+    }
+
+    public static function store(int $schemeId, array $tabs): string
+    {
+        $dir = resource_path("views/schemes/scheme_{$schemeId}");
+        if (!File::exists($dir)) {
+            File::makeDirectory($dir, 0755, true);
+        }
+        foreach ($tabs as $tab) {
+            $tabCode = $tab['tab_code'];
+            /* ================= TAB 104 : DOCUMENT ================= */
+            if ($tabCode == 104) {
+                File::put(
+                    "{$dir}/104.blade.php",
+                    <<<BLADE
+                {{-- DOCUMENT TAB --}}
+                <livewire:enclosure-list :scheme_id="\$schemeId" :tabCode="$tabCode" :application_id="\$applicationId" :form_preview="\$form_preview" />
+                BLADE
+                );
+                continue;
+            }
+
+            /* ================= NORMAL FORM TABS ================= */
+            if ($tabCode == 105) {
+
+                $fields = SelfDeclerationBasefield::where('scheme_id', $schemeId)
+                    ->where('tab_code', 105)
+                    ->where('is_active', true)
+                    ->orderBy('field_position')
+                    ->get()
+                    ->values();
+
+                $sectionMap = SectionLevelMaster::pluck(
+                    'section_level_name',
+                    'id'
+                )->toArray();
+
+                $layout = DB::table('scheme_tab_layouts')
+                    ->where('scheme_id', $schemeId)
+                    ->where('tab_code', 105)
+                    ->value('layout_json');
+
+                $layout = $layout ? json_decode($layout, true) : [];
+
+                if (isset($layout['layout'])) {
+                    $layout = $layout['layout'];
+                }
+
+                $blade = "<div class='space-y-6'>";
+
+                $cursor = 0;
+                $total = $fields->count();
+                $layoutIndex = 0;
+
+                $lastPrintedSection = null;
+
+                while ($cursor < $total) {
+
+                    $field = $fields[$cursor];
+
+                    $currentSectionKey = $field->section_level_id
+                        ? $field->section_level_type . '-' . $field->section_level_id
+                        : 'no_section';
+
+                    if ($lastPrintedSection !== $currentSectionKey) {
+
+                        if ($currentSectionKey !== 'no_section') {
+                            [, $sectionId] = explode('-', $currentSectionKey);
+                            $title = $sectionMap[$sectionId] ?? 'Section';
+
+                            $blade .= <<<HTML
+                <div class="mt-6 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
+                    <span class="font-semibold text-indigo-700">{$title}</span>
+                </div>
+                HTML;
+                        }
+
+                        $lastPrintedSection = $currentSectionKey;
+                    }
+
+                    $requestedCols = $layout[$layoutIndex]['columns'] ?? 1;
+                    $layoutIndex++;
+                    if ($layoutIndex >= count($layout)) {
+                        $layoutIndex = 0;
+                    }
+
+                    $rowFields = [];
+
+                    while (
+                        $cursor < $total &&
+                        count($rowFields) < $requestedCols
+                    ) {
+
+                        $nextField = $fields[$cursor];
+
+                        $nextSectionKey = $nextField->section_level_id
+                            ? $nextField->section_level_type . '-' . $nextField->section_level_id
+                            : 'no_section';
+                        if ($nextSectionKey !== $currentSectionKey) {
+                            break;
+                        }
+                        $rowFields[] = $nextField;
+                        $cursor++;
+                    }
+
+                    if ($requestedCols > 1) {
+                        $blade .= "<div class='grid grid-cols-1 md:grid-cols-{$requestedCols} gap-5'>";
+                    } else {
+                        $blade .= "<div class='w-full'>";
+                    }
+                    foreach ($rowFields as $rf) {
+                        $blade .= self::renderSelfDeclarationField($rf);
+                    }
+                    $blade .= "</div>";
+                }
+
+                $blade .= "</div>";
+                File::put("{$dir}/105.blade.php", $blade);
+                continue;
+            }
+            $isCurrentAddress = ($tabCode == 102) && ($tab['is_current_address'] ?? false);
+            $blade = '';
+            $fields = $tab['fields'] ?? [];
+            $renderFields = array_values(array_filter($fields, fn($f) => !str_starts_with($f['field_name'], 'cur_')));
+            $syncableFields = array_values(array_filter($fields, fn($f) => !empty($f['is_syncable'])));
+            $total = count($renderFields);
+            $cursor = 0;
+
+            if (!empty($layout)) {
+                $blade .= "<div x-data=\"{ sameAsPermanent: false, formData: @entangle('formData').live, sync() { if(this.sameAsPermanent) { ";
+                foreach ($syncableFields as $field) {
+                    $name = $field['field_name'];
+                    $blade .= "this.formData.cur_{$name} = this.formData.{$name}; ";
+                }
+                $blade .= "this.\$nextTick(() => { setTimeout(() => { document.querySelectorAll('[name^=\\'cur_\\']').forEach(el => delete el.dataset.loaded); if(typeof window.initMasterData === 'function') window.initMasterData(); }, 100); }); ";
+                $blade .= " } } }\" x-init=\"\$watch('sameAsPermanent', v => sync()); ";
+                foreach ($syncableFields as $field) {
+                    $name = $field['field_name'];
+                    $blade .= "\$watch('formData.{$name}', v => { if(sameAsPermanent) sync(); }); ";
+                }
+                $blade .= "\">\n";
+
+                foreach ($layout as $row) {
+                    if ($cursor >= $total)
+                        break;
+                    $cols = max(1, min(3, (int) $row['columns']));
+                    $rowFields = array_slice($renderFields, $cursor, $cols);
+                    $cursor += count($rowFields);
+                    $blade .= "<div class=\"grid md:grid-cols-{$cols} gap-4 mt-4\">\n";
+                    foreach ($rowFields as $field) {
+                        $blade .= self::renderField($field);
+                    }
+                    $blade .= "</div>\n";
+                }
+
+                if ($cursor < $total) {
+                    while ($cursor < $total) {
+                        $field = $renderFields[$cursor++];
+                        $blade .= "<div class=\"grid md:grid-cols-1 gap-4 mt-4\">\n";
+                        $blade .= self::renderField($field);
+                        $blade .= "</div>\n";
+                    }
+                }
+
+                if ($isCurrentAddress) {
+                    $blade .= <<<HTML
+                    <div class="mt-8 mb-4 p-4 bg-gray-50 border-y border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">Current Address</h3>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" x-model="sameAsPermanent" class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm font-medium text-gray-700">Same as Permanent Address</span>
+                        </label>
+                    </div>
+                    HTML;
+
+
+                    // Filter fields that are marked as syncable
+                    $totalSync = count($syncableFields);
+
+                    $cursor = 0;
+                    foreach ($layout as $row) {
+                        if ($cursor >= $totalSync)
+                            break;
+                        $cols = max(1, min(3, (int) $row['columns']));
+                        $rowFields = array_slice($syncableFields, $cursor, $cols);
+                        $cursor += count($rowFields);
+                        $blade .= "<div class=\"grid md:grid-cols-{$cols} gap-4 mt-4\">\n";
+                        foreach ($rowFields as $field) {
+                            $curName = 'cur_' . $field['field_name'];
+                            $curField = collect($fields)->firstWhere('field_name', $curName);
+                            if ($curField) {
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            } else {
+                                $curField = $field;
+                                $curField['field_name'] = $curName;
+                                $curField['db_column'] = 'other_details';
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            }
+                        }
+                        $blade .= "</div>\n";
+                    }
+                    if ($cursor < $totalSync) {
+                        while ($cursor < $totalSync) {
+                            $field = $syncableFields[$cursor++];
+                            $blade .= "<div class=\"grid md:grid-cols-1 gap-4 mt-4\">\n";
+                            $curName = 'cur_' . $field['field_name'];
+                            $curField = collect($fields)->firstWhere('field_name', $curName);
+                            if ($curField) {
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            } else {
+                                $curField = $field;
+                                $curField['field_name'] = $curName;
+                                $curField['db_column'] = 'other_details';
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            }
+                            $blade .= "</div>\n";
+                        }
+                    }
+                }
+                $blade .= "</div>\n";
+            } else {
+                // No layout saved, default grid
+                $blade .= "<div x-data=\"{ sameAsPermanent: false, formData: @entangle('formData').live, sync() { if(this.sameAsPermanent) { ";
+                foreach ($syncableFields as $field) {
+                    $name = $field['field_name'];
+                    $blade .= "this.formData.cur_{$name} = this.formData.{$name}; ";
+                }
+                $blade .= "this.\$nextTick(() => { setTimeout(() => { document.querySelectorAll('[name^=\\'cur_\\']').forEach(el => delete el.dataset.loaded); if(typeof window.initMasterData === 'function') window.initMasterData(); }, 100); }); ";
+                $blade .= " } } }\" x-init=\"\$watch('sameAsPermanent', v => sync()); ";
+                foreach ($syncableFields as $field) {
+                    $name = $field['field_name'];
+                    $blade .= "\$watch('formData.{$name}', v => { if(sameAsPermanent) sync(); }); ";
+                }
+                $blade .= "\">\n";
+
+                $blade .= "<div class=\"grid md:grid-cols-2 gap-4 mt-4\">\n";
+                foreach ($renderFields as $field) {
+                    $blade .= self::renderField($field);
+                }
+                $blade .= "</div>\n";
+
+                if ($isCurrentAddress) {
+                    $blade .= <<<HTML
+                    <div class="mt-8 mb-4 p-4 bg-gray-50 border-y border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">Current Address</h3>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" x-model="sameAsPermanent" class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm font-medium text-gray-700">Same as Permanent Address</span>
+                        </label>
+                    </div>
+                    HTML;
+                    $blade .= "<div class=\"grid md:grid-cols-2 gap-4 mt-4\">\n";
+                        foreach ($syncableFields as $field) {
+                            $curName = 'cur_' . $field['field_name'];
+                            $curField = collect($fields)->firstWhere('field_name', $curName);
+                            if ($curField) {
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            } else {
+                                $curField = $field;
+                                $curField['field_name'] = $curName;
+                                $curField['db_column'] = 'other_details';
+                                $curField['is_readonly'] = 'sameAsPermanent';
+                                $blade .= self::renderField($curField);
+                            }
+                        }
+                    $blade .= "</div>\n";
+                }
+                $blade .= "</div>\n";
+            }
+            File::put("{$dir}/{$tabCode}.blade.php", $blade);
+        }
+        return $dir;
+    }
+
+    private static function renderField(array $field): string
+    {
+        $label = $field['level_name'] ?? '';
+        $name = $field['field_name'] ?? uniqid();
+
+        $type = $field['field_type'] ?? 'text';
+        $validation = $field['validation_rule'] ?? ''; // <--- নতুন
+        $regex = $field['regex'] ?? null;              // <--- নতুন
+        $dynamicAttr = self::generateDynamicInputLogic($name, $validation, $regex);
+        if ($name === 'ifscode' || $name === 'ifsc_code') {
+            $wireModelMode = 'wire:model.live';
+        } 
+        // বাকি যেসব ফিল্ডে digits বা size আছে সেগুলোতে .blur হবে
+        elseif (str_contains($validation, 'digits') || str_contains($validation, 'size')) {
+            $wireModelMode = 'wire:model.blur';
+        } 
+        // অন্য সব সাধারণ ফিল্ডে .live থাকবে
+        else {
+            $wireModelMode = 'wire:model.live';
+        }
+        $isConfirmField = false;
+$isEdit = false;
+        if (!empty($field['validation_rule'])) {
+            $rules = explode('|', $field['validation_rule']);
+            $isRequired = in_array('required', $rules, true);
+
+            foreach ($rules as $rule) {
+                if (str_starts_with($rule, 'same:')) {
+                    $isConfirmField = true;
+                    break;
+                }
+            }
+        }
+
+        if ($isConfirmField) {
+            $type = 'password';
+        }
+
+        // $type = $field['field_type'] ?? 'text';
+        $value = $field['value'] ?? 1;
+        $placeholder = 'Enter ' . $field['level_name'] ?? '';
+        $isRequired = false;
+        if (!empty($field['validation_rule'])) {
+            $rules = explode('|', $field['validation_rule']);
+            $isRequired = in_array('required', $rules, true);
+        }
+
+        $requiredAttr = $isRequired ? 'required' : '';
+        $isReadonly = !empty($field['is_readonly']);
+        $readonlyVal = $field['is_readonly'] ?? 0;
+
+        if (is_string($readonlyVal) && $readonlyVal === 'sameAsPermanent') {
+            $readonlyAttr = '::readonly="sameAsPermanent" ::disabled="sameAsPermanent"';
+        } else {
+            $readonlyAttr = ((int)$readonlyVal === 1) ? 'readonly' : '';
+        }
+        $disabledAttr = in_array($name, ['ds_registration_no', 'application_type', 'ds_date']) ? ':disabled="$isEdit"' : '';
+        $ignore = !empty($field['field_class']);
+        $wireIgnore = $ignore ? 'wire:ignore' : '';
+        $hasDependency =
+            !empty($field['dependent_on']) &&
+            !empty($field['dependent_on_values']) &&
+            is_array($field['dependent_on_values']);
+
+        $dependentOn = $field['dependent_on'] ?? null;
+        $dependentValues = $field['dependent_on_values'] ?? [];
+        $minAttr = '';
+        $maxAttr = '';
+        if ($name === 'dob') {
+            $minAttr = ':min="$minDOB"';
+            $maxAttr = ':max="$maxDOB"';
+        } elseif ($name === 'application_date' || $name === 'ds_date') {
+            $minAttr = ':min="$minDate"';
+            $maxAttr = ':max="$maxDate"';
+        }
+
+        $xData = '';
+        $xShow = '';
+        $xCloak = '';
+
+        if ($hasDependency) {
+            $values = collect($dependentValues)
+                ->map(fn($v) => "'" . (string) $v . "'")
+                ->implode(',');
+            $xData = <<<HTML
+    x-data="{
+        formData: @entangle('formData').live,
+        get isVisible() {
+            if (!this.formData) return false;
+            return [{$values}].includes(String(this.formData.{$dependentOn}));
+        },
+        sync() {
+            if (!this.isVisible && this.formData.hasOwnProperty('{$name}')) {
+                this.formData.{$name} = null;
+            }
+        },
+        init() {
+            this.sync();
+            this.\$watch('formData.{$dependentOn}', () => this.sync());
+        }
+    }"
+    HTML;
+            $xShow = 'x-show="isVisible"';
+            $xCloak = 'x-cloak';
+            $wireKey = 'wire:key="field-dep-' . $name . '"';
+        } else {
+            $wireKey = 'wire:key="field-norm-' . $name . '"';
+        }
+
+        switch ($type) {
+            // case 'select':
+            //     $optionsHtml = '';
+            //     foreach (($field['options'] ?? []) as $key => $optionlabel) {
+            //         $key = e($key);
+            //         $optionlabel = e($optionlabel);
+            //         $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
+            //     }
+            //     $fieldHtml = <<<BLADE
+            //     <x-form.select
+            //         name="{$name}"
+            //         label="{$label}"
+            //         data-wire="{$name}"
+            //         {$wireIgnore}
+            //          {$readonlyAttr}
+            //           {$requiredAttr}
+            //         wire:model.live="formData.{$name}"
+            //     >
+            //         <option value="">-- Select {$label} --</option>
+            //         {$optionsHtml}
+            //     </x-form.select>
+            //     BLADE;
+            //     break;
+            case 'select':
+
+                // ✅ SPECIAL RENDER FOR app_type ONLY
+                if ($name === 'application_type') {
+
+                    $fieldHtml = <<<BLADE
+        <div wire:key="field-norm-application_type">
+            <x-form.select
+                name="application_type"
+                label="Application Type"
+                data-wire="application_type"
+                required
+                wire:model.live="formData.application_type"
+                {$disabledAttr}
+            >
+                <option value="">-- Select Application Type --</option>
+
+                @foreach(\$appTypeOptions as \$value => \$label)
+                    <option value="{{ \$value }}">{{ \$label }}</option>
+                @endforeach
+
+            </x-form.select>
+        </div>
+        BLADE;
+
+                    break;
+                }
+
+                // 🔹 NORMAL SELECT FOR OTHER FIELDS
+                $optionsHtml = '';
+                foreach (($field['options'] ?? []) as $key => $optionlabel) {
+                    $key = e($key);
+                    $optionlabel = e($optionlabel);
+                    $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
+                }
+
+                $fieldHtml = <<<BLADE
+    <x-form.select
+        name="{$name}"
+        label="{$label}"
+        data-wire="{$name}"
+        {$wireIgnore}
+        {$readonlyAttr}
+        {$requiredAttr}
+        {$disabledAttr}
+        wire:model.live="formData.{$name}"
+    >
+        <option value="">-- Select {$label} --</option>
+        {$optionsHtml}
+    </x-form.select>
+    BLADE;
+
+                break;
+
+            case 'textarea':
+                $fieldHtml = <<<BLADE
+                <x-form.textarea
+                    name="{$name}"
+                    label="{$label}"
+                    placeholder="{$placeholder}"
+                    {$wireIgnore}
+                     {$readonlyAttr}
+                      {$requiredAttr}
+                      {$disabledAttr}
+                    wire:model.live="formData.{$name}"
+                />
+                BLADE;
+                break;
+            case 'checkbox':
+                $fieldHtml = <<<BLADE
+                    <x-form.checkbox
+                        name="{$name}"
+                        value="{$value}"
+                        label="{$label}"
+                        {$disabledAttr}
+                        wire:model.live="formData.{$name}"
+                    />
+                BLADE;
+                break;
+
+            case 'text':
+            case 'number':
+            case 'date':
+            default:
+                $fieldHtml = <<<BLADE
+                <x-form.input
+                    type="{$type}"
+                    name="{$name}"
+                    label="{$label}"
+                    placeholder="{$placeholder}"
+                    {$wireIgnore}
+                    {$readonlyAttr}
+                    {$requiredAttr}
+                    {$minAttr}
+                    {$maxAttr}
+                    {$disabledAttr}
+                    {$wireModelMode}="formData.{$name}"
+                    {$dynamicAttr}
+                />
+                BLADE;
+                break;
+        }
+
+        /* ========= FINAL OUTPUT ========= */
+        return <<<BLADE
+        <div {$xData} {$xShow} {$xCloak} {$wireKey}>
+            {$fieldHtml}
+        </div>
+        BLADE;
+    }
+
+
+    private static function renderSelfDeclarationField($field): string
+    {
+        $label = $field->level_name;
+        $name = $field->field_name;
+        $type = $field->field_type ?? 'text';
+        $validation = $field->validation_rule ?? ''; // <--- নতুন
+        $regex = $field->regex ?? null;
+        $value = $field->value ?? 1;
+        $placeholder = 'Enter ' . $field->level_name ?? '';
+        $paddingClass = $field->section_level_id ? 'pl-6' : 'pl-0';
+        $options = [];
+        $dynamicAttr = self::generateDynamicInputLogic($name, $validation, $regex);
+        if (!empty($field->options)) {
+            if (is_string($field->options)) {
+                $decoded = json_decode($field->options, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $options = $decoded;
+                }
+            } elseif (is_array($field->options)) {
+                $options = $field->options;
+            }
+        }
+
+        switch ($type) {
+
+            /* ===== NUMBER ===== */
+            case 'number':
+                return <<<BLADE
+                <div class="{$paddingClass}">
+                    <x-form.input
+                        type="number"
+                        name="{$name}"
+                        label="{$label}"
+                        placeholder="{$placeholder}"
+                        wire:model.live="formData.{$name}"
+                    />
+                </div>
+                BLADE;
+
+                /* ===== TEXTAREA ===== */
+            case 'textarea':
+                return <<<BLADE
+                <div class="{$paddingClass}">
+                    <x-form.textarea
+                        name="{$name}"
+                        label="{$label}"
+                        placeholder="{$placeholder}"
+                        wire:model.live="formData.{$name}"
+                    />
+                </div>
+                BLADE;
+
+                /* ===== SELECT ===== */
+            case 'select':
+
+                $optionsHtml = '';
+                foreach ($options as $key => $text) {
+                    if (is_int($key)) {
+                        $key = $text;
+                    }
+                    $key = e($key);
+                    $text = e($text);
+
+                    $optionsHtml .= "<option value=\"{$key}\">{$text}</option>\n";
+                }
+
+                return <<<BLADE
+                <div class="{$paddingClass}">
+                    <x-form.select
+                        name="{$name}"
+                        label="{$label}"
+                        wire:model.live="formData.{$name}"
+                    >
+                        <option value="">-- Select {$label} --</option>
+                        {$optionsHtml}
+                    </x-form.select>
+                </div>
+                BLADE;
+
+                /* ===== RADIO ===== */
+            case 'radio':
+
+                $radioHtml = '';
+                foreach ($options as $key => $text) {
+                    if (is_int($key)) {
+                        $key = $text;
+                    }
+
+                    $key = e($key);
+                    $text = e($text);
+
+                    $radioHtml .= <<<HTML
+                    <label class="flex items-center gap-2">
+                        <input
+                            type="radio"
+                            name="{$name}"
+                            value="{$key}"
+                            wire:model.live="formData.{$name}"
+                        />
+                        {$text}
+                    </label>
+                    HTML;
+                }
+
+                return <<<BLADE
+                <div class="{$paddingClass}">
+                    <label class="block font-medium text-gray-700 mb-1">{$label}</label>
+                    <div class="flex flex-wrap gap-4">
+                        {$radioHtml}
+                    </div>
+                </div>
+                BLADE;
+
+                /* ===== CHECKBOX ===== */
+            case 'checkbox':
+                return <<<BLADE
+                <div class="{$paddingClass}">
+                    <x-form.checkbox
+                        name="{$name}"
+                        label="{$label}"
+                        value="{$value}"
+                        wire:model.live="formData.{$name}"
+                    />
+                </div>
+                BLADE;
+
+                /* ===== DEFAULT TEXT ===== */
+            default:
+                return <<<BLADE
+            <div class="{$paddingClass}">
+                <x-form.input
+                    type="text"
+                    name="{$name}"
+                    label="{$label}"
+                    placeholder="{$placeholder}"
+                    wire:model.live="formData.{$name}"
+                    {$dynamicAttr}
+                />
+            </div>
+            BLADE;
+        }
+    }
+
+    private static function generateDynamicInputLogic(string $name, ?string $validation, ?string $regex): string
+    {
+        if (empty($validation) && empty($regex)) return '';
+
+        $maxDigits = null;
+        // validation_rule থেকে size:11 বা digits:10 বের করা
+        if ($validation && preg_match('/(?:digits|size):(\d+)/', $validation, $matches)) {
+            $maxDigits = $matches[1];
+        }
+
+        $cleanInput = "";
+
+        // IFSC Code এর জন্য বিশেষ লজিক (অক্ষর + সংখ্যা এবং Uppercase)
+        if ($name === 'ifscode' || $name === 'ifsc_code') {
+            $cleanInput = "\$el.value = \$el.value.toUpperCase().replace(/[^A-Z0-9]/g, '')";
+        }
+        // সংখ্যা ফিল্টার (Mobile/Pin/Bank Acc) - যেখানে digits বা regex এ শুধু সংখ্যা আছে
+        elseif (($validation && str_contains($validation, 'digits')) || ($regex && str_contains($regex, '0-9') && !str_contains($regex, 'A-Z'))) {
+            $cleanInput = "\$el.value = \$el.value.replace(/[^0-9]/g, '')";
+        }
+        // নাম ফিল্টার (Letters only)
+        elseif ($regex && $regex === '^[A-Za-z .]+$') {
+            $cleanInput = "\$el.value = \$el.value.replace(/[^A-Za-z .]/g, '')";
+        }
+
+        if (empty($cleanInput)) return '';
+
+        $sliceCode = $maxDigits ? ".slice(0, {$maxDigits})" : "";
+
+        return "x-on:input.stop=\"{$cleanInput}{$sliceCode}; \$wire.set('formData.{$name}', \$el.value, false)\"";
+    }
+}

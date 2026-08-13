@@ -2,54 +2,73 @@
 
 namespace App\Livewire;
 
-use \Carbon\Carbon;
-use App\Models\Codemaster;
-use App\Models\BenRejectDetail;
+use App\Helpers\CheckAuthHelper;
 use App\Helpers\EncryptionArray;
-use App\Models\BenRejectDetails;
-use App\Models\BeneficiaryPersonal;
-use App\Exports\BeneficiariesExport;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Models\BeneficiaryCommonList;
-use Illuminate\Support\Facades\Crypt;
-use App\Models\DraftBeneficiaryPersonal;
+use App\Models\BeneficiaryPersonalDetail;
+use App\Models\Codemaster;
+use App\Services\TableExportService;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\Views\Column;
+use Illuminate\Support\Facades\Crypt;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filters\TextFilter;
 
 class BeneficiaryTable extends DataTableComponent
 {
     public ?int $perPage = 5;
+
     public string $reportType;
+
     public string $search = '';
 
-    public $district_id, $rural_urban, $blockurban, $gp_ward, $sub_div;
+    public $district_id;
+
+    public $rural_urban;
+
+    public $blockurban;
+
+    public $gp_ward;
+
+    public $sub_div;
+
     protected $listeners = ['filtersApplied'];
 
-    public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
+    public $loginDistrictCode;
+
+    public $loginSubdivisionCode;
+
+    public $loginBlockCode;
+
     public array $filter_condition = [];
+
     public $relationFather;
-    public function mount(string $reportType = ''): void
+
+    public $schemeName;
+
+    public $schemeId;
+
+    public function mount(string $reportType = '', $schemeName = null, $schemeId = null): void
     {
+        $this->schemeId = $schemeId;
         $this->reportType = $reportType;
         $this->relationFather = Codemaster::getIdByCode(131);
 
         // dd($this->relationFather);
         $select_lgd = session('lgd_session');
 
-        if (!empty($select_lgd['district_id'])) {
-            $this->filter_condition['district_id'] = Crypt::decryptString($select_lgd['district_id']);
+        if (! empty($select_lgd['district_id'])) {
+            $this->filter_condition['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
         }
 
-        if (!empty($select_lgd['block_id'])) {
-            $this->filter_condition['block_id'] = Crypt::decryptString($select_lgd['block_id']);
+        if (! empty($select_lgd['block_id'])) {
+            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
         }
 
-        if (!empty($select_lgd['subdivision_id'])) {
-            $this->filter_condition['sub_division_id'] = Crypt::decryptString($select_lgd['subdivision_id']);
+        if (! empty($select_lgd['subdivision_id'])) {
+            $this->filter_condition['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
     }
+
     public function filtersApplied($filters)
     {
         // dd($filters['gp_ward']);
@@ -61,6 +80,7 @@ class BeneficiaryTable extends DataTableComponent
         $this->sub_div = $filters['subdivision_id'];
         // dd($this->gp_ward );
     }
+
     public function configure(): void
     {
         $this->setPrimaryKey('sourceable_id')
@@ -104,104 +124,65 @@ class BeneficiaryTable extends DataTableComponent
             'class' => 'px-4 py-3 divide-y divide-gray-200 bg-white overflow-y-auto',
         ]);
     }
+
     public function updatedSearch($value): void
     {
         $this->setSearch($value);
         $this->resetPage();
     }
+
     public function updatedPerPage($value): void
     {
-        $this->perPage = (int)$value;
-        $this->setPerPage((int)$value);
+        $this->perPage = (int) $value;
+        $this->setPerPage((int) $value);
         $this->resetPage();
     }
+
     public function columns(): array
     {
-        if ($this->reportType == '4') {
-            $columns = [
-                Column::make("Application ID", "application_id")
-                    ->label(fn($row) => $row->application_id ?? 'N/A'),
-
-                Column::make("Applicant Name")
-                    ->label(function ($row) {
-                        return $row->personal_details[0]['full_name'] ?? 'N/A';
-                    }),
-
-                Column::make("Father's Name")
-                    ->label(function ($row) {
-                        return collect($row->relationship_details)
-                            ->firstWhere('relation_type_id', $this->relationFather)['full_name'] ?? 'N/A';
-                    }),
-
-                Column::make("Age")
-                    ->label(function ($row) {
-                        $dob = $row->personal_details[0]['dob'] ?? null;
-                        return $dob ? Carbon::parse($dob)->age : 'N/A';
-                    }),
-
-                Column::make("Mobile No.")
-                    ->label(function ($row) {
-                        return $row->personal_details[0]['mobile_no'] ?? 'N/A';
-                    }),
-            ];
-
-            return $columns;
-        }
         $columns = [
-            Column::make("Application ID", "application_id")
-                ->label(fn($row) => $row->sourceable->application_id ?? 'N/A'),
+            Column::make('Application ID', 'application_id')
+                ->label(fn ($row) => $row->application_id ?? 'N/A'),
 
-            Column::make("Applicant Name", "full_name")
-                ->label(fn($row) => $row->sourceable->full_name ?? 'N/A'),
+            Column::make('Applicant Name', 'full_name')
+                ->label(fn ($row) => $row->beneficiary_name ?? 'N/A'),
 
             Column::make("Father's Name")
-                ->label(fn($row) => $row->sourceable->relationships
-                    ->where('relation_type_id', $this->relationFather)->first()?->full_name),
+                ->label(fn ($row) => $row->ben_father_name ?? 'N/A'),
 
-            Column::make("Age", "dob")
-                ->label(fn($row) => $row->sourceable->dob ?? 'N/A'),
-            // Column::make("Age", "dob")
-            // ->format(fn($value) => $value ? Carbon::parse($value)->age : 'N/A'),
+            Column::make('Age', 'dob')
+                ->label(fn ($row) => $row->dob ?? 'N/A'),
         ];
 
         if (in_array($this->reportType, ['1', '5', '4'])) {
-            $columns[] = Column::make("Applicant Mobile No.", "mobile_no")
-                ->label(fn($row) => $row->sourceable->mobile_no ?? 'N/A');
+            $columns[] = Column::make('Applicant Mobile No.', 'mobile_no')
+                ->label(fn ($row) => $row->other_details['mobile_no'] ?? 'N/A');
         }
 
-
         if ($this->reportType == '3') {
-            $beneficiaryColumn = Column::make("Beneficiary ID", "beneficiary_id")
-                ->label(fn($row) => $row->sourceable->beneficiary_id ?? 'N/A');
+            $beneficiaryColumn = Column::make('Beneficiary ID', 'beneficiary_id')
+                ->label(fn ($row) => $row->beneficiary_id ?? 'N/A');
 
             array_unshift($columns, $beneficiaryColumn);
         }
 
-
-        if ($this->reportType == '4') {
-            $columns[2] = Column::make("Father's Name", "father_full_name");
-            $columns[] = Column::make("Rejected Reason", "rejected_reason");
-        }
-
-
-
-        $columns[] = Column::make("Actions")
+        $columns[] = Column::make('Actions')
             ->label(function ($row) {
-                if (($this->reportType == '3') || ($this->reportType == '2') || ($this->reportType == '5')) {
+                if (($this->reportType == '3') || ($this->reportType == '2')) {
                     return view('coulmn_button.view', [
                         'link' => route('custom_application.view', [
-                            // 'application_id' => Crypt::encrypt($row->application_id),
-                            'id' => $this->reportType == '3' ? encrypt($row->sourceable->application_id) : encrypt($row->sourceable->application_id),
-                            'reportType' => $this->reportType,
+                            'id' => Crypt::encryptString($row->application_id),
+                            'scheme_id' => Crypt::encryptString($row->scheme_id),
                         ]),
                         'tooltip' => 'View Application',
                     ])->render();
-                }
-                if (($this->reportType == '1')) {
+                } elseif ((($this->reportType == '1') || ($this->reportType == '6') || ($this->reportType == '5')) && (CheckAuthHelper::isCommonOperator())) {
                     return view('coulmn_button.actions', [
-                        'link' => route('draftedit', Crypt::encryptString($row->sourceable->application_id)),
+                        'link' => route('draftedit').'?app_id='.Crypt::encryptString($row->application_id).'&ben_id='.Crypt::encryptString($row->beneficiary_id).'&scheme_id='.Crypt::encryptString($row->scheme_id),
                         'tooltip' => 'Edit Application',
                     ])->render();
+                } else {
+                    return 'N/A';
                 }
             })
             ->html();
@@ -215,133 +196,92 @@ class BeneficiaryTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $roleVerified  = Codemaster::getIdByCode(23);
-        $roleApproved  = Codemaster::getIdByCode(0);
-        $roleReverted  = Codemaster::getIdByCode(21);
-        $Reverted  = Codemaster::getIdByCode(22);
+        // Status Constants
+        $STATUS_VERIFIED = 1;
+        $STATUS_APPROVED = 2;
+        $STATUS_FINAL = 0;
+        $STATUS_REJECT = -100;
+        $STATUS_REVERT = -20;
+        $STATUS_PARTIAL = null;
 
-        $next_level_role_id = null;
-        $sourceableClass = null;
+        $nextLevelRoleId = null;
 
-        if ($this->reportType == "2") {
-            $sourceableClass = DraftBeneficiaryPersonal::class;
-            $next_level_role_id = $roleVerified;
-        } elseif ($this->reportType == "3") {
-            $sourceableClass = BeneficiaryPersonal::class;
-            $next_level_role_id = $roleApproved;
-        } elseif ($this->reportType == "1") {
-            $sourceableClass = DraftBeneficiaryPersonal::class;
-            $next_level_role_id = $roleReverted;
-        } elseif ($this->reportType == "5") {
-            $sourceableClass = DraftBeneficiaryPersonal::class;
-            $extraConditions = ['is_final_submit' => true];
-             $next_level_role_id = $Reverted;
-            $query = BeneficiaryCommonList::whereHasMorph('sourceable', $sourceableClass, function ($q) use ($next_level_role_id, $extraConditions) {
-                if (!empty($extraConditions)) {
-                    foreach ($extraConditions as $field => $value) {
-                        $q->where($field, $value);
-                    }
-                }
-                $q->where('next_level_role_id', $next_level_role_id);
-            });
-        } elseif ($this->reportType == "4") {
-            $query = BenRejectDetails::query();
-            // dd($query->get());
+        // Default condition
+        $extraConditions = [
+            'scheme_id' => $this->schemeId,
+        ];
 
-            return EncryptionArray::applyLocationFilter(
-                $query,
-                $this->reportType,
-                $this->district_id ? (int) $this->district_id : null,
-                $this->rural_urban ? (int) $this->rural_urban : null,
-                $this->blockurban ? (int) $this->blockurban : null,
-                $this->gp_ward ? (int) $this->gp_ward : null,
-                $this->sub_div ? (int) $this->sub_div : null
-            );
+        switch ($this->reportType) {
+
+            case '1': // Partial
+                $extraConditions['is_final'] = 0;
+                $nextLevelRoleId = $STATUS_PARTIAL;
+                break;
+
+            case '2': // Verified
+                $extraConditions['is_final'] = 1;
+                $nextLevelRoleId = $STATUS_VERIFIED;
+                break;
+
+            case '3': // Approved
+                $extraConditions['is_final'] = 1;
+                $nextLevelRoleId = $STATUS_APPROVED;
+                break;
+
+            case '4': // Rejected
+                $extraConditions['is_final'] = 1;
+                $nextLevelRoleId = $STATUS_REJECT;
+                break;
+
+            case '5': // Reverted
+                $extraConditions['is_final'] = 1;
+                $nextLevelRoleId = $STATUS_REVERT;
+                break;
+
+            case '6': // Final
+                $extraConditions['is_final'] = 1;
+                $nextLevelRoleId = $STATUS_FINAL;
+                break;
         }
-        $query = BeneficiaryCommonList::with('sourceable.contact', 'sourceable.relationships')
-            ->whereHasMorph(
-                'sourceable',
-                $sourceableClass,
-                function ($q) use ($next_level_role_id) {
-                    $q->where('next_level_role_id', $next_level_role_id);
-                }
-            );
 
-        // dd($query->get());
-        if (!empty($this->filter_condition)) {
+        /**
+         * --- BASE QUERY ---
+         */
+        $query = BeneficiaryPersonalDetail::with('contact')
+            ->where(function ($q) use ($extraConditions, $nextLevelRoleId) {
+
+                foreach ($extraConditions as $field => $value) {
+                    $q->where($field, $value);
+                }
+
+                $q->where('next_level_role_id', $nextLevelRoleId);
+            });
+
+        /**
+         * --- EXTRA FILTER CONDITION ---
+         */
+        if (! empty($this->filter_condition)) {
             $query->where($this->filter_condition);
         }
 
-        // if (!empty($this->filter_condition['district_id'])) {
-        //     $districtId = $this->filter_condition['district_id'];
-
-        //     $query->whereHasMorph(
-        //         'sourceable',
-        //         $sourceableClass,
-        //         function ($q) use ($districtId) {
-        //             $q->whereHas('contact', function ($contactQuery) use ($districtId) {
-        //                 $contactQuery->where('district_id', $districtId);
-        //             });
-        //         }
-        //     );
-        // }
-
-        // if (!empty($this->filter_condition['block_id'])) {
-        //     $blockId = $this->filter_condition['block_id'];
-
-        //     $query->whereHasMorph(
-        //         'sourceable',
-        //         $sourceableClass,
-        //         function ($q) use ($blockId) {
-        //             $q->whereHas('contact', function ($contactQuery) use ($blockId) {
-        //                 $contactQuery->where('block_id', $blockId);
-        //             });
-        //         }
-        //     );
-        // }
-
-        // if (!empty($this->filter_condition['subdivision_id'])) {
-        //     $subdivisionId = $this->filter_condition['subdivision_id'];
-
-        //     $query->whereHasMorph(
-        //         'sourceable',
-        //         $sourceableClass,
-        //         function ($q) use ($subdivisionId) {
-        //             $q->whereHas('contact.municipality', function ($municipalityQuery) use ($subdivisionId) {
-        //                 $municipalityQuery->where('subdivision_id', $subdivisionId);
-        //             });
-        //         }
-        //     );
-        // }
-
-        // dd($this->gp_ward);
-        // $query = EncryptionArray::applyLocationFilter(
-        //     $query,
-        //     $this->reportType,
-        //     $this->district_id ? (int) $this->district_id : null,
-        //     $this->rural_urban ? (int) $this->rural_urban : null,
-        //     $this->blockurban ? (int) $this->blockurban : null,
-        //     $this->gp_ward ? (int) $this->gp_ward : null
-        // );
-
-
+        /**
+         * --- LOCATION FILTER ---
+         */
         if ($this->district_id || $this->rural_urban || $this->blockurban || $this->gp_ward) {
-            // dd($this->gp_ward);
-            $query = EncryptionArray::applyLocationFilter(
+            $query = EncryptionArray::applyLocationFilters(
                 $query,
-                $this->reportType,
-                $this->district_id ? (int) $this->district_id : null,
-                $this->rural_urban ? (int) $this->rural_urban : null,
-                $this->blockurban ? (int) $this->blockurban : null,
-                $this->gp_ward ? (int) $this->gp_ward : null,
-                $this->sub_div ? (int) $this->sub_div : null
+                $this->district_id ?: null,
+                $this->rural_urban ?: null,
+                $this->blockurban ?: null,
+                $this->gp_ward ?: null,
+                $this->sub_div ?: null
             );
         }
 
         $this->dispatch('hideLoader');
+
         return $query;
     }
-
 
     public function filters(): array
     {
@@ -368,20 +308,12 @@ class BeneficiaryTable extends DataTableComponent
                 }),
         ];
     }
-    public function exportExcel()
-    {
-        $data = $this->builder()->get()->map(function ($row) {
-            return [
-                'application_id' => $row->sourceable->application_id ?? 'N/A',
-                'full_name' => $row->sourceable->full_name ?? 'N/A',
-                'father_name' => optional($row->sourceable->relationships
-                    ->where('relation_type_id', $this->relationFather ?? null)
-                    ->first())->full_name ?? 'N/A',
-                'dob' => $row->sourceable->dob ?? 'N/A',
-                'mobile_no' => $row->sourceable->mobile_no ?? 'N/A',
-            ];
-        });
 
-        return Excel::download(new BeneficiariesExport($data), 'beneficiaries_all.xlsx');
+    public function exportExcel(TableExportService $exportService)
+    {
+        return $exportService->export(
+            $this,
+            'applications_all.xlsx'
+        );
     }
 }

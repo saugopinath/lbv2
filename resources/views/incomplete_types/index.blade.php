@@ -1,6 +1,3 @@
-
 <x-layouts.app>
-
-     @livewire('incomplete-search-wrapper', ['stage' => $stage ?? null])
-
+    <livewire:incomplete :stage="$stage"/>
 </x-layouts.app>

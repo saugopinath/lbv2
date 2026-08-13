@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -38,14 +37,25 @@ class DatabaseSeeder extends Seeder
             Role\DaspurIIBlockOperatorSeeder::class,
             Role\GhatalSdoOperatorSeeder::class,
             Role\GhatalSdoVerifierSeeder::class,
-            IncompletTypeModeSeeder::class,
             ValidationFailedCodemasterSeeder::class,
             UpdateNextLevelRoleIdSeeder::class,
             OpTypeSeeder::class,
-            CasteRequestIdSeeder::class,
-            CasteRequestOpTypeSeeder::class,
-            BeneficiaryApprovedListSeeder::class,
-            ApplicantIncompletDetailsSeeder::class,
+            DsPhaseSeeder::class,
+            CmoAtrSeeder::class,
+            CmoRedressedStatusSeeder::class,
+            BackFromJBSeeder::class,
+            otherformAttribute\FromFieldTypeSeeder::class,
+            otherformAttribute\MasterSectionSeeder::class,
+            otherformAttribute\ValidationRuleSeeder::class,
+            CommonTabFieldsSeeder::class,
+            MasterTabSeeder::class,
+            DuareSarkarPermissionSeeder::class,
+            NormalEntryPermissionSeeder::class,
+            AssignPermission\OperatorPermissionSeeder::class,
+            AssignPermission\VerifierPermissionSeeder::class,
+            AssignPermission\ApproverPermissionSeeder::class,
+            AssignPermission\GivePermissionToAdminSeeder::class,
+            AssignPermission\HODPermissionSeeder::class,
         ]);
     }
 }

@@ -6,8 +6,8 @@
                     wire:model="fullname" x-on:input="$el.value = $el.value.replace(/[^A-Za-z\s]/g, '')" />
             </div>
             <div>
-                <x-form.input id="fullnameaadhar" name="fullnameaadhar" label="Full Name as in Aadhaar"
-                    placeholder="Enter Full Name as in Aadhaar" required wire:model="fullnameaadhar"
+                <x-form.input id="fullnameaadhaar" name="fullnameaadhaar" label="Full Name as in Aadhaar"
+                    placeholder="Enter Full Name as in Aadhaar" required wire:model="fullnameaadhaar"
                     x-on:input="$el.value = $el.value.replace(/[^A-Za-z\s]/g, '')" />
             </div>
         </div>

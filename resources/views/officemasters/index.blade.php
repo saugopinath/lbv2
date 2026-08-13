@@ -5,15 +5,15 @@
             <h2 class="text-xl font-semibold text-gray-700">
                 OfficeMasters
             </h2>
-            @can('create offices')
-                <a href="{{ route('office-masters.create') }}"
-                    class="bg-blue-500 text-white px-4 py-2 rounded-2xl shadow-md hover:bg-blue-600 whitespace-nowrap cursor-pointer">
-                    New OfficeMaster
-                </a>
-            @endcan
+
+            <a href="{{ route('office-masters-create') }}"
+                class="bg-blue-500 text-white px-4 py-2 rounded-2xl shadow-md hover:bg-blue-600 whitespace-nowrap cursor-pointer">
+                New OfficeMaster
+            </a>
+
         </div>
     </div>
-    <div class="bg-white shadow-xl rounded-2xl ">
+    <div class="bg-white shadow-xl rounded-2xl mt-4 p-4">
         <div>
             <livewire:office-masters />
         </div>

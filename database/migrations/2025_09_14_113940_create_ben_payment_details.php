@@ -17,7 +17,7 @@ return new class extends Migration
             foreach ([
                 'apr', 'may', 'jun', 'jul',
                 'aug', 'sep', 'oct', 'nov',
-                'dec', 'jan', 'feb', 'mar'
+                'dec', 'jan', 'feb', 'mar',
             ] as $month) {
                 $table->decimal("{$month}_lot_no", 15, 2)->nullable();
                 $table->string("{$month}_lot_type", 20)->nullable();

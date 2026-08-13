@@ -2,15 +2,16 @@
 
 namespace App\Livewire\Incomplete;
 
+use App\Helpers\CheckAuthHelper;
 use Livewire\Component;
 use App\Models\Ifsccodemaster;
 use App\Models\BeneficiaryPersonal;
-use App\Models\ApplicantIncompletDeatil;
+use App\Models\ApplicantIncompleteDetail;
 
 class BankAccountFail extends Component
 {
     public $ifscode, $bankname, $bankbranchname, $bank_account_number, $old, $dupAction = null, $item, $bank_action = '', $confirmbankaccountnumber;
-
+    public $schemeId;
     protected $listeners = [
         'dup-bank-action-changed' => 'setDupAction'
     ];
@@ -36,7 +37,7 @@ class BankAccountFail extends Component
     //     $this->item = $item;
     //     $old = $item->old_value ?? [];
 
-    //      $app_det = ApplicantIncompletDeatil::with('banks')->where('application_id', $item->application_id)->first();
+    //      $app_det = ApplicantIncompleteDetail::with('banks')->where('application_id', $item->application_id)->first();
     //     if ($app_det->banks) {
     //         $this->ifscode = $app_det->banks->ifsc;
     //         $this->updatedIfscode($this->ifscode);
@@ -47,10 +48,11 @@ class BankAccountFail extends Component
     //     $this->ifscode = $old['ifsc'] ?? '';
     //     $this->bank_account_number = $old['bank_account_number'] ?? '';
     // }
-    public function mount($item,$dupAction = null)
+    public function mount($item, $dupAction = null, $schemeId = null)
     {
         $this->item = $item;
-         $this->dupAction = $dupAction;
+        $this->schemeId = $schemeId;
+        $this->dupAction = $dupAction;
 
         $old_value = $item->old_value ?? [];
         $new_value = $item->new_value ?? [];
@@ -89,7 +91,7 @@ class BankAccountFail extends Component
             $this->confirmbankaccountnumber = old('confirmbankaccountnumber', $old_value['confirmbankaccountnumber'] ?? '');
         }
 
-        $app_det = ApplicantIncompletDeatil::with('banks')
+        $app_det = ApplicantIncompleteDetail::with('banks')
             ->where('application_id', $item->application_id)
             ->first();
 
@@ -128,16 +130,18 @@ class BankAccountFail extends Component
     }
     public function render()
     {
-        $user = auth()->user();
+        // $user = auth()->user();
 
         $stage = $this->stage ?? null;
 
 
         if (!$stage) {
-            if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+            if (CheckAuthHelper::isCommmonVerifier()) {
+                // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
                 $stage = 'verifier';
 
-            } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+                // } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+            } elseif (CheckAuthHelper::isCommonApprover()) {
                 $stage = 'approver';
             }
 

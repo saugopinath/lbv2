@@ -17,14 +17,14 @@
     ])>
         {{ __($localisationPath.'Applied Filters') }}:
     </small>
-    @tableloop($this->getPillDataForFilter() as $filterKey => $filterPillData)
+    @foreach($this->getPillDataForFilter() as $filterKey => $filterPillData)
 
         @if ($filterPillData->hasCustomPillBlade)
             @include($filterPillData->getCustomPillBlade(), ['filter' => $this->getFilterByKey($filterKey), 'filterPillData' => $filterPillData])
         @else
             <x-livewire-tables::filter-pill :$filterKey :$filterPillData />
         @endif
-    @endtableloop
+    @endforeach
 
     <x-livewire-tables::tools.filter-pills.buttons.reset-all />
 </div>

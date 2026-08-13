@@ -4,12 +4,12 @@ namespace App\Livewire\BankUpdate;
 
 use Livewire\Component;
 use App\Models\Ifsccodemaster;
-use App\Models\BeneficiaryCommonList;
+use App\Models\BeneficiaryPersonalDetail;
 
 class BankUpdate extends Component
 {
     public $ifscode, $bankname, $bankbranchname, $bank_account_number, $confirmbankaccountnumber;
-    public $application_id;
+    public $application_id,$scheme_id;
     public function updatedIfscode()
     {
         $ifs = Ifsccodemaster::with('bank')
@@ -26,20 +26,22 @@ class BankUpdate extends Component
         }
     }
 
-    public function mount($application_id)
+    public function mount($application_id,$scheme_id)
     {
-
         $this->application_id = $application_id;
-
-        $query = BeneficiaryCommonList::with(['sourceable', 'sourceable.bank'])
-            ->where('sourceable_id', $this->application_id)
+        $this->scheme_id = $scheme_id;
+   
+        $query = BeneficiaryPersonalDetail::query()
+            ->with(['contact', 'banks'])
+            ->where('application_id', $this->application_id)
+            ->where('scheme_id', $this->scheme_id)
             ->first();
+              
+        $this->ifscode = $query?->banks?->ifscode ?? '';
+        $this->bank_account_number = $query?->banks?->bankaccountnumber ?? '';
+        $this->confirmbankaccountnumber = $query?->banks?->bankaccountnumber ?? '';
 
-        $this->ifscode = $query?->sourceable->bank->ifsc ?? '';
-        $this->bank_account_number = $query?->sourceable->bank->bank_account_number ?? '';
-        $this->confirmbankaccountnumber = $query?->sourceable->bank->bank_account_number ?? '';
-
-        if ($query && $query->sourceable?->bank) {
+        if ($query && $query->banks) {
             $this->updatedIfscode();
         }
     }

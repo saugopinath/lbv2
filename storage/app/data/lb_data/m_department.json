@@ -1,0 +1,167 @@
+[
+    {
+        "id": 9,
+        "name": "WCD",
+        "is_active": 1,
+        "slug": "wcd-sw-dept",
+        "icon": null,
+        "image_ref": null,
+        "rank": 1,
+        "f_name": "Women and Child Development & Social Welfare Department",
+        "ref_color": "blue",
+        "json_data": {
+            "id": 9,
+            "long": "The Women and Child Development & Social Welfare Department oversees programs focused on the welfare of women, children, senior citizens, disabled individuals, and marginalized households. It manages child development services, nutrition programs, Anganwadi centers, adoption processes, and protection schemes. The department also administers pensions, disability support, rehabilitation services, and women empowerment initiatives. Through partnerships with NGOs and district authorities, it ensures effective delivery of welfare benefits. Awareness campaigns, training, and community outreach strengthen gender equality and social protection. Its comprehensive approach makes it central to inclusive development and social welfare in West Bengal.",
+            "about": {
+                "vision_mission": [
+                    {
+                        "text": "A society where women and children realize their full potential in a safe and supportive environment.",
+                        "title": "Vision"
+                    },
+                    {
+                        "text": "To implement policies and programs that promote women's empowerment, child development, and social welfare through strategic interventions and community participation.",
+                        "title": "Mission"
+                    }
+                ]
+            },
+            "short": "This department implements welfare schemes for women, children, elderly persons, and vulnerable groups, focusing on nutrition, protection, empowerment, and social security.",
+            "contact": {
+                "email": "secy-wcd@wb.gov.in",
+                "address": "Writers' Buildings, Kolkata - 700001",
+                "website": "www.wbwcd.gov.in",
+                "helplines": [
+                    "1800-345-6789 (Women Helpline)",
+                    "1098 (Child Helpline)"
+                ]
+            },
+            "tagline": {
+                "line1": "Empowering Women",
+                "line2": "Nurturing Children",
+                "line3": "Building Stronger Communities"
+            },
+            "ref_color": "blue",
+            "very_short": "Supports welfare of women, children, disabled, elderly, and vulnerable groups.",
+            "quick_stats": [
+                {
+                    "schemes": 20
+                }
+            ],
+            "key_functions": [
+                {
+                    "icon": "fa-user-shield",
+                    "text": "Economic, social, and political empowerment through skill development, entrepreneurship, and leadership programs.",
+                    "title": "Women Empowerment"
+                },
+                {
+                    "icon": "fa-baby",
+                    "text": "Ensuring holistic development of children through nutrition, health, education, and protection services.",
+                    "title": "Child Development"
+                },
+                {
+                    "icon": "fa-shield-alt",
+                    "text": "Protection against violence, abuse, exploitation via women helplines, shelter homes, and child protection services.",
+                    "title": "Protection Services"
+                },
+                {
+                    "icon": "fa-balance-scale",
+                    "text": "Implementing state policies aligned with national frameworks and international conventions.",
+                    "title": "Policy Implementation"
+                }
+            ],
+            "department_name": "Women and Child Development & Social Welfare Department",
+            "flagship_schemes": [
+                {
+                    "name": "Lakshmir Bhandar",
+                    "color": "purple",
+                    "benefit": "₹500-₹1000/month",
+                    "description": "Monthly financial assistance to women heads of families.",
+                    "target_group": "Women"
+                },
+                {
+                    "name": "Old Age Pension",
+                    "color": "blue",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for elderly citizens.",
+                    "target_group": "60+ Years"
+                },
+                {
+                    "name": "Widow Pension",
+                    "color": "green",
+                    "benefit": "₹1000/month",
+                    "description": "Financial support for widowed women.",
+                    "target_group": "Widows"
+                },
+                {
+                    "name": "Manabik",
+                    "color": "yellow",
+                    "benefit": "₹1000/month",
+                    "description": "Monthly pension for disabled persons.",
+                    "target_group": "Persons with Disabilities"
+                },
+                {
+                    "name": "Kanyashree Prakalpa",
+                    "color": "pink",
+                    "description": "Empowerment through education and financial assistance.",
+                    "target_group": "Girl Students"
+                }
+            ],
+            "major_initiatives": [
+                {
+                    "icon": "fa-female",
+                    "name": "Kanyashree Prakalpa",
+                    "description": "Award-winning conditional cash transfer scheme for girl children."
+                },
+                {
+                    "icon": "fa-heart",
+                    "name": "Rupashree Prakalpa",
+                    "description": "Financial assistance for marriage of girls from economically weak families."
+                },
+                {
+                    "icon": "fa-home",
+                    "name": "Swabalamban",
+                    "description": "Shelter homes and rehabilitation for women in distress."
+                },
+                {
+                    "icon": "fa-utensils",
+                    "name": "ICDS Services",
+                    "description": "Integrated Child Development Services across all blocks."
+                }
+            ],
+            "ref_gradient_color": "blue",
+            "orgnizational_structure": [
+                {
+                    "icon": "fa-user-tie",
+                    "title": "Minister-in-Charge"
+                },
+                {
+                    "icon": "fa-user-md",
+                    "title": "Principal Secretary"
+                },
+                {
+                    "icon": "fa-users",
+                    "title": "District Magistrates"
+                },
+                {
+                    "icon": "fa-female",
+                    "title": "Child Development Project Officers"
+                },
+                {
+                    "icon": "fa-school",
+                    "title": "AngAnganwadi Workers"
+                },
+                {
+                    "icon": "fa-hands-helping",
+                    "title": "NGO Partners"
+                }
+            ]
+        },
+        "json_data_bak": {
+            "id": 9,
+            "long": "The Women and Child Development & Social Welfare Department oversees programs focused on the welfare of women, children, senior citizens, disabled individuals, and marginalized households. It manages child development services, nutrition programs, Anganwadi centers, adoption processes, and protection schemes. The department also administers pensions, disability support, rehabilitation services, and women empowerment initiatives. Through partnerships with NGOs and district authorities, it ensures effective delivery of welfare benefits. Awareness campaigns, training, and community outreach strengthen gender equality and social protection. Its comprehensive approach makes it central to inclusive development and social welfare in West Bengal.",
+            "short": "This department implements welfare schemes for women, children, elderly persons, and vulnerable groups, focusing on nutrition, protection, empowerment, and social security.",
+            "ref_color": "fuchsia",
+            "very_short": "Supports welfare of women, children, disabled, elderly, and vulnerable groups.",
+            "department_name": "Women and Child Development & Social Welfare Department"
+        }
+    }
+]

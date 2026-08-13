@@ -6,7 +6,7 @@
 
     <ul class="list-disc list-inside text-sm text-gray-700 mb-2">
         @foreach ($mobileIssues as $issueItem)
-            <li>{{ $issueItem->incompletType->name }}</li>
+            <li>{{ $issueItem->incompleteType->name }}</li>
         @endforeach
     </ul>
 
@@ -16,13 +16,20 @@
 
     <div class="mt-2">
         @if (!empty($stage) && in_array($stage, ['verifier', 'revert']))
-            
+
         {{--  @dump('ok2');  --}}
+            @php
+                $mobileKey = $mobileIssues[0]->application_id;
+                $oldMobile = old("dup_mobile.{$mobileKey}");
+            @endphp
+
             <div class="grid gap-6 mb-2 md:grid-cols-3 pl-4 pr-4">
-                <x-form.input id="dup_mobile_{{ $mobileIssues[0]->application_id }}" name="dup_mobile"
-                label="New Mobile Number" placeholder="Enter New Mobile" required
-                wire:model.defer="formData.dup_mobile.{{ $mobileIssues[0]->application_id }}"
-                x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />
+                <x-form.input id="dup_mobile_{{ $mobileKey }}"
+                    name="dup_mobile[{{ $mobileKey }}]"
+                    label="New Mobile Number" placeholder="Enter New Mobile" required
+                    wire:model.defer="formData.dup_mobile.{{ $mobileKey }}"
+                    value="{{ $oldMobile ?? ($formData['dup_mobile'][$mobileKey] ?? '') }}"
+                    x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0,10)" />
             </div>
 
         @elseif (!empty($stage) && $stage === 'approver')

@@ -5,6 +5,7 @@ namespace App\Livewire\Permission;
 use App\Models\Permission;
 use App\Models\ValidationScoreMapping;
 use Livewire\Component;
+use App\Attributes\Loggable;
 
 class CreatePermissionForm extends Component
 {
@@ -15,8 +16,6 @@ class CreatePermissionForm extends Component
     public $has_score = null;
     public $min_score;
     public $max_score;
-
-
 
     public function rules()
     {
@@ -39,7 +38,7 @@ class CreatePermissionForm extends Component
 
         return $rules;
     }
-    public function massages()
+    public function messages()
     {
         return [
             'name.required' => 'The permission name is required.',
@@ -55,11 +54,11 @@ class CreatePermissionForm extends Component
             'max_score.gte' => 'Maximum score must be greater than or equal to minimum score.',
         ];
     }
+    #[Loggable(level: 'C', nickname: 'Create Permission')]
     public function save()
     {
         $this->dispatch('showLoader');
         $this->validate();
-
         if ($this->is_parent == '0') {
             $this->parent_id = null;
         }
@@ -68,6 +67,17 @@ class CreatePermissionForm extends Component
         //             'is_parent'  => $this->is_parent,
         //             'parent_id'  => $this->parent_id,
         //         ]);
+        $existingPermission = Permission::where('name', $this->name)
+            // ->where('parent_id', $this->parent_id)
+            ->first();
+        if ($existingPermission) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'A permission with this name and parent already exists.',
+            ]);
+            $this->dispatch('hideLoader');
+            return;
+        }
         $permission = Permission::create([
             'name'       => $this->name,
             'guard_name' => 'web',
@@ -80,14 +90,17 @@ class CreatePermissionForm extends Component
                 'max_score'     => $this->max_score,
             ]);
         }
-
         $this->reset(['name', 'is_parent', 'parent_id', 'has_score', 'min_score', 'max_score']);
         $this->dispatch('close-modal');
         $this->dispatch('hideLoader');
         // $this->dispatch('notify', 'Permission created successfully!', 'success');
-        $this->dispatch('notify', message: 'Permission created successfully!');
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => 'Permission created successfully!'
+        ]);
         $this->dispatch('refreshDatatable');
     }
+    #[Loggable(level: 'N', nickname: 'Cancel Create Permission')]
     public function cancel()
     {
         $this->reset(['name', 'is_parent', 'parent_id', 'has_score', 'min_score', 'max_score']);

@@ -6,16 +6,24 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "2.1",
         "elasticsearch/elasticsearch": "^9.1",
+        "guzzlehttp/guzzle": "^7.10",
+        "jenssegers/agent": "^2.6",
         "laravel/framework": "^11.0",
+        "laravel/scout": "^11.0",
         "laravel/tinker": "^2.9",
         "maatwebsite/excel": "^3.1",
+        "meilisearch/meilisearch-php": "*",
         "mews/captcha": "3.3.3",
         "orangehill/iseed": "^3.1",
         "owen-it/laravel-auditing": "^14.0",
         "rappasoft/laravel-livewire-tables": "^3.7",
+        "spatie/laravel-activitylog": "^4.11",
         "spatie/laravel-permission": "^6.22",
-        "staudenmeir/belongs-to-through": "^2.16"
+        "staudenmeir/belongs-to-through": "^2.16",
+        "stevebauman/location": "^7.6",
+        "tymon/jwt-auth": "^2.3"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16",
@@ -24,7 +32,6 @@
         "laravel/sail": "^1.26",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.0",
-        "phpunit/phpunit": "^10.5",
         "spatie/laravel-ignition": "^2.4"
     },
     "autoload": {
@@ -71,6 +78,9 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "audit": {
+           "ignore": ["PKSA-rkkf-636k-qjb3", "PKSA-2cx9-ynrq-qdk3"]
         }
     },
     "minimum-stability": "stable",

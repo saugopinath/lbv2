@@ -1,0 +1,96 @@
+<?php
+
+$portal = config('app.app_portal', 'ay');
+if ($portal == 'ay') {
+    $title = 'Annapurna Yojana | Government of West Bengal';
+    $headLine = 'Annapurna Yojana';
+    $logo = 'biswo5.png';
+    $headerlogo = 'Emblem_of_India5.png';
+    $logo_class = 'w-48 sm:w-64 mb-4';
+    $das_logo = 'default-user.png';
+    $logo_das_width = 'w-8';
+    $das_logo_class = 'p-1';
+    $bg_image = 'background-cover.jpg';
+    $schemeIds = [21];
+    $footerText = 'Design and develpod By NIC.';
+    $deptName = 'Women and Child Development & Social Welfare Department';
+    $indexName = 'Annapurna Yojana | Government of West Bengal';
+    $initiallogo = 'biswo5.png';
+    $dept_logo = 'biswo5.png';
+    $indexName = 'Women and Child Development & Social Welfare Department | Government of West Bengal';
+    $footerDescription = 'A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic development and welfare.';
+} else if ($portal == 'jb') {
+    $title = 'Jai Bangla Portal | Government of West Bengal';
+    $headLine = 'Jai Bangla';
+    $logo = 'jb_logo.png';
+    $headerlogo = 'Emblem_of_India.png';
+    $logo_class = 'w-56 sm:w-64 mb-4';
+    $das_logo = 'biswo_bangla.png';
+    $logo_das_width = 'w-20';
+    $das_logo_class = 'p-2';
+    $bg_image = 'jb-bg.jpg';
+    $schemeIds = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 17, 19, 20];
+    $footerText = 'Design and develpod By NIC.';
+    $deptName = 'Finance Department';
+    $dept_logo = 'biswo_logo.png';
+    $initiallogo = 'jb_logo.png';
+    $indexName = 'Department of Finance | Government of West Bengal';
+    $footerDescription = 'A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic development and welfare.';
+} else if ($portal == 'ub') {
+    $title = 'Unnayan Bangla | Government of West Bengal';
+    $headLine = 'Unnayan Bangla';
+    $logo = 'ub_logo.png';
+    $headerlogo = 'header_logo.png';
+    $initiallogo = 'ub_logo.png';
+    $logo_class = 'w-56 sm:w-64 mb-4';
+    $das_logo = 'default-user.png';
+    $logo_das_width = 'w-12';
+    $das_logo_class = 'p-2';
+    $bg_image = 'jb_bg.png';
+    $schemeIds = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 17, 19, 20];
+    $footerText = 'Design and develpod By NIC.';
+    $deptName = 'Finance Department';
+    $indexName = 'Finance Department | Government of West Bengal';
+    $dept_logo = 'biswo_logo.png';
+    $footerDescription = 'A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic development and welfare.';
+} else {
+    $title = 'Annapurna Yojana | Government of West Bengal';
+    $headLine = 'Annapurna Yojana';
+    $logo = 'biswo.png';
+    $headerlogo = 'Emblem_of_India.png';
+    $logo_class = 'w-48 sm:w-64 mb-4';
+    $das_logo = 'biswo.png';
+    $logo_das_width = 'w-8';
+    $das_logo_class = 'p-1';
+    $bg_image = 'background-cover.jpg';
+    $schemeIds = [21];
+    $footerText = 'Design and develpod By NIC.';
+    $deptName = 'Government of West Bengal';
+    $indexName = 'Annapurna Yojana | Government of West Bengal';
+    $initiallogo = 'biswo.png';
+    $dept_logo = 'biswo.png';
+    $indexName = 'Government of West Bengal';
+    $footerDescription = 'A comprehensive Direct Benefit Transfer initiative by the Government of West Bengal for holistic development and welfare.';
+}
+return [
+    'app_portal' => $portal,
+    'title' => $title,
+    'headLine' => $headLine,
+    'indexName' => $indexName,
+    'logo' => $logo,
+    'headerlogo' => $headerlogo,
+    'logo_class' => $logo_class,
+    'das_logo' => $das_logo,
+    'das_logo_class' => $das_logo_class,
+    'logo_das_width' => $logo_das_width,
+    'is_jb' => ($portal == 'jb'),
+    'is_lb' => ($portal == 'lb'),
+    'is_ay' => ($portal == 'ay'),
+    'bg_image' => $bg_image,
+    'schemeIds' => $schemeIds,
+    'footerText' => $footerText,
+    'deptName' => $deptName,
+    'initiallogo' => $initiallogo,
+    'dept_logo' => $dept_logo,
+    'footerDescription' => $footerDescription,
+];

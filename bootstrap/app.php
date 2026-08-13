@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\JwtMiddleware;
 use App\Http\Middleware\PermissionRedirectMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -12,6 +13,7 @@ use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
@@ -22,6 +24,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'permission.redirect' => PermissionRedirectMiddleware::class,
+            'jwt' => JwtMiddleware::class,
+        ]);
+    })
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->web(append: [
+            \App\Http\Middleware\PageVisitlog::class,
+            \App\Http\Middleware\DetectSessionTimeout::class,
+            \App\Http\Middleware\SetPermissionTeamId::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -1,0 +1,111 @@
+{  
+  "genders": ["Male", "Female", "Other"],
+  "categories": ["UR", "EWS", "SC", "ST", "OBC"],
+  "rcTypes": ["AAY", "PHH", "SPHH", "RKSY-I", "RKSY-II", "Non-Subsidized"],
+  "liftingStatuses": ["Lifting Regularly", "Not Lifting", "Surrendered"],
+  "landOwnershipTypes": ["Own", "Leased", "Both"],
+  "electricityProviders": ["WBSEDCL", "CESC"],
+  "employmentNatures": [
+    "Government Sector",
+    "Salaried, in Private Sector",
+    "Formal Sector Self-Employed (Entrepreneur/Business/Proprietor/etc.)",
+    "Part-time job",
+    "Informal Sector Self-Employed (Artisan/Craftsman/Farmer/etc.)",
+    "Housewife",
+    "Unemployed",
+    "Others"
+  ],
+  "documentTypes": [
+    { "value": "KCC", "label": "Kisan Credit Card (KCC)" },
+    { "value": "KCC ARD", "label": "KCC ARD" },
+    { "value": "Artisan Credit Card", "label": "Artisan Credit Card" },
+    { "value": "MJCC", "label": "MGNREGA Job Card (MJCC)" },
+    { "value": "Student CC", "label": "Student Credit Card" },
+    { "value": "Others", "label": "Others" }
+  ],
+  "schoolTypes": [
+    "Govt School",
+    "Govt Aided School",
+    "Govt Sponsored School",
+    "Madrasah",
+    "Recognized Private School",
+    "Unrecognized Private School",
+    "Others"
+  ],
+  "benefitSchemes": [
+    "Lakshmir Bhandar",
+    "Swasthya Sathi",
+    "Kanyashree",
+    "Rupashree",
+    "Krishak Bandhu",
+    "Old Age Pension",
+    "Disability Pension",
+    "Widow Pension",
+    "PM-Kisan",
+    "Others"
+  ],
+  "relations": [
+    "Spouse",
+    "Son",
+    "Daughter",
+    "Father",
+    "Mother",
+    "Brother",
+    "Sister",
+    "Father-in-law",
+    "Mother-in-law",
+    "Son-in-law",
+    "Daughter-in-law",
+    "Grandson",
+    "Granddaughter",
+    "Grandfather",
+    "Grandmother",
+    "Uncle",
+    "Aunt",
+    "Nephew",
+    "Niece",
+    "Others"
+  ],
+  "validationRules": {
+    "aadhaar": {
+      "digits": 12,
+      "algorithm": "verhoeff",
+      "verhoeff": {
+        "d": [
+          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+          [1, 2, 3, 4, 0, 6, 7, 8, 9, 5],
+          [2, 3, 4, 0, 1, 7, 8, 9, 5, 6],
+          [3, 4, 0, 1, 2, 8, 9, 5, 6, 7],
+          [4, 0, 1, 2, 3, 9, 5, 6, 7, 8],
+          [5, 9, 8, 7, 6, 0, 4, 3, 2, 1],
+          [6, 5, 9, 8, 7, 1, 0, 4, 3, 2],
+          [7, 6, 5, 9, 8, 2, 1, 0, 4, 3],
+          [8, 7, 6, 5, 9, 3, 2, 1, 0, 4],
+          [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        ],
+        "p": [
+          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+          [1, 5, 7, 6, 2, 8, 3, 0, 9, 4],
+          [5, 8, 0, 3, 7, 9, 6, 1, 4, 2],
+          [8, 9, 1, 6, 0, 4, 3, 5, 2, 7],
+          [9, 4, 5, 3, 1, 2, 6, 8, 7, 0],
+          [4, 2, 8, 6, 5, 7, 3, 9, 0, 1],
+          [2, 7, 9, 3, 8, 0, 6, 4, 1, 5],
+          [7, 0, 4, 6, 9, 1, 3, 2, 5, 8]
+        ]
+      }
+    },
+    "epic": {
+      "regex": "^[A-Z]{3}[0-9]{7}$",
+      "description": "3 uppercase letters followed by 7 digits (e.g. ABC1234567)"
+    },
+    "pan": {
+      "regex": "^[A-Z]{3}[CPHFATBLJG][A-Z][0-9]{4}[A-Z]$",
+      "description": "PAN format: 5 letters (4th is entity type), 4 digits, 1 letter (e.g. ABCDE1234F)"
+    },
+    "ifsc": {
+      "regex": "^[A-Z]{4}0[A-Z0-9]{6}$",
+      "description": "4 uppercase letters, 0, then 6 alphanumeric chars (e.g. SBIN0001234)"
+    }
+  }
+}

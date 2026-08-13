@@ -35,25 +35,25 @@ class CasteRequestOpTypeSeeder extends Seeder
                 "name" => "REQUEST CASTE MODIFICATION",
                 "short_name" => "request_caste_modification",
                 "parent_short_code" => "op_type",
-                "code" => "2106",
+                "code" => "2107",
             ),
             array(
-                "name" => "VERIFy CASTE MODIFICATION",
+                "name" => "VERIFY CASTE MODIFICATION",
                 "short_name" => "verify_cast_modification",
                 "parent_short_code" => "op_type",
-                "code" => "2107",
+                "code" => "2108",
             ),
             array(
                 "name" => "APPROVE CASTE MODIFICATION",
                 "short_name" => "approve_cast_modification",
                 "parent_short_code" => "op_type",
-                "code" => "2108",
+                "code" => "2109",
             ),
             array(
                 "name" => "REVERT CASTE MODIFICATION",
                 "short_name" => "revert_cast_modification",
                 "parent_short_code" => "op_type",
-                "code" => "2109",
+                "code" => "2110",
             ),
 
 
@@ -69,4 +69,3 @@ class CasteRequestOpTypeSeeder extends Seeder
         }
     }
 }
-

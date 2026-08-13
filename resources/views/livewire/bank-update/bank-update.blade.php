@@ -62,10 +62,11 @@
                     ✅ Bank account numbers match
                 </p>
             </div>
-            
+
             <div>
                 <h3 class="font-semibold mb-2">Upload Bank Passbook</h3>
-                <livewire:enclosure-list :application_id="$application_id" :doc_type_id_array_list="[111]" />                
+                <livewire:enclosure-list :application_id="$application_id" :scheme_id="$scheme_id"
+                    :doc_type_id_array_list="[111]" />
                 @error('document_type')
                     <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
                 @enderror

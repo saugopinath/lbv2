@@ -1,30 +1,34 @@
 <?php
 
 namespace App\Livewire;
-
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class IncompleteSearchWrapper extends Component
 {
     public array $filters = [
-        'district_id'     => null,
-        'rural_urban'     => null,
-        'subdivision_id'  => null,
-        'blockurban'      => null,
-        'gp_ward'         => null,
+        'district_id' => null,
+        'rural_urban' => null,
+        'subdivision_id' => null,
+        'blockurban' => null,
+        'gpward' => null,
         'incomplete_type' => null,
     ];
 
-    public $revert = 'no'; // default
+    public $revert = 'no';
     public ?string $stage = null;
+    public ?int $schemeId = null;
 
-    protected $listeners = [
-        'filtersApplied'       => 'updateGeoFilters',
-        'filterIncompleteType' => 'updateIncompleteType',
-    ];
 
-    public function mount(?string $stage = null)
+    #[On('filter-applied')]
+    public function filterApplied($filters)
     {
+        $this->filters = array_merge($this->filters, $filters);
+    }
+
+    public function mount(?int $schemeId = null, ?string $stage = null)
+    {
+        $this->schemeId = $schemeId;
         $this->stage = $stage;
     }
 
@@ -33,15 +37,15 @@ class IncompleteSearchWrapper extends Component
         $this->filters = array_merge($this->filters, $data);
     }
 
-    public function updateIncompleteType($code)
+    #[On('filterIncompleteType')]
+    public function filterIncompleteType($code)
     {
-        // dd($code);
         $this->filters['incomplete_type'] = $code;
     }
 
     public function search()
     {
-        // $this->dispatch('showLoader');
+        // $this->filters['scheme_id'] = $this->schemeId;
         $this->dispatch('doSearch', $this->filters);
     }
 
@@ -57,11 +61,11 @@ class IncompleteSearchWrapper extends Component
     public function resetAll()
     {
         $this->filters = [
-            'district_id'     => null,
-            'rural_urban'     => null,
-            'subdivision_id'  => null,
-            'blockurban'      => null,
-            'gp_ward'         => null,
+            'district_id' => null,
+            'rural_urban' => null,
+            'subdivision_id' => null,
+            'blockurban' => null,
+            'gpward' => null,
             'incomplete_type' => null,
         ];
 

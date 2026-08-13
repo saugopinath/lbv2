@@ -1,0 +1,379 @@
+<?php
+
+namespace App\Livewire\CreateAssignOtherFormField;
+
+use App\Models\Codemaster;
+use App\Models\SectionLevelMaster;
+use Livewire\Component;
+use App\Models\Scheme;
+use App\Models\FromFieldType;
+use App\Models\ValidationRule;
+use App\Models\SchemeTabBasefield;
+use Illuminate\Support\Str;
+use App\Models\MasterTab;
+use App\Models\SchemeAttachedDocMappings;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\DB;
+
+class CreateOtherfromAttribute extends Component
+{
+    public $scheme_id;
+    public $level_name;
+    public $field_id, $field_class;
+    public $field_name;
+    public $field_type;
+    public array $validation_rule = [];
+    public array $options = [];
+    public string $option_input = '';
+    public $docTypes = [];
+
+    public string $is_under_section = 'no';
+    public string $is_multiple = 'no';
+
+    public $section_id = null;
+    public $sections = [];
+    public $schemes = [];
+    public $fieldTypes = [];
+    public $validationRules = [];
+    public array $validationRuleOptions = [];
+    public string $is_choose_default = 'no';
+    public $default_values;
+    public $default_value;
+    public $defaultOptions;
+    public $isdependent = 'no';
+    public $depenentOptions;
+    public $depenent_on;
+    public $isdepenentsec = false;
+    public $depvalues = [];
+    public $depvaluesopt = [];
+    public $isdependentvalue = 'no';
+    public $depvalueradio = false;
+    public $isconfirm = 'no';
+    public $confirmOptions;
+    public $confirm_of;
+
+    public $lock = false;
+    public $tabs, $tabId;
+    public $master_sec = 'yes';
+    public $selectedDocType = null;
+    public $isRequired = 0;
+    public $maxFileSize = '500KB';
+    public $extensionTypes = [];
+    public function mount($data = null)
+    {
+        if ($data) {
+            try {
+                $this->scheme_id = $data['scheme_id'];
+                $this->tabId = $data['tab_code'];
+                if (filled($this->scheme_id) && filled($this->tabId)) {
+                    $this->lock = true;
+                }
+            } catch (DecryptException $e) {
+                abort(403, 'Invalid scheme reference');
+            }
+        }
+
+        $this->schemes = Scheme::all();
+        $this->tabs = MasterTab::all();
+        $this->fieldTypes = FromFieldType::all();
+        $this->validationRuleOptions = ValidationRule::all()
+            ->pluck('description', 'rule')
+            ->toArray();
+        if (SchemeTabBasefield::exists()) {
+            $this->isdepenentsec = true;
+        }
+
+        $this->docTypes = Codemaster::where('parent_id', 16)
+            ->orderBy('name')
+            ->get();
+    }
+    public function updatedSchemeId()
+    {
+        $this->resetSection();
+    }
+    public function updatedIsUnderSection($value)
+    {
+        if ($value === 'yes') {
+            $this->loadSections();
+        } else {
+            $this->resetSection();
+        }
+    }
+    public function updatedFieldType($value)
+    {
+        if ($value !== 'select') {
+            $this->is_multiple = 'no';
+            $this->is_choose_default = 'no';
+        }
+        if ($value == 'file') {
+            $this->master_sec = 'no';
+        } else {
+            $this->master_sec = 'yes';
+        }
+        $this->isdependent = 'no';
+    }
+    protected function loadSections()
+    {
+        $this->sections = SectionLevelMaster::where('is_active', true)->where('section_level_code', 0)->get();       
+    }
+    protected function resetSection()
+    {
+        $this->sections = [];
+        $this->section_id = null;
+    }
+    public function updatedIsChooseDefault($value)
+    {
+        $this->is_choose_default = $value;
+
+        $this->default_values = json_decode(
+            file_get_contents(public_path('js/form-options.json')),
+            true
+        );
+
+        $this->default_value = null;
+    }
+    public function updatedDefaultValue($value)
+    {
+        $this->defaultOptions = [];
+        if ($this->is_choose_default === 'yes') {
+            if (isset($this->default_values[$value])) {
+                $this->defaultOptions = $this->default_values[$value];
+                if (empty($this->defaultOptions)) {
+                    $this->field_class = strtolower(
+                        preg_replace('/[^a-zA-Z0-9]+/', '_', $value)
+                    );
+                }
+            }
+        }
+    }
+    public function updatedIsconfirm($value)
+    {
+        $this->isconfirm = $value;
+        if ($this->isconfirm == 'yes') {
+            $this->confirmOptions = SchemeTabBasefield::get();
+        }
+    }
+    public function updatedIsdependent($value)
+    {
+        $this->isdependent = $value;
+        $this->depenentOptions = SchemeTabBasefield::get();
+        $this->depenent_on = null;
+        $this->depvaluesopt = [];
+    }
+    public function updatedDepenentOn($value)
+    {
+        $this->depenent_on = $value;
+        $this->reset(['isdependentvalue', 'depvalues']);
+        if ($value) {
+            $this->depvalueradio = true;   
+        } else {
+            $this->depvalueradio = false;
+            $this->isdependentvalue = 'no';
+            $this->depvaluesopt = [];
+            $this->depvalues = [];
+        }
+    }
+    public function updatedIsdependentValue($value)
+    {
+        if ($value === 'yes') {
+
+            $isExists = SchemeTabBasefield::find($this->depenent_on);
+
+            if ($isExists && is_array($isExists->options)) {
+                $this->depvaluesopt = collect($isExists->options)
+                    ->toArray();
+            }
+        } else {           
+            $this->depvaluesopt = [];
+            $this->depvalues = [];
+        }
+    }
+    public function updatedDepvalues()
+    {
+        $selectedValues = collect($this->depvalues)
+            ->map(fn($v) => is_array($v) ? (string) $v['value'] : (string) $v)
+            ->toArray();
+        
+        if (in_array('0', $selectedValues)) {
+
+            $isExists = SchemeTabBasefield::find($this->depenent_on);
+
+            if ($isExists && is_array($isExists->options)) {
+
+                $this->depvalues = collect($isExists->options)
+                    ->keys()
+                    ->map(fn($k) => (string) $k)
+                    ->reject(fn($k) => $k === '0') 
+                    ->values()
+                    ->toArray();
+            }
+        }
+    }
+    protected function rules()
+    {
+        if ($this->field_type === 'file') {
+            return [
+                'scheme_id' => 'required',
+                'tabId' => 'required',
+                'selectedDocType' => 'required',
+                'isRequired' => 'required|in:0,1',
+                'maxFileSize' => 'required|in:100KB,500KB',
+                'extensionTypes' => 'required|array|min:1',
+            ];
+        }
+        return [
+            'scheme_id' => 'required',
+            'tabId' => 'required',
+            'level_name' => 'required|string|max:100',
+            'field_id' => 'required|string|max:100',
+            'field_name' => 'required|string|max:150',
+            'field_type' => 'required|string',
+            'validation_rule' => 'required|array|min:1',
+            'is_under_section' => 'required|in:yes,no',
+            'section_id' => 'required_if:is_under_section,yes',
+            'is_multiple' => 'required_if:field_type,select',
+            'is_choose_default' => 'required|in:yes,no',
+            'default_value' => 'required_if:is_choose_default,yes',
+            'isdependent' => 'required|in:yes,no',
+            'depenent_on' => 'required_if:isdependent,yes',
+            'depvalues' => 'required_if:isdependentvalue,yes',
+            'isconfirm' => 'required|in:yes,no',
+            'confirm_of' => 'required_if:isconfirm,yes',
+        ];
+    }
+    public function addOption()
+    {
+        if ($this->option_input !== '') {
+            $this->options[] = $this->option_input;
+            $this->option_input = '';
+        }
+    }
+    public function removeOption($index)
+    {
+        unset($this->options[$index]);
+        $this->options = array_values($this->options);
+    }
+    public function save()
+    {
+        $this->validate();
+        DB::beginTransaction();
+        try {
+            if ($this->field_type === 'file') {
+
+                SchemeAttachedDocMappings::updateOrCreate([
+                    'scheme_id' => $this->scheme_id,
+                    'tab_code' => $this->tabId,
+                    'doc_type_id' => $this->selectedDocType,
+                    'is_required' => $this->isRequired,
+                    'max_file_size' => $this->maxFileSize,
+                    'extension_type' => implode(',', $this->extensionTypes),
+                ]);
+                $this->reset([
+                    'scheme_id',
+                    'tabId',
+                    'selectedDocType',
+                    'isRequired',
+                    'maxFileSize',
+                    'extensionTypes'
+                ]);
+            } else {
+                $currentRules = is_array($this->validation_rule)
+                    ? implode('|', collect($this->validation_rule)->flatten()->toArray())
+                    : $this->validation_rule;
+               
+                if (($this->isconfirm ?? 'no') === 'yes') {
+                    $currentRules .= ($currentRules ? '|' : '') . 'same:formData.' . SchemeTabBasefield::find($this->confirm_of)->field_name;
+                }
+               
+                $depValues = null;
+                if (($this->isdependentvalue ?? 'no') === 'yes' && !empty($this->depvalues)) {
+                    if (is_string($this->depvalues)) {
+                        $decoded = json_decode($this->depvalues, true);
+                        $depValues = is_array($decoded) ? array_values($decoded) : null;
+                    } elseif (is_array($this->depvalues)) {
+                        $depValues = array_values($this->depvalues);
+                    }
+                }
+               
+                if (($this->isdependent ?? 'no') === 'yes' && str_contains($currentRules, 'required') && !empty($depValues)) {
+                    $valuesString = ',' . implode(',', $depValues);
+                 
+                    $currentRules = str_replace(
+                        'required',
+                        'required_if:formData.' . SchemeTabBasefield::find($this->depenent_on)->field_name . $valuesString,
+                        $currentRules
+                    );
+                }
+
+                $options = collect($this->options)
+                    ->flatten()
+                    ->filter(fn($v) => is_string($v))
+                    ->values()
+                    ->mapWithKeys(fn($value, $index) => [$index + 1 => $value])
+                    ->toArray();
+
+                SchemeTabBasefield::create([
+                    'scheme_id' => $this->scheme_id,
+                    'tab_code' => $this->tabId,
+                    'level_name' => $this->level_name,
+                    'field_id' => $this->field_id,
+                    'field_class' => $this->field_class,
+                    'field_name' => $this->field_name,
+                    'field_type' => $this->field_type,
+                    'validation_rule' => $currentRules,
+
+                    'options' => in_array($this->field_type, ['select', 'checkbox', 'radio'])
+                        ? (
+                            $this->is_choose_default === 'yes'
+                            ? $this->defaultOptions
+                            : $options
+                        )
+                        : null,
+                    'section_level_id' => $this->is_under_section === 'yes'
+                        ? $this->section_id
+                        : null,
+                    'is_multiple' => $this->field_type === 'select'
+                        ? ($this->is_multiple === 'yes')
+                        : false,
+                    'dependent_on' => $this->isdependent === 'yes' ? SchemeTabBasefield::find($this->depenent_on)->field_name : null,
+                    'dependent_on_values' => $this->isdependentvalue === 'yes' ? $this->depvalues : null,
+                    'confirm_of' => $this->isconfirm === 'yes' ? SchemeTabBasefield::find($this->confirm_of)->field_name : null,
+                    'db_colunm' => 'other_details',
+                ]);
+                $this->reset([
+                    'level_name',
+                    'field_id',
+                    'field_name',
+                    'field_type',
+                    'validation_rule',
+                    'options',
+                    'option_input',
+                    'is_under_section',
+                    'section_id',
+                    'is_multiple',
+                    'is_choose_default',
+                    'default_value',
+                    'defaultOptions',
+                    'isdependent',
+                    'depenent_on',
+                    'depvalues',
+                    'scheme_id',
+                    'tabId'
+                ]);
+            }
+            DB::commit();
+            session()->flash('success', 'Field created successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', 'Something went wrong while creating the field.');
+        }
+    }
+    public function updatedFieldName($value)
+    {
+        $this->field_id = Str::slug($value, '_');
+    }
+    public function render()
+    {
+        return view('livewire.create-assign-other-form-field.create-otherfrom-attribute');
+    }
+}

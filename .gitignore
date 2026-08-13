@@ -3,7 +3,6 @@
 /public/build
 /public/hot
 /public/storage
-/storage/*.key
 /vendor
 .env
 .env.backup
@@ -17,3 +16,17 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+/resources/views/schemes/*
+# Ignore all storage
+/storage/*
+
+# Allow app folder
+!/storage/app/
+
+# Allow data folder inside app
+!/storage/app/data/
+
+# Allow files inside data
+!/storage/app/data/**
+/storage/app/livewire-tmp/*
+/storage/app/final_schemes_formdata/

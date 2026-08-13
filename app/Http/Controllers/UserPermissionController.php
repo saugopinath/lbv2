@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\CheckAuthHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use Illuminate\Http\Request;
 
 class UserPermissionController extends Controller
@@ -10,7 +11,7 @@ class UserPermissionController extends Controller
     protected $isAuthorized = false;
     public function __construct()
     {
-        if (CheckAuthHelper::isCommonWorkFlow4thStep()) {
+        if (CheckAuthHelper::isCommonPrivilegedUser()) {
             $this->isAuthorized = true;
         } else {
              redirect()->route('dashboard')
@@ -20,7 +21,7 @@ class UserPermissionController extends Controller
     }
      public function index()
     {
-        if (Auth::user()->can('view user permission')) {
+         if (WorkFlowPermissionHelper::canViewUserPermisson()) {       
             return view('UserPermissions.user_permission_index');
         }
 

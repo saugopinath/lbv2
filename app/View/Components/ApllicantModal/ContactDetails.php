@@ -16,13 +16,17 @@ class ContactDetails extends Component
     public $id, $applicantDet, $distname, $ps, $blockmunicorp, $gpward, $villtown, $houseno, $po, $pin, $mode;
     public function __construct($id, $reportType = null, $mode = null)
     {
-        $reportType = request()->query('reportType');
+        if (request()->query('reportType')) {
+            $reportType = request()->query('reportType');
+        }
         $this->mode = $mode;
-        if ($reportType === '3') {
+        if ($reportType == '3') {
+            // dd('here');
             $this->applicantDet = BeneficiaryPersonal::with('contact')
                 ->where('application_id', $id)
                 ->firstOrFail();
         } else {
+            // dd('there');
             $this->applicantDet = DraftBeneficiaryPersonal::with('contact')
                 ->where('application_id', $id)
                 ->firstOrFail();
@@ -48,7 +52,7 @@ class ContactDetails extends Component
      */
     public function render(): View|Closure|string
     {
-        if ($this->mode === 'page') {
+        if ($this->mode == 'page') {
             return view('components.apllicant-modal.contact-details-page');
         }
         return view('components.apllicant-modal.contact-details');

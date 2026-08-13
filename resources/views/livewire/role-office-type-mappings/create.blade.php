@@ -9,13 +9,14 @@
             <h2 class="text-xl font-semibold text-gray-700">
                 Create Role Office Type Mappings
             </h2>
+            <x-form.back-button :url="route('role-office-master-mappings')" />
         </div>
 
         <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
             <div class="grid gap-6 mb-2 md:grid-cols-3">
 
                 <x-form.select name="role" id="role" label="Role" wire:model="role">
-                    <option value="">Select</option>
+                    <option value="">----Select Role----</option>
                     @foreach ($roles as $role)
                         <option value="{{ $role->id }}">{{ $role->name }}</option>
                     @endforeach
@@ -40,11 +41,10 @@
                     <x-button.primary type="submit" class="bg-blue-500 text-white whitespace-nowrap cursor-pointer">
                         Create
                     </x-button.primary>
-
-                    <a href="{{ route('role-office-master-mappings.index') }}"
-                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 shadow-md whitespace-nowrap">
-                        Back
-                    </a>
+                    <x-button.success class="bg-blue-500 text-white whitespace-nowrap cursor-pointer"
+                        wire:click="updateReset">
+                        Reset
+                    </x-button.success>
                 </div>
             </div>
         </div>

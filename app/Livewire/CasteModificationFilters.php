@@ -3,28 +3,42 @@
 namespace App\Livewire;
 
 use App\Helpers\CheckAuthHelper;
+use App\Helpers\FormOptionHelper;
 use Livewire\Component;
 use App\Models\CodeMaster;
+use App\Models\Scheme;
 use Illuminate\Support\Facades\Crypt;
 
 class CasteModificationFilters extends Component
 {
     public string $applicantStatus = '';
     public string $casteId = '';
+    public  $schemeId = null;
     public array $statusOptions = [];
     public $casteOptions;
+    public $schemeOptions;
 
     protected $rules = [
         'applicantStatus' => 'required|string',
+        'schemeId'        => 'required',
     ];
     public function mount(): void
     {
-        $this->casteOptions = CodeMaster::where('code', 17)->first()
-            ->children()
-            ->pluck('name', 'id');
+        if (request()->query('retain_filters') == 1) {
+            $filters = session('caste_mod_filters', []);
+            $this->applicantStatus = $filters['status'] ?? '';
+            $this->casteId = $filters['caste'] ?? '';
+            $this->schemeId = $filters['scheme'] ?? '';
+        } else {
+            session()->forget('caste_mod_filters');
+            $this->applicantStatus = '';
+            $this->casteId = '';
+            $this->schemeId = '';
+        }
 
+        $this->schemeOptions = Scheme::where('is_active', true)->pluck('name', 'id')->toArray();
+        $this->casteOptions = FormOptionHelper::get('Caste');
         $roleId = session('lgd_session') ? Crypt::decryptString(session('lgd_session.role_id')) : null;
-
         if (CheckAuthHelper::isVerifier()) {
             $this->statusOptions = [
                 'PL'  => 'Pending List',
@@ -51,24 +65,29 @@ class CasteModificationFilters extends Component
     public function applyFilters()
     {
         try {
-
             $this->validate();
+            session(['caste_mod_filters' => [
+                'status' => $this->applicantStatus,
+                'caste'  => $this->casteId,
+                'scheme' => $this->schemeId,
+            ]]);
             $this->dispatch('filtersApplied', [
                 'status' => $this->applicantStatus,
                 'caste'  => $this->casteId,
+                'scheme' => $this->schemeId,
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->resettable();
             throw $e;
         }
     }
-
-
     public function resetFilters()
     {
         $this->resetValidation();
         $this->applicantStatus = '';
         $this->casteId = '';
+        $this->schemeId = '';
+        session()->forget('caste_mod_filters');
         $this->dispatch('resetFilters');
     }
     public function resettable()

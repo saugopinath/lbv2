@@ -2,73 +2,115 @@
 
 namespace App\Livewire\ProcessApplication;
 
-use App\Models\FaultyBeneficiaryPersonal;
-use Livewire\Component;
-use App\Models\Codemaster;
-use Livewire\Attributes\On;
-use Masmerise\Toaster\Toaster;
-use App\Models\BenRejectDetails;
-use App\Models\BeneficiaryAadhaar;
-use Illuminate\Support\Facades\DB;
-use App\Models\BeneficiaryPersonal;
-use App\Models\DraftBeneficiaryBank;
-use Illuminate\Support\Facades\Auth;
-use App\Models\DraftBeneficiaryContact;
-use App\Models\DraftBeneficiaryPersonal;
-use App\Models\DraftBeneficiaryDeclaration;
-use App\Models\ApplicantRejectRevertDetails;
-use App\Models\DraftBeneficiaryRelationship;
+use App\Helpers\CheckAuthHelper;
+use App\Helpers\SchemeCapacityHelper;
+use App\Helpers\WorkFlowPermissionHelper;
 use App\Models\AcceptRejectInfo;
+use App\Models\BeneficiaryPersonalDetail;
+use App\Models\Codemaster;
+use App\Services\WorkflowService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
+use Livewire\Component;
+use Carbon\Carbon;
 
 class BulkActionModal extends Component
 {
     public bool $bulkActionModal = false;
+
     public array $selectedRows = [];
+
     public string $bulkActionType = '';
+
     public ?int $reason = null;
 
     public string $remark = '';
+
     public array $reasons = [];
+
     public array $availableActions = [];
+
+    public $filter_data = [];
+
     public int $currentUserId;
+
+    public $applicationId;
+
+    public $entryType;
+
+    public $sameLevelRoleId;
+    public $nextLevelRoleId;
+
+    public $schemeId;
 
     public string $bulkActionTypeLabel = 'Select Operation';
 
     #[On('openBulkActionModal')]
-    public function openModal(array $selectedIds = [])
+    public function openModal(array $selectedIds, WorkflowService $workflowService)
     {
-        $this->reset(['bulkActionType', 'reason', 'remark', 'availableActions', 'bulkActionTypeLabel']);
-        $this->selectedRows = $selectedIds;
-        // dd($this->selectedRows);
-
-        $user = Auth::user();
-        // dump($user);
-
-
-        if ($user->hasRole(['Verifier', 'Delegated Verifier'])) {
-
-            $this->availableActions = [
-                'V' => 'Verify',
-                'R' => 'Reject',
-                'T' => 'Revert',
-            ];
-        } elseif ($user->hasRole(['Approver', 'Delegated Approver'])) {
-
-            $this->availableActions = [
-                'A' => 'Approve',
-                'R' => 'Reject',
-                'T' => 'Revert',
-            ];
+        $select_lgd = session('lgd_session');
+      
+        if (!empty($select_lgd['district_id'])) {
+            $this->filter_data['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
+        }
+        if (!empty($select_lgd['block_id'])) {
+            $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['block_id']);
+        }
+        if (!empty($select_lgd['subdivision_id'])) {
+            $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
 
+        $this->reset(['bulkActionType', 'reason', 'remark', 'availableActions', 'bulkActionTypeLabel']);
+        $this->selectedRows = $selectedIds;
+      
+        $this->applicationId = $this->selectedRows['selectedIds']['application_id'];
+        $this->entryType = $this->selectedRows['selectedIds']['entry_type'];
+        $this->schemeId = $this->selectedRows['selectedIds']['schemeId'];
+      
+        $levelRoles = $workflowService->getLevelRoles($this->schemeId);
+        if ($levelRoles) {
+            $this->sameLevelRoleId = $levelRoles->same_level_role_id;
+            $this->nextLevelRoleId = $levelRoles->next_level_role_id;
+        }
 
-        $this->bulkActionModal = true; //render again
+        if ($this->entryType == 1) {          
+            $entryType = 1;
+        } elseif ($this->entryType == 2) {           
+            $entryType = 2;
+        } else {
+            $entryType = null;
+        }
+
+        if ($entryType) {
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'verification', true, $this->schemeId) && ((!$levelRoles->is_final_step && !$levelRoles->is_first_step) || ($levelRoles->is_final_step && $levelRoles->is_first_step))) {
+                $this->availableActions['V'] = $levelRoles->workflowstep->label;
+            }
+
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'approver', true, $this->schemeId) && $levelRoles->is_final_step) {
+                $this->availableActions['A'] = $levelRoles->workflowstep->label;
+            }
+
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'reject', true, $this->schemeId) && (!$levelRoles->is_first_step || ($levelRoles->is_final_step && $levelRoles->is_first_step))) {
+                $this->availableActions['R'] = 'Reject';
+            }
+
+            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'revert', true, $this->schemeId) && (!$levelRoles->is_first_step || ($levelRoles->is_final_step && $levelRoles->is_first_step))) {
+                $this->availableActions['T'] = 'Revert';
+            }
+        }
+        $this->bulkActionModal = true;
     }
 
-    public function updatedBulkActionType($value)
+    public function updatedBulkActionType($value, WorkflowService $workflowService)
     {
         if (in_array($value, ['R', 'T'])) {
+            if ($value == 'T') {
+                $this->nextLevelRoleId = $workflowService->getLevelRoles($this->schemeId, 1)->same_level_role_id;
+            } elseif ($value == 'R') {
+                $this->nextLevelRoleId = -100;
+            }
             $this->reasons = Codemaster::where('parent_id', 12)
                 ->orderBy('id', 'asc')
                 ->pluck('name', 'id')
@@ -82,40 +124,47 @@ class BulkActionModal extends Component
 
     public function performBulkAction()
     {
-
         $validated = $this->validate([
             'bulkActionType' => 'required|in:V,A,R,T',
-            'reason' => in_array($this->bulkActionType, ['R', 'T']) ? 'required' : 'nullable',
-            'remark' => in_array($this->bulkActionType, ['R', 'T']) ? 'required|string|max:255' : 'nullable',
+
+            'reason' => in_array($this->bulkActionType, ['R', 'T'])
+                ? 'required'
+                : 'nullable',
+
+            'remark' => in_array($this->bulkActionType, ['R', 'T', 'A', 'V'])
+                ? 'required|string|max:255'
+                : 'nullable',
         ]);
-
-        $successMessage = 'Action performed successfully!';
+       
         $approverRoleId = Codemaster::getIdByCode(23);
-        $operatorRoleId = Codemaster::getIdByCode(21);
-        $currentUserId = Auth::id();
-        $select_lgd = session('lgd_session');
-        $user_id = Crypt::decryptString($select_lgd['role_id']);
-
-
-        // DB::transaction(function () use (&$successMessage, $approverRoleId, $operatorRoleId, $currentUserId) {
-        $ids = $this->selectedRows;
+        $ids = (array) $this->applicationId;
+       
         if ($this->bulkActionType === 'V') {
             foreach ($ids as $id) {
+                if (!$this->checkCapacity($id, $this->nextLevelRoleId)) {
+                    return;
+                }
                 DB::beginTransaction();
                 try {
-                    $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                    $DraftBeneficiaryPersonal->next_level_role_id = $approverRoleId;
-                    $DraftBeneficiaryPersonal->save();
+                    $dbData = [
+                        'next_level_role_id' => $this->nextLevelRoleId,
+                        'verification_date' => Carbon::now()->toDateString(),
+                    ];
+                    $existingRecord = BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->first();
+                    $existingRecord->update($dbData);
+
+                    $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
                     $AcceptRejectInfo = new AcceptRejectInfo;
-                    $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                    $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                    $AcceptRejectInfo->application_id = $id;
+                    $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
                     $AcceptRejectInfo->ip_address = request()->ip();
+                    $AcceptRejectInfo->scheme_id = $this->schemeId;
                     $AcceptRejectInfo->user_id = Auth::id();
                     $AcceptRejectInfo->browser = request()->header('User-Agent');
                     $AcceptRejectInfo->model_name = null;
                     $AcceptRejectInfo->op_type = $approverRoleId;
                     $AcceptRejectInfo->revert_reason_cause_id = null;
-                    $AcceptRejectInfo->revert_reason_remarks = null;
+                    $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
                     $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
                         ->latest('id')
                         ->value('id') ?? null;
@@ -123,7 +172,7 @@ class BulkActionModal extends Component
                     DB::commit();
                     $this->dispatch('toastr', [
                         'type' => 'success',
-                        'message' => 'Application verified successfully!'
+                        'message' => 'Application verified successfully!',
                     ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
@@ -132,30 +181,41 @@ class BulkActionModal extends Component
             }
         } elseif ($this->bulkActionType === 'A') {
             foreach ($ids as $id) {
+                if (!$this->checkCapacity($id, $this->nextLevelRoleId)) {
+                    return;
+                }
                 DB::beginTransaction();
                 try {
-                    $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                    $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(code: 0);
-                    $DraftBeneficiaryPersonal->save();
+
+                    $dbData = [
+                        'next_level_role_id' => $this->nextLevelRoleId,
+                        'is_clean' => 1,
+                        'approval_date' => Carbon::now()->toDateString(),
+                    ];
+                    $existingRecord = BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->first();
+                    $existingRecord->update($dbData);
+
+                    $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
                     $AcceptRejectInfo = new AcceptRejectInfo;
-                    $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                    $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                    $AcceptRejectInfo->application_id = $id;
+                    $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
                     $AcceptRejectInfo->ip_address = request()->ip();
+                    $AcceptRejectInfo->scheme_id = $this->schemeId;
                     $AcceptRejectInfo->user_id = Auth::id();
                     $AcceptRejectInfo->browser = request()->header('User-Agent');
                     $AcceptRejectInfo->model_name = null;
                     $AcceptRejectInfo->op_type = Codemaster::getIdByCode(0);
                     $AcceptRejectInfo->revert_reason_cause_id = null;
-                    $AcceptRejectInfo->revert_reason_remarks = null;
+                    $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
                     $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
                         ->latest('id')
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     DB::commit();
-                     $this->dispatch('toastr', [
-                    'type' => 'success',
-                    'message' => 'Application approved successfully!'
-                ]);
+                    $this->dispatch('toastr', [
+                        'type' => 'success',
+                        'message' => 'Application approved successfully!',
+                    ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
@@ -163,38 +223,45 @@ class BulkActionModal extends Component
             }
         } elseif ($this->bulkActionType === 'T') {
 
-            $user = auth()->user();
-            if ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+            if (CheckAuthHelper::isCommonApprover()) {
                 $next_level_role_id = Codemaster::getIdByCode(22);
             }
-            if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+            if (CheckAuthHelper::isCommmonVerifier()) {
                 $next_level_role_id = Codemaster::getIdByCode(21);
             }
             foreach ($ids as $id) {
                 DB::beginTransaction();
                 try {
-                    $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                    $DraftBeneficiaryPersonal->next_level_role_id = $next_level_role_id;
-                    $DraftBeneficiaryPersonal->save();
+                    $dbData = [
+                        'next_level_role_id' => $this->nextLevelRoleId,
+                    ];
+                    $existingRecord = BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->first();
+                    $existingRecord->update($dbData);
+
+                    $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
                     $AcceptRejectInfo = new AcceptRejectInfo;
-                    $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                    $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                    $AcceptRejectInfo->application_id = $id;
+                    $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
                     $AcceptRejectInfo->ip_address = request()->ip();
+                    $AcceptRejectInfo->scheme_id = $this->schemeId;
                     $AcceptRejectInfo->user_id = Auth::id();
                     $AcceptRejectInfo->browser = request()->header('User-Agent');
                     $AcceptRejectInfo->model_name = null;
                     $AcceptRejectInfo->op_type = $next_level_role_id;
-                    $AcceptRejectInfo->revert_reason_cause_id =  $validated['reason'];
+                    $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
                     $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
                     $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
                         ->latest('id')
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
+                    // BeneficiaryPersonalDetail::where('application_id', $id)->update([
+                    //     'next_level_role_id' => $this->nextLevelRoleId,
+                    // ]);
                     DB::commit();
-                     $this->dispatch('toastr', [
-                    'type' => 'warning',
-                    'message' => 'Application reverted successfully!'
-                ]);
+                    $this->dispatch('toastr', [
+                        'type' => 'warning',
+                        'message' => 'Application reverted successfully!',
+                    ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
@@ -203,49 +270,68 @@ class BulkActionModal extends Component
         } elseif ($this->bulkActionType === 'R') {
             foreach ($ids as $id) {
                 DB::beginTransaction();
-                try {
-                    $DraftBeneficiaryPersonal = DraftBeneficiaryPersonal::find($id);
-                    $DraftBeneficiaryPersonal->next_level_role_id = Codemaster::getIdByCode(-1);
-                    $DraftBeneficiaryPersonal->save();
+                try {                    
+                    $dbData = [
+                        'next_level_role_id' => $this->nextLevelRoleId,
+                        'is_clean' => 10,
+                        'rejection_date' => Carbon::now()->toDateString(),
+                    ];
+                    $existingRecord = BeneficiaryPersonalDetail::where('application_id', $id)->where($this->filter_data)->first();
+                    $existingRecord->update($dbData);
+
+                    $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $id)->value('beneficiary_id');
                     $AcceptRejectInfo = new AcceptRejectInfo;
-                    $AcceptRejectInfo->application_id = $DraftBeneficiaryPersonal->application_id;
-                    $AcceptRejectInfo->beneficiary_id = $DraftBeneficiaryPersonal->beneficiary_id;
+                    $AcceptRejectInfo->application_id = $id;
+                    $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
                     $AcceptRejectInfo->ip_address = request()->ip();
+                    $AcceptRejectInfo->scheme_id = $this->schemeId;
                     $AcceptRejectInfo->user_id = Auth::id();
                     $AcceptRejectInfo->browser = request()->header('User-Agent');
                     $AcceptRejectInfo->model_name = null;
                     $AcceptRejectInfo->op_type = Codemaster::getIdByCode(-1);
-                    $AcceptRejectInfo->revert_reason_cause_id = null;
-                    $AcceptRejectInfo->revert_reason_remarks = null;
+                    $AcceptRejectInfo->revert_reason_cause_id = $validated['reason'];
+                    $AcceptRejectInfo->revert_reason_remarks = $validated['remark'];
                     $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $id)
                         ->latest('id')
                         ->value('id') ?? null;
                     $AcceptRejectInfo->save();
                     DB::commit();
-                     $this->dispatch('toastr', [
-                    'type' => 'error',
-                    'message' => 'Application rejected successfully!'
-                ]);
+                    $this->dispatch('toastr', [
+                        'type' => 'error',
+                        'message' => 'Application rejected successfully!',
+                    ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
                 }
             }
         }
-        // });
-        // Toaster::success($successMessage);
-
         $this->bulkActionModal = false;
 
         $this->reset(['bulkActionType', 'reason', 'remark', 'selectedRows', 'bulkActionTypeLabel']);
 
-        return redirect()->route('lb-application-list');
-        // $this->dispatch('toaster-success', $successMessage);
-        // $this->dispatch('actionPerformedAndRedirect');
+        return redirect()->route('lb-application-list', [
+            'scheme_id' => Crypt::encryptString($this->schemeId),
+        ]);
     }
-
-
-
+    private function checkCapacity($id, $actionType): bool
+    {
+        $result = SchemeCapacityHelper::checkBulk(
+            $this->schemeId,
+            $actionType,
+            [$id]
+        );
+        if (!$result['is_processed']) {
+            $msg = 'Capacity exceeded for ' . ($result['model'] ?? 'Scheme') .
+                '! Available: ' . ($result['remaining_capacity'] ?? 0);
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => $msg,
+            ]);
+            return false;
+        }
+        return true;
+    }
     public function render()
     {
         return view('livewire.process-application.bulk-action-modal');

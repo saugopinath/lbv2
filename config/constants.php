@@ -85,10 +85,11 @@ return [
     ],
     'fin_year' => [
         '2021-2022' => '2021-2022',
-	    '2022-2023' => '2022-2023',
+        '2022-2023' => '2022-2023',
         '2023-2024' => '2023-2024',
         '2024-2025' => '2024-2025',
         '2025-2026' => '2025-2026',
+        '2026-2027' => '2026-2027',
     ],
     'monthlist' => [
         'April' => 'APRIL',
@@ -154,8 +155,8 @@ return [
         'purohithousing' => array("scheme_code" => '13', "name" => 'One time Housing Scheme', 'slug' => 'housing', 'maintable' => 'PensionPurohitHousingICAD', 'doctable' => 'BenDocsPurohitHousingICAD', 'docarctable' => 'BenDocsArcPurohitHousingICAD'),
         'purohitboth' => array("scheme_code" => '14', "name" => 'Both', 'slug' => 'both', 'maintable' => 'PensionPurohitHousingICAD')
     ],
-    'site_title' => 'Lakshmir Bhandar',
-    'site_titleShort' => 'Lakshmir Bhandar',
+    'site_title' => 'ANNAPURNA BHANDAR',
+    'site_titleShort' => 'ANNAPURNA BHANDAR',
     'lb_source' => [
         // 'nfsa' => 'NFSA (Khadyasathi)',
         'ss_nfsa' => 'Swasthya Sathi',
@@ -204,33 +205,33 @@ return [
         '4' => 'She has not attained the age of 18 years',
         '5' => 'She is a not a citizen of India and/or has not been a resident of West Bengal for the last 10
         years',
-        '6' => 'She earns any monthly remuneration from any regular/ contractual Government job or gets 
+        '6' => 'She earns any monthly remuneration from any regular/ contractual Government job or gets
         any Pension under any Government scheme',
         '7' => 'Others (Please specify)'
     ],
     'bandhan_response_code' => [
-        '01'     => "Account Closed or Transferred",
-        '02'     => "No Such Account",
-        '03'     => "Account Description Does not Tally",
-        '04'     => "Miscellaneous - Others",
-        '51' =>     "Miscellaneous - KYC Documents Pending",
-        '52' =>     "Miscellaneous - Documents Pending for Account Holder turning Major",
-        '53' =>     "Miscellaneous - A/c Inactive (No Transactions for last 3 Months)",
-        '54' =>     "Miscellaneous - Dormant A/c (No Transactions for last 6 Months)",
-        '55'     => "Miscellaneous - A/c in Zero Balance/No Transactions have Happened",
-        '56' =>     "Miscellaneous - Simple Account",
-        '57' =>     "Miscellaneous - Amount Exceeds limit set on Account by Bank for Credit per Transaction",
+        '01' => "Account Closed or Transferred",
+        '02' => "No Such Account",
+        '03' => "Account Description Does not Tally",
+        '04' => "Miscellaneous - Others",
+        '51' => "Miscellaneous - KYC Documents Pending",
+        '52' => "Miscellaneous - Documents Pending for Account Holder turning Major",
+        '53' => "Miscellaneous - A/c Inactive (No Transactions for last 3 Months)",
+        '54' => "Miscellaneous - Dormant A/c (No Transactions for last 6 Months)",
+        '55' => "Miscellaneous - A/c in Zero Balance/No Transactions have Happened",
+        '56' => "Miscellaneous - Simple Account",
+        '57' => "Miscellaneous - Amount Exceeds limit set on Account by Bank for Credit per Transaction",
         '58' => "Miscellaneous - Account reached maximum Credit limit set on account by Bank",
-        '59' =>     "Miscellaneous - Network Failure (CBS)",
-        '60' =>     "Account Holder Expired",
-        '61'     => "Mandate Cancelled",
-        '62' =>     "Account Under Litigation",
-        '63' =>     "Invalid Aadhaar Number",
-        '64' =>     "Aadhaar Number not Mapped to Account Number",
-        '65' =>     "Account Holder Name Invalid",
-        '66' =>     "UMRN Does not exist",
-        '68' =>     "A/c Blocked or Frozen",
-        '99' =>     "Mark Pending",
+        '59' => "Miscellaneous - Network Failure (CBS)",
+        '60' => "Account Holder Expired",
+        '61' => "Mandate Cancelled",
+        '62' => "Account Under Litigation",
+        '63' => "Invalid Aadhaar Number",
+        '64' => "Aadhaar Number not Mapped to Account Number",
+        '65' => "Account Holder Name Invalid",
+        '66' => "UMRN Does not exist",
+        '68' => "A/c Blocked or Frozen",
+        '99' => "Mark Pending",
     ],
     'ds_phase' => [
         'phaselist' => array('2' => 'Phase II', '3' => 'Phase III'),
@@ -244,11 +245,11 @@ return [
     'duare_sarkar_phase' => [
         '2' => 'Phase 2',
         '3' => 'Phase 3',
-	    '4' => 'Phase 4',
+        '4' => 'Phase 4',
         '5' => 'Special camps: Phase 4',
-	    '6' => 'Phase 5',
-	    '7' => 'Phase 6',
-	'8' => 'Phase 7'
+        '6' => 'Phase 5',
+        '7' => 'Phase 6',
+        '8' => 'Phase 7'
     ],
     'academic_year' => [
         '2020' => '2020',
@@ -258,5 +259,13 @@ return [
         '2024' => '2024',
         '2025' => '2025',
     ],
-    'EncryptionKey'=>'wltHCqXLI0rTIZtjY2tw9FuglpZFIcHzBhBZAG9ADKw=',
+    'EncryptionKey' => 'wltHCqXLI0rTIZtjY2tw9FuglpZFIcHzBhBZAG9ADKw=',
+    'contact_phone' => '1800-102-8255',
+    'jb' => 'Jai Bangla',
+    'lb' => 'Lakshmir Bhandar',
+
+    'module_codes' => [
+        'caste_management' => 'caste_mng_01',
+        'update_mark_beneficiary' => 'UP_MB_D_01',
+    ],
 ];

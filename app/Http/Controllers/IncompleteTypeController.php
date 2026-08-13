@@ -2,24 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\AadhaarHelper;
+use App\Helpers\ChechDupHelper;
+use App\Helpers\CheckAuthHelper;
+use App\Helpers\WorkFlowPermissionHelper;
+use App\Models\AcceptRejectInfo;
+use App\Models\ApplicantIncompleteDetail;
+use App\Models\BeneficiaryTemEnclosure;
 use App\Models\Codemaster;
 use Illuminate\Http\Request;
-use App\Helpers\ChechDupHelper;
-use App\Models\AcceptRejectInfo;
 use Illuminate\Support\Facades\Crypt;
-use App\Models\BeneficiaryTemEnclosure;
-use App\Models\ApplicantIncompletDeatil;
-use Illuminate\Support\Facades\Validator;
-use App\Helpers\AadhaarHelper;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
-use App\Helpers\CheckAuthHelper;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 
 class IncompleteTypeController extends Controller
 {
     protected $isAuthorized = false;
+
     public function __construct()
     {
         if (CheckAuthHelper::isCommonWorkFlow2ndStep()) {
@@ -30,64 +31,65 @@ class IncompleteTypeController extends Controller
                 ->send();
         }
     }
-    public function index($stage = 'verifier')
-    {
-        $user = Auth::user();
 
-        if ($stage === 'verifier' && $user->can('view verifier incomplete')) {
+    public function index($stage)
+    {
+        if ($stage === 'verifier' && WorkFlowPermissionHelper::canVerifierIncomplete()) {
             return view('incomplete_types.index', ['stage' => 'verifier']);
         }
 
-        if ($stage === 'approver' && $user->can('view approver incomplete')) {
+        if ($stage === 'approver' && WorkFlowPermissionHelper::canApproverIncomplete()) {
             return view('incomplete_types.index', ['stage' => 'approver']);
         }
 
         $header = 'Oops! You do not have permission to view this incomplete stage.';
+
         return view('CommonRestictedpage.index', compact('header'));
     }
-    public function fullUpdate(Request $request, $id)
+
+    public function fullUpdate(Request $request, $id, $schemeId)
     {
-        if (Auth::user()->can('update incomplete')) {
+        if (WorkFlowPermissionHelper::canUpdateIncomplete()) {
             $realId = Crypt::decrypt($id);
+            $schemeId = Crypt::decrypt($schemeId);
 
-            // Wrap everything in try-catch
             try {
-                // Collect input
-                $aadharData     = $request->aadhar_modification;
-                $mobileData     = $request->dup_mobile;
+                $aadharData = $request->aadhaar_modification;
+                $rawMobileData = $request->dup_mobile;
+                $mobileData = is_array($rawMobileData) ? ($rawMobileData[$realId] ?? null) : $rawMobileData;
                 $bankActionData = (int) $request->bank_action;
-                $bankAccData    = $request->bank_account_number;
+                $bankAccData = $request->bank_account_number;
                 $confirmAccData = $request->confirmbankaccountnumber;
-                $ifscodeData    = $request->ifscode;
+                $ifscodeData = $request->ifscode;
 
-                // Get all issues
-                $allIssues = ApplicantIncompletDeatil::where('application_id', $realId)->get();
-                $applicantInfo = $allIssues->first()?->beneficiaryCommonList;
+                $allIssues = ApplicantIncompleteDetail::where('application_id', $realId)->where('scheme_id', $schemeId)->get();
+                $applicantInfo = $allIssues->first()?->personaldetails;
 
                 if ($allIssues->isEmpty()) {
                     return back()->with('error', 'Application not found!');
                 }
 
-                // ✅ Step 1: Duplicate check before proceeding
-                $duplicateCheck = $this->checkduplicate($request, $id);
+                $duplicateCheck = $this->checkduplicate($request, $id, $schemeId);
                 if ($duplicateCheck !== true) {
                     return back()->withErrors(['duplicate_check' => $duplicateCheck])->withInput();
                 }
-                // dd('ok');
-                // ✅ Step 2: Validation rules setup
+
                 $rules = [];
                 $messages = [];
 
                 foreach ($allIssues as $item) {
-                    $typeCode = $item->incomplet_type ?? null;
-                    if (!$typeCode) continue;
+                    $typeCode = $item->incomplete_type ?? null;
+
+                    if (! $typeCode) {
+                        continue;
+                    }
 
                     // Aadhaar checks
                     if (in_array($typeCode, ['141', '149', '1414'])) {
                         $rules['aadhaar'] = 'required|digits:12';
                         $messages += [
                             'aadhaar.required' => 'Aadhaar number is required.',
-                            'aadhaar.digits'   => 'Aadhaar number must be exactly 12 digits.',
+                            'aadhaar.digits' => 'Aadhaar number must be exactly 12 digits.',
                         ];
 
                         $uploadedDocsCount = BeneficiaryTemEnclosure::where('application_id', $realId)
@@ -105,7 +107,7 @@ class IncompleteTypeController extends Controller
                         $rules['mobile'] = 'required|digits:10';
                         $messages += [
                             'mobile.required' => 'Mobile number is required.',
-                            'mobile.digits'   => 'Mobile number must be exactly 10 digits.',
+                            'mobile.digits' => 'Mobile number must be exactly 10 digits.',
                         ];
                     }
 
@@ -114,14 +116,14 @@ class IncompleteTypeController extends Controller
                         $rules['bank_action'] = 'required|in:1,2,3,4';
                         $messages += [
                             'bank_action.required' => 'Invalid bank action selected.',
-                            'bank_action.in'       => 'Operation Type is required.',
+                            'bank_action.in' => 'Operation Type is required.',
                         ];
 
                         if (in_array($bankActionData, [2, 3])) {
                             $rules += [
-                                'bank_account_number'      => 'required',
+                                'bank_account_number' => 'required',
                                 'confirmbankaccountnumber' => 'required|same:bank_account_number',
-                                'ifscode'                  => 'required|regex:/^[A-Z]{4}0[A-Z0-9]{6}$/i',
+                                'ifscode' => 'required|regex:/^[A-Z]{4}0[A-Z0-9]{6}$/i',
                             ];
 
                             $messages += [
@@ -145,11 +147,10 @@ class IncompleteTypeController extends Controller
                     }
                 }
 
-                // ✅ Step 3: Validation check
                 $validator = Validator::make(
                     [
                         'aadhaar' => $aadharData,
-                        'mobile'  => $mobileData,
+                        'mobile' => $mobileData,
                         'bank_action' => $bankActionData,
                         'bank_account_number' => $bankAccData,
                         'confirmbankaccountnumber' => $confirmAccData,
@@ -164,38 +165,47 @@ class IncompleteTypeController extends Controller
                     return back()->withErrors($validator)->withInput();
                 }
 
-                // ✅ Step 4: Aadhaar logical validation
-                if (in_array($typeCode ?? '', ['141', '149', '1414']) && !AadhaarHelper::validate($aadharData)) {
-                    return back()
-                        ->withErrors(['aadhaar' => 'Invalid Aadhaar number.'])
-                        ->withInput();
+                foreach ($allIssues as $item) {
+
+                    $typeCode = $item->incomplete_type ?? null;
+
+                    if (in_array($typeCode, ['141', '149', '1414'])) {
+
+                        if (! AadhaarHelper::validate($aadharData)) {
+                            return back()
+                                ->withErrors(['aadhaar' => 'Invalid Aadhaar number.'])
+                                ->withInput();
+                        }
+
+                    }
                 }
 
-                // ✅ Step 5: Begin DB transaction safely
                 DB::beginTransaction();
 
                 try {
                     $select_lgd = session('lgd_session');
                     $user_id = Crypt::decryptString($select_lgd['role_id']);
-
                     // Log request
                     $acceptReject = AcceptRejectInfo::create([
-                        'application_id'         => $realId,
-                        'beneficiary_id'         => $applicantInfo->beneficiary_id,
-                        'ip_address'             => $request->ip(),
-                        'user_id'                => $user_id,
-                        'browser'                => $request->header('User-Agent'),
-                        'model_name'             => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
-                        'op_type'                => Codemaster::where('code', 2103)->value('id'),
+                        'application_id' => $realId,
+                        'scheme_id' => $schemeId,
+                        'beneficiary_id' => $applicantInfo->beneficiary_id,
+                        'ip_address' => $request->ip(),
+                        'user_id' => $user_id,
+                        'browser' => $request->header('User-Agent'),
+                        'model_name' => class_basename(Route::current()->controller).'@'.Route::getCurrentRoute()->getActionMethod(),
+                        'op_type' => Codemaster::where('code', 2103)->value('id'),
                     ]);
 
-                    $bankIssues = $allIssues->filter(fn($i) => in_array($i->incomplet_type, ['145', '146', '1411', '1412', '1413']));
-                    $dupbankacc = $bankIssues->contains(fn($i) => $i->incomplet_type == '1411');
+                    $bankIssues = $allIssues->filter(fn ($i) => in_array($i->incomplete_type, ['145', '146', '1411', '1412', '1413']));
+                    $dupbankacc = $bankIssues->contains(fn ($i) => $i->incomplete_type == '1411');
 
                     // ✅ Step 6: Update loop
                     foreach ($allIssues as $item) {
-                        $typeCode = $item->incomplet_type ?? null;
-                        if (!$typeCode) continue;
+                        $typeCode = $item->incomplete_type ?? null;
+                        if (! $typeCode) {
+                            continue;
+                        }
 
                         $jsonValue = [];
                         $isActive = 1;
@@ -214,12 +224,12 @@ class IncompleteTypeController extends Controller
                         // Bank
                         elseif (in_array($typeCode, ['145', '146', '1411', '1412', '1413'])) {
                             $jsonValue = [
-                                'ifscode'                 => $ifscodeData,
-                                'bank_account_number'     => $bankAccData,
+                                'ifscode' => $ifscodeData,
+                                'bank_account_number' => $bankAccData,
                                 'confirmbankaccountnumber' => $confirmAccData,
                             ];
 
-                            $relatedIssues = $allIssues->whereIn('incomplet_type', ['145', '146', '1411', '1412', '1413']);
+                            $relatedIssues = $allIssues->whereIn('incomplete_type', ['145', '146', '1411', '1412', '1413']);
 
                             if ($relatedIssues->count() > 1) {
                                 if ($typeCode == '1411') {
@@ -230,23 +240,22 @@ class IncompleteTypeController extends Controller
                             }
 
                             $item->update([
-                                'new_value'             => $jsonValue,
-                                'change_type'           => $bankActionData ?? null,
+                                'new_value' => $jsonValue,
+                                'change_type' => $bankActionData ?? null,
                                 'next_level_request_id' => 1,
-                                'request_id'            => $acceptReject->id,
-                                'is_active'             => $isActive,
+                                'request_id' => $acceptReject->id,
+                                'is_active' => $isActive,
                             ]);
 
                             continue;
                         }
 
-                        // Generic update
-                        if (!empty($jsonValue)) {
+                        if (! empty($jsonValue)) {
                             $item->update([
-                                'new_value'             => $jsonValue,
-                                'change_type'           => null,
+                                'new_value' => $jsonValue,
+                                'change_type' => null,
                                 'next_level_request_id' => 1,
-                                'request_id'            => $acceptReject->id,
+                                'request_id' => $acceptReject->id,
                             ]);
                         }
                     }
@@ -254,65 +263,65 @@ class IncompleteTypeController extends Controller
                     DB::commit();
 
                     session()->flash('success', "Request sent to Approver for Application ID: {$realId}");
+
                     return redirect()->route('incomplete.types', ['stage' => 'verifier', 'id' => $realId]);
                 } catch (\Exception $innerEx) {
                     DB::rollBack();
-                    return back()->with('error', 'DB transaction failed: ' . $innerEx->getMessage())->withInput();
+
+                    return back()->with('error', 'DB transaction failed: '.$innerEx->getMessage())->withInput();
                 }
             } catch (\Exception $e) {
-                return back()->with('error', 'Unexpected error: ' . $e->getMessage())->withInput();
+                return back()->with('error', 'Unexpected error: '.$e->getMessage())->withInput();
             }
         }
         $header = 'Oops! You do not have permission to update incomplete.';
+
         return view('CommonRestictedpage.index', compact('header'));
     }
-    public function revertVerify(Request $request, $id)
+
+    public function revertVerify(Request $request, $id, $schemeId)
     {
-        if (Auth::user()->can('revert incomplete')) {
+        if (WorkFlowPermissionHelper::canRevertIncomplete()) {
             $realId = Crypt::decrypt($id);
+            $schemeId = Crypt::decrypt($schemeId);
 
             try {
-                // ---------------------------------------------------------
-                //  Step 1: Get related data
-                // ---------------------------------------------------------
-                $aadharData     = $request->aadhar_modification;
-                $mobileData     = $request->dup_mobile;
+                $aadharData = $request->aadhaar_modification;
+                $rawMobileData = $request->dup_mobile;
+                $mobileData = is_array($rawMobileData) ? ($rawMobileData[$realId] ?? null) : $rawMobileData;
                 $bankActionData = (int) $request->bank_action;
-                $bankAccData    = $request->bank_account_number;
+                $bankAccData = $request->bank_account_number;
                 $confirmAccData = $request->confirmbankaccountnumber;
-                $ifscodeData    = $request->ifscode;
+                $ifscodeData = $request->ifscode;
 
-                $allIssues = ApplicantIncompletDeatil::where('application_id', $realId)->get();
-                $applicantInfo = $allIssues->first()?->beneficiaryCommonList;
+                // Get all issues
+                $allIssues = ApplicantIncompleteDetail::where('application_id', $realId)->where('scheme_id', $schemeId)->get();
+                $applicantInfo = $allIssues->first()?->personaldetails;
 
                 if ($allIssues->isEmpty()) {
                     return back()->with('error', 'Application not found!');
                 }
 
-                // ---------------------------------------------------------
-                //  Step 2: Duplicate check
-                // ---------------------------------------------------------
-                $duplicateCheck = $this->checkduplicate($request, $id);
+                $duplicateCheck = $this->checkduplicate($request, $id, $schemeId);
                 if ($duplicateCheck !== true) {
                     return back()->withErrors(['duplicate_check' => $duplicateCheck])->withInput();
                 }
 
-                // ---------------------------------------------------------
-                //  Step 3: Validation setup
-                // ---------------------------------------------------------
                 $rules = [];
                 $messages = [];
 
                 foreach ($allIssues as $item) {
-                    $typeCode = $item->incomplet_type ?? null;
-                    if (!$typeCode) continue;
+                    $typeCode = $item->incomplete_type ?? null;
+                    if (! $typeCode) {
+                        continue;
+                    }
 
                     // Aadhaar
                     if (in_array($typeCode, ['141', '149', '1414'])) {
                         $rules['aadhaar'] = 'required|digits:12';
                         $messages += [
                             'aadhaar.required' => 'Aadhaar number is required.',
-                            'aadhaar.digits'   => 'Aadhaar number must be exactly 12 digits.',
+                            'aadhaar.digits' => 'Aadhaar number must be exactly 12 digits.',
                         ];
 
                         $uploadedDocsCount = BeneficiaryTemEnclosure::where('application_id', $realId)
@@ -330,7 +339,7 @@ class IncompleteTypeController extends Controller
                         $rules['mobile'] = 'required|digits:10';
                         $messages += [
                             'mobile.required' => 'Mobile number is required.',
-                            'mobile.digits'   => 'Mobile number must be exactly 10 digits.',
+                            'mobile.digits' => 'Mobile number must be exactly 10 digits.',
                         ];
                     }
 
@@ -339,14 +348,14 @@ class IncompleteTypeController extends Controller
                         $rules['bank_action'] = 'required|in:1,2,3,4';
                         $messages += [
                             'bank_action.required' => 'Invalid bank action selected.',
-                            'bank_action.in'       => 'Operation Type is required.',
+                            'bank_action.in' => 'Operation Type is required.',
                         ];
 
                         if (in_array($bankActionData, [2, 3])) {
                             $rules += [
-                                'bank_account_number'      => 'required',
+                                'bank_account_number' => 'required',
                                 'confirmbankaccountnumber' => 'required|same:bank_account_number',
-                                'ifscode'                  => 'required|regex:/^[A-Z]{4}0[A-Z0-9]{6}$/i',
+                                'ifscode' => 'required|regex:/^[A-Z]{4}0[A-Z0-9]{6}$/i',
                             ];
 
                             $messages += [
@@ -370,12 +379,9 @@ class IncompleteTypeController extends Controller
                     }
                 }
 
-                // ---------------------------------------------------------
-                //  Step 4: Run validation
-                // ---------------------------------------------------------
                 $validator = Validator::make([
                     'aadhaar' => $aadharData,
-                    'mobile'  => $mobileData,
+                    'mobile' => $mobileData,
                     'bank_action' => $bankActionData,
                     'bank_account_number' => $bankAccData,
                     'confirmbankaccountnumber' => $confirmAccData,
@@ -388,44 +394,44 @@ class IncompleteTypeController extends Controller
                 }
 
                 // Aadhaar validity
-                if (isset($aadharData) && !empty($aadharData)) {
-                    if (!AadhaarHelper::validate($aadharData)) {
+                if (isset($aadharData) && ! empty($aadharData)) {
+                    if (! AadhaarHelper::validate($aadharData)) {
                         return back()->withErrors(['aadhaar' => 'Invalid Aadhaar number.'])->withInput();
                     }
                 }
 
-                // ---------------------------------------------------------
-                //  Step 5: Database transaction
-                // ---------------------------------------------------------
                 DB::beginTransaction();
 
                 $select_lgd = session('lgd_session');
                 $user_id = Crypt::decryptString($select_lgd['role_id']);
 
                 $previousId = AcceptRejectInfo::where('application_id', $realId)
+                    ->where('scheme_id', $schemeId)
                     ->orderByDesc('id')
                     ->value('id');
-
-                // ✅ Correct variable name
+               
                 $acceptRejectInfo = AcceptRejectInfo::create([
-                    'application_id'         => $realId,
-                    'beneficiary_id'         => $applicantInfo->beneficiary_id ?? null,
-                    'ip_address'             => $request->ip(),
-                    'user_id'                => $user_id,
-                    'browser'                => $request->header('User-Agent'),
-                    'model_name'             => class_basename(Route::current()->controller) . '@' . Route::getCurrentRoute()->getActionMethod(),
-                    'op_type'                => Codemaster::where('code', 2103)->value('id'),
+                    'application_id' => $realId,
+                    'beneficiary_id' => $applicantInfo->beneficiary_id ?? null,
+                    'scheme_id' => $schemeId,
+                    'ip_address' => $request->ip(),
+                    'user_id' => $user_id,
+                    'browser' => $request->header('User-Agent'),
+                    'model_name' => class_basename(Route::current()->controller).'@'.Route::getCurrentRoute()->getActionMethod(),
+                    'op_type' => Codemaster::where('code', 2103)->value('id'),
                     'revert_reason_cause_id' => null,
-                    'revert_reason_remarks'  => null,
-                    'parent_id'              => $previousId,
+                    'revert_reason_remarks' => null,
+                    'parent_id' => $previousId,
                 ]);
 
-                $bankIssues = $allIssues->filter(fn($i) => in_array($i->incomplet_type, ['145', '146', '1411', '1412', '1413']));
-                $dupbankacc = $bankIssues->contains(fn($i) => $i->incomplet_type == '1411');
+                $bankIssues = $allIssues->filter(fn ($i) => in_array($i->incomplete_type, ['145', '146', '1411', '1412', '1413']));
+                $dupbankacc = $bankIssues->contains(fn ($i) => $i->incomplete_type == '1411');
 
                 foreach ($allIssues as $item) {
-                    $typeCode = $item->incomplet_type ?? null;
-                    if (!$typeCode) continue;
+                    $typeCode = $item->incomplete_type ?? null;
+                    if (! $typeCode) {
+                        continue;
+                    }
 
                     $jsonValue = [];
                     $isActive = 1;
@@ -442,12 +448,12 @@ class IncompleteTypeController extends Controller
                     // Bank
                     elseif (in_array($typeCode, ['145', '146', '1411', '1412', '1413'])) {
                         $jsonValue = [
-                            'ifscode'                 => $ifscodeData,
-                            'bank_account_number'     => $bankAccData,
+                            'ifscode' => $ifscodeData,
+                            'bank_account_number' => $bankAccData,
                             'confirmbankaccountnumber' => $confirmAccData,
                         ];
 
-                        $relatedIssues = $allIssues->whereIn('incomplet_type', ['145', '146', '1411', '1412', '1413']);
+                        $relatedIssues = $allIssues->whereIn('incomplete_type', ['145', '146', '1411', '1412', '1413']);
 
                         if ($relatedIssues->count() === 1) {
                             $isActive = 1;
@@ -460,22 +466,22 @@ class IncompleteTypeController extends Controller
                         }
 
                         $item->update([
-                            'new_value'             => $jsonValue,
-                            'change_type'           => $bankActionData ?? null,
+                            'new_value' => $jsonValue,
+                            'change_type' => $bankActionData ?? null,
                             'next_level_request_id' => 1,
-                            'request_id'            => $acceptRejectInfo->id,
-                            'is_active'             => $isActive,
+                            'request_id' => $acceptRejectInfo->id,
+                            'is_active' => $isActive,
                         ]);
 
                         continue;
                     }
 
-                    if (!empty($jsonValue)) {
+                    if (! empty($jsonValue)) {
                         $item->update([
-                            'new_value'             => $jsonValue,
-                            'change_type'           => $bankActionData ?? null,
+                            'new_value' => $jsonValue,
+                            'change_type' => $bankActionData ?? null,
                             'next_level_request_id' => 1,
-                            'request_id'            => $acceptRejectInfo->id,
+                            'request_id' => $acceptRejectInfo->id,
                         ]);
                     }
                 }
@@ -483,47 +489,49 @@ class IncompleteTypeController extends Controller
                 DB::commit();
 
                 session()->flash('success', "Revert details updated and sent to approver for Application ID: {$realId}");
+
                 return redirect()->route('incomplete.types', ['stage' => 'revert', 'id' => $realId]);
             } catch (\Throwable $e) {
                 DB::rollBack();
                 session()->flash('error', 'Something went wrong while reverting. Please try again.');
+
                 return back()->withInput();
             }
         }
         $header = 'Oops! You do not have permission to revert incomplete.';
+
         return view('CommonRestictedpage.index', compact('header'));
     }
-    public function checkduplicate(Request $request, $id)
+
+    public function checkduplicate(Request $request, $id, $schemeId)
     {
         $realId = Crypt::decrypt($id);
 
-        $aadharData     = $request->aadhar_modification;
-        $mobileData     = $request->dup_mobile;
+        $aadharData = $request->aadhaar_modification;
+        $rawMobileData = $request->dup_mobile;
+        $mobileData = is_array($rawMobileData) ? ($rawMobileData[$realId] ?? null) : $rawMobileData;
         $confirmAccData = $request->confirmbankaccountnumber;
-        // dd( $aadharData );
-        $allIssues = ApplicantIncompletDeatil::where('application_id', $realId)->get();
+        $allIssues = ApplicantIncompleteDetail::where('application_id', $realId)->where('scheme_id', $schemeId)->get();
 
         if ($allIssues->isEmpty()) {
             return true; // No issues found, no need for duplicate check
         }
 
         foreach ($allIssues as $item) {
-            // dd($item);
-            $typeCode = $item->incomplet_type ?? null;
+            $typeCode = $item->incomplete_type ?? null;
 
             if (in_array($typeCode, ['141', '149', '1414']) && $aadharData) {
-                // dd($item->beneficiaryCommonList);
-                $result = ChechDupHelper::checkDuplicate('aadhaar', $aadharData, $item->beneficiaryCommonList);
+                $result = ChechDupHelper::checkDuplicate('aadhaar', $aadharData, $item->incomplete_type, $schemeId);
                 if ($result !== true) {
                     return $result; // Return error message
                 }
             } elseif (in_array($typeCode, ['142', '1410']) && $mobileData) {
-                $result = ChechDupHelper::checkDuplicate('mobile', $mobileData, $item->beneficiaryCommonList);
+                $result = ChechDupHelper::checkDuplicate('mobile', $mobileData, $item->incomplete_type, $schemeId);
                 if ($result !== true) {
                     return $result; // Return error message
                 }
             } elseif (in_array($typeCode, ['145', '146', '1411', '1412', '1413']) && $confirmAccData) {
-                $result = ChechDupHelper::checkDuplicate('bank', $confirmAccData, $item->beneficiaryCommonList);
+                $result = ChechDupHelper::checkDuplicate('bank', $confirmAccData, $item->incomplete_type, $schemeId);
                 if ($result !== true) {
                     return $result; // Return error message
                 }
@@ -531,5 +539,10 @@ class IncompleteTypeController extends Controller
         }
 
         return true; // No duplicates found
+    }
+
+    public function incompleteDetails()
+    {
+        return view('incomplete.incompleteDetails');
     }
 }

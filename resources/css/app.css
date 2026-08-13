@@ -1,16 +1,482 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Inter:wght@300;400;500;600;700;800&display=swap");
 
-@import 'tailwindcss';
+@import "tailwindcss";
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+@plugin '@tailwindcss/forms';
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
-@source '..//*.blade.php';
-@source '..//*.js';
+@source '../views/**/*.blade.php';
+@source '../js/**/*.js';
+@source '../../vendor/masmerise/livewire-toaster/resources/views/*.blade.php';
 
-
-.bg-login-cover {
-    background-image: url('/images/background-cover.jpg');
-    /* filter: brightness(0.5); */
+@theme {
+    /* Font Family - Figtree as primary (matching tailwind config), Inter as fallback */
+    --font-sans:
+        "Figtree", "Inter", ui-sans-serif, system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+        "Noto Sans", sans-serif;
 }
+
+/* ============================================================
+   Dark Mode - Class-based (matching tailwind config darkMode:"class")
+   ============================================================ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   Global Base Styles
+   ============================================================ */
+.bg-login-cover {
+    /* Background image is set in the layout file via inline style */
+}
+
 [x-cloak] {
     display: none !important;
+}
+
+/* ============================================================
+   Custom Scrollbar (shared across all frontend pages)
+   ============================================================ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #667eea;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #764ba2;
+}
+
+/* Thin scrollbar for Firefox */
+.scroll-container {
+    scrollbar-width: thin;
+    scrollbar-color: #c7d2fe #f1f5f9;
+}
+
+/* ============================================================
+   Shared Animation Utilities
+   ============================================================ */
+@keyframes floatingGlow {
+    0%,
+    100% {
+        transform: translateY(0px) scale(1);
+        filter: drop-shadow(0 0 10px rgba(255, 196, 0, 0.3));
+    }
+    50% {
+        transform: translateY(-10px) scale(1.05);
+        filter: drop-shadow(0 0 20px rgba(255, 196, 0, 0.6));
+    }
+}
+
+.animate-floating-glow {
+    animation: floatingGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0.4);
+        opacity: 0.5;
+    }
+    70% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.animate-ripple {
+    animation: ripple 2.2s ease-out infinite;
+}
+
+@keyframes slideUpFade {
+    0% {
+        opacity: 1;
+        filter: blur(0px);
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        filter: blur(10px);
+        transform: translateY(-40px);
+    }
+}
+
+.hideLoader {
+    animation: slideUpFade 0.7s ease forwards;
+}
+
+@keyframes float {
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.marquee-content {
+    display: inline-flex;
+    gap: 2rem;
+    animation: marquee 18s linear infinite;
+}
+
+.paused {
+    animation-play-state: paused !important;
+}
+
+/* ============================================================
+   Gradient Text (used in dashboard layout)
+   ============================================================ */
+.gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ============================================================
+   Glass Effect (used in dashboard header)
+   ============================================================ */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================================
+   Dashboard Sidebar Styles
+   ============================================================ */
+.sidebar {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-link {
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.sidebar-link::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 60%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+    border-radius: 0 4px 4px 0;
+}
+
+.sidebar-link:hover::before,
+.sidebar-link.active::before {
+    width: 4px;
+}
+
+.sidebar-link.active {
+    background: rgba(102, 126, 234, 0.15);
+    color: #a5b4fc;
+}
+
+/* ============================================================
+   Stat Cards (used in dashboard)
+   ============================================================ */
+.stat-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================================
+   Scheme Cards (used in dashboard & home)
+   ============================================================ */
+.scheme-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.scheme-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.scheme-card:hover::before {
+    transform: scaleX(1);
+}
+
+.scheme-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px rgba(102, 126, 234, 0.2);
+}
+
+/* ============================================================
+   Notification Badge
+   ============================================================ */
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444;
+    color: white;
+    border-radius: 9999px;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+/* ============================================================
+   Accordion (used in ben-details)
+   ============================================================ */
+.accordion-toggle {
+    transition: all 0.3s ease;
+}
+
+.accordion-content {
+    transition:
+        max-height 0.3s ease-out,
+        opacity 0.2s ease-out;
+}
+
+.accordion-content:not(.hidden) {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================================
+   Footer Decoration
+   ============================================================ */
+.footer-decoration {
+    position: relative;
+    overflow: hidden;
+}
+
+.footer-decoration::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #f59e0b, #ec4899, #8b5cf6, #10b981);
+    background-size: 400% 400%;
+    animation: gradientShift 8s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* ============================================================
+   Accessibility Options Button
+   ============================================================ */
+.acc-btn {
+    width: 100%;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 14px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.acc-btn:hover {
+    background: #f3f4f6;
+}
+
+/* Accessibility body states */
+body.big-text {
+    font-size: 1.5rem;
+}
+body.large-line-height {
+    line-height: 1.75;
+}
+body.large-cursor {
+    cursor:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><circle cx='16' cy='16' r='10' fill='black'/></svg>")
+            16 16,
+        auto;
+}
+body.text-spacing * {
+    letter-spacing: 0.05em;
+}
+
+/* ============================================================
+   Floating Icon Animations (footer)
+   ============================================================ */
+.floating-icon {
+    position: absolute;
+    animation: floatSlow 6s ease-in-out infinite;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.icon-1 {
+    top: 20%;
+    left: 10%;
+    animation-duration: 7s;
+    font-size: 3rem;
+}
+.icon-2 {
+    top: 40%;
+    left: 80%;
+    animation-duration: 9s;
+    font-size: 2.5rem;
+}
+.icon-3 {
+    top: 70%;
+    left: 30%;
+    animation-duration: 8s;
+    font-size: 3rem;
+}
+.icon-4 {
+    top: 85%;
+    left: 60%;
+    animation-duration: 10s;
+    font-size: 2.5rem;
+}
+
+@keyframes floatSlow {
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+/* ============================================================
+   Link Hover Effect (notification & scheme pages)
+   ============================================================ */
+.link-hover-effect {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.link-hover-effect::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: #f59e0b;
+    transition: width 0.3s ease;
+}
+
+.link-hover-effect:hover::after {
+    width: 100%;
+}
+
+/* ============================================================
+   Search Page - Card Hover
+   ============================================================ */
+.card-hover {
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-2px);
+}
+
+/* ============================================================
+   Shake animation (search page)
+   ============================================================ */
+@keyframes shake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-5px);
+    }
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(5px);
+    }
+}
+
+.animate-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* ============================================================
+   Chart Container
+   ============================================================ */
+.chart-container {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
 }

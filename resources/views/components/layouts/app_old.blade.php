@@ -7,7 +7,7 @@
     <meta name="description" content="Premium Tailwind CSS Admin & Dashboard Template" />
     <meta name="author" content="Webonzer" />
     <!-- Site Tiltle -->
-    <title>Lakshmir Bhandar | Government of West Bengal</title>
+    <title>ANNAPURNA BHANDAR | Government of West Bengal</title>
     <!-- Favicon Icon -->
     <link rel="shortcut icon" href="{{asset('images/biswofab.ico')}}">
     <!-- Style Css -->

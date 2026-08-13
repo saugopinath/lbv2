@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('lb_scheme.unique_app_ben_ids', function (Blueprint $table) {
-            $table->id('application_id');//pk
+            $table->id('application_id');
             $table->unsignedBigInteger('beneficiary_id')->unique();
-            
+            $table->unsignedBigInteger('scheme_id')->references('id')->on('public.schemes')->onDelete('cascade');
             $table->timestamps();
         });
     }

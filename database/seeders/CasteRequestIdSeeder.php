@@ -19,7 +19,6 @@ class CasteRequestIdSeeder extends Seeder
                 "short_name" => "caste_request_status",
                 "code" => "220",
             ),
-           
         );
         foreach ($codemasterParents as $codemasterParent_item) {
             Codemaster::create([
@@ -29,7 +28,6 @@ class CasteRequestIdSeeder extends Seeder
             ]);
         }
         $codemasterChilds = array(
-        
             array(
                 "name" => "INITIAL UPDATE CASTE REQUEST",
                 "short_name" => "initial_update_request",
@@ -54,8 +52,6 @@ class CasteRequestIdSeeder extends Seeder
                 "parent_short_code" => "caste_request_status",
                 "code" => "2204",
             ),
-            
-
         );
         foreach ($codemasterChilds as $codemasterChild_item) {
             Codemaster::create([

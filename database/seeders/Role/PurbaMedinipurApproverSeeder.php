@@ -47,8 +47,6 @@ class PurbaMedinipurApproverSeeder extends Seeder
             'role_id' => $role_approver->id,
             'office_id' => $office->id,
         ]);
-
-
          $user_delegated_approver = User::create([
             'name' => 'purbamedinipurdelegatedapprover',
             'mobile_no' => '7583035700',

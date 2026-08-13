@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -16,7 +15,7 @@ return new class extends Migration
             $table->bigInteger('user_id');
             $table->foreign('user_id', 'user_id_fk')->references('id')->on('users');
             $table->string('name');
-            $table->string('full_name_as_in_aadhar')->nullable();
+            $table->string('full_name_as_in_aadhaar')->nullable();
             $table->string('picture')->nullable();
             $table->date('date_hired')->nullable();
             $table->smallInteger('department_id')->nullable();
@@ -25,7 +24,7 @@ return new class extends Migration
             $table->smallInteger('is_active')->default(1);
             $table->index('id');
             $table->index('user_id');
-           
+
         });
     }
 

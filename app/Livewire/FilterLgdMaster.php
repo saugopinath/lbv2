@@ -250,6 +250,8 @@ class FilterLgdMaster extends Component
 
     public function updatedSelectedGpWard()
     {
+        // Auto-search logic removed as per user request to rely on manual search button
+        /*
         $user = auth()->user();
 
         $stage = $this->stage ?? null;
@@ -271,6 +273,7 @@ class FilterLgdMaster extends Component
                 'gp_ward'        => $this->selectedGpWard,
             ]);
         }
+        */
     }
 
 

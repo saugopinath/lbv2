@@ -2,14 +2,15 @@
 
 namespace App\Livewire\Incomplete;
 
+use App\Helpers\CheckAuthHelper;
 use Livewire\Component;
 use App\Models\Ifsccodemaster;
-use App\Models\ApplicantIncompletDeatil;
+use App\Models\ApplicantIncompleteDetail;
 
 class MismatchHigh extends Component
 {
     public $ifscode, $bankname, $bankbranchname, $bank_account_number, $old, $dupAction = null, $item, $bank_action = '', $confirmbankaccountnumber;
-
+    public $schemeId;
     protected $listeners = [
         'dup-bank-action-changed' => 'setDupAction'
     ];
@@ -30,10 +31,11 @@ class MismatchHigh extends Component
         }
     }
 
-    public function mount($item,$dupAction = null)
+    public function mount($item, $dupAction = null, $schemeId = null)
     {
         $this->item = $item;
-         $this->dupAction = $dupAction;
+        $this->schemeId = $schemeId;
+        $this->dupAction = $dupAction;
         //  dd($this->dupAction);
 // dd($this->item);
         $old_value = $item->old_value ?? [];
@@ -73,7 +75,7 @@ class MismatchHigh extends Component
             $this->confirmbankaccountnumber = old('confirmbankaccountnumber', $old_value['confirmbankaccountnumber'] ?? '');
         }
 
-        $app_det = ApplicantIncompletDeatil::with('banks')
+        $app_det = ApplicantIncompleteDetail::with('banks')
             ->where('application_id', $item->application_id)
             ->first();
 
@@ -114,16 +116,27 @@ class MismatchHigh extends Component
 
     public function render()
     {
-        $user = auth()->user();
+        // $user = auth()->user();
 
         $stage = $this->stage ?? null;
 
 
+        // if (!$stage) {
+        //     if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+        //         $stage = 'verifier';
+
+        //     } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+        //         $stage = 'approver';
+        //     }
+
+        // }
         if (!$stage) {
-            if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
+            if (CheckAuthHelper::isCommmonVerifier()) {
+                // if ($user->hasAnyRole(['Verifier', 'Delegated Verifier'])) {
                 $stage = 'verifier';
 
-            } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+                // } elseif ($user->hasAnyRole(['Approver', 'Delegated Approver'])) {
+            } elseif (CheckAuthHelper::isCommonApprover()) {
                 $stage = 'approver';
             }
 

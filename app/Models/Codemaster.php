@@ -6,11 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Codemaster extends Model
 {
-   protected $fillable = [
+    protected $fillable = [
         'name',
         'short_name',
         'parent_id',
+        'parent_short_code',
         'code',
+        'is_active',
     ];
     public function parent()
     {

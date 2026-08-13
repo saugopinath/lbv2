@@ -8,7 +8,10 @@ use OwenIt\Auditing\Contracts\Auditable;
 class BeneficiaryBank extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
-    protected $primaryKey = 'application_id';
+    protected $guarded = [
+        'id',
+    ];
+    // protected $primaryKey = 'beneficiary_id';
     protected $table = 'lb_scheme.beneficiary_banks';
     protected $fillable = [
         'application_id',
@@ -43,5 +46,19 @@ class BeneficiaryBank extends Model implements Auditable
     public function ifscMaster()
     {
         return $this->belongsTo(Ifsccodemaster::class, 'ifsc', 'code');
+    }
+
+    public function bankname()
+    {
+        $ifsc = $this->ifscbranch;
+        $accno = $this->bank_account_number;
+        if ($ifsc && $ifsc->bank) {
+            return [
+                'bank_name'   => $ifsc->bank->name,
+                'branch_name' => $ifsc->branch,
+                'ifsc_code'   => $ifsc->code,
+                'accno' => $accno,
+            ];
+        }
     }
 }

@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Models;
+
+use Laravel\Scout\Searchable;
+
+class BeneficiarySelfDeclaration extends BaseAuditableModel
+{
+    use Searchable;
+    protected $guarded = [];
+    protected $table = 'pension.beneficiary_self_declarations';
+    protected $primaryKey = 'application_id';
+    public $incrementing = false;
+    protected $casts = [
+        'other_details' => 'array',
+    ];
+    public function searchableAs()
+    {
+        return 'pension_beneficiary_self_declarations';
+    }
+    public function toSearchableArray()
+    {
+        return [
+            'scheme_id' => $this->scheme_id,
+            'application_id' => $this->application_id,
+            'beneficiary_id' => $this->beneficiary_id,
+            'other_details' => $this->other_details,
+            'is_clean' => $this->is_clean,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at
+        ];
+    }
+}
