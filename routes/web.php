@@ -180,6 +180,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/csv-splitter', CsvSplitter::class)->name('csv-splitter');
 
     Route::get('/form', [Formcontroller::class, 'index'])->middleware('permission.redirect:canEntry')->name('form');
+    Route::get('/form1', [Formcontroller::class, 'index'])->middleware('permission.redirect:canEntry')->name('form1');
     Route::get('application-lists', [Formcontroller::class, 'applicationLists'])->name('application-lists');
     Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])->name('define-workflow1');
 
