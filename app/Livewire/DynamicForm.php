@@ -26,6 +26,7 @@ use App\Attributes\Loggable;
 use App\Models\CmoSmData;
 use App\Models\DsPhase;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 #[Loggable(level: 'Normal', nickname: 'Dynamic Form Entry')]
 
@@ -106,7 +107,7 @@ class DynamicForm extends Component
         if (!WorkFlowPermissionHelper::canEntry($schemeId)) {
             abort(403, 'You are not authorized to create entry.');
         }
-        
+
         if (!WorkFlowPermissionHelper::canCreateEntry($schemeId)) {
             abort(403, 'You are not authorized for any application type entry.');
         }
@@ -454,7 +455,7 @@ class DynamicForm extends Component
             try {
                 $this->validate($rules);
             } catch (\Illuminate\Validation\ValidationException $e) {
-                   $this->dispatch('hideLoader');
+                $this->dispatch('hideLoader');
                 $this->dispatch('toastr', [
                     'type' => 'error',
                     'message' => 'Validation failed: ' . implode(', ', \Illuminate\Support\Arr::flatten($e->errors())),
@@ -526,7 +527,8 @@ class DynamicForm extends Component
         $this->dispatch('hideLoader');
     }
 
-    public function onDocumentTabFailed() {
+    public function onDocumentTabFailed()
+    {
         $this->dispatch('hideLoader');
     }
 
@@ -650,7 +652,7 @@ class DynamicForm extends Component
     }
 
     private function saveCurrentTabData(): bool
-    {      
+    {
         if (!$this->applicationId) {
             return false;
         }
@@ -729,12 +731,12 @@ class DynamicForm extends Component
         try {
             $existingRecord = $modelClass::where('application_id', $this->applicationId)->first();
             if ($existingRecord) {
-                if($existingRecord['application_type']){
-                      $dbData['application_type'] = $existingRecord['application_type'];
-                $dbData['ds_date'] = $existingRecord['ds_date'];
-                $dbData['ds_registration_no'] = $existingRecord['ds_registration_no'];
+                if ($existingRecord['application_type']) {
+                    $dbData['application_type'] = $existingRecord['application_type'];
+                    $dbData['ds_date'] = $existingRecord['ds_date'];
+                    $dbData['ds_registration_no'] = $existingRecord['ds_registration_no'];
                 }
-              
+
                 $updated = $existingRecord->update($dbData);
                 if ($updated) {
                     $this->navMessage = 'Application updated successfully! ID: ' . $this->applicationId;
@@ -924,6 +926,19 @@ class DynamicForm extends Component
         return json_decode(File::get($path), true);
     }
 
+    // /**
+    //  * Livewire Component Helper:
+    //  * Fetches current active tab rules dynamically using the Factory pattern.
+    //  */
+    // private function getValidationRulesForActiveTab(): array
+    // {
+    //     // 1. Pass active scheme ID & active tab code to the Factory
+    //     $validator = TabValidationFactory::make((string) $this->schemeId, (string) $this->activeTab);
+
+    //     // 2. Retrieve compiled validation rules (custom or fallback master)
+    //     return $validator->getRules();
+    // }
+
     private function getValidationRulesForActiveTab(): array
     {
         $json = $this->getSchemeJson();
@@ -980,7 +995,6 @@ class DynamicForm extends Component
                 }
 
                 $rules["formData.{$fieldName}"] = array_values(array_filter($fieldRules));
-                
             }
         }
 
@@ -998,7 +1012,7 @@ class DynamicForm extends Component
             foreach ($tab['fields'] ?? [] as $field) {
                 if (!empty($field['field_name']) && !empty($field['level_name'])) {
                     $attributes["formData.{$field['field_name']}"] = $field['level_name'];
-                    
+
                     if ((string)$this->activeTab === '102') {
                         $attributes["formData.cur_{$field['field_name']}"] = 'Current ' . $field['level_name'];
                     }

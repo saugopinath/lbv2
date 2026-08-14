@@ -70,9 +70,9 @@ class SchemewiseStoreDataJsonHelper
 
                         $curField = $field;
                         $curField['field_name'] = 'cur_' . $name;
-                        
+
                         $curField['db_column'] = 'other_details';
-                        
+
                         $curField['level_name'] = 'Current ' . $field['level_name'];
                         if (!empty($curField['dependent_on'])) {
                             $curField['dependent_on'] = 'cur_' . $curField['dependent_on'];
@@ -381,20 +381,20 @@ class SchemewiseStoreDataJsonHelper
                     </div>
                     HTML;
                     $blade .= "<div class=\"grid md:grid-cols-2 gap-4 mt-4\">\n";
-                        foreach ($syncableFields as $field) {
-                            $curName = 'cur_' . $field['field_name'];
-                            $curField = collect($fields)->firstWhere('field_name', $curName);
-                            if ($curField) {
-                                $curField['is_readonly'] = 'sameAsPermanent';
-                                $blade .= self::renderField($curField);
-                            } else {
-                                $curField = $field;
-                                $curField['field_name'] = $curName;
-                                $curField['db_column'] = 'other_details';
-                                $curField['is_readonly'] = 'sameAsPermanent';
-                                $blade .= self::renderField($curField);
-                            }
+                    foreach ($syncableFields as $field) {
+                        $curName = 'cur_' . $field['field_name'];
+                        $curField = collect($fields)->firstWhere('field_name', $curName);
+                        if ($curField) {
+                            $curField['is_readonly'] = 'sameAsPermanent';
+                            $blade .= self::renderField($curField);
+                        } else {
+                            $curField = $field;
+                            $curField['field_name'] = $curName;
+                            $curField['db_column'] = 'other_details';
+                            $curField['is_readonly'] = 'sameAsPermanent';
+                            $blade .= self::renderField($curField);
                         }
+                    }
                     $blade .= "</div>\n";
                 }
                 $blade .= "</div>\n";
@@ -415,17 +415,17 @@ class SchemewiseStoreDataJsonHelper
         $dynamicAttr = self::generateDynamicInputLogic($name, $validation, $regex);
         if ($name === 'ifscode' || $name === 'ifsc_code') {
             $wireModelMode = 'wire:model.live';
-        } 
+        }
         // বাকি যেসব ফিল্ডে digits বা size আছে সেগুলোতে .blur হবে
         elseif (str_contains($validation, 'digits') || str_contains($validation, 'size')) {
             $wireModelMode = 'wire:model.blur';
-        } 
+        }
         // অন্য সব সাধারণ ফিল্ডে .live থাকবে
         else {
             $wireModelMode = 'wire:model.live';
         }
         $isConfirmField = false;
-$isEdit = false;
+        $isEdit = false;
         if (!empty($field['validation_rule'])) {
             $rules = explode('|', $field['validation_rule']);
             $isRequired = in_array('required', $rules, true);
@@ -489,23 +489,23 @@ $isEdit = false;
                 ->map(fn($v) => "'" . (string) $v . "'")
                 ->implode(',');
             $xData = <<<HTML
-    x-data="{
-        formData: @entangle('formData').live,
-        get isVisible() {
-            if (!this.formData) return false;
-            return [{$values}].includes(String(this.formData.{$dependentOn}));
-        },
-        sync() {
-            if (!this.isVisible && this.formData.hasOwnProperty('{$name}')) {
-                this.formData.{$name} = null;
+        x-data="{
+            formData: @entangle('formData').live,
+            get isVisible() {
+                if (!this.formData) return false;
+                return [{$values}].includes(String(this.formData.{$dependentOn}));
+            },
+            sync() {
+                if (!this.isVisible && this.formData.hasOwnProperty('{$name}')) {
+                    this.formData.{$name} = null;
+                }
+            },
+            init() {
+                this.sync();
+                this.\$watch('formData.{$dependentOn}', () => this.sync());
             }
-        },
-        init() {
-            this.sync();
-            this.\$watch('formData.{$dependentOn}', () => this.sync());
-        }
-    }"
-    HTML;
+        }"
+        HTML;
             $xShow = 'x-show="isVisible"';
             $xCloak = 'x-cloak';
             $wireKey = 'wire:key="field-dep-' . $name . '"';
@@ -573,20 +573,20 @@ $isEdit = false;
                 }
 
                 $fieldHtml = <<<BLADE
-    <x-form.select
-        name="{$name}"
-        label="{$label}"
-        data-wire="{$name}"
-        {$wireIgnore}
-        {$readonlyAttr}
-        {$requiredAttr}
-        {$disabledAttr}
-        wire:model.live="formData.{$name}"
-    >
-        <option value="">-- Select {$label} --</option>
-        {$optionsHtml}
-    </x-form.select>
-    BLADE;
+                <x-form.select
+                    name="{$name}"
+                    label="{$label}"
+                    data-wire="{$name}"
+                    {$wireIgnore}
+                    {$readonlyAttr}
+                    {$requiredAttr}
+                    {$disabledAttr}
+                    wire:model.live="formData.{$name}"
+                >
+                    <option value="">-- Select {$label} --</option>
+                    {$optionsHtml}
+                </x-form.select>
+                BLADE;
 
                 break;
 

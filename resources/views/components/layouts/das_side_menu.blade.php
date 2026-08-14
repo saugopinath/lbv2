@@ -42,7 +42,7 @@
                 <!-- Sub-menu -->
                 <div class="pl-4" id="list_menu" x-collapse x-show="activeMenu === 'LBFrom'" x-transition>
                     <ul>
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canEntry())
+                        {{-- @if (\App\Helpers\WorkFlowPermissionHelper::canEntry())
                             <li>
                                 <a class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white @if (request()->routeIs('form')) bg-slate-700 text-white @endif" href="{{ route('form') }}">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -52,7 +52,7 @@
                                     <span class="truncate" x-show="sidebar">Application Form</span>
                                 </a>
                             </li>
-                        @endif
+                        @endif --}}
                         @if (\App\Helpers\WorkFlowPermissionHelper::canEntry())
                             <li>
                                 <a class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white @if (request()->routeIs('form1')) bg-slate-700 text-white @endif" href="{{ route('form1') }}">
@@ -82,7 +82,7 @@
         @endif
 
 
-        @if (\App\Helpers\WorkFlowPermissionHelper::canDutyManagement())
+        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canDutyManagement())
             {{-- @canany(['manage role mappings', 'view offices', 'view users']) --}}
             <div>
                 <button @click="activeMenu === 'DutyManagement' ? activeMenu = null : activeMenu = 'DutyManagement'" class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -99,7 +99,7 @@
                 <div class="pl-4" id="list_menu" x-collapse x-show="activeMenu === 'DutyManagement'" x-transition>
                     <ul>
                         {{-- Role Office Type Mapping --}}
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canRoleMapping())
+                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canRoleMapping())
                             {{-- @can('manage role mappings') --}}
                             <li>
                                 <a class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white" href="{{ route('role-office-master-mappings') }}">
@@ -114,7 +114,7 @@
 
                         {{-- Office Masters --}}
                         {{-- @can('view offices') --}}
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canViewOffices())
+                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canViewOffices())
                             <li>
                                 <a class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white" href="{{ route('officemasters') }}">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -127,7 +127,7 @@
                         @endif
 
                         {{-- @can('view users') --}}
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canViewUser())
+                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canViewUser())
                             <li>
                                 <a class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white" href="{{ route('user-managements') }}">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -144,7 +144,7 @@
 
         @endif
 
-        @if (\App\Helpers\WorkFlowPermissionHelper::canDynamicWorkflowManagement())
+        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canDynamicWorkflowManagement())
             <div>
                 <a class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded" href="{{ route('dynamic-workflow-config') }}">
                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -209,7 +209,7 @@
             </div>
         @endif
 
-        @if (\App\Helpers\WorkFlowPermissionHelper::canSchemeOnboard())
+        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canSchemeOnboard())
             <div>
                 <button @click="activeMenu === 'SchemeOnboard' ? activeMenu = null : activeMenu = 'SchemeOnboard'" class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -225,7 +225,7 @@
 
                 <div class="pl-4" id="list_menu" x-collapse x-show="activeMenu === 'SchemeOnboard'" x-transition>
                     <ul>
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canMasterTab())
+                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canMasterTab())
                             <li>
                                 <a class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white" href="{{ route('master-tab') }}">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -235,7 +235,7 @@
                                         Management</span></a>
                             </li>
                         @endif
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canDefineWorkflow())
+                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canDefineWorkflow())
                             <li>
                                 <a class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white" href="{{ route('define-workflow1') }}">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -245,7 +245,7 @@
                                         Workflow</span></a>
                             </li>
                         @endif
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canSchemeCapacitySetting())
+                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canSchemeCapacitySetting())
                             <li>
                                 <a class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white" href="{{ route('scheme-capacity') }}">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -259,7 +259,7 @@
                 </div>
             </div>
         @endif
-        @if (\App\Helpers\WorkFlowPermissionHelper::canUserPermission())
+        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canUserPermission())
             <div>
                 <button @click="activeMenu === 'CreatePermission' ? activeMenu = null : activeMenu = 'CreatePermission'" class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -275,7 +275,7 @@
 
                 <div class="pl-4" id="list_menu" x-collapse x-show="activeMenu === 'CreatePermission'" x-transition>
                     <ul>
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canRoleRankManagement())
+                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canRoleRankManagement())
                             <li>
                                 <a class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white" href="{{ route('role-rank-management') }}">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -286,7 +286,7 @@
                             </li>
                         @endif
                         {{-- @can('view permission') --}}
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canViewPermission())
+                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canViewPermission())
                             <li>
                                 <a class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white" href="{{ route('permission') }}">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -297,7 +297,7 @@
                             </li>
                             {{-- @endcan --}}
                         @endif
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canViewUserPermisson())
+                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canViewUserPermisson())
                             {{-- @can('view user permission') --}}
                             <li>
                                 <a class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white" href="{{ route('user-permission') }}">
@@ -309,7 +309,7 @@
                             </li>
                             {{-- @endcan --}}
                         @endif
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canRolePermissionManagement())
+                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canRolePermissionManagement())
                             <li>
                                 <a class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white" href="{{ route('role-permission-management') }}">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

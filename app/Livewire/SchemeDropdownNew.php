@@ -34,11 +34,12 @@ class SchemeDropdownNew extends Component
         $query = Scheme::query()
             ->where('is_active', 1)
             ->when($scheme_id, fn($q) => $q->where('id', $scheme_id));
-        if ($isFinal) {
-            $query->whereHas('schemeFinalSubmitChecks', function ($q) {
-                $q->where('is_final_submitted', true);
-            });
-        }
+        // Commented for development
+        // if ($isFinal) {
+        //     $query->whereHas('schemeFinalSubmitChecks', function ($q) {
+        //         $q->where('is_final_submitted', true);
+        //     });
+        // }
         $this->schemes = $query->get();
     }
     public function updatedSchemeId($value)
