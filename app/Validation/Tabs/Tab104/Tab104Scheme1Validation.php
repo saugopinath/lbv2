@@ -2,13 +2,11 @@
 
 namespace App\Validation\Tabs\Tab104;
 
-class Tab104Scheme1Validation
+class Tab104Scheme1Validation extends MasterTab104Validation
 {
-    /**
-     * Create a new class instance.
-     */
-    public function __construct()
+    public function getRules(): array
     {
-        //
+        $rules = parent::getRules();
+        return $rules;
     }
 }

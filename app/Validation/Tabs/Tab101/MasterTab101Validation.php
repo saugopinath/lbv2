@@ -17,6 +17,9 @@ class MasterTab101Validation extends BaseTabValidation
      */
     public function getRules(): array
     {
-        return $this->getJsonRules();
+        $rules = $this->getJsonRules();
+        // $rules['formData.application_type'] = ['required'];
+        // unset($rules['formData.beneficiary_name']);
+        return $rules;
     }
 }

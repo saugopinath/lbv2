@@ -27,6 +27,7 @@ use App\Models\CmoSmData;
 use App\Models\DsPhase;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
+use App\Validation\TabValidationFactory;
 
 #[Loggable(level: 'Normal', nickname: 'Dynamic Form Entry')]
 
@@ -926,80 +927,83 @@ class DynamicForm extends Component
         return json_decode(File::get($path), true);
     }
 
-    // /**
-    //  * Livewire Component Helper:
-    //  * Fetches current active tab rules dynamically using the Factory pattern.
-    //  */
-    // private function getValidationRulesForActiveTab(): array
-    // {
-    //     // 1. Pass active scheme ID & active tab code to the Factory
-    //     $validator = TabValidationFactory::make((string) $this->schemeId, (string) $this->activeTab);
-
-    //     // 2. Retrieve compiled validation rules (custom or fallback master)
-    //     return $validator->getRules();
-    // }
-
+    /**
+     * Livewire Component Helper:
+     * Fetches current active tab rules dynamically using the Factory pattern.
+     */
     private function getValidationRulesForActiveTab(): array
     {
-        $json = $this->getSchemeJson();
-        $rules = [];
-        $ageConfig = AgeManagements::where('scheme_id', $this->schemeId)->first();
-        foreach ($json['tabs'] ?? [] as $tab) {
-            if ((string) $tab['tab_code'] !== (string) $this->activeTab) {
-                continue;
-            }
-            foreach ($tab['fields'] ?? [] as $field) {
-                $fieldName = $field['field_name'];
-                $fieldRules = explode('|', $field['validation_rule'] ?? '');
-                if ($field['field_type'] === 'checkbox') {
+        // 1. Pass active scheme ID & active tab code to the Factory
+        $validator = TabValidationFactory::make((string) $this->schemeId, (string) $this->activeTab);
 
-                    $fieldRules = array_map(function ($rule) {
+        // 2. EXPLICITLY CALL IT HERE: Sanitize your form inputs
+        $this->formData = $validator->sanitizeFormData($this->formData);
 
-                        return $rule === 'required'
-                            ? 'accepted'
-                            : $rule;
-                    }, $fieldRules);
-                }
-                if ($fieldName === 'age' && $ageConfig) {
-                    $fieldRules = array_filter($fieldRules, function ($rule) {
-                        $r = trim($rule);
-
-                        return !str_starts_with($r, 'min:') &&
-                            !str_starts_with($r, 'max:') &&
-                            $r !== 'integer' &&
-                            $r !== 'numeric';
-                    });
-                    $fieldRules[] = 'integer';
-                    if (!is_null($ageConfig->min_age)) {
-                        $fieldRules[] = "min:{$ageConfig->min_age}";
-                    }
-                    if (!is_null($ageConfig->max_age)) {
-                        $fieldRules[] = "max:{$ageConfig->max_age}";
-                    }
-                }
-                if ($fieldName === 'dob' && $ageConfig) {
-                    $fieldRules = array_filter($fieldRules, function ($rule) {
-                        $r = trim($rule);
-
-                        return !str_starts_with($r, 'after_or_equal:') &&
-                            !str_starts_with($r, 'before_or_equal:');
-                    });
-                    if (!is_null($ageConfig->max_age)) {
-                        $minDate = now()->subYears($ageConfig->max_age)->format('Y-m-d');
-                        $fieldRules[] = "after_or_equal:{$minDate}";
-                    }
-                    if (!is_null($ageConfig->min_age)) {
-                        $maxDate = now()->subYears($ageConfig->min_age)->format('Y-m-d');
-                        $fieldRules[] = "before_or_equal:{$maxDate}";
-                    }
-                }
-
-                $rules["formData.{$fieldName}"] = array_values(array_filter($fieldRules));
-            }
-        }
-
-        return $rules;
+        // 3. Retrieve compiled validation rules (custom or fallback master)
+        return $validator->getRules();
     }
+
+    // private function getValidationRulesForActiveTab(): array
+    // {
+    //     $json = $this->getSchemeJson();
+    //     $rules = [];
+    //     $ageConfig = AgeManagements::where('scheme_id', $this->schemeId)->first();
+    //     foreach ($json['tabs'] ?? [] as $tab) {
+    //         if ((string) $tab['tab_code'] !== (string) $this->activeTab) {
+    //             continue;
+    //         }
+    //         foreach ($tab['fields'] ?? [] as $field) {
+    //             $fieldName = $field['field_name'];
+    //             $fieldRules = explode('|', $field['validation_rule'] ?? '');
+    //             if ($field['field_type'] === 'checkbox') {
+
+    //                 $fieldRules = array_map(function ($rule) {
+
+    //                     return $rule === 'required'
+    //                         ? 'accepted'
+    //                         : $rule;
+    //                 }, $fieldRules);
+    //             }
+    //             if ($fieldName === 'age' && $ageConfig) {
+    //                 $fieldRules = array_filter($fieldRules, function ($rule) {
+    //                     $r = trim($rule);
+
+    //                     return !str_starts_with($r, 'min:') &&
+    //                         !str_starts_with($r, 'max:') &&
+    //                         $r !== 'integer' &&
+    //                         $r !== 'numeric';
+    //                 });
+    //                 $fieldRules[] = 'integer';
+    //                 if (!is_null($ageConfig->min_age)) {
+    //                     $fieldRules[] = "min:{$ageConfig->min_age}";
+    //                 }
+    //                 if (!is_null($ageConfig->max_age)) {
+    //                     $fieldRules[] = "max:{$ageConfig->max_age}";
+    //                 }
+    //             }
+    //             if ($fieldName === 'dob' && $ageConfig) {
+    //                 $fieldRules = array_filter($fieldRules, function ($rule) {
+    //                     $r = trim($rule);
+
+    //                     return !str_starts_with($r, 'after_or_equal:') &&
+    //                         !str_starts_with($r, 'before_or_equal:');
+    //                 });
+    //                 if (!is_null($ageConfig->max_age)) {
+    //                     $minDate = now()->subYears($ageConfig->max_age)->format('Y-m-d');
+    //                     $fieldRules[] = "after_or_equal:{$minDate}";
+    //                 }
+    //                 if (!is_null($ageConfig->min_age)) {
+    //                     $maxDate = now()->subYears($ageConfig->min_age)->format('Y-m-d');
+    //                     $fieldRules[] = "before_or_equal:{$maxDate}";
+    //                 }
+    //             }
+
+    //             $rules["formData.{$fieldName}"] = array_values(array_filter($fieldRules));
+    //         }
+    //     }
+
+    //     return $rules;
+    // }
 
     protected function validationAttributes(): array
     {

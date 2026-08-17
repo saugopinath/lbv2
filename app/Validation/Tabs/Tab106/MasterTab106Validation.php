@@ -2,13 +2,12 @@
 
 namespace App\Validation\Tabs\Tab106;
 
-class MasterTab106Validation
+use App\Validation\Tabs\BaseTabValidation;
+
+class MasterTab106Validation extends BaseTabValidation
 {
-    /**
-     * Create a new class instance.
-     */
-    public function __construct()
+    public function getRules(): array
     {
-        //
+        return $this->getJsonRules();
     }
 }

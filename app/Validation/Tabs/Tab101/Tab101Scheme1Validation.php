@@ -19,11 +19,11 @@ class Tab101Scheme1Validation extends MasterTab101Validation
         // 1. Retrieve baseline rules from MasterTab101Validation
         $rules = parent::getRules();
 
-        // 2. Add or override rules specific to Scheme 1 on Tab 101
-        // Example: $rules['formData.aadhaar_number'] = ['required', 'digits:12'];
+        // // 2. Add or override rules specific to Scheme 1 on Tab 101
+        // $rules['formData.application_type'] = ['required'];
 
-        // 3. Remove a field if Scheme 1 doesn't require it on Tab 101
-        // Example: unset($rules['formData.optional_pension_code']);
+        // // 3. Remove a field if Scheme 1 doesn't require it on Tab 101
+        // unset($rules['formData.optional_pension_code']);
 
         return $rules;
     }
