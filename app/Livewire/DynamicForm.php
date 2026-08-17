@@ -937,7 +937,8 @@ class DynamicForm extends Component
         $validator = TabValidationFactory::make((string) $this->schemeId, (string) $this->activeTab);
 
         // 2. EXPLICITLY CALL IT HERE: Sanitize your form inputs
-        $this->formData = $validator->sanitizeFormData($this->formData);
+        // Can cause issue on loadExistingApplication() due to looping through formData and modifying it. Uncomment if needed.
+        // $this->formData = $validator->sanitizeFormData($this->formData); 
 
         // 3. Retrieve compiled validation rules (custom or fallback master)
         return $validator->getRules();

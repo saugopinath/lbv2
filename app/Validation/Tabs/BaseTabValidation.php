@@ -30,7 +30,7 @@ abstract class BaseTabValidation
      * Common Core Method: Reads the scheme's JSON configuration file from storage
      * and compiles default Laravel validation rules for fields inside the current tab.
      */
-    protected function getJsonRules(): array
+    protected function parseJsonSchemaRules(): array
     {
         // 1. Locate the JSON schema file for the current scheme
         $path = storage_path("app/final_schemes_formdata/scheme_{$this->schemeId}.json");
@@ -127,6 +127,31 @@ abstract class BaseTabValidation
         }
 
         return $fieldRules;
+    }
+
+    /**
+     * Rules that apply globally to EVERY tab across EVERY scheme.
+     */
+    protected function getGlobalRules(): array
+    {
+        return [
+            // // Example: Force common system-wide fields to be sanitized/required
+            // 'formData.application_type' => ['required'],
+        ];
+    }
+
+    /**
+     * Parses default rules from JSON schema/DB and merges global baseline rules.
+     */
+    protected function getJsonRules(): array
+    {
+        $schemaRules = $this->parseJsonSchemaRules(); // Your existing DB/JSON loader logic
+
+        // Merge global baseline rules with your JSON schema rules
+        $finalRules = array_merge($schemaRules, $this->getGlobalRules());
+        // unset($finalRules['formData.beneficiary_name']);
+
+        return $finalRules;
     }
 
     /**
