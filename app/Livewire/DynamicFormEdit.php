@@ -305,8 +305,9 @@ class DynamicForm extends Component
     {
         $this->aadhaarVerified = true;
         $this->aadhaarPayload = [
-            'encoded' => $data['encoded'],
-            'hash' => $data['hash'],
+            // 'encoded' => $data['encoded'],
+            // 'hash' => $data['hash'],
+            'aadhaar_token' => $data['aadhaar_token'],
         ];
 
         $this->navMessage = null;

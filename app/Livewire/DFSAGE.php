@@ -132,7 +132,7 @@ class DynamicForm extends Component
 
         $this->maxDate = Carbon::now()->format('Y-m-d');
         $this->minDate = Carbon::now()->subYears(2)->format('Y-m-d');
-        
+
         $this->updateAgeLimits();
         if ($grievanceId) {
             $this->grievanceId = $grievanceId;
@@ -375,8 +375,9 @@ class DynamicForm extends Component
     {
         $this->aadhaarVerified = true;
         $this->aadhaarPayload = [
-            'encoded' => $data['encoded'],
-            'hash' => $data['hash'],
+            // 'encoded' => $data['encoded'],
+            // 'hash' => $data['hash'],
+            'aadhaar_token' => $data['aadhaar_token'],
         ];
         $this->navMessage = null;
         $this->navMessageType = 'success';
@@ -664,12 +665,12 @@ class DynamicForm extends Component
         try {
             $existingRecord = $modelClass::where('application_id', $this->applicationId)->first();
             if ($existingRecord) {
-                if($existingRecord['application_type']){
-                      $dbData['application_type'] = $existingRecord['application_type'];
-                $dbData['ds_date'] = $existingRecord['ds_date'];
-                $dbData['ds_registration_no'] = $existingRecord['ds_registration_no'];
+                if ($existingRecord['application_type']) {
+                    $dbData['application_type'] = $existingRecord['application_type'];
+                    $dbData['ds_date'] = $existingRecord['ds_date'];
+                    $dbData['ds_registration_no'] = $existingRecord['ds_registration_no'];
                 }
-              
+
                 $updated = $existingRecord->update($dbData);
                 if ($updated) {
                     $this->navMessage = 'Application updated successfully! ID: ' . $this->applicationId;

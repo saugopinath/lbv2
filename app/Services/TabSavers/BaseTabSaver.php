@@ -131,10 +131,11 @@ abstract class BaseTabSaver
                     'application_id' => $component->applicationId,
                     'beneficiary_id' => $component->beneficiaryId,
                     'scheme_id'     => $this->schemeId,
-                    'aadhaar_hash'   => $component->aadhaarPayload['hash'],
-                    'encoded_aadhaar' => $component->aadhaarPayload['encoded'],
+                    'aadhaar_token' => $component->aadhaarPayload['aadhaar_token'],
+                    // 'aadhaar_hash'   => $component->aadhaarPayload['hash'],
+                    // 'encoded_aadhaar' => $component->aadhaarPayload['encoded'],
                     'encode_key'     => null,
-                    'aadhaar_vault'  => $component->aadhaarPayload['hash'],
+                    // 'aadhaar_vault'  => $component->aadhaarPayload['hash'],
                 ]);
 
                 if ($component->grievanceId) {

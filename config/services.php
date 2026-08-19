@@ -36,5 +36,9 @@ return [
         'username' => env('ELK_USERNAME'),
         'password' => env('ELK_PASSWORD')
     ],
+    'adv' => [
+        'url' => env('ADV_VAULT_URL'),
+        'key' => env('ADV_VAULT_KEY'),
+    ],
 
 ];

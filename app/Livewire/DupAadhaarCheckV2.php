@@ -10,6 +10,7 @@ use App\Helpers\AadhaarHelper;
 use App\Helpers\WorkFlowPermissionHelper;
 use App\Attributes\Loggable;
 use Illuminate\Support\Facades\Session;
+use App\Services\AadhaarEncryptionService;
 
 class DupAadhaarCheckV2 extends Component
 {
@@ -25,7 +26,6 @@ class DupAadhaarCheckV2 extends Component
     }
     public function checkDuplicate()
     {
-        // dd($this->schemeId);
         $this->error = null;
         $this->aadhaar = trim($this->aadhaar);
 
@@ -36,12 +36,17 @@ class DupAadhaarCheckV2 extends Component
         //     return ['status' => 'error', 'message' => $this->error];
         // }
 
-        $encoded_aadhar = Crypt::encryptString($this->aadhaar);
-        $aadhaar_hash = md5($this->aadhaar);
+        // $encoded_aadhar = Crypt::encryptString($this->aadhaar);
+        // $aadhaar_hash = md5($this->aadhaar);
 
-        $exists = BeneficiaryAadhaar::where('aadhaar_hash', $aadhaar_hash)
+        $encrypted_aadhaar = AadhaarEncryptionService::generateEncryptedAadhaar($this->aadhaar);
+
+        $exists = BeneficiaryAadhaar::
+            // where('aadhaar_hash', $aadhaar_hash)
+            where('aadhaar_token', $encrypted_aadhaar)
             ->where('scheme_id', $this->schemeId)
             ->exists();
+        //
 
         if ($exists) {
             $this->error = "Duplicate Aadhaar found for this scheme!";
@@ -54,8 +59,9 @@ class DupAadhaarCheckV2 extends Component
         }
 
         $this->dispatch('aadhaarChecked', [
-            'encoded' => $encoded_aadhar,
-            'hash' => $aadhaar_hash
+            // 'encoded' => $encoded_aadhar,
+            // 'hash' => $aadhaar_hash
+            'aadhaar_token' => $encrypted_aadhaar
         ]);
 
         $this->dispatch('hideLoader');
@@ -66,14 +72,15 @@ class DupAadhaarCheckV2 extends Component
     {
         // Session::put('dup_aadhaar', md5(trim($this->aadhaar)));
         $this->showDsTable = true;
+        $encrypted_aadhaar = AadhaarEncryptionService::generateEncryptedAadhaar($this->aadhaar);
         $this->dispatch('aadhaarCheckedds', [
-            'aadhar_hash' => md5(trim($this->aadhaar))
+            // 'aadhar_hash' => md5(trim($this->aadhaar))
+            'aadhaar_token' => $encrypted_aadhaar
         ]);
         return [
             'status' => true
         ];
     }
-
     public function render()
     {
         return view('livewire.dup-aadhaar-check-v2');
