@@ -10,7 +10,7 @@ use App\Helpers\AadhaarHelper;
 use App\Helpers\WorkFlowPermissionHelper;
 use App\Attributes\Loggable;
 use Illuminate\Support\Facades\Session;
-use App\Services\AadhaarEncryptionService;
+use App\Contracts\AadhaarEncryptionServiceInterface;
 
 class DupAadhaarCheckV2 extends Component
 {
@@ -39,7 +39,7 @@ class DupAadhaarCheckV2 extends Component
         // $encoded_aadhar = Crypt::encryptString($this->aadhaar);
         // $aadhaar_hash = md5($this->aadhaar);
 
-        $encrypted_aadhaar = AadhaarEncryptionService::generateEncryptedAadhaar($this->aadhaar);
+        $encrypted_aadhaar = app(AadhaarEncryptionServiceInterface::class)->generateEncryptedAadhaar($this->aadhaar);
 
         $exists = BeneficiaryAadhaar::
             // where('aadhaar_hash', $aadhaar_hash)
@@ -72,7 +72,7 @@ class DupAadhaarCheckV2 extends Component
     {
         // Session::put('dup_aadhaar', md5(trim($this->aadhaar)));
         $this->showDsTable = true;
-        $encrypted_aadhaar = AadhaarEncryptionService::generateEncryptedAadhaar($this->aadhaar);
+        $encrypted_aadhaar = app(AadhaarEncryptionServiceInterface::class)->generateEncryptedAadhaar($this->aadhaar);
         $this->dispatch('aadhaarCheckedds', [
             // 'aadhar_hash' => md5(trim($this->aadhaar))
             'aadhaar_token' => $encrypted_aadhaar

@@ -34,6 +34,9 @@ use App\Observers\BenRejectDetailsObserver;
 use App\Models\BeneficiaryPersonal;
 use App\Observers\BeneficiaryPersonalObserver;
 
+use App\Contracts\AadhaarEncryptionServiceInterface;
+use App\Services\AadhaarEncryptionService;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -57,6 +60,14 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(DuplicatecheckInterface::class, DuplicatecheckService::class);
+
+        $this->app->singleton(AadhaarEncryptionServiceInterface::class, function ($app) {
+            return new AadhaarEncryptionService(
+                url: config('services.adv.url', ''),
+                apiKey: config('services.adv.key', ''),
+                environment: config('app.env', 'production')
+            );
+        });
     }
 
     /**

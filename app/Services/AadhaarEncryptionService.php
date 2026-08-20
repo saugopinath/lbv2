@@ -2,60 +2,58 @@
 
 namespace App\Services;
 
+use App\Contracts\AadhaarEncryptionServiceInterface;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
-class AadhaarEncryptionService
+class AadhaarEncryptionService implements AadhaarEncryptionServiceInterface
 {
-    public static function generateEncryptedAadhaar(string $aadhaarNumber): string
+    public function __construct(
+        private readonly string $url,
+        private readonly string $apiKey,
+        private readonly string $environment
+    ) {}
+
+    public function generateEncryptedAadhaar(string $aadhaarNumber): string
     {
-        $url = config('services.adv.url') ?? '';
-        $apiKey = config('services.adv.key') ?? '';
-        $environement = config('app.env');
-
-        // Implementation for generating encrypted Aadhaar
-        if ($environement === 'production' && !empty($url) && !empty($apiKey)) {
-            try {
-                $response = Http::withToken($apiKey)
-                    ->acceptJson()
-                    ->post("{$url}/tokenize", [
-                        'aadhaar' => $aadhaarNumber
-                    ]);
-
-                if ($response->successful()) {
-                    return $response->json('reference_key');
-                }
-
-                throw new Exception('Aadhaar tokenization API returned an error status.');
-            } catch (Exception $e) {
-                Log::critical('Aadhaar Tokenization Failed: ' . $e->getMessage());
-                throw $e;
-            }
+        if ($this->environment !== 'production' || empty($this->url) || empty($this->apiKey)) {
+            return md5($aadhaarNumber); // Mock for local/testing
         }
-        return md5($aadhaarNumber); // For Local
+
+        return $this->sendRequest('/tokenize', ['aadhaar' => $aadhaarNumber], 'reference_key', 'Tokenization');
     }
 
-    // /**
-    //  * Exchange a Reference Key back to a raw Aadhaar number (for verified users/audits).
-    //  */
-    // public function detokenize(string $referenceKey): string
-    // {
-    //     try {
-    //         $response = Http::withToken($apiKey)
-    //             ->acceptJson()
-    //             ->post("{$url}/detokenize", [
-    //                 'reference_key' => $referenceKey
-    //             ]);
+    public function detokenize(string $referenceKey): string
+    {
+        if ($this->environment !== 'production' || empty($this->url) || empty($this->apiKey)) {
+            return $referenceKey; // Mock for local/testing
+        }
 
-    //         if ($response->successful()) {
-    //             return $response->json('aadhaar');
-    //         }
+        return $this->sendRequest('/detokenize', ['reference_key' => $referenceKey], 'aadhaar', 'Detokenization');
+    }
 
-    //         throw new Exception('Aadhaar detokenization API returned an error status.');
-    //     } catch (Exception $e) {
-    //         Log::critical('Aadhaar Detokenization Failed: ' . $e->getMessage());
-    //         throw $e;
-    //     }
-    // }
+    private function sendRequest(string $endpoint, array $payload, string $responseKey, string $action): string
+    {
+        try {
+            $response = $this->client()->post($endpoint, $payload);
+
+            if ($response->successful() && $response->has($responseKey)) {
+                return (string) $response->json($responseKey);
+            }
+
+            throw new Exception("Aadhaar {$action} API returned an error status.");
+        } catch (Exception $e) {
+            Log::critical("Aadhaar {$action} Failed: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    private function client(): PendingRequest
+    {
+        return Http::baseUrl($this->url)
+            ->withToken($this->apiKey)
+            ->acceptJson();
+    }
 }
