@@ -30,23 +30,23 @@ class DupAadhaarCheckV2 extends Component
         $this->aadhaar = trim($this->aadhaar);
 
         // Commented for Dev
-        // if (!AadhaarHelper::validate($this->aadhaar)) {
+        // if (!AadhaarHelper::validate($this->aadhaar)) { // Verhoeff checksum validation
         //     $this->error = "Invalid Aadhaar number";
         //     $this->dispatch('hideLoader');
         //     return ['status' => 'error', 'message' => $this->error];
         // }
 
+        // Previous work, which was replaced by the work done below it
         // $encoded_aadhar = Crypt::encryptString($this->aadhaar);
         // $aadhaar_hash = md5($this->aadhaar);
 
         $encrypted_aadhaar = app(AadhaarEncryptionServiceInterface::class)->generateEncryptedAadhaar($this->aadhaar);
 
         $exists = BeneficiaryAadhaar::
-            // where('aadhaar_hash', $aadhaar_hash)
+            // where('aadhaar_hash', $aadhaar_hash) // Previous work, which was replaced by the work done below it
             where('aadhaar_token', $encrypted_aadhaar)
             ->where('scheme_id', $this->schemeId)
             ->exists();
-        //
 
         if ($exists) {
             $this->error = "Duplicate Aadhaar found for this scheme!";
@@ -59,8 +59,8 @@ class DupAadhaarCheckV2 extends Component
         }
 
         $this->dispatch('aadhaarChecked', [
-            // 'encoded' => $encoded_aadhar,
-            // 'hash' => $aadhaar_hash
+            // 'encoded' => $encoded_aadhar, // VV
+            // 'hash' => $aadhaar_hash // Previous work, which was replaced by the work done below it
             'aadhaar_token' => $encrypted_aadhaar
         ]);
 
@@ -74,7 +74,7 @@ class DupAadhaarCheckV2 extends Component
         $this->showDsTable = true;
         $encrypted_aadhaar = app(AadhaarEncryptionServiceInterface::class)->generateEncryptedAadhaar($this->aadhaar);
         $this->dispatch('aadhaarCheckedds', [
-            // 'aadhar_hash' => md5(trim($this->aadhaar))
+            // 'aadhar_hash' => md5(trim($this->aadhaar)) // Previous work, which was replaced by the work done below it
             'aadhaar_token' => $encrypted_aadhaar
         ]);
         return [
