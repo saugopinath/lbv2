@@ -937,19 +937,24 @@ class DynamicForm extends Component
     }
 
     /**
-     * Livewire Component Helper:
-     * Fetches current active tab rules dynamically using the Factory pattern.
+     * 1. Primary Rules Method (Used Everywhere in Backend)
+     * Returns clean Laravel validation rules so $this->validate(...) works natively.
      */
     private function getValidationRulesForActiveTab(): array
     {
-        // 1. Pass active scheme ID & active tab code to the Factory
         $validator = TabValidationFactory::make((string) $this->schemeId, (string) $this->activeTab);
 
-        // 2. EXPLICITLY CALL IT HERE: Sanitize your form inputs
-        // Can cause issue on loadExistingApplication() due to looping through formData and modifying it. Uncomment if needed.
-        // $this->formData = $validator->sanitizeFormData($this->formData); 
+        return $validator->getLaravelRules();
+    }
 
-        // 3. Retrieve compiled validation rules (custom or fallback master)
+    /**
+     * 2. Structured Rules Method (Used specifically for View / Alpine JS / Blade)
+     * Returns full payload including 'level_name' for label mapping and client-side guard.
+     */
+    private function getValidationRulesWithMetadata(): array
+    {
+        $validator = TabValidationFactory::make((string) $this->schemeId, (string) $this->activeTab);
+
         return $validator->getRules();
     }
 
@@ -1085,6 +1090,11 @@ class DynamicForm extends Component
 
     public function render()
     {
-        return view('livewire.dynamic-form');
+        // Resolves rules for active tab (e.g. ['formData.first_name' => 'required|string|max:150'])
+        $activeRules = $this->getValidationRulesWithMetadata();
+
+        return view('livewire.dynamic-form', [
+            'activeRules' => $activeRules,
+        ]);
     }
 }

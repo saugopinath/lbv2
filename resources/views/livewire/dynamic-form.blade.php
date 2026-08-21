@@ -1,4 +1,16 @@
-<div class="px-6 pt-4 shrink-0">
+{{-- 
+    Alpine Component Wrapper & Data Bridge
+    - x-data="hybridFormGuard()": Initializes the main Alpine JS form guard component scoped to this container.
+    - <script id="active-tab-rules">: Injects active tab Laravel validation rules as JSON. 
+      This allows client-side Alpine logic to read server validation rules without extra API calls.
+--}}
+<div class="px-6 pt-4 shrink-0" x-data="hybridFormGuard()">
+
+    {{-- Active tab validation rules injected as JSON for client-side evaluation --}}
+    <script id="active-tab-rules" type="application/json">
+        {!! json_encode($activeRules) !!}
+    </script>
+
     <h2 class="block p-3 bg-blue-50 border border-blue-200 text-2xl rounded-lg shadow-sm dark:bg-blue-900/30 dark:border-blue-800 text-blue-700 dark:text-blue-100 font-semibold mb-3">
         {{ $heading }}
     </h2>
@@ -49,6 +61,34 @@
                 </div>
             </div>
         @endif
+
+        @php
+            /**
+             * Normalizes backend server errors from Laravel's ViewErrorBag using level_name from $activeRules.
+ */
+$serverErrors = [];
+
+if ($errors->any()) {
+    foreach ($errors->keys() as $key) {
+        $rawMessage = $errors->first($key);
+
+        // 1. Resolve level_name from active rules array
+        $ruleConfig = $activeRules[$key] ?? null;
+        $levelName = is_array($ruleConfig) && !empty($ruleConfig['level_name']) ? $ruleConfig['level_name'] : ucwords(str_replace(['formData.', '_', '.'], ['', ' ', ' '], $key));
+
+        // 2. Replace raw property path occurrences in Laravel's validation message with level_name
+                    $rawField = str_replace('formData.', '', $key);
+                    $searchPatterns = ['form data.' . $rawField, 'formData.' . $rawField, $key, $rawField];
+
+                    $serverErrors[$key] = str_ireplace($searchPatterns, $levelName, $rawMessage);
+                }
+            }
+            // Illuminate\Support\Facades\Log::info($serverErrors);
+        @endphp
+
+        <!-- Standalone Dynamic Error Banner Component -->
+        <x-form-error :errors="$serverErrors" />
+
         @if ($activeTab)
             <div class="p-4">
 
@@ -73,12 +113,21 @@
 
                     {{-- RIGHT --}}
                     <div class="flex gap-2">
+                        {{-- 
+    Dynamic Navigation & Submission Controls
+    - @if (!$isLast && $nextTab): Renders multi-step navigation for intermediate tabs.
+      @click="processSaveAndNext(...)": Intercepts the click in Alpine to run client-side 
+      validation before telling Livewire to advance to the next tab.
+    - @else: Renders the final submission button on the last tab.
+      @click="processFinalSubmit()": Intercepts the click in Alpine to enforce final tab 
+      client-side validation before triggering the final Livewire submission.
+--}}
                         @if (!$isLast && $nextTab)
-                            <button class="px-4 py-2 bg-indigo-600 text-white rounded" wire:click="saveAndNext({{ $nextTab }})" x-on:click="Livewire.dispatch('showLoader')">
+                            <button @click="processSaveAndNext('{{ $nextTab }}')" class="px-4 py-2 bg-indigo-600 text-white rounded">
                                 Save & Next
                             </button>
                         @else
-                            <button class="px-4 py-2 bg-green-600 text-white rounded" wire:click="finalSubmit" x-on:click="Livewire.dispatch('showLoader')">
+                            <button @click="processFinalSubmit()" class="px-4 py-2 bg-green-600 text-white rounded">
                                 Submit
                             </button>
                         @endif

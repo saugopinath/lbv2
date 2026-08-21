@@ -1,19 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" x-data
-    x-init="$watch('$store.app.mode', mode => document.documentElement.classList.toggle('dark', mode === 'dark'))">
+<html lang="en" x-data x-init="$watch('$store.app.mode', mode => document.documentElement.classList.toggle('dark', mode === 'dark'))">
 
 <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Premium Tailwind CSS Admin & Dashboard Template" />
-    <meta name="author" content="Webonzer" />
+    <meta content="IE=edge" http-equiv="X-UA-Compatible" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="Premium Tailwind CSS Admin & Dashboard Template" name="description" />
+    <meta content="Webonzer" name="author" />
 
     <!-- Site Title -->
     <title>{{ config('jblbConf.title') }}</title>
 
     <!-- Favicon Icon -->
-    <link rel="shortcut icon" href="{{ asset('images/' . config('jblbConf.headerlogo')) }}">
+    <link href="{{ asset('images/' . config('jblbConf.headerlogo')) }}" rel="shortcut icon">
 
     <!-- Styles -->
     @livewireStyles
@@ -24,7 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body x-data="$store.app" class="bg-[#def0f4] dark:bg-gray-900 text-black dark:text-white">
+<body class="bg-[#def0f4] dark:bg-gray-900 text-black dark:text-white" x-data="$store.app">
     <!-- Main Layout -->
     <div class="flex h-screen overflow-hidden">
         <!-- Main Container -->
@@ -68,6 +67,8 @@
             });
         });
     </script>
+    {{-- Client Side validation for the Application Form sub-module --}}
+    <script src="{{ asset('js/form-validation.js') }}"></script>
     @livewireScripts
     @if (session()->has('toastr'))
         <script>
