@@ -68,6 +68,11 @@ class AppServiceProvider extends ServiceProvider
                 environment: config('app.env', 'production')
             );
         });
+
+        $this->app->bind(
+            \App\Contracts\DynamicFormHandlerInterface::class,
+            \App\Services\DynamicFormService::class
+        );
     }
 
     /**
