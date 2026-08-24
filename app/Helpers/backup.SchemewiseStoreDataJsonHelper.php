@@ -413,22 +413,17 @@ class SchemewiseStoreDataJsonHelper
         $validation = $field['validation_rule'] ?? ''; // <--- নতুন
         $regex = $field['regex'] ?? null;              // <--- নতুন
         $dynamicAttr = self::generateDynamicInputLogic($name, $validation, $regex);
-        if ($name === 'ifscode' || $name === 'dob') {
-            $wireModelMode = 'wire:model.blur';
-        } else {
-            $wireModelMode = 'wire:model';
+        if ($name === 'ifscode' || $name === 'ifsc_code') {
+            $wireModelMode = 'wire:model.live';
         }
-        // if ($name === 'ifscode' || $name === 'ifsc_code') {
-        //     $wireModelMode = 'wire:model.live';
-        // }
         // বাকি যেসব ফিল্ডে digits বা size আছে সেগুলোতে .blur হবে
-        // elseif (str_contains($validation, 'digits') || str_contains($validation, 'size')) {
-        //     $wireModelMode = 'wire:model.blur';
-        // }
-        // // অন্য সব সাধারণ ফিল্ডে .live থাকবে
-        // else {
-        //     $wireModelMode = 'wire:model.live';
-        // }
+        elseif (str_contains($validation, 'digits') || str_contains($validation, 'size')) {
+            $wireModelMode = 'wire:model.blur';
+        }
+        // অন্য সব সাধারণ ফিল্ডে .live থাকবে
+        else {
+            $wireModelMode = 'wire:model.live';
+        }
         $isConfirmField = false;
         $isEdit = false;
         if (!empty($field['validation_rule'])) {
@@ -519,7 +514,30 @@ class SchemewiseStoreDataJsonHelper
         }
 
         switch ($type) {
+            // case 'select':
+            //     $optionsHtml = '';
+            //     foreach (($field['options'] ?? []) as $key => $optionlabel) {
+            //         $key = e($key);
+            //         $optionlabel = e($optionlabel);
+            //         $optionsHtml .= "<option value=\"{$key}\">{$optionlabel}</option>\n";
+            //     }
+            //     $fieldHtml = <<<BLADE
+            //     <x-form.select
+            //         name="{$name}"
+            //         label="{$label}"
+            //         data-wire="{$name}"
+            //         {$wireIgnore}
+            //          {$readonlyAttr}
+            //           {$requiredAttr}
+            //         wire:model.live="formData.{$name}"
+            //     >
+            //         <option value="">-- Select {$label} --</option>
+            //         {$optionsHtml}
+            //     </x-form.select>
+            //     BLADE;
+            //     break;
             case 'select':
+
                 // ✅ SPECIAL RENDER FOR app_type ONLY
                 if ($name === 'application_type') {
 
@@ -530,7 +548,7 @@ class SchemewiseStoreDataJsonHelper
                 label="Application Type"
                 data-wire="application_type"
                 required
-                wire:model.blur="formData.application_type"
+                wire:model.live="formData.application_type"
                 {$disabledAttr}
             >
                 <option value="">-- Select Application Type --</option>
@@ -563,7 +581,7 @@ class SchemewiseStoreDataJsonHelper
                     {$readonlyAttr}
                     {$requiredAttr}
                     {$disabledAttr}
-                    wire:model="formData.{$name}"
+                    wire:model.live="formData.{$name}"
                 >
                     <option value="">-- Select {$label} --</option>
                     {$optionsHtml}
@@ -582,7 +600,7 @@ class SchemewiseStoreDataJsonHelper
                      {$readonlyAttr}
                       {$requiredAttr}
                       {$disabledAttr}
-                    wire:model="formData.{$name}"
+                    wire:model.live="formData.{$name}"
                 />
                 BLADE;
                 break;
@@ -593,7 +611,7 @@ class SchemewiseStoreDataJsonHelper
                         value="{$value}"
                         label="{$label}"
                         {$disabledAttr}
-                        wire:model="formData.{$name}"
+                        wire:model.live="formData.{$name}"
                     />
                 BLADE;
                 break;
@@ -664,7 +682,7 @@ class SchemewiseStoreDataJsonHelper
                         name="{$name}"
                         label="{$label}"
                         placeholder="{$placeholder}"
-                        wire:model="formData.{$name}"
+                        wire:model.live="formData.{$name}"
                     />
                 </div>
                 BLADE;
@@ -677,7 +695,7 @@ class SchemewiseStoreDataJsonHelper
                         name="{$name}"
                         label="{$label}"
                         placeholder="{$placeholder}"
-                        wire:model="formData.{$name}"
+                        wire:model.live="formData.{$name}"
                     />
                 </div>
                 BLADE;
@@ -701,7 +719,7 @@ class SchemewiseStoreDataJsonHelper
                     <x-form.select
                         name="{$name}"
                         label="{$label}"
-                        wire:model="formData.{$name}"
+                        wire:model.live="formData.{$name}"
                     >
                         <option value="">-- Select {$label} --</option>
                         {$optionsHtml}
@@ -727,7 +745,7 @@ class SchemewiseStoreDataJsonHelper
                             type="radio"
                             name="{$name}"
                             value="{$key}"
-                            wire:model="formData.{$name}"
+                            wire:model.live="formData.{$name}"
                         />
                         {$text}
                     </label>
@@ -751,7 +769,7 @@ class SchemewiseStoreDataJsonHelper
                         name="{$name}"
                         label="{$label}"
                         value="{$value}"
-                        wire:model="formData.{$name}"
+                        wire:model.live="formData.{$name}"
                     />
                 </div>
                 BLADE;
@@ -765,7 +783,7 @@ class SchemewiseStoreDataJsonHelper
                     name="{$name}"
                     label="{$label}"
                     placeholder="{$placeholder}"
-                    wire:model="formData.{$name}"
+                    wire:model.live="formData.{$name}"
                     {$dynamicAttr}
                 />
             </div>

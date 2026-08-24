@@ -46,20 +46,29 @@
         let result = await $wire.DsMark();
         this.dsData = result.status;
     }
-}" x-init="$watch('aadhaar', value => {
-    errorMessage = '';
-    successMessage = '';
-    disableCheckBtn = false;
-    dsMark = false;
-    dsData = false;
-    Livewire.dispatch('aadhaarCheckedReset');
-})">
+}">
     <div class="grid gap-6 md:grid-cols-3 mb-6 p-4 border-b border-gray-200 dark:border-gray-700">
 
         <!-- Aadhaar Input -->
         <div>
-            <x-form.input id="check_aadhar" label="Aadhaar Number" name="aadhar_number" placeholder="Enter Aadhaar Number" required x-model="aadhaar" x-on:input="aadhaar = $el.value.replace(/[^0-9]/g, '').slice(0,12);
-        $el.value = aadhaar;" />
+            <x-form.input id="check_aadhar" label="Aadhaar Number" name="aadhar_number" placeholder="Enter Aadhaar Number" required x-on:input="
+        let clean = $event.target.value.replace(/[^0-9]/g, '').slice(0, 12);
+        $event.target.value = clean;
+        aadhaar = clean;
+
+        // If the button was previously disabled (meaning a check was completed),
+        // notify Livewire ONCE that the verified state is now reset.
+        if (disableCheckBtn) {
+            Livewire.dispatch('aadhaarCheckedReset');
+        }
+
+        // Local Alpine resets
+        errorMessage = '';
+        successMessage = '';
+        disableCheckBtn = false;
+        dsMark = false;
+        dsData = false;
+                " />
         </div>
 
         <!-- Button -->

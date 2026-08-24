@@ -416,6 +416,92 @@ class DynamicForm extends Component
         return json_decode(File::get($path), true);
     }
 
+    public function updatedFormDataIfscode($value)
+    {
+        if (strlen($value) !== 11) {
+            $this->formData['bankname'] = '';
+            $this->formData['bank_branch_name'] = '';
+
+            return;
+        } else {
+            $ifsc = strtoupper($value);
+            $this->formData['ifscode'] = $ifsc;
+            $ifs = Ifsccodemaster::with('bankmaster')
+                ->where('code', $ifsc)
+                ->where('is_active', 1)
+                ->first();
+        }
+        if ($ifs) {
+            $this->formData['bankname'] = $ifs->bankmaster->name ?? '';
+            $this->formData['bank_branch_name'] = $ifs->branch ?? '';
+        } else {
+            $this->formData['bankname'] = '';
+            $this->formData['bank_branch_name'] = '';
+
+            $this->addError(
+                'formData.ifscode',
+                'This IFSC code is not registered.'
+            );
+        }
+    }
+
+    public function updatedFormDataApplicationType($value)
+    {
+        if (!array_key_exists($value, $this->appTypeOptions)) {
+
+            $this->addError('formData.application_type', 'Unauthorized application type.');
+
+            $this->formData['application_type'] = null;
+        }
+    }
+
+    public function updatedFormDataDob($value)
+    {
+        if (!empty($value)) {
+            $this->formData['age'] = Carbon::parse($value)->age;
+        } else {
+            $this->formData['age'] = null;
+        }
+    }
+
+    // Called Automatically, mainly used when validation is being done
+    protected function validationAttributes(): array
+    {
+        $json = $this->getSchemeJson();
+        $attributes = [];
+        foreach ($json['tabs'] ?? [] as $tab) {
+            if ((string) $tab['tab_code'] !== (string) $this->activeTab) {
+                continue;
+            }
+            foreach ($tab['fields'] ?? [] as $field) {
+                if (!empty($field['field_name']) && !empty($field['level_name'])) {
+                    $attributes["formData.{$field['field_name']}"] = $field['level_name'];
+
+                    if ((string)$this->activeTab === '102') {
+                        $attributes["formData.cur_{$field['field_name']}"] = 'Current ' . $field['level_name'];
+                    }
+                }
+            }
+        }
+
+        return $attributes;
+    }
+
+    // Called Automatically, mainly used when validation is being done
+    protected function messages(): array
+    {
+        return [
+
+            'formData.*.accepted' => 'Please confirm: :attribute.',
+            'formData.*.required' => ':attribute is required.',
+            'formData.*.regex' => 'Invalid format for :attribute.',
+            'formData.*.numeric' => ':attribute must be a number.',
+            'formData.*.date' => ':attribute must be a date.',
+            'formData.*.required_if' => ':attribute is required.',
+            'formData.*.required_unless' => ':attribute is required.',
+        ];
+    }
+
     // For if(isFirst && !isLast) Server Validation -> Application type permission -> Capacity -> Check application ID present -> Duplicate Check -> Save
     #[Loggable(level: 'Moderate', nickname: 'Save Application details')]
     public function saveAndNext($nextTab)
@@ -767,16 +853,6 @@ class DynamicForm extends Component
 
     // ------------------------------VVVV-- The Below methods are not being used as per my investigation --VVVV-----------------------------------
 
-    public function updatedFormDataApplicationType($value)
-    {
-        if (!array_key_exists($value, $this->appTypeOptions)) {
-
-            $this->addError('formData.application_type', 'Unauthorized application type.');
-
-            $this->formData['application_type'] = null;
-        }
-    }
-
     // private function saveCurrentTabData(): bool
     // {
     //     if (!$this->applicationId) {
@@ -974,35 +1050,6 @@ class DynamicForm extends Component
     //     return false;
     // }
 
-    public function updatedFormDataIfscode($value)
-    {
-        if (strlen($value) !== 11) {
-            $this->formData['bankname'] = '';
-            $this->formData['bank_branch_name'] = '';
-
-            return;
-        } else {
-            $ifsc = strtoupper($value);
-            $this->formData['ifscode'] = $ifsc;
-            $ifs = Ifsccodemaster::with('bankmaster')
-                ->where('code', $ifsc)
-                ->where('is_active', 1)
-                ->first();
-        }
-        if ($ifs) {
-            $this->formData['bankname'] = $ifs->bankmaster->name ?? '';
-            $this->formData['bank_branch_name'] = $ifs->branch ?? '';
-        } else {
-            $this->formData['bankname'] = '';
-            $this->formData['bank_branch_name'] = '';
-
-            $this->addError(
-                'formData.ifscode',
-                'This IFSC code is not registered.'
-            );
-        }
-    }
-
     // private function getValidationRulesForActiveTab(): array
     // {
     //     $json = $this->getSchemeJson();
@@ -1064,49 +1111,4 @@ class DynamicForm extends Component
 
     //     return $rules;
     // }
-
-    protected function validationAttributes(): array
-    {
-        $json = $this->getSchemeJson();
-        $attributes = [];
-        foreach ($json['tabs'] ?? [] as $tab) {
-            if ((string) $tab['tab_code'] !== (string) $this->activeTab) {
-                continue;
-            }
-            foreach ($tab['fields'] ?? [] as $field) {
-                if (!empty($field['field_name']) && !empty($field['level_name'])) {
-                    $attributes["formData.{$field['field_name']}"] = $field['level_name'];
-
-                    if ((string)$this->activeTab === '102') {
-                        $attributes["formData.cur_{$field['field_name']}"] = 'Current ' . $field['level_name'];
-                    }
-                }
-            }
-        }
-
-        return $attributes;
-    }
-
-    protected function messages(): array
-    {
-        return [
-
-            'formData.*.accepted' => 'Please confirm: :attribute.',
-            'formData.*.required' => ':attribute is required.',
-            'formData.*.regex' => 'Invalid format for :attribute.',
-            'formData.*.numeric' => ':attribute must be a number.',
-            'formData.*.date' => ':attribute must be a date.',
-            'formData.*.required_if' => ':attribute is required.',
-            'formData.*.required_unless' => ':attribute is required.',
-        ];
-    }
-
-    public function updatedFormDataDob($value)
-    {
-        if (!empty($value)) {
-            $this->formData['age'] = Carbon::parse($value)->age;
-        } else {
-            $this->formData['age'] = null;
-        }
-    }
 }
