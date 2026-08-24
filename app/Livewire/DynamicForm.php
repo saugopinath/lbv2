@@ -180,7 +180,7 @@ class DynamicForm extends Component
     {
         foreach ($this->views as $tabCode) {
 
-            $tab = MasterTab::where('tab_code', $tabCode)->first();
+            $tab = MasterTab::select('tab_model_name')->where('tab_code', $tabCode)->first();
 
             if (!$tab || empty($tab->tab_model_name)) {
                 continue;
@@ -400,7 +400,7 @@ class DynamicForm extends Component
 
         sort($this->views);
 
-        $this->tabs = MasterTab::whereIn('tab_code', $this->views)
+        $this->tabs = MasterTab::select('id', 'tab_name', 'tab_icon', 'tab_code')->whereIn('tab_code', $this->views)
             ->get()
             ->keyBy('tab_code');
     }
@@ -426,7 +426,16 @@ class DynamicForm extends Component
         } else {
             $ifsc = strtoupper($value);
             $this->formData['ifscode'] = $ifsc;
-            $ifs = Ifsccodemaster::with('bankmaster')
+            // $ifs = Ifsccodemaster::with('bankmaster')
+            //     ->where('code', $ifsc)
+            //     ->where('is_active', 1)
+            //     ->first();
+            $ifs = Ifsccodemaster::select(['id', 'code', 'branch', 'bankmaster_id'])
+                ->with([
+                    'bankmaster' => function ($query) {
+                        $query->select(['id', 'name']);
+                    }
+                ])
                 ->where('code', $ifsc)
                 ->where('is_active', 1)
                 ->first();
@@ -720,7 +729,7 @@ class DynamicForm extends Component
         $row = UniqueAppBenId::create([
             'scheme_id' => $this->schemeId,
         ]);
-        $beneficiary_id_obj = UniqueAppBenId::where('application_id', $row->application_id)->first();
+        $beneficiary_id_obj = UniqueAppBenId::select('beneficiary_id')->where('application_id', $row->application_id)->first();
         $this->applicationId = $row->application_id;
         $this->beneficiaryId = $beneficiary_id_obj->beneficiary_id;
 
@@ -814,7 +823,7 @@ class DynamicForm extends Component
 
         $this->maxDate = Carbon::now()->format('Y-m-d');
         $this->minDate = Carbon::now()->subYears(2)->format('Y-m-d');
-        $ageConfig = AgeManagements::where('scheme_id', $schemeId)->first();
+        $ageConfig = AgeManagements::select('min_age', 'max_age')->where('scheme_id', $schemeId)->first();
         if ($ageConfig) {
             if ($ageConfig['max_age']) {
                 $this->minDOB = now()->subYears($ageConfig['max_age'])->format('Y-m-d');

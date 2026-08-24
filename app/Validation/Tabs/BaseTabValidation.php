@@ -321,7 +321,7 @@ abstract class BaseTabValidation
      */
     protected function getAgeManagementConfig(): ?object
     {
-        return AgeManagements::where('scheme_id', $this->schemeId)->first();
+        return AgeManagements::select('min_age', 'max_age')->where('scheme_id', $this->schemeId)->first();
     }
 
     /**

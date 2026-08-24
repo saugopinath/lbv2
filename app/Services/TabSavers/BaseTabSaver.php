@@ -2,18 +2,22 @@
 
 namespace App\Services\TabSavers;
 
-use App\Models\AcceptRejectInfo;
-use App\Models\BeneficiaryAadhaar;
-use App\Models\CmoSmData;
-use App\Models\Codemaster;
-use App\Models\DsPhase;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use App\Models\{
+    AcceptRejectInfo,
+    BeneficiaryAadhaar,
+    CmoSmData,
+    Codemaster,
+    DsPhase
+};
+use Illuminate\Support\Facades\{
+    Auth,
+    Cache,
+    Crypt,
+    DB,
+    Schema,
+    File
+};
 use Throwable;
-use Illuminate\Support\Facades\File;
 
 abstract class BaseTabSaver
 {
@@ -140,12 +144,10 @@ abstract class BaseTabSaver
 
                 if ($component->grievanceId) {
                     $grievanceId = Crypt::decryptString($component->grievanceId);
-                    $cmoSmData = CmoSmData::find($grievanceId);
-                    if ($cmoSmData) {
-                        $cmoSmData->lb_application_id = $component->applicationId;
-                        $cmoSmData->is_mark = 1;
-                        $cmoSmData->save();
-                    }
+                    CmoSmData::where('id', $grievanceId)->update([
+                        'lb_application_id' => $component->applicationId,
+                        'is_mark'           => 1,
+                    ]);
                 }
             }
 

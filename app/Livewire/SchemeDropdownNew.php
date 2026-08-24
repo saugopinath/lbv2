@@ -31,7 +31,8 @@ class SchemeDropdownNew extends Component
                 $scheme_id = Crypt::decryptString($select_lgd['scheme_id'][0]);
             }
         }
-        $query = Scheme::query()
+
+        $query = Scheme::select('id', 'name')
             ->where('is_active', 1)
             ->when($scheme_id, fn($q) => $q->where('id', $scheme_id));
         // Commented for development
@@ -40,6 +41,7 @@ class SchemeDropdownNew extends Component
         //         $q->where('is_final_submitted', true);
         //     });
         // }
+
         $this->schemes = $query->get();
     }
     public function updatedSchemeId($value)
