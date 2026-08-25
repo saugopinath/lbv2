@@ -651,110 +651,61 @@ class DynamicForm extends Component
     }
 
     // For checking the Capacity of the scheme via Service Handler
-    private function checkCapacity(): bool
-    {
-        $handler = app(DynamicFormHandlerInterface::class);
-        $result = $handler->isCapacityAvailable(
-            (int) $this->schemeId,
-            (int) $this->actionType,
-            [(int) ($this->formData['application_type'] ?? 0)],
-            $this->isEdit,
-            $this->applicationId
-        );
-
-        if (!$result['is_processed']) {
-            $msg = 'Capacity exceeded for ' . ($result['model'] ?? 'Scheme') .
-                '! Available: ' . ($result['remaining_capacity'] ?? 0);
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => $msg,
-            ]);
-            return false;
-        }
-        return true;
-    }
-
-    /*
-    // ARCHIVED FOR ROLLBACK: checkCapacity
-    private function checkCapacity_legacy(): bool
-    {
-        if ($this->isEdit || !empty($this->applicationId)) {
-            return true;
-        }
-        $result = SchemeCapacityHelper::check(
-            $this->schemeId,
-            $this->actionType,
-            [(int) $this->formData['application_type']]
-        );
-        if (!$result['is_processed']) {
-            $msg = 'Capacity exceeded for ' . ($result['model'] ?? 'Scheme') .
-                '! Available: ' . ($result['remaining_capacity'] ?? 0);
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => $msg,
-            ]);
-            return false;
-        }
-        return true;
-    }
-    */
+    // private function checkCapacity(): bool
+    // {
+    //     if ($this->isEdit || !empty($this->applicationId)) {
+    //         return true;
+    //     }
+    //     $result = SchemeCapacityHelper::check(
+    //         $this->schemeId,
+    //         $this->actionType,
+    //         [(int) $this->formData['application_type']]
+    //     );
+    //     if (!$result['is_processed']) {
+    //         $msg = 'Capacity exceeded for ' . ($result['model'] ?? 'Scheme') .
+    //             '! Available: ' . ($result['remaining_capacity'] ?? 0);
+    //         $this->dispatch('toastr', [
+    //             'type' => 'error',
+    //             'message' => $msg,
+    //         ]);
+    //         return false;
+    //     }
+    //     return true;
+    // }
 
     // For checking if the application_type that was submitted, operator has permission to submit an entry. Used for checking before saving
-    private function checkApplicationTypePermission(): bool
-    {
-        $handler = app(DynamicFormHandlerInterface::class);
-        try {
-            return $handler->processSubmission(
-                $this->formData,
-                (int) $this->schemeId,
-                (int) $this->actionType,
-                $this->isEdit,
-                $this->applicationId
-            );
-        } catch (\Exception $e) {
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => $e->getMessage(),
-            ]);
-            return false;
-        }
-    }
+    // private function checkApplicationTypePermission: bool
+    // {
+    //     $type = $this->formData['application_type'] ?? null;
 
-    /*
-    // ARCHIVED FOR ROLLBACK: checkApplicationTypePermission
-    private function checkApplicationTypePermission_legacy(): bool
-    {
-        $type = $this->formData['application_type'] ?? null;
+    //     if (empty($type)) {
+    //         $this->dispatch('toastr', [
+    //             'type' => 'error',
+    //             'message' => 'Application type is required or not authorized.'
+    //         ]);
+    //         return false;
+    //     }
 
-        if (empty($type)) {
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => 'Application type is required or not authorized.'
-            ]);
-            return false;
-        }
+    //     if ($type == 1 && !WorkFlowPermissionHelper::canNormalEntryAllow($this->schemeId)) {
 
-        if ($type == 1 && !WorkFlowPermissionHelper::canNormalEntryAllow($this->schemeId)) {
+    //         $this->dispatch('toastr', [
+    //             'type' => 'error',
+    //             'message' => 'Normal entry is not allowed.'
+    //         ]);
 
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => 'Normal entry is not allowed.'
-            ]);
+    //         return false;
+    //     }
 
-            return false;
-        }
+    //     if ($type == 2 && !WorkFlowPermissionHelper::canDuareSarkarEntryAllow($this->schemeId)) {
 
-        if ($type == 2 && !WorkFlowPermissionHelper::canDuareSarkarEntryAllow($this->schemeId)) {
-
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => 'Duare Sarkar entry is not allowed.'
-            ]);
-            return false;
-        }
-        return true;
-    }
-    */
+    //         $this->dispatch('toastr', [
+    //             'type' => 'error',
+    //             'message' => 'Duare Sarkar entry is not allowed.'
+    //         ]);
+    //         return false;
+    //     }
+    //     return true;
+    // }
 
     // Load the application types that have permission for the application_type <select>
     private function loadAppTypeOptions(): void
@@ -775,30 +726,27 @@ class DynamicForm extends Component
         $this->appTypeOptions = $handler->getPermittedApplicationTypes((int) $this->schemeId, $rawOptions);
     }
 
-    /*
-    // ARCHIVED FOR ROLLBACK: loadAppTypeOptions
-    private function loadAppTypeOptions_legacy(): void
-    {
-        $json = $this->getSchemeJson();
-        $options = [];
-        foreach ($json['tabs'] ?? [] as $tab) {
-            foreach ($tab['fields'] ?? [] as $field) {
+    // private function loadAppTypeOptions(): void
+    // {
+    //     $json = $this->getSchemeJson();
+    //     $options = [];
+    //     foreach ($json['tabs'] ?? [] as $tab) {
+    //         foreach ($tab['fields'] ?? [] as $field) {
 
-                if (($field['field_name'] ?? '') === 'application_type') {
-                    $options = $field['options'] ?? [];
-                    break 2;
-                }
-            }
-        }
-        if (!WorkFlowPermissionHelper::canNormalEntryAllow($this->schemeId)) {
-            unset($options[1]);
-        }
-        if (!WorkFlowPermissionHelper::canDuareSarkarEntryAllow($this->schemeId)) {
-            unset($options[2]);
-        }
-        $this->appTypeOptions = $options;
-    }
-    */
+    //             if (($field['field_name'] ?? '') === 'application_type') {
+    //                 $options = $field['options'] ?? [];
+    //                 break 2;
+    //             }
+    //         }
+    //     }
+    //     if (!WorkFlowPermissionHelper::canNormalEntryAllow($this->schemeId)) {
+    //         unset($options[1]);
+    //     }
+    //     if (!WorkFlowPermissionHelper::canDuareSarkarEntryAllow($this->schemeId)) {
+    //         unset($options[2]);
+    //     }
+    //     $this->appTypeOptions = $options;
+    // }
 
     // Save Data to table
     private function saveCurrentTabData(): bool
@@ -883,16 +831,13 @@ class DynamicForm extends Component
             abort(403, 'You are not authorized to create entry or for any application type entry.');
         }
 
-        /*
-        // ARCHIVED FOR ROLLBACK: mount_permissions
-        if (!WorkFlowPermissionHelper::canEntry($schemeId)) {
-            abort(403, 'You are not authorized to create entry.');
-        }
+        // if (!WorkFlowPermissionHelper::canEntry($schemeId)) {
+        //     abort(403, 'You are not authorized to create entry.');
+        // }
 
-        if (!WorkFlowPermissionHelper::canCreateEntry($schemeId)) {
-            abort(403, 'You are not authorized for any application type entry.');
-        }
-        */
+        // if (!WorkFlowPermissionHelper::canCreateEntry($schemeId)) {
+        //     abort(403, 'You are not authorized for any application type entry.');
+        // }
 
         $this->schemeId = $schemeId;
         $this->loadAppTypeOptions();

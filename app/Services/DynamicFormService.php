@@ -9,9 +9,8 @@ use Exception;
 
 class DynamicFormService implements DynamicFormHandlerInterface
 {
-    /**
-     * Check if the user is authorized to create/submit entries for the scheme.
-     */
+
+    // Check if the user is authorized to create/submit entries for the scheme.
     public function authorizeEntry(int $schemeId): bool
     {
         if (!WorkFlowPermissionHelper::canEntry($schemeId)) {
@@ -25,9 +24,8 @@ class DynamicFormService implements DynamicFormHandlerInterface
         return true;
     }
 
-    /**
-     * Retrieve application type options filtered by user permissions and doorcamp config.
-     */
+
+    // Retrieve application type options filtered by user permissions and doorcamp config.
     public function getPermittedApplicationTypes(int $schemeId, array $rawOptions = []): array
     {
         $options = $rawOptions;
@@ -52,9 +50,8 @@ class DynamicFormService implements DynamicFormHandlerInterface
         return $options;
     }
 
-    /**
-     * Check capacity availability for the given scheme and application types.
-     */
+
+    // Check capacity availability for the given scheme and application types.
     public function isCapacityAvailable(int $schemeId, int $actionType, array $applicationTypes, bool $isEdit = false, ?string $applicationId = null): array
     {
         if ($isEdit || !empty($applicationId)) {
@@ -68,10 +65,8 @@ class DynamicFormService implements DynamicFormHandlerInterface
         return SchemeCapacityHelper::check($schemeId, $actionType, $applicationTypes);
     }
 
-    /**
-     * Perform pre-submission checks (permissions & capacity) before saving.
-     * Throws CapacityExceededException if capacity limits are breached.
-     */
+
+    // Perform pre-submission checks (permissions & capacity) before saving.
     public function processSubmission(array $formData, int $schemeId, int $actionType, bool $isEdit, ?string $applicationId): bool
     {
         $type = $formData['application_type'] ?? null;
