@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Helpers\CheckAuthHelper;
 use App\Helpers\WorkFlowPermissionHelper;
 use Illuminate\Http\Request;
+use App\Models\User;
 
 class UsersController extends Controller
 {
@@ -28,4 +29,8 @@ class UsersController extends Controller
         $header = 'Oops! You do not have permission to view users.';
         return view('CommonRestictedpage.index', compact('header'));
      }
+     public function assignPermissionRole(User $user)
+    {
+    return view('users.assign-permission-role', compact('user'));
+    }
 }

@@ -37,6 +37,7 @@ class AuthenticationController  extends Controller
         }
 
         return view('auth.index');
+        
     }
 
     public function loginCheck(LoginRequest $request)

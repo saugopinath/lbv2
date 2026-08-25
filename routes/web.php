@@ -85,6 +85,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // User Management
     Route::get('/user-managements', [UsersController::class, 'index'])->middleware('permission.redirect:canViewUser')->name('user-managements');
+    Route::get('/user-managements/{user}/assign-permission-role', [UsersController::class, 'assignPermissionRole'])
+    ->name('users.assign-permission-role');
 
     Route::get('/users/create', UsersCreate::class)->middleware('permission.redirect:canCreateUsers')->name('users');
 

@@ -3,6 +3,8 @@
     <x-success class="mt-6" />
 
     <form class="mt-4 space-y-4" action="{{ route('loginPost') }}" method="POST">
+        
+        
         @csrf
         <div>
             <x-publicForm.text-input
@@ -34,8 +36,22 @@
                 required />
             <x-publicForm.captcha />
         </div>
-        <x-publicForm.button type="submit" class="w-full h-12 bg-[#0e3e98f0] text-white text-lg font-semibold rounded-xl shadow-md hover:bg-[#0c3591] flex justify-center items-center gap-3">Send OTP</x-publicForm.button>
+        <!-- OTP / TOTP -->
+    
 
+                {{-- <x-form.radio id="check_aadhaar" name="aadhaar_number" label="OTP" value="12"
+                
+                />
+                 <x-form.radio id="check_aadhaar" name="aadhaar_number" label="TOTP" value="13"
+                
+                /> --}}
+                <div class="flex flex-col sm:flex-row items-center gap-2">
+                <x-form.radio id="check_otp" name="aadhaar_number" label="OTP" value="12" />
+                <x-form.radio id="check_totp" name="aadhaar_number" label="TOTP" value="13" />
+                </div>
+        
+        <x-publicForm.button type="submit" class="w-full h-12 bg-[#0e3e98f0] text-white text-lg font-semibold rounded-xl shadow-md hover:bg-[#0c3591] flex justify-center items-center gap-3">Send OTP</x-publicForm.button>
+    
     </form>
     <div class="text-right mt-2 text-blue-600 italic text-sm hover:underline cursor-pointer">
         <a href="{{ route('forget-password') }}">Forgot Password?</a>

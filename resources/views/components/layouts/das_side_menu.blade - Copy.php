@@ -101,7 +101,7 @@
         @endif
 
 
-        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canDutyManagement())
+        @if (\App\Helpers\WorkFlowPermissionHelper::canDutyManagement())
             {{-- @canany(['manage role mappings', 'view offices', 'view users']) --}}
             <div>
                 <button @click="activeMenu === 'DutyManagement' ? activeMenu = null : activeMenu = 'DutyManagement'"
@@ -124,7 +124,7 @@
                 <div id="list_menu" x-show="activeMenu === 'DutyManagement'" x-collapse x-transition class="pl-4">
                     <ul>
                         {{-- Role Office Type Mapping --}}
-                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canRoleMapping())
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canRoleMapping())
                             {{-- @can('manage role mappings') --}}
                             <li>
                                 <a href="{{ route('role-office-master-mappings') }}"
@@ -143,7 +143,7 @@
 
                         {{-- Office Masters --}}
                         {{-- @can('view offices') --}}
-                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canViewOffices())
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canViewOffices())
                             <li>
                                 <a href="{{ route('officemasters') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white">
@@ -160,7 +160,7 @@
                         @endif
 
                         {{-- @can('view users') --}}
-                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canViewUser())
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canViewUser())
                             <li>
                                 <a href="{{ route('user-managements') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white">
@@ -181,7 +181,7 @@
 
         @endif
 
-        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canDynamicWorkflowManagement())
+        @if (\App\Helpers\WorkFlowPermissionHelper::canDynamicWorkflowManagement())
             <div>
                 <a href="{{ route('dynamic-workflow-config') }}"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -247,7 +247,7 @@
                             </li>
                         @endif
 
-                        @if  (\App\Helpers\WorkFlowPermissionHelper::canApproverIncomplet())
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canApproverIncomplet())
                             <li>
                                 <a href="{{ route('incomplete.types', 'approver') }}"
                                     class="flex item-center px-2 py-1 text-left rounder hover:bg-slate-700 hover:text-white">
@@ -266,7 +266,7 @@
             </div>
         @endif
 
-        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canSchemeOnboard())
+        @if (\App\Helpers\WorkFlowPermissionHelper::canSchemeOnboard())
             <div>
                 <button @click="activeMenu === 'SchemeOnboard' ? activeMenu = null : activeMenu = 'SchemeOnboard'"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -290,7 +290,7 @@
 
                 <div id="list_menu" x-show="activeMenu === 'SchemeOnboard'" x-collapse x-transition class="pl-4">
                     <ul>
-                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canMasterTab())
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canMasterTab())
                             <li>
                                 <a href="{{ route('master-tab') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
@@ -306,7 +306,7 @@
                                         Management</span></a>
                             </li>
                         @endif
-                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canDefineWorkflow())
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canDefineWorkflow())
                             <li>
                                 <a href="{{ route('define-workflow1') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
@@ -322,7 +322,7 @@
                                         Workflow</span></a>
                             </li>
                         @endif
-                        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canSchemeCapacitySetting())
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canSchemeCapacitySetting())
                             <li>
                                 <a href="{{ route('scheme-capacity') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
@@ -342,7 +342,7 @@
                 </div>
             </div>
         @endif
-        @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canUserPermission())
+        @if (\App\Helpers\WorkFlowPermissionHelper::canUserPermission())
         <div>
             <button @click="activeMenu === 'CreatePermission' ? activeMenu = null : activeMenu = 'CreatePermission'"
                 class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -366,7 +366,7 @@
 
             <div id="list_menu" x-show="activeMenu === 'CreatePermission'" x-collapse x-transition class="pl-4">
                 <ul>
-                    @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canRoleRankManagement())
+                    @if (\App\Helpers\WorkFlowPermissionHelper::canRoleRankManagement())
                         <li>
                             <a href="{{ route('role-rank-management') }}"
                                 class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
@@ -383,7 +383,7 @@
                         </li>
                     @endif
                     {{-- @can('view permission') --}}
-                    @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canViewPermission())
+                    @if (\App\Helpers\WorkFlowPermissionHelper::canViewPermission())
                         <li>
                             <a href="{{ route('permission') }}"
                                 class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
@@ -400,7 +400,7 @@
                         </li>
                         {{-- @endcan --}}
                     @endif
-                    @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canViewUserPermisson())
+                    @if (\App\Helpers\WorkFlowPermissionHelper::canViewUserPermisson())
                         {{-- @can('view user permission') --}}
                         <li>
                             <a href="{{ route('user-permission') }}"
@@ -418,7 +418,7 @@
                         </li>
                         {{-- @endcan --}}
                     @endif
-                    @if (auth()->user()->mappedRoles->contains('name', 'Super Admin') || \App\Helpers\WorkFlowPermissionHelper::canRolePermissionManagement())
+                    @if (\App\Helpers\WorkFlowPermissionHelper::canRolePermissionManagement())
                                     <li>
                                         <a href="{{ route('role-permission-management') }}"
                                             class="flex item-center px-2 py-1 text-left text-slate-200 rounder hover:bg-slate-700 hover:text-white">
@@ -495,7 +495,7 @@
                         @endif
 
                         {{-- @can('view caste modification list') --}}
-                        @if ( \App\Helpers\WorkFlowPermissionHelper::canCasteModification())
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canCasteModification())
                             <li>
                                 <a href="{{ route('caste-management-request-list') }}"
                                     class="flex item-center px-2 py-1 text-left text-slate-200 rounded hover:bg-slate-700 hover:text-white @if (request()->routeIs('caste-management-request-list')) bg-slate-700 text-white @endif">
@@ -539,7 +539,7 @@
             {{-- @endcanany --}}
         @endif
 
-        @if ( \App\Helpers\WorkFlowPermissionHelper::canRejectApprovedBeneficiary())
+        @if (\App\Helpers\WorkFlowPermissionHelper::canRejectApprovedBeneficiary())
             <div>
                 <a href="{{ route('reject-approved-beneficiary') }}"
                     class="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 dark:hover:bg-slate-700 text-slate-200 hover:text-white rounded">
@@ -627,7 +627,7 @@
                 </a>
             </div>
         @endif
-        @if ( \App\Helpers\WorkFlowPermissionHelper::canSarasoriMukhyamantri())
+        @if (\App\Helpers\WorkFlowPermissionHelper::canSarasoriMukhyamantri())
             <div>
                 <button
                     @click="activeMenu === 'Sarasori Mukhyamantri' ? activeMenu = null : activeMenu = 'Sarasori Mukhyamantri'"
