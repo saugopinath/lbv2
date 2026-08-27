@@ -444,6 +444,7 @@ class DynamicForm extends Component
         if ($ifs) {
             $this->formData['bankname'] = $ifs->bankmaster->name ?? '';
             $this->formData['bank_branch_name'] = $ifs->branch ?? '';
+            $this->resetErrorBag('formData.ifscode');
         } else {
             $this->formData['bankname'] = '';
             $this->formData['bank_branch_name'] = '';
@@ -462,6 +463,8 @@ class DynamicForm extends Component
             $this->addError('formData.application_type', 'Unauthorized application type.');
 
             $this->formData['application_type'] = null;
+        } else {
+            $this->resetErrorBag('formData.application_type');
         }
     }
 

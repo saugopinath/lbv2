@@ -216,7 +216,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // / Global Dynamic Workflow Routes
     Route::get('dynamic-workflow-config', WorkflowWizard::class)->middleware('permission.redirect:canDynamicWorkflowManagement')->name('dynamic-workflow-config');
     // Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
-// Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
+    // Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
 
     Route::controller(BackFromJBController::class)->group(function () {
         Route::any('/backfromjb', 'backfromjb')->middleware('permission.redirect:canBackFromJb')->name('backfromjb');
@@ -234,8 +234,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/cmo-add-actions', 'addactions')->name('cmo-add-actions');
     });
     // Route::get('dynamic-workflow-request', RequestUpdateBeneficiary::class)->name('dynamic-workflow-request');
-// Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
-// Route::get('dynamic-process-workflow', DynamicProcessPage::class)->name('dynamic-process-workflow');
+    // Route::get('dynamic-workflow-action', ProcessWorkflow::class)->name('dynamic-workflow-action');
+    // Route::get('dynamic-process-workflow', DynamicProcessPage::class)->name('dynamic-process-workflow');
 
     Route::controller(UpdateMarkBeneficiaryDetailsController::class)->group(function () {
         Route::get('request-update-beneficiary', 'updateRequest')->name('request-update-beneficiary');
@@ -244,10 +244,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Route::get('caste-management', [CasteManagementController::class, 'index'])->name('caste-management');
-// Route::get('caste-management-request-list', [CasteManagementController::class, 'requestdedlistdetails'])->name('caste-management-request-list');
-// Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
-//     // ->middleware('permission.redirect:canBeneficiaryDetails')
-//     ->name('view-beneficiary-details');
+    // Route::get('caste-management-request-list', [CasteManagementController::class, 'requestdedlistdetails'])->name('caste-management-request-list');
+    // Route::get('/view-beneficiary-details', [CasteModificationController::class, 'viewAppDetails'])
+    //     // ->middleware('permission.redirect:canBeneficiaryDetails')
+    //     ->name('view-beneficiary-details');
 
 
     Route::controller(CasteManagementController::class)->group(function () {
