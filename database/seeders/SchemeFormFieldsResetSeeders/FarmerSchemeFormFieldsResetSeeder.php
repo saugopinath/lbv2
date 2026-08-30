@@ -279,6 +279,76 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                 // Land Details (107)
                 [
                     'tab_code' => 107,
+                    'field_id' => 'mouza_name',
+                    'field_name' => 'mouza_name',
+                    'level_name' => 'Name of the Mouza',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|string',
+                    'section_level_id' => $landSec->id,
+                    'section_level_type' => 0,
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 1,
+                ],
+                [
+                    'tab_code' => 107,
+                    'field_id' => 'jl_no',
+                    'field_name' => 'jl_no',
+                    'level_name' => 'J.L. No.',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|string',
+                    'section_level_id' => $landSec->id,
+                    'section_level_type' => 0,
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 2,
+                ],
+                [
+                    'tab_code' => 107,
+                    'field_id' => 'khatian_no',
+                    'field_name' => 'khatian_no',
+                    'level_name' => 'Khatian No.',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|string',
+                    'section_level_id' => $landSec->id,
+                    'section_level_type' => 0,
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 3,
+                ],
+                [
+                    'tab_code' => 107,
+                    'field_id' => 'plot_no',
+                    'field_name' => 'plot_no',
+                    'level_name' => 'Plot No.',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|string',
+                    'section_level_id' => $landSec->id,
+                    'section_level_type' => 0,
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 4,
+                ],
+                [
+                    'tab_code' => 107,
+                    'field_id' => 'area',
+                    'field_name' => 'area',
+                    'level_name' => 'Area in Acre',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|string',
+                    'section_level_id' => $landSec->id,
+                    'section_level_type' => 0,
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 5,
+                ],
+                [
+                    'tab_code' => 107,
                     'field_id' => 'cultivation_by_applicant',
                     'field_name' => 'cultivation_by_applicant',
                     'level_name' => 'Select Cultivation by Applicant (Yes/No)',
@@ -290,7 +360,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 1,
+                    'field_position' => 6,
                 ],
                 [
                     'tab_code' => 107,
@@ -304,7 +374,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 2,
+                    'field_position' => 7,
                 ],
                 [
                     'tab_code' => 107,
@@ -318,7 +388,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 3,
+                    'field_position' => 8,
                 ],
                 // Family Members (108)
                 [
@@ -509,6 +579,11 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'confirmbankaccountnumber',
                 ],
                 107 => [
+                    'mouza_name',
+                    'jl_no',
+                    'khatian_no',
+                    'plot_no',
+                    'area',
                     'cultivation_by_applicant',
                     'source_present_income',
                     'other_benefits_received',
@@ -573,28 +648,61 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
 
             // 6. Seed Attached Documents (Tab 104)
             $docs = [
-                ['doc_type_id' => 103, 'is_required' => true, 'max_file_size' => '100KB', 'extension_type' => 'jpg,png,jpeg,pdf'],
-                ['doc_type_id' => 107, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 111, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 106, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 108, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 119, 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '161', 'is_required' => true, 'max_file_size' => '100KB', 'extension_type' => 'jpg,png,jpeg,pdf'],
+                ['code' => '165', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '169', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '164', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '166', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '1617', 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
             ];
 
-            foreach ($docs as $index => $doc) {
-                SchemeAttachedDocMappings::create([
-                    'scheme_id' => $schemeId,
-                    'tab_code' => 104,
-                    'doc_type_id' => $doc['doc_type_id'],
-                    'field_position' => $index + 1,
-                    'is_required' => $doc['is_required'],
-                    'max_file_size' => $doc['max_file_size'],
-                    'extension_type' => $doc['extension_type'],
-                ]);
+                        foreach ($docs as $index => $doc) {
+                $cm = \App\Models\Codemaster::where('code', $doc['code'])->first();
+                if ($cm) {
+                    SchemeAttachedDocMappings::create([
+                        'scheme_id' => $schemeId,
+                        'tab_code' => 104,
+                        'doc_type_id' => $cm->id,
+                        'field_position' => $index + 1,
+                        'is_required' => $doc['is_required'],
+                        'max_file_size' => $doc['max_file_size'],
+                        'extension_type' => $doc['extension_type'],
+                    ]);
+                }
             }
 
             // 7. Seed Self Declaration Fields (Tab 105)
             $selfDecls = [
+                [
+                    'field_name' => 'resident',
+                    'field_id' => 'resident',
+                    'level_name' => 'I am a resident of West Bengal',
+                    'field_type' => 'checkbox',
+                    'validation_rule' => 'required',
+                    'section_level_id' => null,
+                    'section_level_type' => null,
+                    'field_position' => 1,
+                ],
+                [
+                    'field_name' => 'no_govt_salary',
+                    'field_id' => 'no_govt_salary',
+                    'level_name' => 'I do not earn any monthly remuneration from any regular Government job',
+                    'field_type' => 'checkbox',
+                    'validation_rule' => 'required',
+                    'section_level_id' => null,
+                    'section_level_type' => null,
+                    'field_position' => 2,
+                ],
+                [
+                    'field_name' => 'info_true',
+                    'field_id' => 'info_true',
+                    'level_name' => 'All information and documents submitted are correct',
+                    'field_type' => 'checkbox',
+                    'validation_rule' => 'required',
+                    'section_level_id' => null,
+                    'section_level_type' => null,
+                    'field_position' => 3,
+                ],
                 [
                     'field_name' => 'aadhaar_consent',
                     'field_id' => 'aadhaar_consent',
@@ -604,7 +712,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'validation_rule' => 'required',
                     'section_level_id' => null,
                     'section_level_type' => null,
-                    'field_position' => 1,
+                    'field_position' => 4,
                 ],
                 [
                     'field_name' => 'pension_from',
@@ -616,7 +724,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'validation_rule' => 'nullable',
                     'section_level_id' => null,
                     'section_level_type' => null,
-                    'field_position' => 2,
+                    'field_position' => 5,
                 ],
                 [
                     'field_name' => 'pension_other_sources_1',
@@ -626,7 +734,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'validation_rule' => 'nullable|string',
                     'section_level_id' => null,
                     'section_level_type' => null,
-                    'field_position' => 3,
+                    'field_position' => 6,
                 ],
                 [
                     'field_name' => 'pension_other_sources_2',
@@ -636,7 +744,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'validation_rule' => 'nullable|string',
                     'section_level_id' => null,
                     'section_level_type' => null,
-                    'field_position' => 4,
+                    'field_position' => 7,
                 ],
                 [
                     'field_name' => 'nominee_name',
@@ -727,6 +835,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     ['row' => 1, 'columns' => 3],
                     ['row' => 2, 'columns' => 3],
                     ['row' => 3, 'columns' => 3],
+                    ['row' => 4, 'columns' => 1],
                 ],
                 102 => [
                     ['row' => 1, 'columns' => 3],
@@ -742,6 +851,8 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                 ],
                 107 => [
                     ['row' => 1, 'columns' => 3],
+                    ['row' => 2, 'columns' => 3],
+                    ['row' => 3, 'columns' => 2],
                 ],
                 108 => [
                     ['row' => 1, 'columns' => 3],

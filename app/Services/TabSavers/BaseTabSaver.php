@@ -78,7 +78,7 @@ abstract class BaseTabSaver
             return false;
         } catch (Throwable $e) {
             DB::rollBack();
-            // Optional: Log error
+            echo $e->getMessage() . "\n";
             return false;
         }
     }

@@ -53,6 +53,11 @@ class WidowPensionSchemeFormFieldsResetSeeder extends Seeder
 
             // 2. Ensure Sections exist in SectionLevelMaster
             $sectionsData = [
+                'nominee_sec' => [
+                    'name' => 'Nominee Details',
+                    'short' => 'nominee_sec',
+                    'tab_code' => 105,
+                ],
                 'pension_from_sec' => [
                     'name' => 'Presently, I am receiving following pension(s) from:',
                     'short' => 'pension_from_sec',
@@ -98,7 +103,7 @@ class WidowPensionSchemeFormFieldsResetSeeder extends Seeder
                     'db_colunm' => 'gender',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 5,
+                    'field_position' => 1,
                     'is_mendetory' => 1,
                 ],
                 [
@@ -112,7 +117,7 @@ class WidowPensionSchemeFormFieldsResetSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 14,
+                    'field_position' => 2,
                     'is_mendetory' => 1,
                 ],
                 [
@@ -125,7 +130,7 @@ class WidowPensionSchemeFormFieldsResetSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 15,
+                    'field_position' => 3,
                 ],
             ];
 
@@ -263,29 +268,62 @@ class WidowPensionSchemeFormFieldsResetSeeder extends Seeder
 
             // 6. Seed Attached Documents (Tab 104: Photo 103, Aadhaar 107, Bank Passbook 111, Ration Card 106, Husband Death Cert 117, Aadhaar Consent 126, Income Cert 110)
             $docs = [
-                ['doc_type_id' => 103, 'is_required' => true, 'max_file_size' => '100KB', 'extension_type' => 'jpg,png,jpeg,pdf'],
-                ['doc_type_id' => 107, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 111, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 106, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 117, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 126, 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 110, 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '161', 'is_required' => true, 'max_file_size' => '100KB', 'extension_type' => 'jpg,png,jpeg,pdf'],
+                ['code' => '165', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '169', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '164', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '1615', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '1624', 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '1626', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
             ];
 
-            foreach ($docs as $index => $doc) {
-                SchemeAttachedDocMappings::create([
-                    'scheme_id' => $schemeId,
-                    'tab_code' => 104,
-                    'doc_type_id' => $doc['doc_type_id'],
-                    'field_position' => $index + 1,
-                    'is_required' => $doc['is_required'],
-                    'max_file_size' => $doc['max_file_size'],
-                    'extension_type' => $doc['extension_type'],
-                ]);
+                        foreach ($docs as $index => $doc) {
+                $cm = \App\Models\Codemaster::where('code', $doc['code'])->first();
+                if ($cm) {
+                    SchemeAttachedDocMappings::create([
+                        'scheme_id' => $schemeId,
+                        'tab_code' => 104,
+                        'doc_type_id' => $cm->id,
+                        'field_position' => $index + 1,
+                        'is_required' => $doc['is_required'],
+                        'max_file_size' => $doc['max_file_size'],
+                        'extension_type' => $doc['extension_type'],
+                    ]);
+                }
             }
 
             // 7. Seed Self Declaration Fields (Tab 105: Nominee removed, not_remarried_declaration added)
             $selfDecls = [
+                [
+                    'field_name' => 'nominee_name',
+                    'field_id' => 'nominee_name',
+                    'level_name' => 'Nominee Name',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|string',
+                    'section_level_id' => $sectionIds['nominee_sec'] ?? null,
+                    'section_level_type' => 0,
+                    'field_position' => 4, // will be auto incremented later if needed, or just append
+                ],
+                [
+                    'field_name' => 'nominee_address',
+                    'field_id' => 'nominee_address',
+                    'level_name' => 'Nominee Address',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|string',
+                    'section_level_id' => $sectionIds['nominee_sec'] ?? null,
+                    'section_level_type' => 0,
+                    'field_position' => 5,
+                ],
+                [
+                    'field_name' => 'nominee_relationship',
+                    'field_id' => 'nominee_relationship',
+                    'level_name' => 'Nominee Relationship',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|string',
+                    'section_level_id' => $sectionIds['nominee_sec'] ?? null,
+                    'section_level_type' => 0,
+                    'field_position' => 6,
+                ],
                 [
                     'field_name' => 'aadhaar_consent',
                     'field_id' => 'aadhaar_consent',
@@ -294,7 +332,7 @@ class WidowPensionSchemeFormFieldsResetSeeder extends Seeder
                     'validation_rule' => 'nullable',
                     'section_level_id' => null,
                     'section_level_type' => null,
-                    'field_position' => 1,
+                    'field_position' => 7,
                 ],
                 [
                     'field_name' => 'pension_from',
@@ -305,7 +343,7 @@ class WidowPensionSchemeFormFieldsResetSeeder extends Seeder
                     'validation_rule' => 'nullable',
                     'section_level_id' => $sectionIds['pension_from_sec'] ?? null,
                     'section_level_type' => 0,
-                    'field_position' => 2,
+                    'field_position' => 8,
                 ],
                 [
                     'field_name' => 'not_remarried_declaration',
@@ -315,7 +353,7 @@ class WidowPensionSchemeFormFieldsResetSeeder extends Seeder
                     'validation_rule' => 'required',
                     'section_level_id' => null,
                     'section_level_type' => null,
-                    'field_position' => 3,
+                    'field_position' => 9,
                 ],
                 [
                     'field_name' => 'social_security_pension',
@@ -337,7 +375,7 @@ class WidowPensionSchemeFormFieldsResetSeeder extends Seeder
                     'validation_rule' => 'nullable',
                     'section_level_id' => $sectionIds['social_sec'] ?? null,
                     'section_level_type' => 0,
-                    'field_position' => 4,
+                    'field_position' => 10,
                 ],
             ];
 

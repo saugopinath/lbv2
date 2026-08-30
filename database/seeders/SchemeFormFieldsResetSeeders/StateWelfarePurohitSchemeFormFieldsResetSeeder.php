@@ -103,6 +103,19 @@ class StateWelfarePurohitSchemeFormFieldsResetSeeder extends Seeder
             // 3. Ensure custom base fields exist
             $customBaseFields = [
                 [
+                    'tab_code' => 106,
+                    'field_id' => 'pan',
+                    'field_name' => 'pan',
+                    'level_name' => 'PAN',
+                    'field_type' => 'text',
+                    'validation_rule' => 'required',
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 4,
+                    'is_mendetory' => 1,
+                ],
+                [
                     'tab_code' => 101,
                     'field_id' => 'gender',
                     'field_name' => 'gender',
@@ -159,6 +172,7 @@ class StateWelfarePurohitSchemeFormFieldsResetSeeder extends Seeder
                 [
                     'tab_code' => 107,
                     'field_id' => 'mouza_name',
+                    'field_position' => 3,
                     'field_name' => 'mouza_name',
                     'level_name' => 'Name of the Mouza',
                     'field_type' => 'text',
@@ -182,7 +196,7 @@ class StateWelfarePurohitSchemeFormFieldsResetSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 2,
+                    'field_position' => 3,
                 ],
                 [
                     'tab_code' => 107,
@@ -196,7 +210,7 @@ class StateWelfarePurohitSchemeFormFieldsResetSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 3,
+                    'field_position' => 4,
                 ],
                 [
                     'tab_code' => 107,
@@ -210,7 +224,7 @@ class StateWelfarePurohitSchemeFormFieldsResetSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 4,
+                    'field_position' => 5,
                 ],
                 [
                     'tab_code' => 107,
@@ -224,21 +238,22 @@ class StateWelfarePurohitSchemeFormFieldsResetSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 5,
+                    'field_position' => 6,
                 ],
                 [
                     'tab_code' => 107,
-                    'field_id' => 'in_name_of',
-                    'field_name' => 'in_name_of',
-                    'level_name' => 'In the Name of',
-                    'field_type' => 'text',
-                    'validation_rule' => 'nullable|string',
+                    'field_id' => 'land_available',
+                    'field_name' => 'land_available',
+                    'level_name' => 'Land Available for House',
+                    'field_type' => 'select',
+                    'options' => ['1' => 'Yes', '2' => 'No'],
+                    'validation_rule' => 'nullable',
                     'section_level_id' => $sectionIds['land_dwelling_sec'] ?? null,
                     'section_level_type' => 0,
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 6,
+                    'field_position' => 1,
                 ],
             ];
 
@@ -330,7 +345,7 @@ class StateWelfarePurohitSchemeFormFieldsResetSeeder extends Seeder
                     'khatian_no',
                     'plot_no',
                     'area',
-                    'in_name_of',
+                    'land_available',
                 ],
             ];
 
@@ -386,27 +401,30 @@ class StateWelfarePurohitSchemeFormFieldsResetSeeder extends Seeder
 
             // 6. Seed Attached Documents (Tab 104)
             $docs = [
-                ['doc_type_id' => 103, 'is_required' => true, 'max_file_size' => '100KB', 'extension_type' => 'jpg,png,jpeg,pdf'],
-                ['doc_type_id' => 107, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 111, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 106, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 108, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 119, 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 110, 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 113, 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 105, 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '161', 'is_required' => true, 'max_file_size' => '100KB', 'extension_type' => 'jpg,png,jpeg,pdf'],
+                ['code' => '165', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '169', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '164', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '166', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '1617', 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '168', 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '167', 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '1610', 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
             ];
 
-            foreach ($docs as $index => $doc) {
-                SchemeAttachedDocMappings::create([
-                    'scheme_id' => $schemeId,
-                    'tab_code' => 104,
-                    'doc_type_id' => $doc['doc_type_id'],
-                    'field_position' => $index + 1,
-                    'is_required' => $doc['is_required'],
-                    'max_file_size' => $doc['max_file_size'],
-                    'extension_type' => $doc['extension_type'],
-                ]);
+                        foreach ($docs as $index => $doc) {
+                $cm = \App\Models\Codemaster::where('code', $doc['code'])->first();
+                if ($cm) {
+                    SchemeAttachedDocMappings::create([
+                        'scheme_id' => $schemeId,
+                        'tab_code' => 104,
+                        'doc_type_id' => $cm->id,
+                        'field_position' => $index + 1,
+                        'is_required' => $doc['is_required'],
+                        'max_file_size' => $doc['max_file_size'],
+                        'extension_type' => $doc['extension_type'],
+                    ]);
+                }
             }
 
             // 7. Seed Self Declaration Fields (Tab 105) with Section Associations
@@ -419,7 +437,7 @@ class StateWelfarePurohitSchemeFormFieldsResetSeeder extends Seeder
                     'validation_rule' => 'nullable',
                     'section_level_id' => null,
                     'section_level_type' => null,
-                    'field_position' => 1,
+                    'field_position' => 2,
                 ],
                 [
                     'field_name' => 'pension_from',

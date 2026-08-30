@@ -256,24 +256,27 @@ class TapasiliBandhuSchemeFormFieldsResetSeeder extends Seeder
 
             // 6. Seed Attached Documents (Tab 104: Photo 103, Aadhaar 107, Bank Passbook 111, Ration Card 106, Aadhaar Consent 126, Caste Cert 104)
             $docs = [
-                ['doc_type_id' => 103, 'is_required' => true, 'max_file_size' => '100KB', 'extension_type' => 'jpg,png,jpeg,pdf'],
-                ['doc_type_id' => 107, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 111, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 106, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 126, 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 104, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '161', 'is_required' => true, 'max_file_size' => '100KB', 'extension_type' => 'jpg,png,jpeg,pdf'],
+                ['code' => '165', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '169', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '164', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '1624', 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '162', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
             ];
 
-            foreach ($docs as $index => $doc) {
-                SchemeAttachedDocMappings::create([
-                    'scheme_id' => $schemeId,
-                    'tab_code' => 104,
-                    'doc_type_id' => $doc['doc_type_id'],
-                    'field_position' => $index + 1,
-                    'is_required' => $doc['is_required'],
-                    'max_file_size' => $doc['max_file_size'],
-                    'extension_type' => $doc['extension_type'],
-                ]);
+                        foreach ($docs as $index => $doc) {
+                $cm = \App\Models\Codemaster::where('code', $doc['code'])->first();
+                if ($cm) {
+                    SchemeAttachedDocMappings::create([
+                        'scheme_id' => $schemeId,
+                        'tab_code' => 104,
+                        'doc_type_id' => $cm->id,
+                        'field_position' => $index + 1,
+                        'is_required' => $doc['is_required'],
+                        'max_file_size' => $doc['max_file_size'],
+                        'extension_type' => $doc['extension_type'],
+                    ]);
+                }
             }
 
             // 7. Seed Self Declaration Fields (Tab 105)
@@ -350,6 +353,16 @@ class TapasiliBandhuSchemeFormFieldsResetSeeder extends Seeder
                     'section_level_id' => $sectionIds['social_sec'] ?? null,
                     'section_level_type' => 0,
                     'field_position' => 6,
+                ],
+                [
+                    'field_name' => 'nominee_consent',
+                    'field_id' => 'nominee_consent',
+                    'level_name' => 'In the event of my death, I hereby nominate (Consent)',
+                    'field_type' => 'checkbox',
+                    'validation_rule' => 'nullable',
+                    'section_level_id' => $sectionIds['nominee_sec'] ?? null,
+                    'section_level_type' => 0,
+                    'field_position' => 7,
                 ],
             ];
 

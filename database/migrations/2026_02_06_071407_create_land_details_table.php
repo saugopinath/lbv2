@@ -8,7 +8,7 @@ return new class extends Migration {
 
     public function up(): void
     {
-        Schema::create('lb_scheme.land_details', function (Blueprint $table) {
+        Schema::create('pension.land_details', function (Blueprint $table) {
 
         $table->id();
         $table->unsignedBigInteger('scheme_id');
@@ -23,16 +23,12 @@ $table->unsignedBigInteger('beneficiary_id')->unique();
         $table->timestamps();
           
 
-        $table->foreign('application_id', 'application_id_fk')
+        $table->foreign('application_id', 'land_application_id_fk')
                 ->references('application_id')
-                ->on('lb_scheme.unique_app_ben_ids')
+                ->on('pension.unique_app_ben_ids')
                 ->cascadeOnDelete();
 
-        $table->foreign('beneficiary_id', 'beneficiary_id_fk')
-                ->references('beneficiary_id')
-                ->on('lb_scheme.unique_app_ben_ids')
-                ->cascadeOnDelete();
-        $table->foreign('scheme_id', 'scheme_id_fk')
+        $table->foreign('scheme_id', 'land_scheme_id_fk')
                 ->references('id')
                 ->on('public.schemes')
                 ->cascadeOnDelete();
@@ -42,6 +38,6 @@ $table->unsignedBigInteger('beneficiary_id')->unique();
 
     public function down(): void
     {
-        Schema::dropIfExists('lb_scheme.land_details');
+        Schema::dropIfExists('pension.land_details');
     }
 };
