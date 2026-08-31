@@ -67,7 +67,11 @@
                                     <div class="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
                                         <div class="text-xs text-gray-500 uppercase tracking-wider mb-1">{{ $label }}</div>
                                         <div class="text-lg font-semibold text-gray-800 ml-2">
-                                            {{ ($value !== null && $value !== '' && $value !== '-') ? $value : 'Not Applicable' }}
+                                            @if(is_array($value))
+                                                <pre class="text-xs bg-gray-100 p-2 rounded overflow-auto">{{ json_encode($value, JSON_PRETTY_PRINT) }}</pre>
+                                            @else
+                                                {{ ($value !== null && $value !== '' && $value !== '-') ? $value : 'Not Applicable' }}
+                                            @endif
                                         </div>
                                     </div>
                                 @endforeach

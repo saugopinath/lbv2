@@ -148,100 +148,612 @@ class SchemewiseStoreDataJsonHelper
             }
 
             /* ================= NORMAL FORM TABS ================= */
-            if ($tabCode == 105) {
+            if ($tabCode == 107) {
+                // Farmer Custom Land Details dynamically generated from settings
+                $modalPath = resource_path("views/components/dynamic-modal.blade.php");
+                if (!File::exists($modalPath)) {
+                    $modalContent = <<<'BLADE'
+@props([
+    'showVar' => 'showModal',
+    'title' => 'Add Details',
+    'fields' => [],
+    'targetVar' => 'newLand',
+    'submitAction' => 'addLand()',
+])
 
+<div x-show="{{ $showVar }}" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+    <div class="flex items-center justify-center min-h-screen w-full p-4 text-center">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="{{ $showVar }} = false">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="inline-block bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full z-10">
+            <div class="bg-blue-600 px-6 py-4 text-white">
+                <h3 class="text-lg font-bold">{{ $title }}</h3>
+            </div>
+            <div class="bg-white px-6 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="space-y-4">
+                    @foreach($fields as $field)
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">{{ $field['label'] }}</label>
+                            @if(($field['type'] ?? 'text') === 'select')
+                                <select x-model="{{ $targetVar }}.{{ $field['name'] }}" class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                    <option value="">-- Select --</option>
+                                    @foreach($field['options'] ?? [] as $val => $lbl)
+                                        <option value="{{ $val }}">{{ $lbl }}</option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <input type="{{ $field['type'] ?? 'text' }}" x-model="{{ $targetVar }}.{{ $field['name'] }}" class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="{{ $field['placeholder'] ?? '' }}" />
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-200">
+                <button type="button" @click="{{ $showVar }} = false" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm font-semibold">Cancel</button>
+                <button type="button" @click="{{ $submitAction }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+BLADE;
+                    File::ensureDirectoryExists(dirname($modalPath));
+                    File::put($modalPath, $modalContent);
+                }
+
+                $allFields = $tab['fields'] ?? [];
+                $landsField = collect($allFields)->firstWhere('field_name', 'lands');
+
+                if ($landsField) {
+                    $tableSectionId = $landsField['section_level_id'] ?? null;
+                    if (!$tableSectionId && !empty($allFields)) {
+                        $tableSectionId = $allFields[0]['section_level_id'];
+                    }
+
+                    $tableFields = array_values(array_filter($allFields, function ($f) use ($tableSectionId) {
+                        return $f['section_level_id'] == $tableSectionId && $f['field_name'] !== 'lands';
+                    }));
+
+                    $bottomFields = array_values(array_filter($allFields, function ($f) use ($tableSectionId) {
+                        return $f['section_level_id'] != $tableSectionId;
+                    }));
+
+                    $newLandJsFields = [];
+                    foreach ($tableFields as $f) {
+                        $newLandJsFields[] = "{$f['field_name']}: ''";
+                    }
+                    $newLandJsStr = implode(', ', $newLandJsFields);
+
+                    $validationJsFields = [];
+                    foreach ($tableFields as $f) {
+                        $rules = explode('|', $f['validation_rule'] ?? '');
+                        if (in_array('required', $rules)) {
+                            $validationJsFields[] = "!this.newLand.{$f['field_name']}";
+                        }
+                    }
+                    if (empty($validationJsFields)) {
+                        foreach ($tableFields as $f) {
+                            $validationJsFields[] = "!this.newLand.{$f['field_name']}";
+                        }
+                    }
+                    $validationJsStr = implode(' || ', $validationJsFields);
+
+                    $tableHeadersHtml = "                        <th class=\"px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider\">Serial No</th>\n";
+                    foreach ($tableFields as $f) {
+                        $lbl = e($f['level_name'] ?? ucwords(str_replace('_', ' ', $f['field_name'])));
+                        $tableHeadersHtml .= "                        <th class=\"px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider\">{$lbl}</th>\n";
+                    }
+                    $tableHeadersHtml .= "                        <th class=\"px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider\">Action</th>\n";
+
+                    $tableCellsHtml = "                            <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\" x-text=\"index + 1\"></td>\n";
+                    foreach ($tableFields as $f) {
+                        $tableCellsHtml .= "                            <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-700\" x-text=\"land.{$f['field_name']}\"></td>\n";
+                    }
+                    $tableCellsHtml .= "                            <td class=\"px-6 py-4 whitespace-nowrap text-center text-sm font-medium\">
+                                                    <button type=\"button\" @click=\"removeLand(index)\" class=\"text-red-600 hover:text-red-900 font-semibold\">Delete</button>
+                                                </td>\n";
+
+                    $bottomFieldsHtml = "<div class=\"grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 items-start\">\n";
+                    foreach ($bottomFields as $f) {
+                        $bottomFieldsHtml .= "    <div wire:key=\"field-norm-{$f['field_name']}\">\n";
+                        $bottomFieldsHtml .= self::renderField($f);
+                        $bottomFieldsHtml .= "    </div>\n";
+                    }
+                    $bottomFieldsHtml .= "</div>\n";
+
+                    $hiddenInputsHtml = '';
+                    foreach ($tableFields as $f) {
+                        $hiddenInputsHtml .= "    <input type=\"hidden\" name=\"{$f['field_name']}\" id=\"{$f['field_name']}\" wire:model=\"formData.{$f['field_name']}\" />\n";
+                    }
+
+                    $modalFieldsArrayStr = '';
+                    foreach ($tableFields as $f) {
+                        $lbl = addslashes($f['level_name'] ?? ucwords(str_replace('_', ' ', $f['field_name'])));
+                        $rules = explode('|', $f['validation_rule'] ?? '');
+                        $isRequired = (in_array('required', $rules) || ($f['is_mendetory'] ?? 0) == 1) ? 'true' : 'false';
+                        $optionsStr = '';
+                        if (!empty($f['options']) && is_array($f['options'])) {
+                            $opts = [];
+                            foreach($f['options'] as $k => $v) {
+                                $opts[] = "'" . addslashes($k) . "' => '" . addslashes($v) . "'";
+                            }
+                            $optionsStr = ", 'options' => [" . implode(", ", $opts) . "]";
+                        }
+                        $modalFieldsArrayStr .= "            ['name' => '{$f['field_name']}', 'label' => '{$lbl}', 'placeholder' => 'Enter {$lbl}', 'type' => '{$f['field_type']}', 'is_required' => {$isRequired}{$optionsStr}],\n";
+                    }
+
+                    $mapping = DB::table('scheme_tab_mappings')
+                        ->where('scheme_id', $schemeId)
+                        ->where('tab_code', $tabCode)
+                        ->first();
+                    $placement = $mapping->modal_placement ?? 'top-right';
+
+                    $isTopRight = ($placement === 'top-right');
+                    $isTopCenter = ($placement === 'top-center');
+                    
+                    $headerButtonHtml = '';
+                    if ($isTopRight || $isTopCenter) {
+                        $btnWrapperClass = $isTopCenter ? 'absolute left-1/2 -translate-x-1/2' : '';
+                        $headerButtonHtml = <<<HTML
+                                                <div class="{$btnWrapperClass}">
+                                                    <button type="button" @click="showModal = true" class="flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-50 transition text-sm">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                                        </svg>
+                                                        Add Land Details
+                                                    </button>
+                                                </div>
+HTML;
+                    }
+
+                    $justifyClass = 'justify-end';
+                    if (str_contains($placement, 'left')) $justifyClass = 'justify-start';
+                    elseif (str_contains($placement, 'center')) $justifyClass = 'justify-center';
+
+                    $barButtonHtml = <<<HTML
+                                            <div class="px-6 py-4 flex {$justifyClass} items-center bg-gray-50 border-b border-gray-200">
+                                                <button type="button" @click="showModal = true" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition text-sm">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                                    </svg>
+                                                    Add Land Details
+                                                </button>
+                                            </div>
+HTML;
+
+                    $topButtonHtml = (str_starts_with($placement, 'top') && !$isTopRight && !$isTopCenter) ? $barButtonHtml : '';
+                    $bottomButtonHtml = str_starts_with($placement, 'bottom') ? str_replace('border-b', 'border-t', $barButtonHtml) : '';
+
+                    $blade = <<<BLADE
+                                    <div x-data="{
+                                        lands: @js(\$formData['lands'] ?? []),
+                                        showModal: false,
+                                        newLand: { {$newLandJsStr} },
+                                        addLand() {
+                                            if ({$validationJsStr}) {
+                                                alert('Please fill all land detail fields.');
+                                                return;
+                                            }
+                                            if (!this.lands) {
+                                                this.lands = [];
+                                            }
+                                            this.lands.push({...this.newLand});
+                                            this.newLand = { {$newLandJsStr} };
+                                            this.showModal = false;
+                                            \$wire.set('formData.lands', this.lands);
+                                        },
+                                        removeLand(index) {
+                                            this.lands.splice(index, 1);
+                                            \$wire.set('formData.lands', this.lands);
+                                        }
+                                    }" x-init="if(!this.lands || typeof this.lands !== 'object') { this.lands = []; }">
+
+                                        <div class="mb-6 rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+                                            <!-- Header Bar -->
+                                            <div class="bg-blue-600 px-6 py-4 flex justify-between items-center text-white relative">
+                                                <h3 class="text-lg font-bold">Land Details</h3>
+                                    {$headerButtonHtml}
+                                            </div>
+                                    {$topButtonHtml}
+
+                                            <!-- Data Table -->
+                                            <div class="overflow-x-auto">
+                                                <table class="min-w-full divide-y divide-gray-200">
+                                                    <thead class="bg-gray-50">
+                                                        <tr>
+                                    {$tableHeadersHtml}                    </tr>
+                                                    </thead>
+                                                    <tbody class="bg-white divide-y divide-gray-200">
+                                                        <template x-for="(land, index) in lands" :key="index">
+                                                            <tr>
+                                    {$tableCellsHtml}                        </tr>
+                                                        </template>
+                                                        <tr x-show="!lands || lands.length === 0">
+                                                            <td colspan="10" class="px-6 py-8 text-center text-sm text-gray-500">
+                                                                No land details added yet. Click "+ Add Land Details" to add a record.
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                    {$bottomButtonHtml}
+                                        </div>
+
+                                        <!-- Form Input Fields below table -->
+                                    {$bottomFieldsHtml}
+                                        <!-- Hidden Inputs to prevent JS type validation errors for fields not directly shown in the DOM -->
+                                    {$hiddenInputsHtml}
+                                        <!-- Add Land Details Modal (using reusable component) -->
+                                        <x-dynamic-modal
+                                            showVar="showModal"
+                                            title="Add Land Details"
+                                            targetVar="newLand"
+                                            submitAction="addLand()"
+                                            :fields="[
+                                    {$modalFieldsArrayStr}        ]"
+                                        />
+                                    </div>
+                                    BLADE;
+                    File::put("{$dir}/107.blade.php", $blade);
+                    continue;
+                }
+            } elseif ($tabCode == 108) {
+                // Farmer Custom Family Details dynamically generated from settings
+                $modalPath = resource_path("views/components/dynamic-modal.blade.php");
+                if (!File::exists($modalPath)) {
+                    $modalContent = <<<'BLADE'
+@props([
+    'showVar' => 'showModal',
+    'title' => 'Add Details',
+    'fields' => [],
+    'targetVar' => 'newMember',
+    'submitAction' => 'addMember()',
+])
+
+<div x-show="{{ $showVar }}" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+    <div class="flex items-center justify-center min-h-screen w-full p-4 text-center">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="{{ $showVar }} = false">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="inline-block bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full z-10">
+            <div class="bg-blue-600 px-6 py-4 text-white">
+                <h3 class="text-lg font-bold">{{ $title }}</h3>
+            </div>
+            <div class="bg-white px-6 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="space-y-4">
+                    @foreach($fields as $field)
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">{{ $field['label'] }}</label>
+                            @if(($field['type'] ?? 'text') === 'select')
+                                <select x-model="{{ $targetVar }}.{{ $field['name'] }}" class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                    <option value="">-- Select --</option>
+                                    @foreach($field['options'] ?? [] as $val => $lbl)
+                                        <option value="{{ $val }}">{{ $lbl }}</option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <input type="{{ $field['type'] ?? 'text' }}" x-model="{{ $targetVar }}.{{ $field['name'] }}" class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="{{ $field['placeholder'] ?? '' }}" />
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-200">
+                <button type="button" @click="{{ $showVar }} = false" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm font-semibold">Cancel</button>
+                <button type="button" @click="{{ $submitAction }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+BLADE;
+                    File::ensureDirectoryExists(dirname($modalPath));
+                    File::put($modalPath, $modalContent);
+                }
+
+                $allFields = $tab['fields'] ?? [];
+                $familiesField = collect($allFields)->firstWhere('field_name', 'families');
+
+                if ($familiesField) {
+                    $tableSectionId = $familiesField['section_level_id'] ?? null;
+                    if (!$tableSectionId && !empty($allFields)) {
+                        $tableSectionId = $allFields[0]['section_level_id'];
+                    }
+
+                    $tableFields = array_values(array_filter($allFields, function ($f) use ($tableSectionId) {
+                        return $f['section_level_id'] == $tableSectionId && $f['field_name'] !== 'families';
+                    }));
+
+                    $bottomFields = array_values(array_filter($allFields, function ($f) use ($tableSectionId) {
+                        return $f['section_level_id'] != $tableSectionId;
+                    }));
+
+                    $newMemberJsFields = [];
+                    foreach ($tableFields as $f) {
+                        $newMemberJsFields[] = "{$f['field_name']}: ''";
+                    }
+                    $newMemberJsStr = implode(', ', $newMemberJsFields);
+
+                    $validationJsFields = [];
+                    foreach ($tableFields as $f) {
+                        $rules = explode('|', $f['validation_rule'] ?? '');
+                        if (in_array('required', $rules)) {
+                            $validationJsFields[] = "!this.newMember.{$f['field_name']}";
+                        }
+                    }
+                    if (empty($validationJsFields)) {
+                        foreach ($tableFields as $f) {
+                            $validationJsFields[] = "!this.newMember.{$f['field_name']}";
+                        }
+                    }
+                    $validationJsStr = implode(' || ', $validationJsFields);
+
+                    $tableHeadersHtml = "                        <th class=\"px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider\">Serial No</th>\n";
+                    foreach ($tableFields as $f) {
+                        $lbl = e($f['level_name'] ?? ucwords(str_replace('_', ' ', $f['field_name'])));
+                        $tableHeadersHtml .= "                        <th class=\"px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider\">{$lbl}</th>\n";
+                    }
+                    $tableHeadersHtml .= "                        <th class=\"px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider\">Action</th>\n";
+
+                    $tableCellsHtml = "                            <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\" x-text=\"index + 1\"></td>\n";
+                    foreach ($tableFields as $f) {
+                        $tableCellsHtml .= "                            <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-700\" x-text=\"family.{$f['field_name']}\"></td>\n";
+                    }
+                    $tableCellsHtml .= "                            <td class=\"px-6 py-4 whitespace-nowrap text-center text-sm font-medium\">
+                                                    <button type=\"button\" @click=\"removeMember(index)\" class=\"text-red-600 hover:text-red-900 font-semibold\">Delete</button>
+                                                </td>\n";
+
+                    $bottomFieldsHtml = "<div class=\"grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 items-start\">\n";
+                    foreach ($bottomFields as $f) {
+                        $bottomFieldsHtml .= "    <div wire:key=\"field-norm-{$f['field_name']}\">\n";
+                        $bottomFieldsHtml .= self::renderField($f);
+                        $bottomFieldsHtml .= "    </div>\n";
+                    }
+                    $bottomFieldsHtml .= "</div>\n";
+
+                    $hiddenInputsHtml = '';
+                    foreach ($tableFields as $f) {
+                        $hiddenInputsHtml .= "    <input type=\"hidden\" name=\"{$f['field_name']}\" id=\"{$f['field_name']}\" wire:model=\"formData.{$f['field_name']}\" />\n";
+                    }
+
+                    $modalFieldsArrayStr = '';
+                    foreach ($tableFields as $f) {
+                        $lbl = addslashes($f['level_name'] ?? ucwords(str_replace('_', ' ', $f['field_name'])));
+                        $rules = explode('|', $f['validation_rule'] ?? '');
+                        $isRequired = (in_array('required', $rules) || ($f['is_mendetory'] ?? 0) == 1) ? 'true' : 'false';
+                        $optionsStr = '';
+                        if (!empty($f['options']) && is_array($f['options'])) {
+                            $opts = [];
+                            foreach($f['options'] as $k => $v) {
+                                $opts[] = "'" . addslashes($k) . "' => '" . addslashes($v) . "'";
+                            }
+                            $optionsStr = ", 'options' => [" . implode(", ", $opts) . "]";
+                        }
+                        $modalFieldsArrayStr .= "            ['name' => '{$f['field_name']}', 'label' => '{$lbl}', 'placeholder' => 'Enter {$lbl}', 'type' => '{$f['field_type']}', 'is_required' => {$isRequired}{$optionsStr}],\n";
+                    }
+
+                    $mapping = DB::table('scheme_tab_mappings')
+                        ->where('scheme_id', $schemeId)
+                        ->where('tab_code', $tabCode)
+                        ->first();
+                    $placement = $mapping->modal_placement ?? 'top-right';
+
+                    $isTopRight = ($placement === 'top-right');
+                    $isTopCenter = ($placement === 'top-center');
+                    
+                    $headerButtonHtml = '';
+                    if ($isTopRight || $isTopCenter) {
+                        $btnWrapperClass = $isTopCenter ? 'absolute left-1/2 -translate-x-1/2' : '';
+                        $headerButtonHtml = <<<HTML
+                                                <div class="{$btnWrapperClass}">
+                                                    <button type="button" @click="showModal = true" class="flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-50 transition text-sm">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                                        </svg>
+                                                        Add Family Details
+                                                    </button>
+                                                </div>
+HTML;
+                    }
+
+                    $justifyClass = 'justify-end';
+                    if (str_contains($placement, 'left')) $justifyClass = 'justify-start';
+                    elseif (str_contains($placement, 'center')) $justifyClass = 'justify-center';
+
+                    $barButtonHtml = <<<HTML
+                                            <div class="px-6 py-4 flex {$justifyClass} items-center bg-gray-50 border-b border-gray-200">
+                                                <button type="button" @click="showModal = true" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition text-sm">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                                    </svg>
+                                                    Add Family Details
+                                                </button>
+                                            </div>
+HTML;
+
+                    $topButtonHtml = (str_starts_with($placement, 'top') && !$isTopRight && !$isTopCenter) ? $barButtonHtml : '';
+                    $bottomButtonHtml = str_starts_with($placement, 'bottom') ? str_replace('border-b', 'border-t', $barButtonHtml) : '';
+
+                    $blade = <<<BLADE
+                                    <div x-data="{
+                                        families: @js(\$formData['families'] ?? []),
+                                        showModal: false,
+                                        newMember: { {$newMemberJsStr} },
+                                        addMember() {
+                                            if ({$validationJsStr}) {
+                                                alert('Please fill all family detail fields.');
+                                                return;
+                                            }
+                                            if (!this.families) {
+                                                this.families = [];
+                                            }
+                                            this.families.push({...this.newMember});
+                                            this.newMember = { {$newMemberJsStr} };
+                                            this.showModal = false;
+                                            \$wire.set('formData.families', this.families);
+                                        },
+                                        removeMember(index) {
+                                            this.families.splice(index, 1);
+                                            \$wire.set('formData.families', this.families);
+                                        }
+                                    }" x-init="if(!this.families || typeof this.families !== 'object') { this.families = []; }">
+
+                                        <div class="mb-6 rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+                                            <!-- Header Bar -->
+                                            <div class="bg-blue-600 px-6 py-4 flex justify-between items-center text-white relative">
+                                                <h3 class="text-lg font-bold">Family Details</h3>
+                                    {$headerButtonHtml}
+                                            </div>
+                                    {$topButtonHtml}
+
+                                            <!-- Data Table -->
+                                            <div class="overflow-x-auto">
+                                                <table class="min-w-full divide-y divide-gray-200">
+                                                    <thead class="bg-gray-50">
+                                                        <tr>
+                                    {$tableHeadersHtml}                    </tr>
+                                                    </thead>
+                                                    <tbody class="bg-white divide-y divide-gray-200">
+                                                        <template x-for="(family, index) in families" :key="index">
+                                                            <tr>
+                                    {$tableCellsHtml}                        </tr>
+                                                        </template>
+                                                        <tr x-show="!families || families.length === 0">
+                                                            <td colspan="10" class="px-6 py-8 text-center text-sm text-gray-500">
+                                                                No family details added yet. Click "+ Add Family Details" to add a record.
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                    {$bottomButtonHtml}
+                                        </div>
+
+                                        <!-- Form Input Fields below table -->
+                                    {$bottomFieldsHtml}
+                                        <!-- Hidden Inputs to prevent JS type validation errors for fields not directly shown in the DOM -->
+                                    {$hiddenInputsHtml}
+                                        <!-- Add Family Details Modal (using reusable component) -->
+                                        <x-dynamic-modal
+                                            showVar="showModal"
+                                            title="Add Family Details"
+                                            targetVar="newMember"
+                                            submitAction="addMember()"
+                                            :fields="[
+                                    {$modalFieldsArrayStr}        ]"
+                                        />
+                                    </div>
+                                    BLADE;
+                    File::put("{$dir}/108.blade.php", $blade);
+                    continue;
+                }
+            } elseif ($tabCode == 105) {
+                // Fully generic, configuration-driven Self Declaration generator
                 $fields = SelfDeclerationBasefield::where('scheme_id', $schemeId)
                     ->where('tab_code', 105)
                     ->where('is_active', true)
                     ->orderBy('field_position')
-                    ->get()
-                    ->values();
+                    ->get();
 
-                $sectionMap = SectionLevelMaster::pluck(
-                    'section_level_name',
-                    'id'
-                )->toArray();
-
-                $layout = DB::table('scheme_tab_layouts')
-                    ->where('scheme_id', $schemeId)
+                $sections = SectionLevelMaster::where('scheme_id', $schemeId)
                     ->where('tab_code', 105)
-                    ->value('layout_json');
+                    ->where('is_active', true)
+                    ->get()
+                    ->sortBy(function ($sec) use ($fields) {
+                        $firstField = $fields->where('section_level_id', $sec->id)->sortBy('field_position')->first();
+                        return $firstField ? $firstField->field_position : 9999;
+                    });
 
-                $layout = $layout ? json_decode($layout, true) : [];
+                $blade = "<div class=\"space-y-6\">\n";
+                foreach ($sections as $sec) {
+                    $secFields = $fields->where('section_level_id', $sec->id)->values();
+                    if ($secFields->isEmpty()) continue;
 
-                if (isset($layout['layout'])) {
-                    $layout = $layout['layout'];
-                }
-
-                $blade = "<div class='space-y-6'>";
-
-                $cursor = 0;
-                $total = $fields->count();
-                $layoutIndex = 0;
-
-                $lastPrintedSection = null;
-
-                while ($cursor < $total) {
-
-                    $field = $fields[$cursor];
-
-                    $currentSectionKey = $field->section_level_id
-                        ? $field->section_level_type . '-' . $field->section_level_id
-                        : 'no_section';
-
-                    if ($lastPrintedSection !== $currentSectionKey) {
-
-                        if ($currentSectionKey !== 'no_section') {
-                            [, $sectionId] = explode('-', $currentSectionKey);
-                            $title = $sectionMap[$sectionId] ?? 'Section';
-
-                            $blade .= <<<HTML
-                <div class="mt-6 mb-2 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded">
-                    <span class="font-semibold text-indigo-700">{$title}</span>
-                </div>
-                HTML;
-                        }
-
-                        $lastPrintedSection = $currentSectionKey;
-                    }
-
-                    $requestedCols = $layout[$layoutIndex]['columns'] ?? 1;
-                    $layoutIndex++;
-                    if ($layoutIndex >= count($layout)) {
-                        $layoutIndex = 0;
-                    }
-
-                    $rowFields = [];
-
-                    while (
-                        $cursor < $total &&
-                        count($rowFields) < $requestedCols
-                    ) {
-
-                        $nextField = $fields[$cursor];
-
-                        $nextSectionKey = $nextField->section_level_id
-                            ? $nextField->section_level_type . '-' . $nextField->section_level_id
-                            : 'no_section';
-                        if ($nextSectionKey !== $currentSectionKey) {
-                            break;
-                        }
-                        $rowFields[] = $nextField;
-                        $cursor++;
-                    }
-
-                    if ($requestedCols > 1) {
-                        $blade .= "<div class='grid grid-cols-1 md:grid-cols-{$requestedCols} gap-5'>";
+                    if (!empty(trim($sec->section_level_name))) {
+                        $blade .= "    <!-- {$sec->section_level_name} -->\n";
+                        $blade .= "    <div class=\"mb-6\">\n";
+                        $blade .= "        <div class=\"mt-6 mb-4 px-3 py-2 bg-indigo-50 border-l-4 border-indigo-600 rounded\">\n";
+                        $blade .= "            <span class=\"font-bold text-indigo-700\">{$sec->section_level_name}</span>\n";
+                        $blade .= "        </div>\n";
                     } else {
-                        $blade .= "<div class='w-full'>";
+                        $blade .= "    <div class=\"mb-6\">\n";
                     }
-                    foreach ($rowFields as $rf) {
-                        $blade .= self::renderSelfDeclarationField($rf);
+
+                    if ($sec->section_level_short_name === 'aadhaar_sec') {
+                        // Aadhaar Consent inline dropdown
+                        $consentField = $secFields->first();
+                        $optionsHtml = '<option value="">-- Select --</option>';
+                        foreach ($consentField->options ?? [] as $val => $lbl) {
+                            $optionsHtml .= "<option value=\"{$val}\">{$lbl}</option>";
+                        }
+                        
+                        $blade .= <<<HTML
+                                            <div class="flex items-center flex-wrap gap-2 text-gray-700 bg-gray-50 p-4 border border-gray-200 rounded">
+                                                <span class="text-sm font-medium">I</span>
+                                                <select name="{$consentField->field_name}" wire:model="formData.{$consentField->field_name}" class="inline-block py-1 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-indigo-700">
+                                                    {$optionsHtml}
+                                                </select>
+                                                <span class="text-sm font-medium">{$consentField->level_name}</span>
+                                            </div>
+                                            @error('formData.{$consentField->field_name}') <span class="text-red-500 text-xs mt-1 block">{{ \$message }}</span> @enderror
+                                    HTML;
+                    } elseif ($sec->section_level_short_name === 'pension_from_sec' || $sec->section_level_short_name === 'social_sec') {
+                        // Checkboxes
+                        $checkboxField = $secFields->first();
+                        $checkboxesHtml = '';
+                        foreach ($checkboxField->options ?? [] as $val => $lbl) {
+                            $checkboxesHtml .= <<<HTML
+                                                                <label class="flex items-center gap-2 cursor-pointer py-1">
+                                                                    <input type="checkbox" name="{$checkboxField->field_name}[]" value="{$val}" wire:model="formData.{$checkboxField->field_name}" class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
+                                                                    <span class="text-sm text-gray-700 font-medium">{$lbl}</span>
+                                                                </label>
+                                                HTML;
+                        }
+                        
+                        $levelNameHtml = '';
+                        if (!empty(trim($checkboxField->level_name))) {
+                            $levelNameHtml = "<div class=\"text-sm font-semibold text-gray-700 mb-2\">{$checkboxField->level_name}</div>";
+                        }
+                        
+                        $blade .= <<<HTML
+                                                        {$levelNameHtml}
+                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50 p-4 border border-gray-200 rounded">
+                                                            {$checkboxesHtml}
+                                                        </div>
+                                                        @error('formData.{$checkboxField->field_name}') <span class="text-red-500 text-xs mt-1 block">{{ \$message }}</span> @enderror
+                                                HTML;
+                    } else {
+                        // Fallback grid layout for generic sections
+                        $cols = count($secFields);
+                        $blade .= "        <div class=\"grid grid-cols-1 md:grid-cols-{$cols} gap-4\">\n";
+                        foreach ($secFields as $f) {
+                            $blade .= self::renderSelfDeclarationField($f);
+                        }
+                        $blade .= "        </div>\n";
                     }
-                    $blade .= "</div>";
+
+                    $blade .= "    </div>\n";
                 }
 
-                $blade .= "</div>";
+                // Fields with no section
+                $noSectionFields = $fields->whereNull('section_level_id')->values();
+                if (!$noSectionFields->isEmpty()) {
+                    $blade .= "    <div class=\"mb-6\">\n";
+                    $cols = min(3, count($noSectionFields));
+                    $blade .= "        <div class=\"grid grid-cols-1 md:grid-cols-{$cols} gap-4\">\n";
+                    foreach ($noSectionFields as $f) {
+                        $blade .= self::renderSelfDeclarationField($f);
+                    }
+                    $blade .= "        </div>\n";
+                    $blade .= "    </div>\n";
+                }
+
+                $blade .= "</div>\n";
                 File::put("{$dir}/105.blade.php", $blade);
                 continue;
             }

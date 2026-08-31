@@ -495,6 +495,19 @@
                     </div>
                     @endif
 
+                    @if(in_array($activeTabCode, [107, 108]))
+                    <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <label class="block text-sm font-bold text-blue-900 mb-2">Modal Button Placement</label>
+                        <select wire:model="modalPlacement" class="w-full max-w-xs py-2 px-3 border border-blue-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-indigo-700 bg-white shadow-sm">
+                            <option value="top-right">Top-right</option>
+                            <option value="top-center">Top-center</option>
+                            <option value="bottom-left">Bottom-left</option>
+                            <option value="bottom-center">Bottom-center</option>
+                            <option value="bottom-right">Bottom-right</option>
+                        </select>
+                    </div>
+                    @endif
+
                     <div class="grid grid-cols-2 gap-3">
                         @foreach($modalFields as $field)
                         <div class="flex flex-col p-3 rounded border {{ $field['is_mandatory'] ? 'border-green-300 bg-green-50' : 'bg-gray-50 border-gray-200' }}">

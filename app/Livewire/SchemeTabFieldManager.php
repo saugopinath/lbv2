@@ -29,6 +29,8 @@ class SchemeTabFieldManager extends Component
 
     public $tabs = [];
 
+    public $modalPlacement = 'top-right';
+
     public $tabFields = [];
 
     public $showManageModal = false;
@@ -402,6 +404,15 @@ class SchemeTabFieldManager extends Component
             $this->isSyncableSelected = [];
         }
 
+        if (in_array($tabCode, [107, 108])) {
+            $mapping = SchemeTabMapping::where('scheme_id', $this->schemeId)
+                ->where('tab_code', $tabCode)
+                ->first();
+            $this->modalPlacement = $mapping->modal_placement ?? 'top-right';
+        } else {
+            $this->modalPlacement = 'top-right';
+        }
+
         $fields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
             ->whereIn('tab_code', [$tabCode, 0])
             ->where('is_active', true)
@@ -495,6 +506,12 @@ class SchemeTabFieldManager extends Component
                 SchemeTabMapping::where('scheme_id', $schemeId)
                     ->where('tab_code', $tabCode)
                     ->update(['is_current_address' => $this->isCurrentAddress]);
+            }
+
+            if (in_array($tabCode, [107, 108])) {
+                SchemeTabMapping::where('scheme_id', $schemeId)
+                    ->where('tab_code', $tabCode)
+                    ->update(['modal_placement' => $this->modalPlacement]);
             }
 
             $existingFormFields = SchemeTabFormField::where('scheme_id', $schemeId)

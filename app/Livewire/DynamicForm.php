@@ -118,6 +118,7 @@ class DynamicForm extends Component
         $this->applicationId = null;
         $this->beneficiaryId = null;
         $this->formData = [];
+        $this->initFormDataDefaults();
         $this->completedTabs = [];
         $this->allTabsCompleted = false;
         if (!empty($this->views)) {
@@ -139,6 +140,7 @@ class DynamicForm extends Component
         $this->applicationId = null;
         $this->beneficiaryId = null;
         $this->formData = [];
+        $this->initFormDataDefaults();
         $this->completedTabs = [];
         $this->allTabsCompleted = false;
         if (!empty($this->views)) {
@@ -399,7 +401,18 @@ class DynamicForm extends Component
             $this->views[] = str_replace('.blade.php', '', $file->getFilename());
         }
 
-        sort($this->views);
+        $orderedTabs = \App\Models\SchemeTabMapping::where('scheme_id', $schemeId)
+            ->where('is_active', true)
+            ->orderBy('position')
+            ->pluck('tab_code')
+            ->toArray();
+
+        if (!empty($orderedTabs)) {
+            // Keep only tabs that exist as files, ordered by the DB mapping
+            $this->views = array_map('strval', array_values(array_intersect($orderedTabs, $this->views)));
+        } else {
+            sort($this->views);
+        }
 
         $this->tabs = MasterTab::select('id', 'tab_name', 'tab_icon', 'tab_code')->whereIn('tab_code', $this->views)
             ->get()
@@ -827,6 +840,27 @@ class DynamicForm extends Component
         return true;
     }
 
+    private function initFormDataDefaults(): void
+    {
+        $json = $this->getSchemeJson();
+        foreach ($json['tabs'] ?? [] as $tab) {
+            foreach ($tab['fields'] ?? [] as $field) {
+                if (empty($field['field_name'])) continue;
+                
+                $fieldName = $field['field_name'];
+                
+                if (
+                    ($field['field_type'] === 'checkbox' && !empty($field['is_multiple'])) || 
+                    ($field['field_type'] === 'select' && !empty($field['is_multiple']))
+                ) {
+                    if (!isset($this->formData[$fieldName])) {
+                        $this->formData[$fieldName] = [];
+                    }
+                }
+            }
+        }
+    }
+
     public function mount($schemeId = null, $schemeName = null, $saveNext = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null)
     {
         $handler = app(DynamicFormHandlerInterface::class);
@@ -845,6 +879,7 @@ class DynamicForm extends Component
         $this->schemeId = $schemeId;
         $this->loadAppTypeOptions();
         $this->loadScheme($schemeId);
+        $this->initFormDataDefaults();
 
         if (!empty($this->views)) {
             $this->activeTab = (string) $this->views[0];

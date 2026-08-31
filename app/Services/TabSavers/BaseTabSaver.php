@@ -211,7 +211,18 @@ abstract class BaseTabSaver
         }
 
         if (!empty($otherDetails)) {
-            $dbData['other_details'] = json_encode($otherDetails);
+            $tab = DB::table('master_tabs')->where('tab_code', $this->tabCode)->first();
+            $modelClass = $tab ? "App\\Models\\{$tab->tab_model_name}" : null;
+            if ($modelClass && class_exists($modelClass)) {
+                $modelInstance = new $modelClass;
+                if ($modelInstance->hasCast('other_details', ['array', 'json', 'object', 'collection'])) {
+                    $dbData['other_details'] = $otherDetails;
+                } else {
+                    $dbData['other_details'] = json_encode($otherDetails);
+                }
+            } else {
+                $dbData['other_details'] = json_encode($otherDetails);
+            }
         }
 
         // Auditing & extra system fields

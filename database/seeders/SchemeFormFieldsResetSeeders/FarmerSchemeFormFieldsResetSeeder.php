@@ -34,7 +34,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
         $schemeId = (int) $scheme->id;
 
         // Ensure MasterTab 108 (Family Members) exists
-        MasterTab::firstOrCreate(
+        MasterTab::updateOrCreate(
             ['tab_code' => 108],
             [
                 'tab_name' => 'Family Members',
@@ -66,7 +66,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
             }
 
             // 2. Ensure Sections exist in SectionLevelMaster
-            $landSec = SectionLevelMaster::firstOrCreate(
+            $landSec = SectionLevelMaster::updateOrCreate(
                 [
                     'scheme_id' => $schemeId,
                     'tab_code' => 107,
@@ -82,7 +82,23 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                 ]
             );
 
-            $familySec = SectionLevelMaster::firstOrCreate(
+            $landOtherSec = SectionLevelMaster::updateOrCreate(
+                [
+                    'scheme_id' => $schemeId,
+                    'tab_code' => 107,
+                    'section_level_short_name' => 'land_other_sec',
+                ],
+                [
+                    'scheme_id' => $schemeId,
+                    'section_level_name' => 'Other Land Details',
+                    'section_level_short_name' => 'land_other_sec',
+                    'section_level_code' => 1,
+                    'tab_code' => 107,
+                    'is_active' => true,
+                ]
+            );
+
+            $familySec = SectionLevelMaster::updateOrCreate(
                 [
                     'scheme_id' => $schemeId,
                     'tab_code' => 108,
@@ -97,6 +113,54 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'is_active' => true,
                 ]
             );
+
+            $sectionsData = [
+                'aadhaar_sec' => [
+                    'name' => '',
+                    'short' => 'aadhaar_sec',
+                    'tab_code' => 105,
+                ],
+                'pension_from_sec' => [
+                    'name' => 'Presently, I am receiving following pension(s) from:',
+                    'short' => 'pension_from_sec',
+                    'tab_code' => 105,
+                ],
+                'pension_other_sec' => [
+                    'name' => 'In case the applicant is receiving pension from other sources',
+                    'short' => 'pension_other_sec',
+                    'tab_code' => 105,
+                ],
+                'nominee_sec' => [
+                    'name' => 'In the event of my death, I hereby nominate (Please mention Name, Address & Relationship)',
+                    'short' => 'nominee_sec',
+                    'tab_code' => 105,
+                ],
+                'social_sec' => [
+                    'name' => 'Presently, I am receiving the following social Security Pension/s (Please tick):',
+                    'short' => 'social_sec',
+                    'tab_code' => 105,
+                ],
+            ];
+
+            $sectionIds = [];
+            foreach ($sectionsData as $key => $sdata) {
+                $sec = SectionLevelMaster::updateOrCreate(
+                    [
+                        'scheme_id' => $schemeId,
+                        'tab_code' => $sdata['tab_code'],
+                        'section_level_short_name' => $sdata['short'],
+                    ],
+                    [
+                        'scheme_id' => $schemeId,
+                        'section_level_name' => $sdata['name'],
+                        'section_level_short_name' => $sdata['short'],
+                        'section_level_code' => 0,
+                        'tab_code' => $sdata['tab_code'],
+                        'is_active' => true,
+                    ]
+                );
+                $sectionIds[$key] = $sec->id;
+            }
 
             // 3. Ensure custom base fields exist for Scheme
             $customBaseFields = [
@@ -137,7 +201,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'level_name' => 'Digital Ration Card category',
                     'field_type' => 'select',
                     'options' => ['AAY' => 'AAY', 'PHH' => 'PHH', 'SPHH' => 'SPHH', 'RKSY-I' => 'RKSY-I', 'RKSY-II' => 'RKSY-II'],
-                    'validation_rule' => 'nullable',
+                    'validation_rule' => 'required',
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
@@ -149,7 +213,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'field_name' => 'ration_card_number',
                     'level_name' => 'Ration Card Number',
                     'field_type' => 'text',
-                    'validation_rule' => 'nullable|string',
+                    'validation_rule' => 'required|string',
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
@@ -173,7 +237,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'field_name' => 'voter_id_number',
                     'level_name' => 'EPIC/Voter Id Number',
                     'field_type' => 'text',
-                    'validation_rule' => 'nullable|string',
+                    'validation_rule' => 'required|string',
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
@@ -233,7 +297,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'field_name' => 'krishak_bondhu_id',
                     'level_name' => 'Krishak Bondhu ID',
                     'field_type' => 'text',
-                    'validation_rule' => 'nullable|string',
+                    'validation_rule' => 'required|string',
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
@@ -279,6 +343,20 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                 // Land Details (107)
                 [
                     'tab_code' => 107,
+                    'field_id' => 'block',
+                    'field_name' => 'block',
+                    'level_name' => 'Block',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|string',
+                    'section_level_id' => $landSec->id,
+                    'section_level_type' => 0,
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 1,
+                ],
+                [
+                    'tab_code' => 107,
                     'field_id' => 'mouza_name',
                     'field_name' => 'mouza_name',
                     'level_name' => 'Name of the Mouza',
@@ -289,7 +367,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 1,
+                    'field_position' => 2,
                 ],
                 [
                     'tab_code' => 107,
@@ -303,7 +381,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 2,
+                    'field_position' => 3,
                 ],
                 [
                     'tab_code' => 107,
@@ -317,7 +395,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 3,
+                    'field_position' => 4,
                 ],
                 [
                     'tab_code' => 107,
@@ -331,7 +409,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 4,
+                    'field_position' => 5,
                 ],
                 [
                     'tab_code' => 107,
@@ -345,7 +423,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
-                    'field_position' => 5,
+                    'field_position' => 6,
                 ],
                 [
                     'tab_code' => 107,
@@ -355,21 +433,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'field_type' => 'select',
                     'options' => ['1' => 'Yes', '2' => 'No'],
                     'validation_rule' => 'required',
-                    'section_level_id' => $landSec->id,
-                    'section_level_type' => 0,
-                    'db_colunm' => 'other_details',
-                    'is_common' => false,
-                    'is_active' => true,
-                    'field_position' => 6,
-                ],
-                [
-                    'tab_code' => 107,
-                    'field_id' => 'source_present_income',
-                    'field_name' => 'source_present_income',
-                    'level_name' => 'Source of Present Income',
-                    'field_type' => 'text',
-                    'validation_rule' => 'nullable|string',
-                    'section_level_id' => $landSec->id,
+                    'section_level_id' => $landOtherSec->id,
                     'section_level_type' => 0,
                     'db_colunm' => 'other_details',
                     'is_common' => false,
@@ -378,17 +442,45 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                 ],
                 [
                     'tab_code' => 107,
-                    'field_id' => 'other_benefits_received',
-                    'field_name' => 'other_benefits_received',
-                    'level_name' => 'Any other Benefits received',
+                    'field_id' => 'source_present_income',
+                    'field_name' => 'source_present_income',
+                    'level_name' => 'Source of Present Income',
                     'field_type' => 'text',
                     'validation_rule' => 'nullable|string',
-                    'section_level_id' => $landSec->id,
+                    'section_level_id' => $landOtherSec->id,
                     'section_level_type' => 0,
                     'db_colunm' => 'other_details',
                     'is_common' => false,
                     'is_active' => true,
                     'field_position' => 8,
+                ],
+                [
+                    'tab_code' => 107,
+                    'field_id' => 'other_benefits_received',
+                    'field_name' => 'other_benefits_received',
+                    'level_name' => 'Any other Benefits received',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|string',
+                    'section_level_id' => $landOtherSec->id,
+                    'section_level_type' => 0,
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 9,
+                ],
+                [
+                    'tab_code' => 107,
+                    'field_id' => 'lands',
+                    'field_name' => 'lands',
+                    'level_name' => 'Land Details Table',
+                    'field_type' => 'hidden',
+                    'validation_rule' => 'nullable',
+                    'section_level_id' => $landSec->id,
+                    'section_level_type' => 0,
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 10,
                 ],
                 // Family Members (108)
                 [
@@ -490,10 +582,24 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'is_active' => true,
                     'field_position' => 7,
                 ],
+                [
+                    'tab_code' => 108,
+                    'field_id' => 'families',
+                    'field_name' => 'families',
+                    'level_name' => 'Family Details Table',
+                    'field_type' => 'hidden',
+                    'validation_rule' => 'nullable',
+                    'section_level_id' => $familySec->id,
+                    'section_level_type' => 0,
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 8,
+                ],
             ];
 
             foreach ($customBaseFields as $cbf) {
-                SchemeTabBasefield::firstOrCreate(
+                SchemeTabBasefield::updateOrCreate(
                     [
                         'field_id' => $cbf['field_id'],
                         'tab_code' => $cbf['tab_code'],
@@ -579,6 +685,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'confirmbankaccountnumber',
                 ],
                 107 => [
+                    'block',
                     'mouza_name',
                     'jl_no',
                     'khatian_no',
@@ -587,6 +694,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'cultivation_by_applicant',
                     'source_present_income',
                     'other_benefits_received',
+                    'lands',
                 ],
                 108 => [
                     'member_name',
@@ -596,6 +704,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     'member_monthly_income',
                     'member_relationship',
                     'member_dependent',
+                    'families',
                 ],
             ];
 
@@ -656,7 +765,7 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                 ['code' => '1617', 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
             ];
 
-                        foreach ($docs as $index => $doc) {
+            foreach ($docs as $index => $doc) {
                 $cm = \App\Models\Codemaster::where('code', $doc['code'])->first();
                 if ($cm) {
                     SchemeAttachedDocMappings::create([
@@ -674,112 +783,82 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
             // 7. Seed Self Declaration Fields (Tab 105)
             $selfDecls = [
                 [
-                    'field_name' => 'resident',
-                    'field_id' => 'resident',
-                    'level_name' => 'I am a resident of West Bengal',
-                    'field_type' => 'checkbox',
-                    'validation_rule' => 'required',
-                    'section_level_id' => null,
-                    'section_level_type' => null,
-                    'field_position' => 1,
-                ],
-                [
-                    'field_name' => 'no_govt_salary',
-                    'field_id' => 'no_govt_salary',
-                    'level_name' => 'I do not earn any monthly remuneration from any regular Government job',
-                    'field_type' => 'checkbox',
-                    'validation_rule' => 'required',
-                    'section_level_id' => null,
-                    'section_level_type' => null,
-                    'field_position' => 2,
-                ],
-                [
-                    'field_name' => 'info_true',
-                    'field_id' => 'info_true',
-                    'level_name' => 'All information and documents submitted are correct',
-                    'field_type' => 'checkbox',
-                    'validation_rule' => 'required',
-                    'section_level_id' => null,
-                    'section_level_type' => null,
-                    'field_position' => 3,
-                ],
-                [
                     'field_name' => 'aadhaar_consent',
                     'field_id' => 'aadhaar_consent',
-                    'level_name' => 'I give consent to the use of the Aadhaar No. for authenticating my identity for social security pension',
+                    'level_name' => 'consent to the use of the Aadhaar No. for authenticating my identity for social security pension (In case Aadhaar no. provided by the applicant)',
                     'field_type' => 'select',
-                    'options' => ['give' => 'give', 'give not' => 'give not'],
+                    'options' => ['give' => 'give', 'do not give' => 'do not give'],
                     'validation_rule' => 'required',
-                    'section_level_id' => null,
-                    'section_level_type' => null,
-                    'field_position' => 4,
+                    'section_level_id' => $sectionIds['aadhaar_sec'] ?? null,
+                    'section_level_type' => 0,
+                    'field_position' => 1,
                 ],
                 [
                     'field_name' => 'pension_from',
                     'field_id' => 'pension_from',
-                    'level_name' => 'Presently, I am receiving following pension(s) from:',
+                    'level_name' => '',
                     'field_type' => 'checkbox',
                     'is_multiple' => true,
                     'options' => ['1' => 'Central Govt', '2' => 'State Govt', '3' => 'Local Administration', '4' => 'Govt. Aided Organization'],
                     'validation_rule' => 'nullable',
-                    'section_level_id' => null,
-                    'section_level_type' => null,
-                    'field_position' => 5,
+                    'section_level_id' => $sectionIds['pension_from_sec'] ?? null,
+                    'section_level_type' => 0,
+                    'field_position' => 2,
                 ],
                 [
                     'field_name' => 'pension_other_sources_1',
                     'field_id' => 'pension_other_sources_1',
-                    'level_name' => 'In case the applicant is receiving pension from other sources (1)',
+                    'level_name' => '1.',
                     'field_type' => 'text',
                     'validation_rule' => 'nullable|string',
-                    'section_level_id' => null,
-                    'section_level_type' => null,
-                    'field_position' => 6,
+                    'section_level_id' => $sectionIds['pension_other_sec'] ?? null,
+                    'section_level_type' => 0,
+                    'field_position' => 3,
                 ],
                 [
                     'field_name' => 'pension_other_sources_2',
                     'field_id' => 'pension_other_sources_2',
-                    'level_name' => 'In case the applicant is receiving pension from other sources (2)',
+                    'level_name' => '2.',
                     'field_type' => 'text',
                     'validation_rule' => 'nullable|string',
-                    'section_level_id' => null,
-                    'section_level_type' => null,
-                    'field_position' => 7,
+                    'section_level_id' => $sectionIds['pension_other_sec'] ?? null,
+                    'section_level_type' => 0,
+                    'field_position' => 4,
                 ],
                 [
                     'field_name' => 'nominee_name',
                     'field_id' => 'nominee_name',
-                    'level_name' => 'In the event of my death, I hereby nominate (Name)',
+                    'level_name' => 'Name',
                     'field_type' => 'text',
                     'validation_rule' => 'nullable|string',
-                    'section_level_id' => null,
-                    'section_level_type' => null,
+                    'section_level_id' => $sectionIds['nominee_sec'] ?? null,
+                    'section_level_type' => 0,
                     'field_position' => 5,
                 ],
                 [
                     'field_name' => 'nominee_address',
                     'field_id' => 'nominee_address',
-                    'level_name' => 'Nominee Address',
+                    'level_name' => 'Address',
                     'field_type' => 'text',
                     'validation_rule' => 'nullable|string',
-                    'section_level_id' => null,
-                    'section_level_type' => null,
+                    'section_level_id' => $sectionIds['nominee_sec'] ?? null,
+                    'section_level_type' => 0,
                     'field_position' => 6,
                 ],
                 [
                     'field_name' => 'nominee_relationship',
                     'field_id' => 'nominee_relationship',
-                    'level_name' => 'Nominee Relationship',
+                    'level_name' => 'Relationship',
                     'field_type' => 'text',
                     'validation_rule' => 'nullable|string',
-                    'section_level_id' => null,
-                    'section_level_type' => null,
+                    'section_level_id' => $sectionIds['nominee_sec'] ?? null,
+                    'section_level_type' => 0,
                     'field_position' => 7,
                 ],
                 [
                     'field_name' => 'social_security_pension',
                     'field_id' => 'social_security_pension',
-                    'level_name' => 'Presently, I am receiving the following social Security Pension/s:',
+                    'level_name' => '',
                     'field_type' => 'checkbox',
                     'is_multiple' => true,
                     'options' => [
@@ -795,8 +874,8 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                         '10' => 'Artisan/Weaver Old Age Pension',
                     ],
                     'validation_rule' => 'nullable',
-                    'section_level_id' => null,
-                    'section_level_type' => null,
+                    'section_level_id' => $sectionIds['social_sec'] ?? null,
+                    'section_level_type' => 0,
                     'field_position' => 8,
                 ],
             ];
@@ -873,13 +952,17 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
                     ]
                 );
             }
+
+            // Set modal placement for Land Details (Tab 107) and Family Details (Tab 108)
+            \App\Models\SchemeTabMapping::where('scheme_id', $schemeId)
+                ->whereIn('tab_code', [107, 108])
+                ->update(['modal_placement' => 'top-right']);
         });
 
         // 9. Regenerate JSON & Blade templates via helper
         $data = SchemewiseStoreDataJsonHelper::generateSchemeJson($schemeId);
         SchemewiseStoreDataJsonHelper::storeSchemeJson($schemeId, $data);
         SchemewiseStoreDataJsonHelper::store($schemeId, $data['tabs']);
-
         $this->command?->info("Farmer Pension (Scheme ID {$schemeId}) form fields successfully reset and regenerated with Family Members tab!");
     }
 }

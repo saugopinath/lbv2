@@ -311,14 +311,14 @@ document.addEventListener('alpine:init', () => {
             for (let [fieldKey, ruleString] of Object.entries(activeRules)) {
                 const input = this.findInputElement(fieldKey)
 
-                if (input.type === 'file') {
-                    continue
-                }
-
                 if (!input) {
                     /* console.log(
                         `⏩ [validateClientSide] Field ${fieldKey} not found in DOM, skipping.`
                     ) */
+                    continue
+                }
+
+                if (input.type === 'file') {
                     continue
                 }
 
