@@ -36,6 +36,8 @@ use App\Observers\BeneficiaryPersonalObserver;
 
 use App\Contracts\AadhaarEncryptionServiceInterface;
 use App\Services\AadhaarEncryptionService;
+use App\Contracts\DocumentStorageInterface;
+use App\Services\DocumentService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -65,6 +67,16 @@ class AppServiceProvider extends ServiceProvider
             return new AadhaarEncryptionService(
                 url: config('services.adv.url', ''),
                 apiKey: config('services.adv.key', ''),
+                environment: config('app.env', 'production')
+            );
+        });
+
+        $this->app->singleton(DocumentStorageInterface::class, function ($app) {
+            return new DocumentService(
+                storageType: config('services.doc_storage.type', 1),
+                baseUrl: config('services.doc_storage.base_url', ''),
+                appId: config('services.doc_storage.app_id', ''),
+                clientSecret: config('services.doc_storage.client_secret', ''),
                 environment: config('app.env', 'production')
             );
         });

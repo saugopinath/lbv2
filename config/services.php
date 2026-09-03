@@ -40,5 +40,11 @@ return [
         'url' => env('ADV_VAULT_URL'),
         'key' => env('ADV_VAULT_KEY'),
     ],
+    'doc_storage' => [
+        'base_url' => env('DOC_STORAGE_BASE_URL'),
+        'app_id' => env('DOC_STORAGE_APP_ID'),
+        'client_secret' => env('DOC_STORAGE_CLIENT_SECRET'),
+        'type' => env('DOC_STORAGE_TYPE'),
+    ],
 
 ];
