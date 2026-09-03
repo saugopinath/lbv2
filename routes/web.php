@@ -48,6 +48,7 @@ use App\Livewire\SchemeTabFieldManager;
 use App\Livewire\UserPermission\AssignPermissionsPage;
 use App\Livewire\Users\Create as UsersCreate;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DutyAssignmentRoleOfficeTypeMappingsController;
 
 require __DIR__ . '/home.php';
 
@@ -93,8 +94,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Role & Office Mappings
     Route::get('role-office-master-mappings', [RoleOfficeTypeMappingsController::class, 'index'])->middleware('permission.redirect:canRoleMapping')->name('role-office-master-mappings');
 
-    Route::get('/role-office-type-mappings-create', Create::class)->middleware('permission.redirect:canRoleMappings')->name('role-office-type-mappings-create');
-
+     Route::get('/role-office-type-mappings-create', Create::class)->middleware('permission.redirect:canRoleMappings')->name('role-office-type-mappings-create');
+    
+     Route::get('duty-assignment/role-office-master-mappings', function () {
+     return view('duty-assignment.index');
+     })->name('duty-assignment-role-office-master-mappings');
     // Office Masters
     Route::get('officemasters', [OfficeMastersController::class, 'index'])->middleware('permission.redirect:canViewOffices')->name('officemasters');
 

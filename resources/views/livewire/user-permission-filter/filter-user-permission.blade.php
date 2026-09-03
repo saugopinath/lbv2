@@ -3,14 +3,16 @@
         <legend class="text-sm font-semibold text-gray-600 mb-2">Filter Users</legend>
 
         <div class="grid gap-4 md:grid-cols-2">
-            <div class="relative">
-            <x-form.select name="scheme" id="scheme" label="Scheme" required wire:model.live="selectscheme">
-                <option value="">----Select Scheme----</option>
-                @foreach ($schemes as $scheme)
-                    <option value="{{ $scheme->id }}">{{ $scheme->name }}</option>
-                @endforeach
-            </x-form.select>
-        </div>
+            @if (!$hideScheme)
+    <div class="relative">
+        <x-form.select name="scheme" id="scheme" label="Scheme" required wire:model.live="selectscheme">
+            <option value="">----Select Scheme----</option>
+            @foreach ($schemes as $scheme)
+                <option value="{{ $scheme->id }}">{{ $scheme->name }}</option>
+            @endforeach
+        </x-form.select>
+    </div>
+@endif
         {{-- Role --}}
         <div class="relative">
             <x-form.select name="role" label="Role" wire:model.live="role" required>

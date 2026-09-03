@@ -14,7 +14,8 @@
             </div>
         </div>
         <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
-            <livewire:user-permission-filter.filter-user-permission />
+            {{-- <livewire:user-permission-filter.filter-user-permission /> --}}
+            <livewire:user-permission-filter.filter-user-permission :hideScheme="true" />
             <livewire:user-permission-details-table :schemeId="$schemeId" />
             <livewire:user-permission.user-permission-edit-modal :schemeId="$schemeId" />
             <livewire:user-permission.bulk-user-permission-modal :schemeId="$schemeId" />

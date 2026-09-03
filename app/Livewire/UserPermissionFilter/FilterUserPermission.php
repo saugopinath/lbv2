@@ -17,6 +17,8 @@ class FilterUserPermission extends Component
     public $mapping_level;
 
     public $selectscheme;
+    
+    public $hideScheme = false;
 
     public $office;
 
