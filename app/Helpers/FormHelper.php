@@ -23,6 +23,15 @@ class FormHelper
             return $field['options'][$value] ?? '-';
         }
         if ($type === 'checkbox') {
+            if (!empty($field['is_multiple']) && is_array($value)) {
+                $labels = [];
+                foreach ($value as $v) {
+                    if (isset($field['options'][$v])) {
+                        $labels[] = $field['options'][$v];
+                    }
+                }
+                return empty($labels) ? '-' : implode(', ', $labels);
+            }
             return $value ? 'Yes' : 'No';
         }
         static $districtCache = [];

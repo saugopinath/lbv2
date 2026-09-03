@@ -53,6 +53,11 @@ class LPPRetainerSchemeFormFieldsResetSeeder extends Seeder
 
             // 2. Ensure Sections exist in SectionLevelMaster
             $sectionsData = [
+                'aadhaar_sec' => [
+                    'name' => '',
+                    'short' => 'aadhaar_sec',
+                    'tab_code' => 105,
+                ],
                 'pension_from_sec' => [
                     'name' => 'Presently, I am receiving following pension(s) from:',
                     'short' => 'pension_from_sec',
@@ -72,7 +77,7 @@ class LPPRetainerSchemeFormFieldsResetSeeder extends Seeder
 
             $sectionIds = [];
             foreach ($sectionsData as $key => $sdata) {
-                $sec = SectionLevelMaster::firstOrCreate(
+                $sec = SectionLevelMaster::updateOrCreate(
                     [
                         'scheme_id' => $schemeId,
                         'tab_code' => $sdata['tab_code'],
@@ -120,10 +125,83 @@ class LPPRetainerSchemeFormFieldsResetSeeder extends Seeder
                     'field_position' => 14,
                     'is_mendetory' => 1,
                 ],
+                [
+                    'tab_code' => 106,
+                    'field_id' => 'ration_card_category',
+                    'field_name' => 'ration_card_category',
+                    'level_name' => 'Digital Ration Card category',
+                    'field_type' => 'select',
+                    'options' => ['AAY' => 'AAY', 'PHH' => 'PHH', 'SPHH' => 'SPHH', 'RKSY-I' => 'RKSY-I', 'RKSY-II' => 'RKSY-II'],
+                    'validation_rule' => 'required',
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 1,
+                ],
+                [
+                    'tab_code' => 106,
+                    'field_id' => 'ration_card_number',
+                    'field_name' => 'ration_card_number',
+                    'level_name' => 'Ration Card Number',
+                    'field_type' => 'text',
+                    'validation_rule' => 'required|string',
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 2,
+                ],
+                [
+                    'tab_code' => 106,
+                    'field_id' => 'voter_id_number',
+                    'field_name' => 'voter_id_number',
+                    'level_name' => 'EPIC/Voter Id Number',
+                    'field_type' => 'text',
+                    'validation_rule' => 'required|string',
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 4,
+                ],
+                [
+                    'tab_code' => 102,
+                    'field_id' => 'wb_dwelling_years',
+                    'field_name' => 'wb_dwelling_years',
+                    'level_name' => 'Number of years of Dwelling in WB',
+                    'field_type' => 'text',
+                    'validation_rule' => 'required|numeric',
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 12,
+                ],
+                [
+                    'tab_code' => 102,
+                    'field_id' => 'mobile_number',
+                    'field_name' => 'mobile_number',
+                    'level_name' => 'Mobile No.',
+                    'field_type' => 'text',
+                    'validation_rule' => 'required|digits:10',
+                    'db_colunm' => 'mobile_no',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 13,
+                ],
+                [
+                    'tab_code' => 102,
+                    'field_id' => 'email_id',
+                    'field_name' => 'email_id',
+                    'level_name' => 'Email ID',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|email',
+                    'db_colunm' => 'email',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 14,
+                ],
             ];
 
             foreach ($customBaseFields as $cbf) {
-                SchemeTabBasefield::firstOrCreate(
+                SchemeTabBasefield::updateOrCreate(
                     [
                         'field_id' => $cbf['field_id'],
                         'tab_code' => $cbf['tab_code'],
@@ -261,7 +339,7 @@ class LPPRetainerSchemeFormFieldsResetSeeder extends Seeder
                 ['code' => '1610', 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
             ];
 
-                        foreach ($docs as $index => $doc) {
+            foreach ($docs as $index => $doc) {
                 $cm = \App\Models\Codemaster::where('code', $doc['code'])->first();
                 if ($cm) {
                     SchemeAttachedDocMappings::create([
@@ -281,18 +359,20 @@ class LPPRetainerSchemeFormFieldsResetSeeder extends Seeder
                 [
                     'field_name' => 'aadhaar_consent',
                     'field_id' => 'aadhaar_consent',
-                    'level_name' => 'I give consent to the use of the Aadhaar No. for authenticating my identity for social security pension (In case Aadhaar no. provided by the applicant)',
-                    'field_type' => 'checkbox',
-                    'validation_rule' => 'nullable',
-                    'section_level_id' => null,
-                    'section_level_type' => null,
+                    'level_name' => 'consent to the use of the Aadhaar No. for authenticating my identity for social security pension (In case Aadhaar no. provided by the applicant)',
+                    'field_type' => 'select',
+                    'options' => ['give' => 'give', 'do not give' => 'do not give'],
+                    'validation_rule' => 'required',
+                    'section_level_id' => $sectionIds['aadhaar_sec'] ?? null,
+                    'section_level_type' => 0,
                     'field_position' => 1,
                 ],
                 [
                     'field_name' => 'pension_from',
                     'field_id' => 'pension_from',
-                    'level_name' => 'Presently, I am receiving following pension(s) from:',
-                    'field_type' => 'select',
+                    'level_name' => '',
+                    'field_type' => 'checkbox',
+                    'is_multiple' => true,
                     'options' => ['1' => 'Central Govt', '2' => 'State Govt', '3' => 'Local Administration', '4' => 'Govt. Aided Organization'],
                     'validation_rule' => 'nullable',
                     'section_level_id' => $sectionIds['pension_from_sec'] ?? null,
@@ -302,7 +382,7 @@ class LPPRetainerSchemeFormFieldsResetSeeder extends Seeder
                 [
                     'field_name' => 'nominee_name',
                     'field_id' => 'nominee_name',
-                    'level_name' => 'In the event of my death, I hereby nominate (Name)',
+                    'level_name' => 'Name',
                     'field_type' => 'text',
                     'validation_rule' => 'nullable|string',
                     'section_level_id' => $sectionIds['nominee_sec'] ?? null,
@@ -312,7 +392,7 @@ class LPPRetainerSchemeFormFieldsResetSeeder extends Seeder
                 [
                     'field_name' => 'nominee_address',
                     'field_id' => 'nominee_address',
-                    'level_name' => 'Nominee Address',
+                    'level_name' => 'Address',
                     'field_type' => 'text',
                     'validation_rule' => 'nullable|string',
                     'section_level_id' => $sectionIds['nominee_sec'] ?? null,
@@ -322,7 +402,7 @@ class LPPRetainerSchemeFormFieldsResetSeeder extends Seeder
                 [
                     'field_name' => 'nominee_relationship',
                     'field_id' => 'nominee_relationship',
-                    'level_name' => 'Nominee Relationship',
+                    'level_name' => 'Relationship',
                     'field_type' => 'text',
                     'validation_rule' => 'nullable|string',
                     'section_level_id' => $sectionIds['nominee_sec'] ?? null,
@@ -332,8 +412,9 @@ class LPPRetainerSchemeFormFieldsResetSeeder extends Seeder
                 [
                     'field_name' => 'social_security_pension',
                     'field_id' => 'social_security_pension',
-                    'level_name' => 'Presently, I am receiving the following social Security Pension/s:',
-                    'field_type' => 'select',
+                    'level_name' => '',
+                    'field_type' => 'checkbox',
+                    'is_multiple' => true,
                     'options' => [
                         '1' => 'NSAP Old Age',
                         '2' => 'NSAP Widow Pension',
@@ -361,6 +442,7 @@ class LPPRetainerSchemeFormFieldsResetSeeder extends Seeder
                     'field_id' => $sd['field_id'],
                     'level_name' => $sd['level_name'],
                     'field_type' => $sd['field_type'],
+                    'is_multiple' => $sd['is_multiple'] ?? false,
                     'section_level_id' => $sd['section_level_id'],
                     'section_level_type' => $sd['section_level_type'],
                     'options' => $sd['options'] ?? null,

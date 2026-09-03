@@ -42,9 +42,12 @@
                     @endforeach
                 </div>
             </div>
-            <div class="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-200">
-                <button type="button" @click="{{ $showVar }} = false" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm font-semibold">Cancel</button>
-                <button type="button" @click="{{ $submitAction }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold">Add</button>
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                <div class="text-sm font-semibold text-red-600 w-full sm:w-auto" x-show="modalError" x-html="modalError" style="display: none;"></div>
+                <div class="flex justify-end gap-2 w-full sm:w-auto">
+                    <button type="button" @click="{{ $showVar }} = false; modalError = ''" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm font-semibold">Cancel</button>
+                    <button type="button" @click="{{ $submitAction }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold">Add</button>
+                </div>
             </div>
         </div>
     </div>

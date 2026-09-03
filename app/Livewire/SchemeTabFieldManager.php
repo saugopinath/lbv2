@@ -31,6 +31,8 @@ class SchemeTabFieldManager extends Component
 
     public $modalPlacement = 'top-right';
 
+    public bool $showModalCard = true;
+
     public $tabFields = [];
 
     public $showManageModal = false;
@@ -409,8 +411,10 @@ class SchemeTabFieldManager extends Component
                 ->where('tab_code', $tabCode)
                 ->first();
             $this->modalPlacement = $mapping->modal_placement ?? 'top-right';
+            $this->showModalCard = (bool) ($mapping->show_modal_card ?? true);
         } else {
             $this->modalPlacement = 'top-right';
+            $this->showModalCard = true;
         }
 
         $fields = SchemeTabBasefield::whereIn('scheme_id', [0, $this->schemeId])
@@ -511,7 +515,10 @@ class SchemeTabFieldManager extends Component
             if (in_array($tabCode, [107, 108])) {
                 SchemeTabMapping::where('scheme_id', $schemeId)
                     ->where('tab_code', $tabCode)
-                    ->update(['modal_placement' => $this->modalPlacement]);
+                    ->update([
+                        'modal_placement' => $this->modalPlacement,
+                        'show_modal_card' => $this->showModalCard,
+                    ]);
             }
 
             $existingFormFields = SchemeTabFormField::where('scheme_id', $schemeId)

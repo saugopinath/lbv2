@@ -63,11 +63,33 @@ abstract class BaseTabValidation
                 continue;
             }
 
+            // Identify section IDs that are tabular (like families and lands)
+            $tableSectionIds = [];
+            foreach ($tab['fields'] ?? [] as $f) {
+                if (in_array($f['field_name'] ?? '', ['families', 'lands'])) {
+                    if (isset($f['section_level_id'])) {
+                        $tableSectionIds[] = $f['section_level_id'];
+                    }
+                }
+            }
+
+            $showModalCard = $tab['show_modal_card'] ?? true;
+
             // 4. Loop through every input field definition declared inside the active tab
             foreach ($tab['fields'] ?? [] as $field) {
                 // Safely extract field key name across standard and enclosure schemas
                 $fieldName = $this->resolveFieldName($field);
                 if (!$fieldName) {
+                    continue;
+                }
+
+                // If show_modal_card is disabled, do not require families / lands array fields
+                if (!$showModalCard && in_array($fieldName, ['families', 'lands'])) {
+                    continue;
+                }
+
+                // Skip child fields of table sections to prevent them from blocking the global 'Save and Next'
+                if (in_array($field['section_level_id'] ?? null, $tableSectionIds) && !in_array($fieldName, ['families', 'lands'])) {
                     continue;
                 }
 

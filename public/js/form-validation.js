@@ -152,6 +152,9 @@ document.addEventListener('alpine:init', () => {
                     '✅ [formErrorBanner:jumpTo] Target element located:',
                     target
                 ) */
+                // Dispatch event to open any containing modal if applicable
+                target.dispatchEvent(new CustomEvent('open-dynamic-modal', { bubbles: true }));
+
                 target.scrollIntoView({ behavior: 'smooth', block: 'center' })
                 target.focus()
 

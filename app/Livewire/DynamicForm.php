@@ -330,6 +330,22 @@ class DynamicForm extends Component
         $review = [];
         $json = $this->getSchemeJson();
 
+        // Pre-fetch all section level names to avoid N+1 queries
+        $sectionLevelIds = [];
+        foreach ($json['tabs'] ?? [] as $tab) {
+            foreach ($tab['fields'] ?? [] as $field) {
+                if (!empty($field['section_level_id'])) {
+                    $sectionLevelIds[] = $field['section_level_id'];
+                }
+            }
+        }
+        $sectionNames = [];
+        if (!empty($sectionLevelIds)) {
+            $sectionNames = \App\Models\SectionLevelMaster::whereIn('id', array_unique($sectionLevelIds))
+                ->pluck('section_level_name', 'id')
+                ->toArray();
+        }
+
         foreach ($json['tabs'] ?? [] as $tab) {
 
             $tabCode = (string) ($tab['tab_code'] ?? '');
@@ -368,11 +384,23 @@ class DynamicForm extends Component
                     data_get($this->formData, $fieldName),
                     $this->formData
                 );
-                $review[$tabCode]['fields'][$label] = $value;
+                
+                $sectionName = null;
+                if (!empty($field['section_level_id']) && isset($sectionNames[$field['section_level_id']])) {
+                    $sectionName = $sectionNames[$field['section_level_id']];
+                }
+
+                $review[$tabCode]['fields'][] = [
+                    'label' => $label,
+                    'value' => $value,
+                    'field_name' => $fieldName,
+                    'field_type' => $field['field_type'] ?? 'text',
+                    'section_name' => $sectionName,
+                ];
             }
         }
 
-        return $review;
+        return array_values($review);
     }
 
     private function updateTabNavigation(): void

@@ -90,7 +90,7 @@ if ($errors->any()) {
         <x-form-error :errors="$serverErrors" />
 
         @if ($activeTab)
-            <div class="p-4">
+            <div class="p-4" wire:key="tab-content-{{ $activeTab }}">
 
                 @includeIf("schemes.scheme_{$schemeId}.{$activeTab}", [
                     'schemeId' => $schemeId,

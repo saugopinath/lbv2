@@ -68,7 +68,7 @@
         });
     </script>
     {{-- Client Side validation for the Application Form sub-module --}}
-    <script src="{{ asset('js/form-validation.js') }}"></script>
+    <script src="{{ asset('js/form-validation.js?v=' . time()) }}"></script>
     @livewireScripts
     @if (session()->has('toastr'))
         <script>

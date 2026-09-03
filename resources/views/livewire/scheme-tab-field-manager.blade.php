@@ -496,15 +496,33 @@
                     @endif
 
                     @if(in_array($activeTabCode, [107, 108]))
-                    <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <label class="block text-sm font-bold text-blue-900 mb-2">Modal Button Placement</label>
-                        <select wire:model="modalPlacement" class="w-full max-w-xs py-2 px-3 border border-blue-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-indigo-700 bg-white shadow-sm">
-                            <option value="top-right">Top-right</option>
-                            <option value="top-center">Top-center</option>
-                            <option value="bottom-left">Bottom-left</option>
-                            <option value="bottom-center">Bottom-center</option>
-                            <option value="bottom-right">Bottom-right</option>
-                        </select>
+                    <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                        <div>
+                            <label class="block text-sm font-bold text-blue-900 mb-2">Modal Button Placement</label>
+                            <select wire:model="modalPlacement" class="w-full py-2 px-3 border border-blue-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-indigo-700 bg-white shadow-sm">
+                                <option value="top-right">Top-right</option>
+                                <option value="top-center">Top-center</option>
+                                <option value="bottom-left">Bottom-left</option>
+                                <option value="bottom-center">Bottom-center</option>
+                                <option value="bottom-right">Bottom-right</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-blue-900 mb-2">
+                                {{ $activeTabCode == 107 ? 'Show Add Land Details Card' : 'Show Add Family Members Card' }}
+                            </label>
+                            <button type="button" 
+                                wire:click="$set('showModalCard', {{ $showModalCard ? 'false' : 'true' }})"
+                                class="w-full h-[38px] flex items-center justify-center gap-2.5 px-4 rounded-md border text-sm font-semibold transition-all duration-150 shadow-sm cursor-pointer select-none {{ $showModalCard ? 'bg-indigo-600 border-indigo-600 text-white hover:bg-indigo-700' : 'bg-gray-200 border-gray-300 text-gray-700 hover:bg-gray-300' }}">
+                                <span class="relative flex h-2.5 w-2.5 shrink-0">
+                                  @if($showModalCard)
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                  @endif
+                                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 {{ $showModalCard ? 'bg-green-400' : 'bg-gray-500' }}"></span>
+                                </span>
+                                <span class="truncate">{{ $showModalCard ? 'Enabled (Card Visible)' : 'Disabled (Card Hidden)' }}</span>
+                            </button>
+                        </div>
                     </div>
                     @endif
 

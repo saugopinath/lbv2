@@ -108,6 +108,24 @@ abstract class BaseTabSaver
             $dbData['ds_registration_no'] = $existingRecord->ds_registration_no;
         }
 
+        if (isset($dbData['other_details'])) {
+            $existingOther = $existingRecord->other_details;
+            if (is_string($existingOther)) {
+                $existingOther = json_decode($existingOther, true) ?? [];
+            } elseif (!is_array($existingOther)) {
+                $existingOther = [];
+            }
+            $newOther = is_array($dbData['other_details'])
+                ? $dbData['other_details']
+                : (json_decode($dbData['other_details'], true) ?? []);
+
+            $mergedOther = array_merge($existingOther, $newOther);
+
+            $dbData['other_details'] = $existingRecord->hasCast('other_details', ['array', 'json', 'object', 'collection'])
+                ? $mergedOther
+                : json_encode($mergedOther);
+        }
+
         $updated = $existingRecord->update($dbData);
         if ($updated) {
             $this->notifySuccess($component, 'Application updated successfully!');

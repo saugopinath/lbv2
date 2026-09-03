@@ -53,6 +53,11 @@ class ManabikSchemeFormFieldsResetSeeder extends Seeder
 
             // 2. Ensure Sections exist in SectionLevelMaster
             $sectionsData = [
+                'aadhaar_sec' => [
+                    'name' => '',
+                    'short' => 'aadhaar_sec',
+                    'tab_code' => 105,
+                ],
                 'pension_from_sec' => [
                     'name' => 'Presently, I am receiving following pension(s) from:',
                     'short' => 'pension_from_sec',
@@ -72,7 +77,7 @@ class ManabikSchemeFormFieldsResetSeeder extends Seeder
 
             $sectionIds = [];
             foreach ($sectionsData as $key => $sdata) {
-                $sec = SectionLevelMaster::firstOrCreate(
+                $sec = SectionLevelMaster::updateOrCreate(
                     [
                         'scheme_id' => $schemeId,
                         'tab_code' => $sdata['tab_code'],
@@ -170,10 +175,131 @@ class ManabikSchemeFormFieldsResetSeeder extends Seeder
                     'is_active' => true,
                     'field_position' => 18,
                 ],
+                [
+                    'tab_code' => 106,
+                    'field_id' => 'ration_card_category',
+                    'field_name' => 'ration_card_category',
+                    'level_name' => 'Digital Ration Card category',
+                    'field_type' => 'select',
+                    'options' => ['AAY' => 'AAY', 'PHH' => 'PHH', 'SPHH' => 'SPHH', 'RKSY-I' => 'RKSY-I', 'RKSY-II' => 'RKSY-II'],
+                    'validation_rule' => 'required',
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 1,
+                ],
+                [
+                    'tab_code' => 106,
+                    'field_id' => 'ration_card_number',
+                    'field_name' => 'ration_card_number',
+                    'level_name' => 'Ration Card Number',
+                    'field_type' => 'text',
+                    'validation_rule' => 'required|string',
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 2,
+                ],
+                [
+                    'tab_code' => 106,
+                    'field_id' => 'pan',
+                    'field_name' => 'pan',
+                    'level_name' => 'Pan',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|string',
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 3,
+                ],
+                [
+                    'tab_code' => 106,
+                    'field_id' => 'ahl_tin',
+                    'field_name' => 'ahl_tin',
+                    'level_name' => 'AHL TIN',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|string',
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 5,
+                ],
+                [
+                    'tab_code' => 106,
+                    'field_id' => 'bpl_seq_number',
+                    'field_name' => 'bpl_seq_number',
+                    'level_name' => 'BPL Seq Number (if available)',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|string',
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 6,
+                ],
+                [
+                    'tab_code' => 106,
+                    'field_id' => 'bpl_id_number',
+                    'field_name' => 'bpl_id_number',
+                    'level_name' => 'BPL Id Number (if available)',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|string',
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 7,
+                ],
+                [
+                    'tab_code' => 106,
+                    'field_id' => 'bpl_total_score',
+                    'field_name' => 'bpl_total_score',
+                    'level_name' => 'BPL Total Score (if available)',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|string',
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 8,
+                ],
+                [
+                    'tab_code' => 102,
+                    'field_id' => 'wb_dwelling_years',
+                    'field_name' => 'wb_dwelling_years',
+                    'level_name' => 'Number of years of Dwelling in WB',
+                    'field_type' => 'text',
+                    'validation_rule' => 'required|numeric',
+                    'db_colunm' => 'other_details',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 12,
+                ],
+                [
+                    'tab_code' => 102,
+                    'field_id' => 'mobile_number',
+                    'field_name' => 'mobile_number',
+                    'level_name' => 'Mobile No.',
+                    'field_type' => 'text',
+                    'validation_rule' => 'required|digits:10',
+                    'db_colunm' => 'mobile_no',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 13,
+                ],
+                [
+                    'tab_code' => 102,
+                    'field_id' => 'email_id',
+                    'field_name' => 'email_id',
+                    'level_name' => 'Email ID',
+                    'field_type' => 'text',
+                    'validation_rule' => 'nullable|email',
+                    'db_colunm' => 'email',
+                    'is_common' => false,
+                    'is_active' => true,
+                    'field_position' => 14,
+                ],
             ];
 
             foreach ($customBaseFields as $cbf) {
-                SchemeTabBasefield::firstOrCreate(
+                SchemeTabBasefield::updateOrCreate(
                     [
                         'field_id' => $cbf['field_id'],
                         'tab_code' => $cbf['tab_code'],
@@ -307,26 +433,34 @@ class ManabikSchemeFormFieldsResetSeeder extends Seeder
                 }
             }
 
-            // 6. Seed Attached Documents (Tab 104: Docs 1, 2, 3, 4, 8, 24 -> Photo 103, Aadhaar 107, Bank Passbook 111, Ration Card 106, Aadhaar Consent 126, Disability Cert 105)
+            // 6. Seed Attached Documents
             $docs = [
-                ['doc_type_id' => 103, 'is_required' => true, 'max_file_size' => '100KB', 'extension_type' => 'jpg,png,jpeg,pdf'],
-                ['doc_type_id' => 107, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 111, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 106, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 126, 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
-                ['doc_type_id' => 105, 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'],
+                ['code' => '161', 'is_required' => true, 'max_file_size' => '100KB', 'extension_type' => 'jpg,png,jpeg,pdf'], // Passport size profile photo
+                ['code' => '1624', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'], // Aadhaar consent form
+                ['code' => '165', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'], // Copy of Aadhar Card
+                ['code' => '163', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'], // Copy of Disability Certificate from Appropriate Authority
+                ['code' => '169', 'is_required' => true, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'], // Copy of Bank Pass book
+                ['code' => '1617', 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'], // Copy of PAN Card
+                ['code' => '162', 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'], // Copy of Caste Certificate
+                ['code' => '168', 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'], // Copy of Income Certificate(Self Declaration)
+                ['code' => '1610', 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'], // Others, please specify
+                ['code' => '164', 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'], // Copy of Digital Ration Card
+                ['code' => '166', 'is_required' => false, 'max_file_size' => '500KB', 'extension_type' => 'jpg,jpeg,png,pdf'], // Copy of EPIC/ Voter Id
             ];
 
             foreach ($docs as $index => $doc) {
-                SchemeAttachedDocMappings::create([
-                    'scheme_id' => $schemeId,
-                    'tab_code' => 104,
-                    'doc_type_id' => $doc['doc_type_id'],
-                    'field_position' => $index + 1,
-                    'is_required' => $doc['is_required'],
-                    'max_file_size' => $doc['max_file_size'],
-                    'extension_type' => $doc['extension_type'],
-                ]);
+                $cm = \App\Models\Codemaster::where('code', $doc['code'])->first();
+                if ($cm) {
+                    SchemeAttachedDocMappings::create([
+                        'scheme_id' => $schemeId,
+                        'tab_code' => 104,
+                        'doc_type_id' => $cm->id,
+                        'field_position' => $index + 1,
+                        'is_required' => $doc['is_required'],
+                        'max_file_size' => $doc['max_file_size'],
+                        'extension_type' => $doc['extension_type'],
+                    ]);
+                }
             }
 
             // 7. Seed Self Declaration Fields (Tab 105: pension_other_sources_1 & 2 present, nominee removed)
@@ -334,18 +468,20 @@ class ManabikSchemeFormFieldsResetSeeder extends Seeder
                 [
                     'field_name' => 'aadhaar_consent',
                     'field_id' => 'aadhaar_consent',
-                    'level_name' => 'I give consent to the use of the Aadhaar No. for authenticating my identity for social security pension (In case Aadhaar no. provided by the applicant)',
-                    'field_type' => 'checkbox',
-                    'validation_rule' => 'nullable',
-                    'section_level_id' => null,
-                    'section_level_type' => null,
+                    'level_name' => 'consent to the use of the Aadhaar No. for authenticating my identity for social security pension (In case Aadhaar no. provided by the applicant)',
+                    'field_type' => 'select',
+                    'options' => ['give' => 'give', 'do not give' => 'do not give'],
+                    'validation_rule' => 'required',
+                    'section_level_id' => $sectionIds['aadhaar_sec'] ?? null,
+                    'section_level_type' => 0,
                     'field_position' => 1,
                 ],
                 [
                     'field_name' => 'pension_from',
                     'field_id' => 'pension_from',
-                    'level_name' => 'Presently, I am receiving following pension(s) from:',
-                    'field_type' => 'select',
+                    'level_name' => '',
+                    'field_type' => 'checkbox',
+                    'is_multiple' => true,
                     'options' => ['1' => 'Central Govt', '2' => 'State Govt', '3' => 'Local Administration', '4' => 'Govt. Aided Organization'],
                     'validation_rule' => 'nullable',
                     'section_level_id' => $sectionIds['pension_from_sec'] ?? null,
@@ -355,7 +491,7 @@ class ManabikSchemeFormFieldsResetSeeder extends Seeder
                 [
                     'field_name' => 'pension_other_sources_1',
                     'field_id' => 'pension_other_sources_1',
-                    'level_name' => 'In case the applicant is receiving pension from other sources (1)',
+                    'level_name' => '1.',
                     'field_type' => 'text',
                     'validation_rule' => 'nullable|string',
                     'section_level_id' => $sectionIds['pension_other_sec'] ?? null,
@@ -365,7 +501,7 @@ class ManabikSchemeFormFieldsResetSeeder extends Seeder
                 [
                     'field_name' => 'pension_other_sources_2',
                     'field_id' => 'pension_other_sources_2',
-                    'level_name' => 'In case the applicant is receiving pension from other sources (2)',
+                    'level_name' => '2.',
                     'field_type' => 'text',
                     'validation_rule' => 'nullable|string',
                     'section_level_id' => $sectionIds['pension_other_sec'] ?? null,
@@ -373,40 +509,11 @@ class ManabikSchemeFormFieldsResetSeeder extends Seeder
                     'field_position' => 4,
                 ],
                 [
-                    'field_name' => 'nominee_name',
-                    'field_id' => 'nominee_name',
-                    'level_name' => 'Nominee Name',
-                    'field_type' => 'text',
-                    'validation_rule' => 'nullable|string',
-                    'section_level_id' => $sectionIds['nominee_sec'] ?? null,
-                    'section_level_type' => 0,
-                    'field_position' => 5,
-                ],
-                [
-                    'field_name' => 'nominee_address',
-                    'field_id' => 'nominee_address',
-                    'level_name' => 'Nominee Address',
-                    'field_type' => 'text',
-                    'validation_rule' => 'nullable|string',
-                    'section_level_id' => $sectionIds['nominee_sec'] ?? null,
-                    'section_level_type' => 0,
-                    'field_position' => 6,
-                ],
-                [
-                    'field_name' => 'nominee_relationship',
-                    'field_id' => 'nominee_relationship',
-                    'level_name' => 'Nominee Relationship',
-                    'field_type' => 'text',
-                    'validation_rule' => 'nullable|string',
-                    'section_level_id' => $sectionIds['nominee_sec'] ?? null,
-                    'section_level_type' => 0,
-                    'field_position' => 7,
-                ],
-                [
                     'field_name' => 'social_security_pension',
                     'field_id' => 'social_security_pension',
-                    'level_name' => 'Presently, I am receiving the following social Security Pension/s:',
-                    'field_type' => 'select',
+                    'level_name' => '',
+                    'field_type' => 'checkbox',
+                    'is_multiple' => true,
                     'options' => [
                         '1' => 'NSAP Old Age',
                         '2' => 'NSAP Widow Pension',
@@ -434,6 +541,7 @@ class ManabikSchemeFormFieldsResetSeeder extends Seeder
                     'field_id' => $sd['field_id'],
                     'level_name' => $sd['level_name'],
                     'field_type' => $sd['field_type'],
+                    'is_multiple' => $sd['is_multiple'] ?? false,
                     'section_level_id' => $sd['section_level_id'],
                     'section_level_type' => $sd['section_level_type'],
                     'options' => $sd['options'] ?? null,

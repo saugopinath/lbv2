@@ -90,6 +90,7 @@ class SchemewiseStoreDataJsonHelper
                 'tab_icon' => $tab->masterTab->tab_icon ?? '',
                 'tab_short_name' => $tab->masterTab->tab_short_name ?? '',
                 'is_current_address' => $tab->is_current_address,
+                'show_modal_card' => (bool) ($tab->show_modal_card ?? true),
                 'fields' => $fields,
                 'layout' => $layout,
             ];
@@ -153,53 +154,53 @@ class SchemewiseStoreDataJsonHelper
                 $modalPath = resource_path("views/components/dynamic-modal.blade.php");
                 if (!File::exists($modalPath)) {
                     $modalContent = <<<'BLADE'
-@props([
-    'showVar' => 'showModal',
-    'title' => 'Add Details',
-    'fields' => [],
-    'targetVar' => 'newLand',
-    'submitAction' => 'addLand()',
-])
+                                        @props([
+                                            'showVar' => 'showModal',
+                                            'title' => 'Add Details',
+                                            'fields' => [],
+                                            'targetVar' => 'newLand',
+                                            'submitAction' => 'addLand()',
+                                        ])
 
-<div x-show="{{ $showVar }}" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
-    <div class="flex items-center justify-center min-h-screen w-full p-4 text-center">
-        <!-- Backdrop -->
-        <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="{{ $showVar }} = false">
-            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
+                                        <div x-show="{{ $showVar }}" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+                                            <div class="flex items-center justify-center min-h-screen w-full p-4 text-center">
+                                                <!-- Backdrop -->
+                                                <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="{{ $showVar }} = false">
+                                                    <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                                                </div>
 
-        <!-- Modal Content -->
-        <div class="inline-block bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full z-10">
-            <div class="bg-blue-600 px-6 py-4 text-white">
-                <h3 class="text-lg font-bold">{{ $title }}</h3>
-            </div>
-            <div class="bg-white px-6 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div class="space-y-4">
-                    @foreach($fields as $field)
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">{{ $field['label'] }}</label>
-                            @if(($field['type'] ?? 'text') === 'select')
-                                <select x-model="{{ $targetVar }}.{{ $field['name'] }}" class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                                    <option value="">-- Select --</option>
-                                    @foreach($field['options'] ?? [] as $val => $lbl)
-                                        <option value="{{ $val }}">{{ $lbl }}</option>
-                                    @endforeach
-                                </select>
-                            @else
-                                <input type="{{ $field['type'] ?? 'text' }}" x-model="{{ $targetVar }}.{{ $field['name'] }}" class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="{{ $field['placeholder'] ?? '' }}" />
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-            <div class="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-200">
-                <button type="button" @click="{{ $showVar }} = false" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm font-semibold">Cancel</button>
-                <button type="button" @click="{{ $submitAction }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold">Add</button>
-            </div>
-        </div>
-    </div>
-</div>
-BLADE;
+                                                <!-- Modal Content -->
+                                                <div class="inline-block bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full z-10">
+                                                    <div class="bg-blue-600 px-6 py-4 text-white">
+                                                        <h3 class="text-lg font-bold">{{ $title }}</h3>
+                                                    </div>
+                                                    <div class="bg-white px-6 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                                        <div class="space-y-4">
+                                                            @foreach($fields as $field)
+                                                                <div>
+                                                                    <label class="block text-sm font-semibold text-gray-700 mb-1">{{ $field['label'] }}</label>
+                                                                    @if(($field['type'] ?? 'text') === 'select')
+                                                                        <select x-model="{{ $targetVar }}.{{ $field['name'] }}" class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                                                            <option value="">-- Select --</option>
+                                                                            @foreach($field['options'] ?? [] as $val => $lbl)
+                                                                                <option value="{{ $val }}">{{ $lbl }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    @else
+                                                                        <input type="{{ $field['type'] ?? 'text' }}" x-model="{{ $targetVar }}.{{ $field['name'] }}" class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="{{ $field['placeholder'] ?? '' }}" />
+                                                                    @endif
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                    <div class="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-200">
+                                                        <button type="button" @click="{{ $showVar }} = false" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm font-semibold">Cancel</button>
+                                                        <button type="button" @click="{{ $submitAction }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold">Add</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        BLADE;
                     File::ensureDirectoryExists(dirname($modalPath));
                     File::put($modalPath, $modalContent);
                 }
@@ -223,23 +224,27 @@ BLADE;
 
                     $newLandJsFields = [];
                     foreach ($tableFields as $f) {
-                        $newLandJsFields[] = "{$f['field_name']}: ''";
+                        $newLandJsFields[] = "'{$f['field_name']}': ''";
                     }
                     $newLandJsStr = implode(', ', $newLandJsFields);
 
-                    $validationJsFields = [];
+                    $validationJsCheckBlocks = [];
+                    $hasRequired = false;
                     foreach ($tableFields as $f) {
                         $rules = explode('|', $f['validation_rule'] ?? '');
                         if (in_array('required', $rules)) {
-                            $validationJsFields[] = "!this.newLand.{$f['field_name']}";
+                            $hasRequired = true;
                         }
                     }
-                    if (empty($validationJsFields)) {
-                        foreach ($tableFields as $f) {
-                            $validationJsFields[] = "!this.newLand.{$f['field_name']}";
+
+                    foreach ($tableFields as $f) {
+                        $rules = explode('|', $f['validation_rule'] ?? '');
+                        if ($hasRequired ? in_array('required', $rules) : true) {
+                            $lbl = addslashes($f['level_name'] ?? ucwords(str_replace('_', ' ', $f['field_name'])));
+                            $validationJsCheckBlocks[] = "if (!this.newLand['{$f['field_name']}']) missingFields.push('{$lbl}');";
                         }
                     }
-                    $validationJsStr = implode(' || ', $validationJsFields);
+                    $validationJsChecksStr = implode("\n                                            ", $validationJsCheckBlocks);
 
                     $tableHeadersHtml = "                        <th class=\"px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider\">Serial No</th>\n";
                     foreach ($tableFields as $f) {
@@ -258,9 +263,7 @@ BLADE;
 
                     $bottomFieldsHtml = "<div class=\"grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 items-start\">\n";
                     foreach ($bottomFields as $f) {
-                        $bottomFieldsHtml .= "    <div wire:key=\"field-norm-{$f['field_name']}\">\n";
                         $bottomFieldsHtml .= self::renderField($f);
-                        $bottomFieldsHtml .= "    </div>\n";
                     }
                     $bottomFieldsHtml .= "</div>\n";
 
@@ -277,7 +280,7 @@ BLADE;
                         $optionsStr = '';
                         if (!empty($f['options']) && is_array($f['options'])) {
                             $opts = [];
-                            foreach($f['options'] as $k => $v) {
+                            foreach ($f['options'] as $k => $v) {
                                 $opts[] = "'" . addslashes($k) . "' => '" . addslashes($v) . "'";
                             }
                             $optionsStr = ", 'options' => [" . implode(", ", $opts) . "]";
@@ -290,23 +293,50 @@ BLADE;
                         ->where('tab_code', $tabCode)
                         ->first();
                     $placement = $mapping->modal_placement ?? 'top-right';
+                    $showModalCard = (bool) ($mapping->show_modal_card ?? true);
+
+                    if (!$showModalCard) {
+                        if (empty($bottomFields)) {
+                            $emptyBlade = <<<BLADE
+                                            <div wire:key="empty-tab-wrapper-{$tabCode}" class="p-8 bg-blue-50 border border-blue-200 rounded-xl text-center shadow-sm my-4">
+                                                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600 mb-3">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0 1 18 0z" />
+                                                    </svg>
+                                                </div>
+                                                <h4 class="text-base font-bold text-blue-900">No fields are present on this tab</h4>
+                                                <p class="text-sm text-blue-700 mt-1">You may continue to the next tab by clicking <span class="font-semibold">Save & Next</span>.</p>
+                                            </div>
+                                        BLADE;
+                            File::put("{$dir}/107.blade.php", $emptyBlade);
+                            continue;
+                        } else {
+                            $bottomOnlyBlade = <<<BLADE
+                                                    <div wire:key="land-tab-wrapper">
+                                                        {$bottomFieldsHtml}
+                                                    </div>
+                                                    BLADE;
+                            File::put("{$dir}/107.blade.php", $bottomOnlyBlade);
+                            continue;
+                        }
+                    }
 
                     $isTopRight = ($placement === 'top-right');
                     $isTopCenter = ($placement === 'top-center');
-                    
+
                     $headerButtonHtml = '';
                     if ($isTopRight || $isTopCenter) {
                         $btnWrapperClass = $isTopCenter ? 'absolute left-1/2 -translate-x-1/2' : '';
                         $headerButtonHtml = <<<HTML
-                                                <div class="{$btnWrapperClass}">
-                                                    <button type="button" @click="showModal = true" class="flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-50 transition text-sm">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                                                        </svg>
-                                                        Add Land Details
-                                                    </button>
-                                                </div>
-HTML;
+                        <div class="{$btnWrapperClass}">
+                            <button type="button" @click="showModal = true; modalError = ''" class="flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-50 transition text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Add Land Details
+                            </button>
+                        </div>
+                        HTML;
                     }
 
                     $justifyClass = 'justify-end';
@@ -315,28 +345,32 @@ HTML;
 
                     $barButtonHtml = <<<HTML
                                             <div class="px-6 py-4 flex {$justifyClass} items-center bg-gray-50 border-b border-gray-200">
-                                                <button type="button" @click="showModal = true" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition text-sm">
+                                                <button type="button" @click="showModal = true; modalError = ''" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition text-sm">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                                                     </svg>
                                                     Add Land Details
                                                 </button>
                                             </div>
-HTML;
+                                        HTML;
 
                     $topButtonHtml = (str_starts_with($placement, 'top') && !$isTopRight && !$isTopCenter) ? $barButtonHtml : '';
                     $bottomButtonHtml = str_starts_with($placement, 'bottom') ? str_replace('border-b', 'border-t', $barButtonHtml) : '';
 
                     $blade = <<<BLADE
-                                    <div x-data="{
+                                    <div wire:key="land-tab-wrapper" x-data="{
                                         lands: @js(\$formData['lands'] ?? []),
                                         showModal: false,
+                                        modalError: '',
                                         newLand: { {$newLandJsStr} },
                                         addLand() {
-                                            if ({$validationJsStr}) {
-                                                alert('Please fill all land detail fields.');
+                                            let missingFields = [];
+                                            {$validationJsChecksStr}
+                                            if (missingFields.length > 0) {
+                                                this.modalError = '<div class=\'flex items-start gap-2 mb-2\'><svg class=\'h-5 w-5 text-red-500 shrink-0 mt-0.5\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'currentColor\' stroke-width=\'2\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z\'/></svg><div><span class=\'font-semibold text-red-700 text-sm\'>Please provide the following details:</span><ul class=\'list-disc list-inside space-y-1 text-sm text-red-600 mt-1\'>' + missingFields.map(f => '<li>' + f + '</li>').join('') + '</ul></div></div>';
                                                 return;
                                             }
+                                            this.modalError = '';
                                             if (!this.lands) {
                                                 this.lands = [];
                                             }
@@ -349,7 +383,7 @@ HTML;
                                             this.lands.splice(index, 1);
                                             \$wire.set('formData.lands', this.lands);
                                         }
-                                    }" x-init="if(!this.lands || typeof this.lands !== 'object') { this.lands = []; }">
+                                    }" @open-dynamic-modal="showModal = true" x-init="if(!this.lands || typeof this.lands !== 'object') { this.lands = []; }">
 
                                         <div class="mb-6 rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
                                             <!-- Header Bar -->
@@ -405,53 +439,53 @@ HTML;
                 $modalPath = resource_path("views/components/dynamic-modal.blade.php");
                 if (!File::exists($modalPath)) {
                     $modalContent = <<<'BLADE'
-@props([
-    'showVar' => 'showModal',
-    'title' => 'Add Details',
-    'fields' => [],
-    'targetVar' => 'newMember',
-    'submitAction' => 'addMember()',
-])
+                                            @props([
+                                                'showVar' => 'showModal',
+                                                'title' => 'Add Details',
+                                                'fields' => [],
+                                                'targetVar' => 'newMember',
+                                                'submitAction' => 'addMember()',
+                                            ])
 
-<div x-show="{{ $showVar }}" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
-    <div class="flex items-center justify-center min-h-screen w-full p-4 text-center">
-        <!-- Backdrop -->
-        <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="{{ $showVar }} = false">
-            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
+                                            <div x-show="{{ $showVar }}" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+                                                <div class="flex items-center justify-center min-h-screen w-full p-4 text-center">
+                                                    <!-- Backdrop -->
+                                                    <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="{{ $showVar }} = false">
+                                                        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                                                    </div>
 
-        <!-- Modal Content -->
-        <div class="inline-block bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full z-10">
-            <div class="bg-blue-600 px-6 py-4 text-white">
-                <h3 class="text-lg font-bold">{{ $title }}</h3>
-            </div>
-            <div class="bg-white px-6 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div class="space-y-4">
-                    @foreach($fields as $field)
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">{{ $field['label'] }}</label>
-                            @if(($field['type'] ?? 'text') === 'select')
-                                <select x-model="{{ $targetVar }}.{{ $field['name'] }}" class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                                    <option value="">-- Select --</option>
-                                    @foreach($field['options'] ?? [] as $val => $lbl)
-                                        <option value="{{ $val }}">{{ $lbl }}</option>
-                                    @endforeach
-                                </select>
-                            @else
-                                <input type="{{ $field['type'] ?? 'text' }}" x-model="{{ $targetVar }}.{{ $field['name'] }}" class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="{{ $field['placeholder'] ?? '' }}" />
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-            <div class="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-200">
-                <button type="button" @click="{{ $showVar }} = false" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm font-semibold">Cancel</button>
-                <button type="button" @click="{{ $submitAction }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold">Add</button>
-            </div>
-        </div>
-    </div>
-</div>
-BLADE;
+                                                    <!-- Modal Content -->
+                                                    <div class="inline-block bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full z-10">
+                                                        <div class="bg-blue-600 px-6 py-4 text-white">
+                                                            <h3 class="text-lg font-bold">{{ $title }}</h3>
+                                                        </div>
+                                                        <div class="bg-white px-6 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                                            <div class="space-y-4">
+                                                                @foreach($fields as $field)
+                                                                    <div>
+                                                                        <label class="block text-sm font-semibold text-gray-700 mb-1">{{ $field['label'] }}</label>
+                                                                        @if(($field['type'] ?? 'text') === 'select')
+                                                                            <select x-model="{{ $targetVar }}.{{ $field['name'] }}" class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                                                                <option value="">-- Select --</option>
+                                                                                @foreach($field['options'] ?? [] as $val => $lbl)
+                                                                                    <option value="{{ $val }}">{{ $lbl }}</option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                        @else
+                                                                            <input type="{{ $field['type'] ?? 'text' }}" x-model="{{ $targetVar }}.{{ $field['name'] }}" class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="{{ $field['placeholder'] ?? '' }}" />
+                                                                        @endif
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                        <div class="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-200">
+                                                            <button type="button" @click="{{ $showVar }} = false" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm font-semibold">Cancel</button>
+                                                            <button type="button" @click="{{ $submitAction }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold">Add</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            BLADE;
                     File::ensureDirectoryExists(dirname($modalPath));
                     File::put($modalPath, $modalContent);
                 }
@@ -475,23 +509,27 @@ BLADE;
 
                     $newMemberJsFields = [];
                     foreach ($tableFields as $f) {
-                        $newMemberJsFields[] = "{$f['field_name']}: ''";
+                        $newMemberJsFields[] = "'{$f['field_name']}': ''";
                     }
                     $newMemberJsStr = implode(', ', $newMemberJsFields);
 
-                    $validationJsFields = [];
+                    $validationJsCheckBlocks = [];
+                    $hasRequired = false;
                     foreach ($tableFields as $f) {
                         $rules = explode('|', $f['validation_rule'] ?? '');
                         if (in_array('required', $rules)) {
-                            $validationJsFields[] = "!this.newMember.{$f['field_name']}";
+                            $hasRequired = true;
                         }
                     }
-                    if (empty($validationJsFields)) {
-                        foreach ($tableFields as $f) {
-                            $validationJsFields[] = "!this.newMember.{$f['field_name']}";
+
+                    foreach ($tableFields as $f) {
+                        $rules = explode('|', $f['validation_rule'] ?? '');
+                        if ($hasRequired ? in_array('required', $rules) : true) {
+                            $lbl = addslashes($f['level_name'] ?? ucwords(str_replace('_', ' ', $f['field_name'])));
+                            $validationJsCheckBlocks[] = "if (!this.newMember['{$f['field_name']}']) missingFields.push('{$lbl}');";
                         }
                     }
-                    $validationJsStr = implode(' || ', $validationJsFields);
+                    $validationJsChecksStr = implode("\n                                            ", $validationJsCheckBlocks);
 
                     $tableHeadersHtml = "                        <th class=\"px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider\">Serial No</th>\n";
                     foreach ($tableFields as $f) {
@@ -510,9 +548,7 @@ BLADE;
 
                     $bottomFieldsHtml = "<div class=\"grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 items-start\">\n";
                     foreach ($bottomFields as $f) {
-                        $bottomFieldsHtml .= "    <div wire:key=\"field-norm-{$f['field_name']}\">\n";
                         $bottomFieldsHtml .= self::renderField($f);
-                        $bottomFieldsHtml .= "    </div>\n";
                     }
                     $bottomFieldsHtml .= "</div>\n";
 
@@ -529,7 +565,7 @@ BLADE;
                         $optionsStr = '';
                         if (!empty($f['options']) && is_array($f['options'])) {
                             $opts = [];
-                            foreach($f['options'] as $k => $v) {
+                            foreach ($f['options'] as $k => $v) {
                                 $opts[] = "'" . addslashes($k) . "' => '" . addslashes($v) . "'";
                             }
                             $optionsStr = ", 'options' => [" . implode(", ", $opts) . "]";
@@ -542,16 +578,43 @@ BLADE;
                         ->where('tab_code', $tabCode)
                         ->first();
                     $placement = $mapping->modal_placement ?? 'top-right';
+                    $showModalCard = (bool) ($mapping->show_modal_card ?? true);
+
+                    if (!$showModalCard) {
+                        if (empty($bottomFields)) {
+                            $emptyBlade = <<<BLADE
+                                            <div wire:key="empty-tab-wrapper-{$tabCode}" class="p-8 bg-blue-50 border border-blue-200 rounded-xl text-center shadow-sm my-4">
+                                                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600 mb-3">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0 1 18 0z" />
+                                                    </svg>
+                                                </div>
+                                                <h4 class="text-base font-bold text-blue-900">No fields are present on this tab</h4>
+                                                <p class="text-sm text-blue-700 mt-1">You may continue to the next tab by clicking <span class="font-semibold">Save & Next</span>.</p>
+                                            </div>
+                                            BLADE;
+                            File::put("{$dir}/108.blade.php", $emptyBlade);
+                            continue;
+                        } else {
+                            $bottomOnlyBlade = <<<BLADE
+<div wire:key="family-tab-wrapper">
+    {$bottomFieldsHtml}
+</div>
+BLADE;
+                            File::put("{$dir}/108.blade.php", $bottomOnlyBlade);
+                            continue;
+                        }
+                    }
 
                     $isTopRight = ($placement === 'top-right');
                     $isTopCenter = ($placement === 'top-center');
-                    
+
                     $headerButtonHtml = '';
                     if ($isTopRight || $isTopCenter) {
                         $btnWrapperClass = $isTopCenter ? 'absolute left-1/2 -translate-x-1/2' : '';
                         $headerButtonHtml = <<<HTML
                                                 <div class="{$btnWrapperClass}">
-                                                    <button type="button" @click="showModal = true" class="flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-50 transition text-sm">
+                                                    <button type="button" @click="showModal = true; modalError = ''" class="flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-50 transition text-sm">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                                                         </svg>
@@ -567,7 +630,7 @@ HTML;
 
                     $barButtonHtml = <<<HTML
                                             <div class="px-6 py-4 flex {$justifyClass} items-center bg-gray-50 border-b border-gray-200">
-                                                <button type="button" @click="showModal = true" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition text-sm">
+                                                <button type="button" @click="showModal = true; modalError = ''" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition text-sm">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                                                     </svg>
@@ -580,15 +643,19 @@ HTML;
                     $bottomButtonHtml = str_starts_with($placement, 'bottom') ? str_replace('border-b', 'border-t', $barButtonHtml) : '';
 
                     $blade = <<<BLADE
-                                    <div x-data="{
+                                    <div wire:key="family-tab-wrapper" x-data="{
                                         families: @js(\$formData['families'] ?? []),
                                         showModal: false,
+                                        modalError: '',
                                         newMember: { {$newMemberJsStr} },
                                         addMember() {
-                                            if ({$validationJsStr}) {
-                                                alert('Please fill all family detail fields.');
+                                            let missingFields = [];
+                                            {$validationJsChecksStr}
+                                            if (missingFields.length > 0) {
+                                                this.modalError = '<div class=\'flex items-start gap-2 mb-2\'><svg class=\'h-5 w-5 text-red-500 shrink-0 mt-0.5\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'currentColor\' stroke-width=\'2\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z\'/></svg><div><span class=\'font-semibold text-red-700 text-sm\'>Please provide the following details:</span><ul class=\'list-disc list-inside space-y-1 text-sm text-red-600 mt-1\'>' + missingFields.map(f => '<li>' + f + '</li>').join('') + '</ul></div></div>';
                                                 return;
                                             }
+                                            this.modalError = '';
                                             if (!this.families) {
                                                 this.families = [];
                                             }
@@ -601,7 +668,7 @@ HTML;
                                             this.families.splice(index, 1);
                                             \$wire.set('formData.families', this.families);
                                         }
-                                    }" x-init="if(!this.families || typeof this.families !== 'object') { this.families = []; }">
+                                    }" @open-dynamic-modal="showModal = true" x-init="if(!this.families || typeof this.families !== 'object') { this.families = []; }">
 
                                         <div class="mb-6 rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
                                             <!-- Header Bar -->
@@ -684,58 +751,13 @@ HTML;
                         $blade .= "    <div class=\"mb-6\">\n";
                     }
 
-                    if ($sec->section_level_short_name === 'aadhaar_sec') {
-                        // Aadhaar Consent inline dropdown
-                        $consentField = $secFields->first();
-                        $optionsHtml = '<option value="">-- Select --</option>';
-                        foreach ($consentField->options ?? [] as $val => $lbl) {
-                            $optionsHtml .= "<option value=\"{$val}\">{$lbl}</option>";
-                        }
-                        
-                        $blade .= <<<HTML
-                                            <div class="flex items-center flex-wrap gap-2 text-gray-700 bg-gray-50 p-4 border border-gray-200 rounded">
-                                                <span class="text-sm font-medium">I</span>
-                                                <select name="{$consentField->field_name}" wire:model="formData.{$consentField->field_name}" class="inline-block py-1 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-indigo-700">
-                                                    {$optionsHtml}
-                                                </select>
-                                                <span class="text-sm font-medium">{$consentField->level_name}</span>
-                                            </div>
-                                            @error('formData.{$consentField->field_name}') <span class="text-red-500 text-xs mt-1 block">{{ \$message }}</span> @enderror
-                                    HTML;
-                    } elseif ($sec->section_level_short_name === 'pension_from_sec' || $sec->section_level_short_name === 'social_sec') {
-                        // Checkboxes
-                        $checkboxField = $secFields->first();
-                        $checkboxesHtml = '';
-                        foreach ($checkboxField->options ?? [] as $val => $lbl) {
-                            $checkboxesHtml .= <<<HTML
-                                                                <label class="flex items-center gap-2 cursor-pointer py-1">
-                                                                    <input type="checkbox" name="{$checkboxField->field_name}[]" value="{$val}" wire:model="formData.{$checkboxField->field_name}" class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
-                                                                    <span class="text-sm text-gray-700 font-medium">{$lbl}</span>
-                                                                </label>
-                                                HTML;
-                        }
-                        
-                        $levelNameHtml = '';
-                        if (!empty(trim($checkboxField->level_name))) {
-                            $levelNameHtml = "<div class=\"text-sm font-semibold text-gray-700 mb-2\">{$checkboxField->level_name}</div>";
-                        }
-                        
-                        $blade .= <<<HTML
-                                                        {$levelNameHtml}
-                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50 p-4 border border-gray-200 rounded">
-                                                            {$checkboxesHtml}
-                                                        </div>
-                                                        @error('formData.{$checkboxField->field_name}') <span class="text-red-500 text-xs mt-1 block">{{ \$message }}</span> @enderror
-                                                HTML;
-                    } else {
-                        // Fallback grid layout for generic sections
-                        $cols = count($secFields);
-                        $blade .= "        <div class=\"grid grid-cols-1 md:grid-cols-{$cols} gap-4\">\n";
-                        foreach ($secFields as $f) {
-                            $blade .= self::renderSelfDeclarationField($f);
-                        }
-                        $blade .= "        </div>\n";
+                    // Layout for all sections
+                    $cols = count($secFields);
+                    $blade .= "        <div class=\"grid grid-cols-1 md:grid-cols-{$cols} gap-4\">\n";
+                    foreach ($secFields as $f) {
+                        $blade .= self::renderSelfDeclarationField($f);
                     }
+                    $blade .= "        </div>\n";
 
                     $blade .= "    </div>\n";
                 }
@@ -1099,15 +1121,42 @@ HTML;
                 BLADE;
                 break;
             case 'checkbox':
-                $fieldHtml = <<<BLADE
-                    <x-form.checkbox
-                        name="{$name}"
-                        value="{$value}"
-                        label="{$label}"
-                        {$disabledAttr}
-                        wire:model="formData.{$name}"
-                    />
-                BLADE;
+                if (!empty($field->is_multiple)) {
+                    $checkboxesHtml = '';
+                    foreach ($options as $val => $lbl) {
+                        $val = e($val);
+                        $lbl = e($lbl);
+                        $checkboxesHtml .= <<<HTML
+                            <label class="flex items-center gap-2 cursor-pointer py-1">
+                                <input type="checkbox" name="{$name}[]" value="{$val}" wire:model="formData.{$name}" class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
+                                <span class="text-sm text-gray-700 font-medium">{$lbl}</span>
+                            </label>
+                        HTML;
+                    }
+                    $levelNameHtml = '';
+                    if (!empty(trim($label))) {
+                        $levelNameHtml = "<div class=\"text-sm font-semibold text-gray-700 mb-2\">{$label}</div>";
+                    }
+                    $fieldHtml = <<<BLADE
+                    <div class="{$paddingClass}">
+                        {$levelNameHtml}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50 p-4 border border-gray-200 rounded">
+                            {$checkboxesHtml}
+                        </div>
+                        @error('formData.{$name}') <span class="text-red-500 text-xs mt-1 block">{{ \$message }}</span> @enderror
+                    </div>
+                    BLADE;
+                } else {
+                    $fieldHtml = <<<BLADE
+                        <x-form.checkbox
+                            name="{$name}"
+                            value="{$value}"
+                            label="{$label}"
+                            {$disabledAttr}
+                            wire:model="formData.{$name}"
+                        />
+                    BLADE;
+                }
                 break;
 
             case 'text':
@@ -1196,29 +1245,25 @@ HTML;
 
                 /* ===== SELECT ===== */
             case 'select':
-
-                $optionsHtml = '';
+                $optionsHtml = '<option value="">-- Select --</option>';
                 foreach ($options as $key => $text) {
                     if (is_int($key)) {
                         $key = $text;
                     }
                     $key = e($key);
                     $text = e($text);
-
                     $optionsHtml .= "<option value=\"{$key}\">{$text}</option>\n";
                 }
 
                 return <<<BLADE
-                <div class="{$paddingClass}">
-                    <x-form.select
-                        name="{$name}"
-                        label="{$label}"
-                        wire:model="formData.{$name}"
-                    >
-                        <option value="">-- Select {$label} --</option>
+                <div class="col-span-full flex items-center flex-wrap gap-2 text-gray-700 bg-gray-50 p-4 border border-gray-200 rounded {$paddingClass}">
+                    <span class="text-sm font-medium">I</span>
+                    <select name="{$name}" wire:model="formData.{$name}" class="inline-block py-1 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-indigo-700">
                         {$optionsHtml}
-                    </x-form.select>
+                    </select>
+                    <span class="text-sm font-medium">{$label}</span>
                 </div>
+                @error('formData.{$name}') <span class="text-red-500 text-xs mt-1 block">{{ \$message }}</span> @enderror
                 BLADE;
 
                 /* ===== RADIO ===== */
@@ -1247,7 +1292,7 @@ HTML;
                 }
 
                 return <<<BLADE
-                <div class="{$paddingClass}">
+                <div class="col-span-full {$paddingClass}">
                     <label class="block font-medium text-gray-700 mb-1">{$label}</label>
                     <div class="flex flex-wrap gap-4">
                         {$radioHtml}
@@ -1257,6 +1302,33 @@ HTML;
 
                 /* ===== CHECKBOX ===== */
             case 'checkbox':
+                if (!empty($options)) {
+                    $checkboxesHtml = '';
+                    foreach ($options as $val => $lbl) {
+                        $val = e($val);
+                        $lbl = e($lbl);
+                        $checkboxesHtml .= <<<HTML
+                            <label class="flex items-center gap-2 cursor-pointer py-1">
+                                <input type="checkbox" name="{$name}[]" value="{$val}" wire:model="formData.{$name}" class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
+                                <span class="text-sm text-gray-700 font-medium">{$lbl}</span>
+                            </label>
+                        HTML;
+                    }
+                    $levelNameHtml = '';
+                    if (!empty(trim($label))) {
+                        $levelNameHtml = "<div class=\"text-sm font-semibold text-gray-700 mb-2\">{$label}</div>";
+                    }
+                    return <<<BLADE
+                    <div class="col-span-full {$paddingClass}">
+                        {$levelNameHtml}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50 p-4 border border-gray-200 rounded">
+                            {$checkboxesHtml}
+                        </div>
+                        @error('formData.{$name}') <span class="text-red-500 text-xs mt-1 block">{{ \$message }}</span> @enderror
+                    </div>
+                    BLADE;
+                }
+
                 return <<<BLADE
                 <div class="{$paddingClass}">
                     <x-form.checkbox
