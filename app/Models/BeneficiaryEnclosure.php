@@ -62,6 +62,7 @@ class BeneficiaryEnclosure extends BaseAuditableModel
             'document_type' => $this->document_type,
             'created_by' => $this->created_by,
             'tab_code' => $this->tab_code,
+            'storage_type' => $this->storage_type,
             'is_clean' => (bool) $this->is_clean,
             'created_at' => optional($this->created_at)->timestamp,
             'updated_at' => optional($this->updated_at)->timestamp,

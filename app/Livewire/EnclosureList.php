@@ -10,6 +10,8 @@ use App\Models\BeneficiaryTemEnclosure;
 use App\Models\BeneficiaryPersonalDetail;
 use App\Models\SchemeAttachedDocMappings;
 use App\Models\UniqueAppBenId;
+use Illuminate\Http\Client\Response;
+use App\Contracts\DocumentStorageInterface;
 
 class EnclosureList extends Component
 {
@@ -243,7 +245,21 @@ class EnclosureList extends Component
         }
 
         $this->validate();
-        $base64 = base64_encode(file_get_contents($this->singleDocument->getRealPath()));
+        $handler = app(DocumentStorageInterface::class);
+        $uploadResult = $handler->uploadDocument(
+            $this->singleDocument->getRealPath(),
+            $this->singleDocument->getClientOriginalName(),
+            Auth::id()
+        );
+
+        if ($uploadResult === true || !is_array($uploadResult)) {
+            $storageType = 'DB';
+            $attachedDocument = base64_encode(file_get_contents($this->singleDocument->getRealPath()));
+        } else {
+            $storageType = 'external';
+            $attachedDocument = $uploadResult['result']['documentId'] ?? null;
+        }
+
         $model = $this->enclosureModel();
         $beneficiaryId = BeneficiaryPersonalDetail::where('application_id', $this->application_id)->value('beneficiary_id');
         // dd($model);
@@ -255,40 +271,30 @@ class EnclosureList extends Component
                 fn($q) => $q->where('tab_code', $this->tabCode)
             )
             ->first();
-        // dd($existingDoc);
-        if ($existingDoc) {
-            $updateData = [
-                'attched_document' => $base64,
-                'ip_address' => request()->ip(),
-                'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
-                'document_mime_type' => $this->singleDocument->getMimeType(),
-                'created_by' => Auth::id(),
-                'scheme_id' => $this->scheme_id,
-            ];
-            if ((int) $this->enclosureSource !== 5) {
-                $updateData['tab_code'] = $this->tabCode;
-            }
-            $existingDoc->update($updateData);
-        } else {
-            // dd('juhsjh');
-            $createData = [
-                'application_id' => $this->application_id,
-                'beneficiary_id' => $beneficiaryId,
-                'attched_document' => $base64,
-                'ip_address' => request()->ip(),
-                'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
-                'document_mime_type' => $this->singleDocument->getMimeType(),
-                'document_type' => $this->currentDocId,
-                'created_by' => Auth::id(),
-                'scheme_id' => $this->scheme_id,
-            ];
-            if ((int) $this->enclosureSource !== 5) {
-                $createData['tab_code'] = $this->tabCode;
-            }
-            // dd($createData);
-            $model::create($createData);
-            // dd($is_upload);
+
+        $documentData = [
+            'storage_type' => $storageType,
+            'attched_document' => $attachedDocument,
+            'ip_address' => request()->ip(),
+            'document_extension' => strtolower($this->singleDocument->getClientOriginalExtension()),
+            'document_mime_type' => $this->singleDocument->getMimeType(),
+            'created_by' => Auth::id(),
+            'scheme_id' => $this->scheme_id,
+        ];
+
+        if ((int) $this->enclosureSource !== 5) {
+            $documentData['tab_code'] = $this->tabCode;
         }
+
+        if ($existingDoc) {
+            $existingDoc->update($documentData);
+        } else {
+            $documentData['application_id'] = $this->application_id;
+            $documentData['beneficiary_id'] = $beneficiaryId;
+            $documentData['document_type'] = $this->currentDocId;
+            $model::create($documentData);
+        }
+
         $docId = $this->currentDocId;
         $this->singleDocument = null;
         $this->currentDocId = null;
@@ -324,8 +330,28 @@ class EnclosureList extends Component
     {
         $model = $this->enclosureModel();
         $document = $model::findOrFail($id);
-        $decoded = base64_decode($document->attched_document);
         $filename = 'document_' . $document->document_type . '.' . $document->document_extension;
+
+        if ($document->storage_type === 'external') {
+            if (empty($document->attched_document)) {
+                throw new \Exception("External document ID is missing for document record: {$id}");
+            }
+
+            $handler = app(DocumentStorageInterface::class);
+            $response = $handler->downloadDocument($document->attched_document);
+
+            $fileData = $response->body();
+            $contentType = $response->header('Content-Type');
+            $typeString = is_array($contentType) ? ($contentType[0] ?? $document->document_mime_type) : ($contentType ?? $document->document_mime_type);
+
+            return response()->streamDownload(function () use ($fileData) {
+                echo $fileData;
+            }, $filename, [
+                'Content-Type' => $typeString,
+            ]);
+        }
+
+        $decoded = base64_decode($document->attched_document);
         return response()->streamDownload(function () use ($decoded) {
             echo $decoded;
         }, $filename, [
