@@ -956,13 +956,19 @@ class FarmerSchemeFormFieldsResetSeeder extends Seeder
             // Set modal placement for Land Details (Tab 107) and Family Details (Tab 108)
             \App\Models\SchemeTabMapping::where('scheme_id', $schemeId)
                 ->whereIn('tab_code', [107, 108])
-                ->update(['modal_placement' => 'top-right']);
+                ->update(['modal_placement' => 'top-right', 'show_modal_card' => true]);
         });
 
         // 9. Regenerate JSON & Blade templates via helper
         $data = SchemewiseStoreDataJsonHelper::generateSchemeJson($schemeId);
         SchemewiseStoreDataJsonHelper::storeSchemeJson($schemeId, $data);
         SchemewiseStoreDataJsonHelper::store($schemeId, $data['tabs']);
+
+        SchemeFinalSubmitCheck::updateOrCreate(
+            ['scheme_id' => $schemeId],
+            ['is_final_submitted' => false]
+        );
+
         $this->command?->info("Farmer Pension (Scheme ID {$schemeId}) form fields successfully reset and regenerated with Family Members tab!");
     }
 }

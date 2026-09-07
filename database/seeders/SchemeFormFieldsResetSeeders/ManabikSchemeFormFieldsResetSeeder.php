@@ -602,6 +602,11 @@ class ManabikSchemeFormFieldsResetSeeder extends Seeder
         SchemewiseStoreDataJsonHelper::storeSchemeJson($schemeId, $data);
         SchemewiseStoreDataJsonHelper::store($schemeId, $data['tabs']);
 
+        SchemeFinalSubmitCheck::updateOrCreate(
+            ['scheme_id' => $schemeId],
+            ['is_final_submitted' => false]
+        );
+
         $this->command?->info("Manabik Scheme (Scheme ID {$schemeId}) form fields successfully reset and regenerated!");
     }
 }
