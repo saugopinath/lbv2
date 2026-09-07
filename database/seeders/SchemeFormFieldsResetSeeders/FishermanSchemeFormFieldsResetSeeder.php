@@ -596,6 +596,11 @@ class FishermanSchemeFormFieldsResetSeeder extends Seeder
         SchemewiseStoreDataJsonHelper::storeSchemeJson($schemeId, $data);
         SchemewiseStoreDataJsonHelper::store($schemeId, $data['tabs']);
 
+        SchemeFinalSubmitCheck::updateOrCreate(
+            ['scheme_id' => $schemeId],
+            ['is_final_submitted' => false]
+        );
+
         $this->command?->info("Fisherman Pension (Scheme ID {$schemeId}) form fields successfully reset and regenerated!");
     }
 }
