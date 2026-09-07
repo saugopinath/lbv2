@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\BaseAuditableModel;
-
-class PersonalIdentificationNumber(S) extends Model
+class PersonalIdentificationNumber extends BaseAuditableModel
 {
-    //
+    protected $table = 'pension.personal_identification_number(_s)';
+
+    protected $guarded = [];
 }

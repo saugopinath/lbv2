@@ -26,6 +26,8 @@ return new class extends Migration
             $table->string('policestation', 150)->nullable();
             $table->string('housepremiseno', 150)->nullable();
             $table->string('pincode', 6)->nullable();
+            $table->string('mobile_no', 15)->nullable();
+            $table->string('email', 150)->nullable();
             $table->jsonb('other_details')->nullable();
             $table->timestamps();
         });

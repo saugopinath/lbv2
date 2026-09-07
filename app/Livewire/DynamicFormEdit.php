@@ -305,8 +305,9 @@ class DynamicForm extends Component
     {
         $this->aadhaarVerified = true;
         $this->aadhaarPayload = [
-            'encoded' => $data['encoded'],
-            'hash' => $data['hash'],
+            // 'encoded' => $data['encoded'],
+            // 'hash' => $data['hash'],
+            'aadhaar_token' => $data['aadhaar_token'],
         ];
 
         $this->navMessage = null;
@@ -668,7 +669,18 @@ class DynamicForm extends Component
             $this->views[] = str_replace('.blade.php', '', $file->getFilename());
         }
 
-        sort($this->views);
+        $orderedTabs = \App\Models\SchemeTabMapping::where('scheme_id', $schemeId)
+            ->where('is_active', true)
+            ->orderBy('position')
+            ->pluck('tab_code')
+            ->toArray();
+
+        if (!empty($orderedTabs)) {
+            // Keep only tabs that exist as files, ordered by the DB mapping
+            $this->views = array_values(array_intersect($orderedTabs, $this->views));
+        } else {
+            sort($this->views);
+        }
 
         $this->tabs = MasterTab::whereIn('tab_code', $this->views)
             ->get()

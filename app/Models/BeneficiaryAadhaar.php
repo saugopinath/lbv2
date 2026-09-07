@@ -32,6 +32,7 @@ class BeneficiaryAadhaar extends BaseAuditableModel
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'scheme_id' => $this->scheme_id,
+            'aadhaar_token' => $this->aadhaar_token,
         ];
     }
 }

@@ -24,7 +24,7 @@ class PageVisitlog
 
             // ⭐ Link Livewire Action to the current Page Visit
             $referrer = $request->headers->get('referer');
-            $latestVisit = UserPageVisitLog::where('session_id', $request->session()->getId())
+            $latestVisit = UserPageVisitLog::select('id')->where('session_id', $request->session()->getId())
                 ->where('url', $referrer)
                 ->latest()
                 ->first();
@@ -197,8 +197,7 @@ class PageVisitlog
             $browser = $agent->browser();
             $userId = Auth::id();
             $userRole = UserRoleSchemeOfficeMapping::where('user_id', $userId)
-                ->first()
-                ->role_id ?? null;
+                ->value('role_id') ?? null;
 
             $route = $request->route();
             $controller = $route ? $route->getControllerClass() : null;
