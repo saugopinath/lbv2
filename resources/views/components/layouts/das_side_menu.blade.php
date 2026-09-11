@@ -390,7 +390,7 @@
                 <!-- Sub-menu -->
                 <div class="pl-4" id="list_menu" x-collapse x-show="activeMenu === 'Incomplete'" x-transition>
                     <ul>
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canVerifierIncomplet())
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canVerifierIncomplete())
                             <li>
                                 <a class="flex item-center px-2 py-1 text-left rounder hover:bg-slate-700 hover:text-white" href="{{ route('incomplete.types', 'verifier') }}">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -401,7 +401,7 @@
                             </li>
                         @endif
 
-                        @if (\App\Helpers\WorkFlowPermissionHelper::canApproverIncomplet())
+                        @if (\App\Helpers\WorkFlowPermissionHelper::canApproverIncomplete())
                             <li>
                                 <a class="flex item-center px-2 py-1 text-left rounder hover:bg-slate-700 hover:text-white" href="{{ route('incomplete.types', 'approver') }}">
                                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

@@ -25,17 +25,29 @@ class workflowmanagementController extends Controller
                     $schemeId = $request->scheme;
                     $totalSteps = (int) $request->noofSteps;
                     $parentId = null;
+                    $data = [];
                     for ($i = 1; $i <= $totalSteps; $i++) {
-                        $step = new WorkflowStep();
-                        $step->scheme_id = $schemeId;
-                        $step->rank = $i;
-                        $step->label = $request->input('labelName' . $i);
-                        $step->parent_id = $parentId;
-                        $step->is_first = ($i === 1);
-                        $step->is_last = ($i === $totalSteps);
-                        $step->save();
-                        $parentId = $step->id;
+                        $data[] = [
+                            'scheme_id' => $schemeId,
+                            'rank' => $i,
+                            'label' => $request->input('labelName' . $i),
+                            'parent_id' => $parentId,
+                            'is_first' => ($i === 1),
+                            'is_last' => ($i === $totalSteps),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                        // $step = new WorkflowStep();
+                        // $step->scheme_id = $schemeId;
+                        // $step->rank = $i;
+                        // $step->label = $request->input('labelName' . $i);
+                        // $step->parent_id = $parentId;
+                        // $step->is_first = ($i === 1);
+                        // $step->is_last = ($i === $totalSteps);
+                        // $step->save();
+                        // $parentId = $step->id;
                     }
+                    WorkflowStep::insert($data);
                 });
                 return redirect()->route('create-steps')->with('success', 'Workflow created successfully');
             } catch (\Exception $e) {
