@@ -22,10 +22,13 @@ return [
     'invalidMobile' => 'Invalid Mobile Number',
     'mobile10digit' => 'The Mobile Number should be 10 digits',
     'invalidCaptcha' => 'Invalid Captcha',
+    'otp_totp_type_Required' => 'The OTP/TOTP field is required',
+    'otp_totp_type_Invalid' => 'Invalid OTP/TOTP',
     'invalidOtp' => 'Invalid OTP',
     'otp6digit' => 'The OTP field should be 6 digits',
     'Passwordminchar' => 'The password must be at least 8 characters.',
     'previousPasswordTaken' => 'Your password is the same as the previous one, please try another.',
     'Passwordhealth' => 'The password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character.',
     'passwordsucessfullyreset' => 'Password has been updated successfully.',
+    'something went wrong' => 'Something went wrong',
 ];

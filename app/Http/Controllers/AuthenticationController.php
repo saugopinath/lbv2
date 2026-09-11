@@ -6,9 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\ForgetpasswordRequest;
-use App\Http\Requests\OtpVerificationRequest;
 use App\Http\Requests\ValidateOtpRequest;
-use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\ResetPasswordPostRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Crypt;
@@ -82,7 +80,14 @@ class AuthenticationController  extends Controller
             $lastOtpStore = $this->authenticationService->userLastOtpStore($userObj->id, $otp);
             if ($snd_sms && $smsTrack && $lastOtpStore) {
                 DB::commit();
-                return redirect()->route('otp-validate', ['source_type' => Crypt::encrypt(2), 'token_id' => Crypt::encrypt($userObj->id)])->with('success', __('messages.otpsend'));
+                $request->session()->put('otp_data', [
+                    'mobile_no' => $userData['mobile_no'],
+                    'source_type' => Crypt::encrypt(2),
+                    'user_id' => Crypt::encrypt($userObj->id),
+                    'otp_totp_value' => Crypt::encrypt($otp),
+                    'otp_totp_type' => Crypt::encrypt($userData['otp_totp_type'])
+                ]);
+                return redirect()->route('otp-validate')->with('success', __('messages.otpsend'));
             } else {
                 DB::rollback();
                 return back()->withErrors('errors', __('messages.dbroolback'));
@@ -118,7 +123,12 @@ class AuthenticationController  extends Controller
             //dump($snd_sms);dump($smsTrack);dd($lastOtpStore);
             if ($snd_sms && $smsTrack && $lastOtpStore) {
                 DB::commit();
-                return redirect()->route('otp-validate', ['source_type' => Crypt::encrypt(1), 'token_id' => Crypt::encrypt($user_obj->id)])->with('success', __('messages.otpsend'));
+                $request->session()->put('otp_data', [
+                    'source_type' => Crypt::encrypt(1),
+                    'user_id' => Crypt::encrypt($user_obj->id),
+                    'otp_totp' => $otp
+                ]);
+                return redirect()->route('otp-validate')->with('success', __('messages.otpsend'));
             } else {
                 DB::rollBack();
                 return back()->withErrors(['errors' => [__('messages.dbroolback')]]);
@@ -128,27 +138,37 @@ class AuthenticationController  extends Controller
             return back()->withErrors(['errors' => [__('messages.dbroolback')]]);
         }
     }
-    public function otpVerification(OtpVerificationRequest $request)
+    public function otpVerification(Request $request)
     {
-        $otpData = $request->validated();
-        $user_id = Crypt::decrypt($request->get('token_id'));
-        $source_type = Crypt::decrypt($request->get('source_type'));
-        return view(
-            'auth.otpverification',
-            [
-                'user_id' => $user_id,
-                'source_type' => $source_type
-            ]
-        );
+        try{
+            $otpSessionData = $request->session()->get('otp_data');
+                    $mobile_no = Crypt::decrypt($otpSessionData['mobile_no']);
+                    $user_id = Crypt::decrypt($otpSessionData['user_id']);
+                    $source_type = Crypt::decrypt($otpSessionData['source_type']);
+                    $otp_totp_type = Crypt::decrypt($otpSessionData['otp_totp_type']);
+                    return view(
+                        'auth.otpverification',
+                        [
+                            'mobile_no' => $mobile_no,
+                            'user_id' => $user_id,
+                            'source_type' => $source_type,
+                            'otp_totp_type' => $otp_totp_type,
+                        ]
+                    );
+        }
+        catch(\Exception $e){
+            return redirect()->route('login')->withErrors(['errors' => [__('messages.something went wrong')]]);
+        }
     }
     public function otpValidate(ValidateOtpRequest $request)
     {
         $otpDate = $request->validated();
-        $user_id = Crypt::decrypt($request->get('token_id'));
-        $source_type = Crypt::decrypt($request->get('source_type'));
+        $otpSessionData = $request->session()->get('otp_data');
+        $user_id = Crypt::decrypt($otpSessionData['user_id']);
+        $source_type = Crypt::decrypt($otpSessionData['source_type']);
         if ($source_type == 1) {
             //dd('ok');
-            return redirect('reset-password?token_id=' . Crypt::encrypt($user_id) . '&source_type=' . Crypt::encrypt($source_type));
+            return redirect('reset-password');
         }
         if ($source_type == 2) {
             $update_user = User::where('id', $user_id)
@@ -166,8 +186,9 @@ class AuthenticationController  extends Controller
     }
     public function resendOtp(Request $request)
     {
-        $user_id = Crypt::decrypt($request->get('token_id'));
-        $source_type = Crypt::decrypt($request->get('source_type'));
+        $otpSessionData = $request->session()->get('otp_data');
+        $user_id = Crypt::decrypt($otpSessionData['user_id']);
+        $source_type = Crypt::decrypt($otpSessionData['source_type']);
         $user_obj = $this->userService->find($user_id);
 
         try {
@@ -185,7 +206,12 @@ class AuthenticationController  extends Controller
             //dump($snd_sms);dump($smsTrack);dd($lastOtpStore);
             if ($snd_sms && $smsTrack && $lastOtpStore) {
                 DB::commit();
-                return redirect()->route('otp-validate', ['source_type' => Crypt::encrypt($source_type), 'token_id' => Crypt::encrypt($user_obj->id)])->with('success', __('messages.otpsend'));
+                $request->session()->put('otp_data', [
+                    'source_type' => Crypt::encrypt($source_type),
+                    'user_id' => Crypt::encrypt($user_obj->id),
+                    'otp_totp' => $otp
+                ]);
+                return redirect()->route('otp-validate')->with('success', __('messages.otpsend'));
             } else {
                 DB::rollBack();
                 return back()->withErrors(['errors' => [__('messages.dbroolback')]]);
@@ -195,11 +221,11 @@ class AuthenticationController  extends Controller
             return back()->withErrors(['errors' => [__('messages.dbroolback')]]);
         }
     }
-    public function resetPassword(ResetPasswordRequest $request)
+    public function resetPassword(Request $request)
     {
-        $otpData = $request->validated();
-        $user_id = Crypt::decrypt($request->get('token_id'));
-        $source_type = Crypt::decrypt($request->get('source_type'));
+        $otpSessionData = $request->session()->get('otp_data');
+        $user_id = Crypt::decrypt($otpSessionData['user_id']);
+        $source_type = Crypt::decrypt($otpSessionData['source_type']);
         return view(
             'auth.resetpassword',
             [
@@ -213,8 +239,9 @@ class AuthenticationController  extends Controller
         // dd('ok');
         $otpDate = $request->validated();
 
-        $user_id = Crypt::decrypt($request->get('token_id'));
-        $source_type = Crypt::decrypt($request->get('source_type'));
+        $otpSessionData = $request->session()->get('otp_data');
+        $user_id = Crypt::decrypt($otpSessionData['user_id']);
+        $source_type = Crypt::decrypt($otpSessionData['source_type']);
         $user_obj = $this->userService->find($user_id);
 
 

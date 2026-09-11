@@ -5,8 +5,6 @@
 
     <form action="{{ route('otp-validate-post') }}" method="POST" class="mt-4 space-y-4">
         @csrf
-        <input type="hidden" name="token_id" value="{{ Crypt::encrypt($user_id) }}">
-        <input type="hidden" name="source_type" value="{{ Crypt::encrypt($source_type) }}">
         <!-- OTP Input -->
         <div>
             <x-publicForm.text-input
@@ -14,7 +12,7 @@
                 name="otp"
                 type="text"
                 maxlength="6"
-                placeholder="Enter OTP"
+                placeholder="Enter {{$otp_totp_type==12?'OTP':'TOTP'}}"
                 autofocus
                 autocomplete="off"
                 :value="old('otp')"
@@ -37,11 +35,11 @@
 
         <div class="mt-4 space-y-5">
             <x-publicForm.button type="submit" class="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold rounded-xl shadow-md transition-colors duration-200">
-                Validate OTP
+                Validate {{$otp_totp_type==12?'OTP':'TOTP'}}
             </x-publicForm.button>
 
             <x-publicForm.button onclick="resendOtp()" class="w-full h-12 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold rounded-xl shadow-md transition-colors duration-200">
-                Resend Code
+                Resend {{$otp_totp_type==12?'OTP':'TOTP'}}
             </x-publicForm.button>
         </div>
 
@@ -70,8 +68,6 @@
     <!-- Resend OTP Form -->
     <form action="{{ route('resendOtp') }}" method="POST" id="resendForm" class="hidden">
         @csrf
-        <input type="hidden" name="token_id" value="{{ Crypt::encrypt($user_id) }}">
-        <input type="hidden" name="source_type" value="{{ Crypt::encrypt($source_type) }}">
     </form>
 
     <!-- Scripts -->
