@@ -64,8 +64,11 @@ Route::controller(AuthenticationController::class)->group(function () {
     Route::get('/login', 'login')->name('login');
     Route::post('/loginPost', 'loginCheck')->name('loginPost');
     Route::post('/resendOtp', 'resendOtp')->name('resendOtp');
-    Route::get('/otp-validate', 'otpVerification')->middleware('2fa')->name('otp-validate');
+    // Route::get('/otp-validate', 'otpVerification')->middleware('2fa')->name('otp-validate');
     Route::post('/otp-validate-post', 'otpValidate')->middleware('2fa')->name('otp-validate-post');
+    // Route::get('/totp-verification', 'totpVerification')->name('totp-verification');
+    Route::get('/verification', 'verification')->name('verification');
+    Route::post('/totp-validate-post', 'totpValidate')->name('totp-validate-post');
     Route::get('/forget-password', 'forgetPassword')->name('forget-password');
     Route::post('/forgetpasswordPost', 'forgetPasswordPost')->name('forgetpasswordPost');
     Route::get('/reset-password', 'resetPassword')->middleware('2fa')->name('reset-password');

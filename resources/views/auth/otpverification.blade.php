@@ -2,6 +2,9 @@
     <!-- Error & Success Messages -->
     <x-errors class="mt-4" />
     <x-success class="mt-4" />
+    <script>
+    window.history.replaceState(null, '', '{{ route('login') }}');
+</script>
 
     <form action="{{ route('otp-validate-post') }}" method="POST" class="mt-4 space-y-4">
         @csrf

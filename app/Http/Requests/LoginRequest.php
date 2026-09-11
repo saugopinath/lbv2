@@ -24,7 +24,8 @@ class LoginRequest extends FormRequest
         return [
             'mobile_no' => 'required|regex:/[0-9]{10}/|digits:10',
             'password' => 'required',
-            'captcha' => 'required|captcha'
+            'captcha' => 'required|captcha',
+            'verification_type' => 'required|in:12,13',
         ];
     }
     public function messages()
@@ -37,6 +38,8 @@ class LoginRequest extends FormRequest
             'password.required' => __('messages.Passwordrequired'),
             'captcha.required' => __('messages.Captcharequired'),
             'captcha.captcha' => __('messages.invalidCaptcha'),
+
+            'verification_type.required' => 'Please select either OTP or TOTP.',
         ];
     }
 }

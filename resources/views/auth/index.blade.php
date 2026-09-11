@@ -46,12 +46,21 @@
                 
                 /> --}}
                 <div class="flex flex-col sm:flex-row items-center gap-2">
-                <x-form.radio id="check_otp" name="aadhaar_number" label="OTP" value="12" />
-                <x-form.radio id="check_totp" name="aadhaar_number" label="TOTP" value="13" />
+                <x-form.radio id="check_otp" name="verification_type" label="OTP" value="12" />
+                <x-form.radio id="check_totp" name="verification_type" label="TOTP" value="13" />
                 </div>
         
-        <x-publicForm.button type="submit" class="w-full h-12 bg-[#0e3e98f0] text-white text-lg font-semibold rounded-xl shadow-md hover:bg-[#0c3591] flex justify-center items-center gap-3">Send OTP</x-publicForm.button>
-    
+<x-publicForm.button id="loginButton" type="submit" class="w-full h-12 bg-blue-600 hover:bg-blue-700 !text-white text-lg font-semibold rounded-xl shadow-md transition-colors duration-200 flex justify-center items-center gap-3">
+    Send OTP
+</x-publicForm.button>
+<script>
+    document.querySelectorAll('input[name="verification_type"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            document.getElementById('loginButton').textContent =
+                this.value === '13' ? 'Send TOTP' : 'Send OTP';
+        });
+    });
+</script>  
     </form>
     <div class="text-right mt-2 text-blue-600 italic text-sm hover:underline cursor-pointer">
         <a href="{{ route('forget-password') }}">Forgot Password?</a>

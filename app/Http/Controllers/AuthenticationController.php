@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User_audit_trail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
+use PragmaRX\Google2FA\Google2FA;
 
 class AuthenticationController  extends Controller
 {
@@ -31,14 +32,20 @@ class AuthenticationController  extends Controller
     ) {}
 
     public function login()
-    {
-        if (auth()->check()) {
-            return redirect()->route('dashboard');
-        }
-
-        return view('auth.index');
-        
+{
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
     }
+    
+    // if (session()->has('totp_user_id')) {
+        // $token_id = Crypt::encrypt(session('totp_user_id'));
+
+        // return view('auth.totpverification', [
+            // 'token_id' => $token_id,
+            // 'secret' => null
+    
+    return view('auth.index');
+}
 
     public function loginCheck(LoginRequest $request)
     {
@@ -71,6 +78,33 @@ class AuthenticationController  extends Controller
             return back()->withErrors(['password' => [__('messages.passwordexpire')]]);
         }
         if ($valid == 1) {
+             if ($userData['verification_type'] == '13') {
+        // TOTP code here
+        $google2fa = new Google2FA();
+
+if (empty($userObj->totp_secret)) {
+    $secret = $google2fa->generateSecretKey();
+
+    User::where('id', $userObj->id)->update([
+        'totp_secret' => $secret
+    ]);
+} else {
+    $secret = $userObj->totp_secret;
+}
+
+
+$token_id = Crypt::encrypt($userObj->id);
+
+$request->session()->put('totp_user_id', $userObj->id);
+
+$user_id = [
+    'token_id' => $token_id
+];
+
+$request->session()->put('user_id', $user_id);
+
+return redirect()->route('verification');
+    }
             DB::beginTransaction();
             if (env('APP_ENV') == 'local' || env('APP_ENV') == 'staging')
                 $otp = '123456';
@@ -82,13 +116,30 @@ class AuthenticationController  extends Controller
             $lastOtpStore = $this->authenticationService->userLastOtpStore($userObj->id, $otp);
             if ($snd_sms && $smsTrack && $lastOtpStore) {
                 DB::commit();
-                return redirect()->route('otp-validate', ['source_type' => Crypt::encrypt(2), 'token_id' => Crypt::encrypt($userObj->id)])->with('success', __('messages.otpsend'));
+                return redirect()->route('verification', ['source_type' => Crypt::encrypt(2), 'token_id' => Crypt::encrypt($userObj->id)])->with('success', __('messages.otpsend'));
             } else {
                 DB::rollback();
                 return back()->withErrors('errors', __('messages.dbroolback'));
             }
         }
     }
+    public function verification(Request $request)
+{
+    if ($request->get('source_type')) {
+        $user_id = Crypt::decrypt($request->get('token_id'));
+        $source_type = Crypt::decrypt($request->get('source_type'));
+
+        return view('auth.otpverification', [
+            'user_id' => $user_id,
+            'source_type' => $source_type
+        ]);
+    }
+   if ($request->get('resend')) {
+    session()->flash('success', 'A new TOTP code has been sent to your Authenticator app.');
+    return $this->totpVerification($request);
+}
+    return $this->totpVerification($request);
+}
     public function forgetPassword(): \Illuminate\View\View
     {
         return view('auth.forgetpassword');
@@ -159,6 +210,7 @@ class AuthenticationController  extends Controller
                 $user = User::where('id', $user_id)->where('is_active', 1)->first();
                 // $address=$user->RoleSchemeOfficeMappings->Office;
                 $request->session()->flush();
+                
                 Auth::login($user);
                 return redirect('/dashboard');
             }
@@ -267,4 +319,50 @@ class AuthenticationController  extends Controller
 
         return redirect('/login');
     }
+    public function totpVerification(Request $request)
+{
+    $user_id = $request->session()->get('user_id');
+$token_id = $user_id['token_id'];
+
+$userId = Crypt::decrypt($token_id);
+
+    $user = User::find($userId);
+
+    if (!$user || empty($user->totp_secret)) {
+        return redirect()->route('login')
+            ->withErrors(['error' => 'TOTP is not configured.']);
+    }
+
+    return view('auth.totpverification', [
+        'token_id' => $token_id,
+        'secret' => $user->totp_secret,
+    ]);
+}
+
+public function totpValidate(Request $request)
+{
+    $request->validate([
+        'token_id' => 'required',
+        'code' => 'required|digits:6',
+    ]);
+
+    $userId = Crypt::decrypt($request->token_id);
+    $user = User::find($userId);
+
+    if (!$user || empty($user->totp_secret)) {
+        return back()->withErrors(['code' => 'Invalid TOTP.']);
+    }
+
+    $google2fa = new Google2FA();
+
+    if (!$google2fa->verifyKey($user->totp_secret, $request->code)) {
+        return back()->withErrors(['code' => 'Invalid TOTP code.']);
+    }
+    $request->session()->forget('totp_user_id');
+    $request->session()->flush();
+
+    Auth::login($user);
+
+   return redirect('/dashboard')->with('success', 'TOTP verified successfully.');
+}
 }
