@@ -15,7 +15,7 @@ class Formcontroller extends Controller
             'You do not have access to this module.'
         );
 
-        return view('form');
+        return view('form', compact('moduleCode'));
     }
     public function applicationLists(Request $request)
     {
@@ -26,6 +26,6 @@ class Formcontroller extends Controller
             'You do not have access to this module.'
         );
 
-        return view('applicationlists');
+        return view('applicationlists', compact('moduleCode'));
     }
 }

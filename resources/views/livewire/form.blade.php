@@ -6,10 +6,10 @@
     @endif
     @if ($schemeData)
         @if ($schemeId == 21)
-            <livewire:annapurna-yojana-form :scheme-id="$schemeId" :schemeName="$schemeName" :grievanceId="$grievanceId" :wire:key="'annapurna-yojana-form-'.$schemeId" />
+            <livewire:annapurna-yojana-form :scheme-id="$schemeId" :schemeName="$schemeName" :grievanceId="$grievanceId" :moduleCode="$moduleCode" :wire:key="'annapurna-yojana-form-'.$schemeId" />
         @else
             <div class="max-w-auto mx-auto bg-white rounded-xl shadow-sm p-6">
-                <livewire:dynamic-form :scheme-id="$schemeId" :schemeName="$schemeName" :grievanceId="$grievanceId" :wire:key="'dynamic-form-'.$schemeId" />
+                <livewire:dynamic-form :scheme-id="$schemeId" :schemeName="$schemeName" :grievanceId="$grievanceId" :moduleCode="$moduleCode" :wire:key="'dynamic-form-'.$schemeId" />
             </div>
         @endif
     @endif

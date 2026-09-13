@@ -11,13 +11,15 @@ use Exception;
 class DupCheckSchemeConfigSettings extends Component
 {
     public $schemeId;
+    public $moduleId;
     public $dupcheckOptions = [];
     public $schemeOptions = [];
     public $config = [];
 
-    public function mount($schemeId)
+    public function mount($schemeId, $moduleId)
     {
         $this->schemeId = $schemeId;
+        $this->moduleId = $moduleId;
         $this->dupcheckOptions = [
             'Aadhaar' => 'Aadhaar',
             'Bank'   => 'Bank',
@@ -36,7 +38,9 @@ class DupCheckSchemeConfigSettings extends Component
                 'schemes'  => []
             ];
         }
-        $existingSettings = DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)->get();
+        $existingSettings = DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
+            ->where('module_id', $this->moduleId)
+            ->get();
         foreach ($existingSettings as $setting) {
             if (isset($this->config[$setting->check_with])) {
                 $this->config[$setting->check_with] = [
@@ -66,12 +70,15 @@ class DupCheckSchemeConfigSettings extends Component
 
         DB::beginTransaction();
         try {
-            DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)->delete();
+            DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
+                ->where('module_id', $this->moduleId)
+                ->delete();
 
             foreach ($this->config as $optionName => $data) {
                 if ($data['selected']) {
                     $setting = new DupcheckschemeconfigSetting();
                     $setting->scheme_id = $this->schemeId;
+                    $setting->module_id = $this->moduleId;
                     $setting->check_with = $optionName;
                     $setting->is_same = $data['issame'] === 'yes' ? true : false;
                     $setting->is_cross = $data['iscross'] === 'yes' ? true : false;

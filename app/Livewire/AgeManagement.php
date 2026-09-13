@@ -10,21 +10,23 @@ use App\Models\AgeManagements;
 class AgeManagement extends Component
 {
     public $schemeId;
+    public $moduleId;
     public $minage, $maxage;
     public $isspecial = 'no';
     public $specialcaseOptions;
     public $selectedSpecialCases = [];
 
-    public function mount($schemeId)
+    public function mount($schemeId, $moduleId)
     {
         $this->schemeId = $schemeId;
+        $this->moduleId = $moduleId;
         $this->specialcaseOptions = collect([
             '1' => 'Handicapped',
             '2' => 'Widow',
         ])->map(function ($name, $id) {
             return (object) ['id' => $id, 'name' => $name];
         });
-        $record = AgeManagements::where('scheme_id', $this->schemeId)->first();
+        $record = AgeManagements::where('scheme_id', $this->schemeId)->where('module_id', $this->moduleId)->first();
 
         if ($record) {
             $this->minage = $record->min_age;
@@ -121,12 +123,13 @@ class AgeManagement extends Component
                     ];
                 }
             }
-            $old = AgeManagements::where('scheme_id', $this->schemeId)->first();
+            $old = AgeManagements::where('scheme_id', $this->schemeId)->where('module_id', $this->moduleId)->first();
             if ($old) {
                 $old->delete();
             }
             $age = new AgeManagements();
             $age->scheme_id = $this->schemeId;
+            $age->module_id = $this->moduleId;
             $age->min_age = $this->minage ?: null;
             $age->max_age = $this->maxage ?: null;
             $age->is_special = $this->isspecial === 'yes';

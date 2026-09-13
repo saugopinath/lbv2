@@ -35,12 +35,12 @@ class DefineWorkflow extends Component
                 'component' => 'createworkflow-steps',
                 'step' => 1,
             ],
-            [
-                'title' => 'Assign Role to Steps',
-                'description' => 'Assign specific roles to each workflow step.',
-                'component' => 'assign-workflow',
-                'step' => 2,
-            ],
+            // [
+            //     'title' => 'Assign Role to Steps',
+            //     'description' => 'Assign specific roles to each workflow step.',
+            //     'component' => 'assign-workflow',
+            //     'step' => 2,
+            // ],
             [
                 'title' => 'Duplicate Check Configuration',
                 'description' => 'Set rules to prevent duplicate entries.',
