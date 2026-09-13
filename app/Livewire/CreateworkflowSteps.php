@@ -48,12 +48,14 @@ class CreateworkflowSteps extends Component
         $this->moduleId = $moduleData['module_id'];
         $this->moduleCode = $moduleData['module_code'];
 
-        $steps = WorkflowStep::where('scheme_id', $this->schemeId)
-            ->orderBy('rank')
-            ->pluck('label')->toArray();
+        // FIX: Load existing steps from DynamicWorkflowLabel instead of WorkflowStep to match save()
+        $steps = DynamicWorkflowLabel::where('scheme_id', $this->schemeId)
+            ->where('module_id', $this->moduleId)
+            ->orderBy('id')
+            ->pluck('label_name')->toArray();
 
-        // $roles = Role::select('name', 'id')->whereNotNull('rank')->orderBy('rank')->get();
-        $roles = Role::orderBy('name')->pluck('name', 'id')->toArray();
+        // FIX: Enforce Original Role Rank Hierarchy for the UI alert by querying whereNotNull('rank')
+        $roles = Role::whereNotNull('rank')->orderBy('rank')->pluck('name', 'id')->toArray();
         $permissions = Permission::select('name', 'id')->orderBy('name')->get();
 
         if (!empty($roles)) {
@@ -188,182 +190,220 @@ class CreateworkflowSteps extends Component
             return;
         }
 
-        dd(array_filter($this->roleSelection), array_filter($this->permissionsSelection, fn($item) => !empty($item)), $this);
-
-        DB::beginTransaction();
-        try {
-            $parentId = null;
-            $totalSteps = count($this->labels);
-            $data = [];
-            for ($i = 0; $i < $totalSteps; $i++) {
-                $data[] = [
-                    'scheme_id' => $this->schemeId,
-                    'rank' => $i,
-                    'label' => $this->labels[$i],
-                    'parent_id' => $parentId,
-                    'is_first' => ($i === 0),
-                    'is_last' => ($i === $totalSteps - 1),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-                // $step = new WorkflowStep();
-                // $step->scheme_id = $this->schemeId;
-                // $step->rank = $i + 1;
-                // $step->label = $this->labels[$i];
-                // $step->parent_id = $parentId;
-                // $step->is_first = ($i === 0);
-                // $step->is_last = ($i === $totalSteps - 1);
-                // $step->save();
-                // $parentId = $step->id;
-            }
-            WorkflowStep::insert($data);
-            DB::commit();
-            $this->already = true;
-            $this->dispatch('toastr', [
-                'type' => 'success',
-                'message' => 'Workflow steps created successfully!'
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            $this->already = false;
-            $this->dispatch('toastr', [
-                'type' => 'error',
-                'message' => 'Something went wrong. Please try again.'
-            ]);
-        }
+        // DB::beginTransaction();
+        // try {
+        //     $parentId = null;
+        //     $totalSteps = count($this->labels);
+        //     $data = [];
+        //     for ($i = 0; $i < $totalSteps; $i++) {
+        //         $data[] = [
+        //             'scheme_id' => $this->schemeId,
+        //             'rank' => $i,
+        //             'label' => $this->labels[$i],
+        //             'parent_id' => $parentId,
+        //             'is_first' => ($i === 0),
+        //             'is_last' => ($i === $totalSteps - 1),
+        //             'created_at' => now(),
+        //             'updated_at' => now(),
+        //         ];
+        //         // $step = new WorkflowStep();
+        //         // $step->scheme_id = $this->schemeId;
+        //         // $step->rank = $i + 1;
+        //         // $step->label = $this->labels[$i];
+        //         // $step->parent_id = $parentId;
+        //         // $step->is_first = ($i === 0);
+        //         // $step->is_last = ($i === $totalSteps - 1);
+        //         // $step->save();
+        //         // $parentId = $step->id;
+        //     }
+        //     WorkflowStep::insert($data);
+        //     DB::commit();
+        //     $this->already = true;
+        //     $this->dispatch('toastr', [
+        //         'type' => 'success',
+        //         'message' => 'Workflow steps created successfully!'
+        //     ]);
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     $this->already = false;
+        //     $this->dispatch('toastr', [
+        //         'type' => 'error',
+        //         'message' => 'Something went wrong. Please try again.'
+        //     ]);
+        // }
 
         try {
+            DB::beginTransaction();
+
             $schemeId = $this->schemeId;
             $moduleId = $this->moduleId;
             $moduleCode = $this->moduleCode;
-            $stepCount = $this->noofSteps;
-            $roleSelection = array_filter($this->roleSelection);
-            $permissionsSelection = array_filter($this->permissionsSelection, fn($item) => !empty($item));
+            $stepCount = (int) $this->noofSteps;
+            $roleSelection = array_filter($this->roleSelection ?? []);
+            $permissionsSelection = array_filter($this->permissionsSelection ?? [], fn($item) => !empty($item));
+
             $schemeModule = DynamicWorkflowSchemeModule::updateOrCreate(
                 [
                     'scheme_id' => $schemeId,
                     'module_id' => $moduleId,
                 ],
                 [
-                    'scheme_id' => $schemeId,
-                    'module_id' => $moduleId,
+                    'scheme_id'        => $schemeId,
+                    'module_id'        => $moduleId,
                     'main_module_code' => $moduleCode,
-                    'step_count' => $stepCount,
+                    'step_count'       => $stepCount,
                 ]
             );
+
+            // Clean up old records for update capability
             workflowstepRolemapping::where('module_id', $schemeModule->id)->where('scheme_id', $schemeId)->delete();
             DynamicWorkflowLabel::where('module_id', $schemeModule->id)->where('scheme_id', $schemeId)->delete();
+
             $parent = Codemaster::select('id', 'code')->where('short_name', 'dynamic_op_type')->first();
             $maxCode = null;
             $parent_id = null;
             $parent_code = null;
+
             if ($parent) {
                 $parent_id = $parent->id;
                 $parent_code = $parent->code;
                 $maxCode = Codemaster::where('parent_short_code', 'dynamic_op_type')->max('code');
             }
+
             for ($i = 0; $i < $stepCount; $i++) {
                 $rank = ($i + 1) * 10;
-                $successRank = ($i < count($stepCount) - 1) ? ($i + 2) * 10 : 0;
-                $revertRank = ($i > 0) ? $i * 10 : - ($this->schemeId);
+                $successRank = ($i < $stepCount - 1) ? ($i + 2) * 10 : 0;
+                $revertRank = ($i > 0) ? $i * 10 : - ($schemeId);
                 $opTypeId = null;
 
                 if ($parent) {
                     $labelSlug = strtolower(str_replace(' ', '_', $this->labels[$i]));
-                    $codemaster = Codemaster::select('id')->where('parent_id', $parent_id)
-                        ->where('short_name', $labelSlug)
+                    $codemaster = Codemaster::select('id')
+                        ->where('parent_id', $parent_id)
+                        ->where('short_name', strtolower($moduleCode) . '_' . $labelSlug)
                         ->first();
+
                     if (!$codemaster) {
                         if (!$maxCode) {
                             $maxCode = ($parent_code * 10);
                         }
+                        $maxCode++;
+
                         $codemaster = Codemaster::create([
-                            'name' => strtoupper($this->labels[$i]),
-                            'short_name' => strtolower($moduleCode) . '_' . $labelSlug,
-                            'parent_id' => $parent_id,
+                            'name'              => strtoupper($this->labels[$i]),
+                            'short_name'        => strtolower($moduleCode) . '_' . $labelSlug,
+                            'parent_id'         => $parent_id,
                             'parent_short_code' => 'dynamic_op_type',
-                            'code' => $maxCode + 1,
-                            'is_active' => 1,
+                            'code'              => $maxCode,
+                            'is_active'         => 1,
                         ]);
                     }
                     $opTypeId = $codemaster->id;
                 }
 
                 $label = DynamicWorkflowLabel::create([
-                    'scheme_id' => $schemeId,
-                    'module_id' => $moduleId,
+                    'scheme_id'  => $schemeId,
+                    'module_id'  => $moduleId,
                     'label_name' => $this->labels[$i],
                     'op_type_id' => $opTypeId,
                 ]);
-                $data = [];
-                if (!empty($roleSelection) && isset($roleSelection[$i])) {
-                    foreach ($roleSelection[$i] as $roleId) {
-                        $data[] = [
-                            'scheme_id' => $schemeId,
-                            'module_id' => $schemeModule->id,
-                            'workflow_step_id' => $label->id,
-                            'role_id' => $roleId,
-                            'rank' => $rank,
-                            'next_level_role_id' => $successRank,
-                            'same_level_role_id' => $revertRank,
-                            'is_final_step' => ($i == count($stepCount) - 1),
-                            'action_type' => null,
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ];
-                    }
-                    workflowstepRolemapping::insert($data);
+
+                $assignedRoleIds = [];
+
+                // FEATURE: Auto-create the module access permission
+                $moduleAccessPerm = strtolower(str_replace(' ', '_', $moduleCode)) . '_access';
+                Permission::firstOrCreate(['name' => $moduleAccessPerm, 'guard_name' => 'web']);
+
+                // MODE 1: Existing Role Selection
+                if (!empty($roleSelection[$i])) {
+                    $assignedRoleIds = (array) $roleSelection[$i];
                 }
-                $dt = [];
-                if (!empty($permissionsSelection) && isset($permissionsSelection[$i])) {
-                    $roleCreated = [];
-                    foreach ($permissionsSelection[$i] as $permId => $val) {
-                        if (is_numeric($permId)) {
-                            $permission = Permission::select('id', 'name')->find($permId);
-                            if ($permission) {
-                                $roleChkFlag = $this->labels[$i] . '_' . $i;
-                                if (!array_key_exists($roleChkFlag, $roleCreated)) {
-                                    $crRole = Role::create([
-                                        'name' => $this->labels[$i],
-                                        'guard_name' => 'web',
-                                        'rank' => Role::max('rank') + 1,
-                                    ]);
-                                    $crRoleId = $crRole->id;
-                                    $x = [$roleChkFlag => $crRoleId];
-                                    $roleCreated[$roleChkFlag] = $x;
-                                } else {
-                                    $crRoleId = $roleCreated[$roleChkFlag];
-                                }
+
+                // MODE 2: Custom Role Creation via Permissions
+                if (!empty($permissionsSelection[$i])) {
+                    $selectedPermissionIds = array_keys(array_filter($permissionsSelection[$i]));
+
+                    if (!empty($selectedPermissionIds)) {
+                        // FIX: Prepend scheme and module code to make role names unique across workflows
+                        $uniqueRoleName = strtoupper($moduleCode) . '_' . $schemeId . '_' . $this->labels[$i];
+                        $crRole = Role::firstOrCreate(
+                            [
+                                'name'       => $uniqueRoleName,
+                                'guard_name' => 'web',
+                            ],
+                            [
+                                'rank'       => (Role::max('rank') ?? 0) + 1,
+                            ]
+                        );
+
+                        $permissions = Permission::whereIn('id', $selectedPermissionIds)->get();
+
+                        // Sync revokes if updating
+                        $currentPermissions = $crRole->permissions->pluck('id')->toArray();
+                        if (!empty($currentPermissions)) {
+                            $permissionsToRevoke = array_diff($currentPermissions, $selectedPermissionIds);
+                            foreach ($permissionsToRevoke as $permId) {
+                                $crRole->revokePermissionTo($permId);
                             }
                         }
-                    }
 
-                    if (!empty($this->permissionsSelection[$i])) {
-                        // 1. Extract only the checked permission IDs
-                        $selectedPermissionIds = array_keys(array_filter($this->permissionsSelection[$i]));
-
-                        if (!empty($selectedPermissionIds)) {
-                            // 2. Create or find the Role once for this step
-                            $crRole = Role::firstOrCreate(
-                                [
-                                    'name'       => $this->labels[$i],
-                                    'guard_name' => 'web',
-                                ],
-                                [
-                                    'rank'       => (Role::max('rank') ?? 0) + 1,
-                                ]
-                            );
-
-                            // 3. Attach all permissions to the role in 1 batch query
-                            $crRole->syncPermissions($selectedPermissionIds);
-
-                            // 4. Clean integer ID ready for your workflow step record
-                            $crRoleId = $crRole->id;
+                        foreach ($permissions as $permission) {
+                            if (!$crRole->hasPermissionTo($permission->name)) {
+                                $crRole->givePermissionTo($permission);
+                            }
                         }
+
+                        // Add newly created role ID so workflow step mapping can record it
+                        $assignedRoleIds[] = $crRole->id;
+
+                        // Save permission IDs to label
+                        $label->update(['permissions' => $selectedPermissionIds]);
                     }
                 }
+
+                // Save Workflow Step Role Mappings for whichever mode was used
+                if (!empty($assignedRoleIds)) {
+                    $mappingData = [];
+                    foreach ($assignedRoleIds as $roleId) {
+                        // FEATURE: Give the assigned role the module access permission
+                        $role = Role::find($roleId);
+                        if ($role && !$role->hasPermissionTo($moduleAccessPerm)) {
+                            $role->givePermissionTo($moduleAccessPerm);
+                        }
+
+                        $mappingData[] = [
+                            'scheme_id'          => $schemeId,
+                            'module_id'          => $schemeModule->id,
+                            'workflow_step_id'   => $label->id,
+                            'role_id'            => $roleId,
+                            'rank'               => $rank,
+                            'next_level_role_id' => $successRank,
+                            'same_level_role_id' => $revertRank,
+                            'is_final_step'      => ($i == $stepCount - 1),
+                            'action_type'        => null,
+                            'created_at'         => now(),
+                            'updated_at'         => now(),
+                        ];
+                    }
+                    workflowstepRolemapping::insert($mappingData);
+                }
             }
+
+            DB::commit();
+
+            $this->already = true;
+            $this->dispatch('toastr', [
+                'type'    => 'success',
+                'message' => 'Workflow steps created successfully!',
+            ]);
         } catch (\Exception $e) {
+            DB::rollBack();
+
+            $this->already = false;
+            $this->dispatch('toastr', [
+                'type'    => 'error',
+                'message' => 'Something went wrong. Please try again.',
+            ]);
         }
     }
 

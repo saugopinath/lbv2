@@ -6,12 +6,26 @@ use Illuminate\Http\Request;
 
 class Formcontroller extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $moduleCode = $request->query('module');
+        abort_unless(
+            $moduleCode && \App\Helpers\WorkFlowPermissionHelper::canAccessModule($moduleCode),
+            403,
+            'You do not have access to this module.'
+        );
+
         return view('form');
     }
-    public function applicationLists()
+    public function applicationLists(Request $request)
     {
+        $moduleCode = $request->query('module');
+        abort_unless(
+            $moduleCode && \App\Helpers\WorkFlowPermissionHelper::canAccessModule($moduleCode),
+            403,
+            'You do not have access to this module.'
+        );
+
         return view('applicationlists');
     }
 }
