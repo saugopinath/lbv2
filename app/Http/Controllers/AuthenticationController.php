@@ -6,9 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\ForgetpasswordRequest;
-use App\Http\Requests\OtpVerificationRequest;
 use App\Http\Requests\ValidateOtpRequest;
-use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\ResetPasswordPostRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Crypt;
@@ -20,6 +18,8 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User_audit_trail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
+use Google2FA;
+use App\Services\TwoFactor\TwoFactorAuthFactory;
 
 class AuthenticationController  extends Controller
 {
@@ -33,7 +33,7 @@ class AuthenticationController  extends Controller
     public function login()
     {
         if (auth()->check()) {
-            return redirect()->route('dashboard');
+            auth()->logout();
         }
 
         return view('auth.index');
@@ -72,17 +72,29 @@ class AuthenticationController  extends Controller
         }
         if ($valid == 1) {
             DB::beginTransaction();
-            if (env('APP_ENV') == 'local' || env('APP_ENV') == 'staging')
-                $otp = '123456';
-            else
-                $otp = rand(111111, 999999);
-            $message = 'Your OTP for ANNAPURNA BHANDAR scheme login is ' . $otp . ' . ANNAPURNA BHANDAR, Govt of WB.';
-            $snd_sms = $this->sendsmsService->sendSms($userData['mobile_no'], $message);
-            $smsTrack = $this->sendsmsService->SmstrackInsert($userObj->id, $userData['mobile_no'], $otp, $message);
-            $lastOtpStore = $this->authenticationService->userLastOtpStore($userObj->id, $otp);
+            $generator = TwoFactorAuthFactory::getInstance()->create($userData['otp_totp_type']);
+            $otp = $generator->generate();
+            $displayCode = $generator->getDisplayCode($otp);
+            $message = 'Your ' . $generator->getLabel() . ' for ANNAPURNA BHANDAR scheme login is ' . $displayCode . ' . ANNAPURNA BHANDAR, Govt of WB.';
+            
+            if ($generator->requiresSms()) {
+                $snd_sms = $this->sendsmsService->sendSms($userData['mobile_no'], $message);
+            } else {
+                $snd_sms = true;
+            }
+            $smsTrack = $this->sendsmsService->SmstrackInsert($userObj->id, $userData['mobile_no'], $userData['otp_totp_type'],$displayCode, $message);
+            $lastOtpStore = $this->authenticationService->userLastOtpStore($userObj->id, $displayCode, $userData['otp_totp_type']);
             if ($snd_sms && $smsTrack && $lastOtpStore) {
                 DB::commit();
-                return redirect()->route('otp-validate', ['source_type' => Crypt::encrypt(2), 'token_id' => Crypt::encrypt($userObj->id)])->with('success', __('messages.otpsend'));
+                $request->session()->put('otp_data', [
+                    'mobile_no' => Crypt::encrypt($userData['mobile_no']),
+                    'source_type' => Crypt::encrypt(2),
+                    'user_id' => Crypt::encrypt($userObj->id),
+                    'otp_totp_value' => Crypt::encrypt($otp),
+                    'otp_totp_type' => Crypt::encrypt($userData['otp_totp_type'])
+                ]);
+               // dd('ok');
+                return redirect()->route('otp-validate')->with('success', __('messages.' . $generator->getLabel() . 'send'));
             } else {
                 DB::rollback();
                 return back()->withErrors('errors', __('messages.dbroolback'));
@@ -107,18 +119,31 @@ class AuthenticationController  extends Controller
             // dd($user_obj);
             DB::beginTransaction();
             // $otp = rand(111111,999999);
-            if (env('APP_ENV') == 'local' || env('APP_ENV') == 'staging')
-                $otp = '123456';
-            else
-                $otp = rand(111111, 999999);
-            $message = 'Your OTP for ANNAPURNA BHANDAR scheme login is ' . $otp . ' . ANNAPURNA BHANDAR, Govt of WB.';
-            $snd_sms = $this->sendsmsService->sendSms($userData['mobile_no'], $message);
-            $smsTrack = $this->sendsmsService->SmstrackInsert($user_obj->id, $userData['mobile_no'], $otp, $message);
-            $lastOtpStore = $this->authenticationService->userLastOtpStore($user_obj->id, $otp);
+            $otp_totp_type = 12; // Default to OTP for forget password
+            $generator = TwoFactorAuthFactory::getInstance()->create($otp_totp_type);
+            $otp = $generator->generate();
+            $displayCode = $generator->getDisplayCode($otp);
+            $message = 'Your ' . $generator->getLabel() . ' for ANNAPURNA BHANDAR scheme login is ' . $displayCode . ' . ANNAPURNA BHANDAR, Govt of WB.';
+            
+            if ($generator->requiresSms()) {
+                $snd_sms = $this->sendsmsService->sendSms($userData['mobile_no'], $message);
+            } else {
+                $snd_sms = true;
+            }
+            $smsTrack = $this->sendsmsService->SmstrackInsert($user_obj->id, $userData['mobile_no'], $otp_totp_type, $displayCode, $message);
+            $lastOtpStore = $this->authenticationService->userLastOtpStore($user_obj->id, Crypt::encrypt($otp), $otp_totp_type);
             //dump($snd_sms);dump($smsTrack);dd($lastOtpStore);
             if ($snd_sms && $smsTrack && $lastOtpStore) {
                 DB::commit();
-                return redirect()->route('otp-validate', ['source_type' => Crypt::encrypt(1), 'token_id' => Crypt::encrypt($user_obj->id)])->with('success', __('messages.otpsend'));
+                $request->session()->put('otp_data', [
+                    'mobile_no' => Crypt::encrypt($userData['mobile_no']),
+                    'source_type' => Crypt::encrypt(1),
+                    'user_id' => Crypt::encrypt($user_obj->id),
+                    'otp_totp_value' => Crypt::encrypt($otp),
+                    'otp_totp_type' => Crypt::encrypt($userData['mobile_no']),
+                ]);
+               // dd($generator->getLabel());
+                return redirect()->route('otp-validate')->with('success', __('messages.' . $generator->getLabel() . 'send'));
             } else {
                 DB::rollBack();
                 return back()->withErrors(['errors' => [__('messages.dbroolback')]]);
@@ -128,27 +153,63 @@ class AuthenticationController  extends Controller
             return back()->withErrors(['errors' => [__('messages.dbroolback')]]);
         }
     }
-    public function otpVerification(OtpVerificationRequest $request)
+    public function otpVerification(Request $request)
     {
-        $otpData = $request->validated();
-        $user_id = Crypt::decrypt($request->get('token_id'));
-        $source_type = Crypt::decrypt($request->get('source_type'));
-        return view(
-            'auth.otpverification',
-            [
-                'user_id' => $user_id,
-                'source_type' => $source_type
-            ]
-        );
+        
+        try{
+                    //dd('ok');
+                    $otpSessionData = $request->session()->get('otp_data');
+                    //dd($otpSessionData);
+                    $mobile_no = Crypt::decrypt($otpSessionData['mobile_no']);
+                    $user_id = Crypt::decrypt($otpSessionData['user_id']);
+                    $source_type = Crypt::decrypt($otpSessionData['source_type']);
+                    $otp_totp_type = Crypt::decrypt($otpSessionData['otp_totp_type']);
+                    $qrCode = null;
+                    if ($otp_totp_type == 13) {
+                        $otp_totp_value = Crypt::decrypt($otpSessionData['otp_totp_value']);
+                        $qrCode = Google2FA::getQRCodeInline(
+                            config('app.name'),
+                            $mobile_no,
+                            $otp_totp_value
+                        );
+                    }
+
+                    return response()
+    ->view('auth.otpverification', [
+        'mobile_no' => $mobile_no,
+        'user_id' => $user_id,
+        'source_type' => $source_type,
+        'otp_totp_type' => $otp_totp_type,
+        'qrCode' => $qrCode
+    ])
+    ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+    ->header('Pragma', 'no-cache')
+    ->header('Expires', '0');
+        }
+        catch(\Exception $e){
+            return redirect()->route('login')->withErrors(['errors' => [__('messages.something went wrong')]]);
+        }
     }
     public function otpValidate(ValidateOtpRequest $request)
     {
+         try{
         $otpDate = $request->validated();
-        $user_id = Crypt::decrypt($request->get('token_id'));
-        $source_type = Crypt::decrypt($request->get('source_type'));
+        $otpSessionData = $request->session()->get('otp_data');
+        $user_id = Crypt::decrypt($otpSessionData['user_id']);
+        $source_type = Crypt::decrypt($otpSessionData['source_type']);
+        $otp_totp_type = Crypt::decrypt($otpSessionData['otp_totp_type']);
+        $otp_totp_value = Crypt::decrypt($otpSessionData['otp_totp_value']);
+
+        $generator = TwoFactorAuthFactory::getInstance()->create($otp_totp_type);
+        $isValid = $generator->validate($otp_totp_value, $otpDate['otp']);
+
+        if (!$isValid) {
+            return back()->withErrors(['otp' => [__('messages.invalid' . $generator->getLabel())]]);
+        }
+
         if ($source_type == 1) {
             //dd('ok');
-            return redirect('reset-password?token_id=' . Crypt::encrypt($user_id) . '&source_type=' . Crypt::encrypt($source_type));
+            return redirect('reset-password');
         }
         if ($source_type == 2) {
             $update_user = User::where('id', $user_id)
@@ -161,45 +222,61 @@ class AuthenticationController  extends Controller
                 $request->session()->flush();
                 Auth::login($user);
                 return redirect('/dashboard');
+                
             }
+        }
+        }
+        catch(\Exception $e){
+            return redirect()->route('login')->withErrors(['errors' => [__('messages.something went wrong')]]);
         }
     }
     public function resendOtp(Request $request)
     {
-        $user_id = Crypt::decrypt($request->get('token_id'));
-        $source_type = Crypt::decrypt($request->get('source_type'));
-        $user_obj = $this->userService->find($user_id);
-
+       
         try {
-            // dd($user_obj);
+            $otpSessionData = $request->session()->get('otp_data');
+            $mobile_no = Crypt::decrypt($otpSessionData['mobile_no']);
+            $user_id = Crypt::decrypt($otpSessionData['user_id']);
+            $source_type = Crypt::decrypt($otpSessionData['source_type']);
+            $otp_totp_type = Crypt::decrypt($otpSessionData['otp_totp_type']);
+            $otp_totp_value = Crypt::decrypt($otpSessionData['otp_totp_value']);
+            $user_obj = $this->userService->find($user_id);
             DB::beginTransaction();
-            // $otp = rand(111111,999999);
-            if (env('APP_ENV') == 'local' || env('APP_ENV') == 'staging')
-                $otp = '123456';
-            else
-                $otp = rand(111111, 999999);
-            $message = 'Your OTP for ANNAPURNA BHANDAR scheme login is ' . $otp . ' . ANNAPURNA BHANDAR, Govt of WB.';
-            $snd_sms = $this->sendsmsService->sendSms($user_obj->mobile_no, $message);
-            $smsTrack = $this->sendsmsService->SmstrackInsert($user_obj->id, $user_obj->mobile_no, $otp, $message);
-            $lastOtpStore = $this->authenticationService->userLastOtpStore($user_obj->id, $otp);
-            //dump($snd_sms);dump($smsTrack);dd($lastOtpStore);
-            if ($snd_sms && $smsTrack && $lastOtpStore) {
-                DB::commit();
-                return redirect()->route('otp-validate', ['source_type' => Crypt::encrypt($source_type), 'token_id' => Crypt::encrypt($user_obj->id)])->with('success', __('messages.otpsend'));
+            $generator = TwoFactorAuthFactory::getInstance()->create($otp_totp_type);
+            $otp = $generator->generate();
+            $displayCode = $generator->getDisplayCode($otp);
+            $message = 'Your ' . $generator->getLabel() . ' for ANNAPURNA BHANDAR scheme login is ' . $displayCode . ' . ANNAPURNA BHANDAR, Govt of WB.';
+            
+            if ($generator->requiresSms()) {
+                $snd_sms = $this->sendsmsService->sendSms($mobile_no, $message);
             } else {
-                DB::rollBack();
-                return back()->withErrors(['errors' => [__('messages.dbroolback')]]);
+                $snd_sms = true;
             }
-        } catch (\Exception $e) {
-            // dd($e); 
-            return back()->withErrors(['errors' => [__('messages.dbroolback')]]);
+            $smsTrack = $this->sendsmsService->SmstrackInsert($user_obj->id, $mobile_no, $otp_totp_type,$displayCode, $message);
+            $lastOtpStore = $this->authenticationService->userLastOtpStore($user_obj->id, $displayCode, $otp_totp_type);
+            if ($snd_sms && $smsTrack && $lastOtpStore) {
+               // dd('ok');
+                DB::commit();
+                session()->put('otp_data.otp_totp_value',Crypt::encrypt($otp));
+                
+               // dd('ok');
+                return redirect()->route('otp-validate')->with('success', __('messages.' . $generator->getLabel() . 'send'));
+            } else {
+                DB::rollback();
+                return back()->withErrors('errors', __('messages.dbroolback'));
+            }
+        }
+        catch(\Exception $e){
+            dd($e);
+            return redirect()->route('login')->withErrors(['errors' => [__('messages.something went wrong')]]);
         }
     }
-    public function resetPassword(ResetPasswordRequest $request)
+    public function resetPassword(Request $request)
     {
-        $otpData = $request->validated();
-        $user_id = Crypt::decrypt($request->get('token_id'));
-        $source_type = Crypt::decrypt($request->get('source_type'));
+         try{
+        $otpSessionData = $request->session()->get('otp_data');
+        $user_id = Crypt::decrypt($otpSessionData['user_id']);
+        $source_type = Crypt::decrypt($otpSessionData['source_type']);
         return view(
             'auth.resetpassword',
             [
@@ -207,14 +284,19 @@ class AuthenticationController  extends Controller
                 'source_type' => $source_type
             ]
         );
+        }
+        catch(\Exception $e){
+            return redirect()->route('login')->withErrors(['errors' => [__('messages.something went wrong')]]);
+        }
     }
     public function resetPasswordPost(ResetPasswordPostRequest $request)
     {
-        // dd('ok');
+        try{
         $otpDate = $request->validated();
 
-        $user_id = Crypt::decrypt($request->get('token_id'));
-        $source_type = Crypt::decrypt($request->get('source_type'));
+        $otpSessionData = $request->session()->get('otp_data');
+        $user_id = Crypt::decrypt($otpSessionData['user_id']);
+        $source_type = Crypt::decrypt($otpSessionData['source_type']);
         $user_obj = $this->userService->find($user_id);
 
 
@@ -255,6 +337,10 @@ class AuthenticationController  extends Controller
                 DB::rollback();
                 return back()->withErrors(['errors' => [__('messages.dbroolback')]]);
             }
+        }
+        }
+        catch(\Exception $e){
+            return redirect()->route('login')->withErrors(['errors' => [__('messages.something went wrong')]]);
         }
     }
     public function logout(Request $request): RedirectResponse
