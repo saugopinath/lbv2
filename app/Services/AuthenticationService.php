@@ -47,10 +47,12 @@ class AuthenticationService implements AuthenticationInterface
        return $return_arr;
       
     }
-    public function userLastOtpStore(int $userId, string $otp): bool
+    public function userLastOtpStore(int $userId, string $otp, int $otp_totp_type = 12): bool
     {
         $cur_time=Carbon::now()->setTimezone('Asia/Kolkata')->format('Y/m/d H:i:s');
-        $expire_time=Carbon::now()->setTimezone('Asia/Kolkata')->addMinutes(1)->format('Y/m/d H:i:s');
+        $generator = \App\Services\TwoFactor\TwoFactorAuthFactory::getInstance()->create($otp_totp_type);
+        $expire_minutes = $generator->getExpirationMinutes();
+        $expire_time=Carbon::now()->setTimezone('Asia/Kolkata')->addMinutes($expire_minutes)->format('Y/m/d H:i:s');
         $otp_hash=md5($otp);
         //dump($otp);dd($otp_hash);
         $update_user = User::where('id', $userId)

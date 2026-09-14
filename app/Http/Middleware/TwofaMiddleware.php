@@ -22,12 +22,17 @@ class TwofaMiddleware
     public function handle(Request $request, Closure $next): Response
     {
        try{
-        $user_id = Crypt::decrypt($request->get('token_id'));
-        $source_type = Crypt::decrypt($request->get('source_type'));
+        $otpSessionData = $request->session()->get('otp_data');
+        if (empty($otpSessionData)) {
+            return redirect('login')->withErrors(['errors' => [__('messages.invalidSignature')]]);
+        }
+        $user_id = Crypt::decrypt($otpSessionData['user_id']);
+        $source_type = Crypt::decrypt($otpSessionData['source_type']);
         $user_obj = $this->userService->find($user_id);
         if(is_null($user_obj)){
             return redirect('login')->withErrors(['errors' => [__('messages.invalidSignature')]]);
         }
+        //dd($user_obj);
         if(strtotime(Carbon::now()->format('Y/m/d H:i:s')) > strtotime($user_obj->last_otp_expire_time)){
             return redirect('login')->withErrors(['errors' => [__('messages.otpexpired')]]);
         }

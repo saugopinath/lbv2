@@ -42,9 +42,31 @@
                 <x-form.radio id="check_totp" name="otp_totp_type" label="TOTP" value="13" />
                 </div>
         
-        <x-publicForm.button type="submit" class="w-full h-12 bg-[#0e3e98f0] text-white text-lg font-semibold rounded-xl shadow-md hover:bg-[#0c3591] flex justify-center items-center gap-3">Send OTP</x-publicForm.button>
+        <x-publicForm.button id="submit_btn" type="submit" class="w-full h-12 bg-[#0e3e98f0] text-white text-lg font-semibold rounded-xl shadow-md hover:bg-[#0c3591] flex justify-center items-center gap-3">Send OTP</x-publicForm.button>
     
     </form>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const radios = document.querySelectorAll('input[name="otp_totp_type"]');
+            const submitBtn = document.getElementById('submit_btn');
+
+            function updateButtonText() {
+                const checkedRadio = document.querySelector('input[name="otp_totp_type"]:checked');
+                if (checkedRadio && checkedRadio.value == '13') {
+                    submitBtn.textContent = 'Send TOTP';
+                } else {
+                    submitBtn.textContent = 'Send OTP';
+                }
+            }
+
+            radios.forEach(radio => {
+                radio.addEventListener('change', updateButtonText);
+            });
+
+            updateButtonText();
+        });
+    </script>
     <div class="text-right mt-2 text-blue-600 italic text-sm hover:underline cursor-pointer">
         <a href="{{ route('forget-password') }}">Forgot Password?</a>
     </div>
