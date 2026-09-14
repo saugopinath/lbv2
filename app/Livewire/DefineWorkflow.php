@@ -45,13 +45,13 @@ class DefineWorkflow extends Component
                 'title' => 'Duplicate Check Configuration',
                 'description' => 'Set rules to prevent duplicate entries.',
                 'component' => 'dup-check-scheme-config-settings',
-                'step' => 3,
+                'step' => 2,
             ],
             [
                 'title' => 'Age Management Configuration',
                 'description' => 'Define age validation rules and eligibility.',
                 'component' => 'age-management',
-                'step' => 4,
+                'step' => 3,
             ],
         ];
     }

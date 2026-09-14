@@ -595,7 +595,7 @@ class WorkFlowPermissionHelper
 
     public static function getUserModules($schemeId = null)
     {
-        $allModules = \App\Models\DynamicWorkflowModule::where('is_active', 1)->get();
+        $allModules = \App\Models\DynamicWorkflowModule::select('module_name', 'module_code')->where('is_active', 1)->get();
         return $allModules->filter(function ($module) use ($schemeId) {
             return self::canAccessModule($module->module_code, $schemeId);
         });

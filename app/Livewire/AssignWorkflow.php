@@ -14,12 +14,17 @@ class AssignWorkflow extends Component
     {
         $this->schemeId = $schemeId;
         $this->moduleId = $moduleId;
-        // FIX: Check DynamicWorkflowLabel instead of WorkflowStep since new steps are saved there
-        $steps = DynamicWorkflowLabel::where('scheme_id', $schemeId)
+        $schemeModule = \App\Models\DynamicWorkflowSchemeModule::where('scheme_id', $schemeId)
             ->where('module_id', $moduleId)
-            ->get();
-        if ($steps->isNotEmpty()) {
-            $this->already = true;
+            ->first();
+
+        if ($schemeModule) {
+            $steps = DynamicWorkflowLabel::where('scheme_id', $schemeId)
+                ->where('module_id', $schemeModule->id)
+                ->get();
+            if ($steps->isNotEmpty()) {
+                $this->already = true;
+            }
         }
     }
     public function render()

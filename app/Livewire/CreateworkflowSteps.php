@@ -48,11 +48,17 @@ class CreateworkflowSteps extends Component
         $this->moduleId = $moduleData['module_id'];
         $this->moduleCode = $moduleData['module_code'];
 
-        // FIX: Load existing steps from DynamicWorkflowLabel instead of WorkflowStep to match save()
-        $steps = DynamicWorkflowLabel::where('scheme_id', $this->schemeId)
+        // FIX: Load existing steps from DynamicWorkflowLabel using scheme_module ID
+        $schemeModule = DynamicWorkflowSchemeModule::where('scheme_id', $this->schemeId)
             ->where('module_id', $this->moduleId)
-            ->orderBy('id')
-            ->pluck('label_name')->toArray();
+            ->first();
+
+        $steps = $schemeModule
+            ? DynamicWorkflowLabel::where('scheme_id', $this->schemeId)
+                ->where('module_id', $schemeModule->id)
+                ->orderBy('id')
+                ->pluck('label_name')->toArray()
+            : [];
 
         // FIX: Enforce Original Role Rank Hierarchy for the UI alert by querying whereNotNull('rank')
         $roles = Role::whereNotNull('rank')->orderBy('rank')->pluck('name', 'id')->toArray();
@@ -303,7 +309,7 @@ class CreateworkflowSteps extends Component
 
                 $label = DynamicWorkflowLabel::create([
                     'scheme_id'  => $schemeId,
-                    'module_id'  => $moduleId,
+                    'module_id'  => $schemeModule->id,
                     'label_name' => $this->labels[$i],
                     'op_type_id' => $opTypeId,
                 ]);
@@ -402,7 +408,7 @@ class CreateworkflowSteps extends Component
             $this->already = false;
             $this->dispatch('toastr', [
                 'type'    => 'error',
-                'message' => 'Something went wrong. Please try again.',
+                'message' => 'Something went wrong. Please try again.' . $e->getMessage(),
             ]);
         }
     }

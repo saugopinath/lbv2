@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('unique_app_ben_ids', function (Blueprint $table) {
+        Schema::table('pension.unique_app_ben_ids', function (Blueprint $table) {
             $table->unsignedBigInteger('module_id')->nullable()->after('scheme_id');
         });
     }
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('unique_app_ben_ids', function (Blueprint $table) {
+        Schema::table('pension.unique_app_ben_ids', function (Blueprint $table) {
             $table->dropColumn('module_id');
         });
     }
