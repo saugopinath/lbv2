@@ -26,7 +26,23 @@ class AgeManagement extends Component
         ])->map(function ($name, $id) {
             return (object) ['id' => $id, 'name' => $name];
         });
-        $record = AgeManagements::where('scheme_id', $this->schemeId)->where('module_id', $this->moduleId)->first();
+        $schemeModule = \App\Models\DynamicWorkflowSchemeModule::where('scheme_id', $this->schemeId)
+            ->where('module_id', $this->moduleId)
+            ->first();
+
+        $record = AgeManagements::where('scheme_id', $this->schemeId)
+            ->where(function($q) use ($schemeModule) {
+                $q->where('module_id', $this->moduleId);
+                if ($schemeModule) {
+                    $q->orWhere('module_id', $schemeModule->id);
+                }
+                $q->orWhereNull('module_id');
+            })
+            ->first();
+
+        if (!$record) {
+            $record = AgeManagements::where('scheme_id', $this->schemeId)->first();
+        }
 
         if ($record) {
             $this->minage = $record->min_age;
@@ -37,11 +53,12 @@ class AgeManagement extends Component
                     ? $record->special_case
                     : json_decode($record->special_case, true);
 
-                foreach ($data as $id => $values) {
+                $this->selectedSpecialCases = [];
+                foreach ((array)$data as $id => $values) {
                     $this->selectedSpecialCases[] = [
                         'case_id' => (string)$id,
-                        'min'     => $values['min'],
-                        'max'     => $values['max'],
+                        'min'     => $values['min'] ?? '',
+                        'max'     => $values['max'] ?? '',
                     ];
                 }
             }

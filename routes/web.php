@@ -188,6 +188,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/form', [Formcontroller::class, 'index'])->middleware('permission.redirect:canEntry')->name('form');
     Route::get('application-lists', [Formcontroller::class, 'applicationLists'])->name('application-lists');
     Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])->name('define-workflow1');
+    Route::get('/configured-workflows', [workflowmanagementController::class, 'configuredWorkflows'])->middleware('permission.redirect:canDefineWorkflow')->name('configured-workflows');
 
     Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])->middleware('permission.redirect:canUpdateBankDetailsPermission')->name('bankUpdate');
 

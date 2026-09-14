@@ -12,6 +12,48 @@ class Workflow extends Component
     // public $schemeName = null;
     public $moduleData = false;
     public $moduleId;
+
+    public function mount()
+    {
+        $schemeIdParam = request()->query('scheme_id');
+        $moduleIdParam = request()->query('module_id');
+
+        if ($schemeIdParam && $moduleIdParam) {
+            $schemeId = null;
+            $moduleId = null;
+
+            try {
+                $schemeId = \Illuminate\Support\Facades\Crypt::decryptString($schemeIdParam);
+            } catch (\Exception $e) {
+                $schemeId = $schemeIdParam;
+            }
+
+            try {
+                $moduleId = \Illuminate\Support\Facades\Crypt::decryptString($moduleIdParam);
+            } catch (\Exception $e) {
+                $moduleId = $moduleIdParam;
+            }
+
+            if ($schemeId && $moduleId) {
+                $scheme = \App\Models\Scheme::find($schemeId);
+                $module = \App\Models\DynamicWorkflowModule::find($moduleId);
+
+                if ($scheme && $module) {
+                    $this->schemeId = $scheme->id;
+                    $this->schemeData = [
+                        'scheme_id' => $scheme->id,
+                        'scheme_name' => $scheme->name,
+                    ];
+                    $this->moduleId = $module->id;
+                    $this->moduleData = [
+                        'module_id' => $module->id,
+                        'module_name' => $module->module_name,
+                        'module_code' => $module->module_code,
+                    ];
+                }
+            }
+        }
+    }
     // public $moduleName;
     #[On('module-selected')]
     public function handlemoduleData($moduleData)

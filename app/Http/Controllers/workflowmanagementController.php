@@ -13,6 +13,10 @@ class workflowmanagementController extends Controller
     {
         return view('workflowmanagement.index');
     }
+    public function configuredWorkflows()
+    {
+        return view('workflowmanagement.configured_workflows');
+    }
     public function createSteps(Request $request)
     {
         if ($request->isMethod('post')) {

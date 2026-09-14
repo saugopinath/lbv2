@@ -38,8 +38,17 @@ class DupCheckSchemeConfigSettings extends Component
                 'schemes'  => []
             ];
         }
-        $existingSettings = DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
+        $schemeModule = \App\Models\DynamicWorkflowSchemeModule::where('scheme_id', $this->schemeId)
             ->where('module_id', $this->moduleId)
+            ->first();
+
+        $existingSettings = DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
+            ->where(function($q) use ($schemeModule) {
+                $q->where('module_id', $this->moduleId);
+                if ($schemeModule) {
+                    $q->orWhere('module_id', $schemeModule->id);
+                }
+            })
             ->get();
         foreach ($existingSettings as $setting) {
             if (isset($this->config[$setting->check_with])) {

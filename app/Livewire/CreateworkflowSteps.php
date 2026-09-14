@@ -57,8 +57,8 @@ class CreateworkflowSteps extends Component
             ? DynamicWorkflowLabel::where('scheme_id', $this->schemeId)
                 ->where('module_id', $schemeModule->id)
                 ->orderBy('id')
-                ->pluck('label_name')->toArray()
-            : [];
+                ->get()
+            : collect([]);
 
         // FIX: Enforce Original Role Rank Hierarchy for the UI alert by querying whereNotNull('rank')
         $roles = Role::whereNotNull('rank')->orderBy('rank')->pluck('name', 'id')->toArray();
@@ -71,16 +71,46 @@ class CreateworkflowSteps extends Component
         if (!empty($permissions)) {
             $this->permissionsList = $permissions;
         }
-        if (!empty($steps)) {
-            $this->noofSteps = count($steps);
-            $this->labels = $steps;
-            $this->already = true;
-        }
 
-        foreach ($this->labels as $index => $value) {
-            $this->assignRule[$index] = "1";
-            $this->existingRole[$index] = true;
-            $this->newRole[$index] = false;
+        if ($steps->isNotEmpty()) {
+            $this->noofSteps = $steps->count();
+            $this->labels = [];
+            $this->already = true;
+
+            foreach ($steps as $index => $step) {
+                $this->labels[$index] = $step->label_name;
+
+                $roleMappings = workflowstepRolemapping::where('workflow_step_id', $step->id)
+                    ->where('scheme_id', $this->schemeId)
+                    ->where('module_id', $schemeModule->id)
+                    ->pluck('role_id')
+                    ->toArray();
+
+                if (!empty($roleMappings)) {
+                    $this->assignRule[$index] = "1";
+                    $this->existingRole[$index] = true;
+                    $this->newRole[$index] = false;
+                    $this->roleSelection[$index] = array_map('strval', $roleMappings);
+                    $this->permissionsSelection[$index] = [];
+                } elseif (!empty($step->permissions)) {
+                    $this->assignRule[$index] = "2";
+                    $this->existingRole[$index] = false;
+                    $this->newRole[$index] = true;
+                    $this->roleSelection[$index] = [];
+                    $permSelection = [];
+                    $permArray = is_array($step->permissions) ? $step->permissions : json_decode($step->permissions, true);
+                    foreach ((array) $permArray as $permId) {
+                        $permSelection[$permId] = true;
+                    }
+                    $this->permissionsSelection[$index] = $permSelection;
+                } else {
+                    $this->assignRule[$index] = "1";
+                    $this->existingRole[$index] = true;
+                    $this->newRole[$index] = false;
+                    $this->roleSelection[$index] = [];
+                    $this->permissionsSelection[$index] = [];
+                }
+            }
         }
     }
     protected function rules()
