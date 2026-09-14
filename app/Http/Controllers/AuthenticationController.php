@@ -33,7 +33,7 @@ class AuthenticationController  extends Controller
     public function login()
     {
         if (auth()->check()) {
-            return redirect()->route('dashboard');
+            auth()->logout();
         }
 
         return view('auth.index');
@@ -155,6 +155,7 @@ class AuthenticationController  extends Controller
     }
     public function otpVerification(Request $request)
     {
+        
         try{
                     //dd('ok');
                     $otpSessionData = $request->session()->get('otp_data');
@@ -173,16 +174,17 @@ class AuthenticationController  extends Controller
                         );
                     }
 
-                    return view(
-                        'auth.otpverification',
-                        [
-                            'mobile_no' => $mobile_no,
-                            'user_id' => $user_id,
-                            'source_type' => $source_type,
-                            'otp_totp_type' => $otp_totp_type,
-                            'qrCode' => $qrCode
-                        ]
-                    );
+                    return response()
+    ->view('auth.otpverification', [
+        'mobile_no' => $mobile_no,
+        'user_id' => $user_id,
+        'source_type' => $source_type,
+        'otp_totp_type' => $otp_totp_type,
+        'qrCode' => $qrCode
+    ])
+    ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+    ->header('Pragma', 'no-cache')
+    ->header('Expires', '0');
         }
         catch(\Exception $e){
             return redirect()->route('login')->withErrors(['errors' => [__('messages.something went wrong')]]);
@@ -220,6 +222,7 @@ class AuthenticationController  extends Controller
                 $request->session()->flush();
                 Auth::login($user);
                 return redirect('/dashboard');
+                
             }
         }
         }

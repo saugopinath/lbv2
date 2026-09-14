@@ -24,7 +24,8 @@ class TwofaMiddleware
        try{
         $otpSessionData = $request->session()->get('otp_data');
         if (empty($otpSessionData)) {
-            return redirect('login')->withErrors(['errors' => [__('messages.invalidSignature')]]);
+            // return redirect('login')->withErrors(['errors' => [__('messages.invalidSignature')]]);
+             return redirect('login');
         }
         $user_id = Crypt::decrypt($otpSessionData['user_id']);
         $source_type = Crypt::decrypt($otpSessionData['source_type']);

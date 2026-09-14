@@ -1,4 +1,5 @@
 <x-layouts.guest>
+    
     <!-- Error & Success Messages -->
     <x-errors class="mt-4" />
     <x-success class="mt-4" />
@@ -90,4 +91,14 @@
             );
         }
     </script>
+    
+    <script>
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted) {
+            window.location.replace('{{ route('login') }}');
+        }
+    });
+</script>
+
+
 </x-layouts.guest>
