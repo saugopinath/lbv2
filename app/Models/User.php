@@ -38,6 +38,7 @@ class User extends Authenticatable implements Auditable, JWTSubject
         'updated_at',
         'mobile_no',
         'is_active',
+        'google2fa_secret',
     ];
 
     /**

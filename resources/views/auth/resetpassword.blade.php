@@ -3,8 +3,6 @@
     <x-errors class="mt-4" />
     <form class="mt-4 space-y-5" action="{{ route('resetPasswordPost') }}" method="POST">
         @csrf
-        <input type="hidden" name="token_id" value="{{Crypt::encrypt($user_id)}}">
-        <input type="hidden" name="source_type" value="{{Crypt::encrypt($source_type)}}">
 
         <div>
             <x-publicForm.password-input

@@ -6,8 +6,6 @@
 
     <form action="{{ route('otp-validate-post') }}" method="POST" class="mt-4 space-y-4">
         @csrf
-        <input type="hidden" name="token_id" value="{{ Crypt::encrypt($user_id) }}">
-        <input type="hidden" name="source_type" value="{{ Crypt::encrypt($source_type) }}">
         <!-- OTP Input -->
         <div>
             <x-publicForm.text-input
@@ -15,7 +13,7 @@
                 name="otp"
                 type="text"
                 maxlength="6"
-                placeholder="Enter OTP"
+                placeholder="Enter {{$otp_totp_type==12?'OTP':'TOTP'}}"
                 autofocus
                 autocomplete="off"
                 :value="old('otp')"
@@ -36,13 +34,22 @@
             <x-publicForm.captcha />
         </div>
 
+        @if($otp_totp_type == 13 && !empty($qrCode))
+        <div class="flex flex-col items-center justify-center my-4 p-4 border border-gray-200 rounded-xl bg-white shadow-sm">
+            <p class="text-sm font-semibold text-gray-700 mb-2">Scan with Google Authenticator</p>
+            <div>
+                {!! $qrCode !!}
+            </div>
+        </div>
+        @endif
+
         <div class="mt-4 space-y-5">
             <x-publicForm.button type="submit" class="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold rounded-xl shadow-md transition-colors duration-200">
-                Validate OTP
+                Validate {{$otp_totp_type==12?'OTP':'TOTP'}}
             </x-publicForm.button>
 
             <x-publicForm.button onclick="resendOtp()" class="w-full h-12 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold rounded-xl shadow-md transition-colors duration-200">
-                Resend Code
+                Resend {{$otp_totp_type==12?'OTP':'TOTP'}}
             </x-publicForm.button>
         </div>
 
@@ -71,8 +78,6 @@
     <!-- Resend OTP Form -->
     <form action="{{ route('resendOtp') }}" method="POST" id="resendForm" class="hidden">
         @csrf
-        <input type="hidden" name="token_id" value="{{ Crypt::encrypt($user_id) }}">
-        <input type="hidden" name="source_type" value="{{ Crypt::encrypt($source_type) }}">
     </form>
 
     <!-- Scripts -->
