@@ -586,4 +586,18 @@ class WorkFlowPermissionHelper
         return self::hasPermission('update-mark-beneficiary-details', $schemeId)
             || self::hasPermission('update-beneficiary-list', $schemeId) || self::hasPermission('request-update-beneficiary', $schemeId);
     }
+
+    public static function canAccessModule($moduleCode, $schemeId = null): bool
+    {
+        $permissionName = strtolower(str_replace(' ', '_', $moduleCode)) . '_access';
+        return self::hasPermission($permissionName, $schemeId);
+    }
+
+    public static function getUserModules($schemeId = null)
+    {
+        $allModules = \App\Models\DynamicWorkflowModule::select('module_name', 'module_code')->where('is_active', 1)->get();
+        return $allModules->filter(function ($module) use ($schemeId) {
+            return self::canAccessModule($module->module_code, $schemeId);
+        });
+    }
 }

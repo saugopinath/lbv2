@@ -71,6 +71,10 @@ class DynamicForm extends Component
 
     public $beneficiaryId;
 
+    public $moduleCode;
+
+    public $moduleId;
+
     public $navMessage = null;
 
     public $navMessageType = 'success';
@@ -812,6 +816,7 @@ class DynamicForm extends Component
         }
         $row = UniqueAppBenId::create([
             'scheme_id' => $this->schemeId,
+            'module_id' => $this->moduleId,
         ]);
         $beneficiary_id_obj = UniqueAppBenId::select('beneficiary_id')->where('application_id', $row->application_id)->first();
         $this->applicationId = $row->application_id;
@@ -889,7 +894,7 @@ class DynamicForm extends Component
         }
     }
 
-    public function mount($schemeId = null, $schemeName = null, $saveNext = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null)
+    public function mount($schemeId = null, $schemeName = null, $saveNext = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null, $moduleCode = null)
     {
         $handler = app(DynamicFormHandlerInterface::class);
         if (!$handler->authorizeEntry((int) $schemeId)) {
@@ -915,6 +920,13 @@ class DynamicForm extends Component
         }
         $this->schemeId = $schemeId;
         $this->schemeName = $schemeName;
+        $this->moduleCode = $moduleCode;
+        if ($this->moduleCode) {
+            $module = \App\Models\DynamicWorkflowModule::where('module_code', $this->moduleCode)->first();
+            if ($module) {
+                $this->moduleId = $module->id;
+            }
+        }
         $this->heading = 'Government Of West Bengal ' . $this->schemeName . ' Scheme';
         $this->saveNext = $saveNext;
         $this->form_preview = $form_preview;

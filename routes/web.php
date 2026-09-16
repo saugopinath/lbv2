@@ -87,18 +87,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // User Management
     Route::get('/user-managements', [UsersController::class, 'index'])->middleware('permission.redirect:canViewUser')->name('user-managements');
     Route::get('/user-managements/{user}/assign-permission-role', [UsersController::class, 'assignPermissionRole'])
-    ->name('users.assign-permission-role');
+        ->name('users.assign-permission-role');
 
     Route::get('/users/create', UsersCreate::class)->middleware('permission.redirect:canCreateUsers')->name('users');
 
     // Role & Office Mappings
     Route::get('role-office-master-mappings', [RoleOfficeTypeMappingsController::class, 'index'])->middleware('permission.redirect:canRoleMapping')->name('role-office-master-mappings');
 
-     Route::get('/role-office-type-mappings-create', Create::class)->middleware('permission.redirect:canRoleMappings')->name('role-office-type-mappings-create');
-    
-     Route::get('duty-assignment/role-office-master-mappings', function () {
-     return view('duty-assignment.index');
-     })->name('duty-assignment-role-office-master-mappings');
+    Route::get('/role-office-type-mappings-create', Create::class)->middleware('permission.redirect:canRoleMappings')->name('role-office-type-mappings-create');
+
+    Route::get('duty-assignment/role-office-master-mappings', function () {
+        return view('duty-assignment.index');
+    })->name('duty-assignment-role-office-master-mappings');
     // Office Masters
     Route::get('officemasters', [OfficeMastersController::class, 'index'])->middleware('permission.redirect:canViewOffices')->name('officemasters');
 
@@ -186,9 +186,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/csv-splitter', CsvSplitter::class)->name('csv-splitter');
 
     Route::get('/form', [Formcontroller::class, 'index'])->middleware('permission.redirect:canEntry')->name('form');
-    Route::get('/form1', [Formcontroller::class, 'index'])->middleware('permission.redirect:canEntry')->name('form1');
     Route::get('application-lists', [Formcontroller::class, 'applicationLists'])->name('application-lists');
     Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])->name('define-workflow1');
+    Route::get('/configured-workflows', [workflowmanagementController::class, 'configuredWorkflows'])->middleware('permission.redirect:canDefineWorkflow')->name('configured-workflows');
 
     Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])->middleware('permission.redirect:canUpdateBankDetailsPermission')->name('bankUpdate');
 

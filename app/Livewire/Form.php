@@ -12,8 +12,10 @@ class Form extends Component
     public $schemeId, $schemeName = null;
     public $showSchemeDropdown = true;
     public $grievanceId;
-    public function mount($hideSchemeDropdown = false)
+    public $moduleCode;
+    public function mount($moduleCode = null, $hideSchemeDropdown = false)
     {
+        $this->moduleCode = $moduleCode;
         if ($hideSchemeDropdown) {
             $this->showSchemeDropdown = false;
             $schemeData = Scheme::where('is_active', 1)->first();

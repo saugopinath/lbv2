@@ -30,11 +30,11 @@ class DupAadhaarCheckV2 extends Component
         $this->aadhaar = trim($this->aadhaar);
 
         // Commented for Dev
-        // if (!AadhaarHelper::validate($this->aadhaar)) { // Verhoeff checksum validation
-        //     $this->error = "Invalid Aadhaar number";
-        //     $this->dispatch('hideLoader');
-        //     return ['status' => 'error', 'message' => $this->error];
-        // }
+        if (!AadhaarHelper::validate($this->aadhaar)) { // Verhoeff checksum validation
+            $this->error = "Invalid Aadhaar number";
+            $this->dispatch('hideLoader');
+            return ['status' => 'error', 'message' => $this->error];
+        }
 
         // Previous work, which was replaced by the work done below it
         // $encoded_aadhar = Crypt::encryptString($this->aadhaar);

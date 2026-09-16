@@ -19,10 +19,10 @@
 
         // Verhoeff checksum validation
         {{-- Commented for Dev --}}
-        {{-- if (!verhoeffValidate(val)) {
+        if (!verhoeffValidate(val)) {
             this.errorMessage = 'Invalid Aadhaar number';
             return;
-        } --}}
+        }
         Livewire.dispatch('showLoader');
         // Send to Livewire
         $wire.aadhaar = val;

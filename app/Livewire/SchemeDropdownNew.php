@@ -20,6 +20,8 @@ class SchemeDropdownNew extends Component
     {
         $this->reset(['schemeId', 'schemeSelected']);
     }
+
+    #[On('scheme-created')]
     public function mount($isFinal = false, $isAssigned = false)
     {
         $scheme_id = null;
@@ -44,11 +46,13 @@ class SchemeDropdownNew extends Component
 
         $this->schemes = $query->get();
     }
+
     public function updatedSchemeId($value)
     {
         if ($value) {
             $this->schemeSelected = true;
-            $schemeName = Scheme::find($value)->name;
+            $scheme = collect($this->schemes)->firstWhere('id', (int) $value);
+            $schemeName = data_get($scheme, 'name');
             $schemeData = ['scheme_id' => $value, 'scheme_name' => $schemeName];
             $this->dispatch('selectedScheme', $schemeData);
         } else {
@@ -56,6 +60,7 @@ class SchemeDropdownNew extends Component
             $this->dispatch('selectedScheme', null);
         }
     }
+
     public function render()
     {
         return view('livewire.scheme-dropdown-new');

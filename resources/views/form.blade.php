@@ -1,3 +1,3 @@
 <x-layouts.app>
-    <livewire:form />
+    <livewire:form :module-code="$moduleCode" />
 </x-layouts.app>
