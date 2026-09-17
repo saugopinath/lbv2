@@ -6,18 +6,23 @@ use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use App\Models\AgeManagements;
+use App\Models\DynamicWorkflowSchemeModule;
 
 class AgeManagement extends Component
 {
     public $schemeId;
     public $moduleId;
+    public $schemeModuleId;
+    public bool $isEdit = false;
+    public bool $already = false;
     public $minage, $maxage;
     public $isspecial = 'no';
     public $specialcaseOptions;
     public $selectedSpecialCases = [];
 
-    public function mount($schemeId, $moduleId)
+    public function mount($schemeId, $moduleId, $isEdit = false)
     {
+        $this->isEdit = $isEdit;
         $this->schemeId = $schemeId;
         $this->moduleId = $moduleId;
         $this->specialcaseOptions = collect([
@@ -26,40 +31,34 @@ class AgeManagement extends Component
         ])->map(function ($name, $id) {
             return (object) ['id' => $id, 'name' => $name];
         });
-        $schemeModule = \App\Models\DynamicWorkflowSchemeModule::where('scheme_id', $this->schemeId)
+        $this->schemeModuleId = DynamicWorkflowSchemeModule::where('scheme_id', $this->schemeId)
             ->where('module_id', $this->moduleId)
-            ->first();
+            ->value('id');
 
-        $record = AgeManagements::where('scheme_id', $this->schemeId)
-            ->where(function($q) use ($schemeModule) {
-                $q->where('module_id', $this->moduleId);
-                if ($schemeModule) {
-                    $q->orWhere('module_id', $schemeModule->id);
-                }
-                $q->orWhereNull('module_id');
-            })
-            ->first();
+        if ($this->schemeModuleId) {
+            $record = AgeManagements::select('min_age', 'max_age', 'is_special', 'special_case')
+                ->where('scheme_id', $this->schemeId)
+                ->where('module_id', $this->schemeModuleId)
+                ->first();
 
-        if (!$record) {
-            $record = AgeManagements::where('scheme_id', $this->schemeId)->first();
-        }
+            if ($record) {
+                $this->already = true;
+                $this->minage = $record->min_age;
+                $this->maxage = $record->max_age;
+                $this->isspecial = $record->is_special ? 'yes' : 'no';
+                if ($record->special_case) {
+                    $data = is_array($record->special_case)
+                        ? $record->special_case
+                        : json_decode($record->special_case, true);
 
-        if ($record) {
-            $this->minage = $record->min_age;
-            $this->maxage = $record->max_age;
-            $this->isspecial = $record->is_special ? 'yes' : 'no';
-            if ($record->special_case) {
-                $data = is_array($record->special_case)
-                    ? $record->special_case
-                    : json_decode($record->special_case, true);
-
-                $this->selectedSpecialCases = [];
-                foreach ((array)$data as $id => $values) {
-                    $this->selectedSpecialCases[] = [
-                        'case_id' => (string)$id,
-                        'min'     => $values['min'] ?? '',
-                        'max'     => $values['max'] ?? '',
-                    ];
+                    $this->selectedSpecialCases = [];
+                    foreach ((array)$data as $id => $values) {
+                        $this->selectedSpecialCases[] = [
+                            'case_id' => (string)$id,
+                            'min'     => $values['min'] ?? '',
+                            'max'     => $values['max'] ?? '',
+                        ];
+                    }
                 }
             }
         }
@@ -140,19 +139,26 @@ class AgeManagement extends Component
                     ];
                 }
             }
-            $old = AgeManagements::where('scheme_id', $this->schemeId)->where('module_id', $this->moduleId)->first();
-            if ($old) {
-                $old->delete();
+            if (!$this->schemeModuleId) {
+                $this->schemeModuleId = DynamicWorkflowSchemeModule::where('scheme_id', $this->schemeId)
+                    ->where('module_id', $this->moduleId)
+                    ->value('id');
             }
-            $age = new AgeManagements();
-            $age->scheme_id = $this->schemeId;
-            $age->module_id = $this->moduleId;
-            $age->min_age = $this->minage ?: null;
-            $age->max_age = $this->maxage ?: null;
-            $age->is_special = $this->isspecial === 'yes';
-            $age->special_case = $jsonContent ? json_encode($jsonContent) : null;
 
-            $age->save();
+            if ($this->schemeModuleId) {
+                AgeManagements::updateOrCreate(
+                    [
+                        'scheme_id' => $this->schemeId,
+                        'module_id' => $this->schemeModuleId,
+                    ],
+                    [
+                        'min_age'      => $this->minage ?: null,
+                        'max_age'      => $this->maxage ?: null,
+                        'is_special'   => $this->isspecial === 'yes',
+                        'special_case' => $jsonContent ? json_encode($jsonContent) : null,
+                    ]
+                );
+            }
             DB::commit();
             $this->dispatch('toastr', ['type' => 'success', 'message' => 'Saved Successfully!']);
         } catch (Exception $e) {

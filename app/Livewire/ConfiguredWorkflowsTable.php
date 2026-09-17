@@ -7,6 +7,8 @@ use Livewire\WithPagination;
 use App\Models\DynamicWorkflowSchemeModule;
 use App\Models\DynamicWorkflowLabel;
 use App\Models\workflowstepRolemapping;
+use App\Models\DupcheckschemeconfigSetting;
+use App\Models\AgeManagements;
 
 class ConfiguredWorkflowsTable extends Component
 {
@@ -29,14 +31,16 @@ class ConfiguredWorkflowsTable extends Component
 
     public function delete($id)
     {
-        $schemeModule = DynamicWorkflowSchemeModule::find($id);
+        $schemeModule = DynamicWorkflowSchemeModule::select('id', 'scheme_id')->find($id);
         if ($schemeModule) {
             $schemeId = $schemeModule->scheme_id;
             $schemeModuleId = $schemeModule->id;
 
-            // Delete associated steps and role mappings
+            // Delete associated steps, role mappings, dup check, and age management configs
             workflowstepRolemapping::where('module_id', $schemeModuleId)->where('scheme_id', $schemeId)->delete();
             DynamicWorkflowLabel::where('module_id', $schemeModuleId)->where('scheme_id', $schemeId)->delete();
+            DupcheckschemeconfigSetting::where('module_id', $schemeModuleId)->where('scheme_id', $schemeId)->delete();
+            AgeManagements::where('module_id', $schemeModuleId)->where('scheme_id', $schemeId)->delete();
             $schemeModule->delete();
 
             $this->dispatch('toastr', [
@@ -51,9 +55,30 @@ class ConfiguredWorkflowsTable extends Component
         }
     }
 
+    public function toggleDisable($id)
+    {
+        $schemeModule = DynamicWorkflowSchemeModule::select('id', 'is_disabled')->find($id);
+        if ($schemeModule) {
+            $schemeModule->is_disabled = !$schemeModule->is_disabled;
+            $schemeModule->save();
+
+            $statusMessage = $schemeModule->is_disabled ? 'Workflow disabled successfully!' : 'Workflow enabled successfully!';
+
+            $this->dispatch('toastr', [
+                'type' => 'success',
+                'message' => $statusMessage
+            ]);
+        } else {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Workflow configuration not found.'
+            ]);
+        }
+    }
+
     public function render()
     {
-        $query = DynamicWorkflowSchemeModule::with(['scheme', 'module'])
+        $query = DynamicWorkflowSchemeModule::with(['scheme:id,name', 'module:id,module_name,module_code'])
             ->select('dynamic_workflow_scheme_modules.*')
             ->join('schemes', 'dynamic_workflow_scheme_modules.scheme_id', '=', 'schemes.id')
             ->join('dynamic_workflow_modules', 'dynamic_workflow_scheme_modules.module_id', '=', 'dynamic_workflow_modules.id');
@@ -62,10 +87,10 @@ class ConfiguredWorkflowsTable extends Component
             $searchTerm = '%' . trim($this->search) . '%';
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('schemes.name', 'ILIKE', $searchTerm)
-                  ->orWhereRaw("CAST(schemes.id AS TEXT) ILIKE ?", [$searchTerm])
-                  ->orWhere('dynamic_workflow_modules.module_name', 'ILIKE', $searchTerm)
-                  ->orWhere('dynamic_workflow_modules.module_code', 'ILIKE', $searchTerm)
-                  ->orWhere('dynamic_workflow_scheme_modules.main_module_code', 'ILIKE', $searchTerm);
+                    ->orWhereRaw("CAST(schemes.id AS TEXT) ILIKE ?", [$searchTerm])
+                    ->orWhere('dynamic_workflow_modules.module_name', 'ILIKE', $searchTerm)
+                    ->orWhere('dynamic_workflow_modules.module_code', 'ILIKE', $searchTerm)
+                    ->orWhere('dynamic_workflow_scheme_modules.main_module_code', 'ILIKE', $searchTerm);
             });
         }
 

@@ -29,6 +29,6 @@
 
     {{-- Render Selected Livewire Component --}}
     <div class="mt-6">
-        <livewire:is :component="$steps[$currentStep]['component']" :module-data="$moduleData" :module-id="$moduleId" :scheme-data="$schemeData" :scheme-id="$schemeId" :wire:key="$currentStep" />
+        <livewire:is :component="$steps[$currentStep]['component']" :module-data="$moduleData" :module-id="$moduleId" :scheme-data="$schemeData" :scheme-id="$schemeId" :is-edit="$isEdit" :wire:key="$currentStep" />
     </div>
 </div>

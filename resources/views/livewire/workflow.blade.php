@@ -15,7 +15,7 @@
     @endif
     @if ($schemeData && $moduleData)
         <div class="max-w-5xl mx-auto bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-            <livewire:define-workflow :module-data="$moduleData" :scheme-data="$schemeData" :wire:key="'define-workflow-'.$schemeId.'-'.$moduleId" />
+            <livewire:define-workflow :module-data="$moduleData" :scheme-data="$schemeData" :is-edit="$isEdit" :wire:key="'define-workflow-'.$schemeId.'-'.$moduleId" />
         </div>
     @endif
 </div>

@@ -47,6 +47,7 @@
                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Scheme Name</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Module Name</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Module Code</th>
+                    <th scope="col" class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                     <th scope="col" class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
@@ -68,7 +69,36 @@
                         <td class="px-6 py-4 whitespace-nowrap font-mono text-gray-600 bg-gray-50 rounded px-2 py-0.5 inline-block my-3">
                             {{ $item->main_module_code ?? $item->module->module_code ?? 'N/A' }}
                         </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            @if ($item->is_disabled)
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    Disabled
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Active
+                                </span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-center space-x-2">
+                            @if ($item->is_disabled)
+                                <button wire:click="toggleDisable({{ $item->id }})"
+                                        class="inline-flex items-center px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded-md shadow transition">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Enable
+                                </button>
+                            @else
+                                <button wire:click="toggleDisable({{ $item->id }})"
+                                        class="inline-flex items-center px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white font-medium text-xs rounded-md shadow transition">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                    </svg>
+                                    Disable
+                                </button>
+                            @endif
+
                             <a href="{{ route('define-workflow1', ['scheme_id' => \Illuminate\Support\Facades\Crypt::encryptString($item->scheme_id), 'module_id' => \Illuminate\Support\Facades\Crypt::encryptString($item->module_id)]) }}" 
                                class="inline-flex items-center px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-medium text-xs rounded-md shadow transition">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,7 +119,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-8 text-center text-gray-500 italic">
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500 italic">
                             No configured workflows found.
                         </td>
                     </tr>

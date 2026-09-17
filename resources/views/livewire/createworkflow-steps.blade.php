@@ -12,15 +12,33 @@
     @if ($originalrolerank)
         <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6 space-y-6">
             <!-- Header Section -->
-            <div class="pb-4 border-b border-gray-100">
-                <h1 class="text-xl font-bold text-indigo-700">Create Workflow Steps</h1>
-                <p class="text-xs text-gray-500 mt-1">Configure step counts and assignment rules for this workflow.</p>
+            <div class="pb-4 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                    <h1 class="text-xl font-bold text-indigo-700">Create & Edit Workflow Steps</h1>
+                    <p class="text-xs text-gray-500 mt-1">Configure step counts and assignment rules for this workflow.</p>
+                </div>
+                @if ($isEdit)
+                    <span class="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                        </svg>
+                        Edit Mode
+                    </span>
+                @elseif ($already)
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        View Mode
+                    </span>
+                @endif
             </div>
 
             <form class="space-y-6" wire:submit.prevent="save">
                 @php
                     $isDisabled = false;
-                    if ($already) {
+                    if ($already && !$isEdit) {
                         $isDisabled = true;
                     }
                     $nameOnLabel = false;
@@ -66,30 +84,17 @@
                                     <!-- Radio Options on Next Line -->
                                     <div class="flex flex-wrap items-center gap-6">
                                         <div>
-                                            <x-form.input :label_placement="'right'" :required_star="$requiredStar" id="assignRule_1_{{ $index }}" label="Select from Existing" name="assignRule{{ $index }}" required type="radio" value="1" wire:model.live="assignRule.{{ $index }}" />
+                                            <x-form.input :disabled="$isDisabled" :label_placement="'right'" :required_star="$requiredStar" id="assignRule_1_{{ $index }}" label="Select from Existing" name="assignRule{{ $index }}" required type="radio" value="1" wire:model.live="assignRule.{{ $index }}" />
                                         </div>
                                         <div>
-                                            <x-form.input :label_placement="'right'" :required_star="$requiredStar" id="assignRule_2_{{ $index }}" label="Create new Role" name="assignRule{{ $index }}" type="radio" value="2" wire:model.live="assignRule.{{ $index }}" />
+                                            <x-form.input :disabled="$isDisabled" :label_placement="'right'" :required_star="$requiredStar" id="assignRule_2_{{ $index }}" label="Create new Role" name="assignRule{{ $index }}" type="radio" value="2" wire:model.live="assignRule.{{ $index }}" />
                                         </div>
                                     </div>
                                 </div>
 
                                 @if ($existingRole[$index])
                                     <div class="grid gap-4 md:grid-cols-2" wire:key="workflow-step-roles-{{ $index }}">
-                                        {{-- <x-form.select class="border rounded px-3 py-2 w-full" label="Role Selection" name="roleSelection{{ $index }}" required wire:model="roleSelection.{{ $index }}">
-                                            <option value="">-- Select --</option>
-                                            @foreach ($roles as $role)
-                                                <option value="{{ $role['id'] }}">
-                                                    {{ $role['name'] }}
-                                                </option>
-                                            @endforeach
-                                        </x-form.select> --}}
-
-                                        <x-form.multiselect :options="$roles" label="Role Selection" name="roleSelection{{ $index }}[]" required wire:model.live="roleSelection.{{ $index }}" />
-                                        {{-- @error("roleSelection.{$index}.role_ids")
-                                            <span class="text-red-500 text-xs block mt-1">{{ $message }}</span>
-                                        @enderror --}}
-
+                                        <x-form.multiselect :disabled="$isDisabled" :options="$roles" label="Role Selection" name="roleSelection{{ $index }}[]" required wire:model.live="roleSelection.{{ $index }}" />
                                     </div>
                                 @elseif ($newRole[$index])
                                     <div class="grid gap-4">
@@ -100,7 +105,7 @@
                                             <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 p-3 max-h-48 overflow-y-auto">
                                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                     @foreach ($permissionsList as $permission)
-                                                        <x-form.input :label_placement="'right'" id="permissionsSelection_{{ $index }}_{{ $permission['id'] }}" label="{{ $permission['name'] }}" name="permissionsSelection{{ $index }}[]" type="checkbox" value="{{ $permission['id'] }}" wire:model.live="permissionsSelection.{{ $index }}.{{ $permission['id'] }}" />
+                                                        <x-form.input :disabled="$isDisabled" :label_placement="'right'" id="permissionsSelection_{{ $index }}_{{ $permission['id'] }}" label="{{ $permission['name'] }}" name="permissionsSelection{{ $index }}[]" type="checkbox" value="{{ $permission['id'] }}" wire:model.live="permissionsSelection.{{ $index }}.{{ $permission['id'] }}" />
                                                     @endforeach
                                                 </div>
                                             </div>
@@ -114,7 +119,7 @@
                                 <!-- Label Input -->
                                 <div class="grid gap-4 md:grid-cols-2">
                                     <div>
-                                        <x-form.input id="labels.{{ $index }}" label="Label Name {{ $index + 1 }}" name="labels.{{ $index }}" placeholder="Label Name {{ $index + 1 }}" required wire:model="labels.{{ $index }}" />
+                                        <x-form.input :disabled="$isDisabled" id="labels.{{ $index }}" label="Label Name {{ $index + 1 }}" name="labels.{{ $index }}" placeholder="Label Name {{ $index + 1 }}" required wire:model="labels.{{ $index }}" />
                                     </div>
                                 </div>
 
@@ -124,17 +129,17 @@
                     </div>
 
                     <!-- Actions / Status -->
-                    <div class="pt-2">
+                    <div class="pt-2 flex items-center gap-3">
                         @if ($isDisabled)
                             <div class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-green-800 bg-green-50 border border-green-200 rounded-lg">
                                 <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                                     <path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd" />
                                 </svg>
-                                Already Done
+                                Already Configured (View Mode)
                             </div>
                         @else
                             <button class="inline-flex items-center justify-center px-5 py-2.5 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-medium text-sm rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2" type="submit">
-                                Submit Workflow
+                                {{ $isEdit ? 'Update Workflow Steps' : 'Submit Workflow' }}
                             </button>
                         @endif
                     </div>

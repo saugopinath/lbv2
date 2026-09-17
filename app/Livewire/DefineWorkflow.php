@@ -16,8 +16,11 @@ class DefineWorkflow extends Component
     public $moduleName;
     public $moduleData;
     public $schemeData;
-    public function mount($schemeData, $moduleData)
+    public bool $isEdit = false;
+
+    public function mount($schemeData, $moduleData, $isEdit = false)
     {
+        $this->isEdit = $isEdit;
         $this->schemeId = $schemeData['scheme_id'];
         $this->moduleId = $moduleData['module_id'];
         $this->moduleName = $moduleData['module_name'];

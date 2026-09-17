@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\On;
+use App\Models\Scheme;
+use App\Models\DynamicWorkflowModule;
 
 class Workflow extends Component
 {
@@ -12,6 +14,7 @@ class Workflow extends Component
     // public $schemeName = null;
     public $moduleData = false;
     public $moduleId;
+    public bool $isEdit = false;
 
     public function mount()
     {
@@ -19,6 +22,7 @@ class Workflow extends Component
         $moduleIdParam = request()->query('module_id');
 
         if ($schemeIdParam && $moduleIdParam) {
+            $this->isEdit = true;
             $schemeId = null;
             $moduleId = null;
 
@@ -35,8 +39,8 @@ class Workflow extends Component
             }
 
             if ($schemeId && $moduleId) {
-                $scheme = \App\Models\Scheme::find($schemeId);
-                $module = \App\Models\DynamicWorkflowModule::find($moduleId);
+                $scheme = Scheme::select('id', 'name')->find($schemeId);
+                $module = DynamicWorkflowModule::select('id', 'module_name', 'module_code')->find($moduleId);
 
                 if ($scheme && $module) {
                     $this->schemeId = $scheme->id;

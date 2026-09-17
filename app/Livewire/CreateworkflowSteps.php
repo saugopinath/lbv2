@@ -13,9 +13,11 @@ use Illuminate\Support\Facades\Auth;
 class CreateworkflowSteps extends Component
 {
     public $schemeId;
+    public $schemeModuleId;
     public $noofSteps;
     public $labels = [];
     public bool $already = false;
+    public bool $isEdit = false;
     public bool $originalrolerank = false;
     public $moduleId;
     public $moduleCode;
@@ -26,6 +28,11 @@ class CreateworkflowSteps extends Component
     public $roleSelection = [];
     public $permissionsList = [];
     public $permissionsSelection = [];
+
+    public function enableEditing()
+    {
+        $this->isEdit = true;
+    }
 
     public function rendering()
     {
@@ -42,26 +49,27 @@ class CreateworkflowSteps extends Component
         }
     }
 
-    public function mount($schemeData, $moduleData)
+    public function mount($schemeData, $moduleData, $isEdit = false)
     {
+        $this->isEdit = $isEdit;
         $this->schemeId = $schemeData['scheme_id'];
         $this->moduleId = $moduleData['module_id'];
         $this->moduleCode = $moduleData['module_code'];
 
-        // FIX: Load existing steps from DynamicWorkflowLabel using scheme_module ID
-        $schemeModule = DynamicWorkflowSchemeModule::where('scheme_id', $this->schemeId)
+        $this->schemeModuleId = DynamicWorkflowSchemeModule::where('scheme_id', $this->schemeId)
             ->where('module_id', $this->moduleId)
-            ->first();
+            ->value('id');
 
-        $steps = $schemeModule
-            ? DynamicWorkflowLabel::where('scheme_id', $this->schemeId)
-                ->where('module_id', $schemeModule->id)
-                ->orderBy('id')
-                ->get()
+        $steps = $this->schemeModuleId
+            ? DynamicWorkflowLabel::select('id', 'label_name', 'permissions')
+            ->where('scheme_id', $this->schemeId)
+            ->where('module_id', $this->schemeModuleId)
+            ->orderBy('id')
+            ->get()
             : collect([]);
 
         // FIX: Enforce Original Role Rank Hierarchy for the UI alert by querying whereNotNull('rank')
-        $roles = Role::whereNotNull('rank')->orderBy('rank')->pluck('name', 'id')->toArray();
+        $roles = Role::select('id', 'name', 'rank')->whereNotNull('rank')->orderBy('rank')->pluck('name', 'id')->toArray();
         $permissions = Permission::select('name', 'id')->orderBy('name')->get();
 
         if (!empty($roles)) {
@@ -77,14 +85,20 @@ class CreateworkflowSteps extends Component
             $this->labels = [];
             $this->already = true;
 
+            $stepIds = $steps->pluck('id')->toArray();
+            $allRoleMappings = workflowstepRolemapping::select('workflow_step_id', 'role_id')
+                ->whereIn('workflow_step_id', $stepIds)
+                ->where('scheme_id', $this->schemeId)
+                ->where('module_id', $this->schemeModuleId)
+                ->get()
+                ->groupBy('workflow_step_id');
+
             foreach ($steps as $index => $step) {
                 $this->labels[$index] = $step->label_name;
 
-                $roleMappings = workflowstepRolemapping::where('workflow_step_id', $step->id)
-                    ->where('scheme_id', $this->schemeId)
-                    ->where('module_id', $schemeModule->id)
-                    ->pluck('role_id')
-                    ->toArray();
+                $roleMappings = isset($allRoleMappings[$step->id])
+                    ? $allRoleMappings[$step->id]->pluck('role_id')->toArray()
+                    : [];
 
                 if (!empty($roleMappings)) {
                     $this->assignRule[$index] = "1";
@@ -171,15 +185,32 @@ class CreateworkflowSteps extends Component
             $this->labels = [];
             return;
         }
-        $existing = $this->labels;
+        $existingLabels = $this->labels;
+        $existingRoleSel = $this->roleSelection;
+        $existingPermSel = $this->permissionsSelection;
+        $existingAssignRule = $this->assignRule;
+        $existingExistingRole = $this->existingRole;
+        $existingNewRole = $this->newRole;
+
         $this->labels = [];
         $this->roleSelection = [];
         $this->permissionsSelection = [];
+        $this->assignRule = [];
+        $this->existingRole = [];
+        $this->newRole = [];
+
         for ($i = 0; $i < $value; $i++) {
-            $this->labels[$i] = $existing[$i] ?? '';
-            $this->assignRule[$i] = "1";
-            $this->existingRole[$i] = true;
-            $this->newRole[$i] = false;
+            $this->labels[$i] = $existingLabels[$i] ?? '';
+            $this->assignRule[$i] = $existingAssignRule[$i] ?? "1";
+            $this->existingRole[$i] = $existingExistingRole[$i] ?? true;
+            $this->newRole[$i] = $existingNewRole[$i] ?? false;
+
+            if (isset($existingRoleSel[$i])) {
+                $this->roleSelection[$i] = $existingRoleSel[$i];
+            }
+            if (isset($existingPermSel[$i])) {
+                $this->permissionsSelection[$i] = $existingPermSel[$i];
+            }
         }
     }
     public function updatedassignRule($v)
@@ -360,8 +391,8 @@ class CreateworkflowSteps extends Component
                     $selectedPermissionIds = array_keys(array_filter($permissionsSelection[$i]));
 
                     if (!empty($selectedPermissionIds)) {
-                        // FIX: Prepend scheme and module code to make role names unique across workflows
-                        $uniqueRoleName = strtoupper($moduleCode) . '_' . $schemeId . '_' . $this->labels[$i];
+                        // FIX: Postpend scheme and module code to make role names unique across workflows while keeping label search-friendly
+                        $uniqueRoleName = ucfirst($this->labels[$i]) . '_' . strtoupper($moduleCode) . '_' . $schemeId;
                         $crRole = Role::firstOrCreate(
                             [
                                 'name'       => $uniqueRoleName,
@@ -372,7 +403,7 @@ class CreateworkflowSteps extends Component
                             ]
                         );
 
-                        $permissions = Permission::whereIn('id', $selectedPermissionIds)->get();
+                        $permissions = Permission::select('id', 'name')->whereIn('id', $selectedPermissionIds)->get();
 
                         // Sync revokes if updating
                         $currentPermissions = $crRole->permissions->pluck('id')->toArray();
@@ -400,9 +431,10 @@ class CreateworkflowSteps extends Component
                 // Save Workflow Step Role Mappings for whichever mode was used
                 if (!empty($assignedRoleIds)) {
                     $mappingData = [];
+                    $rolesById = Role::whereIn('id', $assignedRoleIds)->get()->keyBy('id');
                     foreach ($assignedRoleIds as $roleId) {
                         // FEATURE: Give the assigned role the module access permission
-                        $role = Role::find($roleId);
+                        $role = $rolesById->get($roleId);
                         if ($role && !$role->hasPermissionTo($moduleAccessPerm)) {
                             $role->givePermissionTo($moduleAccessPerm);
                         }
@@ -428,9 +460,10 @@ class CreateworkflowSteps extends Component
             DB::commit();
 
             $this->already = true;
+            $this->isEdit = true;
             $this->dispatch('toastr', [
                 'type'    => 'success',
-                'message' => 'Workflow steps created successfully!',
+                'message' => 'Workflow steps saved successfully!',
             ]);
         } catch (\Exception $e) {
             DB::rollBack();

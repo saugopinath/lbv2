@@ -16,6 +16,11 @@ class DynamicWorkflowSchemeModule extends Model
         'module_id',
         'main_module_code',
         'step_count',
+        'is_disabled',
+    ];
+
+    protected $casts = [
+        'is_disabled' => 'boolean',
     ];
 
     public function scheme()

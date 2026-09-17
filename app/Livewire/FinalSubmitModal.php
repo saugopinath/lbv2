@@ -93,21 +93,21 @@ class FinalSubmitModal extends Component
             }
 
             $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->value('beneficiary_id');
-            $AcceptRejectInfo = new AcceptRejectInfo();
-            $AcceptRejectInfo->application_id = $this->applicationId;
-            $AcceptRejectInfo->beneficiary_id = $beneficiary_id;
-            $AcceptRejectInfo->ip_address = request()->ip();
-            $AcceptRejectInfo->scheme_id = $this->schemeId;
-            $AcceptRejectInfo->user_id = Auth::id();
-            $AcceptRejectInfo->browser = request()->header('User-Agent');
-            $AcceptRejectInfo->model_name = null;
-            $AcceptRejectInfo->op_type = Codemaster::getIdByCode(2101);
-            $AcceptRejectInfo->revert_reason_cause_id = null;
-            $AcceptRejectInfo->revert_reason_remarks = null;
-            $AcceptRejectInfo->parent_id = AcceptRejectInfo::where('application_id', $this->applicationId)
-                ->latest('id')
-                ->value('id') ?? null;
-            $AcceptRejectInfo->save();
+            AcceptRejectInfo::create([
+                'application_id'          => $this->applicationId,
+                'beneficiary_id'          => $beneficiary_id,
+                'ip_address'              => request()->ip(),
+                'scheme_id'               => $this->schemeId,
+                'user_id'                 => Auth::id(),
+                'browser'                 => request()->header('User-Agent'),
+                'model_name'              => null,
+                'op_type'                 => Codemaster::getIdByCode(2101),
+                'revert_reason_cause_id'  => null,
+                'revert_reason_remarks'   => null,
+                'parent_id'               => AcceptRejectInfo::where('application_id', $this->applicationId)
+                    ->latest('id')
+                    ->value('id'),
+            ]);
             DB::commit();
             // $this->show = false;
             session()->flash('success', "Application ID: " . $this->applicationId . " Submitted successfully");

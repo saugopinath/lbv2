@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\DupcheckschemeconfigSetting;
 use App\Models\Scheme;
+use App\Models\DynamicWorkflowSchemeModule;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -12,12 +13,16 @@ class DupCheckSchemeConfigSettings extends Component
 {
     public $schemeId;
     public $moduleId;
+    public $schemeModuleId;
+    public bool $isEdit = false;
+    public bool $already = false;
     public $dupcheckOptions = [];
     public $schemeOptions = [];
     public $config = [];
 
-    public function mount($schemeId, $moduleId)
+    public function mount($schemeId, $moduleId, $isEdit = false)
     {
+        $this->isEdit = $isEdit;
         $this->schemeId = $schemeId;
         $this->moduleId = $moduleId;
         $this->dupcheckOptions = [
@@ -27,7 +32,8 @@ class DupCheckSchemeConfigSettings extends Component
             'CS' => 'Caste Certificate Number',
         ];
 
-        $this->schemeOptions = Scheme::where('id', '!=', $schemeId)
+        $this->schemeOptions = Scheme::select('id', 'name')
+            ->where('id', '!=', $schemeId)
             ->pluck('name', 'id')
             ->toArray();
         foreach ($this->dupcheckOptions as $key => $label) {
@@ -38,26 +44,27 @@ class DupCheckSchemeConfigSettings extends Component
                 'schemes'  => []
             ];
         }
-        $schemeModule = \App\Models\DynamicWorkflowSchemeModule::where('scheme_id', $this->schemeId)
+        $this->schemeModuleId = DynamicWorkflowSchemeModule::where('scheme_id', $this->schemeId)
             ->where('module_id', $this->moduleId)
-            ->first();
+            ->value('id');
 
-        $existingSettings = DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
-            ->where(function($q) use ($schemeModule) {
-                $q->where('module_id', $this->moduleId);
-                if ($schemeModule) {
-                    $q->orWhere('module_id', $schemeModule->id);
+        if ($this->schemeModuleId) {
+            $existingSettings = DupcheckschemeconfigSetting::select('check_with', 'is_same', 'is_cross', 'scheme_lists')
+                ->where('scheme_id', $this->schemeId)
+                ->where('module_id', $this->schemeModuleId)
+                ->get();
+            if ($existingSettings->isNotEmpty()) {
+                $this->already = true;
+            }
+            foreach ($existingSettings as $setting) {
+                if (isset($this->config[$setting->check_with])) {
+                    $this->config[$setting->check_with] = [
+                        'selected' => true,
+                        'issame'  => $setting->is_same ? 'yes' : 'no',
+                        'iscross'  => $setting->is_cross ? 'yes' : 'no',
+                        'schemes'  => $setting->scheme_lists ?? []
+                    ];
                 }
-            })
-            ->get();
-        foreach ($existingSettings as $setting) {
-            if (isset($this->config[$setting->check_with])) {
-                $this->config[$setting->check_with] = [
-                    'selected' => true,
-                    'issame'  => $setting->is_same ? 'yes' : 'no',
-                    'iscross'  => $setting->is_cross ? 'yes' : 'no',
-                    'schemes'  => $setting->scheme_lists ?? []
-                ];
             }
         }
     }
@@ -79,20 +86,35 @@ class DupCheckSchemeConfigSettings extends Component
 
         DB::beginTransaction();
         try {
-            DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
-                ->where('module_id', $this->moduleId)
-                ->delete();
+            if (!$this->schemeModuleId) {
+                $this->schemeModuleId = DynamicWorkflowSchemeModule::where('scheme_id', $this->schemeId)
+                    ->where('module_id', $this->moduleId)
+                    ->value('id');
+            }
 
-            foreach ($this->config as $optionName => $data) {
-                if ($data['selected']) {
-                    $setting = new DupcheckschemeconfigSetting();
-                    $setting->scheme_id = $this->schemeId;
-                    $setting->module_id = $this->moduleId;
-                    $setting->check_with = $optionName;
-                    $setting->is_same = $data['issame'] === 'yes' ? true : false;
-                    $setting->is_cross = $data['iscross'] === 'yes' ? true : false;
-                    $setting->scheme_lists = ($data['iscross'] === 'yes') ? $data['schemes'] : null;
-                    $setting->save();
+            if ($this->schemeModuleId) {
+                DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
+                    ->where('module_id', $this->schemeModuleId)
+                    ->delete();
+
+                $insertData = [];
+                foreach ($this->config as $optionName => $item) {
+                    if ($item['selected']) {
+                        $insertData[] = [
+                            'scheme_id'    => $this->schemeId,
+                            'module_id'    => $this->schemeModuleId,
+                            'check_with'   => $optionName,
+                            'is_same'      => $item['issame'] === 'yes',
+                            'is_cross'     => $item['iscross'] === 'yes',
+                            'scheme_lists' => ($item['iscross'] === 'yes') ? json_encode($item['schemes']) : null,
+                            'created_at'   => now(),
+                            'updated_at'   => now(),
+                        ];
+                    }
+                }
+
+                if (!empty($insertData)) {
+                    DupcheckschemeconfigSetting::insert($insertData);
                 }
             }
 
