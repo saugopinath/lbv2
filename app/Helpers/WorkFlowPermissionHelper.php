@@ -442,7 +442,7 @@ class WorkFlowPermissionHelper
 
         $permission = $isBulk ? "Bulk Actions {$prefix} {$suffix}" : "{$prefix} {$suffix}";
 
-        return self::hasPermission($permission, $schemeId);
+        return self::hasPermission($permission, $schemeId) || self::hasPermission("{$prefix} {$suffix}", $schemeId);
     }
 
     public static function canVerifyCastApplication($schemeId = null): bool

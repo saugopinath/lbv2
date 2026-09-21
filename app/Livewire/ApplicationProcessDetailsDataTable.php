@@ -20,6 +20,7 @@ use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Services\WorkflowService;
+use App\Models\DynamicWorkflowSchemeModule;
 
 class ApplicationProcessDetailsDataTable extends DataTableComponent
 {
@@ -35,14 +36,26 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
     public array $filter_condition = [];
     public $sameLevelRoleId, $nextLevelRoleId;
-    public $isFinal;
-    public function mount($schemeId = null, WorkflowService $workflowService): void
+    public $moduleCode;
+    public $schemeModuleId;
+
+    public function mount($schemeId = null, ?WorkflowService $workflowService = null, $moduleCode = null): void
     {
+        $workflowService = $workflowService ?? app(WorkflowService::class);
         $this->schemeId = $schemeId;
+        $this->moduleCode = $moduleCode;
         $this->isFinal = 1;
-        $levelRoles = $workflowService->getLevelRoles($schemeId);
+
+        if ($this->schemeId && $this->moduleCode) {
+            $this->schemeModuleId = DynamicWorkflowSchemeModule::where('scheme_id', $this->schemeId)
+                ->where('main_module_code', $this->moduleCode)
+                ->where('is_disabled', false)
+                ->value('id');
+        }
+
+        $levelRoles = $workflowService->getLevelRoles($schemeId, null, $this->schemeModuleId, $this->moduleCode);
         if ($levelRoles) {
-            $this->sameLevelRoleId = $levelRoles->same_level_role_id;
+            $this->sameLevelRoleId = $levelRoles->rank ?? $levelRoles->same_level_role_id;
             $this->nextLevelRoleId = $levelRoles->next_level_role_id;
         }
 

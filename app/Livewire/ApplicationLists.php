@@ -8,6 +8,13 @@ class ApplicationLists extends Component
 {
     public bool $schemeData = false;
     public $schemeId, $schemeName = null;
+    public $moduleCode = null;
+
+    public function mount($moduleCode = null)
+    {
+        $this->moduleCode = $moduleCode;
+    }
+
     #[On('selectedScheme')]
     public function updateschemeData($schemeData)
     {

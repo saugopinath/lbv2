@@ -15,7 +15,7 @@
             <livewire:filter-lgd-master :button_show="1" />
         </div>
         <div class="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4">
-            <livewire:application-process-details-data-table :scheme-id="$schemeId"
+            <livewire:application-process-details-data-table :scheme-id="$schemeId" :module-code="$moduleCode"
                 :wire:key="'application-lists-'.$schemeId" />
             <livewire:revert-reject-modal />
         </div>

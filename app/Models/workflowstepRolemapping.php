@@ -14,24 +14,53 @@ class WorkflowsteproleMapping extends Model implements Auditable
     protected $casts = [
         'is_final_step' => 'boolean',
     ];
-    public static function getLevelRoleIdsByRole($schemeId, $roleId, $rank = null)
+    public static function getLevelRoleIdsByRole($schemeId, $roleId, $rank = null, $schemeModuleId = null)
     {
         $query = self::query();
         if ($rank !== null) {
-            $query->where('workflow_step_id', $rank);
+            $query->where(function ($q) use ($rank) {
+                $q->where('workflow_step_id', $rank)->orWhere('rank', $rank);
+            });
         } else {
             $query->where('role_id', $roleId);
         }
-        return $query->where('scheme_id', $schemeId)
-            ->with('workflowstep')
-            ->first(['same_level_role_id', 'next_level_role_id', 'is_first_step', 'is_final_step', 'workflow_step_id']);
+        $query->where('scheme_id', $schemeId);
+
+        if ($schemeModuleId !== null) {
+            $query->where('module_id', $schemeModuleId);
+        }
+
+        $result = (clone $query)->with('workflowstep')
+            ->first(['rank', 'same_level_role_id', 'next_level_role_id', 'is_first_step', 'is_final_step', 'workflow_step_id']);
+
+        if (!$result && $schemeModuleId !== null) {
+            $result = self::query()
+                ->where(function ($q) use ($rank, $roleId) {
+                    if ($rank !== null) {
+                        $q->where('workflow_step_id', $rank)->orWhere('rank', $rank);
+                    } else {
+                        $q->where('role_id', $roleId);
+                    }
+                })
+                ->where('scheme_id', $schemeId)
+                ->with('workflowstep')
+                ->first(['rank', 'same_level_role_id', 'next_level_role_id', 'is_first_step', 'is_final_step', 'workflow_step_id']);
+        }
+
+        return $result;
     }
 
-    public static function getMinMaxWorkflowStep(int $schemeId): array
+    public static function getMinMaxWorkflowStep(int $schemeId, $schemeModuleId = null): array
     {
+        $query = self::where('scheme_id', $schemeId);
+
+        if ($schemeModuleId !== null) {
+            $query->where('module_id', $schemeModuleId);
+        }
+
         return [
-            'min' => self::where('scheme_id', $schemeId)->where('module_id', null)->min('workflow_step_id'),
-            'max' => self::where('scheme_id', $schemeId)->where('module_id', null)->max('workflow_step_id'),
+            'min' => (clone $query)->min('workflow_step_id'),
+            'max' => (clone $query)->max('workflow_step_id'),
         ];
     }
     public function transformAudit(array $data): array

@@ -71,7 +71,7 @@ class BulkActionModal extends Component
       
         $levelRoles = $workflowService->getLevelRoles($this->schemeId);
         if ($levelRoles) {
-            $this->sameLevelRoleId = $levelRoles->same_level_role_id;
+            $this->sameLevelRoleId = $levelRoles->rank ?? $levelRoles->same_level_role_id;
             $this->nextLevelRoleId = $levelRoles->next_level_role_id;
         }
 
