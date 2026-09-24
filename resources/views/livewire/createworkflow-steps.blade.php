@@ -20,15 +20,15 @@
                 @if ($isEdit)
                     <span class="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full flex items-center gap-1">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                            <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
                         </svg>
                         Edit Mode
                     </span>
                 @elseif ($already)
                     <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full flex items-center gap-1">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                            <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
                         </svg>
                         View Mode
                     </span>
@@ -123,6 +123,39 @@
                                     </div>
                                 </div>
 
+                                <!-- Optional Specific User Selection Checkbox & Trigger Button -->
+                                <div class="pt-2 space-y-3">
+                                    <div class="flex items-center gap-2">
+                                        <input type="checkbox"
+                                               id="assignSpecificUsers_{{ $index }}"
+                                               wire:model.live="assignSpecificUsers.{{ $index }}"
+                                               @if($isDisabled) disabled @endif
+                                               class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                        <label for="assignSpecificUsers_{{ $index }}" class="text-sm font-medium text-gray-700 cursor-pointer">
+                                            Assign to Specific Users (Optional)
+                                        </label>
+                                    </div>
+
+                                    @if(!empty($assignSpecificUsers[$index]))
+                                        <div class="flex items-center gap-3 pl-6">
+                                            <button type="button"
+                                                    wire:click="openUserModal({{ $index }})"
+                                                    @if($isDisabled) disabled @endif
+                                                    class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                </svg>
+                                                {{ ($assignRule[$index] ?? '1') == '2' ? 'Select Users to Assign Role' : 'Select the Users to give access to' }}
+                                            </button>
+                                            @php
+                                                $selectedCount = count($selectedUserIdsByStep[$index] ?? []);
+                                            @endphp
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $selectedCount > 0 ? 'bg-indigo-100 text-indigo-800' : 'bg-gray-100 text-gray-600' }}">
+                                                {{ $selectedCount }} {{ Str::plural('user', $selectedCount) }} selected
+                                            </span>
+                                        </div>
+                                    @endif
+                                </div>
 
                             </div>
                         @endforeach
@@ -155,4 +188,225 @@
             <span class="font-medium">Please set the Original Role Rank Hierarchy first.</span>
         </div>
     @endif
+
+    <!-- User Selection Modal -->
+    @if ($showUserModal && $activeStepForUserModal !== null)
+        <div class="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4 sm:p-6" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <!-- Modal Backdrop with Blur -->
+            <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" wire:click="closeUserModal"></div>
+
+            <!-- Modal Box with Fixed Dimensions & Project Theme Styling -->
+            <div class="relative bg-white rounded-xl shadow-2xl w-[900px] max-w-[95vw] h-[640px] max-h-[90vh] flex flex-col overflow-hidden border border-gray-200 z-10">
+                <!-- Header -->
+                <div class="flex-none bg-indigo-700 text-white px-6 py-4 flex items-center justify-between border-b border-indigo-800">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <h3 class="text-base font-bold">Select Users for Step {{ $activeStepForUserModal + 1 }} Configuration</h3>
+                    </div>
+                    <button type="button" wire:click="closeUserModal" class="text-indigo-200 hover:text-white transition-colors focus:outline-none p-1 rounded-lg hover:bg-indigo-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Body & Filters -->
+                <div class="flex-1 flex flex-col min-h-0 p-5 space-y-4 overflow-hidden bg-white">
+                    <!-- Search and Filters Bar -->
+                    <div class="flex-none grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                        <!-- Search Input -->
+                        <div class="sm:col-span-5">
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Search User</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                                <input type="text"
+                                       wire:model.live="modalSearch"
+                                       placeholder="Search by Name, Email, Mobile..."
+                                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-xs focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                        </div>
+
+                        <!-- Office Type Filter -->
+                        <div class="sm:col-span-4">
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Office Type Filter</label>
+                            <select wire:model.live="modalOfficeType" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">All Office Types</option>
+                                @foreach($officeTypesList as $ot)
+                                    <option value="{{ $ot['code'] }}">{{ $ot['name'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Page Limit -->
+                        <div class="sm:col-span-3">
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Page Limit</label>
+                            <select wire:model.live="modalPageLimit" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="5">5 per page</option>
+                                <option value="10">10 per page</option>
+                                <option value="25">25 per page</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Mass Selection Toolbar -->
+                    <div class="flex-none flex flex-wrap items-center justify-between gap-2 p-3 bg-indigo-50/70 rounded-xl border border-indigo-100">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-indigo-900">
+                                Selected Users: <span class="text-indigo-700 font-extrabold">{{ count($selectedUserIdsByStep[$activeStepForUserModal] ?? []) }}</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            @php
+                                $modalUsersList = $this->modalUsers;
+                                $pageUserIds = ($modalUsersList !== 'NO_ROLE_SELECTED' && $modalUsersList) ? $modalUsersList->pluck('id')->map(fn($id) => (string)$id)->toArray() : [];
+                            @endphp
+
+                            <!-- Select All Visible on Page Button -->
+                            <button type="button"
+                                    wire:click="selectVisibleOnPage({{ json_encode($pageUserIds) }})"
+                                    @if(empty($pageUserIds)) disabled @endif
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-gray-100 disabled:opacity-50 text-gray-700 border border-gray-300 text-xs font-semibold rounded-lg shadow-sm transition-colors">
+                                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Select All Visible on Page
+                            </button>
+
+                            <!-- Select All Filtered Records Button -->
+                            <button type="button"
+                                    wire:click="selectAllFilteredUsers"
+                                    @if($modalUsersList === 'NO_ROLE_SELECTED') disabled @endif
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors">
+                                <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                                Select All Filtered Records
+                            </button>
+
+                            <!-- Clear Selection Button -->
+                            <button type="button"
+                                    wire:click="clearStepUserSelection"
+                                    class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-semibold rounded-lg transition-colors">
+                                Clear Selection
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Modal Users Content Area -->
+                    @php
+                        $modalUsersList = $this->modalUsers;
+                    @endphp
+
+                    @if ($modalUsersList === 'NO_ROLE_SELECTED')
+                        <!-- Mode 1: No Role Selected Warning -->
+                        <div class="h-[320px] min-h-[320px] max-h-[320px] flex flex-col items-center justify-center p-8 text-center bg-amber-50/70 rounded-xl border border-amber-200 text-amber-800 space-y-2">
+                            <svg class="w-12 h-12 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                            <h4 class="font-bold text-base">Select Role First</h4>
+                            <p class="text-xs text-amber-700 max-w-md">
+                                In "Select from Existing" mode, users are filtered based on the role(s) selected for this step. Please select at least one role in the step configuration above.
+                            </p>
+                        </div>
+                    @else
+                        @php
+                            $pageUserIds = $modalUsersList->pluck('id')->map(fn($id) => (string)$id)->toArray();
+                            $currentSelectedForStep = array_map('strval', $selectedUserIdsByStep[$activeStepForUserModal] ?? []);
+                            $isAllVisibleSelected = count($pageUserIds) > 0 && count(array_diff($pageUserIds, $currentSelectedForStep)) === 0;
+                        @endphp
+
+                        <!-- Users Scrollable Table -->
+                        <div class="h-[320px] min-h-[320px] max-h-[320px] overflow-y-auto rounded-xl border border-gray-200">
+                            <table class="min-w-full divide-y divide-gray-200 text-xs">
+                                <thead class="bg-gray-50 sticky top-0 z-10">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3 text-left font-bold text-gray-700 w-12 bg-gray-50">
+                                            <input type="checkbox"
+                                                   wire:click="toggleSelectAllVisible({{ json_encode($pageUserIds) }})"
+                                                   {{ $isAllVisibleSelected ? 'checked' : '' }}
+                                                   class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                        </th>
+                                        <th scope="col" class="px-4 py-3 text-left font-bold text-gray-700 bg-gray-50">Name</th>
+                                        <th scope="col" class="px-4 py-3 text-left font-bold text-gray-700 bg-gray-50">Role</th>
+                                        <th scope="col" class="px-4 py-3 text-left font-bold text-gray-700 bg-gray-50">Office Type</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 bg-white">
+                                    @forelse ($modalUsersList as $u)
+                                        @php
+                                            $uIdStr = (string)$u->id;
+                                            $isSelected = in_array($uIdStr, $currentSelectedForStep, true);
+
+                                            $rolesList = $u->mappedRoles->pluck('name')->merge(
+                                                $u->RoleSchemeOfficeMappings->pluck('Role.name')->filter()
+                                            )->merge(
+                                                $u->roles->pluck('name')
+                                            )->filter()->unique()->implode(', ');
+
+                                            if (empty($rolesList)) {
+                                                $rolesList = 'N/A';
+                                            }
+
+                                            $officeTypeName = $u->RoleSchemeOfficeMappings->pluck('office.officeType.name')->filter()->unique()->implode(', ');
+                                            if (empty($officeTypeName)) {
+                                                $officeTypeName = 'N/A';
+                                            }
+                                        @endphp
+                                        <tr class="{{ $isSelected ? 'bg-indigo-50/40' : 'hover:bg-gray-50' }}">
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <input type="checkbox"
+                                                       wire:click="toggleSelectUser('{{ $u->id }}')"
+                                                       {{ $isSelected ? 'checked' : '' }}
+                                                       class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap font-medium text-gray-900">
+                                                <div>{{ $u->name }}</div>
+                                                <div class="text-gray-400 text-[11px]">{{ $u->email }}</div>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-gray-600">
+                                                {{ $rolesList }}
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-gray-600">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700">
+                                                    {{ $officeTypeName }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="px-4 py-6 text-center text-gray-500 text-xs">
+                                                No active users found matching your filters.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination Links -->
+                        <div class="flex-none pt-1">
+                            {{ $modalUsersList->links() }}
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Footer -->
+                <div class="flex-none bg-gray-50 px-6 py-3 flex items-center justify-end gap-3 border-t border-gray-100">
+                    <button type="button"
+                            wire:click="closeUserModal"
+                            class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs rounded-lg shadow-sm transition-colors focus:outline-none">
+                        Done / Apply Selection
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
+
+

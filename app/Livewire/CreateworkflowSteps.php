@@ -29,6 +29,16 @@ class CreateworkflowSteps extends Component
     public $permissionsList = [];
     public $permissionsSelection = [];
 
+    // Optional Specific Users Assignment properties
+    public $assignSpecificUsers = [];
+    public $selectedUserIdsByStep = [];
+    public bool $showUserModal = false;
+    public ?int $activeStepForUserModal = null;
+    public string $modalSearch = '';
+    public $modalOfficeType = null;
+    public int $modalPageLimit = 5;
+    public $officeTypesList = [];
+
     public function enableEditing()
     {
         $this->isEdit = true;
@@ -39,12 +49,18 @@ class CreateworkflowSteps extends Component
         for ($i = 0; $i < $this->noofSteps; $i++) {
             if (!isset($this->roleSelection[$i]) || !is_array($this->roleSelection[$i])) {
                 $this->roleSelection[$i] = [];
-            } elseif (!isset($this->roleSelection[$i])) {
-                $this->roleSelection[$i] = [];
             }
 
             if (!isset($this->permissionsSelection[$i])) {
                 $this->permissionsSelection[$i] = [];
+            }
+
+            if (!isset($this->assignSpecificUsers[$i])) {
+                $this->assignSpecificUsers[$i] = false;
+            }
+
+            if (!isset($this->selectedUserIdsByStep[$i]) || !is_array($this->selectedUserIdsByStep[$i])) {
+                $this->selectedUserIdsByStep[$i] = [];
             }
         }
     }
@@ -61,7 +77,7 @@ class CreateworkflowSteps extends Component
             ->value('id');
 
         $steps = $this->schemeModuleId
-            ? DynamicWorkflowLabel::select('id', 'label_name', 'permissions')
+            ? DynamicWorkflowLabel::select('id', 'label_name', 'permissions', 'assign_specific_users', 'user_ids')
             ->where('scheme_id', $this->schemeId)
             ->where('module_id', $this->schemeModuleId)
             ->orderBy('id')
@@ -80,6 +96,11 @@ class CreateworkflowSteps extends Component
             $this->permissionsList = $permissions;
         }
 
+        $this->officeTypesList = Codemaster::select('code', 'name')
+            ->whereIn('code', [151, 152, 153, 154])
+            ->get()
+            ->toArray();
+
         if ($steps->isNotEmpty()) {
             $this->noofSteps = $steps->count();
             $this->labels = [];
@@ -95,6 +116,8 @@ class CreateworkflowSteps extends Component
 
             foreach ($steps as $index => $step) {
                 $this->labels[$index] = $step->label_name;
+                $this->assignSpecificUsers[$index] = (bool) $step->assign_specific_users;
+                $this->selectedUserIdsByStep[$index] = is_array($step->user_ids) ? array_map('strval', $step->user_ids) : [];
 
                 $roleMappings = isset($allRoleMappings[$step->id])
                     ? $allRoleMappings[$step->id]->pluck('role_id')->toArray()
@@ -191,6 +214,8 @@ class CreateworkflowSteps extends Component
         $existingAssignRule = $this->assignRule;
         $existingExistingRole = $this->existingRole;
         $existingNewRole = $this->newRole;
+        $existingAssignSpecificUsers = $this->assignSpecificUsers;
+        $existingSelectedUserIds = $this->selectedUserIdsByStep;
 
         $this->labels = [];
         $this->roleSelection = [];
@@ -198,12 +223,16 @@ class CreateworkflowSteps extends Component
         $this->assignRule = [];
         $this->existingRole = [];
         $this->newRole = [];
+        $this->assignSpecificUsers = [];
+        $this->selectedUserIdsByStep = [];
 
         for ($i = 0; $i < $value; $i++) {
             $this->labels[$i] = $existingLabels[$i] ?? '';
             $this->assignRule[$i] = $existingAssignRule[$i] ?? "1";
             $this->existingRole[$i] = $existingExistingRole[$i] ?? true;
             $this->newRole[$i] = $existingNewRole[$i] ?? false;
+            $this->assignSpecificUsers[$i] = $existingAssignSpecificUsers[$i] ?? false;
+            $this->selectedUserIdsByStep[$i] = $existingSelectedUserIds[$i] ?? [];
 
             if (isset($existingRoleSel[$i])) {
                 $this->roleSelection[$i] = $existingRoleSel[$i];
@@ -229,6 +258,201 @@ class CreateworkflowSteps extends Component
             }
         }
     }
+
+    // Modal Action Methods
+    public function openUserModal($index)
+    {
+        $this->activeStepForUserModal = (int) $index;
+        if (!isset($this->selectedUserIdsByStep[$index]) || !is_array($this->selectedUserIdsByStep[$index])) {
+            $this->selectedUserIdsByStep[$index] = [];
+        }
+        $this->modalSearch = '';
+        $this->modalOfficeType = null;
+        $this->resetPage('modalPage');
+        $this->showUserModal = true;
+    }
+
+    public function closeUserModal()
+    {
+        $this->showUserModal = false;
+        $this->activeStepForUserModal = null;
+    }
+
+    public function updatedModalSearch()
+    {
+        $this->resetPage('modalPage');
+    }
+
+    public function updatedModalOfficeType()
+    {
+        $this->resetPage('modalPage');
+    }
+
+    public function updatedModalPageLimit()
+    {
+        $this->resetPage('modalPage');
+    }
+
+    public function toggleSelectUser($userId)
+    {
+        $stepIndex = $this->activeStepForUserModal;
+        if ($stepIndex === null) return;
+
+        $userId = (string) $userId;
+        if (!isset($this->selectedUserIdsByStep[$stepIndex]) || !is_array($this->selectedUserIdsByStep[$stepIndex])) {
+            $this->selectedUserIdsByStep[$stepIndex] = [];
+        }
+
+        if (in_array($userId, $this->selectedUserIdsByStep[$stepIndex], true)) {
+            $this->selectedUserIdsByStep[$stepIndex] = array_values(array_diff($this->selectedUserIdsByStep[$stepIndex], [$userId]));
+        } else {
+            $this->selectedUserIdsByStep[$stepIndex][] = $userId;
+        }
+    }
+
+    public function toggleSelectAllVisible(array $visibleUserIds)
+    {
+        $stepIndex = $this->activeStepForUserModal;
+        if ($stepIndex === null) return;
+
+        $visibleUserIds = array_map('strval', $visibleUserIds);
+        if (!isset($this->selectedUserIdsByStep[$stepIndex]) || !is_array($this->selectedUserIdsByStep[$stepIndex])) {
+            $this->selectedUserIdsByStep[$stepIndex] = [];
+        }
+
+        $allSelected = true;
+        foreach ($visibleUserIds as $uId) {
+            if (!in_array($uId, $this->selectedUserIdsByStep[$stepIndex], true)) {
+                $allSelected = false;
+                break;
+            }
+        }
+
+        if ($allSelected) {
+            $this->selectedUserIdsByStep[$stepIndex] = array_values(array_diff($this->selectedUserIdsByStep[$stepIndex], $visibleUserIds));
+        } else {
+            $this->selectedUserIdsByStep[$stepIndex] = array_values(array_unique(array_merge($this->selectedUserIdsByStep[$stepIndex], $visibleUserIds)));
+        }
+    }
+
+    public function selectVisibleOnPage(array $visibleUserIds)
+    {
+        $stepIndex = $this->activeStepForUserModal;
+        if ($stepIndex === null) return;
+
+        $visibleUserIds = array_map('strval', $visibleUserIds);
+        if (!isset($this->selectedUserIdsByStep[$stepIndex]) || !is_array($this->selectedUserIdsByStep[$stepIndex])) {
+            $this->selectedUserIdsByStep[$stepIndex] = [];
+        }
+
+        $this->selectedUserIdsByStep[$stepIndex] = array_values(array_unique(array_merge($this->selectedUserIdsByStep[$stepIndex], $visibleUserIds)));
+    }
+
+    public function selectAllFilteredUsers()
+    {
+        $stepIndex = $this->activeStepForUserModal;
+        if ($stepIndex === null) return;
+
+        $rule = $this->assignRule[$stepIndex] ?? "1";
+        $query = User::query()->where('is_active', 1);
+
+        if ($rule == "1") {
+            $selectedRoleIds = array_filter((array) ($this->roleSelection[$stepIndex] ?? []));
+            if (empty($selectedRoleIds)) {
+                return;
+            }
+
+            $query->where(function ($q) use ($selectedRoleIds) {
+                $q->whereHas('RoleSchemeOfficeMappings', function ($sub) use ($selectedRoleIds) {
+                    $sub->whereIn('role_id', $selectedRoleIds);
+                })->orWhereHas('roles', function ($sub) use ($selectedRoleIds) {
+                    $sub->whereIn('roles.id', $selectedRoleIds);
+                });
+            });
+        }
+
+        if (!empty($this->modalSearch)) {
+            $search = $this->modalSearch;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('mobile_no', 'like', "%{$search}%");
+            });
+        }
+
+        if (!empty($this->modalOfficeType)) {
+            $officeType = $this->modalOfficeType;
+            $query->whereHas('RoleSchemeOfficeMappings.office', function ($q) use ($officeType) {
+                $q->where('office_type_id', $officeType);
+            });
+        }
+
+        $filteredIds = array_map('strval', $query->pluck('id')->toArray());
+
+        if (!isset($this->selectedUserIdsByStep[$stepIndex]) || !is_array($this->selectedUserIdsByStep[$stepIndex])) {
+            $this->selectedUserIdsByStep[$stepIndex] = [];
+        }
+
+        $this->selectedUserIdsByStep[$stepIndex] = array_values(array_unique(array_merge($this->selectedUserIdsByStep[$stepIndex], $filteredIds)));
+    }
+
+    public function clearStepUserSelection()
+    {
+        $stepIndex = $this->activeStepForUserModal;
+        if ($stepIndex === null) return;
+
+        $this->selectedUserIdsByStep[$stepIndex] = [];
+    }
+
+    public function getModalUsersProperty()
+    {
+        $stepIndex = $this->activeStepForUserModal;
+        if ($stepIndex === null) return null;
+
+        $rule = $this->assignRule[$stepIndex] ?? "1";
+        $query = User::query()->where('is_active', 1);
+
+        if ($rule == "1") {
+            $selectedRoleIds = array_filter((array) ($this->roleSelection[$stepIndex] ?? []));
+            if (empty($selectedRoleIds)) {
+                return 'NO_ROLE_SELECTED';
+            }
+
+            $query->where(function ($q) use ($selectedRoleIds) {
+                $q->whereHas('RoleSchemeOfficeMappings', function ($sub) use ($selectedRoleIds) {
+                    $sub->whereIn('role_id', $selectedRoleIds);
+                })->orWhereHas('roles', function ($sub) use ($selectedRoleIds) {
+                    $sub->whereIn('roles.id', $selectedRoleIds);
+                });
+            });
+        }
+
+        if (!empty($this->modalSearch)) {
+            $search = $this->modalSearch;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('mobile_no', 'like', "%{$search}%");
+            });
+        }
+
+        if (!empty($this->modalOfficeType)) {
+            $officeType = $this->modalOfficeType;
+            $query->whereHas('RoleSchemeOfficeMappings.office', function ($q) use ($officeType) {
+                $q->where('office_type_id', $officeType);
+            });
+        }
+
+        $query->with([
+            'RoleSchemeOfficeMappings.office.officeType',
+            'RoleSchemeOfficeMappings.Role',
+            'mappedRoles',
+            'roles'
+        ])->orderBy('name', 'asc');
+
+        return $query->paginate((int) $this->modalPageLimit, ['*'], 'modalPage');
+    }
+
     #[Loggable(level: 'C', nickname: 'Create Workflow Steps')]
     public function save()
     {
@@ -368,18 +592,25 @@ class CreateworkflowSteps extends Component
                     $opTypeId = $codemaster->id;
                 }
 
+                $isSpecificUserMode = !empty($this->assignSpecificUsers[$i]);
+                $selectedUserIds = isset($this->selectedUserIdsByStep[$i]) && is_array($this->selectedUserIdsByStep[$i])
+                    ? array_values(array_unique(array_filter($this->selectedUserIdsByStep[$i])))
+                    : [];
+
                 $label = DynamicWorkflowLabel::create([
-                    'scheme_id'  => $schemeId,
-                    'module_id'  => $schemeModule->id,
-                    'label_name' => $this->labels[$i],
-                    'op_type_id' => $opTypeId,
+                    'scheme_id'             => $schemeId,
+                    'module_id'             => $schemeModule->id,
+                    'label_name'            => $this->labels[$i],
+                    'op_type_id'            => $opTypeId,
+                    'assign_specific_users' => $isSpecificUserMode,
+                    'user_ids'              => $isSpecificUserMode ? $selectedUserIds : null,
                 ]);
 
                 $assignedRoleIds = [];
 
                 // FEATURE: Auto-create the module access permission
                 $moduleAccessPerm = strtolower(str_replace(' ', '_', $moduleCode)) . '_access';
-                Permission::firstOrCreate(['name' => $moduleAccessPerm, 'guard_name' => 'web']);
+                $permModel = Permission::firstOrCreate(['name' => $moduleAccessPerm, 'guard_name' => 'web']);
 
                 // MODE 1: Existing Role Selection
                 if (!empty($roleSelection[$i])) {
@@ -428,17 +659,45 @@ class CreateworkflowSteps extends Component
                     }
                 }
 
+                // User & Role Permission Assignments
+                if ($isSpecificUserMode && !empty($selectedUserIds)) {
+                    if (!empty($permissionsSelection[$i]) && isset($crRole)) {
+                        // MODE 2: Assign newly created custom role to the specific selected users
+                        foreach ($selectedUserIds as $uId) {
+                            $user = User::find($uId);
+                            if ($user) {
+                                app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($schemeId);
+                                if (!$user->hasRole($crRole)) {
+                                    $user->assignRole($crRole);
+                                }
+                            }
+                        }
+                    } else {
+                        // MODE 1: Assign direct module access permission to the specific selected users
+                        foreach ($selectedUserIds as $uId) {
+                            $user = User::find($uId);
+                            if ($user) {
+                                $user->givePermissionWithScheme($permModel->id, $schemeId);
+                            }
+                        }
+                    }
+                } else {
+                    // Default Mode: Assign module access permission to assigned roles globally
+                    if (!empty($assignedRoleIds)) {
+                        $rolesById = Role::whereIn('id', $assignedRoleIds)->get()->keyBy('id');
+                        foreach ($assignedRoleIds as $roleId) {
+                            $role = $rolesById->get($roleId);
+                            if ($role && !$role->hasPermissionTo($moduleAccessPerm)) {
+                                $role->givePermissionTo($moduleAccessPerm);
+                            }
+                        }
+                    }
+                }
+
                 // Save Workflow Step Role Mappings for whichever mode was used
                 if (!empty($assignedRoleIds)) {
                     $mappingData = [];
-                    $rolesById = Role::whereIn('id', $assignedRoleIds)->get()->keyBy('id');
                     foreach ($assignedRoleIds as $roleId) {
-                        // FEATURE: Give the assigned role the module access permission
-                        $role = $rolesById->get($roleId);
-                        if ($role && !$role->hasPermissionTo($moduleAccessPerm)) {
-                            $role->givePermissionTo($moduleAccessPerm);
-                        }
-
                         $mappingData[] = [
                             'scheme_id'          => $schemeId,
                             'module_id'          => $schemeModule->id,
