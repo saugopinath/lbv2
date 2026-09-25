@@ -7,11 +7,14 @@ use App\Models\WorkflowStep;
 use App\Models\{User, Codemaster, DynamicWorkflowLabel, DynamicWorkflowModule, DynamicWorkflowSchemeModule, UserRoleSchemeOfficeMapping, workflowstepRolemapping};
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Livewire\WithPagination;
 use App\Attributes\Loggable;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\PermissionRegistrar;
 
 class CreateworkflowSteps extends Component
 {
+    use WithPagination;
     public $schemeId;
     public $schemeModuleId;
     public $noofSteps;
@@ -303,10 +306,12 @@ class CreateworkflowSteps extends Component
             $this->selectedUserIdsByStep[$stepIndex] = [];
         }
 
-        if (in_array($userId, $this->selectedUserIdsByStep[$stepIndex], true)) {
-            $this->selectedUserIdsByStep[$stepIndex] = array_values(array_diff($this->selectedUserIdsByStep[$stepIndex], [$userId]));
+        $currentSelected = array_map('strval', $this->selectedUserIdsByStep[$stepIndex]);
+
+        if (in_array($userId, $currentSelected, true)) {
+            $this->selectedUserIdsByStep[$stepIndex] = array_values(array_diff($currentSelected, [$userId]));
         } else {
-            $this->selectedUserIdsByStep[$stepIndex][] = $userId;
+            $this->selectedUserIdsByStep[$stepIndex] = array_values(array_unique(array_merge($currentSelected, [$userId])));
         }
     }
 
@@ -320,33 +325,23 @@ class CreateworkflowSteps extends Component
             $this->selectedUserIdsByStep[$stepIndex] = [];
         }
 
-        $allSelected = true;
+        $currentSelected = array_map('strval', $this->selectedUserIdsByStep[$stepIndex]);
+
+        $allSelected = count($visibleUserIds) > 0;
         foreach ($visibleUserIds as $uId) {
-            if (!in_array($uId, $this->selectedUserIdsByStep[$stepIndex], true)) {
+            if (!in_array($uId, $currentSelected, true)) {
                 $allSelected = false;
                 break;
             }
         }
 
         if ($allSelected) {
-            $this->selectedUserIdsByStep[$stepIndex] = array_values(array_diff($this->selectedUserIdsByStep[$stepIndex], $visibleUserIds));
+            $this->selectedUserIdsByStep[$stepIndex] = array_values(array_diff($currentSelected, $visibleUserIds));
         } else {
-            $this->selectedUserIdsByStep[$stepIndex] = array_values(array_unique(array_merge($this->selectedUserIdsByStep[$stepIndex], $visibleUserIds)));
+            $this->selectedUserIdsByStep[$stepIndex] = array_values(array_unique(array_merge($currentSelected, $visibleUserIds)));
         }
     }
 
-    public function selectVisibleOnPage(array $visibleUserIds)
-    {
-        $stepIndex = $this->activeStepForUserModal;
-        if ($stepIndex === null) return;
-
-        $visibleUserIds = array_map('strval', $visibleUserIds);
-        if (!isset($this->selectedUserIdsByStep[$stepIndex]) || !is_array($this->selectedUserIdsByStep[$stepIndex])) {
-            $this->selectedUserIdsByStep[$stepIndex] = [];
-        }
-
-        $this->selectedUserIdsByStep[$stepIndex] = array_values(array_unique(array_merge($this->selectedUserIdsByStep[$stepIndex], $visibleUserIds)));
-    }
 
     public function selectAllFilteredUsers()
     {
@@ -661,33 +656,27 @@ class CreateworkflowSteps extends Component
 
                 // User & Role Permission Assignments
                 if ($isSpecificUserMode && !empty($selectedUserIds)) {
+                    $users = User::select('id')->whereIn('id', $selectedUserIds)->get();
                     if (!empty($permissionsSelection[$i]) && isset($crRole)) {
-                        // MODE 2: Assign newly created custom role to the specific selected users
-                        foreach ($selectedUserIds as $uId) {
-                            $user = User::find($uId);
-                            if ($user) {
-                                app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($schemeId);
-                                if (!$user->hasRole($crRole)) {
-                                    $user->assignRole($crRole);
-                                }
+                        // MODE 2: Assign newly created custom role to specific selected users
+                        app(PermissionRegistrar::class)->setPermissionsTeamId($schemeId);
+                        foreach ($users as $user) {
+                            if (!$user->hasRole($crRole)) {
+                                $user->assignRole($crRole);
                             }
                         }
                     } else {
-                        // MODE 1: Assign direct module access permission to the specific selected users
-                        foreach ($selectedUserIds as $uId) {
-                            $user = User::find($uId);
-                            if ($user) {
-                                $user->givePermissionWithScheme($permModel->id, $schemeId);
-                            }
+                        // MODE 1: Assign direct module access permission to specific selected users
+                        foreach ($users as $user) {
+                            $user->givePermissionWithScheme($permModel->id, $schemeId);
                         }
                     }
                 } else {
                     // Default Mode: Assign module access permission to assigned roles globally
                     if (!empty($assignedRoleIds)) {
-                        $rolesById = Role::whereIn('id', $assignedRoleIds)->get()->keyBy('id');
-                        foreach ($assignedRoleIds as $roleId) {
-                            $role = $rolesById->get($roleId);
-                            if ($role && !$role->hasPermissionTo($moduleAccessPerm)) {
+                        $roles = Role::select('id', 'name', 'guard_name')->whereIn('id', $assignedRoleIds)->get();
+                        foreach ($roles as $role) {
+                            if (!$role->hasPermissionTo($moduleAccessPerm)) {
                                 $role->givePermissionTo($moduleAccessPerm);
                             }
                         }

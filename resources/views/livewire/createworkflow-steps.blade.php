@@ -196,7 +196,7 @@
             <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" wire:click="closeUserModal"></div>
 
             <!-- Modal Box with Fixed Dimensions & Project Theme Styling -->
-            <div class="relative bg-white rounded-xl shadow-2xl w-[900px] max-w-[95vw] h-[640px] max-h-[90vh] flex flex-col overflow-hidden border border-gray-200 z-10">
+            <div class="relative bg-white rounded-xl shadow-2xl w-[900px] min-w-[900px] max-w-[900px] h-[640px] min-h-[640px] max-h-[640px] flex flex-col overflow-hidden border border-gray-200 z-10 shrink-0">
                 <!-- Header -->
                 <div class="flex-none bg-indigo-700 text-white px-6 py-4 flex items-center justify-between border-b border-indigo-800">
                     <div class="flex items-center gap-2">
@@ -267,17 +267,6 @@
                                 $pageUserIds = ($modalUsersList !== 'NO_ROLE_SELECTED' && $modalUsersList) ? $modalUsersList->pluck('id')->map(fn($id) => (string)$id)->toArray() : [];
                             @endphp
 
-                            <!-- Select All Visible on Page Button -->
-                            <button type="button"
-                                    wire:click="selectVisibleOnPage({{ json_encode($pageUserIds) }})"
-                                    @if(empty($pageUserIds)) disabled @endif
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-gray-100 disabled:opacity-50 text-gray-700 border border-gray-300 text-xs font-semibold rounded-lg shadow-sm transition-colors">
-                                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                Select All Visible on Page
-                            </button>
-
                             <!-- Select All Filtered Records Button -->
                             <button type="button"
                                     wire:click="selectAllFilteredUsers"
@@ -299,101 +288,105 @@
                     </div>
 
                     <!-- Modal Users Content Area -->
-                    @php
-                        $modalUsersList = $this->modalUsers;
-                    @endphp
-
-                    @if ($modalUsersList === 'NO_ROLE_SELECTED')
-                        <!-- Mode 1: No Role Selected Warning -->
-                        <div class="h-[320px] min-h-[320px] max-h-[320px] flex flex-col items-center justify-center p-8 text-center bg-amber-50/70 rounded-xl border border-amber-200 text-amber-800 space-y-2">
-                            <svg class="w-12 h-12 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                            </svg>
-                            <h4 class="font-bold text-base">Select Role First</h4>
-                            <p class="text-xs text-amber-700 max-w-md">
-                                In "Select from Existing" mode, users are filtered based on the role(s) selected for this step. Please select at least one role in the step configuration above.
-                            </p>
-                        </div>
-                    @else
+                    <div class="flex-1 flex flex-col justify-between min-h-0">
                         @php
-                            $pageUserIds = $modalUsersList->pluck('id')->map(fn($id) => (string)$id)->toArray();
-                            $currentSelectedForStep = array_map('strval', $selectedUserIdsByStep[$activeStepForUserModal] ?? []);
-                            $isAllVisibleSelected = count($pageUserIds) > 0 && count(array_diff($pageUserIds, $currentSelectedForStep)) === 0;
+                            $modalUsersList = $this->modalUsers;
                         @endphp
 
-                        <!-- Users Scrollable Table -->
-                        <div class="h-[320px] min-h-[320px] max-h-[320px] overflow-y-auto rounded-xl border border-gray-200">
-                            <table class="min-w-full divide-y divide-gray-200 text-xs">
-                                <thead class="bg-gray-50 sticky top-0 z-10">
-                                    <tr>
-                                        <th scope="col" class="px-4 py-3 text-left font-bold text-gray-700 w-12 bg-gray-50">
-                                            <input type="checkbox"
-                                                   wire:click="toggleSelectAllVisible({{ json_encode($pageUserIds) }})"
-                                                   {{ $isAllVisibleSelected ? 'checked' : '' }}
-                                                   class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
-                                        </th>
-                                        <th scope="col" class="px-4 py-3 text-left font-bold text-gray-700 bg-gray-50">Name</th>
-                                        <th scope="col" class="px-4 py-3 text-left font-bold text-gray-700 bg-gray-50">Role</th>
-                                        <th scope="col" class="px-4 py-3 text-left font-bold text-gray-700 bg-gray-50">Office Type</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200 bg-white">
-                                    @forelse ($modalUsersList as $u)
-                                        @php
-                                            $uIdStr = (string)$u->id;
-                                            $isSelected = in_array($uIdStr, $currentSelectedForStep, true);
+                        @if ($modalUsersList === 'NO_ROLE_SELECTED')
+                            <!-- Mode 1: No Role Selected Warning -->
+                            <div class="flex-1 flex flex-col items-center justify-center p-8 text-center bg-amber-50/70 rounded-xl border border-amber-200 text-amber-800 space-y-2">
+                                <svg class="w-12 h-12 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                                <h4 class="font-bold text-base">Select Role First</h4>
+                                <p class="text-xs text-amber-700 max-w-md">
+                                    In "Select from Existing" mode, users are filtered based on the role(s) selected for this step. Please select at least one role in the step configuration above.
+                                </p>
+                            </div>
+                        @else
+                            @php
+                                $pageUserIds = $modalUsersList->pluck('id')->map(fn($id) => (string)$id)->toArray();
+                                $currentSelectedForStep = array_map('strval', $selectedUserIdsByStep[$activeStepForUserModal] ?? []);
+                                $isAllVisibleSelected = count($pageUserIds) > 0 && count(array_diff($pageUserIds, $currentSelectedForStep)) === 0;
+                            @endphp
 
-                                            $rolesList = $u->mappedRoles->pluck('name')->merge(
-                                                $u->RoleSchemeOfficeMappings->pluck('Role.name')->filter()
-                                            )->merge(
-                                                $u->roles->pluck('name')
-                                            )->filter()->unique()->implode(', ');
-
-                                            if (empty($rolesList)) {
-                                                $rolesList = 'N/A';
-                                            }
-
-                                            $officeTypeName = $u->RoleSchemeOfficeMappings->pluck('office.officeType.name')->filter()->unique()->implode(', ');
-                                            if (empty($officeTypeName)) {
-                                                $officeTypeName = 'N/A';
-                                            }
-                                        @endphp
-                                        <tr class="{{ $isSelected ? 'bg-indigo-50/40' : 'hover:bg-gray-50' }}">
-                                            <td class="px-4 py-3 whitespace-nowrap">
-                                                <input type="checkbox"
-                                                       wire:click="toggleSelectUser('{{ $u->id }}')"
-                                                       {{ $isSelected ? 'checked' : '' }}
-                                                       class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
-                                            </td>
-                                            <td class="px-4 py-3 whitespace-nowrap font-medium text-gray-900">
-                                                <div>{{ $u->name }}</div>
-                                                <div class="text-gray-400 text-[11px]">{{ $u->email }}</div>
-                                            </td>
-                                            <td class="px-4 py-3 whitespace-nowrap text-gray-600">
-                                                {{ $rolesList }}
-                                            </td>
-                                            <td class="px-4 py-3 whitespace-nowrap text-gray-600">
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700">
-                                                    {{ $officeTypeName }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    @empty
+                            <!-- Users Scrollable Table -->
+                            <div class="flex-1 min-h-0 overflow-y-auto rounded-xl border border-gray-200 bg-white">
+                                <table class="w-full table-fixed divide-y divide-gray-200 text-xs">
+                                    <thead class="bg-gray-50 sticky top-0 z-10">
                                         <tr>
-                                            <td colspan="4" class="px-4 py-6 text-center text-gray-500 text-xs">
-                                                No active users found matching your filters.
-                                            </td>
+                                            <th scope="col" class="px-4 py-3 text-left font-bold text-gray-700 w-12 bg-gray-50">
+                                                <input type="checkbox"
+                                                       wire:key="th-chk-step-{{ $activeStepForUserModal }}-{{ $isAllVisibleSelected ? '1' : '0' }}-{{ count($selectedUserIdsByStep[$activeStepForUserModal] ?? []) }}"
+                                                       wire:change="toggleSelectAllVisible({{ json_encode($pageUserIds) }})"
+                                                       {{ $isAllVisibleSelected ? 'checked' : '' }}
+                                                       class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                            </th>
+                                            <th scope="col" class="px-4 py-3 text-left font-bold text-gray-700 w-2/5 bg-gray-50">Name</th>
+                                            <th scope="col" class="px-4 py-3 text-left font-bold text-gray-700 w-2/5 bg-gray-50">Role</th>
+                                            <th scope="col" class="px-4 py-3 text-left font-bold text-gray-700 w-1/5 bg-gray-50">Office Type</th>
                                         </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 bg-white">
+                                        @forelse ($modalUsersList as $u)
+                                            @php
+                                                $uIdStr = (string)$u->id;
+                                                $isSelected = in_array($uIdStr, $currentSelectedForStep, true);
 
-                        <!-- Pagination Links -->
-                        <div class="flex-none pt-1">
-                            {{ $modalUsersList->links() }}
-                        </div>
-                    @endif
+                                                $rolesList = $u->mappedRoles->pluck('name')->merge(
+                                                    $u->RoleSchemeOfficeMappings->pluck('Role.name')->filter()
+                                                )->merge(
+                                                    $u->roles->pluck('name')
+                                                )->filter()->unique()->implode(', ');
+
+                                                if (empty($rolesList)) {
+                                                    $rolesList = 'N/A';
+                                                }
+
+                                                $officeTypeName = $u->RoleSchemeOfficeMappings->pluck('office.officeType.name')->filter()->unique()->implode(', ');
+                                                if (empty($officeTypeName)) {
+                                                    $officeTypeName = 'N/A';
+                                                }
+                                            @endphp
+                                            <tr class="{{ $isSelected ? 'bg-indigo-50/40' : 'hover:bg-gray-50' }}">
+                                                <td class="px-4 py-3 whitespace-nowrap">
+                                                    <input type="checkbox"
+                                                           wire:key="row-chk-step-{{ $activeStepForUserModal }}-usr-{{ $u->id }}-{{ $isSelected ? '1' : '0' }}"
+                                                           wire:change="toggleSelectUser('{{ $u->id }}')"
+                                                           {{ $isSelected ? 'checked' : '' }}
+                                                           class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                                </td>
+                                                <td class="px-4 py-3 whitespace-nowrap font-medium text-gray-900 truncate" title="{{ $u->name }} ({{ $u->email }})">
+                                                    <div class="truncate">{{ $u->name }}</div>
+                                                    <div class="text-gray-400 text-[11px] truncate">{{ $u->email }}</div>
+                                                </td>
+                                                <td class="px-4 py-3 whitespace-nowrap text-gray-600 truncate" title="{{ $rolesList }}">
+                                                    <span class="truncate block">{{ $rolesList }}</span>
+                                                </td>
+                                                <td class="px-4 py-3 whitespace-nowrap text-gray-600 truncate" title="{{ $officeTypeName }}">
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 truncate">
+                                                        {{ $officeTypeName }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="px-4 py-12 text-center text-gray-500 text-xs">
+                                                    No active users found matching your filters.
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination Links with Reserved Height -->
+                            <div class="flex-none h-10 flex items-center justify-between pt-2">
+                                {{ $modalUsersList->links() }}
+                            </div>
+                        @endif
+                    </div>
                 </div>
 
                 <!-- Footer -->
