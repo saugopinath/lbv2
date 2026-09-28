@@ -148,6 +148,66 @@
                                             </span>
                                         </div>
                                     @endif
+                                    <!-- Dependent Office Mapping Fields for Selected Users -->
+                                    @if (count($selectedUserIdsByStep[$index] ?? []) > 0)
+                                        <div class="mt-3 p-4 bg-indigo-50/60 rounded-xl border border-indigo-100 space-y-3">
+                                            <div class="flex items-center justify-between">
+                                                <h5 class="text-xs font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-1.5">
+                                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h5m-5 0V10m0 11V10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                                                    </svg>
+                                                    Office Mapping for Selected Users <span class="text-red-600">*</span>
+                                                </h5>
+                                                <span class="text-[11px] text-indigo-700 font-medium bg-indigo-100/80 px-2.5 py-0.5 rounded-full">
+                                                    Required for {{ count($selectedUserIdsByStep[$index]) }} selected {{ Str::plural('user', count($selectedUserIdsByStep[$index])) }}
+                                                </span>
+                                            </div>
+
+                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                <!-- Office Type Select -->
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-700 mb-1">Office Type <span class="text-red-600">*</span></label>
+                                                    <select @if ($isDisabled) disabled @endif class="w-full text-xs rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white" wire:model.live="stepOfficeType.{{ $index }}">
+                                                        <option value="">-- Select Office Type --</option>
+                                                        @foreach ($officeTypesList as $code => $typeName)
+                                                            <option value="{{ $code }}">{{ $typeName }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error("stepOfficeType.{$index}")
+                                                        <span class="text-red-600 text-[11px] mt-0.5 block font-medium">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+
+                                                <!-- District Select -->
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-700 mb-1">District <span class="text-red-600">*</span></label>
+                                                    <select @if ($isDisabled || empty($stepOfficeType[$index])) disabled @endif class="w-full text-xs rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed" wire:model.live="stepDistrict.{{ $index }}">
+                                                        <option value="">-- Select District --</option>
+                                                        @foreach ($districtsList as $distId => $distName)
+                                                            <option value="{{ $distId }}">{{ $distName }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error("stepDistrict.{$index}")
+                                                        <span class="text-red-600 text-[11px] mt-0.5 block font-medium">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+
+                                                <!-- Office Select -->
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-700 mb-1">Office <span class="text-red-600">*</span></label>
+                                                    <select @if ($isDisabled || empty($stepOfficeType[$index])) disabled @endif class="w-full text-xs rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed" wire:model.live="stepOffice.{{ $index }}">
+                                                        <option value="">-- Select Office --</option>
+                                                        @foreach ($stepOfficesList[$index] ?? [] as $offId => $offName)
+                                                            <option value="{{ $offId }}">{{ $offName }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error("stepOffice.{$index}")
+                                                        <span class="text-red-600 text-[11px] mt-0.5 block font-medium">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
 
                             </div>

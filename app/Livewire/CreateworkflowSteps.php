@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use App\Models\{Role, Permission};
 use App\Models\WorkflowStep;
-use App\Models\{User, Codemaster, DynamicWorkflowLabel, DynamicWorkflowModule, DynamicWorkflowSchemeModule, UserRoleSchemeOfficeMapping, workflowstepRolemapping, OfficeMaster, Scheme};
+use App\Models\{User, Codemaster, DynamicWorkflowLabel, DynamicWorkflowModule, DynamicWorkflowSchemeModule, UserRoleSchemeOfficeMapping, workflowstepRolemapping, OfficeMaster, Scheme, District};
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -48,6 +48,13 @@ class CreateworkflowSteps extends Component
     public array $officesList = [];
     public array $schemesList = [];
 
+    // Step-level Office Mapping properties (Required when user selection > 0)
+    public array $stepOfficeType = [];
+    public array $stepDistrict = [];
+    public array $stepOffice = [];
+    public array $districtsList = [];
+    public array $stepOfficesList = [];
+
     public function enableEditing()
     {
         $this->isEdit = true;
@@ -70,6 +77,22 @@ class CreateworkflowSteps extends Component
 
             if (!isset($this->selectedUserIdsByStep[$i]) || !is_array($this->selectedUserIdsByStep[$i])) {
                 $this->selectedUserIdsByStep[$i] = [];
+            }
+
+            if (!isset($this->stepOfficeType[$i])) {
+                $this->stepOfficeType[$i] = null;
+            }
+
+            if (!isset($this->stepDistrict[$i])) {
+                $this->stepDistrict[$i] = null;
+            }
+
+            if (!isset($this->stepOffice[$i])) {
+                $this->stepOffice[$i] = null;
+            }
+
+            if (!isset($this->stepOfficesList[$i])) {
+                $this->stepOfficesList[$i] = [];
             }
         }
     }
@@ -118,6 +141,10 @@ class CreateworkflowSteps extends Component
             ->pluck('name', 'id')
             ->toArray();
 
+        $this->districtsList = District::orderBy('name', 'asc')
+            ->pluck('name', 'id')
+            ->toArray();
+
         if ($steps->isNotEmpty()) {
             $this->noofSteps = $steps->count();
             $this->labels = [];
@@ -131,10 +158,55 @@ class CreateworkflowSteps extends Component
                 ->get()
                 ->groupBy('workflow_step_id');
 
+            $allSelectedUserIds = $steps->pluck('user_ids')->filter()->flatten()->unique()->toArray();
+            $userOfficeMappings = !empty($allSelectedUserIds)
+                ? UserRoleSchemeOfficeMapping::with('Office')
+                    ->where('scheme_id', $this->schemeId)
+                    ->whereIn('user_id', $allSelectedUserIds)
+                    ->get()
+                    ->groupBy('user_id')
+                : collect([]);
+
+            // Pre-extract matched office objects for each step outside the loop
+            $stepMatchedOffices = [];
+            foreach ($steps as $index => $step) {
+                $uIds = is_array($step->user_ids) ? $step->user_ids : [];
+                foreach ($uIds as $uId) {
+                    if (isset($userOfficeMappings[$uId]) && $userOfficeMappings[$uId]->first()?->Office) {
+                        $stepMatchedOffices[$index] = $userOfficeMappings[$uId]->first()->Office;
+                        break;
+                    }
+                }
+            }
+
+            // Batch fetch all required offices in 1 single query outside the loop
+            $officeTypeIds = collect($stepMatchedOffices)->pluck('office_type_id')->filter()->unique()->toArray();
+            $allOfficesList = !empty($officeTypeIds)
+                ? OfficeMaster::select('id', 'name', 'office_type_id', 'district_id')
+                    ->whereIn('office_type_id', $officeTypeIds)
+                    ->where('is_active', 1)
+                    ->orderBy('name')
+                    ->get()
+                    ->groupBy('office_type_id')
+                : collect([]);
+
             foreach ($steps as $index => $step) {
                 $this->labels[$index] = $step->label_name;
                 $this->assignSpecificUsers[$index] = (bool) $step->assign_specific_users;
                 $this->selectedUserIdsByStep[$index] = is_array($step->user_ids) ? array_map('strval', $step->user_ids) : [];
+
+                if (isset($stepMatchedOffices[$index])) {
+                    $office = $stepMatchedOffices[$index];
+                    $this->stepOfficeType[$index] = $office->office_type_id;
+                    $this->stepDistrict[$index] = $office->district_id;
+                    $this->stepOffice[$index] = $office->id;
+
+                    $typeOffices = $allOfficesList[$office->office_type_id] ?? collect([]);
+                    if ($office->district_id) {
+                        $typeOffices = $typeOffices->where('district_id', $office->district_id);
+                    }
+                    $this->stepOfficesList[$index] = $typeOffices->pluck('name', 'id')->toArray();
+                }
 
                 $roleMappings = isset($allRoleMappings[$step->id])
                     ? $allRoleMappings[$step->id]->pluck('role_id')->toArray()
@@ -182,6 +254,12 @@ class CreateworkflowSteps extends Component
             $rules["roleSelection.{$i}.*"] = "exclude_unless:assignRule.{$i},1|exists:roles,id";
 
             $rules["permissionsSelection.{$i}"] = "exclude_unless:assignRule.{$i},2|required|array|min:1";
+
+            if (count(array_filter($this->selectedUserIdsByStep[$i] ?? [])) > 0) {
+                $rules["stepOfficeType.{$i}"] = 'required';
+                $rules["stepDistrict.{$i}"] = 'required';
+                $rules["stepOffice.{$i}"] = 'required';
+            }
         }
 
         return $rules;
@@ -210,10 +288,15 @@ class CreateworkflowSteps extends Component
 
             $messages["permissionsSelection.{$i}.required"] = "Please select at least one permission for Step {$stepNum}.";
             $messages["permissionsSelection.{$i}.min"] = "Please select at least one permission for Step {$stepNum}.";
+
+            $messages["stepOfficeType.{$i}.required"] = "Office Type is required for Step {$stepNum} when users are selected.";
+            $messages["stepDistrict.{$i}.required"] = "District is required for Step {$stepNum} when users are selected.";
+            $messages["stepOffice.{$i}.required"] = "Office is required for Step {$stepNum} when users are selected.";
         }
 
         return $messages;
     }
+
     public function updatedNoofSteps($value)
     {
         $value = (int) $value;
@@ -233,6 +316,10 @@ class CreateworkflowSteps extends Component
         $existingNewRole = $this->newRole;
         $existingAssignSpecificUsers = $this->assignSpecificUsers;
         $existingSelectedUserIds = $this->selectedUserIdsByStep;
+        $existingStepOfficeType = $this->stepOfficeType;
+        $existingStepDistrict = $this->stepDistrict;
+        $existingStepOffice = $this->stepOffice;
+        $existingStepOfficesList = $this->stepOfficesList;
 
         $this->labels = [];
         $this->roleSelection = [];
@@ -242,6 +329,10 @@ class CreateworkflowSteps extends Component
         $this->newRole = [];
         $this->assignSpecificUsers = [];
         $this->selectedUserIdsByStep = [];
+        $this->stepOfficeType = [];
+        $this->stepDistrict = [];
+        $this->stepOffice = [];
+        $this->stepOfficesList = [];
 
         for ($i = 0; $i < $value; $i++) {
             $this->labels[$i] = $existingLabels[$i] ?? '';
@@ -250,6 +341,10 @@ class CreateworkflowSteps extends Component
             $this->newRole[$i] = $existingNewRole[$i] ?? false;
             $this->assignSpecificUsers[$i] = $existingAssignSpecificUsers[$i] ?? false;
             $this->selectedUserIdsByStep[$i] = $existingSelectedUserIds[$i] ?? [];
+            $this->stepOfficeType[$i] = $existingStepOfficeType[$i] ?? null;
+            $this->stepDistrict[$i] = $existingStepDistrict[$i] ?? null;
+            $this->stepOffice[$i] = $existingStepOffice[$i] ?? null;
+            $this->stepOfficesList[$i] = $existingStepOfficesList[$i] ?? [];
 
             if (isset($existingRoleSel[$i])) {
                 $this->roleSelection[$i] = $existingRoleSel[$i];
@@ -502,6 +597,37 @@ class CreateworkflowSteps extends Component
         return $query->orderBy('name', 'asc')->paginate((int) $this->modalPageLimit, ['*'], 'modalPage');
     }
 
+    public function updatedStepOfficeType($value, $key)
+    {
+        $stepIndex = (int) $key;
+        $this->stepDistrict[$stepIndex] = null;
+        $this->stepOffice[$stepIndex] = null;
+        $this->stepOfficesList[$stepIndex] = [];
+
+        if ($value) {
+            $query = OfficeMaster::where('office_type_id', $value)->where('is_active', 1);
+            if (!empty($this->stepDistrict[$stepIndex])) {
+                $query->where('district_id', $this->stepDistrict[$stepIndex]);
+            }
+            $this->stepOfficesList[$stepIndex] = $query->orderBy('name')->pluck('name', 'id')->toArray();
+        }
+    }
+
+    public function updatedStepDistrict($value, $key)
+    {
+        $stepIndex = (int) $key;
+        $this->stepOffice[$stepIndex] = null;
+        $officeType = $this->stepOfficeType[$stepIndex] ?? null;
+
+        if ($officeType) {
+            $query = OfficeMaster::where('office_type_id', $officeType)->where('is_active', 1);
+            if (!empty($value)) {
+                $query->where('district_id', $value);
+            }
+            $this->stepOfficesList[$stepIndex] = $query->orderBy('name')->pluck('name', 'id')->toArray();
+        }
+    }
+
     #[Loggable(level: 'C', nickname: 'Create Workflow Steps')]
     public function save()
     {
@@ -525,52 +651,34 @@ class CreateworkflowSteps extends Component
         }
         $this->validate();
 
+        // Validate step office mapping if users are selected
+        for ($i = 0; $i < $this->noofSteps; $i++) {
+            $selectedUsersCount = count(array_filter($this->selectedUserIdsByStep[$i] ?? []));
+            if ($selectedUsersCount > 0) {
+                if (empty($this->stepOfficeType[$i])) {
+                    $this->addError("stepOfficeType.{$i}", "Office Type is required for Step " . ($i + 1) . " when users are selected.");
+                }
+                if (empty($this->stepDistrict[$i])) {
+                    $this->addError("stepDistrict.{$i}", "District is required for Step " . ($i + 1) . " when users are selected.");
+                }
+                if (empty($this->stepOffice[$i])) {
+                    $this->addError("stepOffice.{$i}", "Office is required for Step " . ($i + 1) . " when users are selected.");
+                }
+            }
+        }
+
+        if ($this->getErrorBag()->any()) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Please fill in required Office Type, District, and Office for steps with selected users.'
+            ]);
+            return;
+        }
+
         if (!Auth::check()) {
             session()->flash('error', 'Authentication session expired. Please login again.');
             return;
         }
-
-        // DB::beginTransaction();
-        // try {
-        //     $parentId = null;
-        //     $totalSteps = count($this->labels);
-        //     $data = [];
-        //     for ($i = 0; $i < $totalSteps; $i++) {
-        //         $data[] = [
-        //             'scheme_id' => $this->schemeId,
-        //             'rank' => $i,
-        //             'label' => $this->labels[$i],
-        //             'parent_id' => $parentId,
-        //             'is_first' => ($i === 0),
-        //             'is_last' => ($i === $totalSteps - 1),
-        //             'created_at' => now(),
-        //             'updated_at' => now(),
-        //         ];
-        //         // $step = new WorkflowStep();
-        //         // $step->scheme_id = $this->schemeId;
-        //         // $step->rank = $i + 1;
-        //         // $step->label = $this->labels[$i];
-        //         // $step->parent_id = $parentId;
-        //         // $step->is_first = ($i === 0);
-        //         // $step->is_last = ($i === $totalSteps - 1);
-        //         // $step->save();
-        //         // $parentId = $step->id;
-        //     }
-        //     WorkflowStep::insert($data);
-        //     DB::commit();
-        //     $this->already = true;
-        //     $this->dispatch('toastr', [
-        //         'type' => 'success',
-        //         'message' => 'Workflow steps created successfully!'
-        //     ]);
-        // } catch (\Exception $e) {
-        //     DB::rollBack();
-        //     $this->already = false;
-        //     $this->dispatch('toastr', [
-        //         'type' => 'error',
-        //         'message' => 'Something went wrong. Please try again.'
-        //     ]);
-        // }
 
         try {
             DB::beginTransaction();
@@ -683,7 +791,7 @@ class CreateworkflowSteps extends Component
                             ]
                         );
 
-                        $permissions = Permission::select('id', 'name')->whereIn('id', $selectedPermissionIds)->get();
+                        $permissions = Permission::select('id', 'name', 'guard_name')->whereIn('id', $selectedPermissionIds)->get();
 
                         // Sync revokes if updating
                         $currentPermissions = $crRole->permissions->pluck('id')->toArray();
@@ -756,6 +864,58 @@ class CreateworkflowSteps extends Component
                         ];
                     }
                     workflowstepRolemapping::insert($mappingData);
+                }
+
+                // Save UserRoleSchemeOfficeMapping records in bulk if users are selected for step $i
+                if (!empty($selectedUserIds) && !empty($assignedRoleIds) && !empty($this->stepOffice[$i])) {
+                    $officeId = $this->stepOffice[$i];
+
+                    // Batch query existing records for performance optimization
+                    $existingMappings = UserRoleSchemeOfficeMapping::where('scheme_id', $schemeId)
+                        ->whereIn('user_id', $selectedUserIds)
+                        ->whereIn('role_id', $assignedRoleIds)
+                        ->where('office_id', $officeId)
+                        ->get()
+                        ->groupBy(fn($item) => $item->user_id . '_' . $item->role_id . '_' . $item->office_id);
+
+                    $now = now();
+                    $insertData = [];
+
+                    foreach ($selectedUserIds as $uId) {
+                        foreach ($assignedRoleIds as $rId) {
+                            $key = $uId . '_' . $rId . '_' . $officeId;
+                            if (!isset($existingMappings[$key])) {
+                                $insertData[] = [
+                                    'user_id'    => $uId,
+                                    'scheme_id'  => $schemeId,
+                                    'role_id'    => $rId,
+                                    'office_id'  => $officeId,
+                                    'created_at' => $now,
+                                    'updated_at' => $now,
+                                ];
+                            }
+                        }
+                    }
+
+                    // Perform chunked bulk insertion for high performance (Lakhs of users)
+                    if (!empty($insertData)) {
+                        foreach (array_chunk($insertData, 500) as $chunk) {
+                            UserRoleSchemeOfficeMapping::insert($chunk);
+                        }
+                    }
+
+                    // Sync Spatie team roles for selected users under the current scheme team
+                    app(PermissionRegistrar::class)->setPermissionsTeamId($schemeId);
+                    $usersToAssign = User::select('id')->whereIn('id', $selectedUserIds)->get();
+                    $rolesToAssign = Role::select('id', 'name', 'guard_name')->whereIn('id', $assignedRoleIds)->get();
+
+                    foreach ($usersToAssign as $u) {
+                        foreach ($rolesToAssign as $r) {
+                            if (!$u->hasRole($r)) {
+                                $u->assignRole($r);
+                            }
+                        }
+                    }
                 }
             }
 
