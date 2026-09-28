@@ -1,10 +1,12 @@
 @props([
     'label' => '',
+    'placeholder' => null,
     'model',
     'options' => [],
     'required' => false,
     'allowCustom' => false,
     'disabled' => false,
+    'labelClass' => null,
 ])
 
 <div class="relative" x-data="{
@@ -60,7 +62,7 @@
 
     {{-- Label --}}
     @if ($label)
-        <label class="font-semibold mb-1 block text-sm">
+        <label class="{{ $labelClass ?? 'font-semibold mb-1 block text-sm' }}">
             {{ $label }}
             @if ($required)
                 <span class="text-red-600">*</span>
@@ -74,7 +76,7 @@
 
         <div class="px-2.5 py-2 max-h-36 overflow-y-auto min-h-[42px] custom-scrollbar">
             <template x-if="!selected || selected.length === 0">
-                <span class="text-gray-400">Select {{ $label ? strtolower($label) : 'options' }}</span>
+                <span class="text-gray-400">{{ $placeholder ?? ('Select ' . ($label ? strtolower($label) : 'options')) }}</span>
             </template>
 
             <div class="flex flex-wrap gap-2">

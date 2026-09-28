@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use App\Models\{Role, Permission};
 use App\Models\WorkflowStep;
-use App\Models\{User, Codemaster, DynamicWorkflowLabel, DynamicWorkflowModule, DynamicWorkflowSchemeModule, UserRoleSchemeOfficeMapping, workflowstepRolemapping};
+use App\Models\{User, Codemaster, DynamicWorkflowLabel, DynamicWorkflowModule, DynamicWorkflowSchemeModule, UserRoleSchemeOfficeMapping, workflowstepRolemapping, OfficeMaster, Scheme};
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -38,9 +38,15 @@ class CreateworkflowSteps extends Component
     public bool $showUserModal = false;
     public ?int $activeStepForUserModal = null;
     public string $modalSearch = '';
-    public $modalOfficeType = null;
+    public $modalOfficeType = null; // Preserved for backward compatibility
+    public array $modalRoles = [];
+    public array $modalOffices = [];
+    public array $modalOfficeTypes = [];
+    public array $modalSchemes = [];
     public int $modalPageLimit = 5;
     public $officeTypesList = [];
+    public array $officesList = [];
+    public array $schemesList = [];
 
     public function enableEditing()
     {
@@ -99,9 +105,17 @@ class CreateworkflowSteps extends Component
             $this->permissionsList = $permissions;
         }
 
-        $this->officeTypesList = Codemaster::select('code', 'name')
-            ->whereIn('code', [151, 152, 153, 154])
-            ->get()
+        $this->officeTypesList = Codemaster::whereIn('code', [151, 152, 153, 154])
+            ->pluck('name', 'code')
+            ->toArray();
+
+        $this->officesList = OfficeMaster::where('is_active', 1)
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->toArray();
+
+        $this->schemesList = Scheme::orderBy('name')
+            ->pluck('name', 'id')
             ->toArray();
 
         if ($steps->isNotEmpty()) {
@@ -271,6 +285,18 @@ class CreateworkflowSteps extends Component
         }
         $this->modalSearch = '';
         $this->modalOfficeType = null;
+        $this->modalOffices = [];
+        $this->modalOfficeTypes = [];
+        $this->modalSchemes = [];
+
+        // QOL Feature: Auto-apply selected roles from Step configuration if Mode 1 (Select from Existing) is used
+        $rule = $this->assignRule[$index] ?? "1";
+        if ($rule == "1" && !empty($this->roleSelection[$index])) {
+            $this->modalRoles = array_map('strval', (array) $this->roleSelection[$index]);
+        } else {
+            $this->modalRoles = [];
+        }
+
         $this->resetPage('modalPage');
         $this->showUserModal = true;
     }
@@ -291,8 +317,39 @@ class CreateworkflowSteps extends Component
         $this->resetPage('modalPage');
     }
 
+    public function updatedModalRoles()
+    {
+        $this->resetPage('modalPage');
+    }
+
+    public function updatedModalOffices()
+    {
+        $this->resetPage('modalPage');
+    }
+
+    public function updatedModalOfficeTypes()
+    {
+        $this->resetPage('modalPage');
+    }
+
+    public function updatedModalSchemes()
+    {
+        $this->resetPage('modalPage');
+    }
+
     public function updatedModalPageLimit()
     {
+        $this->resetPage('modalPage');
+    }
+
+    public function resetModalFilters()
+    {
+        $this->modalSearch = '';
+        $this->modalOfficeType = null;
+        $this->modalRoles = [];
+        $this->modalOffices = [];
+        $this->modalOfficeTypes = [];
+        $this->modalSchemes = [];
         $this->resetPage('modalPage');
     }
 
@@ -342,32 +399,16 @@ class CreateworkflowSteps extends Component
         }
     }
 
-
-    public function selectAllFilteredUsers()
+    /**
+     * DRY Query Builder helper for filtering users in Modal efficiently (Optimized for Lakhs of users)
+     */
+    protected function buildModalUsersQuery()
     {
-        $stepIndex = $this->activeStepForUserModal;
-        if ($stepIndex === null) return;
+        $query = User::query()->select(['id', 'name', 'email', 'mobile_no'])->where('is_active', 1);
 
-        $rule = $this->assignRule[$stepIndex] ?? "1";
-        $query = User::query()->where('is_active', 1);
-
-        if ($rule == "1") {
-            $selectedRoleIds = array_filter((array) ($this->roleSelection[$stepIndex] ?? []));
-            if (empty($selectedRoleIds)) {
-                return;
-            }
-
-            $query->where(function ($q) use ($selectedRoleIds) {
-                $q->whereHas('RoleSchemeOfficeMappings', function ($sub) use ($selectedRoleIds) {
-                    $sub->whereIn('role_id', $selectedRoleIds);
-                })->orWhereHas('roles', function ($sub) use ($selectedRoleIds) {
-                    $sub->whereIn('roles.id', $selectedRoleIds);
-                });
-            });
-        }
-
+        // 1. Search filter (Name, Email, Mobile)
         if (!empty($this->modalSearch)) {
-            $search = $this->modalSearch;
+            $search = trim($this->modalSearch);
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
@@ -375,13 +416,56 @@ class CreateworkflowSteps extends Component
             });
         }
 
-        if (!empty($this->modalOfficeType)) {
-            $officeType = $this->modalOfficeType;
-            $query->whereHas('RoleSchemeOfficeMappings.office', function ($q) use ($officeType) {
-                $q->where('office_type_id', $officeType);
+        // 2. Multi-Role filter
+        $selectedRoles = array_filter((array) $this->modalRoles);
+        if (!empty($selectedRoles)) {
+            $query->where(function ($q) use ($selectedRoles) {
+                $q->whereHas('RoleSchemeOfficeMappings', function ($sub) use ($selectedRoles) {
+                    $sub->whereIn('role_id', $selectedRoles);
+                })->orWhereHas('roles', function ($sub) use ($selectedRoles) {
+                    $sub->whereIn('roles.id', $selectedRoles);
+                });
             });
         }
 
+        // 3. Multi-Office filter
+        $selectedOffices = array_filter((array) $this->modalOffices);
+        if (!empty($selectedOffices)) {
+            $query->whereHas('RoleSchemeOfficeMappings', function ($sub) use ($selectedOffices) {
+                $sub->whereIn('office_id', $selectedOffices);
+            });
+        }
+
+        // 4. Multi-Office Type filter (supports new multi-select array + backward compatible single modalOfficeType)
+        $selectedOfficeTypes = array_filter((array) $this->modalOfficeTypes);
+        if (!empty($this->modalOfficeType)) {
+            $selectedOfficeTypes[] = $this->modalOfficeType;
+        }
+        $selectedOfficeTypes = array_unique(array_filter($selectedOfficeTypes));
+
+        if (!empty($selectedOfficeTypes)) {
+            $query->whereHas('RoleSchemeOfficeMappings.office', function ($sub) use ($selectedOfficeTypes) {
+                $sub->whereIn('office_type_id', $selectedOfficeTypes);
+            });
+        }
+
+        // 5. Multi-Scheme filter
+        $selectedSchemes = array_filter((array) $this->modalSchemes);
+        if (!empty($selectedSchemes)) {
+            $query->whereHas('RoleSchemeOfficeMappings', function ($sub) use ($selectedSchemes) {
+                $sub->whereIn('scheme_id', $selectedSchemes);
+            });
+        }
+
+        return $query;
+    }
+
+    public function selectAllFilteredUsers()
+    {
+        $stepIndex = $this->activeStepForUserModal;
+        if ($stepIndex === null) return;
+
+        $query = $this->buildModalUsersQuery();
         $filteredIds = array_map('strval', $query->pluck('id')->toArray());
 
         if (!isset($this->selectedUserIdsByStep[$stepIndex]) || !is_array($this->selectedUserIdsByStep[$stepIndex])) {
@@ -404,48 +488,18 @@ class CreateworkflowSteps extends Component
         $stepIndex = $this->activeStepForUserModal;
         if ($stepIndex === null) return null;
 
+        /* Preserved old NO_ROLE_SELECTED logic as comment for backward compatibility:
         $rule = $this->assignRule[$stepIndex] ?? "1";
-        $query = User::query()->where('is_active', 1);
-
         if ($rule == "1") {
             $selectedRoleIds = array_filter((array) ($this->roleSelection[$stepIndex] ?? []));
             if (empty($selectedRoleIds)) {
                 return 'NO_ROLE_SELECTED';
             }
-
-            $query->where(function ($q) use ($selectedRoleIds) {
-                $q->whereHas('RoleSchemeOfficeMappings', function ($sub) use ($selectedRoleIds) {
-                    $sub->whereIn('role_id', $selectedRoleIds);
-                })->orWhereHas('roles', function ($sub) use ($selectedRoleIds) {
-                    $sub->whereIn('roles.id', $selectedRoleIds);
-                });
-            });
         }
+        */
 
-        if (!empty($this->modalSearch)) {
-            $search = $this->modalSearch;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('mobile_no', 'like', "%{$search}%");
-            });
-        }
-
-        if (!empty($this->modalOfficeType)) {
-            $officeType = $this->modalOfficeType;
-            $query->whereHas('RoleSchemeOfficeMappings.office', function ($q) use ($officeType) {
-                $q->where('office_type_id', $officeType);
-            });
-        }
-
-        $query->with([
-            'RoleSchemeOfficeMappings.office.officeType',
-            'RoleSchemeOfficeMappings.Role',
-            'mappedRoles',
-            'roles'
-        ])->orderBy('name', 'asc');
-
-        return $query->paginate((int) $this->modalPageLimit, ['*'], 'modalPage');
+        $query = $this->buildModalUsersQuery();
+        return $query->orderBy('name', 'asc')->paginate((int) $this->modalPageLimit, ['*'], 'modalPage');
     }
 
     #[Loggable(level: 'C', nickname: 'Create Workflow Steps')]
