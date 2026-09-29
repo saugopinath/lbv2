@@ -35,33 +35,51 @@ class AgeManagement extends Component
             ->where('module_id', $this->moduleId)
             ->value('id');
 
+        $record = null;
         if ($this->schemeModuleId) {
             $record = AgeManagements::select('min_age', 'max_age', 'is_special', 'special_case')
                 ->where('scheme_id', $this->schemeId)
                 ->where('module_id', $this->schemeModuleId)
                 ->first();
+        }
+        if (!$record) {
+            $record = AgeManagements::select('min_age', 'max_age', 'is_special', 'special_case')
+                ->where('scheme_id', $this->schemeId)
+                ->where('module_id', $this->moduleId)
+                ->first();
+        }
+        if (!$record) {
+            $record = AgeManagements::select('min_age', 'max_age', 'is_special', 'special_case')
+                ->where('scheme_id', $this->schemeId)
+                ->whereNull('module_id')
+                ->first();
+        }
 
-            if ($record) {
-                $this->already = true;
-                $this->minage = $record->min_age;
-                $this->maxage = $record->max_age;
-                $this->isspecial = $record->is_special ? 'yes' : 'no';
-                if ($record->special_case) {
-                    $data = is_array($record->special_case)
-                        ? $record->special_case
-                        : json_decode($record->special_case, true);
+        if ($record) {
+            $this->already = true;
+            $this->minage = $record->min_age;
+            $this->maxage = $record->max_age;
+            $this->isspecial = ($record->is_special && $record->is_special !== 'no' && $record->is_special !== '0' && $record->is_special !== false) ? 'yes' : 'no';
+            if ($record->special_case) {
+                $data = is_array($record->special_case)
+                    ? $record->special_case
+                    : json_decode($record->special_case, true);
 
-                    $this->selectedSpecialCases = [];
-                    foreach ((array)$data as $id => $values) {
-                        $this->selectedSpecialCases[] = [
-                            'case_id' => (string)$id,
-                            'min'     => $values['min'] ?? '',
-                            'max'     => $values['max'] ?? '',
-                        ];
-                    }
+                $this->selectedSpecialCases = [];
+                foreach ((array)$data as $id => $values) {
+                    $this->selectedSpecialCases[] = [
+                        'case_id' => (string)$id,
+                        'min'     => $values['min'] ?? '',
+                        'max'     => $values['max'] ?? '',
+                    ];
                 }
             }
         }
+    }
+
+    public function enableEditing()
+    {
+        $this->isEdit = true;
     }
 
     public function updatedIsspecial($value)
@@ -145,11 +163,13 @@ class AgeManagement extends Component
                     ->value('id');
             }
 
-            if ($this->schemeModuleId) {
+            $targetModuleId = $this->schemeModuleId ?: $this->moduleId;
+
+            if ($targetModuleId) {
                 AgeManagements::updateOrCreate(
                     [
                         'scheme_id' => $this->schemeId,
-                        'module_id' => $this->schemeModuleId,
+                        'module_id' => $targetModuleId,
                     ],
                     [
                         'min_age'      => $this->minage ?: null,
@@ -160,6 +180,8 @@ class AgeManagement extends Component
                 );
             }
             DB::commit();
+            $this->already = true;
+            $this->isEdit = false;
             $this->dispatch('toastr', ['type' => 'success', 'message' => 'Saved Successfully!']);
         } catch (Exception $e) {
             // dd($e->getMessage());

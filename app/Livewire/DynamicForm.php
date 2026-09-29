@@ -388,7 +388,7 @@ class DynamicForm extends Component
                     data_get($this->formData, $fieldName),
                     $this->formData
                 );
-                
+
                 $sectionName = null;
                 if (!empty($field['section_level_id']) && isset($sectionNames[$field['section_level_id']])) {
                     $sectionName = $sectionNames[$field['section_level_id']];
@@ -879,11 +879,11 @@ class DynamicForm extends Component
         foreach ($json['tabs'] ?? [] as $tab) {
             foreach ($tab['fields'] ?? [] as $field) {
                 if (empty($field['field_name'])) continue;
-                
+
                 $fieldName = $field['field_name'];
-                
+
                 if (
-                    ($field['field_type'] === 'checkbox' && !empty($field['is_multiple'])) || 
+                    ($field['field_type'] === 'checkbox' && !empty($field['is_multiple'])) ||
                     ($field['field_type'] === 'select' && !empty($field['is_multiple']))
                 ) {
                     if (!isset($this->formData[$fieldName])) {
@@ -896,6 +896,12 @@ class DynamicForm extends Component
 
     public function mount($schemeId = null, $schemeName = null, $saveNext = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null, $moduleCode = null)
     {
+        if ($moduleCode && $schemeId) {
+            if (!WorkFlowPermissionHelper::canAccessModule($moduleCode, (int) $schemeId)) {
+                abort(403, 'You are not authorized to access this module for the selected scheme.');
+            }
+        }
+
         $handler = app(DynamicFormHandlerInterface::class);
         if (!$handler->authorizeEntry((int) $schemeId)) {
             abort(403, 'You are not authorized to create entry or for any application type entry.');

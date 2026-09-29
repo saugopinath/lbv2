@@ -587,10 +587,134 @@ class WorkFlowPermissionHelper
             || self::hasPermission('update-beneficiary-list', $schemeId) || self::hasPermission('request-update-beneficiary', $schemeId);
     }
 
+    /* OLD CODE COMMENTED OUT FOR BACKWARD COMPATIBILITY:
     public static function canAccessModule($moduleCode, $schemeId = null): bool
     {
         $permissionName = strtolower(str_replace(' ', '_', $moduleCode)) . '_access';
         return self::hasPermission($permissionName, $schemeId);
+    }
+    */
+    public static function canAccessModule($moduleCode, $schemeId = null): bool
+    {
+        if (empty($moduleCode)) {
+            return false;
+        }
+
+        $permissionName = strtolower(str_replace(' ', '_', $moduleCode)) . '_access';
+        $hasPerm = self::hasPermission($permissionName, $schemeId);
+
+        if (!$hasPerm) {
+            return false;
+        }
+
+        if ($schemeId) {
+            $module = \App\Models\DynamicWorkflowModule::select('id')
+                ->where('module_code', $moduleCode)
+                ->where('is_active', 1)
+                ->first();
+
+            if (!$module) {
+                return false;
+            }
+
+            $schemeModule = \App\Models\DynamicWorkflowSchemeModule::select('id')
+                ->where('scheme_id', (int) $schemeId)
+                ->where('module_id', $module->id)
+                ->where('is_disabled', 0)
+                ->first();
+
+            if (!$schemeModule) {
+                return false;
+            }
+
+            // Verification of step-level specific user assignment and mapped step roles
+            $steps = \App\Models\DynamicWorkflowLabel::select('id', 'assign_specific_users', 'user_ids')
+                ->where('module_id', $schemeModule->id)
+                ->where('scheme_id', (int) $schemeId)
+                ->get();
+
+            if ($steps->isNotEmpty()) {
+                $hasSpecificUserSteps = $steps->contains(fn($s) => (bool) $s->assign_specific_users);
+
+                if ($hasSpecificUserSteps) {
+                    $userId = (string) auth()->id();
+                    $isUserExplicitlyAllowed = false;
+
+                    foreach ($steps as $step) {
+                        if ($step->assign_specific_users) {
+                            $uIds = is_array($step->user_ids) ? $step->user_ids : (json_decode($step->user_ids, true) ?? []);
+                            if (in_array($userId, array_map('strval', (array)$uIds), true)) {
+                                $isUserExplicitlyAllowed = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    // If steps require specific user assignments and current user is not assigned
+                    if (!$isUserExplicitlyAllowed) {
+                        $hasGeneralRoleSteps = $steps->contains(fn($s) => !$s->assign_specific_users);
+                        if (!$hasGeneralRoleSteps) {
+                            return false;
+                        }
+                    }
+                }
+
+                // Verification of step-level assigned roles (Global Role Mode)
+                $stepRoleIds = \App\Models\workflowstepRolemapping::where('module_id', $schemeModule->id)
+                    ->where('scheme_id', (int) $schemeId)
+                    ->pluck('role_id')
+                    ->toArray();
+
+                if (!empty($stepRoleIds)) {
+                    $user = auth()->user();
+                    if ($user) {
+                        $registrar = app(\Spatie\Permission\PermissionRegistrar::class);
+                        $originalTeamId = $registrar->getPermissionsTeamId();
+                        $registrar->setPermissionsTeamId((int) $schemeId);
+
+                        $userRoleIds = $user->roles()->pluck('id')->toArray();
+                        $registrar->setPermissionsTeamId($originalTeamId);
+
+                        $officeRoleIds = \App\Models\UserRoleSchemeOfficeMapping::where('scheme_id', (int) $schemeId)
+                            ->where('user_id', $user->id)
+                            ->pluck('role_id')
+                            ->toArray();
+
+                        $allUserRoleIds = array_unique(array_merge($userRoleIds, $officeRoleIds));
+                        $hasMatchingRole = !empty(array_intersect($stepRoleIds, $allUserRoleIds));
+
+                        // If user does not have any of the roles assigned to this module's steps
+                        if (!$hasMatchingRole && !$hasSpecificUserSteps) {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        // When schemeId is null, verify if the user has access to AT LEAST ONE active scheme configured for this module
+        $module = \App\Models\DynamicWorkflowModule::select('id')->where('module_code', $moduleCode)->where('is_active', 1)->first();
+        if ($module) {
+            $configuredSchemes = \App\Models\DynamicWorkflowSchemeModule::where('module_id', $module->id)
+                ->where('is_disabled', 0)
+                ->pluck('scheme_id')
+                ->toArray();
+
+            if (!empty($configuredSchemes)) {
+                $hasAccessToAnyScheme = false;
+                foreach ($configuredSchemes as $sId) {
+                    if (self::canAccessModule($moduleCode, $sId)) {
+                        $hasAccessToAnyScheme = true;
+                        break;
+                    }
+                }
+                return $hasAccessToAnyScheme;
+            }
+        }
+
+        return true;
     }
 
     public static function getUserModules($schemeId = null)

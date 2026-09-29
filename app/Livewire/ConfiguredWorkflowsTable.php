@@ -8,7 +8,7 @@ use App\Models\DynamicWorkflowSchemeModule;
 use App\Models\DynamicWorkflowLabel;
 use App\Models\workflowstepRolemapping;
 use App\Models\DupcheckschemeconfigSetting;
-use App\Models\AgeManagements;
+use App\Models\{AgeManagements, Scheme, DynamicWorkflowModule};
 
 class ConfiguredWorkflowsTable extends Component
 {
@@ -16,8 +16,26 @@ class ConfiguredWorkflowsTable extends Component
 
     public $search = '';
     public $perPage = 10;
+    public array $selectedSchemes = [];
+    public array $selectedModules = [];
+    public string $statusFilter = '';
+    public array $schemesList = [];
+    public array $modulesList = [];
 
     protected $paginationTheme = 'tailwind';
+
+    public function mount()
+    {
+        $this->schemesList = Scheme::where('is_active', 1)
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->toArray();
+
+        $this->modulesList = DynamicWorkflowModule::where('is_active', 1)
+            ->orderBy('module_name')
+            ->pluck('module_name', 'id')
+            ->toArray();
+    }
 
     public function updatingSearch()
     {
@@ -26,6 +44,27 @@ class ConfiguredWorkflowsTable extends Component
 
     public function updatingPerPage()
     {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedSchemes()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedModules()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedStatusFilter()
+    {
+        $this->resetPage();
+    }
+
+    public function resetFilters()
+    {
+        $this->reset(['search', 'selectedSchemes', 'selectedModules', 'statusFilter']);
         $this->resetPage();
     }
 
@@ -92,6 +131,20 @@ class ConfiguredWorkflowsTable extends Component
                     ->orWhere('dynamic_workflow_modules.module_code', 'ILIKE', $searchTerm)
                     ->orWhere('dynamic_workflow_scheme_modules.main_module_code', 'ILIKE', $searchTerm);
             });
+        }
+
+        if (!empty($this->selectedSchemes)) {
+            $query->whereIn('dynamic_workflow_scheme_modules.scheme_id', (array) $this->selectedSchemes);
+        }
+
+        if (!empty($this->selectedModules)) {
+            $query->whereIn('dynamic_workflow_scheme_modules.module_id', (array) $this->selectedModules);
+        }
+
+        if ($this->statusFilter === 'active') {
+            $query->where('dynamic_workflow_scheme_modules.is_disabled', 0);
+        } elseif ($this->statusFilter === 'disabled') {
+            $query->where('dynamic_workflow_scheme_modules.is_disabled', 1);
         }
 
         $configuredWorkflows = $query->orderBy('dynamic_workflow_scheme_modules.id', 'desc')

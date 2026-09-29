@@ -1,7 +1,25 @@
     <div @scheme-created.window="openModal=false" class="max-w-5xl mx-auto bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-4" x-data="{ openModal: false }">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <h2 class="text-2xl font-bold text-gray-800">Define Workflow</h2>
-            <x-button.primary @click="openModal=true">Add New Scheme</x-button.primary>
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('users') }}" 
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all duration-150 ease-in-out cursor-pointer"
+                   title="Create a new user">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                    <span>Add New User</span>
+                </a>
+                {{-- OLD CODE COMMENTED OUT FOR BACKWARD COMPATIBILITY:
+                <x-button.primary @click="openModal=true">Add New Scheme</x-button.primary>
+                --}}
+                <x-button.primary @click="openModal=true" class="inline-flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    <span>Add New Scheme</span>
+                </x-button.primary>
+            </div>
         </div>
 
         <div @keydown.escape.window="openModal = false" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" x-cloak x-show="openModal" x-transition:enter-end="opacity-100" x-transition:enter-start="opacity-0" x-transition:enter="transition ease-out duration-200" x-transition:leave-end="opacity-0" x-transition:leave-start="opacity-100" x-transition:leave="transition ease-in duration-150">

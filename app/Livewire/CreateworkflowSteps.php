@@ -161,10 +161,10 @@ class CreateworkflowSteps extends Component
             $allSelectedUserIds = $steps->pluck('user_ids')->filter()->flatten()->unique()->toArray();
             $userOfficeMappings = !empty($allSelectedUserIds)
                 ? UserRoleSchemeOfficeMapping::with('Office')
-                    ->where('scheme_id', $this->schemeId)
-                    ->whereIn('user_id', $allSelectedUserIds)
-                    ->get()
-                    ->groupBy('user_id')
+                ->where('scheme_id', $this->schemeId)
+                ->whereIn('user_id', $allSelectedUserIds)
+                ->get()
+                ->groupBy('user_id')
                 : collect([]);
 
             // Pre-extract matched office objects for each step outside the loop
@@ -183,11 +183,11 @@ class CreateworkflowSteps extends Component
             $officeTypeIds = collect($stepMatchedOffices)->pluck('office_type_id')->filter()->unique()->toArray();
             $allOfficesList = !empty($officeTypeIds)
                 ? OfficeMaster::select('id', 'name', 'office_type_id', 'district_id')
-                    ->whereIn('office_type_id', $officeTypeIds)
-                    ->where('is_active', 1)
-                    ->orderBy('name')
-                    ->get()
-                    ->groupBy('office_type_id')
+                ->whereIn('office_type_id', $officeTypeIds)
+                ->where('is_active', 1)
+                ->orderBy('name')
+                ->get()
+                ->groupBy('office_type_id')
                 : collect([]);
 
             foreach ($steps as $index => $step) {
@@ -922,7 +922,7 @@ class CreateworkflowSteps extends Component
             DB::commit();
 
             $this->already = true;
-            $this->isEdit = true;
+            $this->isEdit = false;
             $this->dispatch('toastr', [
                 'type'    => 'success',
                 'message' => 'Workflow steps saved successfully!',

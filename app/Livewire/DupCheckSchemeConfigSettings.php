@@ -48,25 +48,51 @@ class DupCheckSchemeConfigSettings extends Component
             ->where('module_id', $this->moduleId)
             ->value('id');
 
+        $existingSettings = collect([]);
         if ($this->schemeModuleId) {
             $existingSettings = DupcheckschemeconfigSetting::select('check_with', 'is_same', 'is_cross', 'scheme_lists')
                 ->where('scheme_id', $this->schemeId)
                 ->where('module_id', $this->schemeModuleId)
                 ->get();
-            if ($existingSettings->isNotEmpty()) {
-                $this->already = true;
-            }
+        }
+        if ($existingSettings->isEmpty()) {
+            $existingSettings = DupcheckschemeconfigSetting::select('check_with', 'is_same', 'is_cross', 'scheme_lists')
+                ->where('scheme_id', $this->schemeId)
+                ->where('module_id', $this->moduleId)
+                ->get();
+        }
+        if ($existingSettings->isEmpty()) {
+            $existingSettings = DupcheckschemeconfigSetting::select('check_with', 'is_same', 'is_cross', 'scheme_lists')
+                ->where('scheme_id', $this->schemeId)
+                ->whereNull('module_id')
+                ->get();
+        }
+
+        if ($existingSettings->isNotEmpty()) {
+            $this->already = true;
             foreach ($existingSettings as $setting) {
                 if (isset($this->config[$setting->check_with])) {
+                    $schemes = $setting->scheme_lists;
+                    if (is_string($schemes)) {
+                        $schemes = json_decode($schemes, true) ?: [];
+                    } elseif (!is_array($schemes)) {
+                        $schemes = [];
+                    }
+
                     $this->config[$setting->check_with] = [
                         'selected' => true,
-                        'issame'  => $setting->is_same ? 'yes' : 'no',
-                        'iscross'  => $setting->is_cross ? 'yes' : 'no',
-                        'schemes'  => $setting->scheme_lists ?? []
+                        'issame'  => ($setting->is_same && $setting->is_same !== 'no' && $setting->is_same !== '0') ? 'yes' : 'no',
+                        'iscross'  => ($setting->is_cross && $setting->is_cross !== 'no' && $setting->is_cross !== '0') ? 'yes' : 'no',
+                        'schemes'  => $schemes
                     ];
                 }
             }
         }
+    }
+
+    public function enableEditing()
+    {
+        $this->isEdit = true;
     }
 
     public function save()
@@ -92,9 +118,16 @@ class DupCheckSchemeConfigSettings extends Component
                     ->value('id');
             }
 
-            if ($this->schemeModuleId) {
+            $targetModuleId = $this->schemeModuleId ?: $this->moduleId;
+
+            if ($targetModuleId) {
                 DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
-                    ->where('module_id', $this->schemeModuleId)
+                    ->where(function ($q) use ($targetModuleId) {
+                        $q->where('module_id', $targetModuleId);
+                        if ($this->schemeModuleId) {
+                            $q->orWhere('module_id', $this->moduleId);
+                        }
+                    })
                     ->delete();
 
                 $insertData = [];
@@ -102,7 +135,7 @@ class DupCheckSchemeConfigSettings extends Component
                     if ($item['selected']) {
                         $insertData[] = [
                             'scheme_id'    => $this->schemeId,
-                            'module_id'    => $this->schemeModuleId,
+                            'module_id'    => $targetModuleId,
                             'check_with'   => $optionName,
                             'is_same'      => $item['issame'] === 'yes',
                             'is_cross'     => $item['iscross'] === 'yes',
@@ -119,6 +152,8 @@ class DupCheckSchemeConfigSettings extends Component
             }
 
             DB::commit();
+            $this->already = true;
+            $this->isEdit = false;
             $this->dispatch('toastr', [
                 'type' => 'success',
                 'message' => 'Config saved successfully!'

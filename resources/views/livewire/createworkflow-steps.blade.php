@@ -1,5 +1,5 @@
 <div>
-    @if ($errors->any())
+    {{-- @if ($errors->any())
         <div class="p-3 bg-red-50 border border-red-200 rounded-lg my-2">
             <p class="text-xs font-bold text-red-700">Fields with Errors:</p>
             <ul class="list-disc list-inside text-xs text-red-600">
@@ -8,7 +8,7 @@
                 @endforeach
             </ul>
         </div>
-    @endif
+    @endif --}}
     @if ($originalrolerank)
         <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6 space-y-6">
             <!-- Header Section -->
