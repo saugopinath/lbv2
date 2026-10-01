@@ -55,6 +55,11 @@ class CreateworkflowSteps extends Component
     public array $districtsList = [];
     public array $stepOfficesList = [];
 
+    // Active Pending Request Guard properties
+    public array $stepPendingCounts = [];
+    public int $totalPendingRequests = 0;
+    public array $existingStepIds = [];
+
     public function enableEditing()
     {
         $this->isEdit = true;
@@ -94,6 +99,10 @@ class CreateworkflowSteps extends Component
             if (!isset($this->stepOfficesList[$i])) {
                 $this->stepOfficesList[$i] = [];
             }
+
+            if (!isset($this->stepPendingCounts[$i])) {
+                $this->stepPendingCounts[$i] = 0;
+            }
         }
     }
 
@@ -104,9 +113,24 @@ class CreateworkflowSteps extends Component
         $this->moduleId = $moduleData['module_id'];
         $this->moduleCode = $moduleData['module_code'];
 
+        /* OLD CODE PRESERVED FOR BACKWARD COMPATIBILITY:
         $this->schemeModuleId = DynamicWorkflowSchemeModule::where('scheme_id', $this->schemeId)
             ->where('module_id', $this->moduleId)
             ->value('id');
+        */
+
+        // REQUIREMENT: Enforce DynamicWorkflowSchemeModule creation first so schemeModuleId is always valid
+        $schemeModule = DynamicWorkflowSchemeModule::firstOrCreate(
+            [
+                'scheme_id' => $this->schemeId,
+                'module_id' => $this->moduleId,
+            ],
+            [
+                'main_module_code' => $this->moduleCode,
+                'is_disabled'      => 0,
+            ]
+        );
+        $this->schemeModuleId = $schemeModule->id;
 
         $steps = $this->schemeModuleId
             ? DynamicWorkflowLabel::select('id', 'label_name', 'permissions', 'assign_specific_users', 'user_ids')
@@ -115,6 +139,15 @@ class CreateworkflowSteps extends Component
             ->orderBy('id')
             ->get()
             : collect([]);
+
+        // Detect active pending requests for this workflow
+        $pendingRequests = \App\Models\DynamicWorkflowRequest::select('current_step_id', 'current_rank', DB::raw('count(*) as total'))
+            ->where('module_id', $this->schemeModuleId)
+            ->where('scheme_id', $this->schemeId)
+            ->groupBy('current_step_id', 'current_rank')
+            ->get();
+
+        $this->totalPendingRequests = (int) $pendingRequests->sum('total');
 
         // FIX: Enforce Original Role Rank Hierarchy for the UI alert by querying whereNotNull('rank')
         $roles = Role::select('id', 'name', 'rank')->whereNotNull('rank')->orderBy('rank')->pluck('name', 'id')->toArray();
@@ -194,6 +227,8 @@ class CreateworkflowSteps extends Component
                 $this->labels[$index] = $step->label_name;
                 $this->assignSpecificUsers[$index] = (bool) $step->assign_specific_users;
                 $this->selectedUserIdsByStep[$index] = is_array($step->user_ids) ? array_map('strval', $step->user_ids) : [];
+                $this->existingStepIds[$index] = $step->id;
+                $this->stepPendingCounts[$index] = (int) $pendingRequests->where('current_step_id', $step->id)->sum('total');
 
                 if (isset($stepMatchedOffices[$index])) {
                     $office = $stepMatchedOffices[$index];
@@ -307,6 +342,21 @@ class CreateworkflowSteps extends Component
         if ($value < 1) {
             $this->labels = [];
             return;
+        }
+
+        // GUARD: Prevent reducing steps if removed steps hold active pending requests
+        $existingCount = count($this->labels);
+        if ($value < $existingCount) {
+            for ($checkIdx = $value; $checkIdx < $existingCount; $checkIdx++) {
+                if (!empty($this->stepPendingCounts[$checkIdx]) && $this->stepPendingCounts[$checkIdx] > 0) {
+                    $this->noofSteps = $existingCount;
+                    $this->dispatch('toastr', [
+                        'type' => 'error',
+                        'message' => "Cannot reduce steps to {$value}. Step " . ($checkIdx + 1) . " has {$this->stepPendingCounts[$checkIdx]} active pending request(s)."
+                    ]);
+                    return;
+                }
+            }
         }
         $existingLabels = $this->labels;
         $existingRoleSel = $this->roleSelection;
@@ -703,9 +753,18 @@ class CreateworkflowSteps extends Component
                 ]
             );
 
-            // Clean up old records for update capability
+            /* OLD CODE PRESERVED FOR BACKWARD COMPATIBILITY:
             workflowstepRolemapping::where('module_id', $schemeModule->id)->where('scheme_id', $schemeId)->delete();
             DynamicWorkflowLabel::where('module_id', $schemeModule->id)->where('scheme_id', $schemeId)->delete();
+            */
+
+            // Retrieve existing step labels to preserve IDs and avoid breaking in-flight pending requests
+            $existingLabels = DynamicWorkflowLabel::where('module_id', $schemeModule->id)
+                ->where('scheme_id', $schemeId)
+                ->orderBy('id')
+                ->get();
+
+            $savedLabelIds = [];
 
             $parent = Codemaster::select('id', 'code')->where('short_name', 'dynamic_op_type')->first();
             $maxCode = null;
@@ -717,6 +776,9 @@ class CreateworkflowSteps extends Component
                 $parent_code = $parent->code;
                 $maxCode = Codemaster::where('parent_short_code', 'dynamic_op_type')->max('code');
             }
+
+            // Clean up role mappings before re-inserting fresh mappings
+            workflowstepRolemapping::where('module_id', $schemeModule->id)->where('scheme_id', $schemeId)->delete();
 
             for ($i = 0; $i < $stepCount; $i++) {
                 $rank = ($i + 1) * 10;
@@ -754,14 +816,27 @@ class CreateworkflowSteps extends Component
                     ? array_values(array_unique(array_filter($this->selectedUserIdsByStep[$i])))
                     : [];
 
-                $label = DynamicWorkflowLabel::create([
-                    'scheme_id'             => $schemeId,
-                    'module_id'             => $schemeModule->id,
-                    'label_name'            => $this->labels[$i],
-                    'op_type_id'            => $opTypeId,
-                    'assign_specific_users' => $isSpecificUserMode,
-                    'user_ids'              => $isSpecificUserMode ? $selectedUserIds : null,
-                ]);
+                $existingLabel = $existingLabels->get($i);
+
+                if ($existingLabel) {
+                    $existingLabel->update([
+                        'label_name'            => $this->labels[$i],
+                        'op_type_id'            => $opTypeId,
+                        'assign_specific_users' => $isSpecificUserMode,
+                        'user_ids'              => $isSpecificUserMode ? $selectedUserIds : null,
+                    ]);
+                    $label = $existingLabel;
+                } else {
+                    $label = DynamicWorkflowLabel::create([
+                        'scheme_id'             => $schemeId,
+                        'module_id'             => $schemeModule->id,
+                        'label_name'            => $this->labels[$i],
+                        'op_type_id'            => $opTypeId,
+                        'assign_specific_users' => $isSpecificUserMode,
+                        'user_ids'              => $isSpecificUserMode ? $selectedUserIds : null,
+                    ]);
+                }
+                $savedLabelIds[] = $label->id;
 
                 $assignedRoleIds = [];
 
@@ -917,6 +992,13 @@ class CreateworkflowSteps extends Component
                         }
                     }
                 }
+            }
+
+            // Clean up any old labels that were safely removed (not present in savedLabelIds)
+            $labelsToDelete = $existingLabels->whereNotIn('id', $savedLabelIds);
+            foreach ($labelsToDelete as $delLabel) {
+                workflowstepRolemapping::where('workflow_step_id', $delLabel->id)->delete();
+                $delLabel->delete();
             }
 
             DB::commit();

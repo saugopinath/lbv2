@@ -951,6 +951,7 @@ class DynamicForm extends Component
 
         $this->maxDate = Carbon::now()->format('Y-m-d');
         $this->minDate = Carbon::now()->subYears(2)->format('Y-m-d');
+        /* OLD CODE PRESERVED FOR BACKWARD COMPATIBILITY:
         $ageConfig = AgeManagements::select('min_age', 'max_age')->where('scheme_id', $schemeId)->first();
         if ($ageConfig) {
             if ($ageConfig['max_age']) {
@@ -958,6 +959,33 @@ class DynamicForm extends Component
             }
             if ($ageConfig['min_age']) {
                 $this->maxDOB = now()->subYears($ageConfig['min_age'])->format('Y-m-d');
+            }
+        }
+        */
+
+        $ageConfig = AgeManagements::select('min_age', 'max_age', 'is_special', 'special_case')->where('scheme_id', $schemeId)->first();
+        if ($ageConfig) {
+            $effectiveMinAge = $ageConfig['min_age'] ?? null;
+            $effectiveMaxAge = $ageConfig['max_age'] ?? null;
+
+            // If special cases are configured, determine the widest allowed age bounds for the DOB picker
+            if (!empty($ageConfig['is_special']) && !empty($ageConfig['special_case'])) {
+                $specialCases = is_array($ageConfig['special_case']) ? $ageConfig['special_case'] : json_decode($ageConfig['special_case'], true);
+                foreach ((array) $specialCases as $sc) {
+                    if (isset($sc['min']) && is_numeric($sc['min'])) {
+                        $effectiveMinAge = is_null($effectiveMinAge) ? (int)$sc['min'] : min((int)$effectiveMinAge, (int)$sc['min']);
+                    }
+                    if (isset($sc['max']) && is_numeric($sc['max'])) {
+                        $effectiveMaxAge = is_null($effectiveMaxAge) ? (int)$sc['max'] : max((int)$effectiveMaxAge, (int)$sc['max']);
+                    }
+                }
+            }
+
+            if ($effectiveMaxAge) {
+                $this->minDOB = now()->subYears($effectiveMaxAge)->format('Y-m-d');
+            }
+            if ($effectiveMinAge) {
+                $this->maxDOB = now()->subYears($effectiveMinAge)->format('Y-m-d');
             }
         }
         if ($grievanceId) {

@@ -45,6 +45,18 @@
                     $requiredStar = false;
                 @endphp
 
+                @if(!empty($totalPendingRequests) && $totalPendingRequests > 0)
+                    <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3">
+                        <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        <div class="text-xs space-y-1">
+                            <p class="font-bold text-amber-800">Notice: Active Applications in Queue ({{ $totalPendingRequests }} pending)</p>
+                            <p class="text-amber-700">This workflow currently has in-flight applications. Reducing step count or deleting steps with active queues is locked to protect pending applications.</p>
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Step Count Field -->
                 <div class="max-w-xs">
                     <x-form.input :disabled="$isDisabled" :label_placement="'left'" label="Number of Steps" max="9" name="noofSteps" placeholder="Eg: 3" required type="number" wire:model.live="noofSteps" x-on:input="$event.target.value = $event.target.value.replace(/[^0-9]/g, '').slice(0,1);" x-on:keydown="
@@ -63,15 +75,25 @@
                     <!-- Workflow Steps Container -->
                     <div class="space-y-4">
                         @foreach ($labels as $index => $value)
+                            @php
+                                $stepPending = $stepPendingCounts[$index] ?? 0;
+                            @endphp
                             <div class="bg-gray-50/70 border border-gray-200 rounded-xl p-5 space-y-4" wire:key="step-config-{{ $index }}">
                                 <!-- Step Badge Header -->
-                                <div class="flex items-center gap-2 pb-2 border-b border-gray-200/60">
-                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold">
-                                        {{ $index + 1 }}
-                                    </span>
-                                    <h3 class="text-sm font-semibold text-gray-800">
-                                        Step {{ $index + 1 }} Configuration
-                                    </h3>
+                                <div class="flex items-center justify-between pb-2 border-b border-gray-200/60">
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold">
+                                            {{ $index + 1 }}
+                                        </span>
+                                        <h3 class="text-sm font-semibold text-gray-800">
+                                            Step {{ $index + 1 }} Configuration
+                                        </h3>
+                                    </div>
+                                    @if($stepPending > 0)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200" title="{{ $stepPending }} pending applications at this step">
+                                            ⚠️ {{ $stepPending }} Pending
+                                        </span>
+                                    @endif
                                 </div>
 
                                 <!-- Assign Rules -->

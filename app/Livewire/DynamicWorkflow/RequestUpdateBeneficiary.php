@@ -204,7 +204,7 @@ class RequestUpdateBeneficiary extends Component
         $this->moduleId = $module->id;
         $this->moduleCode = $module->module_code;
         // $this->moduleSchemeId = $module->scheme_id;
-      
+
         if (!$this->beneficiary) {
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -212,7 +212,7 @@ class RequestUpdateBeneficiary extends Component
             ]);
             return;
         }
-       
+
         if (empty($this->selectedFields)) {
             $this->dispatch('toastr', [
                 'type' => 'error',
@@ -220,9 +220,9 @@ class RequestUpdateBeneficiary extends Component
             ]);
             return;
         }
-          
+
         $this->validate($this->rules(), [], $this->validationAttributes());
-        
+
         $payload = $this->prepareWorkflowPayload();
         if (count($payload['actual_changed_blocks']) !== count($this->selectedFields)) {
             $this->dispatch('toastr', [
@@ -252,12 +252,12 @@ class RequestUpdateBeneficiary extends Component
             ->where('scheme_id', $this->beneficiary->scheme_id)
             ->whereNotIn('current_rank', [-100, 0]) // -100 = rejected, 0 = completed
             ->exists();
-            //    dd($hasPendingRequest);
+        //    dd($hasPendingRequest);
         if ($hasPendingRequest) {
             $this->dispatch('toast', 'error', 'A pending request already exists.');
             return;
         }
-        
+
         DB::beginTransaction();
         try {
             $service = new DynamicWorkflowService();
@@ -417,16 +417,23 @@ class RequestUpdateBeneficiary extends Component
 
         abort_if(!$module, 404, 'Workflow module not found.');
 
-        $canAccess = workflowstepRolemapping::where('module_id', $module->id)
+        $schemeModule = DynamicWorkflowSchemeModule::query()
+            ->where('module_id', $module->id)
+            ->when($this->moduleSchemeId, fn($q) => $q->where('scheme_id', $this->moduleSchemeId))
+            ->first();
+
+        $schemeModuleId = $schemeModule ? $schemeModule->id : null;
+
+        $canAccess = workflowstepRolemapping::where('module_id', $schemeModuleId)
             ->when($this->currentRoleId, fn($query) => $query->where('role_id', $this->currentRoleId))
             ->exists();
 
         abort_if(!$canAccess, 403, 'You are not allowed to access this workflow module.');
 
-        $this->moduleId = $module->id;
+        $this->moduleId = $schemeModuleId;
         $this->moduleCode = $module->module_code;
         $this->moduleName = $module->module_name;
-        $this->moduleSchemeId = $module->scheme_id;
+        $this->moduleSchemeId = $schemeModule ? $schemeModule->scheme_id : $this->moduleSchemeId;
         $this->fieldOptions = $this->getAllowedFieldOptions($module);
     }
 

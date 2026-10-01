@@ -157,13 +157,27 @@ class AgeManagement extends Component
                     ];
                 }
             }
+            /* OLD CODE PRESERVED FOR BACKWARD COMPATIBILITY:
             if (!$this->schemeModuleId) {
                 $this->schemeModuleId = DynamicWorkflowSchemeModule::where('scheme_id', $this->schemeId)
                     ->where('module_id', $this->moduleId)
                     ->value('id');
             }
-
             $targetModuleId = $this->schemeModuleId ?: $this->moduleId;
+            */
+
+            // REQUIREMENT: Enforce SchemeModuleID is resolved
+            if (!$this->schemeModuleId) {
+                $schemeModule = DynamicWorkflowSchemeModule::firstOrCreate(
+                    [
+                        'scheme_id' => $this->schemeId,
+                        'module_id' => $this->moduleId,
+                    ]
+                );
+                $this->schemeModuleId = $schemeModule->id;
+            }
+
+            $targetModuleId = $this->schemeModuleId;
 
             if ($targetModuleId) {
                 AgeManagements::updateOrCreate(

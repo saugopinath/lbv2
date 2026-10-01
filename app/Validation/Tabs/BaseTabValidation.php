@@ -204,10 +204,10 @@ abstract class BaseTabValidation
 
     /**
      * Age Rule Mutator: Strips static JSON min/max rules and replaces them with 
-     * dynamic dynamic constraints fetched from the database.
+     * dynamic constraints fetched from the database, including special case exemptions.
      * 
      * @param array $fieldRules Current field rule array
-     * @param object $ageConfig DB configuration object containing min_age/max_age
+     * @param object $ageConfig DB configuration object containing min_age/max_age/is_special/special_case
      * @return array Updated rules with dynamic min/max constraints
      */
     protected function applyAgeRules(array $fieldRules, object $ageConfig): array
@@ -224,11 +224,32 @@ abstract class BaseTabValidation
         // Re-inject validated type and dynamic DB thresholds
         $fieldRules[] = 'integer';
 
-        if (!is_null($ageConfig->min_age)) {
-            $fieldRules[] = "min:{$ageConfig->min_age}";
+        $minAge = $ageConfig->min_age;
+        $maxAge = $ageConfig->max_age;
+
+        // Dynamic evaluation of special cases (e.g. Widow=2, Handicapped=1)
+        if (!empty($ageConfig->is_special) && !empty($ageConfig->special_case)) {
+            $specialCases = is_array($ageConfig->special_case)
+                ? $ageConfig->special_case
+                : json_decode($ageConfig->special_case, true);
+
+            $maritalStatus = $this->formData['marital_status'] ?? null;
+            $isHandicapped = $this->formData['is_handicapped'] ?? $this->formData['disability_type'] ?? null;
+
+            if ($maritalStatus == '2' && isset($specialCases['2'])) {
+                $minAge = !empty($specialCases['2']['min']) ? $specialCases['2']['min'] : $minAge;
+                $maxAge = !empty($specialCases['2']['max']) ? $specialCases['2']['max'] : $maxAge;
+            } elseif (!empty($isHandicapped) && isset($specialCases['1'])) {
+                $minAge = !empty($specialCases['1']['min']) ? $specialCases['1']['min'] : $minAge;
+                $maxAge = !empty($specialCases['1']['max']) ? $specialCases['1']['max'] : $maxAge;
+            }
         }
-        if (!is_null($ageConfig->max_age)) {
-            $fieldRules[] = "max:{$ageConfig->max_age}";
+
+        if (!is_null($minAge)) {
+            $fieldRules[] = "min:{$minAge}";
+        }
+        if (!is_null($maxAge)) {
+            $fieldRules[] = "max:{$maxAge}";
         }
 
         return $fieldRules;
@@ -236,10 +257,10 @@ abstract class BaseTabValidation
 
     /**
      * DOB Date Calculation Mutator: Computes valid past calendar date boundaries 
-     * based on active dynamic min/max age requirements.
+     * based on active dynamic min/max age requirements, including special exemptions.
      * 
      * @param array $fieldRules Current field rule array
-     * @param object $ageConfig DB configuration object containing min_age/max_age
+     * @param object $ageConfig DB configuration object containing min_age/max_age/is_special/special_case
      * @return array Updated rules with relative 'after_or_equal' and 'before_or_equal' date strings
      */
     protected function applyDobRules(array $fieldRules, object $ageConfig): array
@@ -254,14 +275,35 @@ abstract class BaseTabValidation
         // Use safe isolated datetime instance to avoid carbon mutation bugs
         $today = now();
 
+        $minAge = $ageConfig->min_age;
+        $maxAge = $ageConfig->max_age;
+
+        // Dynamic evaluation of special cases (e.g. Widow=2, Handicapped=1)
+        if (!empty($ageConfig->is_special) && !empty($ageConfig->special_case)) {
+            $specialCases = is_array($ageConfig->special_case)
+                ? $ageConfig->special_case
+                : json_decode($ageConfig->special_case, true);
+
+            $maritalStatus = $this->formData['marital_status'] ?? null;
+            $isHandicapped = $this->formData['is_handicapped'] ?? $this->formData['disability_type'] ?? null;
+
+            if ($maritalStatus == '2' && isset($specialCases['2'])) {
+                $minAge = !empty($specialCases['2']['min']) ? $specialCases['2']['min'] : $minAge;
+                $maxAge = !empty($specialCases['2']['max']) ? $specialCases['2']['max'] : $maxAge;
+            } elseif (!empty($isHandicapped) && isset($specialCases['1'])) {
+                $minAge = !empty($specialCases['1']['min']) ? $specialCases['1']['min'] : $minAge;
+                $maxAge = !empty($specialCases['1']['max']) ? $specialCases['1']['max'] : $maxAge;
+            }
+        }
+
         // Maximum age sets the oldest allowed birthdate (after_or_equal)
-        if (!is_null($ageConfig->max_age)) {
-            $minDate = $today->copy()->subYears($ageConfig->max_age)->format('Y-m-d');
+        if (!is_null($maxAge)) {
+            $minDate = $today->copy()->subYears($maxAge)->format('Y-m-d');
             $fieldRules[] = "after_or_equal:{$minDate}";
         }
         // Minimum age sets the youngest allowed birthdate (before_or_equal)
-        if (!is_null($ageConfig->min_age)) {
-            $maxDate = $today->copy()->subYears($ageConfig->min_age)->format('Y-m-d');
+        if (!is_null($minAge)) {
+            $maxDate = $today->copy()->subYears($minAge)->format('Y-m-d');
             $fieldRules[] = "before_or_equal:{$maxDate}";
         }
 
@@ -343,7 +385,10 @@ abstract class BaseTabValidation
      */
     protected function getAgeManagementConfig(): ?object
     {
+        /* OLD CODE PRESERVED FOR BACKWARD COMPATIBILITY:
         return AgeManagements::select('min_age', 'max_age')->where('scheme_id', $this->schemeId)->first();
+        */
+        return AgeManagements::select('min_age', 'max_age', 'is_special', 'special_case')->where('scheme_id', $this->schemeId)->first();
     }
 
     /**

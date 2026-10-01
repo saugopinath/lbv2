@@ -46,6 +46,9 @@ class Form extends Component
     {
         if ($schemeData) {
             $selectedSchemeId = $schemeData['scheme_id'];
+            if (!empty($schemeData['module_code'])) {
+                $this->moduleCode = $schemeData['module_code'];
+            }
             if ($this->moduleCode && !WorkFlowPermissionHelper::canAccessModule($this->moduleCode, $selectedSchemeId)) {
                 $this->schemeData = false;
                 $this->dispatch('toastr', [

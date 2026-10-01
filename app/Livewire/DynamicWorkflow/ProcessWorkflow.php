@@ -8,6 +8,8 @@ use App\Models\DynamicWorkflowLog;
 use App\Models\BeneficiaryPersonalDetail;
 use App\Models\DynamicWorkflowModule;
 use App\Services\DynamicWorkflowService;
+use App\Models\DynamicWorkflowSchemeModule;
+use App\Helpers\WorkFlowPermissionHelper;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -21,14 +23,23 @@ class ProcessWorkflow extends Component
     public $module_id;
     public $module_scheme_id;
     public $button_status;
-    public function mount()
+    public function mount($schemeId = null, $moduleCode = null)
     {
-        // $this->module_code=request()->module_code;
-        $this->module_code = config('constants.module_codes.update_mark_beneficiary');
-        $module = DynamicWorkflowModule::where('module_code', $this->module_code)->first();
-        if ($module) {
-            $this->module_id = $module->id;
-            $this->module_scheme_id = $module->scheme_id;
+        $this->module_code = $moduleCode ?? config('constants.module_codes.update_mark_beneficiary');
+        $activeSchemeId = $schemeId ?? WorkFlowPermissionHelper::getSchemeId();
+
+        $mainModule = DynamicWorkflowModule::where('module_code', $this->module_code)->first();
+        if ($mainModule) {
+            $query = DynamicWorkflowSchemeModule::where('module_id', $mainModule->id);
+            if ($activeSchemeId) {
+                $query->where('scheme_id', $activeSchemeId);
+            }
+            $schemeModule = $query->first();
+
+            if ($schemeModule) {
+                $this->module_id = $schemeModule->id; // Correctly sets SchemeModuleID
+                $this->module_scheme_id = $schemeModule->scheme_id;
+            }
         }
         $this->loadRequests();
     }

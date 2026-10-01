@@ -112,21 +112,33 @@ class DupCheckSchemeConfigSettings extends Component
 
         DB::beginTransaction();
         try {
+            /* OLD CODE PRESERVED FOR BACKWARD COMPATIBILITY:
             if (!$this->schemeModuleId) {
                 $this->schemeModuleId = DynamicWorkflowSchemeModule::where('scheme_id', $this->schemeId)
                     ->where('module_id', $this->moduleId)
                     ->value('id');
             }
-
             $targetModuleId = $this->schemeModuleId ?: $this->moduleId;
+            */
+
+            // REQUIREMENT: Enforce SchemeModuleID is resolved
+            if (!$this->schemeModuleId) {
+                $schemeModule = DynamicWorkflowSchemeModule::firstOrCreate(
+                    [
+                        'scheme_id' => $this->schemeId,
+                        'module_id' => $this->moduleId,
+                    ]
+                );
+                $this->schemeModuleId = $schemeModule->id;
+            }
+
+            $targetModuleId = $this->schemeModuleId;
 
             if ($targetModuleId) {
                 DupcheckschemeconfigSetting::where('scheme_id', $this->schemeId)
                     ->where(function ($q) use ($targetModuleId) {
-                        $q->where('module_id', $targetModuleId);
-                        if ($this->schemeModuleId) {
-                            $q->orWhere('module_id', $this->moduleId);
-                        }
+                        $q->where('module_id', $targetModuleId)
+                          ->orWhere('module_id', $this->moduleId);
                     })
                     ->delete();
 
