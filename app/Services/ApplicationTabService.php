@@ -62,7 +62,7 @@ class ApplicationTabService
                     }
 
                     // Skip if value is null or empty - don't show this field at all
-                    if ($value === null || $value === '') {
+                    if ($value === null || $value === '' || (is_array($value) && empty($value))) {
                         continue;
                     }
 
@@ -94,15 +94,35 @@ class ApplicationTabService
     }
     private function mapOptionValue($field, $value)
     {
-        if ($value === null || empty($field->options)) {
+        $options = $field->options;
+        if (is_string($options)) {
+            $options = json_decode($options, true);
+        }
+
+        if ($value === null || empty($options)) {
             return $value;
         }
-        $key = is_string($value) ? trim($value) : $value;
-        return $field->options[$key] ?? $value;
+
+        if (is_array($value)) {
+            return array_map(function ($item) use ($options) {
+                if (is_scalar($item)) {
+                    $itemKey = is_string($item) ? trim($item) : $item;
+                    return $options[$itemKey] ?? $item;
+                }
+                return $item;
+            }, $value);
+        }
+
+        if (is_scalar($value)) {
+            $key = is_string($value) ? trim($value) : $value;
+            return $options[$key] ?? $value;
+        }
+
+        return $value;
     }
     private function normalizeValue($value): string
     {
-        if ($value === null || $value === '') {
+        if ($value === null || $value === '' || (is_array($value) && empty($value))) {
             return '-';
         }
         if (is_bool($value)) {
@@ -112,10 +132,14 @@ class ApplicationTabService
             return $value ? 'Yes' : 'No';
         }
         if (is_array($value)) {
+            if (array_is_list($value)) {
+                return implode(', ', array_map(fn($v) => is_array($v) ? json_encode($v) : (string) $v, $value));
+            }
+
             return collect($value)
                 ->map(
                     fn($v, $k) =>
-                    ucfirst(str_replace('_', ' ', $k)) . ': ' . $v
+                    ucfirst(str_replace('_', ' ', $k)) . ': ' . (is_array($v) ? json_encode($v) : $v)
                 )
                 ->implode(', ');
         }

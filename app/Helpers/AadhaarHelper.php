@@ -32,6 +32,10 @@ class AadhaarHelper
 
     public static function validate($aadhaar)
     {
+        if (!config('app.verhoeff_check', true)) {
+            return true;
+        }
+
         if (!ctype_digit($aadhaar) || strlen($aadhaar) !== 12) {
             return false; // must be 12 digits
         }

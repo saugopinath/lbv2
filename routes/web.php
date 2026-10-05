@@ -78,11 +78,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])->name('lb-application-list');
+    Route::get('lb-application-list', [SchemeController::class, 'finalSubmitted'])->middleware('permission.redirect:canViewLbApplications')->name('lb-application-list');
 
-    Route::get('/lb-application-list/{scheme_id?}', SchemeDropdown::class)->name('lb-application-list');
+    Route::get('/lb-application-list/{scheme_id?}', SchemeDropdown::class)->middleware('permission.redirect:canViewLbApplications')->name('lb-application-list');
 
-    Route::get('/application', DraftApplicationView::class)->name('draft-application.view');
+    Route::get('/application', DraftApplicationView::class)->middleware('permission.redirect:canViewLbApplications')->name('draft-application.view');
 
     // User Management
     Route::get('/user-managements', [UsersController::class, 'index'])->middleware('permission.redirect:canViewUser')->name('user-managements');
@@ -186,7 +186,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/csv-splitter', CsvSplitter::class)->name('csv-splitter');
 
     Route::get('/form', [Formcontroller::class, 'index'])->middleware('permission.redirect:canEntry')->name('form');
-    Route::get('application-lists', [Formcontroller::class, 'applicationLists'])->name('application-lists');
+    Route::get('application-lists', [Formcontroller::class, 'applicationLists'])->middleware('permission.redirect:canViewLbApplications')->name('application-lists');
     // OLD CODE COMMENTED OUT FOR BACKWARD COMPATIBILITY:
     // Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])->name('define-workflow1');
     Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])->middleware('permission.redirect:canDefineWorkflow')->name('define-workflow1');

@@ -51,7 +51,7 @@ class BulkActionModal extends Component
     public function openModal(array $selectedIds, WorkflowService $workflowService)
     {
         $select_lgd = session('lgd_session');
-      
+
         if (!empty($select_lgd['district_id'])) {
             $this->filter_data['created_by_dist_code'] = Crypt::decryptString($select_lgd['district_id']);
         }
@@ -64,32 +64,35 @@ class BulkActionModal extends Component
 
         $this->reset(['bulkActionType', 'reason', 'remark', 'availableActions', 'bulkActionTypeLabel']);
         $this->selectedRows = $selectedIds;
-      
+
         $this->applicationId = $this->selectedRows['selectedIds']['application_id'];
         $this->entryType = $this->selectedRows['selectedIds']['entry_type'];
         $this->schemeId = $this->selectedRows['selectedIds']['schemeId'];
-      
+
         $levelRoles = $workflowService->getLevelRoles($this->schemeId);
         if ($levelRoles) {
             $this->sameLevelRoleId = $levelRoles->rank ?? $levelRoles->same_level_role_id;
             $this->nextLevelRoleId = $levelRoles->next_level_role_id;
         }
 
-        if ($this->entryType == 1) {          
+        if ($this->entryType == 1) {
             $entryType = 1;
-        } elseif ($this->entryType == 2) {           
+        } elseif ($this->entryType == 2) {
             $entryType = 2;
         } else {
             $entryType = null;
         }
 
-        if ($entryType) {
+        if ($entryType && $levelRoles) {
+            $verifyLabel = $levelRoles->workflowstep?->label ?? 'Verify';
+            $approveLabel = $levelRoles->workflowstep?->label ?? 'Approve';
+
             if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'verification', true, $this->schemeId) && ((!$levelRoles->is_final_step && !$levelRoles->is_first_step) || ($levelRoles->is_final_step && $levelRoles->is_first_step))) {
-                $this->availableActions['V'] = $levelRoles->workflowstep->label;
+                $this->availableActions['V'] = $verifyLabel;
             }
 
             if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'approver', true, $this->schemeId) && $levelRoles->is_final_step) {
-                $this->availableActions['A'] = $levelRoles->workflowstep->label;
+                $this->availableActions['A'] = $approveLabel;
             }
 
             if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'reject', true, $this->schemeId) && (!$levelRoles->is_first_step || ($levelRoles->is_final_step && $levelRoles->is_first_step))) {
@@ -107,7 +110,7 @@ class BulkActionModal extends Component
     {
         if (in_array($value, ['R', 'T'])) {
             if ($value == 'T') {
-                $this->nextLevelRoleId = $workflowService->getLevelRoles($this->schemeId, 1)->same_level_role_id;
+                $this->nextLevelRoleId = $workflowService->getLevelRoles($this->schemeId, 1)?->same_level_role_id;
             } elseif ($value == 'R') {
                 $this->nextLevelRoleId = -100;
             }
@@ -135,10 +138,10 @@ class BulkActionModal extends Component
                 ? 'required|string|max:255'
                 : 'nullable',
         ]);
-       
+
         $approverRoleId = Codemaster::getIdByCode(23);
         $ids = (array) $this->applicationId;
-       
+
         if ($this->bulkActionType === 'V') {
             foreach ($ids as $id) {
                 if (!$this->checkCapacity($id, $this->nextLevelRoleId)) {
@@ -270,7 +273,7 @@ class BulkActionModal extends Component
         } elseif ($this->bulkActionType === 'R') {
             foreach ($ids as $id) {
                 DB::beginTransaction();
-                try {                    
+                try {
                     $dbData = [
                         'next_level_role_id' => $this->nextLevelRoleId,
                         'is_clean' => 10,

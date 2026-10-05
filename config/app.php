@@ -127,4 +127,5 @@ return [
 
     'app_portal' => env('APP_PORTAL', 'jb'),
     'jblb_logo' => env('JBLB_LOGO', 0),
+    'verhoeff_check' => filter_var(env('VERHOEFF_CHECK', true), FILTER_VALIDATE_BOOLEAN),
 ];

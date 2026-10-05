@@ -32,6 +32,9 @@ function invArray(array){
 }
 
 function verhoeffValidate(num){
+    if (typeof window !== 'undefined' && (window.VERHOEFF_CHECK === false || window.VERHOEFF_CHECK === 'false')) {
+        return true;
+    }
     let c = 0;
     let arr = invArray(num);
     for(let i=0; i<arr.length; i++){

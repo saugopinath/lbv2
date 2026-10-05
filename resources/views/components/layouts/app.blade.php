@@ -21,6 +21,9 @@
     <!-- <script src="{{ asset('js/alpine.min.js') }}" defer></script> -->
     <!-- Chart.js for Dashboard -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        window.VERHOEFF_CHECK = {{ config('app.verhoeff_check', true) ? 'true' : 'false' }};
+    </script>
 </head>
 
 <body class="bg-[#def0f4] dark:bg-gray-900 text-black dark:text-white" x-data="$store.app">

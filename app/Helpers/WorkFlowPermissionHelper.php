@@ -729,7 +729,7 @@ class WorkFlowPermissionHelper
      * Resolves the active duty context (office_id and role_id) from the encrypted session,
      * or falls back to fetching the logged-in user's first role & office mapping.
      *
-     * @return array ['office_id' => int|null, 'role_id' => int|null, 'scheme_id' => int|null, 'district_id' => int|null]
+     * @return array ['office_id' => int|null, 'role_id' => int|null]
      */
     public static function getCurrentDuty(): array
     {
@@ -753,8 +753,6 @@ class WorkFlowPermissionHelper
                 return [
                     'office_id'   => (int) $duty['office_id'],
                     'role_id'     => (int) $duty['role_id'],
-                    'scheme_id'   => isset($duty['scheme_id']) ? (int) $duty['scheme_id'] : self::getSchemeId(),
-                    'district_id' => isset($duty['district_id']) ? (int) $duty['district_id'] : null,
                 ];
             }
         }
@@ -775,8 +773,6 @@ class WorkFlowPermissionHelper
                 return [
                     'office_id'   => (int) $firstMapping->office_id,
                     'role_id'     => (int) $firstMapping->role_id,
-                    'scheme_id'   => (int) $firstMapping->scheme_id,
-                    'district_id' => $firstMapping->Office?->district_id ?? null,
                 ];
             }
         }
@@ -784,8 +780,6 @@ class WorkFlowPermissionHelper
         return [
             'office_id'   => null,
             'role_id'     => null,
-            'scheme_id'   => self::getSchemeId(),
-            'district_id' => null,
         ];
     }
 }
