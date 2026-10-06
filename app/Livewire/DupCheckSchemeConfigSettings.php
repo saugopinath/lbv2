@@ -22,7 +22,7 @@ class DupCheckSchemeConfigSettings extends Component
 
     public function mount($schemeId, $moduleId, $isEdit = false)
     {
-        $this->isEdit = $isEdit;
+        $this->isEdit = $isEdit || request()->has('scheme_id');
         $this->schemeId = $schemeId;
         $this->moduleId = $moduleId;
         $this->dupcheckOptions = [
@@ -165,7 +165,6 @@ class DupCheckSchemeConfigSettings extends Component
 
             DB::commit();
             $this->already = true;
-            $this->isEdit = false;
             $this->dispatch('toastr', [
                 'type' => 'success',
                 'message' => 'Config saved successfully!'

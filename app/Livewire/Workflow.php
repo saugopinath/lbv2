@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Models\Scheme;
 use App\Models\DynamicWorkflowModule;
+use Illuminate\Support\Facades\Crypt;
 
 class Workflow extends Component
 {
@@ -21,33 +22,39 @@ class Workflow extends Component
         $schemeIdParam = request()->query('scheme_id');
         $moduleIdParam = request()->query('module_id');
 
-        if ($schemeIdParam && $moduleIdParam) {
+        if ($schemeIdParam) {
             $this->isEdit = true;
             $schemeId = null;
             $moduleId = null;
 
             try {
-                $schemeId = \Illuminate\Support\Facades\Crypt::decryptString($schemeIdParam);
+                $schemeId = Crypt::decryptString($schemeIdParam);
             } catch (\Exception $e) {
                 $schemeId = $schemeIdParam;
             }
 
-            try {
-                $moduleId = \Illuminate\Support\Facades\Crypt::decryptString($moduleIdParam);
-            } catch (\Exception $e) {
-                $moduleId = $moduleIdParam;
+            if ($moduleIdParam) {
+                try {
+                    $moduleId = Crypt::decryptString($moduleIdParam);
+                } catch (\Exception $e) {
+                    $moduleId = $moduleIdParam;
+                }
             }
 
-            if ($schemeId && $moduleId) {
+            if ($schemeId) {
                 $scheme = Scheme::select('id', 'name')->find($schemeId);
-                $module = DynamicWorkflowModule::select('id', 'module_name', 'module_code')->find($moduleId);
-
-                if ($scheme && $module) {
+                if ($scheme) {
                     $this->schemeId = $scheme->id;
                     $this->schemeData = [
                         'scheme_id' => $scheme->id,
                         'scheme_name' => $scheme->name,
                     ];
+                }
+            }
+
+            if ($moduleId) {
+                $module = DynamicWorkflowModule::select('id', 'module_name', 'module_code')->find($moduleId);
+                if ($module) {
                     $this->moduleId = $module->id;
                     $this->moduleData = [
                         'module_id' => $module->id,

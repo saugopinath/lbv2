@@ -44,6 +44,8 @@ class BulkActionModal extends Component
     public $nextLevelRoleId;
 
     public $schemeId;
+    public $moduleCode;
+    public $schemeModuleId;
 
     public string $bulkActionTypeLabel = 'Select Operation';
 
@@ -68,8 +70,10 @@ class BulkActionModal extends Component
         $this->applicationId = $this->selectedRows['selectedIds']['application_id'];
         $this->entryType = $this->selectedRows['selectedIds']['entry_type'];
         $this->schemeId = $this->selectedRows['selectedIds']['schemeId'];
+        $this->moduleCode = $this->selectedRows['selectedIds']['module_code'] ?? null;
+        $this->schemeModuleId = $this->selectedRows['selectedIds']['scheme_module_id'] ?? null;
 
-        $levelRoles = $workflowService->getLevelRoles($this->schemeId);
+        $levelRoles = $workflowService->getLevelRoles($this->schemeId, null, $this->schemeModuleId, $this->moduleCode);
         if ($levelRoles) {
             $this->sameLevelRoleId = $levelRoles->rank ?? $levelRoles->same_level_role_id;
             $this->nextLevelRoleId = $levelRoles->next_level_role_id;
@@ -84,22 +88,28 @@ class BulkActionModal extends Component
         }
 
         if ($entryType && $levelRoles) {
-            $verifyLabel = $levelRoles->workflowstep?->label ?? 'Verify';
+            $canVerify = WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'verification', true, $this->schemeId);
+            $canApprove = WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'approver', true, $this->schemeId);
+            $canReject = WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'reject', true, $this->schemeId);
+            $canRevert = WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'revert', true, $this->schemeId);
+
+            $defaultForwardLabel = ($canApprove && !$canVerify) ? 'Approve' : 'Verify';
+            $verifyLabel = $levelRoles->workflowstep?->label ?? $defaultForwardLabel;
             $approveLabel = $levelRoles->workflowstep?->label ?? 'Approve';
 
-            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'verification', true, $this->schemeId) && ((!$levelRoles->is_final_step && !$levelRoles->is_first_step) || ($levelRoles->is_final_step && $levelRoles->is_first_step))) {
+            if (($canVerify || $canApprove) && ((!$levelRoles->is_final_step && !$levelRoles->is_first_step) || ($levelRoles->is_final_step && $levelRoles->is_first_step))) {
                 $this->availableActions['V'] = $verifyLabel;
             }
 
-            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'approver', true, $this->schemeId) && $levelRoles->is_final_step) {
+            if (($canApprove || $canVerify) && $levelRoles->is_final_step) {
                 $this->availableActions['A'] = $approveLabel;
             }
 
-            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'reject', true, $this->schemeId) && (!$levelRoles->is_first_step || ($levelRoles->is_final_step && $levelRoles->is_first_step))) {
+            if ($canReject && (!$levelRoles->is_first_step || ($levelRoles->is_final_step && $levelRoles->is_first_step))) {
                 $this->availableActions['R'] = 'Reject';
             }
 
-            if (WorkFlowPermissionHelper::canBulkActionAllow($entryType, 'revert', true, $this->schemeId) && (!$levelRoles->is_first_step || ($levelRoles->is_final_step && $levelRoles->is_first_step))) {
+            if ($canRevert && (!$levelRoles->is_first_step || ($levelRoles->is_final_step && $levelRoles->is_first_step))) {
                 $this->availableActions['T'] = 'Revert';
             }
         }
@@ -313,9 +323,14 @@ class BulkActionModal extends Component
 
         $this->reset(['bulkActionType', 'reason', 'remark', 'selectedRows', 'bulkActionTypeLabel']);
 
-        return redirect()->route('lb-application-list', [
+        $params = [
             'scheme_id' => Crypt::encryptString($this->schemeId),
-        ]);
+        ];
+        if (!empty($this->moduleCode)) {
+            $params['module'] = Crypt::encryptString($this->moduleCode);
+        }
+
+        return redirect()->route('lb-application-list', $params);
     }
     private function checkCapacity($id, $actionType): bool
     {

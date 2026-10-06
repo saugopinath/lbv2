@@ -1,4 +1,20 @@
-<div class="bg-white shadow-xl rounded-2xl p-6 space-y-6">
+<div class="bg-white shadow-xl rounded-2xl p-6 space-y-6" 
+     x-data="{ 
+         showDeleteModal: false, 
+         deleteId: null, 
+         deleteSchemeName: '', 
+         deleteModuleName: '',
+         openDeleteModal(id, schemeName, moduleName) {
+             this.deleteId = id;
+             this.deleteSchemeName = schemeName;
+             this.deleteModuleName = moduleName;
+             this.showDeleteModal = true;
+         },
+         closeDeleteModal() {
+             this.showDeleteModal = false;
+             this.deleteId = null;
+         }
+     }">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-gray-200">
         <div>
             <h1 class="text-2xl font-bold text-indigo-700">Configured Workflows</h1>
@@ -96,6 +112,7 @@
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider" scope="col">Scheme Name</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider" scope="col">Module Name</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider" scope="col">Module Code</th>
+                    {{-- <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider" scope="col">Applications</th> --}}
                     <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider" scope="col">Status</th>
                     <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider" scope="col">Actions</th>
                 </tr>
@@ -118,6 +135,18 @@
                         <td class="px-6 py-4 whitespace-nowrap font-mono text-gray-600 bg-gray-50 rounded px-2 py-0.5 inline-block my-3">
                             {{ $item->main_module_code ?? ($item->module->module_code ?? 'N/A') }}
                         </td>
+                        {{-- <td class="px-6 py-4 whitespace-nowrap text-center">
+                            @if (($item->applications_count ?? 0) > 0)
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 gap-1.5 shadow-2xs" title="{{ $item->applications_count }} application(s) present in queue">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                    {{ $item->applications_count }} in Queue
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-slate-400 bg-slate-50 border border-slate-200">
+                                    0 Entries
+                                </span>
+                            @endif
+                        </td> --}}
                         <td class="px-6 py-4 whitespace-nowrap text-center">
                             @if ($item->is_disabled)
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
@@ -153,7 +182,7 @@
                                 Edit
                             </a>
 
-                            <button class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-medium text-xs rounded-md shadow transition" onclick="confirm('Are you sure you want to delete this configured workflow?') || event.stopImmediatePropagation()" wire:click="delete({{ $item->id }})">
+                            <button class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-medium text-xs rounded-md shadow transition cursor-pointer" type="button" @click.stop="openDeleteModal({{ $item->id }}, '{{ addslashes($item->scheme->name ?? ('Scheme #' . $item->scheme_id)) }}', '{{ addslashes($item->module->module_name ?? ($item->main_module_code ?? 'N/A')) }}')">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
                                 </svg>
@@ -163,7 +192,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td class="px-6 py-8 text-center text-gray-500 italic" colspan="7">
+                        <td class="px-6 py-8 text-center text-gray-500 italic" colspan="8">
                             No configured workflows found.
                         </td>
                     </tr>
@@ -175,5 +204,123 @@
     {{-- Pagination Links --}}
     <div class="pt-4 border-t border-gray-200">
         {{ $configuredWorkflows->links() }}
+    </div>
+
+    {{-- Delete Confirmation Premium Tailwind CSS Modal --}}
+    <div aria-labelledby="modal-title" 
+         aria-modal="true" 
+         class="fixed inset-0 z-50 overflow-y-auto" 
+         role="dialog"
+         x-cloak 
+         x-show="showDeleteModal"
+         @keydown.escape.window="closeDeleteModal">
+        
+        <!-- Backdrop with Blur -->
+        <div @click="closeDeleteModal" 
+             aria-hidden="true" 
+             class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
+             x-show="showDeleteModal" 
+             x-transition:enter="transition ease-out duration-200" 
+             x-transition:enter-start="opacity-0" 
+             x-transition:enter-end="opacity-100" 
+             x-transition:leave="transition ease-in duration-150" 
+             x-transition:leave-start="opacity-100" 
+             x-transition:leave-end="opacity-0"></div>
+
+        <!-- Center Modal Content -->
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+            <div @click.stop
+                 class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-100" 
+                 x-show="showDeleteModal" 
+                 x-transition:enter="transition ease-out duration-200" 
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                 x-transition:leave="transition ease-in duration-150" 
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                
+                <!-- Modal Header with Soft Danger Accent -->
+                <div class="bg-gradient-to-r from-red-50 via-rose-50/50 to-transparent p-6 border-b border-rose-100/80 flex items-start justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white flex items-center justify-center shadow-md shadow-red-500/20 ring-4 ring-red-100 flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 leading-tight" id="modal-title">
+                                Delete Configured Workflow
+                            </h3>
+                            <p class="text-xs text-rose-600 font-medium mt-0.5">
+                                Permanent action &bull; Configuration will be purged
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Close X Button -->
+                    <button @click="closeDeleteModal" class="text-slate-400 hover:text-slate-600 hover:bg-white/80 rounded-xl p-1.5 transition-colors cursor-pointer" title="Close modal" type="button">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 space-y-4">
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Are you sure you want to permanently delete this workflow configuration? The scheme will no longer be linked to this module.
+                    </p>
+
+                    <!-- Scheme & Module Details Card -->
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2.5">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-slate-500 font-medium flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                                </svg>
+                                Scheme Name
+                            </span>
+                            <span class="font-bold text-slate-800 bg-white px-2.5 py-1 rounded-lg border border-slate-200/60 shadow-2xs" x-text="deleteSchemeName"></span>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs pt-1.5 border-t border-slate-200/60">
+                            <span class="text-slate-500 font-medium flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                                </svg>
+                                Target Module
+                            </span>
+                            <span class="font-bold text-indigo-700 font-mono bg-indigo-50/80 px-2.5 py-1 rounded-lg border border-indigo-100 shadow-2xs" x-text="deleteModuleName"></span>
+                        </div>
+                    </div>
+
+                    <!-- Warning Callout Banner -->
+                    <div class="bg-amber-50/90 border-l-4 border-amber-500 rounded-xl p-3.5 flex items-start gap-3 text-amber-900">
+                        <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                        </svg>
+                        <div class="text-xs space-y-1">
+                            <p class="font-bold text-amber-900">Consequences of Deletion</p>
+                            <p class="text-amber-800 leading-normal">
+                                All configured workflow steps, step-role mappings, duplicate check settings, age management rules, and auto-generated custom roles will be permanently deleted.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Actions Footer -->
+                <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5">
+                    <button @click="closeDeleteModal" class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:border-slate-400 transition shadow-xs cursor-pointer" type="button">
+                        Cancel
+                    </button>
+                    <button @click="$wire.delete(deleteId); closeDeleteModal();" class="w-full sm:w-auto inline-flex justify-center items-center px-5 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl text-xs font-semibold transition shadow-md shadow-red-500/20 hover:shadow-red-500/30 gap-2 cursor-pointer active:scale-95" type="button">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                        </svg>
+                        <span>Yes, Delete Workflow</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

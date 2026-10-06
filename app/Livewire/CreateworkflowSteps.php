@@ -108,7 +108,7 @@ class CreateworkflowSteps extends Component
 
     public function mount($schemeData, $moduleData, $isEdit = false)
     {
-        $this->isEdit = $isEdit;
+        $this->isEdit = $isEdit || request()->has('scheme_id');
         $this->schemeId = $schemeData['scheme_id'];
         $this->moduleId = $moduleData['module_id'];
         $this->moduleCode = $moduleData['module_code'];
@@ -247,13 +247,7 @@ class CreateworkflowSteps extends Component
                     ? $allRoleMappings[$step->id]->pluck('role_id')->toArray()
                     : [];
 
-                if (!empty($roleMappings)) {
-                    $this->assignRule[$index] = "1";
-                    $this->existingRole[$index] = true;
-                    $this->newRole[$index] = false;
-                    $this->roleSelection[$index] = array_map('strval', $roleMappings);
-                    $this->permissionsSelection[$index] = [];
-                } elseif (!empty($step->permissions)) {
+                if (!empty($step->permissions)) {
                     $this->assignRule[$index] = "2";
                     $this->existingRole[$index] = false;
                     $this->newRole[$index] = true;
@@ -264,6 +258,12 @@ class CreateworkflowSteps extends Component
                         $permSelection[$permId] = true;
                     }
                     $this->permissionsSelection[$index] = $permSelection;
+                } elseif (!empty($roleMappings)) {
+                    $this->assignRule[$index] = "1";
+                    $this->existingRole[$index] = true;
+                    $this->newRole[$index] = false;
+                    $this->roleSelection[$index] = array_map('strval', $roleMappings);
+                    $this->permissionsSelection[$index] = [];
                 } else {
                     $this->assignRule[$index] = "1";
                     $this->existingRole[$index] = true;
@@ -847,6 +847,7 @@ class CreateworkflowSteps extends Component
                 // MODE 1: Existing Role Selection
                 if (!empty($roleSelection[$i])) {
                     $assignedRoleIds = (array) $roleSelection[$i];
+                    $label->update(['permissions' => null]);
                 }
 
                 // MODE 2: Custom Role Creation via Permissions
@@ -883,6 +884,11 @@ class CreateworkflowSteps extends Component
                             }
                         }
 
+                        // Ensure custom role always has module access permission
+                        if (!$crRole->hasPermissionTo($moduleAccessPerm)) {
+                            $crRole->givePermissionTo($moduleAccessPerm);
+                        }
+
                         // Add newly created role ID so workflow step mapping can record it
                         $assignedRoleIds[] = $crRole->id;
 
@@ -891,30 +897,29 @@ class CreateworkflowSteps extends Component
                     }
                 }
 
-                // User & Role Permission Assignments
-                if ($isSpecificUserMode && !empty($selectedUserIds)) {
-                    $users = User::select('id')->whereIn('id', $selectedUserIds)->get();
-                    if (!empty($permissionsSelection[$i]) && isset($crRole)) {
-                        // MODE 2: Assign newly created custom role to specific selected users
-                        app(PermissionRegistrar::class)->setPermissionsTeamId($schemeId);
-                        foreach ($users as $user) {
-                            if (!$user->hasRole($crRole)) {
-                                $user->assignRole($crRole);
-                            }
-                        }
-                    } else {
-                        // MODE 1: Assign direct module access permission to specific selected users
-                        foreach ($users as $user) {
-                            $user->givePermissionWithScheme($permModel->id, $schemeId);
+                // Global Mode: Always ensure all assigned roles have the module access permission
+                if (!empty($assignedRoleIds)) {
+                    $roles = Role::select('id', 'name', 'guard_name')->whereIn('id', $assignedRoleIds)->get();
+                    foreach ($roles as $role) {
+                        if (!$role->hasPermissionTo($moduleAccessPerm)) {
+                            $role->givePermissionTo($moduleAccessPerm);
                         }
                     }
-                } else {
-                    // Default Mode: Assign module access permission to assigned roles globally
-                    if (!empty($assignedRoleIds)) {
-                        $roles = Role::select('id', 'name', 'guard_name')->whereIn('id', $assignedRoleIds)->get();
-                        foreach ($roles as $role) {
-                            if (!$role->hasPermissionTo($moduleAccessPerm)) {
-                                $role->givePermissionTo($moduleAccessPerm);
+                }
+
+                // Specific User Mode: Assign module access permission and custom roles to selected users
+                if ($isSpecificUserMode && !empty($selectedUserIds)) {
+                    $users = User::select('id')->whereIn('id', $selectedUserIds)->get();
+                    app(PermissionRegistrar::class)->setPermissionsTeamId($schemeId);
+
+                    foreach ($users as $user) {
+                        // Direct module permission attachment under the scheme
+                        $user->givePermissionWithScheme($permModel->id, $schemeId);
+
+                        // If a custom role was created for this step, also assign the role under this scheme team
+                        if (!empty($permissionsSelection[$i]) && isset($crRole)) {
+                            if (!$user->hasRole($crRole)) {
+                                $user->assignRole($crRole);
                             }
                         }
                     }
@@ -1001,10 +1006,10 @@ class CreateworkflowSteps extends Component
                 $delLabel->delete();
             }
 
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
             DB::commit();
 
             $this->already = true;
-            $this->isEdit = false;
             $this->dispatch('toastr', [
                 'type'    => 'success',
                 'message' => 'Workflow steps saved successfully!',

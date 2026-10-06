@@ -14,6 +14,7 @@ class DraftApplicationView extends Component
     public $application;
     public $schemeId;
     public $schemeName;
+    public $moduleCode;
 
     public function mount()
     {
@@ -27,6 +28,15 @@ class DraftApplicationView extends Component
 
             $this->schemeName = Scheme::where('id', $this->schemeId)->value('name');
 
+            $moduleParam = request()->query('module');
+            if ($moduleParam) {
+                try {
+                    $this->moduleCode = Crypt::decryptString($moduleParam);
+                } catch (\Exception $e) {
+                    $this->moduleCode = $moduleParam;
+                }
+            }
+
         } catch (\Exception $e) {
             dd($e->getMessage());
         }
@@ -34,15 +44,14 @@ class DraftApplicationView extends Component
 
     public function openActionModal()
     {
-
         $this->dispatch('hideLoader');
-        // $this->dispatch('openBulkActionModal', selectedIds: [$this->application->application_id]);
-// dd($this->application);
+
         $this->dispatch('openBulkActionModal', [
             'selectedIds' => [
                 'application_id' => $this->application->application_id,
                 'schemeId' => $this->application->scheme_id,
                 'entry_type' => $this->application->application_type,
+                'module_code' => $this->moduleCode,
             ]
         ]);
     }
@@ -59,9 +68,14 @@ class DraftApplicationView extends Component
     {
         session()->flash('success', 'The application has been successfully processed.');
 
-        return redirect()->route('lb-application-list', [
+        $params = [
             'scheme_id' => Crypt::encryptString($this->schemeId)
-        ]);
+        ];
+        if (!empty($this->moduleCode)) {
+            $params['module'] = Crypt::encryptString($this->moduleCode);
+        }
+
+        return redirect()->route('lb-application-list', $params);
     }
 
 

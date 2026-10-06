@@ -22,7 +22,11 @@ class WorkflowsteproleMapping extends Model implements Auditable
                 $q->where('workflow_step_id', $rank)->orWhere('rank', $rank);
             });
         } else {
-            $query->where('role_id', $roleId);
+            if (is_array($roleId)) {
+                $query->whereIn('role_id', $roleId);
+            } else {
+                $query->where('role_id', $roleId);
+            }
         }
         $query->where('scheme_id', $schemeId);
 
@@ -39,7 +43,11 @@ class WorkflowsteproleMapping extends Model implements Auditable
                     if ($rank !== null) {
                         $q->where('workflow_step_id', $rank)->orWhere('rank', $rank);
                     } else {
-                        $q->where('role_id', $roleId);
+                        if (is_array($roleId)) {
+                            $q->whereIn('role_id', $roleId);
+                        } else {
+                            $q->where('role_id', $roleId);
+                        }
                     }
                 })
                 ->where('scheme_id', $schemeId)

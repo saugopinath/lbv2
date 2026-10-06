@@ -138,20 +138,21 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         $data = $workflowService->getLevelRoles($this->schemeId, null, $this->schemeModuleId, $this->moduleCode);
 
         if ($data) {
-            $verifyLabel = $data->workflowstep?->label ?? 'Verify';
+            $canVerify = WorkFlowPermissionHelper::canBulkActionAllow(1, 'verification', true, $this->schemeId) ||
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true, $this->schemeId);
+
+            $canApprove = WorkFlowPermissionHelper::canBulkActionAllow(1, 'approver', true, $this->schemeId) ||
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'approver', true, $this->schemeId);
+
+            $defaultForwardLabel = ($canApprove && !$canVerify) ? 'Approve' : 'Verify';
+            $verifyLabel = $data->workflowstep?->label ?? $defaultForwardLabel;
             $approveLabel = $data->workflowstep?->label ?? 'Approve';
 
-            if (
-                (WorkFlowPermissionHelper::canBulkActionAllow(1, 'verification', true, $this->schemeId) ||
-                    WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true, $this->schemeId)) && ((!$data->is_final_step && !$data->is_first_step) || ($data->is_final_step && $data->is_first_step))
-            ) {
+            if (($canVerify || $canApprove) && ((!$data->is_final_step && !$data->is_first_step) || ($data->is_final_step && $data->is_first_step))) {
                 $actions['bulkverify'] = $verifyLabel;
             }
 
-            if (
-                (WorkFlowPermissionHelper::canBulkActionAllow(1, 'approver', true, $this->schemeId) ||
-                    WorkFlowPermissionHelper::canBulkActionAllow(2, 'approver', true, $this->schemeId)) && $data->is_final_step
-            ) {
+            if (($canApprove || $canVerify) && $data->is_final_step) {
                 $actions['bulkapprove'] = $approveLabel;
             }
 
@@ -205,8 +206,12 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                     ?? 'N/A'),
             Column::make("Actions")
                 ->label(function ($row) {
+                    $routeParams = ['application_id' => Crypt::encryptString($row->application_id)];
+                    if (!empty($this->moduleCode)) {
+                        $routeParams['module'] = Crypt::encryptString($this->moduleCode);
+                    }
                     return view('coulmn_button.view', [
-                        'link' => route('draft-application.view', ['application_id' => Crypt::encryptString($row->application_id)]),
+                        'link' => route('draft-application.view', $routeParams),
                         'tooltip' => 'View Application',
                     ])->render();
                 })

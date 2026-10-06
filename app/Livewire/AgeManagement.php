@@ -22,7 +22,7 @@ class AgeManagement extends Component
 
     public function mount($schemeId, $moduleId, $isEdit = false)
     {
-        $this->isEdit = $isEdit;
+        $this->isEdit = $isEdit || request()->has('scheme_id');
         $this->schemeId = $schemeId;
         $this->moduleId = $moduleId;
         $this->specialcaseOptions = collect([
@@ -195,7 +195,6 @@ class AgeManagement extends Component
             }
             DB::commit();
             $this->already = true;
-            $this->isEdit = false;
             $this->dispatch('toastr', ['type' => 'success', 'message' => 'Saved Successfully!']);
         } catch (Exception $e) {
             // dd($e->getMessage());
