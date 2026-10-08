@@ -28,4 +28,15 @@ class PermissionController extends Controller
         $header = 'Oops! You do not have permission to view permission.';
         return view('CommonRestictedpage.index', compact('header'));
     }
+
+    public function information()
+    {
+        if (WorkFlowPermissionHelper::canViewPermission() || (auth()->check() && auth()->user()->mappedRoles->contains('name', 'Super Admin'))) {       
+            return view('permissions.permission_information');
+        }
+
+        $header = 'Oops! You do not have permission to view permission information.';
+        return view('CommonRestictedpage.index', compact('header'));
+    }
 }
+
