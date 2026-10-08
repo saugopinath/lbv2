@@ -107,6 +107,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Permissions Management
     Route::get('/permission', [PermissionController::class, 'index'])->middleware('permission.redirect:canViewPermission')->name('permission');
 
+    Route::get('/permission-information', [PermissionController::class, 'information'])->middleware('permission.redirect:canViewPermission')->name('permission-information');
+
     Route::get('/user-permission', [UserPermissionController::class, 'index'])->middleware('permission.redirect:canViewUserPermisson')->name('user-permission');
 
     Route::get('/assign-users-permissions', AssignPermissionsPage::class)->name('assign-users-permissions');
@@ -191,6 +193,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])->name('define-workflow1');
     Route::get('/define-workflow1', [workflowmanagementController::class, 'index'])->middleware('permission.redirect:canDefineWorkflow')->name('define-workflow1');
     Route::get('/configured-workflows', [workflowmanagementController::class, 'configuredWorkflows'])->middleware('permission.redirect:canDefineWorkflow')->name('configured-workflows');
+    Route::get('/schemes', [workflowmanagementController::class, 'schemes'])->middleware('permission.redirect:canDefineWorkflow')->name('schemes');
 
     Route::get('/bankUpdate', [UpdateBankDetailsController::class, 'index'])->middleware('permission.redirect:canUpdateBankDetailsPermission')->name('bankUpdate');
 
