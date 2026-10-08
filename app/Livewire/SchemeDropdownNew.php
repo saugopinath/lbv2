@@ -80,65 +80,124 @@ class SchemeDropdownNew extends Component
         $duty = WorkFlowPermissionHelper::getCurrentDuty();
         $user = auth()->user();
 
-        $query = Scheme::select('id', 'name')->where('is_active', 1);
+        // 1. FAST PATH: Attempt in-memory extraction from session $duty['scheme_list'] (0 DB queries)
+        $cachedSchemes = null;
+        if ($this->isAssigned && $user && !empty($duty['scheme_list'])) {
+            try {
+                $rawList = is_string($duty['scheme_list']) ? json_decode($duty['scheme_list'], true) : $duty['scheme_list'];
+                $collection = collect($rawList);
 
-        // Duty & user scheme scope filtering for assigned views
-        if ($this->isAssigned && $user) {
-            $assignedSchemeIds = [];
-
-            if (!empty($duty['office_id']) && !empty($duty['role_id'])) {
-                $assignedSchemeIds = \App\Models\UserRoleSchemeOfficeMapping::where('user_id', $user->id)
-                    ->where('office_id', $duty['office_id'])
-                    ->where('role_id', $duty['role_id'])
-                    ->pluck('scheme_id')
-                    ->filter()
-                    ->unique()
-                    ->toArray();
+                if ($collection->isNotEmpty()) {
+                    $first = $collection->first();
+                    // Check if collection contains Scheme models or array items with 'id' and 'name'
+                    if ((is_object($first) || is_array($first)) && (data_get($first, 'id') !== null) && (data_get($first, 'name') !== null)) {
+                        $cachedSchemes = $collection
+                            ->filter(fn($s) => ((int) data_get($s, 'is_active', 1)) === 1)
+                            ->map(fn($s) => (object) [
+                                'id'   => (int) data_get($s, 'id'),
+                                'name' => (string) data_get($s, 'name'),
+                            ])
+                            ->unique('id')
+                            ->values();
+                    }
+                }
+            } catch (\Exception $e) {
+                $cachedSchemes = null;
             }
+        }
 
-            if (empty($assignedSchemeIds)) {
-                $select_lgd = session('lgd_session');
-                if (!empty($select_lgd['scheme_id'])) {
-                    if (is_array($select_lgd['scheme_id'])) {
-                        foreach ($select_lgd['scheme_id'] as $enc) {
+        // If valid schemes were resolved directly from $duty['scheme_list'], apply module filters in-memory
+        if ($cachedSchemes !== null && $cachedSchemes->isNotEmpty()) {
+            if (!empty($this->moduleCode)) {
+                $module = DynamicWorkflowModule::select('id')->where('module_code', $this->moduleCode)->first();
+                if ($module) {
+                    $configuredSchemeIds = DynamicWorkflowSchemeModule::where('module_id', $module->id)
+                        ->where('is_disabled', 0)
+                        ->pluck('scheme_id')
+                        ->toArray();
+                    $cachedSchemes = $cachedSchemes->filter(fn($sch) => in_array($sch->id, $configuredSchemeIds));
+                }
+
+                $this->schemes = $cachedSchemes->filter(function ($sch) {
+                    return WorkFlowPermissionHelper::canAccessModule($this->moduleCode, $sch->id);
+                })->sortBy('name')->values();
+            } else {
+                $this->schemes = $cachedSchemes->sortBy('name')->values();
+            }
+        } else {
+            // 2. FALLBACK PATH: Standard Database Query with user & duty scope filtering
+            $query = Scheme::select('id', 'name')->where('is_active', 1);
+
+            if ($this->isAssigned && $user) {
+                $assignedSchemeIds = [];
+
+                // Check if $duty['scheme_list'] contains only raw IDs
+                if (!empty($duty['scheme_list'])) {
+                    try {
+                        $rawList = is_string($duty['scheme_list']) ? json_decode($duty['scheme_list'], true) : $duty['scheme_list'];
+                        $collection = collect($rawList);
+                        if ($collection->isNotEmpty() && (is_numeric($collection->first()) || is_numeric(data_get($collection->first(), 'id')))) {
+                            $assignedSchemeIds = $collection->map(fn($i) => (int) (is_array($i) || is_object($i) ? data_get($i, 'id') : $i))->filter()->unique()->toArray();
+                        }
+                    } catch (\Exception $e) {
+                    }
+                }
+
+                if (empty($assignedSchemeIds) && !empty($duty['office_id']) && !empty($duty['role_id'])) {
+                    $assignedSchemeIds = \App\Models\UserRoleSchemeOfficeMapping::where('user_id', $user->id)
+                        ->where('office_id', $duty['office_id'])
+                        ->where('role_id', $duty['role_id'])
+                        ->pluck('scheme_id')
+                        ->filter()
+                        ->unique()
+                        ->toArray();
+                }
+
+                if (empty($assignedSchemeIds)) {
+                    $select_lgd = session('lgd_session');
+                    if (!empty($select_lgd['scheme_id'])) {
+                        if (is_array($select_lgd['scheme_id'])) {
+                            foreach ($select_lgd['scheme_id'] as $enc) {
+                                try {
+                                    $assignedSchemeIds[] = (int) Crypt::decryptString($enc);
+                                } catch (\Exception $e) {
+                                    // Ignore decrypt failure
+                                }
+                            }
+                        } else {
                             try {
-                                $assignedSchemeIds[] = (int) Crypt::decryptString($enc);
+                                $assignedSchemeIds[] = (int) Crypt::decryptString($select_lgd['scheme_id']);
                             } catch (\Exception $e) {
-                                // Ignore decrypt failure
                             }
                         }
-                    } else {
-                        try {
-                            $assignedSchemeIds[] = (int) Crypt::decryptString($select_lgd['scheme_id']);
-                        } catch (\Exception $e) {}
                     }
+                }
+
+                if (!empty($assignedSchemeIds)) {
+                    $query->whereIn('id', $assignedSchemeIds);
                 }
             }
 
-            if (!empty($assignedSchemeIds)) {
-                $query->whereIn('id', $assignedSchemeIds);
+            if (!empty($this->moduleCode)) {
+                $module = DynamicWorkflowModule::select('id')->where('module_code', $this->moduleCode)->first();
+                if ($module) {
+                    $configuredSchemeIds = DynamicWorkflowSchemeModule::where('module_id', $module->id)
+                        ->where('is_disabled', 0)
+                        ->pluck('scheme_id')
+                        ->toArray();
+                    $query->whereIn('id', $configuredSchemeIds);
+                }
             }
-        }
 
-        if (!empty($this->moduleCode)) {
-            $module = DynamicWorkflowModule::select('id')->where('module_code', $this->moduleCode)->first();
-            if ($module) {
-                $configuredSchemeIds = DynamicWorkflowSchemeModule::where('module_id', $module->id)
-                    ->where('is_disabled', 0)
-                    ->pluck('scheme_id')
-                    ->toArray();
-                $query->whereIn('id', $configuredSchemeIds);
+            $allSchemes = $query->orderBy('name')->get();
+
+            if (!empty($this->moduleCode)) {
+                $this->schemes = $allSchemes->filter(function ($sch) {
+                    return WorkFlowPermissionHelper::canAccessModule($this->moduleCode, $sch->id);
+                })->values();
+            } else {
+                $this->schemes = $allSchemes;
             }
-        }
-
-        $allSchemes = $query->orderBy('name')->get();
-
-        if (!empty($this->moduleCode)) {
-            $this->schemes = $allSchemes->filter(function ($sch) {
-                return WorkFlowPermissionHelper::canAccessModule($this->moduleCode, $sch->id);
-            })->values();
-        } else {
-            $this->schemes = $allSchemes;
         }
 
         if ($this->enableModuleSelection) {

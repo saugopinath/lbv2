@@ -100,6 +100,7 @@ class DutyWorkFlowPermissionHelper
                 self::$dutyCache = [
                     'office_id'   => (int) $duty['office_id'],
                     'role_id'     => (int) $duty['role_id'],
+                    'scheme_list' => $duty['scheme_list'] ?? null,
                 ];
                 return self::$dutyCache;
             }
@@ -108,6 +109,7 @@ class DutyWorkFlowPermissionHelper
         self::$dutyCache = [
             'office_id'   => null,
             'role_id'     => null,
+            'scheme_list' => null,
         ];
 
         return self::$dutyCache;

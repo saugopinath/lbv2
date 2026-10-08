@@ -753,6 +753,7 @@ class WorkFlowPermissionHelper
                 return [
                     'office_id'   => (int) $duty['office_id'],
                     'role_id'     => (int) $duty['role_id'],
+                    'scheme_list' => $duty['scheme_list'] ?? null,
                 ];
             }
         }
@@ -773,6 +774,7 @@ class WorkFlowPermissionHelper
                 return [
                     'office_id'   => (int) $firstMapping->office_id,
                     'role_id'     => (int) $firstMapping->role_id,
+                    'scheme_list' => null,
                 ];
             }
         }
@@ -780,6 +782,7 @@ class WorkFlowPermissionHelper
         return [
             'office_id'   => null,
             'role_id'     => null,
+            'scheme_list' => null,
         ];
     }
 }
