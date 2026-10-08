@@ -115,21 +115,168 @@
                                 </div>
 
                                 @if ($existingRole[$index])
-                                    <div class="grid gap-4 md:grid-cols-2" wire:key="workflow-step-roles-{{ $index }}">
-                                        <x-form.multiselect :disabled="$isDisabled" :options="$roles" label="Role Selection" name="roleSelection{{ $index }}[]" required wire:model.live="roleSelection.{{ $index }}" />
+                                    @php
+                                        $availableRoles = $this->getAvailableRolesForStep($index);
+                                    @endphp
+                                    <div class="grid gap-4 md:grid-cols-2" wire:key="workflow-step-roles-{{ $index }}-{{ md5(json_encode(array_keys($availableRoles))) }}">
+                                        <x-form.multiselect :disabled="$isDisabled" :options="$availableRoles" label="Role Selection" name="roleSelection{{ $index }}[]" required wire:model.live="roleSelection.{{ $index }}" />
                                     </div>
                                 @elseif ($newRole[$index])
                                     <div class="grid gap-4">
                                         <div>
-                                            <div class="flex items-center gap-2 mb-3">
-                                                <h4 class="font-semibold text-black-800 dark:text-black-300">Permission Selection <span class="text-rose-500">*</span></h4>
+                                            <div class="flex items-center justify-between gap-2 mb-2">
+                                                <h4 class="font-semibold text-black-800 dark:text-black-300 flex items-center gap-2">
+                                                    Permission Selection <span class="text-rose-500">*</span>
+                                                    @php
+                                                        $selectedPermCount = count(array_filter($permissionsSelection[$index] ?? []));
+                                                    @endphp
+                                                    @if ($selectedPermCount > 0)
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">
+                                                            {{ $selectedPermCount }} selected
+                                                        </span>
+                                                    @endif
+                                                </h4>
+                                                {{-- Quick Action: Clear all step permissions (Preserved / Commented out as requested) --}}
+                                                {{--
+                                                @if ($selectedPermCount > 0 && !$isDisabled)
+                                                    <button 
+                                                        type="button" 
+                                                        wire:click="clearAllStepPermissions({{ $index }})" 
+                                                        class="text-xs text-rose-600 hover:text-rose-700 dark:text-rose-400 font-medium hover:underline focus:outline-none"
+                                                    >
+                                                        Clear all ({{ $selectedPermCount }})
+                                                    </button>
+                                                @endif
+                                                --}}
                                             </div>
-                                            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 p-3 max-h-48 overflow-y-auto">
-                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                    @foreach ($permissionsList as $permission)
-                                                        <x-form.input :disabled="$isDisabled" :label_placement="'right'" id="permissionsSelection_{{ $index }}_{{ $permission['id'] }}" label="{{ $permission['name'] }}" name="permissionsSelection{{ $index }}[]" type="checkbox" value="{{ $permission['id'] }}" wire:model.live="permissionsSelection.{{ $index }}.{{ $permission['id'] }}" />
-                                                    @endforeach
+
+                                            <!-- Copy Permissions from Existing Role -->
+                                            <div class="mb-2.5 p-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2">
+                                                <div class="flex items-center gap-1.5 text-xs font-medium text-gray-700 dark:text-gray-300">
+                                                    <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                    </svg>
+                                                    <span>Copy from role:</span>
                                                 </div>
+                                                <div class="flex items-center gap-1.5 flex-1 sm:flex-initial min-w-[220px]">
+                                                    <select 
+                                                        @if ($isDisabled) disabled @endif
+                                                        class="w-full text-xs rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-white disabled:bg-gray-100 disabled:cursor-not-allowed py-1 pl-2 pr-7"
+                                                        wire:model="copyRoleSelection.{{ $index }}"
+                                                    >
+                                                        <option value="">-- Select Role --</option>
+                                                        @foreach ($roles as $roleId => $roleName)
+                                                            <option value="{{ $roleId }}">{{ $roleName }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <button 
+                                                        @if ($isDisabled) disabled @endif
+                                                        type="button" 
+                                                        wire:click="copyRolePermissions({{ $index }})"
+                                                        class="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                                                        title="Copy permissions from selected role"
+                                                    >
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                                        </svg>
+                                                        <span>Copy</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Live Search for Permissions (filters in-memory list with 0 DB queries) -->
+                                            <div class="relative mb-2">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                                                    </svg>
+                                                </div>
+                                                <input 
+                                                    @if ($isDisabled) disabled @endif 
+                                                    class="w-full pl-9 pr-10 py-1.5 text-xs rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-white placeholder-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                                                    placeholder="Search permissions by name..." 
+                                                    type="text" 
+                                                    wire:model.live.debounce.200ms="permissionSearch.{{ $index }}" 
+                                                />
+                                                @if (!empty($permissionSearch[$index]))
+                                                    <button 
+                                                        class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors focus:outline-none" 
+                                                        title="Clear search" 
+                                                        type="button" 
+                                                        wire:click="$set('permissionSearch.{{ $index }}', '')"
+                                                    >
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                                                        </svg>
+                                                    </button>
+                                                @endif
+                                            </div>
+
+                                            {{-- Quick Actions: Bulk Select / Deselect visible filtered permissions (Preserved / Commented out as requested) --}}
+                                            {{--
+                                            @php
+                                                $filteredPermissions = $this->getFilteredPermissions($index);
+                                                $filteredCount = $filteredPermissions->count();
+                                            @endphp
+
+                                            @if ($filteredCount > 0 && !$isDisabled)
+                                                <div class="flex items-center justify-between gap-2 px-1 mb-1.5 text-xs text-gray-500 dark:text-gray-400">
+                                                    <span>Showing {{ $filteredCount }} permission(s)</span>
+                                                    <div class="flex items-center gap-2">
+                                                        <button 
+                                                            type="button" 
+                                                            wire:click="selectAllFilteredPermissions({{ $index }})" 
+                                                            class="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-medium hover:underline focus:outline-none"
+                                                        >
+                                                            Select Visible
+                                                        </button>
+                                                        <span>•</span>
+                                                        <button 
+                                                            type="button" 
+                                                            wire:click="deselectAllFilteredPermissions({{ $index }})" 
+                                                            class="text-gray-600 hover:text-gray-800 dark:text-gray-400 font-medium hover:underline focus:outline-none"
+                                                        >
+                                                            Deselect Visible
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                            --}}
+
+                                            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 p-3 max-h-48 overflow-y-auto">
+                                                @php
+                                                    $filteredPermissions = $this->getFilteredPermissions($index);
+                                                @endphp
+                                                @if ($filteredPermissions->isEmpty())
+                                                    <div class="text-center py-4 text-xs text-gray-500 dark:text-gray-400">
+                                                        No permissions match "<span class="font-medium text-gray-700 dark:text-gray-200">{{ $permissionSearch[$index] }}</span>"
+                                                    </div>
+                                                @else
+                                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" wire:key="step-{{ $index }}-perms-grid-{{ md5($permissionSearch[$index] ?? '') }}">
+                                                        @foreach ($filteredPermissions as $permission)
+                                                            @php
+                                                                $permId = is_array($permission) ? $permission['id'] : $permission->id;
+                                                                $permName = is_array($permission) ? $permission['name'] : $permission->name;
+                                                                $isChecked = !empty($permissionsSelection[$index][$permId]);
+                                                            @endphp
+                                                            <label 
+                                                                wire:key="lbl-step-{{ $index }}-perm-{{ $permId }}"
+                                                                for="permissionsSelection_{{ $index }}_{{ $permId }}" 
+                                                                class="flex items-center gap-2 p-1.5 rounded-lg border border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-white dark:hover:bg-slate-700/50 cursor-pointer text-xs text-gray-700 dark:text-gray-300 select-none transition-all {{ $isChecked ? 'bg-indigo-50/70 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800 font-medium text-indigo-900 dark:text-indigo-200' : '' }}"
+                                                            >
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    id="permissionsSelection_{{ $index }}_{{ $permId }}" 
+                                                                    wire:key="chk-step-{{ $index }}-perm-{{ $permId }}"
+                                                                    @if ($isDisabled) disabled @endif
+                                                                    wire:model.live="permissionsSelection.{{ $index }}.{{ $permId }}"
+                                                                    class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 disabled:opacity-50 transition-colors"
+                                                                />
+                                                                <span class="truncate" title="{{ $permName }}">{{ $permName }}</span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
                                             </div>
                                             @error("permissionsSelection.{$index}")
                                                 <span class="text-red-500 text-xs block mt-1">{{ $message }}</span>

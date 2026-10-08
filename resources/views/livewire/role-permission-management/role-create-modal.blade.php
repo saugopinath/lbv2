@@ -26,14 +26,30 @@
             <form wire:submit.prevent="save" class="space-y-4">
                 <!-- Role Name -->
                 <div>
-
                     <x-form.input
                         id="name"
                         name="name"
                         label="Role Name"
                         placeholder="Enter Role Name"
                         required wire:model="name" />
+                </div>
 
+                <!-- Copy Permissions from Existing Role (Optional) -->
+                <div>
+                    <label for="copyRoleId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Copy Permissions from existing role <span class="text-xs text-gray-500 font-normal">(Optional)</span>
+                    </label>
+                    <select
+                        id="copyRoleId"
+                        name="copyRoleId"
+                        wire:model="copyRoleId"
+                        class="w-full text-sm rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-white py-2 px-3"
+                    >
+                        <option value="">-- Do not copy (Empty Permissions) --</option>
+                        @foreach ($rolesList as $rId => $rName)
+                            <option value="{{ $rId }}">{{ $rName }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="flex justify-end space-x-2 mt-4">

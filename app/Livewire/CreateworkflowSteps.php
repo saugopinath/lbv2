@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use App\Models\{Role, Permission};
 use App\Models\WorkflowStep;
-use App\Models\{User, Codemaster, DynamicWorkflowLabel, DynamicWorkflowModule, DynamicWorkflowSchemeModule, UserRoleSchemeOfficeMapping, workflowstepRolemapping, OfficeMaster, Scheme, District};
+use App\Models\{User, Codemaster, DynamicWorkflowLabel, DynamicWorkflowModule, DynamicWorkflowSchemeModule, UserRoleSchemeOfficeMapping, workflowstepRolemapping, OfficeMaster, Scheme, District, DynamicWorkflowRequest};
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -31,6 +31,151 @@ class CreateworkflowSteps extends Component
     public $roleSelection = [];
     public $permissionsList = [];
     public $permissionsSelection = [];
+    public array $permissionSearch = [];
+    public array $copyRoleSelection = [];
+
+    /**
+     * Filters permissions list in memory for Mode 2 custom role without executing any database queries.
+     */
+    public function getFilteredPermissions($index)
+    {
+        $search = trim($this->permissionSearch[$index] ?? '');
+        $collection = collect($this->permissionsList);
+
+        if ($search === '') {
+            return $collection;
+        }
+
+        return $collection->filter(function ($permission) use ($search) {
+            $name = is_array($permission) ? ($permission['name'] ?? '') : ($permission->name ?? '');
+            return stripos($name, $search) !== false;
+        })->values();
+    }
+
+    /**
+     * Copies all permissions from an existing selected role and replaces the current step permissions selection.
+     */
+    public function copyRolePermissions($index)
+    {
+        $roleId = $this->copyRoleSelection[$index] ?? null;
+
+        if (empty($roleId)) {
+            $this->dispatch('toastr', [
+                'type' => 'warning',
+                'message' => 'Please select a role to copy permissions from.',
+            ]);
+            return;
+        }
+
+        $role = Role::select('id', 'name')->find($roleId);
+        if (!$role) {
+            $this->dispatch('toastr', [
+                'type' => 'error',
+                'message' => 'Selected role not found.',
+            ]);
+            return;
+        }
+
+        $permissionIds = DB::table('role_has_permissions')
+            ->where('role_id', $roleId)
+            ->pluck('permission_id')
+            ->toArray();
+
+        $newSelections = [];
+        foreach ($permissionIds as $permId) {
+            $newSelections[$permId] = true;
+        }
+
+        $this->permissionsSelection[$index] = $newSelections;
+
+        $count = count($permissionIds);
+        $roleName = $role->name;
+
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'message' => "Copied {$count} permission(s) from role '{$roleName}' for Step " . ($index + 1) . ".",
+        ]);
+    }
+
+    /**
+     * Selects all filtered permissions for the specified step.
+     */
+    public function selectAllFilteredPermissions($index)
+    {
+        $filtered = $this->getFilteredPermissions($index);
+        if (!isset($this->permissionsSelection[$index]) || !is_array($this->permissionsSelection[$index])) {
+            $this->permissionsSelection[$index] = [];
+        }
+        foreach ($filtered as $perm) {
+            $id = is_array($perm) ? $perm['id'] : $perm->id;
+            $this->permissionsSelection[$index][$id] = true;
+        }
+    }
+
+    /**
+     * Deselects all filtered permissions for the specified step.
+     */
+    public function deselectAllFilteredPermissions($index)
+    {
+        $filtered = $this->getFilteredPermissions($index);
+        if (isset($this->permissionsSelection[$index]) && is_array($this->permissionsSelection[$index])) {
+            foreach ($filtered as $perm) {
+                $id = is_array($perm) ? $perm['id'] : $perm->id;
+                unset($this->permissionsSelection[$index][$id]);
+            }
+        }
+    }
+
+    /**
+     * Clears all selected permissions for the specified step.
+     */
+    public function clearAllStepPermissions($index)
+    {
+        $this->permissionsSelection[$index] = [];
+    }
+
+    /**
+     * Returns roles available for a specific step, excluding roles already selected in previous steps.
+     */
+    public function getAvailableRolesForStep($index): array
+    {
+        $usedRoleIds = [];
+        for ($i = 0; $i < $index; $i++) {
+            if (!empty($this->roleSelection[$i])) {
+                foreach ((array) $this->roleSelection[$i] as $roleId) {
+                    if (!empty($roleId)) {
+                        $usedRoleIds[] = (string) $roleId;
+                    }
+                }
+            }
+        }
+
+        if (empty($usedRoleIds)) {
+            return $this->roles;
+        }
+
+        return array_filter($this->roles, function ($roleName, $roleId) use ($usedRoleIds) {
+            return !in_array((string) $roleId, $usedRoleIds, true);
+        }, ARRAY_FILTER_USE_BOTH);
+    }
+
+    /**
+     * Auto-removes duplicated roles from subsequent steps when a previous step selection changes.
+     */
+    public function updatedRoleSelection($value, $key)
+    {
+        $stepIndex = (int) $key;
+        $selectedInThisStep = (array) ($this->roleSelection[$stepIndex] ?? []);
+
+        if (!empty($selectedInThisStep)) {
+            $totalSteps = (int) $this->noofSteps;
+            for ($i = $stepIndex + 1; $i < $totalSteps; $i++) {
+                if (!empty($this->roleSelection[$i]) && is_array($this->roleSelection[$i])) {
+                    $this->roleSelection[$i] = array_values(array_diff($this->roleSelection[$i], $selectedInThisStep));
+                }
+            }
+        }
+    }
 
     // Optional Specific Users Assignment properties
     public $assignSpecificUsers = [];
@@ -74,6 +219,14 @@ class CreateworkflowSteps extends Component
 
             if (!isset($this->permissionsSelection[$i])) {
                 $this->permissionsSelection[$i] = [];
+            }
+
+            if (!isset($this->permissionSearch[$i])) {
+                $this->permissionSearch[$i] = '';
+            }
+
+            if (!isset($this->copyRoleSelection[$i])) {
+                $this->copyRoleSelection[$i] = '';
             }
 
             if (!isset($this->assignSpecificUsers[$i])) {
@@ -141,7 +294,7 @@ class CreateworkflowSteps extends Component
             : collect([]);
 
         // Detect active pending requests for this workflow
-        $pendingRequests = \App\Models\DynamicWorkflowRequest::select('current_step_id', 'current_rank', DB::raw('count(*) as total'))
+        $pendingRequests = DynamicWorkflowRequest::select('current_step_id', 'current_rank', DB::raw('count(*) as total'))
             ->where('module_id', $this->schemeModuleId)
             ->where('scheme_id', $this->schemeId)
             ->groupBy('current_step_id', 'current_rank')
@@ -161,20 +314,24 @@ class CreateworkflowSteps extends Component
             $this->permissionsList = $permissions;
         }
 
-        $this->officeTypesList = Codemaster::whereIn('code', [151, 152, 153, 154])
+        $this->officeTypesList = Codemaster::select('name', 'code')
+            ->whereIn('code', [151, 152, 153, 154])
             ->pluck('name', 'code')
             ->toArray();
 
-        $this->officesList = OfficeMaster::where('is_active', 1)
+        $this->officesList = OfficeMaster::select('id', 'name')
+            ->where('is_active', 1)
             ->orderBy('name')
             ->pluck('name', 'id')
             ->toArray();
 
-        $this->schemesList = Scheme::orderBy('name')
+        $this->schemesList = Scheme::select('id', 'name')
+            ->orderBy('name')
             ->pluck('name', 'id')
             ->toArray();
 
-        $this->districtsList = District::orderBy('name', 'asc')
+        $this->districtsList = District::select('id', 'name')
+            ->orderBy('name', 'asc')
             ->pluck('name', 'id')
             ->toArray();
 
@@ -193,7 +350,8 @@ class CreateworkflowSteps extends Component
 
             $allSelectedUserIds = $steps->pluck('user_ids')->filter()->flatten()->unique()->toArray();
             $userOfficeMappings = !empty($allSelectedUserIds)
-                ? UserRoleSchemeOfficeMapping::with('Office')
+                ? UserRoleSchemeOfficeMapping::with('Office:id,name,office_type_id,district_id')
+                ->select('id', 'user_id', 'role_id', 'scheme_id', 'office_id')
                 ->where('scheme_id', $this->schemeId)
                 ->whereIn('user_id', $allSelectedUserIds)
                 ->get()
@@ -361,6 +519,8 @@ class CreateworkflowSteps extends Component
         $existingLabels = $this->labels;
         $existingRoleSel = $this->roleSelection;
         $existingPermSel = $this->permissionsSelection;
+        $existingPermSearch = $this->permissionSearch;
+        $existingCopyRoleSel = $this->copyRoleSelection;
         $existingAssignRule = $this->assignRule;
         $existingExistingRole = $this->existingRole;
         $existingNewRole = $this->newRole;
@@ -374,6 +534,8 @@ class CreateworkflowSteps extends Component
         $this->labels = [];
         $this->roleSelection = [];
         $this->permissionsSelection = [];
+        $this->permissionSearch = [];
+        $this->copyRoleSelection = [];
         $this->assignRule = [];
         $this->existingRole = [];
         $this->newRole = [];
@@ -386,6 +548,8 @@ class CreateworkflowSteps extends Component
 
         for ($i = 0; $i < $value; $i++) {
             $this->labels[$i] = $existingLabels[$i] ?? '';
+            $this->permissionSearch[$i] = $existingPermSearch[$i] ?? '';
+            $this->copyRoleSelection[$i] = $existingCopyRoleSel[$i] ?? '';
             $this->assignRule[$i] = $existingAssignRule[$i] ?? "1";
             $this->existingRole[$i] = $existingExistingRole[$i] ?? true;
             $this->newRole[$i] = $existingNewRole[$i] ?? false;
@@ -655,7 +819,7 @@ class CreateworkflowSteps extends Component
         $this->stepOfficesList[$stepIndex] = [];
 
         if ($value) {
-            $query = OfficeMaster::where('office_type_id', $value)->where('is_active', 1);
+            $query = OfficeMaster::select('id', 'name')->where('office_type_id', $value)->where('is_active', 1);
             if (!empty($this->stepDistrict[$stepIndex])) {
                 $query->where('district_id', $this->stepDistrict[$stepIndex]);
             }
@@ -670,7 +834,7 @@ class CreateworkflowSteps extends Component
         $officeType = $this->stepOfficeType[$stepIndex] ?? null;
 
         if ($officeType) {
-            $query = OfficeMaster::where('office_type_id', $officeType)->where('is_active', 1);
+            $query = OfficeMaster::select('id', 'name')->where('office_type_id', $officeType)->where('is_active', 1);
             if (!empty($value)) {
                 $query->where('district_id', $value);
             }
@@ -759,7 +923,8 @@ class CreateworkflowSteps extends Component
             */
 
             // Retrieve existing step labels to preserve IDs and avoid breaking in-flight pending requests
-            $existingLabels = DynamicWorkflowLabel::where('module_id', $schemeModule->id)
+            $existingLabels = DynamicWorkflowLabel::select('id', 'scheme_id', 'module_id', 'label_name', 'op_type_id', 'assign_specific_users', 'user_ids', 'permissions')
+                ->where('module_id', $schemeModule->id)
                 ->where('scheme_id', $schemeId)
                 ->orderBy('id')
                 ->get();
@@ -842,7 +1007,10 @@ class CreateworkflowSteps extends Component
 
                 // FEATURE: Auto-create the module access permission
                 $moduleAccessPerm = strtolower(str_replace(' ', '_', $moduleCode)) . '_access';
-                $permModel = Permission::firstOrCreate(['name' => $moduleAccessPerm, 'guard_name' => 'web']);
+                $permModel = Permission::firstOrCreate(
+                    ['name' => $moduleAccessPerm, 'guard_name' => 'web'],
+                    ['description' => "Grants role access to view and execute actions in the '{$moduleCode}' dynamic workflow module."]
+                );
 
                 // MODE 1: Existing Role Selection
                 if (!empty($roleSelection[$i])) {
@@ -951,7 +1119,8 @@ class CreateworkflowSteps extends Component
                     $officeId = $this->stepOffice[$i];
 
                     // Batch query existing records for performance optimization
-                    $existingMappings = UserRoleSchemeOfficeMapping::where('scheme_id', $schemeId)
+                    $existingMappings = UserRoleSchemeOfficeMapping::select('id', 'scheme_id', 'user_id', 'role_id', 'office_id')
+                        ->where('scheme_id', $schemeId)
                         ->whereIn('user_id', $selectedUserIds)
                         ->whereIn('role_id', $assignedRoleIds)
                         ->where('office_id', $officeId)
