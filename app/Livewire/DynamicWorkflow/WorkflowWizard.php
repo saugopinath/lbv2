@@ -287,10 +287,15 @@ class WorkflowWizard extends Component
                             if (is_numeric($permissionValue)) {
                                 $permission = Permission::find($permissionValue);
                             } else {
-                                $permission = Permission::firstOrCreate([
-                                    'name' => $permissionValue,
-                                    'guard_name' => 'web',
-                                ]);
+                                $permission = Permission::firstOrCreate(
+                                    [
+                                        'name' => $permissionValue,
+                                        'guard_name' => 'web',
+                                    ],
+                                    [
+                                        'description' => "Custom workflow permission dynamically assigned for processing step '{$permissionValue}'.",
+                                    ]
+                                );
                             }
 
                             if ($permission) {

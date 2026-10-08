@@ -14,18 +14,18 @@ class OperatorPermissionSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            'view draft list',
-            'edit draft',
-            'view beneficiaries',
-            'view reports',
-            'Duare Sarkar Entry',
-            'Normal Entry',
-            'submit-lb-form',
-            'view caste modification list',
-            'edit caste',
-            'update caste',
-'sarasori-mukhyamantri',
-            'cmo-grievance-mark',
+            'view draft list'               => 'Allows operators to access and view their saved draft applications that are pending submission.',
+            'edit draft'                    => 'Authorizes editing and updating previously saved draft application forms before final submission.',
+            'view beneficiaries'            => 'Enables searching and viewing beneficiary records, application status, and personal details.',
+            'view reports'                  => 'Grants access to scheme summary reports, MIS dashboards, and operational performance metrics.',
+            'Duare Sarkar Entry'            => 'Authorizes data entry operators to register applications under Duare Sarkar camp outreach.',
+            'Normal Entry'                  => 'Authorizes data entry operators to create and submit applications under regular intake streams.',
+            'submit-lb-form'                => 'Enables submitting completed Lakshmir Bhandar application forms into the verification pipeline.',
+            'view caste modification list'  => 'Permits viewing submitted requests for beneficiary caste category updates and corrections.',
+            'edit caste'                    => 'Allows initiating and modifying beneficiary caste details with supporting certificate uploads.',
+            'update caste'                  => 'Authorizes submitting updated caste category information for departmental processing.',
+            'sarasori-mukhyamantri'         => 'Grants access to Sarasori Mukhyamantri module for reviewing and handling citizen grievances.',
+            'cmo-grievance-mark'            => 'Permits marking, updating, and linking beneficiary records against CMO grievance numbers.',
         ];
 
         // 1) find role
@@ -39,10 +39,13 @@ class OperatorPermissionSeeder extends Seeder
 
         // Ensure permission records exist and collect Permission models
         $permissionModels = [];
-        foreach ($permissions as $permName) {
+        foreach ($permissions as $permName => $desc) {
             $permissionModels[] = Permission::firstOrCreate(
                 ['name' => $permName],
-                ['guard_name' => 'web']
+                [
+                    'guard_name'  => 'web',
+                    'description' => $desc,
+                ]
             );
         }
         // Get user_ids from mapping table for that role

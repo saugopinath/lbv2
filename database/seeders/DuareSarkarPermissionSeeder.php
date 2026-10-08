@@ -11,25 +11,31 @@ class DuareSarkarPermissionSeeder extends Seeder
     {
         $parent = Permission::firstOrCreate(
             ['name' => 'Duare Sarkar Entry Permission', 'guard_name' => 'web'],
-            ['parent_id' => null]
+            [
+                'parent_id'   => null,
+                'description' => 'Parent group for permissions governing special outreach camp applications under the Duare Sarkar initiative.',
+            ]
         );
 
         $childPermissions = [
-            'Duare Sarkar Entry Allow',
-            'Duare Sarkar Entry Verification Allow',
-            'Duare Sarkar Entry Approver Allow',
-            'Duare Sarkar Entry Reject Allow',
-            'Duare Sarkar Entry Revert Allow',
-            'Bulk Actions Duare Sarkar Entry Verification Allow',
-            'Bulk Actions Duare Sarkar Entry Approver Allow',
-            'Bulk Actions Duare Sarkar Entry Reject Allow',
-            'Bulk Actions Duare Sarkar Entry Revert Allow',
+            'Duare Sarkar Entry Allow' => 'Enables camp-level operators to capture and register beneficiary applications collected during Duare Sarkar outreach camps.',
+            'Duare Sarkar Entry Verification Allow' => 'Authorizes designated camp verifiers to authenticate and verify applications submitted under Duare Sarkar camps.',
+            'Duare Sarkar Entry Approver Allow' => 'Authorizes designated camp approving officers to sanction and approve applications collected in Duare Sarkar camps.',
+            'Duare Sarkar Entry Reject Allow' => 'Permits rejection of ineligible or duplicate applications received during Duare Sarkar camps.',
+            'Duare Sarkar Entry Revert Allow' => 'Allows reverting Duare Sarkar camp applications back to operators for missing documents or invalid data.',
+            'Bulk Actions Duare Sarkar Entry Verification Allow' => 'Enables bulk processing and batch verification of applications collected during Duare Sarkar camps.',
+            'Bulk Actions Duare Sarkar Entry Approver Allow' => 'Enables batch approval and sanctioning of verified Duare Sarkar camp applications.',
+            'Bulk Actions Duare Sarkar Entry Reject Allow' => 'Enables bulk rejection of non-qualifying records from Duare Sarkar outreach drives.',
+            'Bulk Actions Duare Sarkar Entry Revert Allow' => 'Enables bulk reverting of defective Duare Sarkar camp applications for rectification.',
         ];
 
-        foreach ($childPermissions as $permissionName) {
+        foreach ($childPermissions as $permissionName => $description) {
             Permission::firstOrCreate(
                 ['name' => $permissionName, 'guard_name' => 'web'],
-                ['parent_id' => $parent->id]
+                [
+                    'parent_id'   => $parent->id,
+                    'description' => $description,
+                ]
             );
         }
 

@@ -17,35 +17,32 @@ class VerifierPermissionSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            'Normal Entry Verification Allow',
-            'Normal Entry Reject Allow',
-            'Normal Entry Revert Allow',
-            'view beneficiaries',
-            'view reports',
-            'view verifier incomplete',
-            'view caste modification list',
-            'view beneficiary details',
-            'TakeActionForCaste',
-            'VerifyCasteApplication',
-            'RevertCasteApplication',
-            'lb-application-list',
-            'Bulk Actions Duare Sarkar Entry Verification Allow',
-            'Bulk Actions Duare Sarkar Entry Reject Allow',
-            'Bulk Actions Duare Sarkar Entry Revert Allow',
-            'Duare Sarkar Entry Reject Allow',
-            'Duare Sarkar Entry Verification Allow',
-            'Duare Sarkar Entry Revert Allow',
-            'Bulk Actions Normal Entry Revert Allow',
-            'Bulk Actions Normal Entry Reject Allow',
-            'Bulk Actions Normal Entry Verification Allow',
-            'Normal Entry Verification Allow',
-            'Normal Entry Reject Allow',
-            'Normal Entry Revert Allow',
-            'modify caste',
-            'back-from-jb',
-            'back-from-jb-verifier-button',
-            'sarasori-mukhyamantri',
-            'cmo-grievance-mark',
+            'Normal Entry Verification Allow'                    => 'Grants verifiers the authority to review, scrutinize, and verify routine scheme applications.',
+            'Normal Entry Reject Allow'                          => 'Authorizes the rejection of regular intake applications that do not satisfy scheme eligibility criteria.',
+            'Normal Entry Revert Allow'                          => 'Allows reviewers to revert routine applications back to the applicant or operator for document corrections.',
+            'view beneficiaries'                                 => 'Enables searching and viewing beneficiary records, application status, and personal details.',
+            'view reports'                                       => 'Grants access to scheme summary reports, MIS dashboards, and operational performance metrics.',
+            'view verifier incomplete'                           => 'Allows verifiers to view applications marked as incomplete or needing document clarifications.',
+            'view caste modification list'                       => 'Permits viewing submitted requests for beneficiary caste category updates and corrections.',
+            'view beneficiary details'                           => 'Authorizes viewing full beneficiary personal, bank, contact, and enclosure information.',
+            'TakeActionForCaste'                                 => 'Authorizes taking review actions (verify, revert, reject) on submitted caste modification requests.',
+            'VerifyCasteApplication'                             => 'Permits verifiers to validate and recommend caste certificate modifications for approval.',
+            'RevertCasteApplication'                             => 'Allows reverting caste modification requests back to applicant or operator for clarification.',
+            'lb-application-list'                                => 'Enables access to the processing queue of Lakshmir Bhandar applications for verification/approval.',
+            'Bulk Actions Duare Sarkar Entry Verification Allow' => 'Enables bulk processing and batch verification of applications collected during Duare Sarkar camps.',
+            'Bulk Actions Duare Sarkar Entry Reject Allow'       => 'Enables bulk rejection of non-qualifying records from Duare Sarkar outreach drives.',
+            'Bulk Actions Duare Sarkar Entry Revert Allow'       => 'Enables bulk reverting of defective Duare Sarkar camp applications for rectification.',
+            'Duare Sarkar Entry Reject Allow'                    => 'Permits rejection of ineligible or duplicate applications received during Duare Sarkar camps.',
+            'Duare Sarkar Entry Verification Allow'              => 'Authorizes designated camp verifiers to authenticate and verify applications submitted under Duare Sarkar camps.',
+            'Duare Sarkar Entry Revert Allow'                    => 'Allows reverting Duare Sarkar camp applications back to operators for missing documents or invalid data.',
+            'Bulk Actions Normal Entry Revert Allow'             => 'Enables batch reverting of regular applications back to data entry operators.',
+            'Bulk Actions Normal Entry Reject Allow'             => 'Enables batch rejection of regular intake records failing verification parameters.',
+            'Bulk Actions Normal Entry Verification Allow'       => 'Authorizes batch verification of multiple standard scheme intake applications simultaneously.',
+            'modify caste'                                       => 'Authorizes accessing the Caste Management module to process caste revision requests.',
+            'back-from-jb'                                       => 'Authorizes reviewing applications returned from Jai Bangla portal for rectification.',
+            'back-from-jb-verifier-button'                       => 'Enables verifier action buttons on applications returned from Jai Bangla.',
+            'sarasori-mukhyamantri'                              => 'Grants access to Sarasori Mukhyamantri module for reviewing and handling citizen grievances.',
+            'cmo-grievance-mark'                                 => 'Permits marking, updating, and linking beneficiary records against CMO grievance numbers.',
         ];
 
         // 1) find role
@@ -59,10 +56,13 @@ class VerifierPermissionSeeder extends Seeder
 
         // Ensure permission records exist and collect Permission models
         $permissionModels = [];
-        foreach ($permissions as $permName) {
+        foreach ($permissions as $permName => $desc) {
             $permissionModels[] = Permission::firstOrCreate(
                 ['name' => $permName],
-                ['guard_name' => 'web']
+                [
+                    'guard_name'  => 'web',
+                    'description' => $desc,
+                ]
             );
         }
         // Get mappings for that role

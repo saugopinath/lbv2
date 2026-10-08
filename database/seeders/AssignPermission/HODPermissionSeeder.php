@@ -16,8 +16,8 @@ class HODPermissionSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            'sarasori-mukhyamantri',
-            'cmo-grievance-mark',
+            'sarasori-mukhyamantri' => 'Grants access to Sarasori Mukhyamantri module for reviewing and handling citizen grievances.',
+            'cmo-grievance-mark'    => 'Permits marking, updating, and linking beneficiary records against CMO grievance numbers.',
         ];
 
         // 1️⃣ Find Role
@@ -31,12 +31,15 @@ class HODPermissionSeeder extends Seeder
         // 2️⃣ Ensure permission exists
         $permissionModels = [];
 
-        foreach ($permissions as $permName) {
+        foreach ($permissions as $permName => $desc) {
 
             $permissionModels[] = Permission::firstOrCreate(
                 [
                     'name' => $permName,
                     'guard_name' => 'web'
+                ],
+                [
+                    'description' => $desc,
                 ]
             );
         }
