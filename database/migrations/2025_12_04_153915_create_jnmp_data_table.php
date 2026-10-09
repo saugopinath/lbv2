@@ -9,6 +9,7 @@ return new class extends Migration
 {
     public function up()
     {
+        DB::statement('DROP SCHEMA IF EXISTS jnmp CASCADE');
         DB::statement('CREATE SCHEMA IF NOT EXISTS jnmp');
         Schema::create('jnmp.jnmp_data', function (Blueprint $table) {
 

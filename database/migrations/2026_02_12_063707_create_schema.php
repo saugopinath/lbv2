@@ -10,6 +10,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        DB::connection('pgsql_jblbV2')->statement("DROP SCHEMA IF EXISTS pension CASCADE");
         DB::connection('pgsql_jblbV2')->statement("CREATE SCHEMA IF NOT EXISTS pension");
     }
 

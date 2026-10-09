@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-         DB::statement('CREATE SCHEMA IF NOT EXISTS lb_scheme');
+        DB::statement('DROP SCHEMA IF EXISTS lb_scheme CASCADE');
+        DB::statement('CREATE SCHEMA IF NOT EXISTS lb_scheme');
     }
 
     /**
