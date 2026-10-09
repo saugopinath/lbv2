@@ -12,6 +12,7 @@ class DynamicWorkflowModule extends BaseAuditableModel
     protected $fillable = [
         'module_code',
         'module_name',
+        'workflow_type',
         'allowed_fields',
         'is_active',
         'created_by'

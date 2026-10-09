@@ -36,6 +36,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public $loginDistrictCode, $loginSubdivisionCode, $loginBlockCode;
     public array $filter_condition = [];
     public $sameLevelRoleId, $nextLevelRoleId;
+    public array $sameLevelRoleIds = [];
     public $isFinal = 1;
     public $moduleCode;
     public $schemeModuleId;
@@ -54,10 +55,17 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 ->value('id');
         }
 
+        // Resolves all matching step ranks across active modules for the user's role (Merge & Show)
+        $this->sameLevelRoleIds = $workflowService->getAllLevelRoleRanks($schemeId, $this->schemeModuleId);
+
         $levelRoles = $workflowService->getLevelRoles($schemeId, null, $this->schemeModuleId, $this->moduleCode);
         if ($levelRoles) {
             $this->sameLevelRoleId = $levelRoles->rank ?? $levelRoles->same_level_role_id;
             $this->nextLevelRoleId = $levelRoles->next_level_role_id;
+        }
+
+        if (empty($this->sameLevelRoleIds) && $this->sameLevelRoleId) {
+            $this->sameLevelRoleIds = [(int) $this->sameLevelRoleId];
         }
 
         $select_lgd = session('lgd_session');
@@ -193,6 +201,19 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 ->label(fn($row) => $row->application_id ?? 'N/A'),
             Column::make("Application Type", "application_type")
                 ->label(fn($row) => $row->application_type ?? 'N/A'),
+            Column::make("Area / Type")
+                ->label(function ($row) {
+                    $ruralUrban = $row->contact?->rural_urban;
+                    if ($ruralUrban == 2) {
+                        $blockName = $row->contact?->block?->name;
+                        return '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Rural' . ($blockName ? ' (' . e($blockName) . ')' : '') . '</span>';
+                    } elseif ($ruralUrban == 1) {
+                        $muniName = $row->contact?->municipality?->name;
+                        return '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">Urban' . ($muniName ? ' (' . e($muniName) . ')' : '') . '</span>';
+                    }
+                    return '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium text-gray-500 bg-gray-50 border border-gray-200">General</span>';
+                })
+                ->html(),
             Column::make("Applicant Name")
                 ->label(fn($row) => $row->beneficiary_name ?? 'N/A'),
 
@@ -221,11 +242,18 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $query = BeneficiaryPersonalDetail::query()->select('application_id', 'beneficiary_id', 'scheme_id', 'beneficiary_name', 'ben_father_name', 'dob', 'application_type')
+        $query = BeneficiaryPersonalDetail::query()
+            ->with(['contact.block:id,name', 'contact.municipality:id,name'])
+            ->select('application_id', 'beneficiary_id', 'scheme_id', 'beneficiary_name', 'ben_father_name', 'dob', 'application_type')
             ->whereIn('is_clean', [1, 2])
-            ->where('next_level_role_id', $this->sameLevelRoleId)
             ->where('scheme_id', $this->schemeId)
             ->where('is_final', $this->isFinal);
+
+        if (!empty($this->sameLevelRoleIds)) {
+            $query->whereIn('next_level_role_id', $this->sameLevelRoleIds);
+        } elseif ($this->sameLevelRoleId) {
+            $query->where('next_level_role_id', $this->sameLevelRoleId);
+        }
         if (!empty($this->filter_condition)) {
             $query->where($this->filter_condition);
         }

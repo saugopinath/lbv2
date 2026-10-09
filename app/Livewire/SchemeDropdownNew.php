@@ -242,8 +242,8 @@ class SchemeDropdownNew extends Component
         if ($value) {
             $this->schemeSelected = true;
             if ($this->enableModuleSelection) {
-                $this->loadModulesForScheme($value);
-                $this->dispatch('selectedScheme', null);
+                // Background module auto-resolution based on session('current_duty') and workflow_type
+                $this->resolveModuleForScheme($value);
             } else {
                 $scheme = collect($this->schemes)->firstWhere('id', (int) $value);
                 $schemeName = data_get($scheme, 'name');
@@ -260,6 +260,109 @@ class SchemeDropdownNew extends Component
         }
     }
 
+    /**
+     * Resolves the appropriate workflow module for the selected scheme automatically
+     * based on active duty context (Block = rural, Subdivision = urban, others = normal).
+     */
+    protected function resolveModuleForScheme($schemeId)
+    {
+        $duty = WorkFlowPermissionHelper::getCurrentDuty();
+        $officeId = $duty['office_id'] ?? null;
+        $targetWorkflowType = 'normal';
+
+        if ($officeId) {
+            $office = \App\Models\OfficeMaster::with('officeType')->find($officeId);
+            if ($office) {
+                if ((int) $office->office_type_id === 153 || !empty($office->block_id)) {
+                    $targetWorkflowType = 'rural';
+                } elseif ((int) $office->office_type_id === 154 || !empty($office->subdivision_id) || !empty($office->municipalitiy_id)) {
+                    $targetWorkflowType = 'urban';
+                } else {
+                    $typeShort = strtolower($office->officeType?->short_name ?? $office->officeType?->name ?? '');
+                    if (str_contains($typeShort, 'block') || str_contains($typeShort, 'bdo') || str_contains($typeShort, 'rural')) {
+                        $targetWorkflowType = 'rural';
+                    } elseif (str_contains($typeShort, 'sdo') || str_contains($typeShort, 'subdiv') || str_contains($typeShort, 'muni') || str_contains($typeShort, 'urban')) {
+                        $targetWorkflowType = 'urban';
+                    } else {
+                        $targetWorkflowType = 'normal';
+                    }
+                }
+            }
+        }
+
+        // Fetch all active scheme modules configured for this scheme
+        $schemeModules = DynamicWorkflowSchemeModule::with('module')
+            ->where('scheme_id', (int) $schemeId)
+            ->where('is_disabled', 0)
+            ->get();
+
+        if ($schemeModules->isEmpty()) {
+            $scheme = collect($this->schemes)->firstWhere('id', (int) $schemeId);
+            $schemeName = data_get($scheme, 'name', 'Selected Scheme');
+            $this->notConfiguredMessage = "The workflow for \"{$schemeName}\" has not been configured yet. Please contact the administrator.";
+            $this->showNotConfiguredModal = true;
+            $this->dispatch('selectedScheme', null);
+            return null;
+        }
+
+        // 1. Try matching target workflow_type (e.g. rural or urban)
+        $matched = $schemeModules->first(function ($sm) use ($targetWorkflowType) {
+            return strtolower($sm->module?->workflow_type ?? 'normal') === $targetWorkflowType;
+        });
+
+        // 2. Fallback to 'normal' if target type was rural/urban but not found
+        if (!$matched && $targetWorkflowType !== 'normal') {
+            $matched = $schemeModules->first(function ($sm) {
+                return strtolower($sm->module?->workflow_type ?? 'normal') === 'normal';
+            });
+        }
+
+        // 3. Fallback to single/first active module configured
+        if (!$matched) {
+            $matched = $schemeModules->first();
+        }
+
+        // Verify that steps exist for this workflow
+        $hasSteps = DynamicWorkflowLabel::where('module_id', $matched->id)
+            ->where('scheme_id', (int) $schemeId)
+            ->exists();
+
+        if (!$hasSteps) {
+            $scheme = collect($this->schemes)->firstWhere('id', (int) $schemeId);
+            $schemeName = data_get($scheme, 'name', 'Selected Scheme');
+            $moduleName = $matched->module?->module_name ?? 'Selected Module';
+            $this->notConfiguredMessage = "The workflow for \"{$schemeName}\" under \"{$moduleName}\" has not been configured with steps yet. Please contact the administrator.";
+            $this->showNotConfiguredModal = true;
+            $this->dispatch('selectedScheme', null);
+            return null;
+        }
+
+        // Permission check (SuperAdmin always bypasses)
+        $moduleCode = $matched->module?->module_code ?? $matched->main_module_code;
+        if (!WorkFlowPermissionHelper::isSuperAdmin() && !WorkFlowPermissionHelper::canAccessModule($moduleCode, (int) $schemeId)) {
+            $moduleName = $matched->module?->module_name ?? 'Selected Module';
+            $this->notConfiguredMessage = "You do not have permission to access the \"{$moduleName}\" workflow for this scheme.";
+            $this->showNotConfiguredModal = true;
+            $this->dispatch('selectedScheme', null);
+            return null;
+        }
+
+        $scheme = collect($this->schemes)->firstWhere('id', (int) $schemeId);
+        $schemeName = data_get($scheme, 'name');
+
+        $this->dispatch('selectedScheme', [
+            'scheme_id'     => (int) $schemeId,
+            'scheme_name'   => $schemeName,
+            'module_id'     => (int) $matched->module_id,
+            'module_code'   => $moduleCode,
+            'module_name'   => $matched->module?->module_name,
+            'workflow_type' => $matched->module?->workflow_type ?? 'normal',
+        ]);
+
+        return $matched;
+    }
+
+    /* LEGACY MANUAL MODULE SELECTION METHODS PRESERVED FOR FUTURE USE:
     protected function loadModulesForScheme($schemeId)
     {
         if (empty($schemeId)) {
@@ -301,7 +404,6 @@ class SchemeDropdownNew extends Component
                 return;
             }
 
-            // Check if workflow is configured for this scheme and module
             $schemeModule = DynamicWorkflowSchemeModule::select('id')
                 ->where('scheme_id', (int) $this->schemeId)
                 ->where('module_id', (int) $value)
@@ -327,7 +429,6 @@ class SchemeDropdownNew extends Component
                 return;
             }
 
-            // Module permission access check (Super Admin always has permission)
             $moduleCode = data_get($module, 'module_code');
             if (!WorkFlowPermissionHelper::isSuperAdmin() && !WorkFlowPermissionHelper::canAccessModule($moduleCode, (int) $this->schemeId)) {
                 $this->notConfiguredMessage = "You do not have permission to access the \"{$module->module_name}\" workflow for this scheme.";
@@ -351,6 +452,7 @@ class SchemeDropdownNew extends Component
             $this->dispatch('selectedScheme', null);
         }
     }
+    */
 
     public function closeNotConfiguredModal()
     {

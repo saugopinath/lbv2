@@ -20,7 +20,7 @@
                 <option value="">-- Select Existing Module --</option>
                 @foreach ($moduleList as $mod)
                     <option value="{{ $mod->id }}">{{ $mod->module_name }}
-                        ({{ $mod->module_code }})
+                        ({{ $mod->module_code }}) [{{ strtoupper($mod->workflow_type ?? 'normal') }}]
                     </option>
                 @endforeach
             </select>
@@ -51,6 +51,17 @@
                             Code</label>
                         <input class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 uppercase @error('newModuleCode') border-red-500 @enderror" placeholder="e.g., CASTE_CORR" type="text" wire:model="newModuleCode">
                         @error('newModuleCode')
+                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Workflow Type</label>
+                        <select class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 @error('workflowType') border-red-500 @enderror" wire:model="workflowType">
+                            <option value="normal">Normal (Universal)</option>
+                            <option value="rural">Rural (Block level)</option>
+                            <option value="urban">Urban (Subdivision / Municipality level)</option>
+                        </select>
+                        @error('workflowType')
                             <span class="text-red-500 text-xs">{{ $message }}</span>
                         @enderror
                     </div>

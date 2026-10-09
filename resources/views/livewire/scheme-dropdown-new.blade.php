@@ -12,6 +12,7 @@
             </x-form.select>
         </div>
 
+        {{-- LEGACY MANUAL MODULE SELECTION PRESERVED FOR FUTURE USE:
         @if ($enableModuleSelection && $schemeId)
             <div class="pt-2">
                 <x-form.select name="moduleId" label="Workflow Module" wire:model.live="moduleId" class="border rounded px-3 py-2 w-full"
@@ -25,6 +26,7 @@
                 </x-form.select>
             </div>
         @endif
+        --}}
     </div>
 
     <!-- Workflow Not Configured Modal -->

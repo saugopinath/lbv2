@@ -151,9 +151,31 @@ class ConfiguredWorkflowsTable extends Component
 
     public function toggleDisable($id)
     {
-        $schemeModule = DynamicWorkflowSchemeModule::select('id', 'is_disabled')->find($id);
+        $schemeModule = DynamicWorkflowSchemeModule::with('module')->find($id);
         if ($schemeModule) {
-            $schemeModule->is_disabled = !$schemeModule->is_disabled;
+            $newDisabledStatus = !$schemeModule->is_disabled;
+
+            // If attempting to enable, ensure another active module with same workflow_type doesn't already exist for this scheme
+            if (!$newDisabledStatus) {
+                $targetWorkflowType = strtolower($schemeModule->module?->workflow_type ?: 'normal');
+                $alreadyActive = DynamicWorkflowSchemeModule::where('scheme_id', $schemeModule->scheme_id)
+                    ->where('id', '!=', $schemeModule->id)
+                    ->where('is_disabled', 0)
+                    ->whereHas('module', function ($q) use ($targetWorkflowType) {
+                        $q->where('workflow_type', $targetWorkflowType);
+                    })
+                    ->exists();
+
+                if ($alreadyActive) {
+                    $this->dispatch('toastr', [
+                        'type' => 'error',
+                        'message' => "Cannot enable: Another active '{$targetWorkflowType}' workflow is already configured for this scheme. Only one active module of each type is allowed."
+                    ]);
+                    return;
+                }
+            }
+
+            $schemeModule->is_disabled = $newDisabledStatus;
             $schemeModule->save();
 
             $statusMessage = $schemeModule->is_disabled ? 'Workflow disabled successfully!' : 'Workflow enabled successfully!';
@@ -172,7 +194,7 @@ class ConfiguredWorkflowsTable extends Component
 
     public function render()
     {
-        $query = DynamicWorkflowSchemeModule::with(['scheme:id,name', 'module:id,module_name,module_code'])
+        $query = DynamicWorkflowSchemeModule::with(['scheme:id,name', 'module:id,module_name,module_code,workflow_type'])
             ->select('dynamic_workflow_scheme_modules.*')
             ->join('schemes', 'dynamic_workflow_scheme_modules.scheme_id', '=', 'schemes.id')
             ->join('dynamic_workflow_modules', 'dynamic_workflow_scheme_modules.module_id', '=', 'dynamic_workflow_modules.id');
@@ -184,6 +206,7 @@ class ConfiguredWorkflowsTable extends Component
                     ->orWhereRaw("CAST(schemes.id AS TEXT) ILIKE ?", [$searchTerm])
                     ->orWhere('dynamic_workflow_modules.module_name', 'ILIKE', $searchTerm)
                     ->orWhere('dynamic_workflow_modules.module_code', 'ILIKE', $searchTerm)
+                    ->orWhere('dynamic_workflow_modules.workflow_type', 'ILIKE', $searchTerm)
                     ->orWhere('dynamic_workflow_scheme_modules.main_module_code', 'ILIKE', $searchTerm);
             });
         }

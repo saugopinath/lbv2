@@ -112,6 +112,7 @@
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider" scope="col">Scheme Name</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider" scope="col">Module Name</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider" scope="col">Module Code</th>
+                    <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider" scope="col">Workflow Type</th>
                     {{-- <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider" scope="col">Applications</th> --}}
                     <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider" scope="col">Status</th>
                     <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider" scope="col">Actions</th>
@@ -134,6 +135,19 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap font-mono text-gray-600 bg-gray-50 rounded px-2 py-0.5 inline-block my-3">
                             {{ $item->main_module_code ?? ($item->module->module_code ?? 'N/A') }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            @php
+                                $type = strtolower($item->module->workflow_type ?? 'normal');
+                                $badgeClass = match($type) {
+                                    'rural' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                    'urban' => 'bg-sky-50 text-sky-700 border-sky-200',
+                                    default => 'bg-gray-50 text-gray-700 border-gray-200',
+                                };
+                            @endphp
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border {{ $badgeClass }}">
+                                {{ ucfirst($type) }}
+                            </span>
                         </td>
                         {{-- <td class="px-6 py-4 whitespace-nowrap text-center">
                             @if (($item->applications_count ?? 0) > 0)
