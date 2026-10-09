@@ -1,7 +1,7 @@
 <div class="w-full space-y-6">
     @if ($showSchemeDropdown && !$schemeData)
         <div class="max-w-3xl mx-auto bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-            <livewire:scheme-dropdown-new :isFinal="true" :module-code="$moduleCode" :enable-module-selection="empty($moduleCode)" />
+            <livewire:scheme-dropdown-new :isFinal="true" :isAssigned="true" :module-code="$moduleCode" :enable-module-selection="empty($moduleCode)" />
         </div>
     @endif
     @if ($schemeData)

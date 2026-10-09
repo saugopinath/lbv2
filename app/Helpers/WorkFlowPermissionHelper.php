@@ -25,6 +25,42 @@ class WorkFlowPermissionHelper
         return $schemeId ? (int) $schemeId : null;
     }
 
+    public static function isSuperAdmin($user = null): bool
+    {
+        $user = $user ?? auth()->user();
+        if (!$user) {
+            return false;
+        }
+
+        try {
+            if ($user->hasRole('Super Admin') || $user->hasRole('Superadmin')) {
+                return true;
+            }
+        } catch (\Exception $e) {
+        }
+
+        try {
+            if ($user->mappedRoles && $user->mappedRoles->contains(fn($r) => in_array(strtolower(trim($r->name)), ['super admin', 'superadmin', 'super_admin']))) {
+                return true;
+            }
+        } catch (\Exception $e) {
+        }
+
+        $duty = self::getCurrentDuty();
+        if (!empty($duty['role_id'])) {
+            $dutyRole = \App\Models\Role::find($duty['role_id']);
+            if ($dutyRole && in_array(strtolower(trim($dutyRole->name)), ['super admin', 'superadmin', 'super_admin'])) {
+                return true;
+            }
+        }
+
+        if (CheckAuthHelper::isSuperAdmin()) {
+            return true;
+        }
+
+        return false;
+    }
+
     public static function hasPermission($permissionKey, $schemeId = null)
     {
         $user = auth()->user();
@@ -33,6 +69,28 @@ class WorkFlowPermissionHelper
             return false;
         }
 
+        // 1. Check active duty permission via DutyWorkFlowPermissionHelper
+        if (DutyWorkFlowPermissionHelper::hasPermission($permissionKey, $schemeId)) {
+            return true;
+        }
+
+        // 2. Active duty context from session('current_duty') with fallback to first mapping
+        $duty = self::getCurrentDuty();
+        $dutyRoleId = !empty($duty['role_id']) ? (int) $duty['role_id'] : null;
+
+        if ($dutyRoleId) {
+            $dutyRole = \App\Models\Role::find($dutyRoleId);
+            if ($dutyRole) {
+                try {
+                    if ($dutyRole->hasPermissionTo($permissionKey)) {
+                        return true;
+                    }
+                } catch (\Throwable $e) {
+                }
+            }
+        }
+
+        // 3. Fallback: Check mapped roles or Spatie team permissions
         $registrar = app(PermissionRegistrar::class);
         $originalTeamId = $registrar->getPermissionsTeamId();
 
@@ -40,27 +98,69 @@ class WorkFlowPermissionHelper
             $registrar->setPermissionsTeamId((int) $schemeId);
             $user->unsetRelation('roles')->unsetRelation('permissions');
 
-            $hasPerm = $user->can($permissionKey);
+            $hasPerm = false;
+            try {
+                $hasPerm = $user->can($permissionKey);
+            } catch (\Throwable $e) {
+                $hasPerm = false;
+            }
+
+            if (!$hasPerm) {
+                $roleIds = \App\Models\UserRoleSchemeOfficeMapping::where('scheme_id', (int) $schemeId)
+                    ->where('user_id', $user->id)
+                    ->pluck('role_id')
+                    ->toArray();
+                if (!empty($roleIds)) {
+                    $hasPerm = \App\Models\Role::whereIn('id', $roleIds)
+                        ->whereHas('permissions', fn($q) => $q->where('name', $permissionKey))
+                        ->exists();
+                }
+            }
 
             $registrar->setPermissionsTeamId($originalTeamId);
             $user->unsetRelation('roles')->unsetRelation('permissions');
 
-            return $hasPerm;
+            return (bool) $hasPerm;
         }
 
         $userSchemes = self::getUserSchemes();
 
         if (empty($userSchemes)) {
-            return false;
+            $allRoleIds = \App\Models\UserRoleSchemeOfficeMapping::where('user_id', $user->id)
+                ->pluck('role_id')
+                ->toArray();
+            if (!empty($allRoleIds)) {
+                if (\App\Models\Role::whereIn('id', $allRoleIds)->whereHas('permissions', fn($q) => $q->where('name', $permissionKey))->exists()) {
+                    return true;
+                }
+            }
+            try {
+                return (bool) $user->can($permissionKey);
+            } catch (\Throwable $e) {
+                return false;
+            }
         }
 
         $hasPerm = false;
         foreach ($userSchemes as $scheme) {
             $registrar->setPermissionsTeamId((int) $scheme);
             $user->unsetRelation('roles')->unsetRelation('permissions');
-            if ($user->can($permissionKey)) {
-                $hasPerm = true;
-                break;
+            try {
+                if ($user->can($permissionKey)) {
+                    $hasPerm = true;
+                    break;
+                }
+            } catch (\Throwable $e) {
+            }
+            $roleIds = \App\Models\UserRoleSchemeOfficeMapping::where('scheme_id', (int) $scheme)
+                ->where('user_id', $user->id)
+                ->pluck('role_id')
+                ->toArray();
+            if (!empty($roleIds)) {
+                if (\App\Models\Role::whereIn('id', $roleIds)->whereHas('permissions', fn($q) => $q->where('name', $permissionKey))->exists()) {
+                    $hasPerm = true;
+                    break;
+                }
             }
         }
 
@@ -600,12 +700,17 @@ class WorkFlowPermissionHelper
             return false;
         }
 
-        $permissionName = strtolower(str_replace(' ', '_', $moduleCode)) . '_access';
-        $hasPerm = self::hasPermission($permissionName, $schemeId);
-
-        if (!$hasPerm) {
+        $user = auth()->user();
+        if (!$user) {
             return false;
         }
+
+        if (self::isSuperAdmin($user)) {
+            return true;
+        }
+
+        $permissionName = strtolower(str_replace(' ', '_', $moduleCode)) . '_access';
+        $hasPerm = self::hasPermission($permissionName, $schemeId);
 
         if ($schemeId) {
             $module = \App\Models\DynamicWorkflowModule::select('id')
@@ -637,7 +742,7 @@ class WorkFlowPermissionHelper
                 $hasSpecificUserSteps = $steps->contains(fn($s) => (bool) $s->assign_specific_users);
 
                 if ($hasSpecificUserSteps) {
-                    $userId = (string) auth()->id();
+                    $userId = (string) $user->id;
                     $isUserExplicitlyAllowed = false;
 
                     foreach ($steps as $step) {
@@ -659,39 +764,46 @@ class WorkFlowPermissionHelper
                     }
                 }
 
-                // Verification of step-level assigned roles (Global Role Mode)
+                // Verification of step-level assigned roles (Role Mode)
                 $stepRoleIds = \App\Models\workflowstepRolemapping::where('module_id', $schemeModule->id)
                     ->where('scheme_id', (int) $schemeId)
                     ->pluck('role_id')
+                    ->map(fn($id) => (int) $id)
                     ->toArray();
 
                 if (!empty($stepRoleIds)) {
-                    $user = auth()->user();
-                    if ($user) {
-                        $registrar = app(\Spatie\Permission\PermissionRegistrar::class);
-                        $originalTeamId = $registrar->getPermissionsTeamId();
-                        $registrar->setPermissionsTeamId((int) $schemeId);
+                    $duty = self::getCurrentDuty();
+                    $dutyRoleId = !empty($duty['role_id']) ? (int) $duty['role_id'] : null;
 
-                        $userRoleIds = $user->roles()->pluck('id')->toArray();
-                        $registrar->setPermissionsTeamId($originalTeamId);
-
-                        $officeRoleIds = \App\Models\UserRoleSchemeOfficeMapping::where('scheme_id', (int) $schemeId)
-                            ->where('user_id', $user->id)
+                    if ($dutyRoleId) {
+                        // If current active logged-in duty role matches the step role
+                        if (in_array($dutyRoleId, $stepRoleIds, true)) {
+                            return true;
+                        }
+                    } else {
+                        // Fallback: Check user role mappings if no session duty
+                        $userRoleIds = \App\Models\UserRoleSchemeOfficeMapping::where('user_id', $user->id)
                             ->pluck('role_id')
+                            ->map(fn($id) => (int) $id)
                             ->toArray();
 
-                        $allUserRoleIds = array_unique(array_merge($userRoleIds, $officeRoleIds));
-                        $hasMatchingRole = !empty(array_intersect($stepRoleIds, $allUserRoleIds));
-
-                        // If user does not have any of the roles assigned to this module's steps
-                        if (!$hasMatchingRole && !$hasSpecificUserSteps) {
-                            return false;
+                        if (!empty(array_intersect($stepRoleIds, $userRoleIds))) {
+                            return true;
                         }
+                    }
+
+                    // If user's active duty role does not match step roles and no specific user steps allow them
+                    if (!$hasSpecificUserSteps) {
+                        return false;
                     }
                 }
             }
 
-            return true;
+            return (bool) $hasPerm;
+        }
+
+        if (!$hasPerm) {
+            return false;
         }
 
         // When schemeId is null, verify if the user has access to AT LEAST ONE active scheme configured for this module

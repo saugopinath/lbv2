@@ -317,7 +317,7 @@
                                             </span>
                                         </div>
                                     @endif
-                                    <!-- Dependent Office Mapping Fields for Selected Users -->
+                                    {{-- PRESERVED / COMMENTED OUT AS PER REQUIREMENT: Office Mapping moved inside User Selection Modal
                                     @if (count($selectedUserIdsByStep[$index] ?? []) > 0)
                                         <div class="mt-3 p-4 bg-indigo-50/60 rounded-xl border border-indigo-100 space-y-3">
                                             <div class="flex items-center justify-between">
@@ -377,6 +377,7 @@
                                             </div>
                                         </div>
                                     @endif
+                                    --}}
                                 </div>
 
                             </div>
@@ -413,19 +414,19 @@
 
     <!-- User Selection Modal -->
     @if ($showUserModal && $activeStepForUserModal !== null)
-        <div aria-labelledby="modal-title" aria-modal="true" class="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4 sm:p-6" role="dialog">
+        <div aria-labelledby="modal-title" aria-modal="true" class="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-2 sm:p-4 md:p-6" role="dialog">
             <!-- Modal Backdrop with Blur -->
             <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" wire:click="closeUserModal"></div>
 
             <!-- Modal Box with Expanded Dimensions & Responsive Styling -->
-            <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] max-h-[900px] flex flex-col overflow-hidden border border-gray-200 z-10 my-auto">
+            <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl h-[90vh] max-h-[900px] flex flex-col overflow-hidden border border-gray-200 z-10 my-auto">
                 <!-- Header -->
                 <div class="flex-none bg-indigo-700 text-white px-6 py-4 flex items-center justify-between border-b border-indigo-800">
                     <div class="flex items-center gap-2">
                         <svg class="w-5 h-5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
                         </svg>
-                        <h3 class="text-base font-bold">Select Users for Step {{ $activeStepForUserModal + 1 }} Configuration</h3>
+                        <h3 class="text-base font-bold">Select Users & Offices for Step {{ $activeStepForUserModal + 1 }} Configuration</h3>
                     </div>
                     <button class="text-indigo-200 hover:text-white transition-colors focus:outline-none p-1 rounded-lg hover:bg-indigo-600" type="button" wire:click="closeUserModal">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -484,7 +485,7 @@
 
                         <!-- Lower Filter Inputs Grid -->
                         <div class="p-3.5">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 items-start">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 items-start">
                                 <!-- Search Input -->
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 uppercase mb-1">Search User</label>
@@ -505,12 +506,17 @@
 
                                 <!-- Office Type Multi-Select Filter -->
                                 <div>
-                                    <x-form.multiselect :options="$officeTypesList" labelClass="block text-xs font-medium text-gray-500 uppercase mb-1" label="Office Type" placeholder="Select Office Type" wire:model.live="modalOfficeTypes" />
+                                    <x-form.multiselect :options="$this->filteredOfficeTypes" labelClass="block text-xs font-medium text-gray-500 uppercase mb-1" label="Office Type" placeholder="Select Office Type" wire:model.live="modalOfficeTypes" />
+                                </div>
+
+                                <!-- District Multi-Select Filter -->
+                                <div>
+                                    <x-form.multiselect :options="$districtsList" labelClass="block text-xs font-medium text-gray-500 uppercase mb-1" label="District" placeholder="Select District" wire:model.live="modalDistricts" />
                                 </div>
 
                                 <!-- Office Multi-Select Filter -->
                                 <div>
-                                    <x-form.multiselect :options="$officesList" labelClass="block text-xs font-medium text-gray-500 uppercase mb-1" label="Office" placeholder="Select Office" wire:model.live="modalOffices" />
+                                    <x-form.multiselect :options="$this->filteredOfficesList" labelClass="block text-xs font-medium text-gray-500 uppercase mb-1" label="Office" placeholder="Select Office" wire:model.live="modalOffices" />
                                 </div>
 
                                 <!-- Scheme Multi-Select Filter -->
@@ -525,23 +531,6 @@
                     <div class="flex-1 flex flex-col justify-between min-h-0">
                         @php
                             $modalUsersList = $this->modalUsers;
-                        @endphp
-
-                        {{-- COMMENTED FOR BACKWARD COMPATIBILITY: NO_ROLE_SELECTED mode lock warning is removed so modal filters remain flexible
-                        @if ($modalUsersList === 'NO_ROLE_SELECTED')
-                            <div class="flex-1 flex flex-col items-center justify-center p-8 text-center bg-amber-50/70 rounded-xl border border-amber-200 text-amber-800 space-y-2">
-                                <svg class="w-12 h-12 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                </svg>
-                                <h4 class="font-bold text-base">Select Role First</h4>
-                                <p class="text-xs text-amber-700 max-w-md">
-                                    In "Select from Existing" mode, users are filtered based on the role(s) selected for this step. Please select at least one role in the step configuration above.
-                                </p>
-                            </div>
-                        @else
-                        --}}
-
-                        @php
                             $pageUserIds = $modalUsersList && $modalUsersList !== 'NO_ROLE_SELECTED' ? $modalUsersList->pluck('id')->map(fn($id) => (string) $id)->toArray() : [];
                             $currentSelectedForStep = array_map('strval', $selectedUserIdsByStep[$activeStepForUserModal] ?? []);
                             $isAllVisibleSelected = count($pageUserIds) > 0 && count(array_diff($pageUserIds, $currentSelectedForStep)) === 0;
@@ -552,16 +541,13 @@
                             <table class="w-full table-fixed divide-y divide-gray-200 text-xs">
                                 <thead class="bg-gray-50 sticky top-0 z-10">
                                     <tr>
-                                        <th class="px-4 py-3 text-left font-bold text-gray-700 w-12 bg-gray-50" scope="col">
+                                        <th class="px-3 py-3 text-left font-bold text-gray-700 w-12 bg-gray-50" scope="col">
                                             <input {{ $isAllVisibleSelected ? 'checked' : '' }} class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer" type="checkbox" wire:change="toggleSelectAllVisible({{ json_encode($pageUserIds) }})" wire:key="th-chk-step-{{ $activeStepForUserModal }}-{{ $isAllVisibleSelected ? '1' : '0' }}-{{ count($selectedUserIdsByStep[$activeStepForUserModal] ?? []) }}">
                                         </th>
-                                        <th class="px-4 py-3 text-left font-bold text-gray-700 bg-gray-50 w-2/5" scope="col">Name</th>
-                                        <th class="px-4 py-3 text-left font-bold text-gray-700 bg-gray-50 w-2/5" scope="col">Email</th>
-                                        <th class="px-4 py-3 text-left font-bold text-gray-700 bg-gray-50 w-1/5" scope="col">Mobile Number</th>
-                                        {{-- COMMENTED FOR BACKWARD COMPATIBILITY: Multi-value columns hidden as users can have multiple Roles/Offices/Office Types
-                                            <th scope="col" class="px-4 py-3 text-left font-bold text-gray-700 w-2/5 bg-gray-50">Role</th>
-                                            <th scope="col" class="px-4 py-3 text-left font-bold text-gray-700 w-1/5 bg-gray-50">Office Type</th>
-                                            --}}
+                                        <th class="px-3 py-3 text-left font-bold text-gray-700 bg-gray-50 w-48" scope="col">Name</th>
+                                        <th class="px-3 py-3 text-left font-bold text-gray-700 bg-gray-50 w-56" scope="col">Email</th>
+                                        <th class="px-3 py-3 text-left font-bold text-gray-700 bg-gray-50 w-32" scope="col">Mobile</th>
+                                        <th class="px-3 py-3 text-left font-bold text-gray-700 bg-gray-50" scope="col">Office Mapping <span class="text-rose-500">*</span></th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 bg-white">
@@ -570,50 +556,115 @@
                                             $uIdStr = (string) $u->id;
                                             $isSelected = in_array($uIdStr, $currentSelectedForStep, true);
 
-                                            $rolesList = $u->mappedRoles
-                                                ->pluck('name')
-                                                ->merge($u->RoleSchemeOfficeMappings->pluck('Role.name')->filter())
-                                                ->merge($u->roles->pluck('name'))
-                                                ->filter()
-                                                ->unique()
-                                                ->implode(', ');
+                                            $userMappedOffice = $u->RoleSchemeOfficeMappings->first()?->office;
+                                            $userOfficeTypes = $userMappedOffice?->officeType?->name;
+                                            $userDistrictName = $userMappedOffice?->district?->name;
+                                            $userOfficeName = $userMappedOffice?->name;
 
-                                            if (empty($rolesList)) {
-                                                $rolesList = 'N/A';
-                                            }
-
-                                            $officeTypeName = $u->RoleSchemeOfficeMappings->pluck('office.officeType.name')->filter()->unique()->implode(', ');
-                                            if (empty($officeTypeName)) {
-                                                $officeTypeName = 'N/A';
-                                            }
+                                            $rowOfficeTypes = $this->getRoleOfficeTypesForStep($activeStepForUserModal);
+                                            $rowOffices = $isSelected ? $this->getOfficesForUserRow($activeStepForUserModal, $u->id) : [];
+                                            $rowSelectedType = $selectedUserOfficeTypes[$activeStepForUserModal][$u->id] ?? null;
+                                            $rowSelectedDist = $selectedUserDistricts[$activeStepForUserModal][$u->id] ?? null;
+                                            $rowSelectedOffice = $selectedUserOffices[$activeStepForUserModal][$u->id] ?? null;
                                         @endphp
                                         <tr class="{{ $isSelected ? 'bg-indigo-50/40' : 'hover:bg-gray-50' }}">
-                                            <td class="px-4 py-3 whitespace-nowrap">
+                                            <td class="px-3 py-3 whitespace-nowrap">
                                                 <input {{ $isSelected ? 'checked' : '' }} class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer" type="checkbox" wire:change="toggleSelectUser('{{ $u->id }}')" wire:key="row-chk-step-{{ $activeStepForUserModal }}-usr-{{ $u->id }}-{{ $isSelected ? '1' : '0' }}">
                                             </td>
-                                            <td class="px-4 py-3 whitespace-nowrap font-medium text-gray-900 truncate" title="{{ $u->name }}">
+                                            <td class="px-3 py-3 whitespace-nowrap font-medium text-gray-900 truncate" title="{{ $u->name }}">
                                                 <div class="truncate font-semibold">{{ $u->name }}</div>
                                             </td>
-                                            <td class="px-4 py-3 whitespace-nowrap text-gray-600 truncate" title="{{ $u->email }}">
+                                            <td class="px-3 py-3 whitespace-nowrap text-gray-600 truncate" title="{{ $u->email }}">
                                                 <span class="truncate block">{{ $u->email ?: 'N/A' }}</span>
                                             </td>
-                                            <td class="px-4 py-3 whitespace-nowrap text-gray-600 truncate" title="{{ $u->mobile_no }}">
+                                            <td class="px-3 py-3 whitespace-nowrap text-gray-600 truncate" title="{{ $u->mobile_no }}">
                                                 <span class="truncate block">{{ $u->mobile_no ?: 'N/A' }}</span>
                                             </td>
-                                            {{-- COMMENTED FOR BACKWARD COMPATIBILITY: Single value Role & Office Type columns
-                                                <td class="px-4 py-3 whitespace-nowrap text-gray-600 truncate" title="{{ $rolesList }}">
-                                                    <span class="truncate block">{{ $rolesList }}</span>
-                                                </td>
-                                                <td class="px-4 py-3 whitespace-nowrap text-gray-600 truncate" title="{{ $officeTypeName }}">
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 truncate">
-                                                        {{ $officeTypeName }}
-                                                    </span>
-                                                </td>
-                                                --}}
+                                            <td class="px-3 py-2">
+                                                @if ($isSelected)
+                                                    <div class="space-y-1.5 py-1">
+                                                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                                            <!-- 1. Office Type Dropdown -->
+                                                            <div>
+                                                                <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-0.5">Office Type <span class="text-rose-500">*</span></label>
+                                                                <select 
+                                                                    @if ($isDisabled) disabled @endif 
+                                                                    class="w-full text-xs rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white py-1 px-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                                    wire:model.live="selectedUserOfficeTypes.{{ $activeStepForUserModal }}.{{ $u->id }}"
+                                                                >
+                                                                    <option value="">-- Office Type --</option>
+                                                                    @foreach ($rowOfficeTypes as $typeCode => $typeName)
+                                                                        <option value="{{ $typeCode }}">{{ $typeName }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+
+                                                            <!-- 2. District Dropdown -->
+                                                            <div>
+                                                                <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-0.5">District @if ($rowSelectedType && $rowSelectedType != 151)<span class="text-rose-500">*</span>@endif</label>
+                                                                <select 
+                                                                    @if ($isDisabled || empty($rowSelectedType) || $rowSelectedType == 151) disabled @endif 
+                                                                    class="w-full text-xs rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white py-1 px-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                                    wire:model.live="selectedUserDistricts.{{ $activeStepForUserModal }}.{{ $u->id }}"
+                                                                >
+                                                                    @if (empty($rowSelectedType))
+                                                                        <option value="">-- Select Office Type First --</option>
+                                                                    @elseif ($rowSelectedType == 151)
+                                                                        <option value="">State Level (N/A)</option>
+                                                                    @else
+                                                                        <option value="">-- Select District --</option>
+                                                                        @foreach ($districtsList as $distId => $distName)
+                                                                            <option value="{{ $distId }}">{{ $distName }}</option>
+                                                                        @endforeach
+                                                                    @endif
+                                                                </select>
+                                                            </div>
+
+                                                            <!-- 3. Office Dropdown -->
+                                                            <div>
+                                                                <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-0.5">Office <span class="text-rose-500">*</span></label>
+                                                                <select 
+                                                                    @if ($isDisabled || empty($rowSelectedType) || ($rowSelectedType != 151 && empty($rowSelectedDist))) disabled @endif 
+                                                                    class="w-full text-xs rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white py-1 px-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                                    wire:model.live="selectedUserOffices.{{ $activeStepForUserModal }}.{{ $u->id }}"
+                                                                >
+                                                                    @if (empty($rowSelectedType))
+                                                                        <option value="">-- Select Office Type First --</option>
+                                                                    @elseif ($rowSelectedType != 151 && empty($rowSelectedDist))
+                                                                        <option value="">-- Select District First --</option>
+                                                                    @else
+                                                                        <option value="">-- Select Office --</option>
+                                                                        @foreach ($rowOffices as $offId => $offName)
+                                                                            <option value="{{ $offId }}">{{ $offName }}</option>
+                                                                        @endforeach
+                                                                    @endif
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        @error("selectedUserOffices.{$activeStepForUserModal}.{$u->id}")
+                                                            <span class="text-rose-600 text-[10px] block font-medium">{{ $message }}</span>
+                                                        @enderror
+                                                    </div>
+                                                @else
+                                                    <div class="text-xs text-gray-500 truncate py-1" title="{{ $userOfficeName ? "{$userOfficeTypes} / {$userDistrictName} / {$userOfficeName}" : 'Check user to configure office' }}">
+                                                        @if ($userOfficeName)
+                                                            <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+                                                                <span>{{ $userOfficeTypes ?: 'N/A' }}</span>
+                                                                <span class="text-slate-400">&bull;</span>
+                                                                <span>{{ $userDistrictName ?: 'State' }}</span>
+                                                                <span class="text-slate-400">&bull;</span>
+                                                                <span class="font-semibold text-indigo-700">{{ $userOfficeName }}</span>
+                                                            </span>
+                                                        @else
+                                                            <span class="italic text-gray-400">—</span>
+                                                        @endif
+                                                    </div>
+                                                @endif
+                                            </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td class="px-4 py-12 text-center text-gray-500 text-xs" colspan="4">
+                                            <td class="px-4 py-12 text-center text-gray-500 text-xs" colspan="5">
                                                 No active users found matching your filters.
                                             </td>
                                         </tr>

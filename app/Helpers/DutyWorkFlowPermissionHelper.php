@@ -155,6 +155,26 @@ class DutyWorkFlowPermissionHelper
             return false;
         }
 
+        if ($schemeId) {
+            $dutySchemes = [];
+            if (!empty($duty['scheme_list'])) {
+                $raw = is_string($duty['scheme_list']) ? json_decode($duty['scheme_list'], true) : $duty['scheme_list'];
+                $dutySchemes = collect($raw)->map(fn($item) => (int)(is_array($item) || is_object($item) ? data_get($item, 'id') : $item))->filter()->toArray();
+            }
+            if (empty($dutySchemes)) {
+                $dutySchemes = \App\Models\UserRoleSchemeOfficeMapping::where('user_id', $user->id)
+                    ->where('office_id', $officeId)
+                    ->where('role_id', $roleId)
+                    ->pluck('scheme_id')
+                    ->map(fn($id) => (int)$id)
+                    ->toArray();
+            }
+            if (!empty($dutySchemes) && !in_array((int)$schemeId, $dutySchemes, true)) {
+                self::$permCheckCache[$cacheKey] = false;
+                return false;
+            }
+        }
+
         $registrar = app(PermissionRegistrar::class);
         $originalTeamId = $registrar->getPermissionsTeamId();
 
