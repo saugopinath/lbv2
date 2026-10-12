@@ -52,6 +52,30 @@ use App\Http\Controllers\DutyAssignmentRoleOfficeTypeMappingsController;
 
 require __DIR__ . '/home.php';
 
+// Testing Route for Duty Assignment
+Route::get('/test-duty/{role_id?}/{office_id?}', function ($role_id = null, $office_id = null) {
+    $role_id = $role_id ?? request('role_id');
+    $office_id = $office_id ?? request('office_id');
+
+    if ($role_id && $office_id) {
+        $user = auth()->user();
+        $office = \App\Models\OfficeMaster::with('officeType')->find($office_id);
+
+        $dutyData = [
+            'user_id'     => $user?->id,
+            'office_id'   => (int) $office_id,
+            'office_type' => \App\Helpers\DutyWorkFlowPermissionHelper::resolveOfficeType($office),
+            'role_id'     => (int) $role_id,
+            'scheme_list' => $user ? \App\Helpers\DutyWorkFlowPermissionHelper::resolveSchemeList($user, (int) $office_id, (int) $role_id) : [],
+        ];
+
+        session(['current_duty' => \Illuminate\Support\Facades\Crypt::encrypt($dutyData)]);
+    }
+
+    return response()->json(session()->all());
+})->name('test.duty');
+
+
 // Guest Routes
 Route::get('/session-expired', function () {
     return view('auth.session-expired', ['expired_at' => now()->format('h:i:s A')]);

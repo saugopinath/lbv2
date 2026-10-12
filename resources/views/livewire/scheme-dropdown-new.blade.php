@@ -12,21 +12,19 @@
             </x-form.select>
         </div>
 
-        {{-- LEGACY MANUAL MODULE SELECTION PRESERVED FOR FUTURE USE:
-        @if ($enableModuleSelection && $schemeId)
+        @if ($enableModuleSelection && !empty($modules) && count($modules) > 1 && $schemeId)
             <div class="pt-2">
                 <x-form.select name="moduleId" label="Workflow Module" wire:model.live="moduleId" class="border rounded px-3 py-2 w-full"
                     required>
                     <option value="">-- Select Module --</option>
                     @foreach ($modules as $mod)
                     <option value="{{ $mod->id }}">
-                        {{ $mod->module_name }} ({{ $mod->module_code }})
+                        {{ $mod->module_name }} ({{ ucfirst($mod->workflow_type ?? 'Normal') }})
                     </option>
                     @endforeach
                 </x-form.select>
             </div>
         @endif
-        --}}
     </div>
 
     <!-- Workflow Not Configured Modal -->

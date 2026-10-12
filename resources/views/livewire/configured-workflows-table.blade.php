@@ -1,20 +1,19 @@
-<div class="bg-white shadow-xl rounded-2xl p-6 space-y-6" 
-     x-data="{ 
-         showDeleteModal: false, 
-         deleteId: null, 
-         deleteSchemeName: '', 
-         deleteModuleName: '',
-         openDeleteModal(id, schemeName, moduleName) {
-             this.deleteId = id;
-             this.deleteSchemeName = schemeName;
-             this.deleteModuleName = moduleName;
-             this.showDeleteModal = true;
-         },
-         closeDeleteModal() {
-             this.showDeleteModal = false;
-             this.deleteId = null;
-         }
-     }">
+<div class="bg-white shadow-xl rounded-2xl p-6 space-y-6" x-data="{
+    showDeleteModal: false,
+    deleteId: null,
+    deleteSchemeName: '',
+    deleteModuleName: '',
+    openDeleteModal(id, schemeName, moduleName) {
+        this.deleteId = id;
+        this.deleteSchemeName = schemeName;
+        this.deleteModuleName = moduleName;
+        this.showDeleteModal = true;
+    },
+    closeDeleteModal() {
+        this.showDeleteModal = false;
+        this.deleteId = null;
+    }
+}">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-gray-200">
         <div>
             <h1 class="text-2xl font-bold text-indigo-700">Configured Workflows</h1>
@@ -139,7 +138,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-center">
                             @php
                                 $type = strtolower($item->module->workflow_type ?? 'normal');
-                                $badgeClass = match($type) {
+                                $badgeClass = match ($type) {
                                     'rural' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
                                     'urban' => 'bg-sky-50 text-sky-700 border-sky-200',
                                     default => 'bg-gray-50 text-gray-700 border-gray-200',
@@ -196,12 +195,12 @@
                                 Edit
                             </a>
 
-                            <button class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-medium text-xs rounded-md shadow transition cursor-pointer" type="button" @click.stop="openDeleteModal({{ $item->id }}, '{{ addslashes($item->scheme->name ?? ('Scheme #' . $item->scheme_id)) }}', '{{ addslashes($item->module->module_name ?? ($item->main_module_code ?? 'N/A')) }}')">
+                            {{-- <button class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-medium text-xs rounded-md shadow transition cursor-pointer" type="button" @click.stop="openDeleteModal({{ $item->id }}, '{{ addslashes($item->scheme->name ?? ('Scheme #' . $item->scheme_id)) }}', '{{ addslashes($item->module->module_name ?? ($item->main_module_code ?? 'N/A')) }}')">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
                                 </svg>
                                 Delete
-                            </button>
+                            </button> --}}
                         </td>
                     </tr>
                 @empty
@@ -221,38 +220,15 @@
     </div>
 
     {{-- Delete Confirmation Premium Tailwind CSS Modal --}}
-    <div aria-labelledby="modal-title" 
-         aria-modal="true" 
-         class="fixed inset-0 z-50 overflow-y-auto" 
-         role="dialog"
-         x-cloak 
-         x-show="showDeleteModal"
-         @keydown.escape.window="closeDeleteModal">
-        
+    <div @keydown.escape.window="closeDeleteModal" aria-labelledby="modal-title" aria-modal="true" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" x-cloak x-show="showDeleteModal">
+
         <!-- Backdrop with Blur -->
-        <div @click="closeDeleteModal" 
-             aria-hidden="true" 
-             class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
-             x-show="showDeleteModal" 
-             x-transition:enter="transition ease-out duration-200" 
-             x-transition:enter-start="opacity-0" 
-             x-transition:enter-end="opacity-100" 
-             x-transition:leave="transition ease-in duration-150" 
-             x-transition:leave-start="opacity-100" 
-             x-transition:leave-end="opacity-0"></div>
+        <div @click="closeDeleteModal" aria-hidden="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" x-show="showDeleteModal" x-transition:enter-end="opacity-100" x-transition:enter-start="opacity-0" x-transition:enter="transition ease-out duration-200" x-transition:leave-end="opacity-0" x-transition:leave-start="opacity-100" x-transition:leave="transition ease-in duration-150"></div>
 
         <!-- Center Modal Content -->
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-            <div @click.stop
-                 class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-100" 
-                 x-show="showDeleteModal" 
-                 x-transition:enter="transition ease-out duration-200" 
-                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
-                 x-transition:leave="transition ease-in duration-150" 
-                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
-                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-                
+            <div @click.stop class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-100" x-show="showDeleteModal" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter="transition ease-out duration-200" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="transition ease-in duration-150">
+
                 <!-- Modal Header with Soft Danger Accent -->
                 <div class="bg-gradient-to-r from-red-50 via-rose-50/50 to-transparent p-6 border-b border-rose-100/80 flex items-start justify-between">
                     <div class="flex items-center gap-4">

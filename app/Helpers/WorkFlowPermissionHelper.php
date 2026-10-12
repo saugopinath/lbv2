@@ -838,63 +838,13 @@ class WorkFlowPermissionHelper
     }
 
     /**
-     * Resolves the active duty context (office_id and role_id) from the encrypted session,
-     * or falls back to fetching the logged-in user's first role & office mapping.
+     * Resolves the active duty context (office_id, office_type, role_id, scheme_list, etc.).
+     * Centralized and handled solely in DutyWorkFlowPermissionHelper.
      *
-     * @return array ['office_id' => int|null, 'role_id' => int|null]
+     * @return array ['office_id' => int|null, 'office_type' => string|null, 'role_id' => int|null, 'scheme_list' => array, ...]
      */
     public static function getCurrentDuty(): array
     {
-        $duty = session('current_duty');
-
-        // 1. Try to decrypt from session if present
-        if (!empty($duty)) {
-            if (is_string($duty)) {
-                try {
-                    $duty = Crypt::decrypt($duty);
-                } catch (\Exception $e) {
-                    try {
-                        $duty = json_decode(Crypt::decryptString($duty), true);
-                    } catch (\Exception $e2) {
-                        $duty = null;
-                    }
-                }
-            }
-
-            if (is_array($duty) && !empty($duty['office_id']) && !empty($duty['role_id'])) {
-                return [
-                    'office_id'   => (int) $duty['office_id'],
-                    'role_id'     => (int) $duty['role_id'],
-                    'scheme_list' => $duty['scheme_list'] ?? null,
-                ];
-            }
-        }
-
-        // 2. Fallback: Fetch logged-in user's first role and office mapping
-        $user = auth()->user();
-        if ($user) {
-            $schemeId = self::getSchemeId();
-            $query = \App\Models\UserRoleSchemeOfficeMapping::with('Office')->where('user_id', $user->id);
-
-            if ($schemeId) {
-                $query->where('scheme_id', $schemeId);
-            }
-
-            $firstMapping = $query->first() ?? \App\Models\UserRoleSchemeOfficeMapping::with('Office')->where('user_id', $user->id)->first();
-
-            if ($firstMapping) {
-                return [
-                    'office_id'   => (int) $firstMapping->office_id,
-                    'role_id'     => (int) $firstMapping->role_id,
-                    'scheme_list' => null,
-                ];
-            }
-        }
-
-        return [
-            'office_id'   => null,
-            'role_id'     => null,
-            'scheme_list' => null,
-        ];
+        return DutyWorkFlowPermissionHelper::getCurrentDuty();
     }
 }

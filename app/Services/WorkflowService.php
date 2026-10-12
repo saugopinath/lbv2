@@ -109,22 +109,17 @@ class WorkflowService
             $dutyRoleId = $currentDuty['role_id'] ?? null;
 
             // 1. Identify user's jurisdiction from active duty office
-            $dutyOffice = $dutyOfficeId ? \App\Models\OfficeMaster::with('officeType')->find($dutyOfficeId) : null;
-            $isBlockOffice = false;
-            $isSubdivOffice = false;
+            $officeType = $currentDuty['office_type'] ?? null;
+            $isBlockOffice = ($officeType === 'block');
+            $isSubdivOffice = ($officeType === 'subdivision');
 
-            if ($dutyOffice) {
-                if ((int) $dutyOffice->office_type_id === 153 || !empty($dutyOffice->block_id)) {
-                    $isBlockOffice = true;
-                } elseif ((int) $dutyOffice->office_type_id === 154 || !empty($dutyOffice->subdivision_id) || !empty($dutyOffice->municipalitiy_id)) {
-                    $isSubdivOffice = true;
-                } else {
-                    $typeShort = strtolower($dutyOffice->officeType?->short_name ?? $dutyOffice->officeType?->name ?? '');
-                    if (str_contains($typeShort, 'block') || str_contains($typeShort, 'bdo') || str_contains($typeShort, 'rural')) {
-                        $isBlockOffice = true;
-                    } elseif (str_contains($typeShort, 'sdo') || str_contains($typeShort, 'subdiv') || str_contains($typeShort, 'muni') || str_contains($typeShort, 'urban')) {
-                        $isSubdivOffice = true;
-                    }
+            // Fallback only if office_type is missing from duty
+            if (!$officeType && $dutyOfficeId) {
+                $dutyOffice = \App\Models\OfficeMaster::with('officeType')->find($dutyOfficeId);
+                if ($dutyOffice) {
+                    $resolvedType = \App\Helpers\DutyWorkFlowPermissionHelper::resolveOfficeType($dutyOffice);
+                    $isBlockOffice = ($resolvedType === 'block');
+                    $isSubdivOffice = ($resolvedType === 'subdivision');
                 }
             }
 
@@ -162,40 +157,32 @@ class WorkflowService
 
             $targetModuleIds = $targetModules->pluck('id')->toArray();
 
-            // 4. Resolve user roles
-            $rawRoleIds = [];
+            // 4. Resolve user roles (Strictly use active duty role)
+            $roleIds = [];
             if ($dutyRoleId) {
-                $rawRoleIds[] = $dutyRoleId;
-            }
-
-            $encryptedRoleId = session('lgd_session.role_id');
-            if ($encryptedRoleId) {
-                try {
-                    $rawRoleIds[] = Crypt::decryptString($encryptedRoleId);
-                } catch (\Exception $e) {}
-            }
-
-            if ($user) {
-                if ($schemeId) {
-                    app(PermissionRegistrar::class)->setPermissionsTeamId($schemeId);
+                $roleIds[] = (int) $dutyRoleId;
+            } else {
+                // Fallback only if active duty role_id is not set
+                $encryptedRoleId = session('lgd_session.role_id');
+                if ($encryptedRoleId) {
+                    try {
+                        $roleIds[] = (int) Crypt::decryptString($encryptedRoleId);
+                    } catch (\Exception $e) {}
                 }
-                $spatieRoleIds = $user->roles->pluck('id')->toArray();
-                $mappingRoleIds = UserRoleSchemeOfficeMapping::where('user_id', $user->id)
-                    ->when($schemeId, fn($q) => $q->where('scheme_id', $schemeId))
-                    ->pluck('role_id')
-                    ->toArray();
 
-                $rawRoleIds = array_merge($rawRoleIds, $spatieRoleIds, $mappingRoleIds);
+                if ($user && empty($roleIds)) {
+                    $mappingRoleIds = UserRoleSchemeOfficeMapping::where('user_id', $user->id)
+                        ->when($schemeId, fn($q) => $q->where('scheme_id', $schemeId))
+                        ->when($dutyOfficeId, fn($q) => $q->where('office_id', $dutyOfficeId))
+                        ->pluck('role_id')
+                        ->map(fn($id) => (int) $id)
+                        ->toArray();
+
+                    $roleIds = array_merge($roleIds, $mappingRoleIds);
+                }
             }
 
-            $roleIds = array_values(array_unique(array_filter(array_map(function ($id) {
-                if (is_numeric($id)) return (int) $id;
-                try {
-                    $un = @unserialize($id);
-                    if (is_numeric($un)) return (int) $un;
-                } catch (\Throwable $e) {}
-                return null;
-            }, $rawRoleIds))));
+            $roleIds = array_values(array_unique(array_filter($roleIds)));
 
             if (empty($roleIds)) {
                 return [];
