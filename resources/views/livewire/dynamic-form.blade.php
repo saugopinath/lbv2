@@ -11,9 +11,26 @@
         {!! json_encode($activeRules) !!}
     </script>
 
-    <h2 class="block p-3 bg-blue-50 border border-blue-200 text-2xl rounded-lg shadow-sm dark:bg-blue-900/30 dark:border-blue-800 text-blue-700 dark:text-blue-100 font-semibold mb-3">
-        {{ $heading }}
-    </h2>
+    <div class="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg shadow-sm dark:bg-blue-900/30 dark:border-blue-800 mb-3">
+        <h2 class="text-2xl font-semibold text-blue-700 dark:text-blue-100 flex items-center gap-2 flex-wrap">
+            <span>{{ $heading }}</span>
+            @if (!empty($moduleName) || !empty($moduleCode))
+                <div class="relative inline-flex items-center group cursor-pointer" x-data="{ open: false }">
+                    <button @blur="open = false" @focus="open = true" @mouseenter="open = true" @mouseleave="open = false" {{-- title="Module: {{ $moduleName ?: $moduleCode }}" --}} aria-label="Module Information" class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-200/80 hover:bg-blue-300 text-blue-800 dark:bg-blue-800 dark:hover:bg-blue-700 dark:text-blue-100 text-xs font-bold transition-all shadow-xs cursor-help focus:outline-none focus:ring-2 focus:ring-blue-400" type="button">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Tooltip -->
+                    <div class="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-50 px-2.5 py-1 text-xs font-normal text-white bg-slate-900 dark:bg-slate-800 rounded shadow-lg whitespace-nowrap pointer-events-none border border-slate-700" x-cloak x-show="open" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:enter-start="opacity-0 translate-y-1 scale-95" x-transition:enter="transition ease-out duration-150" x-transition:leave-end="opacity-0 translate-y-1 scale-95" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100">
+                        <span>Module: <strong class="font-semibold text-blue-300">{{ $moduleName ?: $moduleCode }}</strong></span>
+                        <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 dark:bg-slate-800 rotate-45 border-t border-l border-slate-700"></div>
+                    </div>
+                </div>
+            @endif
+        </h2>
+    </div>
     @if (!$isEdit)
         <livewire:dup-aadhaar-check-v2 :scheme-id="$schemeId" />
     @endif

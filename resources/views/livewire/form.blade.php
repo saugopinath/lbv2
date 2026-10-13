@@ -9,7 +9,7 @@
             <livewire:annapurna-yojana-form :grievanceId="$grievanceId" :moduleCode="$moduleCode" :scheme-id="$schemeId" :schemeName="$schemeName" :wire:key="'annapurna-yojana-form-'.$schemeId" />
         @else
             <div class="max-w-auto mx-auto bg-white rounded-xl shadow-sm p-6">
-                <livewire:dynamic-form :grievanceId="$grievanceId" :moduleCode="$moduleCode" :scheme-id="$schemeId" :schemeName="$schemeName" :wire:key="'dynamic-form-'.$schemeId" />
+                <livewire:dynamic-form :grievanceId="$grievanceId" :moduleCode="$moduleCode" :scheme-module-id="$schemeModuleId" :scheme-id="$schemeId" :schemeName="$schemeName" :wire:key="'dynamic-form-'.$schemeId" />
             </div>
         @endif
     @endif

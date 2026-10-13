@@ -11,22 +11,24 @@ class RevertRejectModal extends Component
     public $action = '';
     public $revertrejectCauses = [];
     public $cause = '';
+    public $warningMessage = null;
 
     protected $listeners = [
         'open-bulk-revert-modal' => 'openModal'
     ];
 
-    public function openModal($action, $revertrejectCauses = [])
+    public function openModal($action, $revertrejectCauses = [], $warningMessage = null)
     {
-        $this->reset(['remark', 'cause']);
+        $this->reset(['remark', 'cause', 'warningMessage']);
         $this->open = true;
         $this->action = $action;
         $this->revertrejectCauses = $revertrejectCauses ?? [];
+        $this->warningMessage = $warningMessage;
     }
 
     public function close()
     {
-        $this->reset(['open', 'remark', 'cause']);
+        $this->reset(['open', 'remark', 'cause', 'warningMessage']);
     }
 
     public function confirm()

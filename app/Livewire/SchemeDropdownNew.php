@@ -81,21 +81,23 @@ class SchemeDropdownNew extends Component
         $user = auth()->user();
         $isSuperAdmin = WorkFlowPermissionHelper::isSuperAdmin($user);
 
+        $configuredSchemeIds = [];
+        if (!empty($this->moduleCode)) {
+            $moduleId = DynamicWorkflowModule::where('module_code', $this->moduleCode)->value('id');
+            if ($moduleId) {
+                $configuredSchemeIds = DynamicWorkflowSchemeModule::where('module_id', $moduleId)
+                    ->where('is_disabled', 0)
+                    ->pluck('scheme_id')
+                    ->toArray();
+            }
+        }
+
         if ($isSuperAdmin) {
             // Superadmin has unrestricted access to all active schemes
             $query = Scheme::select('id', 'name')->where('is_active', 1);
 
-            if (!empty($this->moduleCode)) {
-                $module = DynamicWorkflowModule::select('id')->where('module_code', $this->moduleCode)->first();
-                if ($module) {
-                    $configuredSchemeIds = DynamicWorkflowSchemeModule::where('module_id', $module->id)
-                        ->where('is_disabled', 0)
-                        ->pluck('scheme_id')
-                        ->toArray();
-                    if (!empty($configuredSchemeIds)) {
-                        $query->whereIn('id', $configuredSchemeIds);
-                    }
-                }
+            if (!empty($configuredSchemeIds)) {
+                $query->whereIn('id', $configuredSchemeIds);
             }
 
             $this->schemes = $query->orderBy('name')->get();
@@ -116,12 +118,7 @@ class SchemeDropdownNew extends Component
 
             if ($cachedSchemes->isNotEmpty()) {
                 if (!empty($this->moduleCode)) {
-                    $module = DynamicWorkflowModule::select('id')->where('module_code', $this->moduleCode)->first();
-                    if ($module) {
-                        $configuredSchemeIds = DynamicWorkflowSchemeModule::where('module_id', $module->id)
-                            ->where('is_disabled', 0)
-                            ->pluck('scheme_id')
-                            ->toArray();
+                    if (!empty($configuredSchemeIds)) {
                         $cachedSchemes = $cachedSchemes->filter(fn($sch) => in_array($sch->id, $configuredSchemeIds));
                     }
 
@@ -153,19 +150,23 @@ class SchemeDropdownNew extends Component
         if ($value) {
             $this->schemeSelected = true;
             if ($this->enableModuleSelection) {
-                $duty = WorkFlowPermissionHelper::getCurrentDuty();
-                $officeType = $duty['office_type'] ?? null;
+                // Load all modules accessible to current user for this scheme
+                $this->loadModulesForScheme($value);
 
-                // For District/State converging offices (or SuperAdmin), allow manual module selection if multiple exist
-                if (in_array($officeType, ['district', 'state']) || WorkFlowPermissionHelper::isSuperAdmin()) {
-                    $this->loadModulesForScheme($value);
-                    if (count($this->modules) > 1) {
-                        return;
-                    }
-                    $this->modules = [];
+                // If user has access to more than 1 module under this scheme, prompt them with module dropdown
+                if (count($this->modules) > 1) {
+                    return;
                 }
 
-                // Block, Subdivision, or schemes with single module: auto-resolve directly
+                // If exactly 1 module is accessible, auto-resolve directly to it
+                if (count($this->modules) === 1) {
+                    $singleModule = collect($this->modules)->first();
+                    $singleModuleId = data_get($singleModule, 'id');
+                    $this->resolveModuleForScheme($value, $singleModuleId);
+                    return;
+                }
+
+                // If 0 modules found, trigger not-configured workflow modal
                 $this->resolveModuleForScheme($value);
             } else {
                 $scheme = collect($this->schemes)->firstWhere('id', (int) $value);
@@ -185,9 +186,9 @@ class SchemeDropdownNew extends Component
 
     /**
      * Resolves the appropriate workflow module for the selected scheme automatically
-     * based on active duty context (Block = rural, Subdivision = urban, others = normal).
+     * based on target module ID or active duty context (Block = rural, Subdivision = urban, others = normal).
      */
-    protected function resolveModuleForScheme($schemeId)
+    public function resolveModuleForScheme($schemeId, $targetModuleId = null)
     {
         $duty = WorkFlowPermissionHelper::getCurrentDuty();
         $officeType = $duty['office_type'] ?? null;
@@ -200,7 +201,9 @@ class SchemeDropdownNew extends Component
         } else {
             $officeId = $duty['office_id'] ?? null;
             if ($officeId) {
-                $office = OfficeMaster::with('officeType')->find($officeId);
+                $office = OfficeMaster::with(['officeType' => fn($q) => $q->select('id', 'name', 'short_name')])
+                    ->select('id', 'office_type_id', 'block_id', 'subdivision_id', 'municipalitiy_id')
+                    ->find($officeId);
                 if ($office) {
                     if ((int) $office->office_type_id === 153 || !empty($office->block_id)) {
                         $targetWorkflowType = 'rural';
@@ -221,7 +224,8 @@ class SchemeDropdownNew extends Component
         }
 
         // Fetch all active scheme modules configured for this scheme
-        $schemeModules = DynamicWorkflowSchemeModule::with('module')
+        $schemeModules = DynamicWorkflowSchemeModule::with(['module' => fn($q) => $q->select('id', 'module_name', 'module_code', 'workflow_type')])
+            ->select('id', 'scheme_id', 'module_id', 'main_module_code', 'is_disabled')
             ->where('scheme_id', (int) $schemeId)
             ->where('is_disabled', 0)
             ->get();
@@ -235,21 +239,34 @@ class SchemeDropdownNew extends Component
             return null;
         }
 
-        // 1. Try matching target workflow_type (e.g. rural or urban)
-        $matched = $schemeModules->first(function ($sm) use ($targetWorkflowType) {
-            return strtolower($sm->module?->workflow_type ?? 'normal') === $targetWorkflowType;
-        });
-
-        // 2. Fallback to 'normal' if target type was rural/urban but not found
-        if (!$matched && $targetWorkflowType !== 'normal') {
-            $matched = $schemeModules->first(function ($sm) {
-                return strtolower($sm->module?->workflow_type ?? 'normal') === 'normal';
+        if ($targetModuleId) {
+            $matched = $schemeModules->firstWhere('module_id', (int) $targetModuleId);
+        } else {
+            // 1. Try matching target workflow_type (e.g. rural or urban)
+            $matched = $schemeModules->first(function ($sm) use ($targetWorkflowType) {
+                return strtolower($sm->module?->workflow_type ?? 'normal') === $targetWorkflowType;
             });
+
+            // 2. Fallback to 'normal' if target type was rural/urban but not found
+            if (!$matched && $targetWorkflowType !== 'normal') {
+                $matched = $schemeModules->first(function ($sm) {
+                    return strtolower($sm->module?->workflow_type ?? 'normal') === 'normal';
+                });
+            }
+
+            // 3. Fallback to single/first active module configured
+            if (!$matched) {
+                $matched = $schemeModules->first();
+            }
         }
 
-        // 3. Fallback to single/first active module configured
         if (!$matched) {
-            $matched = $schemeModules->first();
+            $scheme = collect($this->schemes)->firstWhere('id', (int) $schemeId);
+            $schemeName = data_get($scheme, 'name', 'Selected Scheme');
+            $this->notConfiguredMessage = "The workflow for \"{$schemeName}\" has not been configured yet. Please contact the administrator.";
+            $this->showNotConfiguredModal = true;
+            $this->dispatch('selectedScheme', null);
+            return null;
         }
 
         // Verify that steps exist for this workflow
@@ -281,12 +298,13 @@ class SchemeDropdownNew extends Component
         $schemeName = data_get($scheme, 'name');
 
         $this->dispatch('selectedScheme', [
-            'scheme_id'     => (int) $schemeId,
-            'scheme_name'   => $schemeName,
-            'module_id'     => (int) $matched->module_id,
-            'module_code'   => $moduleCode,
-            'module_name'   => $matched->module?->module_name,
-            'workflow_type' => $matched->module?->workflow_type ?? 'normal',
+            'scheme_id'        => (int) $schemeId,
+            'scheme_name'      => $schemeName,
+            'module_id'        => (int) $matched->module_id,
+            'module_code'      => $moduleCode,
+            'module_name'      => $matched->module?->module_name,
+            'workflow_type'    => $matched->module?->workflow_type ?? 'normal',
+            'scheme_module_id' => (int) $matched->id,
         ]);
 
         return $matched;
@@ -371,12 +389,13 @@ class SchemeDropdownNew extends Component
             $schemeName = data_get($scheme, 'name');
 
             $this->dispatch('selectedScheme', [
-                'scheme_id'     => (int) $this->schemeId,
-                'scheme_name'   => $schemeName,
-                'module_id'     => (int) $module->id,
-                'module_code'   => $module->module_code,
-                'module_name'   => $module->module_name,
-                'workflow_type' => $module->workflow_type ?? 'normal',
+                'scheme_id'        => (int) $this->schemeId,
+                'scheme_name'      => $schemeName,
+                'module_id'        => (int) $module->id,
+                'module_code'      => $module->module_code,
+                'module_name'      => $module->module_name,
+                'workflow_type'    => $module->workflow_type ?? 'normal',
+                'scheme_module_id' => (int) $schemeModule->id,
             ]);
         } else {
             $this->dispatch('selectedScheme', null);

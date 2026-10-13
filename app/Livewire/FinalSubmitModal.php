@@ -21,16 +21,18 @@ class FinalSubmitModal extends Component
     public array $tabsData = [];
     public $previewTabCode = null;
     public $schemeId;
+    public $schemeModuleId = null;
     public $schemeName;
     public $applicantPhoto;
     public $filter_data = [];
 
     protected $listeners = ['openFinalModal'];
-    public function openFinalModal($applicationId, $tabsData, $schemeId = null)
+    public function openFinalModal($applicationId, $tabsData, $schemeId = null, $schemeModuleId = null)
     {
         $this->applicationId = $applicationId;
         $this->tabsData = $tabsData;
         $this->schemeId = $schemeId;
+        $this->schemeModuleId = $schemeModuleId;
         $this->loadimage();
         $this->loadSchemeName();
         $this->show = true;
@@ -56,8 +58,7 @@ class FinalSubmitModal extends Component
     }
     public function loadSchemeName()
     {
-        $scheme = Scheme::find($this->schemeId);
-        $this->schemeName = $scheme->name;
+        $this->schemeName = Scheme::where('id', $this->schemeId)->value('name');
     }
     public function close()
     {
@@ -77,22 +78,41 @@ class FinalSubmitModal extends Component
         if (!empty($select_lgd['subdivision_id'])) {
             $this->filter_data['created_by_local_body_code'] = Crypt::decryptString($select_lgd['subdivision_id']);
         }
-        $levelRoles = $workflowService->getLevelRoles($this->schemeId);
+
+        $BeneficiaryDetails = BeneficiaryPersonalDetail::select(
+                'application_id',
+                'beneficiary_id',
+                'scheme_id',
+                'scheme_module_id',
+                'next_level_role_id',
+                'is_final',
+                'created_by_dist_code',
+                'created_by_local_body_code'
+            )
+            ->where('application_id', $this->applicationId)
+            ->where($this->filter_data)
+            ->first();
+
+        if (!$this->schemeModuleId && $BeneficiaryDetails && $BeneficiaryDetails->scheme_module_id) {
+            $this->schemeModuleId = $BeneficiaryDetails->scheme_module_id;
+        }
+
+        $levelRoles = $workflowService->getLevelRoles($this->schemeId, null, $this->schemeModuleId);
 
         DB::beginTransaction();
         try {
 
-            $BeneficiaryDetails = BeneficiaryPersonalDetail::where('application_id', $this->applicationId)
-                ->where($this->filter_data)
-                ->first();
             if ($BeneficiaryDetails) {
-                $BeneficiaryDetails->next_level_role_id = $levelRoles->next_level_role_id;
+                $BeneficiaryDetails->next_level_role_id = $levelRoles ? $levelRoles->next_level_role_id : 20;
+                if ($this->schemeModuleId) {
+                    $BeneficiaryDetails->scheme_module_id = $this->schemeModuleId;
+                }
                 $BeneficiaryDetails->is_final = 1;
                 $BeneficiaryDetails->updated_at = now();
                 $BeneficiaryDetails->save();
             }
 
-            $beneficiary_id = BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->value('beneficiary_id');
+            $beneficiary_id = $BeneficiaryDetails?->beneficiary_id ?? BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->value('beneficiary_id');
             AcceptRejectInfo::create([
                 'application_id'          => $this->applicationId,
                 'beneficiary_id'          => $beneficiary_id,

@@ -44,6 +44,34 @@ class WorkflowService
                 }
             }
 
+            // 1st Priority: Strictly use active duty role from session('current_duty') if present
+            $rawRoleIds = [];
+            $currentDuty = WorkFlowPermissionHelper::getCurrentDuty();
+
+            if (!empty($currentDuty['role_id'])) {
+                $rawRoleIds[] = (int) $currentDuty['role_id'];
+            } else {
+                // Fallback only if active duty role_id is not set
+                if ($sessionRoleId) {
+                    $rawRoleIds[] = $sessionRoleId;
+                }
+
+                if (auth()->check()) {
+                    $user = auth()->user();
+                    if ($schemeId) {
+                        app(PermissionRegistrar::class)->setPermissionsTeamId($schemeId);
+                    }
+                    $spatieRoleIds = $user->roles->pluck('id')->toArray();
+                    $mappingRoleIds = UserRoleSchemeOfficeMapping::where('user_id', $user->id)
+                        ->when($schemeId, fn($q) => $q->where('scheme_id', $schemeId))
+                        ->pluck('role_id')
+                        ->toArray();
+
+                    $rawRoleIds = array_merge($rawRoleIds, $spatieRoleIds, $mappingRoleIds);
+                }
+            }
+
+            /* OLD CODE COMMENTED OUT FOR BACKWARD COMPATIBILITY:
             // Collect all role IDs associated with this user (current duty, session role, spatie roles, office mapping roles)
             $rawRoleIds = [];
 
@@ -69,6 +97,7 @@ class WorkflowService
 
                 $rawRoleIds = array_merge($rawRoleIds, $spatieRoleIds, $mappingRoleIds);
             }
+            */
 
             $roleIds = array_values(array_unique(array_filter(array_map(function ($id) {
                 if (is_numeric($id)) return (int) $id;
@@ -91,12 +120,11 @@ class WorkflowService
     }
 
     /**
-     * Resolves all matching step ranks across active scheme modules for a user's role.
-     * Enforces jurisdiction isolation (Block = strictly Rural, Subdivision = strictly Urban).
-     * Merging across multiple modules is ONLY applied for the rare case where a higher converging
-     * office (e.g. District) has the same role and user assigned to the final step (is_final_step).
+     * Resolves all matching step targets across active scheme modules for a user's role.
+     * Enforces jurisdiction isolation (Block = Rural & Normal, Subdivision = Urban & Normal).
+     * Higher converging offices (District/State) can process across Rural, Urban, and Normal.
      */
-    public function getAllLevelRoleRanks($schemeId, $schemeModuleId = null): array
+    public function getWorkflowStepTargets($schemeId, $schemeModuleId = null): array
     {
         if (empty($schemeId)) {
             return [];
@@ -115,7 +143,9 @@ class WorkflowService
 
             // Fallback only if office_type is missing from duty
             if (!$officeType && $dutyOfficeId) {
-                $dutyOffice = \App\Models\OfficeMaster::with('officeType')->find($dutyOfficeId);
+                $dutyOffice = \App\Models\OfficeMaster::with(['officeType' => fn($q) => $q->select('id', 'name', 'short_name')])
+                    ->select('id', 'office_type_id', 'block_id', 'subdivision_id', 'municipalitiy_id')
+                    ->find($dutyOfficeId);
                 if ($dutyOffice) {
                     $resolvedType = \App\Helpers\DutyWorkFlowPermissionHelper::resolveOfficeType($dutyOffice);
                     $isBlockOffice = ($resolvedType === 'block');
@@ -124,7 +154,8 @@ class WorkflowService
             }
 
             // 2. Fetch all active scheme modules
-            $activeSchemeModules = DynamicWorkflowSchemeModule::with('module')
+            $activeSchemeModules = DynamicWorkflowSchemeModule::with(['module' => fn($q) => $q->select('id', 'workflow_type')])
+                ->select('id', 'scheme_id', 'module_id', 'main_module_code', 'is_disabled')
                 ->where('scheme_id', $schemeId)
                 ->where('is_disabled', false)
                 ->when($schemeModuleId, fn($q) => $q->where('id', $schemeModuleId))
@@ -135,23 +166,22 @@ class WorkflowService
             }
 
             // 3. JURISDICTION ENFORCEMENT:
-            // - If user sits in a Block office, restrict strictly to Rural (no Urban merge)
-            // - If user sits in a Subdivision office, restrict strictly to Urban (no Rural merge)
-            // - Merging across multiple modules is ONLY allowed for higher/converging offices (District/State)
-            //   where the user/role/office is the same on the final step (is_final_step = true)
+            // - If user sits in a Block office, restrict to Rural and Normal (no Urban)
+            // - If user sits in a Subdivision office, restrict to Urban and Normal (no Rural)
+            // - Converging offices (District/State) can access Rural, Urban, and Normal
             $targetModules = $activeSchemeModules;
 
             if ($isBlockOffice) {
-                $filtered = $activeSchemeModules->filter(fn($sm) => strtolower($sm->module?->workflow_type ?? 'normal') === 'rural');
-                if ($filtered->isEmpty()) {
-                    $filtered = $activeSchemeModules->filter(fn($sm) => strtolower($sm->module?->workflow_type ?? 'normal') === 'normal');
-                }
+                $filtered = $activeSchemeModules->filter(function ($sm) {
+                    $type = strtolower($sm->module?->workflow_type ?? 'normal');
+                    return $type === 'rural' || $type === 'normal';
+                });
                 $targetModules = $filtered->isNotEmpty() ? $filtered : $activeSchemeModules;
             } elseif ($isSubdivOffice) {
-                $filtered = $activeSchemeModules->filter(fn($sm) => strtolower($sm->module?->workflow_type ?? 'normal') === 'urban');
-                if ($filtered->isEmpty()) {
-                    $filtered = $activeSchemeModules->filter(fn($sm) => strtolower($sm->module?->workflow_type ?? 'normal') === 'normal');
-                }
+                $filtered = $activeSchemeModules->filter(function ($sm) {
+                    $type = strtolower($sm->module?->workflow_type ?? 'urban');
+                    return $type === 'urban' || $type === 'normal';
+                });
                 $targetModules = $filtered->isNotEmpty() ? $filtered : $activeSchemeModules;
             }
 
@@ -162,7 +192,6 @@ class WorkflowService
             if ($dutyRoleId) {
                 $roleIds[] = (int) $dutyRoleId;
             } else {
-                // Fallback only if active duty role_id is not set
                 $encryptedRoleId = session('lgd_session.role_id');
                 if ($encryptedRoleId) {
                     try {
@@ -188,15 +217,22 @@ class WorkflowService
                 return [];
             }
 
-            // 5. Query matching step mappings for the resolved modules
-            $mappings = WorkflowsteproleMapping::where('scheme_id', $schemeId)
+            // 5. Query matching step mappings for the resolved modules and roles
+            $mappings = WorkflowsteproleMapping::select('id', 'scheme_id', 'role_id', 'module_id', 'workflow_step_id', 'rank', 'is_final_step', 'is_first_step', 'next_level_role_id')
+                ->where('scheme_id', $schemeId)
                 ->whereIn('role_id', $roleIds)
                 ->whereIn('module_id', $targetModuleIds)
                 ->get();
 
+            // Batch-fetch dynamic workflow labels to prevent N+1 queries during step verification
+            $stepIds = $mappings->pluck('workflow_step_id')->filter()->unique();
+            $labels = $stepIds->isNotEmpty()
+                ? \App\Models\DynamicWorkflowLabel::select('id', 'assign_specific_users', 'user_ids')->whereIn('id', $stepIds)->get()->keyBy('id')
+                : collect();
+
             // Verify step-level specific user assignment if configured
-            $validMappings = $mappings->filter(function ($mapping) use ($user) {
-                $label = \App\Models\DynamicWorkflowLabel::find($mapping->workflow_step_id);
+            $validMappings = $mappings->filter(function ($mapping) use ($user, $labels) {
+                $label = $labels->get($mapping->workflow_step_id);
                 if ($label && $label->assign_specific_users) {
                     $allowedUserIds = (array) (is_array($label->user_ids) ? $label->user_ids : json_decode($label->user_ids, true));
                     if ($user && !in_array((string)$user->id, array_map('strval', $allowedUserIds), true)) {
@@ -206,42 +242,33 @@ class WorkflowService
                 return true;
             });
 
-            $matchedModuleIds = $validMappings->pluck('module_id')->unique();
-
-            // Merging across multiple modules is strictly reserved for the rare case where:
-            // 1. Office is a higher converging office (District/State, not Block or Subdivision)
-            // 2. Both/all modules' matched steps are the FINAL step (is_final_step = true)
-            // 3. The user, role, and office are identical at this final step
-            if ($matchedModuleIds->count() > 1) {
-                $isConvergingOffice = !$isBlockOffice && !$isSubdivOffice;
-                $allAreFinalSteps = $validMappings->every(fn($m) => (bool) $m->is_final_step);
-
-                if ($isConvergingOffice && $allAreFinalSteps) {
-                    // Valid rare case: merge both queues across modules
-                    return array_values(array_unique(array_filter($validMappings->map(fn($m) => (int) ($m->rank ?? $m->workflow_step_id))->toArray())));
-                }
-
-                // If not qualifying for rare merge, do not merge across modules
-                $finalStepMappings = $validMappings->filter(fn($m) => (bool) $m->is_final_step);
-                if ($finalStepMappings->isNotEmpty()) {
-                    $validMappings = $finalStepMappings;
-                } else {
-                    $firstModuleId = $matchedModuleIds->first();
-                    $validMappings = $validMappings->filter(fn($m) => $m->module_id === $firstModuleId);
-                }
-            }
-
-            $finalRanks = [];
+            $targets = [];
             foreach ($validMappings as $mapping) {
                 $rank = $mapping->rank ?? $mapping->workflow_step_id;
                 if ($rank) {
-                    $finalRanks[] = (int) $rank;
+                    $targets[] = [
+                        'scheme_module_id'   => (int) $mapping->module_id,
+                        'rank'               => (int) $rank,
+                        'is_final_step'      => (bool) $mapping->is_final_step,
+                        'is_first_step'      => (bool) $mapping->is_first_step,
+                        'role_id'            => (int) $mapping->role_id,
+                        'next_level_role_id' => $mapping->next_level_role_id ? (int) $mapping->next_level_role_id : null,
+                    ];
                 }
             }
 
-            return array_values(array_unique($finalRanks));
+            return $targets;
         } catch (\Exception $e) {
             return [];
         }
+    }
+
+    /**
+     * Resolves all matching step ranks across active scheme modules for a user's role.
+     */
+    public function getAllLevelRoleRanks($schemeId, $schemeModuleId = null): array
+    {
+        $targets = $this->getWorkflowStepTargets($schemeId, $schemeModuleId);
+        return array_values(array_unique(array_column($targets, 'rank')));
     }
 }

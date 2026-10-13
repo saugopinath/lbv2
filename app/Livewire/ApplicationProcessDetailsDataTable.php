@@ -40,6 +40,7 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     public $isFinal = 1;
     public $moduleCode;
     public $schemeModuleId;
+    public array $stepTargets = [];
 
     public function mount($schemeId = null, ?WorkflowService $workflowService = null, $moduleCode = null, $isFinal = 1): void
     {
@@ -55,8 +56,9 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
                 ->value('id');
         }
 
-        // Resolves all matching step ranks across active modules for the user's role (Merge & Show)
-        $this->sameLevelRoleIds = $workflowService->getAllLevelRoleRanks($schemeId, $this->schemeModuleId);
+        // Resolves all matching step targets (module_id, rank, final/intermediate) across active modules
+        $this->stepTargets = $workflowService->getWorkflowStepTargets($schemeId, $this->schemeModuleId);
+        $this->sameLevelRoleIds = array_values(array_unique(array_column($this->stepTargets, 'rank')));
 
         $levelRoles = $workflowService->getLevelRoles($schemeId, null, $this->schemeModuleId, $this->moduleCode);
         if ($levelRoles) {
@@ -143,40 +145,63 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
         }
 
         $workflowService = app(WorkflowService::class);
-        $data = $workflowService->getLevelRoles($this->schemeId, null, $this->schemeModuleId, $this->moduleCode);
+        $targets = !empty($this->stepTargets) ? $this->stepTargets : $workflowService->getWorkflowStepTargets($this->schemeId, $this->schemeModuleId);
 
-        if ($data) {
-            $canVerify = WorkFlowPermissionHelper::canBulkActionAllow(1, 'verification', true, $this->schemeId) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true, $this->schemeId);
+        $hasIntermediate = false;
+        $hasFinal = false;
+        $hasFirst = false;
 
-            $canApprove = WorkFlowPermissionHelper::canBulkActionAllow(1, 'approver', true, $this->schemeId) ||
-                WorkFlowPermissionHelper::canBulkActionAllow(2, 'approver', true, $this->schemeId);
-
-            $defaultForwardLabel = ($canApprove && !$canVerify) ? 'Approve' : 'Verify';
-            $verifyLabel = $data->workflowstep?->label ?? $defaultForwardLabel;
-            $approveLabel = $data->workflowstep?->label ?? 'Approve';
-
-            if (($canVerify || $canApprove) && ((!$data->is_final_step && !$data->is_first_step) || ($data->is_final_step && $data->is_first_step))) {
-                $actions['bulkverify'] = $verifyLabel;
+        if (!empty($targets)) {
+            foreach ($targets as $t) {
+                if ($t['is_final_step']) {
+                    $hasFinal = true;
+                } else {
+                    $hasIntermediate = true;
+                }
+                if ($t['is_first_step']) {
+                    $hasFirst = true;
+                }
             }
-
-            if (($canApprove || $canVerify) && $data->is_final_step) {
-                $actions['bulkapprove'] = $approveLabel;
+        } else {
+            $data = $workflowService->getLevelRoles($this->schemeId, null, $this->schemeModuleId, $this->moduleCode);
+            if ($data) {
+                if ($data->is_final_step) {
+                    $hasFinal = true;
+                } else {
+                    $hasIntermediate = true;
+                }
+                if ($data->is_first_step) {
+                    $hasFirst = true;
+                }
             }
+        }
 
-            if (
-                (WorkFlowPermissionHelper::canBulkActionAllow(1, 'reject', true, $this->schemeId) ||
-                    WorkFlowPermissionHelper::canBulkActionAllow(2, 'reject', true, $this->schemeId)) && (!$data->is_first_step || ($data->is_final_step && $data->is_first_step))
-            ) {
-                $actions['bulkreject'] = 'Reject';
-            }
+        $canVerify = WorkFlowPermissionHelper::canBulkActionAllow(1, 'verification', true, $this->schemeId) ||
+            WorkFlowPermissionHelper::canBulkActionAllow(2, 'verification', true, $this->schemeId);
 
-            if (
-                (WorkFlowPermissionHelper::canBulkActionAllow(1, 'revert', true, $this->schemeId) ||
-                    WorkFlowPermissionHelper::canBulkActionAllow(2, 'revert', true, $this->schemeId)) && (!$data->is_first_step || ($data->is_final_step && $data->is_first_step))
-            ) {
-                $actions['bulkrevert'] = 'Revert';
-            }
+        $canApprove = WorkFlowPermissionHelper::canBulkActionAllow(1, 'approver', true, $this->schemeId) ||
+            WorkFlowPermissionHelper::canBulkActionAllow(2, 'approver', true, $this->schemeId);
+
+        if (($canVerify || $canApprove) && $hasIntermediate && $hasFinal) {
+            $actions['bulkapprove'] = 'Approve / Forward';
+        } elseif (($canApprove || $canVerify) && $hasFinal) {
+            $actions['bulkapprove'] = 'Approve';
+        } elseif (($canVerify || $canApprove) && $hasIntermediate) {
+            $actions['bulkverify'] = 'Verify / Forward';
+        }
+
+        if (
+            (WorkFlowPermissionHelper::canBulkActionAllow(1, 'reject', true, $this->schemeId) ||
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'reject', true, $this->schemeId)) && (!$hasFirst || ($hasFinal && $hasFirst))
+        ) {
+            $actions['bulkreject'] = 'Reject';
+        }
+
+        if (
+            (WorkFlowPermissionHelper::canBulkActionAllow(1, 'revert', true, $this->schemeId) ||
+                WorkFlowPermissionHelper::canBulkActionAllow(2, 'revert', true, $this->schemeId)) && (!$hasFirst || ($hasFinal && $hasFirst))
+        ) {
+            $actions['bulkrevert'] = 'Revert';
         }
 
         return $actions;
@@ -244,16 +269,30 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     {
         $query = BeneficiaryPersonalDetail::query()
             ->with(['contact.block:id,name', 'contact.municipality:id,name'])
-            ->select('application_id', 'beneficiary_id', 'scheme_id', 'beneficiary_name', 'ben_father_name', 'dob', 'application_type')
+            ->select('application_id', 'beneficiary_id', 'scheme_id', 'scheme_module_id', 'beneficiary_name', 'ben_father_name', 'dob', 'application_type')
             ->whereIn('is_clean', [1, 2])
             ->where('scheme_id', $this->schemeId)
             ->where('is_final', $this->isFinal);
 
-        if (!empty($this->sameLevelRoleIds)) {
+        if (!empty($this->stepTargets)) {
+            $query->where(function ($q) {
+                foreach ($this->stepTargets as $target) {
+                    $q->orWhere(function ($sub) use ($target) {
+                        if (!empty($target['scheme_module_id'])) {
+                            $sub->where('scheme_module_id', $target['scheme_module_id'])
+                                ->where('next_level_role_id', $target['rank']);
+                        } else {
+                            $sub->where('next_level_role_id', $target['rank']);
+                        }
+                    });
+                }
+            });
+        } elseif (!empty($this->sameLevelRoleIds)) {
             $query->whereIn('next_level_role_id', $this->sameLevelRoleIds);
         } elseif ($this->sameLevelRoleId) {
             $query->where('next_level_role_id', $this->sameLevelRoleId);
         }
+
         if (!empty($this->filter_condition)) {
             $query->where($this->filter_condition);
         }
@@ -280,259 +319,205 @@ class ApplicationProcessDetailsDataTable extends DataTableComponent
     {
         $this->handleBulkAction('approver');
     }
+
     public function bulkrevert()
     {
         $this->handleBulkAction('revert');
     }
+
     public function bulkreject()
     {
         $this->handleBulkAction('reject');
     }
+
     public function handleBulkAction($action)
     {
-        $this->revertrejectCauses = Codemaster::where('code', 12)->first()->children()->get();
+        $this->revertrejectCauses = Codemaster::where('code', 12)->first()?->children()->select('id', 'name')->get()?->toArray() ?? [];
         $this->revertrejectAction = $action;
-        $this->dispatch('open-bulk-revert-modal', action: $action, revertrejectCauses: $this->revertrejectCauses);
+
+        $ids = $this->getSelected();
+        $warningMessage = null;
+
+        if (in_array($action, ['verification', 'approver']) && !empty($ids)) {
+            $selectedRecords = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
+                ->select('application_id', 'scheme_module_id', 'scheme_id', 'next_level_role_id')
+                ->get();
+
+            $workflowService = app(WorkflowService::class);
+            $hasFinal = false;
+            $hasIntermediate = false;
+            $stepCache = [];
+
+            foreach ($selectedRecords as $record) {
+                $moduleId = $record->scheme_module_id;
+                $step = $stepCache[$moduleId] ??= $workflowService->getLevelRoles($this->schemeId, null, $moduleId);
+                if ($step) {
+                    if ($step->is_final_step) {
+                        $hasFinal = true;
+                    } else {
+                        $hasIntermediate = true;
+                    }
+                }
+            }
+
+            if ($hasFinal && $hasIntermediate) {
+                $warningMessage = "Selected applications are at different workflow stages (some require Final Approval, while others forward to Recommender). Proceeding will intelligently progress each application to its respective next stage.";
+            }
+        }
+
+        $this->dispatch('open-bulk-revert-modal', action: $action, revertrejectCauses: $this->revertrejectCauses, warningMessage: $warningMessage);
     }
+
     #[On('confirm-bulk-revert')]
     public function confirmBulkRevert($validated, WorkflowService $workflowService)
     {
-        if ($this->revertrejectAction === 'revert') {
-            $this->nextLevelRoleId = $workflowService->getLevelRoles($this->schemeId, 1)->same_level_role_id;
-        } elseif ($this->revertrejectAction === 'reject') {
-            $this->nextLevelRoleId = -100;
-        }
         $ids = $this->getSelected();
-        $select_lgd = session('lgd_session');
-        $user_id = Crypt::decryptString($select_lgd['role_id']);
-        if ($this->revertrejectAction === 'revert') {
+        if (empty($ids)) {
+            return;
+        }
 
-            $ids = $this->getSelected();
+        $action = $this->revertrejectAction;
 
-            if (empty($ids)) {
+        DB::beginTransaction();
+        try {
+            $records = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
+                ->select('application_id', 'beneficiary_id', 'scheme_id', 'scheme_module_id', 'next_level_role_id', 'is_clean')
+                ->get();
+
+            if ($records->isEmpty()) {
+                DB::rollBack();
                 return;
             }
 
-            $next_level_role_id = Codemaster::getIdByCode(21);
+            // Batch-query latest parent IDs from accept_reject_infos in 1 query instead of N queries
+            $appIds = $records->pluck('application_id')->toArray();
+            $latestParentIds = AcceptRejectInfo::whereIn('application_id', $appIds)
+                ->select('application_id', DB::raw('MAX(id) as max_id'))
+                ->groupBy('application_id')
+                ->pluck('max_id', 'application_id')
+                ->toArray();
 
-            DB::beginTransaction();
+            $userId = Auth::id();
+            $ipAddress = request()->ip();
+            $browser = request()->header('User-Agent');
+            $nowDate = Carbon::now()->toDateString();
 
-            try {
-
-                $records = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
-                    ->select('application_id', 'beneficiary_id', 'next_level_role_id', 'is_clean')
-                    ->get();
+            if ($action === 'revert') {
+                $revertOpType = Codemaster::getIdByCode(21);
+                $firstStepsCache = [];
 
                 foreach ($records as $record) {
+                    $moduleId = $record->scheme_module_id;
+                    $firstStep = $firstStepsCache[$moduleId] ??= \App\Models\WorkflowsteproleMapping::select('id', 'scheme_id', 'module_id', 'rank', 'same_level_role_id')
+                        ->where('scheme_id', $this->schemeId)
+                        ->when($moduleId, fn($q) => $q->where('module_id', $moduleId))
+                        ->orderBy('rank', 'asc')
+                        ->first();
+                    $targetNextRoleId = $firstStep ? ($firstStep->rank ?? $firstStep->same_level_role_id) : 10;
 
                     $record->update([
-                        'next_level_role_id' => $this->nextLevelRoleId
+                        'next_level_role_id' => $targetNextRoleId,
                     ]);
 
-                    $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
-                        ->latest('id')
-                        ->value('id');
-
                     AcceptRejectInfo::create([
-                        'application_id' => $record->application_id,
-                        'beneficiary_id' => $record->beneficiary_id,
-                        'ip_address' => request()->ip(),
-                        'scheme_id' => $this->schemeId,
-                        'user_id' => Auth::id(),
-                        'browser' => request()->header('User-Agent'),
-                        'op_type' => $next_level_role_id,
-                        'revert_reason_cause_id' => $validated['cause'],
-                        'revert_reason_remarks' => $validated['remark'],
-                        'parent_id' => $parentId,
+                        'application_id'         => $record->application_id,
+                        'beneficiary_id'         => $record->beneficiary_id,
+                        'ip_address'             => $ipAddress,
+                        'scheme_id'              => $this->schemeId,
+                        'user_id'                => $userId,
+                        'browser'                => $browser,
+                        'op_type'                => $revertOpType,
+                        'revert_reason_cause_id' => $validated['cause'] ?? null,
+                        'revert_reason_remarks'  => $validated['remark'] ?? null,
+                        'parent_id'              => $latestParentIds[$record->application_id] ?? null,
                     ]);
                 }
 
                 DB::commit();
-
                 $this->dispatch('toastr', [
                     'type' => 'warning',
                     'message' => 'All applications reverted successfully!'
                 ]);
-
-                $this->clearSelected();
-                $this->dispatch('actionPerformedAndRedirect');
-            } catch (\Throwable $e) {
-
-                DB::rollBack();
-                throw $e;
-            }
-        } elseif ($this->revertrejectAction === 'reject') {
-
-            $ids = $this->getSelected();
-
-            if (empty($ids)) {
-                return;
-            }
-
-            DB::beginTransaction();
-
-            try {
-
-                $records = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
-                    ->select('application_id', 'beneficiary_id', 'next_level_role_id', 'is_clean')
-                    ->get();
+            } elseif ($action === 'reject') {
+                $rejectOpType = Codemaster::getIdByCode(-1);
 
                 foreach ($records as $record) {
-
                     $record->update([
-                        'next_level_role_id' => $this->nextLevelRoleId,
-                        'is_clean' => 10,
-                        'rejection_date' => Carbon::now()->toDateString(),
+                        'next_level_role_id' => -100,
+                        'is_clean'           => 10,
+                        'rejection_date'     => $nowDate,
                     ]);
 
-                    $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
-                        ->latest('id')
-                        ->value('id');
-
                     AcceptRejectInfo::create([
-                        'application_id' => $record->application_id,
-                        'beneficiary_id' => $record->beneficiary_id,
-                        'ip_address' => request()->ip(),
-                        'scheme_id' => $this->schemeId,
-                        'user_id' => Auth::id(),
-                        'browser' => request()->header('User-Agent'),
-                        'op_type' => Codemaster::getIdByCode(-1),
-                        'revert_reason_cause_id' => $validated['cause'],
-                        'revert_reason_remarks' => $validated['remark'],
-                        'parent_id' => $parentId,
+                        'application_id'         => $record->application_id,
+                        'beneficiary_id'         => $record->beneficiary_id,
+                        'ip_address'             => $ipAddress,
+                        'scheme_id'              => $this->schemeId,
+                        'user_id'                => $userId,
+                        'browser'                => $browser,
+                        'op_type'                => $rejectOpType,
+                        'revert_reason_cause_id' => $validated['cause'] ?? null,
+                        'revert_reason_remarks'  => $validated['remark'] ?? null,
+                        'parent_id'              => $latestParentIds[$record->application_id] ?? null,
                     ]);
                 }
 
                 DB::commit();
-
                 $this->dispatch('toastr', [
                     'type' => 'error',
                     'message' => 'All applications rejected successfully!'
                 ]);
-
-                $this->clearSelected();
-                $this->dispatch('actionPerformedAndRedirect');
-            } catch (\Throwable $e) {
-
-                DB::rollBack();
-                throw $e;
-            }
-        } elseif ($this->revertrejectAction === 'verification') {
-            $ids = $this->getSelected();
-            if (empty($ids))
-                return;
-            $check = SchemeCapacityHelper::checkBulk($this->schemeId, $this->nextLevelRoleId, $ids);
-            if (!$check['is_processed']) {
-                $this->dispatch('toastr', [
-                    'type' => 'error',
-                    'message' => "Capacity exceeded for {$check['model']}! Available: {$check['remaining_capacity']}"
-                ]);
-                return;
-            }
-            DB::beginTransaction();
-            try {
-                $records = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
-                    ->select('application_id', 'beneficiary_id', 'next_level_role_id', 'is_clean')
-                    ->get();
+            } elseif (in_array($action, ['verification', 'approver'])) {
+                $finalOpType = Codemaster::getIdByCode(0);
+                $verifyOpType = Codemaster::getIdByCode(23);
+                $stepCache = [];
 
                 foreach ($records as $record) {
+                    $moduleId = $record->scheme_module_id;
+                    $step = $stepCache[$moduleId] ??= $workflowService->getLevelRoles($this->schemeId, null, $moduleId);
+                    $isFinal = $step ? (bool) $step->is_final_step : ($action === 'approver');
+                    $nextRole = $step ? $step->next_level_role_id : 0;
 
-                    $record->update([
-                        'next_level_role_id' => $this->nextLevelRoleId,
-                        'verification_date' => Carbon::now()->toDateString(),
-                    ]);
-
-                    $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
-                        ->latest('id')
-                        ->value('id');
-
-                    AcceptRejectInfo::create([
-                        'application_id' => $record->application_id,
-                        'beneficiary_id' => $record->beneficiary_id,
-                        'ip_address' => request()->ip(),
-                        'scheme_id' => $this->schemeId,
-                        'user_id' => Auth::id(),
-                        'browser' => request()->header('User-Agent'),
-                        'op_type' => Codemaster::getIdByCode(23),
-                        'revert_reason_remarks' => $validated['remark'] ?? null,
-                        'parent_id' => $parentId,
-                    ]);
-                }
-                DB::commit();
-                $this->dispatch('toastr', ['type' => 'success', 'message' => 'Processed!']);
-                $this->clearSelected();
-            } catch (\Exception $e) {
-                DB::rollBack();
-                throw $e;
-            }
-        } elseif ($this->revertrejectAction === 'approver') {
-
-            $ids = $this->getSelected();
-
-            if (empty($ids)) {
-                return;
-            }
-
-            $check = SchemeCapacityHelper::checkBulk(
-                $this->schemeId,
-                $this->nextLevelRoleId,
-                $ids
-            );
-
-            if (!$check['is_processed']) {
-                $this->dispatch('toastr', [
-                    'type' => 'error',
-                    'message' => "Capacity exceeded for {$check['model']}! Available: {$check['remaining_capacity']}"
-                ]);
-                return;
-            }
-
-            DB::beginTransaction();
-
-            try {
-
-                $records = BeneficiaryPersonalDetail::whereIn('application_id', $ids)
-                    ->select('application_id', 'beneficiary_id', 'next_level_role_id', 'is_clean')
-                    ->get();
-
-                foreach ($records as $record) {
-
-                    $record->update([
-                        'next_level_role_id' => $this->nextLevelRoleId,
-                        'is_clean' => 1,
-                        'approval_date' => Carbon::now()->toDateString(),
-                    ]);
-
-                    $parentId = AcceptRejectInfo::where('application_id', $record->application_id)
-                        ->latest('id')
-                        ->value('id');
+                    if ($isFinal) {
+                        $record->update([
+                            'next_level_role_id' => $nextRole ?? $record->next_level_role_id,
+                            'is_clean'           => 1,
+                            'approval_date'      => $nowDate,
+                        ]);
+                        $opType = $finalOpType;
+                    } else {
+                        $record->update([
+                            'next_level_role_id' => $nextRole,
+                            'verification_date'  => $nowDate,
+                        ]);
+                        $opType = $verifyOpType;
+                    }
 
                     AcceptRejectInfo::create([
-                        'application_id' => $record->application_id,
-                        'beneficiary_id' => $record->beneficiary_id,
-                        'ip_address' => request()->ip(),
-                        'scheme_id' => $this->schemeId,
-                        'user_id' => Auth::id(),
-                        'browser' => request()->header('User-Agent'),
-                        'op_type' => Codemaster::getIdByCode(0),
+                        'application_id'        => $record->application_id,
+                        'beneficiary_id'        => $record->beneficiary_id,
+                        'ip_address'            => $ipAddress,
+                        'scheme_id'             => $this->schemeId,
+                        'user_id'               => $userId,
+                        'browser'               => $browser,
+                        'op_type'               => $opType,
                         'revert_reason_remarks' => $validated['remark'] ?? null,
-                        'parent_id' => $parentId,
+                        'parent_id'             => $latestParentIds[$record->application_id] ?? null,
                     ]);
                 }
 
                 DB::commit();
-
                 $this->dispatch('toastr', [
                     'type' => 'success',
-                    'message' => 'Applications approved successfully!'
+                    'message' => 'Applications processed successfully!'
                 ]);
-
-                $this->clearSelected();
-            } catch (\Throwable $e) {
-
-                DB::rollBack();
-                throw $e;
             }
+
+            $this->clearSelected();
+            $this->dispatch('actionPerformedAndRedirect');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e;
         }
     }
     public function exportExcel()

@@ -17,7 +17,11 @@ use App\Models\{
     MasterTab,
     UniqueAppBenId,
     CmoSmData,
-    DsPhase
+    DsPhase,
+    DynamicWorkflowSchemeModule,
+    DynamicWorkflowModule,
+    SectionLevelMaster,
+    SchemeTabMapping
 };
 use Illuminate\Support\Facades\{
     Auth,
@@ -74,6 +78,10 @@ class DynamicForm extends Component
     public $moduleCode;
 
     public $moduleId;
+
+    public $schemeModuleId = null;
+
+    public $moduleName = '';
 
     public $navMessage = null;
 
@@ -165,7 +173,8 @@ class DynamicForm extends Component
                 'openFinalModal',
                 applicationId: $this->applicationId,
                 tabsData: $tabsData,
-                schemeId: $this->schemeId
+                schemeId: $this->schemeId,
+                schemeModuleId: $this->schemeModuleId
             );
             $this->dispatch('hideLoader');
             return;
@@ -345,7 +354,7 @@ class DynamicForm extends Component
         }
         $sectionNames = [];
         if (!empty($sectionLevelIds)) {
-            $sectionNames = \App\Models\SectionLevelMaster::whereIn('id', array_unique($sectionLevelIds))
+            $sectionNames = SectionLevelMaster::whereIn('id', array_unique($sectionLevelIds))
                 ->pluck('section_level_name', 'id')
                 ->toArray();
         }
@@ -433,7 +442,7 @@ class DynamicForm extends Component
             $this->views[] = str_replace('.blade.php', '', $file->getFilename());
         }
 
-        $orderedTabs = \App\Models\SchemeTabMapping::where('scheme_id', $schemeId)
+        $orderedTabs = SchemeTabMapping::where('scheme_id', $schemeId)
             ->where('is_active', true)
             ->orderBy('position')
             ->pluck('tab_code')
@@ -693,7 +702,8 @@ class DynamicForm extends Component
             'openFinalModal',
             applicationId: $this->applicationId,
             tabsData: $tabsData,
-            schemeId: $this->schemeId
+            schemeId: $this->schemeId,
+            schemeModuleId: $this->schemeModuleId
         );
         $this->dispatch('hideLoader');
     }
@@ -894,7 +904,7 @@ class DynamicForm extends Component
         }
     }
 
-    public function mount($schemeId = null, $schemeName = null, $saveNext = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null, $moduleCode = null)
+    public function mount($schemeId = null, $schemeName = null, $saveNext = null, $applicationId = null, $beneficiaryId = null, $form_preview = null, $grievanceId = null, $moduleCode = null, $schemeModuleId = null)
     {
         if ($moduleCode && $schemeId) {
             if (!WorkFlowPermissionHelper::canAccessModule($moduleCode, (int) $schemeId)) {
@@ -927,10 +937,37 @@ class DynamicForm extends Component
         $this->schemeId = $schemeId;
         $this->schemeName = $schemeName;
         $this->moduleCode = $moduleCode;
-        if ($this->moduleCode) {
-            $module = \App\Models\DynamicWorkflowModule::where('module_code', $this->moduleCode)->first();
+        $this->schemeModuleId = $schemeModuleId;
+
+        $schemeModule = null;
+        if ($this->schemeModuleId) {
+            $schemeModule = DynamicWorkflowSchemeModule::with(['module' => fn($q) => $q->select('id', 'module_name')])
+                ->select('id', 'module_id', 'main_module_code')
+                ->find($this->schemeModuleId);
+        } elseif ($this->moduleCode && $this->schemeId) {
+            $schemeModule = DynamicWorkflowSchemeModule::with(['module' => fn($q) => $q->select('id', 'module_name')])
+                ->select('id', 'module_id', 'main_module_code')
+                ->where('scheme_id', $this->schemeId)
+                ->where('main_module_code', $this->moduleCode)
+                ->where('is_disabled', false)
+                ->first();
+            if ($schemeModule) {
+                $this->schemeModuleId = $schemeModule->id;
+            }
+        }
+
+        if ($schemeModule) {
+            $this->moduleId = $schemeModule->module_id;
+            $this->moduleName = $schemeModule->module?->module_name ?? $schemeModule->main_module_code;
+        } elseif ($this->moduleCode) {
+            $module = DynamicWorkflowModule::select('id', 'module_name')
+                ->where('module_code', $this->moduleCode)
+                ->first();
             if ($module) {
                 $this->moduleId = $module->id;
+                $this->moduleName = $module->module_name;
+            } else {
+                $this->moduleName = ucwords(str_replace(['_', '-'], ' ', $this->moduleCode));
             }
         }
         $this->heading = 'Government Of West Bengal ' . $this->schemeName . ' Scheme';

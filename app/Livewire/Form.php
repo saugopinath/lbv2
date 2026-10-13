@@ -14,6 +14,7 @@ class Form extends Component
     public $showSchemeDropdown = true;
     public $grievanceId;
     public $moduleCode;
+    public $schemeModuleId;
     public function mount($moduleCode = null, $hideSchemeDropdown = false)
     {
         $this->moduleCode = $moduleCode;
@@ -49,6 +50,7 @@ class Form extends Component
             if (!empty($schemeData['module_code'])) {
                 $this->moduleCode = $schemeData['module_code'];
             }
+            $this->schemeModuleId = $schemeData['scheme_module_id'] ?? null;
             if ($this->moduleCode && !WorkFlowPermissionHelper::canAccessModule($this->moduleCode, $selectedSchemeId)) {
                 $this->schemeData = false;
                 $this->dispatch('toastr', [

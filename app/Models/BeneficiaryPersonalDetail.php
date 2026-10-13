@@ -72,6 +72,10 @@ class BeneficiaryPersonalDetail extends BaseAuditableModel
     {
         return $this->hasOne(Scheme::class, 'id', 'scheme_id');
     }
+    public function schemeModule()
+    {
+        return $this->belongsTo(DynamicWorkflowSchemeModule::class, 'scheme_module_id');
+    }
     public function creator()
     {
         $block = Block::where('lgd_code', $this->created_by_local_body_code)->first();

@@ -22,7 +22,9 @@ class DraftApplicationView extends Component
             $encrypted = request()->query('application_id');
             $this->applicationId = (int) Crypt::decryptString($encrypted);
 
-            $this->application = BeneficiaryPersonalDetail::where('application_id', $this->applicationId)->first();
+            $this->application = BeneficiaryPersonalDetail::select('application_id', 'scheme_id', 'application_type', 'scheme_module_id')
+                ->where('application_id', $this->applicationId)
+                ->first();
 
             $this->schemeId = $this->application->scheme_id;
 
@@ -48,10 +50,11 @@ class DraftApplicationView extends Component
 
         $this->dispatch('openBulkActionModal', [
             'selectedIds' => [
-                'application_id' => $this->application->application_id,
-                'schemeId' => $this->application->scheme_id,
-                'entry_type' => $this->application->application_type,
-                'module_code' => $this->moduleCode,
+                'application_id'   => $this->application->application_id,
+                'schemeId'         => $this->application->scheme_id,
+                'entry_type'       => $this->application->application_type,
+                'module_code'      => $this->moduleCode,
+                'scheme_module_id' => $this->application->scheme_module_id,
             ]
         ]);
     }
