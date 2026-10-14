@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\IncompletTypeModelMapping;
+use App\Models\IncompleteTypeModelMapping;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class IncompletTypeModeSeeder extends Seeder
@@ -70,11 +70,13 @@ class IncompletTypeModeSeeder extends Seeder
 
         );
         foreach ($incompletTypeModelMapping as $incompletTypeModelMapping_item) {
-            IncompletTypeModelMapping::updateOrCreate([
-                'incomplet_type_code' => strtoupper($incompletTypeModelMapping_item['incomplet_type_code']),
-                'table_column' => $incompletTypeModelMapping_item['table_column'],
-                'model_name' => $incompletTypeModelMapping_item['model'],
-            ]);
+            IncompleteTypeModelMapping::updateOrCreate(
+                ['incomplete_type_code' => $incompletTypeModelMapping_item['incomplet_type_code']],
+                [
+                    'table_column' => $incompletTypeModelMapping_item['table_column'],
+                    'model_name' => $incompletTypeModelMapping_item['model'],
+                ]
+            );
         }
     }
 }

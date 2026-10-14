@@ -93,8 +93,7 @@ class BeneficiaryApprovedListSeeder extends Seeder
                     'beneficiary_id' => $beneficiaryId,
                 ], [
                     'encode_key' => null,
-                    'encoded_aadhaar' => Crypt::encryptString($aadhaarNumber),
-                    'aadhaar_hash' => md5($aadhaarNumber),
+                    'aadhaar_token' => md5($aadhaarNumber),
                 ]);
                 // dd($beneficiary_aadhar);
                 $beneficiary = BeneficiaryPersonalDetail::updateOrCreate([
