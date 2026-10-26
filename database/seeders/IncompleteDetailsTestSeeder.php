@@ -25,24 +25,33 @@ class IncompleteDetailsTestSeeder extends Seeder
             $this->call(IncompletTypeModeSeeder::class);
         }
 
-        // 2. Ensure Beneficiaries exist
-        if (BeneficiaryPersonalDetail::count() === 0) {
-            $this->command->info('BeneficiaryPersonalDetail is empty, seeding beneficiaries first...');
+        // 2. Ensure Beneficiaries exist for Scheme 20 and Daspur-II Block 2979
+        $beneficiaries = BeneficiaryPersonalDetail::with(['banks', 'contact'])
+            ->where('scheme_id', 20)
+            ->where('created_by_dist_code', 318)
+            ->where('created_by_local_body_code', 2979)
+            ->get();
+
+        if ($beneficiaries->count() < 100) {
+            $this->command->info('Insufficient beneficiaries for Scheme 20 (Daspur-II), seeding beneficiaries first...');
             $this->call(BeneficiaryApprovedListSeeder::class);
+            $beneficiaries = BeneficiaryPersonalDetail::with(['banks', 'contact'])
+                ->where('scheme_id', 20)
+                ->where('created_by_dist_code', 318)
+                ->where('created_by_local_body_code', 2979)
+                ->get();
         }
 
-        $beneficiaries = BeneficiaryPersonalDetail::with(['banks', 'contact'])->get();
-
         if ($beneficiaries->isEmpty()) {
-            $this->command->error('No beneficiaries found in BeneficiaryPersonalDetail.');
+            $this->command->error('No beneficiaries found for Scheme 20.');
             return;
         }
 
         // Get OpTypes and Users
         $verifyOpTypeId = Codemaster::where('code', 2103)->value('id') ?? 150;
         $revertOpTypeId = Codemaster::where('code', 2105)->value('id') ?? 152;
-        $revertReasonId = Codemaster::where('code', 123)->value('id') 
-            ?? Codemaster::where('parent_id', Codemaster::getIdByCode(12))->value('id') 
+        $revertReasonId = Codemaster::where('code', 123)->value('id')
+            ?? Codemaster::where('parent_id', Codemaster::getIdByCode(12))->value('id')
             ?? 72; // BANK PASSBOOK NOT UPLOADED OR NOT CLEARLY VISIBLE
         $userId = User::value('id') ?? 1;
 
@@ -50,9 +59,7 @@ class IncompleteDetailsTestSeeder extends Seeder
 
         // Specific Scenarios Matrix for Testing
         $scenarios = [
-            // -------------------------------------------------------------
             // VERIFIER QUEUE SCENARIOS (next_level_request_id = null)
-            // -------------------------------------------------------------
             [
                 'title' => '[Verifier] Pure No Aadhaar (141)',
                 'stage' => 'verifier',
@@ -206,9 +213,7 @@ class IncompleteDetailsTestSeeder extends Seeder
                 ],
             ],
 
-            // -------------------------------------------------------------
             // APPROVER QUEUE SCENARIOS (next_level_request_id = 1)
-            // -------------------------------------------------------------
             [
                 'title' => '[Approver] No Aadhaar + Bank Account Fail (Ready for Approval)',
                 'stage' => 'approver',
@@ -258,9 +263,7 @@ class IncompleteDetailsTestSeeder extends Seeder
                 'with_temp_docs' => true,
             ],
 
-            // -------------------------------------------------------------
             // REVERT QUEUE SCENARIOS (next_level_request_id = -50)
-            // -------------------------------------------------------------
             [
                 'title' => '[Revert] Bank Account Fail (Reverted by Approver)',
                 'stage' => 'revert',
@@ -390,9 +393,7 @@ class IncompleteDetailsTestSeeder extends Seeder
             $this->command->info("Seeded Scenario: {$scenario['title']} (App ID: {$appId}, Scheme: {$schemeId})");
         }
 
-        // -----------------------------------------------------------------
         // BULK VERIFIER RECORDS FOR PAGINATION AND FILTER TESTING
-        // -----------------------------------------------------------------
         $this->command->info('Seeding bulk verifier records for table pagination & filter testing...');
 
         $bulkTypes = [

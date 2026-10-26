@@ -33,8 +33,8 @@ class BeneficiaryApprovedListSeeder extends Seeder
         try {
 
             for ($i = 0; $i < 600; $i++) {
-                // 🔹 Random Scheme
-                $schemeId = $schemes[array_rand($schemes)];
+                // Scheme 20 (Annapurna Bhandar / LB) assigned to Daspur-II and Ghatal users
+                $schemeId = 20;
 
                 // Office & User তথ্য
                 $office = OfficeMaster::where('district_id', 318)

@@ -1,120 +1,140 @@
-<div class="mt-4">
-    <div class="p-4 mb-4 border rounded-lg bg-gray-50 shadow-sm">
+<div class="space-y-5">
+    {{-- Select Operation Type (Verifier & Revert queues, hidden if dup bank action 1 or 2 applied) --}}
+    @if (!empty($stage) && in_array($stage, ['verifier', 'revert']))
+        @if (!in_array($bank_action, ['1', '2']))
+            <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/30">
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-2.5">
+                    Select Operation Type <span class="text-rose-500">*</span>
+                </label>
+                <div class="flex flex-wrap gap-4">
+                    {{-- KEEP SAME (value 4) --}}
+                    <label class="relative flex items-center gap-3 px-4 py-2.5 rounded-lg border cursor-pointer transition {{ $bank_action == '4' ? 'border-violet-600 bg-violet-50/60 dark:bg-violet-950/40 text-violet-900 dark:text-violet-200 shadow-xs' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-400' }}">
+                        <input type="radio"
+                               class="w-4 h-4 text-violet-600 focus:ring-violet-500 border-gray-300"
+                               name="bank_action"
+                               wire:model.lazy="bank_action"
+                               value="4"
+                               @if ($dupAction === '2' || (!empty($stage) && $stage === 'approver')) disabled @endif />
+                        <span class="text-xs font-bold uppercase tracking-wide">Keep Same Account</span>
+                    </label>
 
-        {{-- Select Operation Type block (hide if bank_action === 1 or 2) --}}
-        @if (!empty($stage) && $stage == 'verifier')
-            @if (!in_array($bank_action, ['1', '2']))
-                <div class="p-4 mb-2 border rounded-lg bg-gray-50 shadow-sm">
-                    <h2>Select Operation Type</h2>
-                    <div class="flex gap-6 pl-4 pr-4 mt-2">
-                        <label class="flex items-center space-x-2 ">
-                            <input type="radio" class="form-radio text-blue-600" name="bank_action"
-                                wire:model.lazy="bank_action" value="4"
-                                @if ($dupAction === '2' || (!empty($stage) && $stage === 'approver')) disabled @endif />
-                            <span>KEEP SAME</span>
-                        </label>
-
-                        <label class="flex items-center space-x-2">
-                            <input type="radio" class="form-radio text-blue-600" name="bank_action"
-                                wire:model.lazy="bank_action" value="3"
-                                @if ($dupAction === '1' || $dupAction === '2' || (!empty($stage) && $stage === 'approver')) disabled @endif
-                                {{ old('bank_action', $bank_action) == '3' ? 'checked' : '' }}
-                                x-on:change="Livewire.dispatch('showLoader')" />
-                            <span>CHANGE</span>
-                        </label>
-                    </div>
-                    @if ($errors->has('bank_action'))
-                        <span class="text-red-800 text-sm">
-                            <li>{{ $errors->first('bank_action') }}</li>
-                    @endif
+                    {{-- CHANGE (value 3) --}}
+                    <label class="relative flex items-center gap-3 px-4 py-2.5 rounded-lg border cursor-pointer transition {{ $bank_action == '3' ? 'border-violet-600 bg-violet-50/60 dark:bg-violet-950/40 text-violet-900 dark:text-violet-200 shadow-xs' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-400' }}">
+                        <input type="radio"
+                               class="w-4 h-4 text-violet-600 focus:ring-violet-500 border-gray-300"
+                               name="bank_action"
+                               wire:model.lazy="bank_action"
+                               value="3"
+                               @if ($dupAction === '1' || $dupAction === '2' || (!empty($stage) && $stage === 'approver')) disabled @endif
+                               {{ old('bank_action', $bank_action) == '3' ? 'checked' : '' }}
+                               x-on:change="Livewire.dispatch('showLoader')" />
+                        <span class="text-xs font-bold uppercase tracking-wide">Change Bank Details</span>
+                    </label>
                 </div>
-            @endif
+
+                @if ($errors->has('bank_action'))
+                    <span class="text-rose-600 text-xs mt-2 block">{{ $errors->first('bank_action') }}</span>
+                @endif
+            </div>
         @endif
-        @if (!empty($stage) && $stage === 'approver' && $dupAction == null)
-            <div class="flex items-center space-x-2">
-                <span class="font-semibold text-gray-700">Bank Action:</span>
-                <span class="text-blue-600">
-                    @if ($bank_action == '4')
-                        KEEP SAME
-                    @else ($bank_action == '3')
-                        CHANGE
-                    @endif
-                </span>
+    @endif
+
+    {{-- Approver Status Badge --}}
+    @if (!empty($stage) && $stage === 'approver' && $dupAction == null)
+        <div class="flex items-center gap-2.5 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700">
+            <span class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Action Selected:</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold {{ $bank_action == '4' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' : 'bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300' }}">
+                {{ $bank_action == '4' ? 'KEEP SAME' : 'CHANGE DETAILS' }}
+            </span>
+        </div>
+    @endif
+
+    {{-- Existing Bank Details (When keeping same or initial state) --}}
+    @if (!empty($stage) && in_array($stage, ['verifier', 'revert']))
+        @if ($bank_action === '' || $bank_action === '4')
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 mb-3 flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                    <span>Current Bank Details on File</span>
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700">
+                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-0.5">IFS Code</span>
+                        <span class="text-xs font-mono font-bold text-gray-800 dark:text-white">{{ $ifscode ?? 'N/A' }}</span>
+                    </div>
+                    <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700">
+                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-0.5">Bank Name</span>
+                        <span class="text-xs font-semibold text-gray-800 dark:text-white">{{ $bankname ?? 'N/A' }}</span>
+                    </div>
+                    <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700">
+                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-0.5">Branch Name</span>
+                        <span class="text-xs font-semibold text-gray-800 dark:text-white">{{ $bankbranchname ?? 'N/A' }}</span>
+                    </div>
+                    <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700">
+                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-0.5">Account Number</span>
+                        <span class="text-xs font-mono font-bold text-gray-800 dark:text-white">{{ $bank_account_number ?? 'N/A' }}</span>
+                    </div>
+                </div>
             </div>
         @endif
 
-        {{-- Existing Bank Details (readonly) --}}
-        @if (!empty($stage) && $stage == 'verifier')
-            @if ($bank_action === '' || $bank_action === '4')
-                <div class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
-                    <x-form.input name="ifscode" label="IFSC Code" wire:model.defer="ifscode" readonly />
-                    <x-form.input name="bankname" label="Bank Name" wire:model.defer="bankname" readonly />
-                    <x-form.input name="bankbranchname" label="Branch Name" wire:model.defer="bankbranchname"
-                        readonly />
-                    <x-form.input name="bank_account_number" label="Existing Bank Account Number"
-                        wire:model.defer="bank_account_number" readonly />
-                </div>
-            @endif
+        {{-- Informational Message for bank_action = 1 --}}
+        @if ($bank_action === '1')
+            <div class="p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-xs flex items-center gap-3">
+                <svg class="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>As Keep Same has been accepted in Duplicate Bank, further modification in this section is not required.</span>
+            </div>
+        @endif
 
-            {{-- Message for bank_action = 1 --}}
-            @if ($bank_action === '1')
-                <div class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
-                    <div class="col-span-3">
-                        <div class="p-4 rounded-md bg-blue-100 border border-blue-300 text-blue-800 text-sm">
-                            ℹ️ As keep same has been accepted in duplicate bank, the modification in this portion will
-                            not
-                            be required further.
-                        </div>
-                    </div>
-                </div>
-            @endif
+        {{-- Informational Message for bank_action = 2 --}}
+        @if ($bank_action === '2')
+            <div class="p-4 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs flex items-center gap-3">
+                <svg class="w-5 h-5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <span>As Duplicate Bank Account has already been changed, further modification in this section is not required.</span>
+            </div>
+        @endif
 
-            {{-- Message for bank_action = 2 --}}
-            @if ($bank_action === '2')
-                <div class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
-                    <div class="col-span-3">
-                        <div class="p-4 rounded-md bg-yellow-100 border border-yellow-300 text-yellow-800 text-sm">
-                            ⚠️ As Duplicate Bank Account has been changed, the modification in this portion will not be
-                            required further.
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            {{-- Form for bank_action = 3 --}}
-            @if ($bank_action === '3')
-                <div x-data="{
-                    bank: @entangle('bank_account_number').live,
-                    confirm: @entangle('confirmbankaccountnumber').live,
-                    ifscode: @entangle('ifscode'),
-                    showSuccess: false,
-                    showError: false,
-                    checkMatch() {
-                        if (this.confirm && this.bank) {
-                            if (this.bank === this.confirm) {
-                                this.showError = false;
-                                this.showSuccess = true;
-                                setTimeout(() => this.showSuccess = false, 2000); // 2 sec পরে success msg উড়ে যাবে
-                            } else {
-                                this.showSuccess = false;
-                                this.showError = true;
-                            }
+        {{-- Form for Bank Action = 3 (Change) --}}
+        @if ($bank_action === '3')
+            <div x-data="{
+                bank: @entangle('bank_account_number').live,
+                confirm: @entangle('confirmbankaccountnumber').live,
+                ifscode: @entangle('ifscode'),
+                showSuccess: false,
+                showError: false,
+                checkMatch() {
+                    if (this.confirm && this.bank) {
+                        if (this.bank === this.confirm) {
+                            this.showError = false;
+                            this.showSuccess = true;
+                            setTimeout(() => this.showSuccess = false, 2500);
                         } else {
                             this.showSuccess = false;
-                            this.showError = false;
+                            this.showError = true;
                         }
+                    } else {
+                        this.showSuccess = false;
+                        this.showError = false;
                     }
-                }" x-effect="checkMatch()" class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
+                }
+            }" x-effect="checkMatch()" class="space-y-5">
 
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {{-- IFSC Code --}}
-                    {{--  <x-form.input name="ifscode" label="IFSC Code" wire:model.live="ifscode"
-                    x-on:input="if ($el.value.length > 11) $el.value = $el.value.slice(0, 11)" />  --}}
-                    <x-form.input name="ifscode" label="IFS Code" required x-model="ifscode" maxlength="11"
-                        wire:model.live="ifscode"
-                        x-on:input="
-            ifscode = $el.value.toUpperCase().slice(0, 11);
-            $el.value = ifscode;
-        " />
+                    <div>
+                        <x-form.input name="ifscode" label="IFS Code" required x-model="ifscode" maxlength="11"
+                            wire:model.live="ifscode"
+                            x-on:input="
+                                ifscode = $el.value.toUpperCase().slice(0, 11);
+                                $el.value = ifscode;
+                            " />
+                    </div>
 
                     {{-- Bank Name --}}
                     <div class="relative">
@@ -129,48 +149,46 @@
                     </div>
 
                     {{-- New Bank Account Number --}}
-                    <x-form.input type="password" name="bank_account_number" label="New Bank Account Number" required
-                        wire:model="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
-                    {{--  <input type="hidden" name="bank_account_number" :value="$wire.bank_account_number">  --}}
+                    <div>
+                        <x-form.input type="password" name="bank_account_number" label="New Bank Account Number" required
+                            wire:model="bank_account_number" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
+                    </div>
+
                     {{-- Confirm Bank Account Number --}}
-                    <div class="col-span-1">
+                    <div>
                         <x-form.input name="confirmbankaccountnumber" label="Confirm Bank Account Number" required
                             wire:model="confirmbankaccountnumber"
                             x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')" />
 
-                        {{-- Error Message --}}
-                        <p x-show="showError" x-transition.opacity class="text-red-500 text-sm mt-1">
+                        <p x-show="showError" x-transition.opacity class="text-rose-600 text-xs font-semibold mt-1">
                             ❌ Bank account numbers do not match
                         </p>
-
-                        {{-- Success Message --}}
-                        <p x-show="showSuccess" x-transition.opacity class="text-green-600 text-sm mt-1">
+                        <p x-show="showSuccess" x-transition.opacity class="text-emerald-600 text-xs font-semibold mt-1">
                             ✅ Bank account numbers match
                         </p>
                     </div>
+                </div>
 
-                     <div class="grid gap-6 mb-4 md:grid-cols-2 px-4">
+                {{-- Bank Enclosures Grid --}}
+                <div class="pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 mb-3 flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                        </svg>
+                        <span>Bank Passbook Enclosures</span>
+                    </h4>
 
-                        {{-- Newly Temp Document --}}
-                        <div>
-                            <h3 class="font-semibold text-gray-800 mb-4">Newly Temp Document</h3>
-
-                            <livewire:enclosure-list
-                                :application_id="$item->application_id"
-                                :scheme_id="$schemeId"
-                                :doc_type_id_array_list="[111]"
-                                :enclosureSource="5"
-                                :wire:key="'bank-new-'.$item->application_id" />
-
-                            @error('document_upload')
-                                <span class="text-red-600 text-sm">{{ $message }}</span>
-                            @enderror
-                        </div>
-
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {{-- Previous Approved Document --}}
-                        <div>
-                            <h3 class="font-semibold mb-2">Previous Approved Document</h3>
-
+                        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/20">
+                            <div class="flex items-center justify-between pb-2 mb-3 border-b border-gray-200 dark:border-gray-700">
+                                <span class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                    Previous Approved Passbook Copy
+                                </span>
+                                <span class="text-xs px-2.5 py-0.5 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium">
+                                    On File
+                                </span>
+                            </div>
                             <livewire:enclosure-list
                                 :application_id="$item->application_id"
                                 :scheme_id="$schemeId"
@@ -179,65 +197,69 @@
                                 :key="'bank-old-'.$item->application_id" />
                         </div>
 
-                    </div>
+                        {{-- Newly Uploaded Document --}}
+                        <div class="p-4 rounded-xl border border-violet-200 dark:border-violet-800 bg-violet-50/30 dark:bg-violet-950/10">
+                            <div class="flex items-center justify-between pb-2 mb-3 border-b border-violet-100 dark:border-violet-800/60">
+                                <span class="text-xs font-bold text-violet-900 dark:text-violet-200 uppercase tracking-wider">
+                                    New Uploaded Passbook Copy
+                                </span>
+                                <span class="text-xs px-2.5 py-0.5 rounded-md bg-violet-100 dark:bg-violet-900/50 text-violet-800 dark:text-violet-300 font-medium">
+                                    Verification Copy
+                                </span>
+                            </div>
+                            <livewire:enclosure-list
+                                :application_id="$item->application_id"
+                                :scheme_id="$schemeId"
+                                :doc_type_id_array_list="[111]"
+                                :enclosureSource="5"
+                                :wire:key="'bank-new-'.$item->application_id" />
 
-                </div>
-            @endif
-        @endif
-        @if (!empty($stage) && $stage === 'approver' && $dupAction == '1')
-            {{--  @dd('ok2');  --}}
-            {{-- ✅ Approver view (read-only labels only) --}}
-            @if ($bank_action === '1')
-                <div class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
-                    <div class="col-span-3">
-                        <div class="p-4 rounded-md bg-blue-100 border border-blue-300 text-blue-800 text-sm">
-                            ℹ️ As keep same has been accepted in duplicate bank, the modification in this portion will
-                            not
-                            be required further.
+                            @error('document_upload')
+                                <span class="text-rose-600 text-xs mt-2 block">{{ $message }}</span>
+                            @enderror
                         </div>
                     </div>
-                </div>
-            @endif
-
-            {{-- Message for bank_action = 2 --}}
-            @if ($bank_action === '2')
-                <div class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
-                    <div class="col-span-3">
-                        <div class="p-4 rounded-md bg-yellow-100 border border-yellow-300 text-yellow-800 text-sm">
-                            ⚠️ As Duplicate Bank Account has been changed, the modification in this portion will not be
-                            required further.
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-        @endif
-        @if (!empty($stage) && $stage === 'approver' && $dupAction == null)
-            {{--  @dd('ok');  --}}
-            <div class="grid gap-6 mb-4 md:grid-cols-3 pl-4 pr-4">
-                <div>
-                    <label class="font-semibold">IFS Code:</label>
-                    <p>{{ $ifscode ?? 'N/A' }}</p>
-                </div>
-                <div>
-                    <label class="font-semibold">Bank Name:</label>
-                    <p>{{ $bankname ?? 'N/A' }}</p>
-                </div>
-                <div>
-                    <label class="font-semibold">Branch Name:</label>
-                    <p>{{ $bankbranchname ?? 'N/A' }}</p>
-                </div>
-                <div>
-                    <label class="font-semibold">Bank Account Number:</label>
-                    <p>{{ $bank_account_number }}</p>
-                    </p>
                 </div>
             </div>
-            <div class="w-1/3">
-                <h3 class="font-semibold mb-2">Newly Temp Document</h3>
+        @endif
+    @endif
 
+    {{-- Approver Views --}}
+    @if (!empty($stage) && $stage === 'approver')
+        @if ($dupAction == '1' && $bank_action === '1')
+            <div class="p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-xs">
+                ℹ️ As Keep Same was accepted in Duplicate Bank, modification here was not required.
+            </div>
+        @elseif ($dupAction == '1' && $bank_action === '2')
+            <div class="p-4 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs">
+                ⚠️ As Duplicate Bank Account was changed, modification here was not required.
+            </div>
+        @elseif ($dupAction == null)
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700">
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-0.5">IFS Code</span>
+                    <span class="text-xs font-mono font-bold text-gray-800 dark:text-white">{{ $ifscode ?? 'N/A' }}</span>
+                </div>
+                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700">
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-0.5">Bank Name</span>
+                    <span class="text-xs font-semibold text-gray-800 dark:text-white">{{ $bankname ?? 'N/A' }}</span>
+                </div>
+                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700">
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-0.5">Branch Name</span>
+                    <span class="text-xs font-semibold text-gray-800 dark:text-white">{{ $bankbranchname ?? 'N/A' }}</span>
+                </div>
+                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700">
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-0.5">Account Number</span>
+                    <span class="text-xs font-mono font-bold text-gray-800 dark:text-white">{{ $bank_account_number ?? 'N/A' }}</span>
+                </div>
+            </div>
+
+            <div class="mt-4 p-4 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-950/20">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-blue-900 dark:text-blue-200 mb-3">
+                    Submitted Passbook Enclosure
+                </h4>
                 <livewire:enclosure-list :application_id="$item->application_id" :scheme_id="$schemeId" :doc_type_id_array_list="[111]" :is_page="1" enclosureSource="5" />
             </div>
         @endif
-    </div>
+    @endif
 </div>

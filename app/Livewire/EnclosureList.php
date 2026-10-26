@@ -57,9 +57,12 @@ class EnclosureList extends Component
         }
 
         if (!empty($this->doc_type_id_array)) {
-            $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-                ->whereIn('doc_type_id', $this->doc_type_id_array)
-                ->get();
+            $docQuery = SchemeAttachedDocMappings::with('codemaster')
+                ->whereIn('doc_type_id', $this->doc_type_id_array);
+            if (!empty($this->scheme_id)) {
+                $docQuery->where('scheme_id', $this->scheme_id);
+            }
+            $this->doc_lists = $docQuery->get()->unique('doc_type_id');
 
             if ($application_id) {
                 $app = BeneficiaryEnclosure::where('application_id', $application_id)
@@ -92,13 +95,19 @@ class EnclosureList extends Component
 
                 if ($is_page == 1) {
                     $uploadedTypes = array_keys($this->existingDocuments);
-                    $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-                        ->whereIn('doc_type_id', $uploadedTypes)
-                        ->get();
+                    $docQuery = SchemeAttachedDocMappings::with('codemaster')
+                        ->whereIn('doc_type_id', $uploadedTypes);
+                    if (!empty($this->scheme_id)) {
+                        $docQuery->where('scheme_id', $this->scheme_id);
+                    }
+                    $this->doc_lists = $docQuery->get()->unique('doc_type_id');
                 } else {
-                    $this->doc_lists = SchemeAttachedDocMappings::with('codemaster')
-                        ->whereIn('doc_type_id', $this->doc_type_id_array_list)
-                        ->get();
+                    $docQuery = SchemeAttachedDocMappings::with('codemaster')
+                        ->whereIn('doc_type_id', $this->doc_type_id_array_list);
+                    if (!empty($this->scheme_id)) {
+                        $docQuery->where('scheme_id', $this->scheme_id);
+                    }
+                    $this->doc_lists = $docQuery->get()->unique('doc_type_id');
                 }
             } else {
 

@@ -57,7 +57,7 @@ class DatabaseSeeder extends Seeder
             AssignPermission\GivePermissionToAdminSeeder::class,
             AssignPermission\HODPermissionSeeder::class,
             IncompletTypeModeSeeder::class,
-            ApplicantIncompleteDetailsSeeder::class,
+            // ApplicantIncompleteDetailsSeeder::class,
         ]);
     }
 }

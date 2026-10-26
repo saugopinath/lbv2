@@ -14,13 +14,13 @@
 >
     <div @class([
             'd-md-flex' => $isBootstrap,
-            'w-full mb-4 md:mb-0 md:w-2/4 md:flex space-y-4 md:space-y-0 md:space-x-2' => $isTailwind,
+            'w-full mb-4 md:mb-0 md:w-auto md:flex md:items-center space-y-3 md:space-y-0 md:space-x-4' => $isTailwind,
         ])
     >
         @if ($this->hasConfigurableAreaFor('toolbar-left-start'))
             <div x-cloak x-show="!currentlyReorderingStatus" @class([
                 'mb-3 mb-md-0 input-group' => $isBootstrap,
-                'flex rounded-md shadow-sm' => $isTailwind,
+                'flex items-center rounded-md shadow-sm' => $isTailwind,
             ])>
                 @include($this->getConfigurableAreaFor('toolbar-left-start'), $this->getParametersForConfigurableArea('toolbar-left-start'))
             </div>

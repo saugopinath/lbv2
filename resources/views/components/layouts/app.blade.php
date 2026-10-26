@@ -36,7 +36,7 @@
             <x-layouts.das_side_menu />
 
             <!-- Content Area -->
-            <div class="flex-1 flex flex-col">
+            <div class="flex-1 flex flex-col min-w-0">
                 <!-- Top Bar -->
                 <x-layouts.das_top_bar />
                 <livewire:loader />
